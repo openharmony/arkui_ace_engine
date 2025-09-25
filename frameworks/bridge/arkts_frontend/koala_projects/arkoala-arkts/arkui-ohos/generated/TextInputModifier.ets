@@ -122,7 +122,9 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _lineBreakStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _lineBreakStrategy_0_0value?: LineBreakStrategy | undefined
     _cancelButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cancelButton_0_0value?: CancelButtonOptions | CancelButtonSymbolOptions | undefined
+    _cancelButton_0_0value?: CancelButtonOptions | undefined
+    _cancelButton_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _cancelButton_1_0value?: CancelButtonSymbolOptions | undefined
     _selectAll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selectAll_0_0value?: boolean | undefined
     _minFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -913,7 +915,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._cancelButton_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCancelButtonAttribute((this._cancelButton_0_0value as CancelButtonOptions | CancelButtonSymbolOptions | undefined));
+                    peer.setCancelButton0Attribute((this._cancelButton_0_0value as CancelButtonOptions | undefined));
                     this._cancelButton_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -923,7 +925,25 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._cancelButton_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCancelButtonAttribute((undefined as CancelButtonOptions | CancelButtonSymbolOptions | undefined));
+                    peer.setCancelButton0Attribute((undefined as CancelButtonOptions | undefined));
+                }
+            }
+        }
+        if (this._cancelButton_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._cancelButton_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCancelButton1Attribute((this._cancelButton_1_0value as CancelButtonSymbolOptions | undefined));
+                    this._cancelButton_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._cancelButton_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._cancelButton_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCancelButton1Attribute((undefined as CancelButtonSymbolOptions | undefined));
                 }
             }
         }
@@ -1999,7 +2019,20 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.cancelButton((undefined as CancelButtonOptions | CancelButtonSymbolOptions | undefined));
+                    this.cancelButton((undefined as CancelButtonOptions | undefined));
+                }
+            }
+        }
+        if (modifier._cancelButton_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._cancelButton_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.cancelButton(modifier._cancelButton_1_0value);
+                    break;
+                }
+                default: {
+                    this.cancelButton((undefined as CancelButtonSymbolOptions | undefined));
                 }
             }
         }
@@ -2834,7 +2867,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         }
         return this
     }
-    cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
+    cancelButton(value: CancelButtonOptions | undefined): this {
         if (((this._cancelButton_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._cancelButton_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2842,6 +2875,17 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         } else
         {
             this._cancelButton_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    cancelButton(value: CancelButtonSymbolOptions | undefined): this {
+        if (((this._cancelButton_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._cancelButton_1_flag = AttributeUpdaterFlag.UPDATE
+            this._cancelButton_1_0value = value
+        } else
+        {
+            this._cancelButton_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

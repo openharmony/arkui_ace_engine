@@ -55,21 +55,6 @@ void AssignOptionalTo(std::optional<T>& dst, const P& src);
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Boolean_I32& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Boolean_Number& src)
 {
     switch (src.selector) {
@@ -780,36 +765,6 @@ void AssignUnionTo(std::optional<T>& dst,
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_ButtonOptions_ResourceStr& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Callback_EnterKeyType_Void_TextAreaSubmitCallback& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Callback_String_Void_SearchSubmitCallback& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3196,21 +3151,6 @@ void AssignUnionTo(std::optional<T>& dst,
     }
 }
 
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
 template<typename T, typename P>
 void AssignLiteralTo(std::optional<T>& dst, const P& src);
 
@@ -3714,7 +3654,6 @@ ASSIGN_OPT(Opt_uiObserver_NavigationInfo)
 ASSIGN_OPT(Opt_uiObserver_RouterPageState)
 ASSIGN_OPT(Opt_unifiedDataChannel_UnifiedData)
 ASSIGN_OPT(Opt_uniformTypeDescriptor_UniformDataType)
-ASSIGN_OPT(Opt_Union_Boolean_I32)
 ASSIGN_OPT(Opt_Union_Boolean_Number)
 ASSIGN_OPT(Opt_Union_CircleShape_EllipseShape_PathShape_RectShape)
 ASSIGN_OPT(Opt_Union_Color_Number_String)
@@ -3800,6 +3739,11 @@ ASSIGN_OPT(Opt_Array_DragPreviewMode)
 ASSIGN_OPT(Opt_Array_ExtensionAbilityInfo)
 ASSIGN_OPT(Opt_Array_FingerInfo)
 ASSIGN_OPT(Opt_Array_Float64)
+ASSIGN_OPT(Opt_Array_font_UIFontAdjustInfo)
+ASSIGN_OPT(Opt_Array_font_UIFontAliasInfo)
+ASSIGN_OPT(Opt_Array_font_UIFontFallbackGroupInfo)
+ASSIGN_OPT(Opt_Array_font_UIFontFallbackInfo)
+ASSIGN_OPT(Opt_Array_font_UIFontGenericInfo)
 ASSIGN_OPT(Opt_Array_FractionStop)
 ASSIGN_OPT(Opt_Array_GestureRecognizer)
 ASSIGN_OPT(Opt_Array_GuideLineStyle)
@@ -3900,7 +3844,6 @@ ASSIGN_OPT(Opt_Callback_DragEvent_Opt_String_Void)
 ASSIGN_OPT(Opt_Callback_DrawContext_CustomSpanDrawInfo_Void)
 ASSIGN_OPT(Opt_Callback_DrawContext_Void)
 ASSIGN_OPT(Opt_Callback_EditableTextChangeValue_Boolean)
-ASSIGN_OPT(Opt_Callback_EnterKeyType_Void)
 ASSIGN_OPT(Opt_Callback_ErrorInformation_Void)
 ASSIGN_OPT(Opt_Callback_Extender_OnFinish)
 ASSIGN_OPT(Opt_Callback_Extender_OnProgress)
@@ -4272,6 +4215,13 @@ ASSIGN_OPT(Opt_FingerInfo)
 ASSIGN_OPT(Opt_FirstMeaningfulPaint)
 ASSIGN_OPT(Opt_FocusMovement)
 ASSIGN_OPT(Opt_FolderStackOptions)
+ASSIGN_OPT(Opt_font_FontInfo)
+ASSIGN_OPT(Opt_font_UIFontAdjustInfo)
+ASSIGN_OPT(Opt_font_UIFontAliasInfo)
+ASSIGN_OPT(Opt_font_UIFontConfig)
+ASSIGN_OPT(Opt_font_UIFontFallbackGroupInfo)
+ASSIGN_OPT(Opt_font_UIFontFallbackInfo)
+ASSIGN_OPT(Opt_font_UIFontGenericInfo)
 ASSIGN_OPT(Opt_FontSettingOptions)
 ASSIGN_OPT(Opt_ForegroundEffectOptions)
 ASSIGN_OPT(Opt_FormCallbackInfo)
@@ -4449,6 +4399,7 @@ ASSIGN_OPT(Opt_TargetInfo)
 ASSIGN_OPT(Opt_TextClockOptions)
 ASSIGN_OPT(Opt_TextContentControllerOptions)
 ASSIGN_OPT(Opt_TextMarqueeOptions)
+ASSIGN_OPT(Opt_TextMenuOptions)
 ASSIGN_OPT(Opt_TextRange)
 ASSIGN_OPT(Opt_TextShadowStyle)
 ASSIGN_OPT(Opt_TextTimerOptions)
@@ -4474,8 +4425,6 @@ ASSIGN_OPT(Opt_Union_Boolean_Resource)
 ASSIGN_OPT(Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_BorderStyle_EdgeStyles)
 ASSIGN_OPT(Opt_Union_ButtonOptions_ResourceStr)
-ASSIGN_OPT(Opt_Union_Callback_EnterKeyType_Void_TextAreaSubmitCallback)
-ASSIGN_OPT(Opt_Union_Callback_String_Void_SearchSubmitCallback)
 ASSIGN_OPT(Opt_Union_Color_I32_String_Resource)
 ASSIGN_OPT(Opt_Union_Color_String_Resource)
 ASSIGN_OPT(Opt_Union_Color_String_Resource_ColoringStrategy)
@@ -4586,6 +4535,7 @@ ASSIGN_OPT(Opt_EdgeColors)
 ASSIGN_OPT(Opt_FadingEdgeOptions)
 ASSIGN_OPT(Opt_FlexSpaceOptions)
 ASSIGN_OPT(Opt_FocusBoxStyle)
+ASSIGN_OPT(Opt_font_FontOptions)
 ASSIGN_OPT(Opt_ForegroundBlurStyleOptions)
 ASSIGN_OPT(Opt_FormInfo)
 ASSIGN_OPT(Opt_GaugeShadowOptions)
@@ -4912,7 +4862,6 @@ ASSIGN_OPT(Opt_SpanStyle)
 ASSIGN_OPT(Opt_Union_RichEditorImageSpanResult_RichEditorTextSpanResult)
 ASSIGN_OPT(Opt_Union_RichEditorTextSpanResult_RichEditorImageSpanResult)
 ASSIGN_OPT(Opt_RichEditorSpan)
-ASSIGN_OPT(Opt_Union_ImageAttachmentInterface_Opt_AttachmentType)
 #undef ASSIGN_OPT
 }
 

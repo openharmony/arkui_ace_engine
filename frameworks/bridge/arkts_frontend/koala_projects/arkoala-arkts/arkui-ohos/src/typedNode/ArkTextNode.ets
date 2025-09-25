@@ -138,8 +138,8 @@ export class ArkTextNode extends ArkBaseNode  implements TextAttribute  {
         return this;
     }
     lineHeight(value: double | string | Resource | undefined): this {
-        const value_casted = value as (TextAlign | undefined)
-        this.getPeer()?.setTextAlignAttribute(value_casted)
+        const value_casted = value as (double | string | Resource | undefined)
+        this.getPeer()?.setLineHeightAttribute(value_casted)
         this.markDirty();
         return this;
     }

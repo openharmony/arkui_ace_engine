@@ -20,7 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkSymbolGlyphPeer, SymbolEffectStrategy, SymbolRenderingStrategy, SymbolGlyphAttribute, SymbolEffect } from "./component/symbolglyph"
+import { ArkSymbolGlyphPeer, SymbolEffectStrategy, SymbolRenderingStrategy, SymbolEffect, SymbolGlyphAttribute } from "./component/symbolglyph"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { Resource } from "global.resource"
@@ -31,6 +31,14 @@ import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
 export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolGlyphAttribute,AttributeModifier<SymbolGlyphAttribute> {
+    constructor(src?: Resource) {
+        super()
+        let src_type: int32 = RuntimeType.UNDEFINED
+        src_type = runtimeType(src)
+        if (RuntimeType.UNDEFINED != src_type) {
+            this.setSymbolGlyphOptions(src)
+        }
+    }
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
@@ -41,6 +49,9 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     applyFocusedAttribute(instance: SymbolGlyphAttribute): void { }
     applyDisabledAttribute(instance: SymbolGlyphAttribute): void { }
     applySelectedAttribute(instance: SymbolGlyphAttribute): void { }
+
+    _setSymbolGlyphOptions_flag:  AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _setSymbolGlyphOptions0_value?: Resource | undefined
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontSize_0_0value?: double | string | Resource | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -51,16 +62,38 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     _effectStrategy_0_0value?: SymbolEffectStrategy | undefined
     _renderingStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _renderingStrategy_0_0value?: SymbolRenderingStrategy | undefined
+    _symbolEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _symbolEffect_0_0value?: SymbolEffect | undefined
     _minFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _minFontScale_0_0value?: double | Resource | undefined
     _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _maxFontScale_0_0value?: double | Resource | undefined
-    _symbolEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _symbolEffect_0_0value?: SymbolEffect | undefined
-    _symbolEffect_0_1value?: boolean | int32 | undefined
+    _symbolEffect_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _symbolEffect_1_0value?: SymbolEffect | undefined
+    _symbolEffect_1_1value?: boolean | undefined
+    _symbolEffect_2_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _symbolEffect_2_0value?: SymbolEffect | undefined
+    _symbolEffect_2_1value?: int32 | undefined
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkSymbolGlyphPeer;
+        if (this._setSymbolGlyphOptions_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (this._setSymbolGlyphOptions_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSymbolGlyphOptionsAttribute((this._setSymbolGlyphOptions0_value as Resource | undefined))
+                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                default: {
+                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.INITIAL
+                    peer.setSymbolGlyphOptionsAttribute(undefined)
+                }
+            }
+        }
         if (this._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._fontSize_0_flag) {
@@ -151,6 +184,24 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
+        if (this._symbolEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._symbolEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSymbolEffect0Attribute((this._symbolEffect_0_0value as SymbolEffect | undefined));
+                    this._symbolEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._symbolEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._symbolEffect_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSymbolEffect0Attribute((undefined as SymbolEffect | undefined));
+                }
+            }
+        }
         if (this._minFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._minFontScale_0_flag) {
@@ -187,27 +238,58 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (this._symbolEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._symbolEffect_1_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._symbolEffect_0_flag) {
+            switch (this._symbolEffect_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSymbolEffectAttribute((this._symbolEffect_0_0value as SymbolEffect | undefined), (this._symbolEffect_0_1value as boolean | int32 | undefined | undefined));
-                    this._symbolEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    peer.setSymbolEffect1Attribute((this._symbolEffect_1_0value as SymbolEffect | undefined), (this._symbolEffect_1_1value as boolean | undefined));
+                    this._symbolEffect_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._symbolEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    this._symbolEffect_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._symbolEffect_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSymbolEffectAttribute((undefined as SymbolEffect | undefined), (undefined as boolean | int32 | undefined | undefined));
+                    this._symbolEffect_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSymbolEffect1Attribute((undefined as SymbolEffect | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._symbolEffect_2_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._symbolEffect_2_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSymbolEffect2Attribute((this._symbolEffect_2_0value as SymbolEffect | undefined), (this._symbolEffect_2_1value as int32 | undefined));
+                    this._symbolEffect_2_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._symbolEffect_2_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._symbolEffect_2_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSymbolEffect2Attribute((undefined as SymbolEffect | undefined), (undefined as int32 | undefined));
                 }
             }
         }
     }
-    mergeModifier(modifier: SymbolGlyphModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        const modifier = value as SymbolGlyphModifier;
+        if (modifier._setSymbolGlyphOptions_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (modifier._setSymbolGlyphOptions_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.setSymbolGlyphOptions(modifier._setSymbolGlyphOptions0_value)
+                    break
+                }
+                default: {
+                    this.setSymbolGlyphOptions(undefined)
+                }
+            }
+        }
         if (modifier._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._fontSize_0_flag) {
@@ -273,6 +355,19 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
+        if (modifier._symbolEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._symbolEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.symbolEffect(modifier._symbolEffect_0_0value);
+                    break;
+                }
+                default: {
+                    this.symbolEffect((undefined as SymbolEffect | undefined));
+                }
+            }
+        }
         if (modifier._minFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._minFontScale_0_flag) {
@@ -299,19 +394,42 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (modifier._symbolEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._symbolEffect_1_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._symbolEffect_0_flag) {
+            switch (modifier._symbolEffect_1_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.symbolEffect(modifier._symbolEffect_0_0value, modifier._symbolEffect_0_1value);
+                    this.symbolEffect(modifier._symbolEffect_1_0value, modifier._symbolEffect_1_1value);
                     break;
                 }
                 default: {
-                    this.symbolEffect((undefined as SymbolEffect | undefined), (undefined as boolean | int32 | undefined | undefined));
+                    this.symbolEffect((undefined as SymbolEffect | undefined), (undefined as boolean | undefined));
                 }
             }
         }
+        if (modifier._symbolEffect_2_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._symbolEffect_2_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.symbolEffect(modifier._symbolEffect_2_0value, modifier._symbolEffect_2_1value);
+                    break;
+                }
+                default: {
+                    this.symbolEffect((undefined as SymbolEffect | undefined), (undefined as int32 | undefined));
+                }
+            }
+        }
+    }
+    setSymbolGlyphOptions(value: Resource | undefined): this {
+        if (this._setSymbolGlyphOptions_flag === AttributeUpdaterFlag.INITIAL ||
+            this._setSymbolGlyphOptions0_value !== value || !Type.of(value).isPrimitive()) {
+            this._setSymbolGlyphOptions0_value = value
+            this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.UPDATE
+        } else {
+            this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
     }
     fontSize(value: double | string | Resource | undefined): this {
         if (((this._fontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -368,6 +486,17 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         }
         return this
     }
+    symbolEffect(value: SymbolEffect | undefined): this {
+        if (((this._symbolEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._symbolEffect_0_flag = AttributeUpdaterFlag.UPDATE
+            this._symbolEffect_0_0value = value
+        } else
+        {
+            this._symbolEffect_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     minFontScale(value: double | Resource | undefined): this {
         if (((this._minFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -390,15 +519,27 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         }
         return this
     }
-    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue?: boolean | int32): this {
-        if (((this._symbolEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._symbolEffect_0_1value) !== (triggerValue)))
+    symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
+        if (((this._symbolEffect_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._symbolEffect_1_1value) !== (isActive)))
         {
-            this._symbolEffect_0_flag = AttributeUpdaterFlag.UPDATE
-            this._symbolEffect_0_0value = symbolEffect
-            this._symbolEffect_0_1value = triggerValue
+            this._symbolEffect_1_flag = AttributeUpdaterFlag.UPDATE
+            this._symbolEffect_1_0value = symbolEffect
+            this._symbolEffect_1_1value = isActive
         } else
         {
-            this._symbolEffect_0_flag = AttributeUpdaterFlag.SKIP
+            this._symbolEffect_1_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue: int32 | undefined): this {
+        if (((this._symbolEffect_2_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._symbolEffect_2_1value) !== (triggerValue)))
+        {
+            this._symbolEffect_2_flag = AttributeUpdaterFlag.UPDATE
+            this._symbolEffect_2_0value = symbolEffect
+            this._symbolEffect_2_1value = triggerValue
+        } else
+        {
+            this._symbolEffect_2_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

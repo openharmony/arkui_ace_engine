@@ -689,6 +689,30 @@ export class StyledStringChangedListener_serializer {
         return value
     }
 }
+export class TextMenuOptions_serializer {
+    public static write(buffer: SerializerBase, value: TextMenuOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForShowMode  = value.showMode
+        if (valueHolderForShowMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShowModeTmpValue  = (valueHolderForShowMode as TextMenuShowMode)
+            valueSerializer.writeInt32(valueHolderForShowModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): TextMenuOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const showModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let showModeTmpBuf : TextMenuShowMode | undefined = undefined
+        if ((showModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            showModeTmpBuf = TextMenuShowMode.fromValue(valueDeserializer.readInt32())
+        }
+        const showModeTmpResult : TextMenuShowMode | undefined = showModeTmpBuf
+        let value : TextMenuOptions = ({showMode: showModeTmpResult} as TextMenuOptions)
+        return value
+    }
+}
 export class TextRange_serializer {
     public static write(buffer: SerializerBase, value: TextRange): void {
         let valueSerializer : SerializerBase = buffer

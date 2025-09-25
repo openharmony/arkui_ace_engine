@@ -47,8 +47,12 @@ import { FrameNode, LayoutConstraint } from "arkui.FrameNode"
 import { Size, Frame, LengthMetrics } from "arkui.Graphics"
 import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask } from "./gesture"
 import { default as image } from "@ohos.multimedia.image"
+import { font_FontOptions_serializer, font_FontInfo_serializer } from "./../framework/ohos.font"
+import { font_UIFontConfig_serializer } from "./../framework/ohos.font.custom"
+import { default as font } from "@ohos.font"
 import { MeasureOptions_serializer } from "./../framework/ohos.measure"
 import { MeasureOptions } from "@ohos.measure"
+import { TextMenuOptions_serializer, TextMenuOptions } from "./textCommon"
 import { CustomBuilder } from "./builder"
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
 import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
@@ -1578,9 +1582,9 @@ export class GlobalScope_ohos_arkui_performanceMonitor {
     }
 }
 export class GlobalScope_ohos_font {
-    static registerFont_serialize(options: object): void {
+    static registerFont_serialize(options: font.FontOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.writeCustomObject('object', options)
+        font_FontOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._GlobalScope_ohos_font_registerFont(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -1595,21 +1599,32 @@ export class GlobalScope_ohos_font {
         const returnResult : Array<string> = buffer
         return returnResult
     }
-    static getFontByName_serialize(fontName: string): object {
+    static getFontByName_serialize(fontName: string): font.FontInfo {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getFontByName(fontName)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : font.FontInfo = font_FontInfo_serializer.read(retvalDeserializer)
+        return returnResult
     }
-    public static registerFont(options: object): void {
-        const options_casted = options as (object)
+    static getUIFontConfig_serialize(): font.UIFontConfig {
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getUIFontConfig()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : font.UIFontConfig = font_UIFontConfig_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    public static registerFont(options: font.FontOptions): void {
+        const options_casted = options as (font.FontOptions)
         GlobalScope_ohos_font.registerFont_serialize(options_casted)
         return
     }
     public static getSystemFontList(): Array<string> {
         return GlobalScope_ohos_font.getSystemFontList_serialize()
     }
-    public static getFontByName(fontName: string): object {
+    public static getFontByName(fontName: string): font.FontInfo {
         const fontName_casted = fontName as (string)
         return GlobalScope_ohos_font.getFontByName_serialize(fontName_casted)
+    }
+    public static getUIFontConfig(): font.UIFontConfig {
+        return GlobalScope_ohos_font.getUIFontConfig_serialize()
     }
 }
 export class GlobalScope_ohos_measure_utils {
@@ -1636,6 +1651,35 @@ export class GlobalScope_ohos_measure_utils {
     public static measureTextSize(options: MeasureOptions): SizeOptions {
         const options_casted = options as (MeasureOptions)
         return GlobalScope_ohos_measure_utils.measureTextSize_serialize(options_casted)
+    }
+}
+export class GlobalScopeUicontextFontScale {
+    static isFollowingSystemFontScale_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._GlobalScopeUicontextFontScale_isFollowingSystemFontScale()
+        return retval
+    }
+    static getMaxFontScale_serialize(): double {
+        const retval  = ArkUIGeneratedNativeModule._GlobalScopeUicontextFontScale_getMaxFontScale()
+        return retval
+    }
+    public static isFollowingSystemFontScale(): boolean {
+        return GlobalScopeUicontextFontScale.isFollowingSystemFontScale_serialize()
+    }
+    public static getMaxFontScale(): double {
+        return GlobalScopeUicontextFontScale.getMaxFontScale_serialize()
+    }
+}
+export class GlobalScopeUicontextTextMenu {
+    static setMenuOptions_serialize(options: TextMenuOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TextMenuOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._GlobalScopeUicontextTextMenu_setMenuOptions(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static setMenuOptions(options: TextMenuOptions): void {
+        const options_casted = options as (TextMenuOptions)
+        GlobalScopeUicontextTextMenu.setMenuOptions_serialize(options_casted)
+        return
     }
 }
 export class IUIContext {

@@ -3232,6 +3232,13 @@ frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.h @arkui_framewo
 frameworks/core/interfaces/native/ani/keyboard_avoid_mode_ani_modifier.h @arkuilayout1
 frameworks/core/interfaces/native/ani/keyboard_avoid_mode_ani_modifier.cpp @arkuilayout1
 
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ApplyModifierToNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkSymbolGlyphNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkTextInputNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkTextAreaNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkTextNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkSearchNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkMarqueeNode.ets @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_input_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/search_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_area_modifier.cpp @huawei_g_five
@@ -3263,6 +3270,7 @@ frameworks/core/interfaces/native/implementation/text_input_controller_peer.h @h
 frameworks/core/interfaces/native/implementation/global_scope_ohos_font_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/global_scope_ohos_measure_utils_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/global_scope_uicontext_text_menu_accessor.cpp @huawei_g_five
+frameworks/core/interfaces/native/implementation/global_scope_uicontext_font_scale_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/edit_menu_options_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_menu_item_id_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_menu_item_id_peer.h @huawei_g_five
@@ -3301,6 +3309,10 @@ frameworks/core/interfaces/native/implementation/baseline_offset_style_accessor.
 frameworks/core/interfaces/native/implementation/baseline_offset_style_peer.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/paragraph_style_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/paragraph_style_peer.h @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/text_based_modifier @huawei_g_five
+frameworks/core/interfaces/native/ani/text_based_ani_modifier.cpp @huawei_g_five
+frameworks/core/interfaces/native/ani/text_based_ani_modifier.h @huawei_g_five
+frameworks/core/interfaces/native/implementation/symbol_glyph_modifier_peer.h @huawei_g_five
 
 [Web ArkTS1.2]
 frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkweb-committer-group
@@ -3608,6 +3620,7 @@ test/unittest/interfaces/form_render/ @form_framework
 [Generated source]
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/ @arkui-idlize
 frameworks/core/interfaces/native/generated/ @arkui-idlize
+frameworks/core/interfaces/native/utility/generated/ @arkui-idlize
 
 [Koala mirror]
 frameworks/bridge/arkts_frontend/koala_mirror/ @huaweimaxuchu
