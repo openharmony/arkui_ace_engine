@@ -207,6 +207,7 @@ template("declarative_js_engine") {
       ":prefetcher",
       ":shape",
       ":statemanagement",
+      ":windowsizelayoutbreakpoint",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
     ]
@@ -793,6 +794,7 @@ template("declarative_js_engine_ng") {
       ":prefetcher",
       ":shape",
       ":statemanagement",
+      ":windowsizelayoutbreakpoint",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
     ]
@@ -1270,6 +1272,15 @@ ohos_abc("statemanagement") {
 ohos_abc("mock") {
   sources = [ "engine/jsMock.js" ]
   output_name = "mock"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("windowsizelayoutbreakpoint") {
+  sources = [ "engine/WindowSizeLayoutBreakpoint.js" ]
+  output_name = "windowsizelayoutbreakpoint"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem
