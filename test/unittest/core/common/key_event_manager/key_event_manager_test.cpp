@@ -293,4 +293,5 @@ HWTEST_F(KeyEventManagerTest, ReDispatch001, TestSize.Level1)
         }
     }
 }
+
 } // namespace OHOS::Ace::NG

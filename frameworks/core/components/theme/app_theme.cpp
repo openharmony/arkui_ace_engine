@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,9 +65,13 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
         themeStyle->GetAttr<double>("page_transition_amplitude_ratio", DEFAULT_AMPLITUDE_RATIO);
     theme->dragPanDistanceMouse_ =
         pattern->GetAttr<Dimension>("app_theme_drag_pan_distance_mouse", 1.0_vp);
-    theme->clickDistanceThreshold_ = pattern->GetAttr<Dimension>(
-        "app_theme_click_distancethreshold", Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::VP));
+    auto clickDistanceThresholdValue = pattern->GetAttr<std::string>("app_theme_click_distancethreshold", "infinity");
+    if (!strcmp(clickDistanceThresholdValue.c_str(), "infinity")) {
+        theme->clickDistanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::VP);
+    } else {
+        theme->clickDistanceThreshold_ = Dimension::FromString(clickDistanceThresholdValue);
+    }
     theme->panDistanceThresholdForDragDrop_ = pattern->GetAttr<Dimension>("app_theme_drag_distancethreshold", 10.0_vp);
     return theme;
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace
