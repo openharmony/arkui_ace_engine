@@ -79,7 +79,10 @@ struct IndexPage {
     new TextList(45, 'lanesMinLength(ListModifier)', 'pages/List/ListModifier/lanesMinLength'),
     new TextList(46, 'ListItemGroupModifierIndex', 'pages/List/ListItemGroupModifier/ListItemGroupModifierIndex'),
     new TextList(47, 'ListItemGroupIndex', 'pages/List/ListItemGroup/ListItemGroupIndex'),
-    new TextList(48, 'ListIndex', 'pages/List/ListIndex')
+    new TextList(48, 'ListIndex', 'pages/List/ListIndex'),
+    new TextList(49, 'scrollBarColor', 'pages/List/scrollBarColor'),
+    new TextList(50, 'scrollBarColor(ListModifier)', 'pages/List/ListModifier/scrollBarColor'),
+    new TextList(51, 'ListModifierIndex', 'pages/List/ListModifier/ListModifierIndex')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
