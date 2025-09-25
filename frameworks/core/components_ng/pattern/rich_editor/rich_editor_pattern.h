@@ -1365,6 +1365,12 @@ public:
         return dataDetectorAdapter_->aiSpanMap_;
     }
 
+    bool NeedClearAISpanMap(const std::u16string& textForAICache) override
+    {
+        bool isAppendContent = dataDetectorAdapter_->textForAI_.rfind(textForAICache, 0) == 0;
+        return !isAppendContent;
+    }
+
     void SetTextDetectEnable(bool enable) override
     {
         auto currentEnable = textDetectEnable_;

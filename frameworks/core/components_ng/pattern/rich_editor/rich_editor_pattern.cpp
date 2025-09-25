@@ -2186,6 +2186,7 @@ UpdateSpanStyle RichEditorPattern::GetUpdateSpanStyle()
 
 void RichEditorPattern::MarkAISpanStyleChanged()
 {
+    dataDetectorAdapter_->aiSpanMap_.clear();
     std::for_each(spans_.begin(), spans_.end(), [](const auto& span) {
         if (span->aiSpanResultCount != 0) {
             span->needReLayout = true;

@@ -566,7 +566,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
     };
 }
 
-void DataDetectorAdapter::StartAITask()
+void DataDetectorAdapter::StartAITask(bool clearAISpanMap)
 {
     if (textForAI_.empty() || (!typeChanged_ && lastTextForAI_ == textForAI_)) {
         MarkDirtyNode();
@@ -577,7 +577,9 @@ void DataDetectorAdapter::StartAITask()
         aiSpanMapCopy = aiSpanMap_;
     }
     detectTexts_.clear();
-    aiSpanMap_.clear();
+    if (clearAISpanMap) {
+        aiSpanMap_.clear();
+    }
     typeChanged_ = false;
     startDetectorTimeStamp_ = std::chrono::high_resolution_clock::now();
     auto context = PipelineContext::GetCurrentContextSafely();

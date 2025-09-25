@@ -91,7 +91,7 @@ public:
     void SetTextDetectTypes(const std::string& types);
     void ParseAIResult(const TextDataDetectResult& result, int32_t startPos);
     void ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos);
-    void StartAITask();
+    void StartAITask(bool clearAISpanMap = true);
     void CancelAITask()
     {
         if (aiDetectDelayTask_) {
