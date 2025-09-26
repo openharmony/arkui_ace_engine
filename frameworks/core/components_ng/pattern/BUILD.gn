@@ -696,6 +696,7 @@ build_component_ng("pattern_ng") {
     "toggle/switch_paint_method.cpp",
     "toggle/switch_paint_property.cpp",
     "toggle/switch_pattern.cpp",
+    "toggle/toggle_base_pattern.cpp",
     "toggle/toggle_model_ng.cpp",
     "toggle/toggle_model_static.cpp",
     "toolbaritem/toolbar_row_pattern.cpp",

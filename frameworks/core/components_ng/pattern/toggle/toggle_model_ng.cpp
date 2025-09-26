@@ -290,10 +290,16 @@ void ToggleModelNG::ReplaceAllChild(const RefPtr<FrameNode>& oldFrameNode)
 {
     auto currentNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     CHECK_NULL_VOID(currentNode);
-    const auto& children = oldFrameNode->GetChildren();
+    auto children = oldFrameNode->GetChildren();
     auto switchPattern = oldFrameNode->GetPattern<SwitchPattern>();
     auto checkboxPattern = oldFrameNode->GetPattern<CheckBoxPattern>();
     auto toggleButtonPattern = oldFrameNode->GetPattern<ToggleButtonPattern>();
+    auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    auto currentHolderNode = currentFrameNode->GetPattern<ToggleBasePattern>();
+    auto oldHolderNode = oldFrameNode->GetPattern<ToggleBasePattern>();
+    if (oldHolderNode) {
+        children = oldHolderNode->GetOrCreateHolderNode()->GetChildren();
+    }
     for (const auto& child : children) {
         if (!child) {
             continue;
@@ -311,7 +317,12 @@ void ToggleModelNG::ReplaceAllChild(const RefPtr<FrameNode>& oldFrameNode)
             toggleButtonPattern->GetBuilderId() == child->GetId()) {
             continue;
         }
-        child->MountToParent(currentNode);
+        if (currentHolderNode) {
+            RefPtr<FrameNode> frameChild = AceType::DynamicCast<FrameNode>(child);
+            currentHolderNode->MountToHolder(frameChild);
+        } else {
+            child->MountToParent(currentNode);
+        }
     }
     oldFrameNode->RemoveAllChildInRenderTree();
 }
