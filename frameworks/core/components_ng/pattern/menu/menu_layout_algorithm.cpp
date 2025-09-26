@@ -395,8 +395,16 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     InitializePadding(layoutWrapper);
     InitializeParam(menuPattern);
     auto needModify = !menuPattern->IsSelectMenu() && !menuPattern->IsSelectOverlayDefaultModeRightClickMenu();
-    if (needModify && canExpandCurrentWindow_) {
-        ModifyOffset(position_);
+    if (needModify) {
+        if (canExpandCurrentWindow_ && isExpandDisplay_) {
+            position_ += displayWindowRect_.GetOffset();
+            TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying displayWindowRect : %{public}s",
+                position_.ToString().c_str());
+        } else if (isUIExtensionSubWindow_ && !isExpandDisplay_) {
+            position_ += displayWindowRect_.GetOffset() - UIExtensionHostWindowRect_.GetOffset();
+            TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying UIExtensionHostWindowRect : %{public}s",
+                position_.ToString().c_str());
+        }
     }
     dumpInfo_.originPlacement =
         PlacementUtils::ConvertPlacementToString(props->GetMenuPlacement().value_or(Placement::NONE));
@@ -472,9 +480,6 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     param_.left = safeAreaInsets.left_.Length();
     param_.right = safeAreaInsets.right_.Length();
     param_.previewMenuGap = targetSecurity_;
-    TAG_LOGI(AceLogTag::ACE_MENU,
-        "safeAreaInsets in InitializeParam: (top: %{public}f, bottom: %{public}f, left: %{public}f, right: %{public}f)",
-        param_.top, param_.bottom, param_.left, param_.right);
 
     InitWrapperRect(props, menuPattern);
     InitializeLayoutRegionMargin(menuPattern);
@@ -539,30 +544,10 @@ void MenuLayoutAlgorithm::InitializeLayoutRegionMargin(const RefPtr<MenuPattern>
     }
 }
 
-bool MenuLayoutAlgorithm::IsExpandDisplay()
-{
-    auto containerId = Container::CurrentId();
-    auto container = AceEngine::Get().GetContainer(containerId);
-    if (containerId >= MIN_SUBCONTAINER_ID) {
-        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-        container = AceEngine::Get().GetContainer(parentContainerId);
-    }
-    CHECK_NULL_RETURN(container, false);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto theme = pipelineContext->GetTheme<SelectTheme>();
-    CHECK_NULL_RETURN(theme, false);
-    // Get FreeMultiWindow status of main window or host window
-    isFreeMultiWindow_ = container->IsFreeMultiWindow();
-    // false for phone devices
-    isExpandDisplay_ = theme->GetExpandDisplay() || isFreeMultiWindow_ || SystemProperties::IsPCMode();
-    return isExpandDisplay_;
-}
-
 void MenuLayoutAlgorithm::InitWrapperRect(
     const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
 {
-    if (canExpandCurrentWindow_ && isExpandDisplay_) {
+    if (canExpandCurrentWindow_ && isExpandDisplay_ && !isTargetNodeInSubwindow_) {
         wrapperRect_ = param_.menuWindowRect;
         wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
         dumpInfo_.wrapperRect = wrapperRect_;
@@ -593,14 +578,13 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     width_ = param_.menuWindowRect.Width();
     height_ = param_.menuWindowRect.Height();
     TAG_LOGI(AceLogTag::ACE_MENU,
-        "safeAreaInsets in InitWrapperRect : (top: %{public}f, bottom: %{public}f, left: %{public}f, right: "
-        "%{public}f)",
-        top_, bottom_, left_, right_);
+        "safeAreaInsets: (top: %{public}f, bottom: %{public}f, left: %{public}f, right: %{public}f)", top_, bottom_,
+        left_, right_);
     auto windowManager = pipelineContext->GetWindowManager();
-    isContainerModal_ = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (!canExpandCurrentWindow_ && isContainerModal_) {
+        if (!canExpandCurrentWindow_ && isContainerModal) {
             LimitContainerModalMenuRect(width_, height_, menuPattern);
         }
     }
@@ -633,14 +617,15 @@ void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
     } else {
         offsetY = position_.GetY();
     }
-    auto left = wrapperRect_.Left();
-    auto top = wrapperRect_.Top();
-    auto bottom = wrapperRect_.Bottom();
-    auto width = wrapperRect_.Width();
+    auto isShowInSubWindow = canExpandCurrentWindow_ && isExpandDisplay_ && !isTargetNodeInSubwindow_;
+    auto windowsOffsetY = isShowInSubWindow ? param_.windowsOffsetY : 0;
     if (LessNotEqual(offsetY, creaseTop)) {
-        wrapperRect_.SetRect(left, top, width, creaseTop - top);
+        wrapperRect_.SetRect(left_, top_ + windowsOffsetY, width_ - left_ - right_, creaseTop - top_);
     } else if (GreatNotEqual(offsetY, creaseBottom)) {
-        wrapperRect_.SetRect(left, creaseBottom, width, bottom - creaseBottom);
+        wrapperRect_.SetRect(left_, creaseBottom, width_ - left_ - right_,
+        windowsOffsetY + height_ - creaseBottom - bottom_);
+    } else {
+        wrapperRect_.SetRect(left_, top_ + windowsOffsetY, width_ - left_ - right_, height_ - top_ - bottom_);
     }
     dumpInfo_.wrapperRect = wrapperRect_;
     TAG_LOGI(AceLogTag::ACE_MENU, "Update wrapperRect for hoverMode : %{public}s", wrapperRect_.ToString().c_str());
@@ -734,8 +719,7 @@ void MenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper)
 
     margin_ = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     optionPadding_ = margin_;
-    // for menu in main window or on phone
-    if (!(canExpandCurrentWindow_ && IsExpandDisplay())) {
+    if (!canExpandCurrentWindow_) {
         paddingStart_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
         paddingEnd_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
     } else {
@@ -799,9 +783,8 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
     auto isContextMenu = menuPattern->IsContextMenu();
-    canExpandCurrentWindow_ = menuLayoutProperty->GetShowInSubWindowValue(true) || isContextMenu;
-    dumpInfo_.showInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true);
-    dumpInfo_.canExpandCurrentWindow = canExpandCurrentWindow_;
+    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true) || isContextMenu;
+    InitCanExpandCurrentWindow(isShowInSubWindow, layoutWrapper);
     Initialize(layoutWrapper);
     if (!targetTag_.empty()) {
         InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
@@ -2958,7 +2941,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     CHECK_NULL_VOID(pipelineContext);
     if (canExpandCurrentWindow_ && !menuPattern->IsSelectMenu()) {
         if (!holdTargetOffset) {
-            ModifyOffset(targetOffset_);
+            ModifyTargetOffset();
             menuPattern->SetTargetOffset(targetOffset_);
         }
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
@@ -2966,7 +2949,10 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         return;
     }
 
-    if (isContainerModal_) {
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
+                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    if (isContainerModal) {
         auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
         auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
                           static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
@@ -3516,29 +3502,46 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementRightBottom(
     return childPosition;
 }
 
-bool MenuLayoutAlgorithm::IsUIExtensionSubWindow()
+void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isShowInSubWindow, LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pipelineContext = DialogManager::GetMainPipelineContext(hostNode);
+    CHECK_NULL_VOID(pipelineContext);
     auto containerId = Container::CurrentId();
     auto container = AceEngine::Get().GetContainer(containerId);
     if (containerId >= MIN_SUBCONTAINER_ID) {
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
         container = AceEngine::Get().GetContainer(parentContainerId);
     }
-    CHECK_NULL_RETURN(container, false);
+    CHECK_NULL_VOID(container);
+    // Get FreeMultiWindow status of main window or host window
+    isFreeMultiWindow_ = container->IsFreeMultiWindow();
+    auto theme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    // false for phone devices
+    isExpandDisplay_ = theme->GetExpandDisplay() || isFreeMultiWindow_ || SystemProperties::IsPCMode();
+    auto isUIExtensionSubWindow = container->IsUIExtensionWindow();
+    if ((isExpandDisplay_ || isUIExtensionSubWindow) && !isShowInSubWindow && containerId >= MIN_SUBCONTAINER_ID) {
+        canExpandCurrentWindow_ = true;
+        isTargetNodeInSubwindow_ = true;
+        return;
+    }
+    canExpandCurrentWindow_ = isExpandDisplay_ && isShowInSubWindow;
     if (containerId >= MIN_SUBCONTAINER_ID) {
-        // check whether parent window is UIExtensionWindow
         isUIExtensionSubWindow_ = container->IsUIExtensionWindow();
         if (isUIExtensionSubWindow_) {
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(containerId);
-            CHECK_NULL_RETURN(subwindow, false);
+            canExpandCurrentWindow_ = true;
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+                containerId, SubwindowType::TYPE_MENU);
+            CHECK_NULL_VOID(subwindow);
             auto rect = subwindow->GetUIExtensionHostWindowRect();
             UIExtensionHostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
             TAG_LOGI(AceLogTag::ACE_MENU, "GetUIExtensionHostWindowRect : %{public}s",
                 UIExtensionHostWindowRect_.ToString().c_str());
-            return true;
         }
     }
-    return false;
 }
 
 Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuPattern)
@@ -3547,63 +3550,38 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
     CHECK_NULL_RETURN(menuPattern, menuWindowRect);
     auto host = menuPattern->GetHost();
     CHECK_NULL_RETURN(host, menuWindowRect);
-    // get default pipelineContext for menu without targetNode
-    auto pipelineContext = DialogManager::GetMainPipelineContext(host);
+    auto pipelineContext = DialogManager::GetMainPipelineContext(host, isTargetNodeInSubwindow_);
     CHECK_NULL_RETURN(pipelineContext, menuWindowRect);
-    auto menuWrapper = menuPattern->GetMenuWrapper();
-    CHECK_NULL_RETURN(menuWrapper, menuWindowRect);
-    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_RETURN(menuWrapperPattern, menuWindowRect);
-    if (menuPattern->IsSubMenu()) {
-        // without targetNode, submenu reuse menuWindowRect of mainMenu
-        auto menuWindowRect = menuWrapperPattern->GetMenuWindowRect();
-        dumpInfo_.menuWindowRect = menuWindowRect;
-        return menuWindowRect;
-    }
-    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
-    if (targetNode) {
-        pipelineContext = targetNode->GetContext();
-        if (!pipelineContext) {
-            TAG_LOGE(AceLogTag::ACE_MENU, "PipelineContext of targetNode is null, return Rect()");
-            return menuWindowRect;
-        }
-    }
     auto rect = pipelineContext->GetDisplayWindowRectInfo();
     displayWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayWindowRectInfo : %{public}s", displayWindowRect_.ToString().c_str());
     menuWindowRect = Rect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
-    if (canExpandCurrentWindow_) {
-        if (isExpandDisplay_) {
-            auto availableRect = OverlayManager::GetDisplayAvailableRect(
-                menuPattern->GetHost(), static_cast<int32_t>(SubwindowType::TYPE_MENU));
-            TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayAvailableRect : %{public}s", availableRect.ToString().c_str());
-            menuWindowRect =
-                Rect(availableRect.Left(), availableRect.Top(), availableRect.Width(), availableRect.Height());
-        } else if (IsUIExtensionSubWindow()) {
-            rect = Rect(UIExtensionHostWindowRect_.Left(), UIExtensionHostWindowRect_.Top(),
-                UIExtensionHostWindowRect_.Width(), UIExtensionHostWindowRect_.Height());
-            menuWindowRect = rect;
-        }
+    auto availableRect = OverlayManager::GetDisplayAvailableRect(
+        menuPattern->GetHost(), static_cast<int32_t>(SubwindowType::TYPE_MENU));
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayAvailableRect : %{public}s", availableRect.ToString().c_str());
+    if (canExpandCurrentWindow_ && isExpandDisplay_) {
+        menuWindowRect = Rect(availableRect.Left(), availableRect.Top(), availableRect.Width(), availableRect.Height());
+    } else if (isUIExtensionSubWindow_ && !isExpandDisplay_) {
+        rect = Rect(UIExtensionHostWindowRect_.Left(), UIExtensionHostWindowRect_.Top(),
+            UIExtensionHostWindowRect_.Width(), UIExtensionHostWindowRect_.Height());
+        menuWindowRect = rect;
     }
     TAG_LOGI(AceLogTag::ACE_MENU, "GetMenuWindowRectInfo : %{public}s", menuWindowRect.ToString().c_str());
     dumpInfo_.menuWindowRect = menuWindowRect;
-    menuWrapperPattern->SetMenuWindowRect(menuWindowRect);
+    menuPattern->SetMenuWindowRect(menuWindowRect);
     return menuWindowRect;
 }
 
-void MenuLayoutAlgorithm::ModifyOffset(OffsetF& offset)
+void MenuLayoutAlgorithm::ModifyTargetOffset()
 {
-    TAG_LOGI(AceLogTag::ACE_MENU, "original targetOffset is : %{public}s", offset.ToString().c_str());
-    if (isExpandDisplay_) {
-        auto containerId = Container::CurrentId();
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(containerId);
-        CHECK_NULL_VOID(subwindow);
-        offset += displayWindowRect_.GetOffset() - subwindow->GetWindowRect().GetOffset();
-        TAG_LOGI(AceLogTag::ACE_MENU, "ModifyOffset with DisplayWindowRect : %{public}s",
-            offset.ToString().c_str());
-    } else if (isUIExtensionSubWindow_) {
-        offset += displayWindowRect_.GetOffset() - UIExtensionHostWindowRect_.GetOffset();
-        TAG_LOGI(AceLogTag::ACE_MENU, "ModifyOffset with UIExtensionHostWindowRect : %{public}s",
+    TAG_LOGI(AceLogTag::ACE_MENU, "original targetOffset is : %{public}s", targetOffset_.ToString().c_str());
+    if (canExpandCurrentWindow_ && isExpandDisplay_ && !isTargetNodeInSubwindow_) {
+        targetOffset_ += displayWindowRect_.GetOffset();
+        TAG_LOGI(AceLogTag::ACE_MENU, "ModifyTargetOffset for displayAvailableRect : %{public}s",
+            targetOffset_.ToString().c_str());
+    } else if (isUIExtensionSubWindow_ && !isExpandDisplay_) {
+        targetOffset_ += displayWindowRect_.GetOffset() - UIExtensionHostWindowRect_.GetOffset();
+        TAG_LOGI(AceLogTag::ACE_MENU, "ModifyTargetOffset for UIExtensionHostWindowRect : %{public}s",
             targetOffset_.ToString().c_str());
     }
 }
