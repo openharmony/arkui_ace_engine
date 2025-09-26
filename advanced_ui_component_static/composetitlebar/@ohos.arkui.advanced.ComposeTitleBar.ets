@@ -32,14 +32,14 @@ import common from '@ohos.app.ability.common';
 import hilog from '@ohos.hilog';
 
 export class ComposeTitleBarMenuItem {
-  value: ResourceStr = '';
-  symbolStyle?: SymbolGlyphModifier;
-  isEnabled?: boolean;
-  action?: () => void;
-  label?: ResourceStr;
-  accessibilityText?: ResourceStr;
-  accessibilityLevel?: string;
-  accessibilityDescription?: ResourceStr;
+  public value: ResourceStr = '';
+  public symbolStyle?: SymbolGlyphModifier;
+  public isEnabled?: boolean;
+  public action?: () => void;
+  public label?: ResourceStr;
+  public accessibilityText?: ResourceStr;
+  public accessibilityLevel?: string;
+  public accessibilityDescription?: ResourceStr;
 }
 
 const TEXT_EDITABLE_DIALOG = '18.3fp';

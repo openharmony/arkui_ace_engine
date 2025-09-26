@@ -637,7 +637,6 @@ export struct SelectDialogV2 {
               .onClick((event: ClickEvent) => {
                 this.selectedIndexInner = index;
                 item?.action();
-                // this.getDialogController()?.close();
               })
             }
             .applyStyles(this.paddingStyle)
