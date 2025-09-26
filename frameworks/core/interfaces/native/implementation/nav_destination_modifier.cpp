@@ -619,6 +619,12 @@ void SetToolbarConfigurationImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(toolbarParam);
+    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto isHideItemText = Converter::OptConvert<bool>(options->value.hideItemValue).value_or(false);
+        NavDestinationModelStatic::SetHideItemText(frameNode, isHideItemText);
+    } else {
+        NavDestinationModelStatic::SetHideItemText(frameNode, false);
+    }
     NG::NavigationToolbarOptions toolbarOptions;
     if (toolbarParam->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         auto typeValue = toolbarParam->value.selector;

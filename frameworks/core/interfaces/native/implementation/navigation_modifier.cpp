@@ -599,6 +599,12 @@ void SetToolbarConfigurationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     CHECK_NULL_VOID(options);
+    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto isHideItemText = Converter::OptConvert<bool>(options->value.hideItemValue).value_or(false);
+        NavigationModelStatic::SetHideItemText(frameNode, isHideItemText);
+    } else {
+        NavigationModelStatic::SetHideItemText(frameNode, false);
+    }
     NG::NavigationToolbarOptions toolbarOptions;
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         auto typeValue = value->value.selector;
@@ -622,10 +628,6 @@ void SetToolbarConfigurationImpl(Ark_NativePointer node,
         }
     }
 
-    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto isHideItemText = Converter::OptConvert<bool>(options->value.hideItemValue).value_or(false);
-        NavigationModelStatic::SetHideItemText(frameNode, isHideItemText);
-    }
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         NG::NavigationBackgroundOptions bgOptions =
             Converter::Convert<NG::NavigationBackgroundOptions>(options->value);
