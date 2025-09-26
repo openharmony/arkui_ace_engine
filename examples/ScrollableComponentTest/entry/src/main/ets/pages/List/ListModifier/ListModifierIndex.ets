@@ -40,7 +40,6 @@ struct Index {
               .height('120vp')
               .fontSize('15vp')
               .backgroundColor('#ffb6c1')
-
               .borderRadius(10)
               .textAlign(TextAlign.Center)
               .onClick(() => {
