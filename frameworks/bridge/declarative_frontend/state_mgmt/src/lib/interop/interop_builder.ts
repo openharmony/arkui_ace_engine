@@ -14,7 +14,7 @@
  */
 
 
-function __makeBuilderParameterStaticProxy_Interop_Internal(name: string, value: Object, sourceGetter: Object) {
+function __makeBuilderParameterStaticProxy_Interop_Internal(name: string, value: Object, sourceGetter: Object): Object {
   if (InteropExtractorModule.makeBuilderParameterStaticProxy === undefined) {
       throw new Error('makeBuilderParameterStaticProxy error!');
   }
