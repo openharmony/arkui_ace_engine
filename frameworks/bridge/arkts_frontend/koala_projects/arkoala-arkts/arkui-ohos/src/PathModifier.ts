@@ -17,21 +17,23 @@ import { AttributeModifier, CommonMethod, CommonShapeMethod, ArkCommonShapeMetho
 import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
 import { ArkPathPeer, PathAttribute } from 'arkui/component/path';
 import { CommonShapeMethodModifier } from './CommonShapeMethodModifier';
+import { PeerNode } from './PeerNode';
 
 export class PathModifier extends CommonShapeMethodModifier implements PathAttribute, AttributeModifier<PathAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyNormalAttribute(instance: CommonShapeMethod): void { }
-    applyPressedAttribute(instance: CommonShapeMethod): void { }
-    applyFocusedAttribute(instance: CommonShapeMethod): void { }
-    applyDisabledAttribute(instance: CommonShapeMethod): void { }
-    applySelectedAttribute(instance: CommonShapeMethod): void { }
+    applyNormalAttribute(instance: PathAttribute): void { }
+    applyPressedAttribute(instance: PathAttribute): void { }
+    applyFocusedAttribute(instance: PathAttribute): void { }
+    applyDisabledAttribute(instance: PathAttribute): void { }
+    applySelectedAttribute(instance: PathAttribute): void { }
     _commands_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _commands_0_0value?: string | undefined
-    applyModifierPatch(peer: ArkPathPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(peerNode: PeerNode): void {
+        super.applyModifierPatch(peerNode)
+        const peer = peerNode as ArkPathPeer
         if (this._commands_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._commands_0_flag) {
@@ -51,8 +53,12 @@ export class PathModifier extends CommonShapeMethodModifier implements PathAttri
             }
         }
     }
-    mergeModifier(modifier: PathModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof PathModifier)) {
+            return;
+        }
+        const modifier = value as PathModifier
         if (modifier._commands_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._commands_0_flag) {

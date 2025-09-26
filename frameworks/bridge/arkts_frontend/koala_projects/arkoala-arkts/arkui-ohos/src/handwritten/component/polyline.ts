@@ -44,6 +44,16 @@ function hookPolylineAttributeModifier(component: ArkPolylineComponent, modifier
         }
     }
     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: PolylineOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as PolylineOptions
+        }
+        let peer: ArkPolylinePeer = component.getPeer() as Object as ArkPolylinePeer;
+        peer?.setPolylineOptionsAttribute(options_casted)
     };
     let updaterReceiver = (): ArkPolylineComponent => {
         let componentNew: ArkPolylineComponent = new ArkPolylineComponent();

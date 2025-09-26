@@ -95,7 +95,7 @@
 #include "core/components_ng/pattern/shape/line_model_ng.h"
 #include "core/components_ng/pattern/shape/polygon_model_ng.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_model_static.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
@@ -333,7 +333,13 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
 
 void* createXComponentNode(ArkUI_Int32 nodeId)
 {
+#ifdef XCOMPONENT_SUPPORTED
+    auto frameNode = XComponentModelStatic::CreateFrameNode(nodeId, true);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return nullptr;
+#endif
 }
 
 void* createListItemGroupNode(ArkUI_Int32 nodeId)
