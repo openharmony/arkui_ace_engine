@@ -79,8 +79,7 @@ namespace GeneratedApiImpl {
 namespace OHOS::Ace::NG::GeneratedModifier {
 
 void SetAppendGroupedLog(void* pFunc) {}
-const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor();
-const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor();
+
 const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier();
 const GENERATED_ArkUIAnimatorModifier* GetAnimatorModifier();
 const GENERATED_ArkUIBadgeModifier* GetBadgeModifier();
@@ -98,7 +97,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier();
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier();
 const GENERATED_ArkUIComponent3DModifier* GetComponent3DModifier();
 const GENERATED_ArkUIComponentRootModifier* GetComponentRootModifier();
-const GENERATED_ArkUIConditionScopeModifier* GetConditionScopeModifier();
 const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier();
 const GENERATED_ArkUICounterModifier* GetCounterModifier();
 const GENERATED_ArkUICustomBuilderRootModifier* GetCustomBuilderRootModifier();
@@ -195,6 +193,8 @@ const GENERATED_ArkUIWindowSceneModifier* GetWindowSceneModifier();
 const GENERATED_ArkUIWithThemeModifier* GetWithThemeModifier();
 const GENERATED_ArkUIXComponentModifier* GetXComponentModifier();
 const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
+const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor();
+const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor();
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor();
 const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor();
 const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor();
@@ -394,7 +394,6 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetCommonShapeMethodModifier,
         GetComponent3DModifier,
         GetComponentRootModifier,
-        GetConditionScopeModifier,
         GetContainerSpanModifier,
         GetCounterModifier,
         GetCustomBuilderRootModifier,

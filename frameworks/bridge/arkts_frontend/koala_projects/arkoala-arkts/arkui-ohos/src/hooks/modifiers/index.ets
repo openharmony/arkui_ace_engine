@@ -228,11 +228,10 @@ import { ArkWithThemeComponent, WithThemeAttribute } from "./../../component/wit
 import { WithThemeModifier } from "./../../WithThemeModifier"
 import { ArkXComponentComponent, XComponentAttribute } from "./../../component/xcomponent"
 import { XComponentModifier } from "./../../XComponentModifier"
-import { ArkRootComponent, Root, ArkComponentRootComponent, ComponentRoot, ArkCustomBuilderRootComponent, CustomBuilderRoot, ArkConditionScopeComponent, ConditionScope, ArkCustomLayoutRootComponent, CustomLayoutRoot } from "./../../component/idlize"
+import { ArkRootComponent, Root, ArkComponentRootComponent, ComponentRoot, ArkCustomBuilderRootComponent, CustomBuilderRoot, ArkCustomLayoutRootComponent, CustomLayoutRoot } from "./../../component/idlize"
 import { RootModifier } from "./../../RootModifier"
 import { ComponentRootModifier } from "./../../ComponentRootModifier"
 import { CustomBuilderRootModifier } from "./../../CustomBuilderRootModifier"
-import { ConditionScopeModifier } from "./../../ConditionScopeModifier"
 import { CustomLayoutRootModifier } from "./../../CustomLayoutRootModifier"
 import { applyAttributeModifierBase, applyCommonModifier, applyAttributeModifierNoCommonMethod } from  './ArkCommonModifier';
 import { CommonModifier } from '../../CommonModifier';
@@ -975,7 +974,6 @@ export function hookXComponentAttributeModifier(component: ArkXComponentComponen
 export function hookRootAttributeModifier(componenet: ArkRootComponent, value: AttributeModifier<Root> | undefined):void {}
 export function hookComponentRootAttributeModifier(componenet: ArkComponentRootComponent, value: AttributeModifier<ComponentRoot> | undefined):void {}
 export function hookCustomBuilderRootAttributeModifier(componenet: ArkCustomBuilderRootComponent, value: AttributeModifier<CustomBuilderRoot> | undefined):void {}
-export function hookConditionScopeAttributeModifier(componenet: ArkConditionScopeComponent, value: AttributeModifier<ConditionScope> | undefined):void {}
 export function hookCustomLayoutRootAttributeModifier(componenet: ArkCustomLayoutRootComponent, value: AttributeModifier<CustomLayoutRoot> | undefined):void {}
 export function hookFormComponentAttributeModifier(component: ArkFormComponentComponent, value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined) {}
 export function hookPasteButtonAttributeModifier(componenet: ArkPasteButtonComponent, value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined):void {}

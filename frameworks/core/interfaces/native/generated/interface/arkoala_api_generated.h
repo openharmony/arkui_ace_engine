@@ -811,6 +811,8 @@ typedef struct UserDataSpanPeer* Ark_UserDataSpan;
 typedef struct Opt_UserDataSpan Opt_UserDataSpan;
 typedef struct Ark_Vec4 Ark_Vec4;
 typedef struct Opt_Vec4 Opt_Vec4;
+typedef struct Ark_VerticalAlignParam Ark_VerticalAlignParam;
+typedef struct Opt_VerticalAlignParam Opt_VerticalAlignParam;
 typedef struct VideoControllerPeer VideoControllerPeer;
 typedef struct VideoControllerPeer* Ark_VideoController;
 typedef struct Opt_VideoController Opt_VideoController;
@@ -1647,8 +1649,6 @@ typedef struct Ark_AdsBlockedDetails Ark_AdsBlockedDetails;
 typedef struct Opt_AdsBlockedDetails Opt_AdsBlockedDetails;
 typedef struct Ark_AlertDialogTextStyleOptions Ark_AlertDialogTextStyleOptions;
 typedef struct Opt_AlertDialogTextStyleOptions Opt_AlertDialogTextStyleOptions;
-typedef struct Ark_AlignRuleOption Ark_AlignRuleOption;
-typedef struct Opt_AlignRuleOption Opt_AlignRuleOption;
 typedef struct AnimationPeer AnimationPeer;
 typedef struct AnimationPeer* Ark_Animation;
 typedef struct Opt_Animation Opt_Animation;
@@ -1884,6 +1884,8 @@ typedef struct Opt_Header Opt_Header;
 typedef struct HierarchicalSymbolEffectPeer HierarchicalSymbolEffectPeer;
 typedef struct HierarchicalSymbolEffectPeer* Ark_HierarchicalSymbolEffect;
 typedef struct Opt_HierarchicalSymbolEffect Opt_HierarchicalSymbolEffect;
+typedef struct Ark_HorizontalAlignParam Ark_HorizontalAlignParam;
+typedef struct Opt_HorizontalAlignParam Opt_HorizontalAlignParam;
 typedef struct Ark_HoverEventParam Ark_HoverEventParam;
 typedef struct Opt_HoverEventParam Opt_HoverEventParam;
 typedef struct Ark_ImageAIOptions Ark_ImageAIOptions;
@@ -2415,6 +2417,8 @@ typedef struct Ark_AlertDialogButtonBaseOptions Ark_AlertDialogButtonBaseOptions
 typedef struct Opt_AlertDialogButtonBaseOptions Opt_AlertDialogButtonBaseOptions;
 typedef struct Ark_AlertDialogButtonOptions Ark_AlertDialogButtonOptions;
 typedef struct Opt_AlertDialogButtonOptions Opt_AlertDialogButtonOptions;
+typedef struct Ark_AlignRuleOption Ark_AlignRuleOption;
+typedef struct Opt_AlignRuleOption Opt_AlignRuleOption;
 typedef struct Ark_AlphabetIndexerOptions Ark_AlphabetIndexerOptions;
 typedef struct Opt_AlphabetIndexerOptions Opt_AlphabetIndexerOptions;
 typedef struct Ark_AnimateParam Ark_AnimateParam;
@@ -8183,6 +8187,15 @@ typedef struct Opt_Vec4 {
     Ark_Tag tag;
     Ark_Vec4 value;
 } Opt_Vec4;
+typedef struct Ark_VerticalAlignParam {
+    /* kind: Interface */
+    Ark_String anchor;
+    Ark_VerticalAlign align;
+} Ark_VerticalAlignParam;
+typedef struct Opt_VerticalAlignParam {
+    Ark_Tag tag;
+    Ark_VerticalAlignParam value;
+} Opt_VerticalAlignParam;
 typedef struct Opt_VideoController {
     Ark_Tag tag;
     Ark_VideoController value;
@@ -12145,14 +12158,6 @@ typedef struct Opt_AlertDialogTextStyleOptions {
     Ark_Tag tag;
     Ark_AlertDialogTextStyleOptions value;
 } Opt_AlertDialogTextStyleOptions;
-typedef struct Ark_AlignRuleOption {
-    /* kind: Interface */
-    Ark_Int32 _stub;
-} Ark_AlignRuleOption;
-typedef struct Opt_AlignRuleOption {
-    Ark_Tag tag;
-    Ark_AlignRuleOption value;
-} Opt_AlignRuleOption;
 typedef struct Opt_Animation {
     Ark_Tag tag;
     Ark_Animation value;
@@ -13054,6 +13059,15 @@ typedef struct Opt_HierarchicalSymbolEffect {
     Ark_Tag tag;
     Ark_HierarchicalSymbolEffect value;
 } Opt_HierarchicalSymbolEffect;
+typedef struct Ark_HorizontalAlignParam {
+    /* kind: Interface */
+    Ark_String anchor;
+    Ark_HorizontalAlign align;
+} Ark_HorizontalAlignParam;
+typedef struct Opt_HorizontalAlignParam {
+    Ark_Tag tag;
+    Ark_HorizontalAlignParam value;
+} Opt_HorizontalAlignParam;
 typedef struct Ark_HoverEventParam {
     /* kind: Interface */
     Ark_FoldStatus foldStatus;
@@ -15709,6 +15723,20 @@ typedef struct Opt_AlertDialogButtonOptions {
     Ark_Tag tag;
     Ark_AlertDialogButtonOptions value;
 } Opt_AlertDialogButtonOptions;
+typedef struct Ark_AlignRuleOption {
+    /* kind: Interface */
+    Opt_HorizontalAlignParam left;
+    Opt_HorizontalAlignParam right;
+    Opt_HorizontalAlignParam middle;
+    Opt_VerticalAlignParam top;
+    Opt_VerticalAlignParam bottom;
+    Opt_VerticalAlignParam center;
+    Opt_Bias bias;
+} Ark_AlignRuleOption;
+typedef struct Opt_AlignRuleOption {
+    Ark_Tag tag;
+    Ark_AlignRuleOption value;
+} Opt_AlignRuleOption;
 typedef struct Ark_AlphabetIndexerOptions {
     /* kind: Interface */
     Array_String arrayValue;
@@ -20633,11 +20661,6 @@ typedef struct GENERATED_ArkUIComponentRootModifier {
                                    Ark_Int32 flags);
 } GENERATED_ArkUIComponentRootModifier;
 
-typedef struct GENERATED_ArkUIConditionScopeModifier {
-    Ark_NativePointer (*construct)(Ark_Int32 id,
-                                   Ark_Int32 flags);
-} GENERATED_ArkUIConditionScopeModifier;
-
 typedef struct GENERATED_ArkUIContainerSpanModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
@@ -21412,8 +21435,6 @@ typedef struct GENERATED_ArkUINavigationModifier {
                                    const Opt_Callback_Boolean_Void* value);
     void (*setOnNavigationModeChange)(Ark_NativePointer node,
                                       const Opt_Callback_NavigationMode_Void* value);
-    void (*setNavDestination)(Ark_NativePointer node,
-                              const Opt_PageMapBuilder* value);
     void (*setCustomNavContentTransition)(Ark_NativePointer node,
                                           const Opt_Type_NavigationAttribute_customNavContentTransition* value);
     void (*setSystemBarStyle)(Ark_NativePointer node,
@@ -24339,7 +24360,7 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     void (*invalidate)(Ark_FrameNode peer);
     void (*disposeTree)(Ark_FrameNode peer);
     Ark_Boolean (*setCrossLanguageOptions)(Ark_FrameNode peer,
-                                    Ark_Boolean options);
+                                           Ark_Boolean options);
     Ark_Boolean (*getCrossLanguageOptions)(Ark_FrameNode peer);
     void (*setMeasuredSize)(Ark_FrameNode peer,
                             const Ark_Size* size);
@@ -25044,12 +25065,6 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
     void (*destroyPeer)(Ark_NavPathStack peer);
     Ark_NavPathStack (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    void (*pushPath0)(Ark_NavPathStack peer,
-                      Ark_NavPathInfo info,
-                      const Opt_Boolean* animated);
-    void (*pushPath1)(Ark_NavPathStack peer,
-                      Ark_NavPathInfo info,
-                      const Opt_NavigationOptions* options);
     void (*pushDestination0)(Ark_VMContext vmContext,
                              Ark_AsyncWorkerPtr asyncWorker,
                              Ark_NavPathStack peer,
@@ -25062,15 +25077,6 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
                              Ark_NavPathInfo info,
                              const Opt_NavigationOptions* options,
                              const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
-    void (*pushPathByName0)(Ark_NavPathStack peer,
-                            const Ark_String* name,
-                            const Opt_Object* param,
-                            const Opt_Boolean* animated);
-    void (*pushPathByName1)(Ark_NavPathStack peer,
-                            const Ark_String* name,
-                            const Ark_Object* param,
-                            const Callback_PopInfo_Void* onPop,
-                            const Opt_Boolean* animated);
     void (*pushDestinationByName0)(Ark_VMContext vmContext,
                                    Ark_AsyncWorkerPtr asyncWorker,
                                    Ark_NavPathStack peer,
@@ -25086,47 +25092,18 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
                                    const Callback_PopInfo_Void* onPop,
                                    const Opt_Boolean* animated,
                                    const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
-    void (*replacePath0)(Ark_NavPathStack peer,
-                         Ark_NavPathInfo info,
-                         const Opt_Boolean* animated);
-    void (*replacePath1)(Ark_NavPathStack peer,
-                         Ark_NavPathInfo info,
-                         const Opt_NavigationOptions* options);
     void (*replaceDestination)(Ark_VMContext vmContext,
                                Ark_AsyncWorkerPtr asyncWorker,
                                Ark_NavPathStack peer,
                                Ark_NavPathInfo info,
                                const Opt_NavigationOptions* options,
                                const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
-    void (*replacePathByName)(Ark_NavPathStack peer,
-                              const Ark_String* name,
-                              const Ark_Object* param,
-                              const Opt_Boolean* animated);
     Ark_Number (*removeByIndexes)(Ark_NavPathStack peer,
                                   const Array_Number* indexes);
     Ark_Number (*removeByName)(Ark_NavPathStack peer,
                                const Ark_String* name);
     Ark_Boolean (*removeByNavDestinationId)(Ark_NavPathStack peer,
                                             const Ark_String* navDestinationId);
-    Opt_NavPathInfo (*pop0)(Ark_NavPathStack peer,
-                            const Opt_Boolean* animated);
-    Opt_NavPathInfo (*pop1)(Ark_NavPathStack peer,
-                            const Ark_Object* result,
-                            const Opt_Boolean* animated);
-    Ark_Number (*popToName0)(Ark_NavPathStack peer,
-                             const Ark_String* name,
-                             const Opt_Boolean* animated);
-    Ark_Number (*popToName1)(Ark_NavPathStack peer,
-                             const Ark_String* name,
-                             const Ark_Object* result,
-                             const Opt_Boolean* animated);
-    void (*popToIndex0)(Ark_NavPathStack peer,
-                        const Ark_Number* index,
-                        const Opt_Boolean* animated);
-    void (*popToIndex1)(Ark_NavPathStack peer,
-                        const Ark_Number* index,
-                        const Ark_Object* result,
-                        const Opt_Boolean* animated);
     Ark_Number (*moveToTop)(Ark_NavPathStack peer,
                             const Ark_String* name,
                             const Opt_Boolean* animated);
@@ -25136,10 +25113,6 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
     void (*clear)(Ark_NavPathStack peer,
                   const Opt_Boolean* animated);
     Array_String (*getAllPathName)(Ark_NavPathStack peer);
-    Opt_Object (*getParamByIndex)(Ark_NavPathStack peer,
-                                  const Ark_Number* index);
-    Array_Opt_Object (*getParamByName)(Ark_NavPathStack peer,
-                                       const Ark_String* name);
     Array_Number (*getIndexByName)(Ark_NavPathStack peer,
                                    const Ark_String* name);
     Opt_NavPathStack (*getParent)(Ark_NavPathStack peer);
@@ -26422,7 +26395,6 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUICommonShapeMethodModifier* (*getCommonShapeMethodModifier)();
     const GENERATED_ArkUIComponent3DModifier* (*getComponent3DModifier)();
     const GENERATED_ArkUIComponentRootModifier* (*getComponentRootModifier)();
-    const GENERATED_ArkUIConditionScopeModifier* (*getConditionScopeModifier)();
     const GENERATED_ArkUIContainerSpanModifier* (*getContainerSpanModifier)();
     const GENERATED_ArkUICounterModifier* (*getCounterModifier)();
     const GENERATED_ArkUICustomBuilderRootModifier* (*getCustomBuilderRootModifier)();
@@ -26728,7 +26700,6 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_COMMON_SHAPE_METHOD,
     GENERATED_ARKUI_COMPONENT_3D,
     GENERATED_ARKUI_COMPONENT_ROOT,
-    GENERATED_ARKUI_CONDITION_SCOPE,
     GENERATED_ARKUI_CONTAINER_SPAN,
     GENERATED_ARKUI_COUNTER,
     GENERATED_ARKUI_CUSTOM_BUILDER_ROOT,

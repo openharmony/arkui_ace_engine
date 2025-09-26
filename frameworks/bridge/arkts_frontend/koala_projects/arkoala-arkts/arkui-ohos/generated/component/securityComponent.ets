@@ -19,7 +19,7 @@
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { Position_serializer, Edges_serializer, LocalizedEdges_serializer, BorderRadiuses_serializer, Padding_serializer, SizeOptions_serializer, ConstraintSizeOptions_serializer, Dimension, Position, Edges, LocalizedEdges, ResourceColor, BorderRadiuses, Padding, Length, SizeOptions, ConstraintSizeOptions, Bias } from "./units"
-import { AlignRuleOption_serializer, LocalizedAlignRuleOptions_serializer, AlignRuleOption, LocalizedAlignRuleOptions, ChainStyle, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam } from "./common"
+import { AlignRuleOption_serializer, LocalizedAlignRuleOptions_serializer, AlignRuleOption, LocalizedAlignRuleOptions, ChainStyle, HorizontalAlignParam, VerticalAlignParam, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam } from "./common"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"

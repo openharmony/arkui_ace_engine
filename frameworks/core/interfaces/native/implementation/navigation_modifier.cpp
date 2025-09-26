@@ -637,7 +637,6 @@ const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
         NavigationAttributeModifier::SetOnTitleModeChangeImpl,
         NavigationAttributeModifier::SetOnNavBarStateChangeImpl,
         NavigationAttributeModifier::SetOnNavigationModeChangeImpl,
-        NavigationAttributeModifier::SetNavDestinationImpl,
         NavigationAttributeModifier::SetCustomNavContentTransitionImpl,
         NavigationAttributeModifier::SetSystemBarStyleImpl,
         NavigationAttributeModifier::SetRecoverableImpl,

@@ -6516,7 +6516,13 @@ export interface HorizontalAlignParam {
     align: HorizontalAlign;
 }
 export interface AlignRuleOption {
-    _stub: int32;
+    left?: HorizontalAlignParam;
+    right?: HorizontalAlignParam;
+    middle?: HorizontalAlignParam;
+    top?: VerticalAlignParam;
+    bottom?: VerticalAlignParam;
+    center?: VerticalAlignParam;
+    bias?: Bias;
 }
 export interface LocalizedHorizontalAlignParam {
     anchor: string;
@@ -11081,16 +11087,19 @@ export class UICommonEvent_serializer {
         return UICommonEventInternal.fromPtr(ptr)
     }
 }
-export class AlignRuleOption_serializer {
-    public static write(buffer: SerializerBase, value: AlignRuleOption): void {
+export class VerticalAlignParam_serializer {
+    public static write(buffer: SerializerBase, value: VerticalAlignParam): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderFor_stub  = value._stub
-        valueSerializer.writeInt32(valueHolderFor_stub)
+        const valueHolderForAnchor  = value.anchor
+        valueSerializer.writeString(valueHolderForAnchor)
+        const valueHolderForAlign  = value.align
+        valueSerializer.writeInt32(valueHolderForAlign.valueOf())
     }
-    public static read(buffer: DeserializerBase): AlignRuleOption {
+    public static read(buffer: DeserializerBase): VerticalAlignParam {
         let valueDeserializer : DeserializerBase = buffer
-        const _stubTmpResult : int32 = valueDeserializer.readInt32()
-        let value : AlignRuleOption = ({_stub: _stubTmpResult} as AlignRuleOption)
+        const anchorTmpResult : string = (valueDeserializer.readString() as string)
+        const alignTmpResult : VerticalAlign = VerticalAlign.fromValue(valueDeserializer.readInt32())
+        let value : VerticalAlignParam = ({anchor: anchorTmpResult, align: alignTmpResult} as VerticalAlignParam)
         return value
     }
 }
@@ -11998,6 +12007,22 @@ export class GeometryTransitionOptions_serializer {
         }
         const hierarchyStrategyTmpResult : TransitionHierarchyStrategy | undefined = hierarchyStrategyTmpBuf
         let value : GeometryTransitionOptions = ({follow: followTmpResult, hierarchyStrategy: hierarchyStrategyTmpResult} as GeometryTransitionOptions)
+        return value
+    }
+}
+export class HorizontalAlignParam_serializer {
+    public static write(buffer: SerializerBase, value: HorizontalAlignParam): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForAnchor  = value.anchor
+        valueSerializer.writeString(valueHolderForAnchor)
+        const valueHolderForAlign  = value.align
+        valueSerializer.writeInt32(valueHolderForAlign.valueOf())
+    }
+    public static read(buffer: DeserializerBase): HorizontalAlignParam {
+        let valueDeserializer : DeserializerBase = buffer
+        const anchorTmpResult : string = (valueDeserializer.readString() as string)
+        const alignTmpResult : HorizontalAlign = HorizontalAlign.fromValue(valueDeserializer.readInt32())
+        let value : HorizontalAlignParam = ({anchor: anchorTmpResult, align: alignTmpResult} as HorizontalAlignParam)
         return value
     }
 }
@@ -13390,6 +13415,114 @@ export class VisibleAreaEventOptions_serializer {
         }
         const expectedUpdateIntervalTmpResult : number | undefined = expectedUpdateIntervalTmpBuf
         let value : VisibleAreaEventOptions = ({ratios: ratiosTmpResult, expectedUpdateInterval: expectedUpdateIntervalTmpResult} as VisibleAreaEventOptions)
+        return value
+    }
+}
+export class AlignRuleOption_serializer {
+    public static write(buffer: SerializerBase, value: AlignRuleOption): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForLeft  = value.left
+        if (valueHolderForLeft !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLeftTmpValue  = valueHolderForLeft!
+            HorizontalAlignParam_serializer.write(valueSerializer, valueHolderForLeftTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForRight  = value.right
+        if (valueHolderForRight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRightTmpValue  = valueHolderForRight!
+            HorizontalAlignParam_serializer.write(valueSerializer, valueHolderForRightTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMiddle  = value.middle
+        if (valueHolderForMiddle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMiddleTmpValue  = valueHolderForMiddle!
+            HorizontalAlignParam_serializer.write(valueSerializer, valueHolderForMiddleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForTop  = value.top
+        if (valueHolderForTop !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTopTmpValue  = valueHolderForTop!
+            VerticalAlignParam_serializer.write(valueSerializer, valueHolderForTopTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBottom  = value.bottom
+        if (valueHolderForBottom !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBottomTmpValue  = valueHolderForBottom!
+            VerticalAlignParam_serializer.write(valueSerializer, valueHolderForBottomTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForCenter  = value.center
+        if (valueHolderForCenter !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCenterTmpValue  = valueHolderForCenter!
+            VerticalAlignParam_serializer.write(valueSerializer, valueHolderForCenterTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBias  = value.bias
+        if (valueHolderForBias !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBiasTmpValue  = valueHolderForBias!
+            Bias_serializer.write(valueSerializer, valueHolderForBiasTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): AlignRuleOption {
+        let valueDeserializer : DeserializerBase = buffer
+        const leftTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let leftTmpBuf : HorizontalAlignParam | undefined = undefined
+        if ((leftTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            leftTmpBuf = HorizontalAlignParam_serializer.read(valueDeserializer)
+        }
+        const leftTmpResult : HorizontalAlignParam | undefined = leftTmpBuf
+        const rightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let rightTmpBuf : HorizontalAlignParam | undefined = undefined
+        if ((rightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            rightTmpBuf = HorizontalAlignParam_serializer.read(valueDeserializer)
+        }
+        const rightTmpResult : HorizontalAlignParam | undefined = rightTmpBuf
+        const middleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let middleTmpBuf : HorizontalAlignParam | undefined = undefined
+        if ((middleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            middleTmpBuf = HorizontalAlignParam_serializer.read(valueDeserializer)
+        }
+        const middleTmpResult : HorizontalAlignParam | undefined = middleTmpBuf
+        const topTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let topTmpBuf : VerticalAlignParam | undefined = undefined
+        if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            topTmpBuf = VerticalAlignParam_serializer.read(valueDeserializer)
+        }
+        const topTmpResult : VerticalAlignParam | undefined = topTmpBuf
+        const bottomTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let bottomTmpBuf : VerticalAlignParam | undefined = undefined
+        if ((bottomTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            bottomTmpBuf = VerticalAlignParam_serializer.read(valueDeserializer)
+        }
+        const bottomTmpResult : VerticalAlignParam | undefined = bottomTmpBuf
+        const centerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let centerTmpBuf : VerticalAlignParam | undefined = undefined
+        if ((centerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            centerTmpBuf = VerticalAlignParam_serializer.read(valueDeserializer)
+        }
+        const centerTmpResult : VerticalAlignParam | undefined = centerTmpBuf
+        const biasTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let biasTmpBuf : Bias | undefined = undefined
+        if ((biasTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            biasTmpBuf = Bias_serializer.read(valueDeserializer)
+        }
+        const biasTmpResult : Bias | undefined = biasTmpBuf
+        let value : AlignRuleOption = ({left: leftTmpResult, right: rightTmpResult, middle: middleTmpResult, top: topTmpResult, bottom: bottomTmpResult, center: centerTmpResult, bias: biasTmpResult} as AlignRuleOption)
         return value
     }
 }
