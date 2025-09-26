@@ -40,6 +40,9 @@ void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
     CHECK_NULL_VOID(navigationStack);
     auto updater = [callback = CallbackHelper(*callback)]() {
         callback.Invoke();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(context);
+        context->RequestFrame();
     };
     navigationStack->SetOnStateChangedCallback(std::move(updater));
 }
