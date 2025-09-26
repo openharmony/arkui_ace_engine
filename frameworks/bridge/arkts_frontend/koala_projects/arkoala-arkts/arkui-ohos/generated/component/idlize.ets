@@ -2522,13 +2522,24 @@ export class SystemOps {
         const returnResult : Array<number> = buffer
         return returnResult
     }
-    static resoureToLengthMetrics_serialize(res: Resource): LengthMetricsCustom {
+    static resourceToLengthMetrics_serialize(res: Resource): LengthMetricsCustom {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         Resource_serializer.write(thisSerializer, res)
-        const retval  = ArkUIGeneratedNativeModule._SystemOps_resoureToLengthMetrics(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._SystemOps_resourceToLengthMetrics(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : LengthMetricsCustom = LengthMetricsCustom_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static blendColorByColorMetrics_serialize(color: number, overlayColor: number): Array<number> {
+        const retval  = ArkUIGeneratedNativeModule._SystemOps_blendColorByColorMetrics(color, overlayColor)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<number> = new Array<number>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readNumber() as number)
+        }
+        const returnResult : Array<number> = buffer
         return returnResult
     }
     public static StartFrame(): KPointer {
@@ -2569,9 +2580,14 @@ export class SystemOps {
         const color_casted = color as (Resource)
         return SystemOps.colorMetricsResourceColor_serialize(color_casted)
     }
-    public static resoureToLengthMetrics(res: Resource): LengthMetricsCustom {
+    public static resourceToLengthMetrics(res: Resource): LengthMetricsCustom {
         const res_casted = res as (Resource)
-        return SystemOps.resoureToLengthMetrics_serialize(res_casted)
+        return SystemOps.resourceToLengthMetrics_serialize(res_casted)
+    }
+    public static blendColorByColorMetrics(color: number, overlayColor: number): Array<number> {
+        const color_casted = color as (number)
+        const overlayColor_casted = overlayColor as (number)
+        return SystemOps.blendColorByColorMetrics_serialize(color_casted, overlayColor_casted)
     }
 }
 export class UIContextAtomicServiceBar {

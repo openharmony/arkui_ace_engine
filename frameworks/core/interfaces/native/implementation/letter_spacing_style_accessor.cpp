@@ -25,13 +25,13 @@ void DestroyPeerImpl(Ark_LetterSpacingStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_LetterSpacingStyle ConstructImpl(Ark_LengthMetrics value)
+Ark_LetterSpacingStyle ConstructImpl(const Ark_LengthMetrics* value)
 {
     auto peer = PeerUtils::CreatePeer<LetterSpacingStylePeer>();
     std::optional<Dimension> spacing;
     Dimension defaultSpacing = Dimension(0, DimensionUnit::VP);
     if (value) {
-        spacing = Converter::OptConvert<Dimension>(value);
+        spacing = Converter::OptConvert<Dimension>(*value);
         Validator::ValidateNonPercent(spacing);
     }
     peer->span = AceType::MakeRefPtr<LetterSpacingSpan>(spacing.value_or(defaultSpacing));

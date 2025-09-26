@@ -39503,13 +39503,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_LengthMetricsCustom ResoureToLengthMetricsImpl(const Ark_Resource* res)
+    Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
-        string out("resoureToLengthMetrics(");
+        string out("resourceToLengthMetrics(");
         WriteToString(&out, res);
         out.append(") \n");
         out.append("[return {}] \n");
@@ -45995,7 +45995,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SystemOpsAccessor::ResourceManagerResetImpl,
             SystemOpsAccessor::SetFrameCallbackImpl,
             SystemOpsAccessor::ColorMetricsResourceColorImpl,
-            SystemOpsAccessor::ResoureToLengthMetricsImpl,
+            SystemOpsAccessor::ResourceToLengthMetricsImpl,
         };
         return &SystemOpsAccessorImpl;
     }

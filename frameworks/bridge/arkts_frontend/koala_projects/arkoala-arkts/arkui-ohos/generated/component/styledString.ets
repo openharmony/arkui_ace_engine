@@ -94,7 +94,10 @@ export class BaselineOffsetStyle implements MaterializedBase {
         this(false, BaselineOffsetStyle.construct(value))
     }
     static construct(value: LengthMetrics): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._BaselineOffsetStyle_construct(extractors.toLengthMetricsPtr(value))
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        LengthMetrics_serializer.write(thisSerializer, value)
+        const retval  = ArkUIGeneratedNativeModule._BaselineOffsetStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     static getFinalizer(): KPointer {
@@ -476,7 +479,10 @@ export class LetterSpacingStyle implements MaterializedBase {
         this(false, LetterSpacingStyle.construct(value))
     }
     static construct(value: LengthMetrics): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._LetterSpacingStyle_construct(extractors.toLengthMetricsPtr(value))
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        LengthMetrics_serializer.write(thisSerializer, value)
+        const retval  = ArkUIGeneratedNativeModule._LetterSpacingStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     static getFinalizer(): KPointer {
@@ -509,7 +515,10 @@ export class LineHeightStyle implements MaterializedBase {
         this(false, LineHeightStyle.construct(lineHeight))
     }
     static construct(lineHeight: LengthMetrics): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._LineHeightStyle_construct(extractors.toLengthMetricsPtr(lineHeight))
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        LengthMetrics_serializer.write(thisSerializer, lineHeight)
+        const retval  = ArkUIGeneratedNativeModule._LineHeightStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     static getFinalizer(): KPointer {

@@ -3269,7 +3269,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _BaseGestureEvent_setFingerList(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _BaselineOffsetStyle_construct(value: KPointer): KPointer
+    native static _BaselineOffsetStyle_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _BaselineOffsetStyle_getFinalizer(): KPointer
     @ani.unsafe.Quick
@@ -4398,7 +4398,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LazyForEachOps_SyncOnMoveOps(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _LetterSpacingStyle_construct(value: KPointer): KPointer
+    native static _LetterSpacingStyle_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _LetterSpacingStyle_getFinalizer(): KPointer
     @ani.unsafe.Quick
@@ -4432,7 +4432,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LinearIndicatorController_stop(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _LineHeightStyle_construct(lineHeight: KPointer): KPointer
+    native static _LineHeightStyle_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _LineHeightStyle_getFinalizer(): KPointer
     @ani.unsafe.Quick
@@ -5344,7 +5344,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _SystemOps_colorMetricsResourceColor(thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _SystemOps_resoureToLengthMetrics(thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    native static _SystemOps_resourceToLengthMetrics(thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _SystemOps_blendColorByColorMetrics(color: number, overlayColor: number): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TabBarSymbol_construct(): KPointer
     @ani.unsafe.Direct

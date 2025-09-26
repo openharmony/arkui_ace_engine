@@ -278,7 +278,7 @@ inline std::vector<Dimension> ParseColumnWidths(const Opt_Array_LengthMetrics& c
         result.reserve(static_cast<size_t>(columnWidths.value.length));
         for (auto i = 0; i < columnWidths.value.length; i++) {
             Ark_LengthMetrics lengthMetrics = columnWidths.value.array[i];
-            result.emplace_back(lengthMetrics ? lengthMetrics->value : Dimension(0.0f));
+            result.emplace_back(Converter::OptConvert<Dimension>(lengthMetrics).value_or(Dimension()));
         }
     }
     return result;

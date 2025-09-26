@@ -26437,10 +26437,12 @@ void impl_BaseGestureEvent_setFingerList(Ark_NativePointer thisPtr, KSerializerB
         GetAccessors()->getBaseGestureEventAccessor()->setFingerList(self, static_cast<Array_FingerInfo*>(&fingerListValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(BaseGestureEvent_setFingerList, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_BaselineOffsetStyle_construct(Ark_NativePointer value) {
-        return GetAccessors()->getBaselineOffsetStyleAccessor()->construct(static_cast<Ark_LengthMetrics>(value));
+Ark_NativePointer impl_BaselineOffsetStyle_construct(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_LengthMetrics valueValueTemp = LengthMetrics_serializer::read(thisDeserializer);;
+        return GetAccessors()->getBaselineOffsetStyleAccessor()->construct(static_cast<Ark_LengthMetrics*>(&valueValueTemp));
 }
-KOALA_INTEROP_DIRECT_1(BaselineOffsetStyle_construct, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_2(BaselineOffsetStyle_construct, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_BaselineOffsetStyle_getFinalizer() {
         return GetAccessors()->getBaselineOffsetStyleAccessor()->getFinalizer();
 }
@@ -30400,10 +30402,12 @@ void impl_LazyForEachOps_SyncOnMoveOps(Ark_NativePointer node, KSerializerBuffer
         GetAccessors()->getLazyForEachOpsAccessor()->SyncOnMoveOps(node, static_cast<Callback_OnMoveFromTo*>(&onMoveFromToOpsValueTemp), static_cast<Opt_OnMoveHandler*>(&onMoveOpsValueTemp), static_cast<Opt_ItemDragEventHandler*>(&onMoveDragEventOpsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(LazyForEachOps_SyncOnMoveOps, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_LetterSpacingStyle_construct(Ark_NativePointer value) {
-        return GetAccessors()->getLetterSpacingStyleAccessor()->construct(static_cast<Ark_LengthMetrics>(value));
+Ark_NativePointer impl_LetterSpacingStyle_construct(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_LengthMetrics valueValueTemp = LengthMetrics_serializer::read(thisDeserializer);;
+        return GetAccessors()->getLetterSpacingStyleAccessor()->construct(static_cast<Ark_LengthMetrics*>(&valueValueTemp));
 }
-KOALA_INTEROP_DIRECT_1(LetterSpacingStyle_construct, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_2(LetterSpacingStyle_construct, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_LetterSpacingStyle_getFinalizer() {
         return GetAccessors()->getLetterSpacingStyleAccessor()->getFinalizer();
 }
@@ -30494,10 +30498,12 @@ void impl_LinearIndicatorController_stop(Ark_NativePointer thisPtr) {
         GetAccessors()->getLinearIndicatorControllerAccessor()->stop(self);
 }
 KOALA_INTEROP_DIRECT_V1(LinearIndicatorController_stop, Ark_NativePointer)
-Ark_NativePointer impl_LineHeightStyle_construct(Ark_NativePointer lineHeight) {
-        return GetAccessors()->getLineHeightStyleAccessor()->construct(static_cast<Ark_LengthMetrics>(lineHeight));
+Ark_NativePointer impl_LineHeightStyle_construct(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_LengthMetrics lineHeightValueTemp = LengthMetrics_serializer::read(thisDeserializer);;
+        return GetAccessors()->getLineHeightStyleAccessor()->construct(static_cast<Ark_LengthMetrics*>(&lineHeightValueTemp));
 }
-KOALA_INTEROP_DIRECT_1(LineHeightStyle_construct, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_2(LineHeightStyle_construct, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_LineHeightStyle_getFinalizer() {
         return GetAccessors()->getLineHeightStyleAccessor()->getFinalizer();
 }
@@ -34478,15 +34484,26 @@ KInteropReturnBuffer impl_SystemOps_colorMetricsResourceColor(KSerializerBuffer 
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_2(SystemOps_colorMetricsResourceColor, KInteropReturnBuffer, KSerializerBuffer, int32_t)
-KInteropReturnBuffer impl_SystemOps_resoureToLengthMetrics(KSerializerBuffer thisArray, int32_t thisLength) {
+KInteropReturnBuffer impl_SystemOps_resourceToLengthMetrics(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Resource resValueTemp = Resource_serializer::read(thisDeserializer);;
-        const auto &retValue = GetAccessors()->getSystemOpsAccessor()->resoureToLengthMetrics(static_cast<Ark_Resource*>(&resValueTemp));
+        const auto &retValue = GetAccessors()->getSystemOpsAccessor()->resourceToLengthMetrics(static_cast<Ark_Resource*>(&resValueTemp));
         SerializerBase _retSerializer {};
         LengthMetricsCustom_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_2(SystemOps_resoureToLengthMetrics, KInteropReturnBuffer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_2(SystemOps_resourceToLengthMetrics, KInteropReturnBuffer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_SystemOps_blendColorByColorMetrics(KInteropNumber color, KInteropNumber overlayColor) {
+        const auto &retValue = GetAccessors()->getSystemOpsAccessor()->blendColorByColorMetrics((const Ark_Number*) (&color), (const Ark_Number*) (&overlayColor));
+        SerializerBase _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
+            const Ark_Number retValueTmpElement = retValue.array[retValueCounterI];
+            _retSerializer.writeNumber(retValueTmpElement);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_2(SystemOps_blendColorByColorMetrics, KInteropReturnBuffer, KInteropNumber, KInteropNumber)
 Ark_NativePointer impl_TabBarSymbol_construct() {
         return GetAccessors()->getTabBarSymbolAccessor()->construct();
 }
