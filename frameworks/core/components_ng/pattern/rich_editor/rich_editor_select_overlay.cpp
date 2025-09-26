@@ -283,10 +283,16 @@ bool RichEditorSelectOverlay::IsStopBackPress() const
 
 void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "OnUpdateMenuInfo dirtyFlag=%{public}d", dirtyFlag);
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     auto hasValue = pattern->GetTextContentLength() > 0;
     menuInfo.showCopyAll = !pattern->IsSelectAll() && hasValue;
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    if (overlayManager && dirtyFlag == DIRTY_ALL_MENU_ITEM) {
+        auto info = overlayManager->GetSelectOverlayInfo();
+        IF_TRUE(info.has_value(), menuInfo.menuBuilder = info->menuInfo.menuBuilder);
+    }
     if (dirtyFlag == DIRTY_COPY_ALL_ITEM) {
         return;
     }
