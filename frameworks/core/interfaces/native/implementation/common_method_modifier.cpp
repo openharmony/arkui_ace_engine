@@ -398,6 +398,7 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
     popupParam->SetEnableArrow(OptConvert<bool>(src.enableArrow).value_or(popupParam->EnableArrow()));
     auto popupTransitionEffectsOpt = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(src.transition);
     if (popupTransitionEffectsOpt.has_value()) {
+        popupParam->SetHasTransition(true);
         popupParam->SetTransitionEffects(popupTransitionEffectsOpt.value());
     }
 };
