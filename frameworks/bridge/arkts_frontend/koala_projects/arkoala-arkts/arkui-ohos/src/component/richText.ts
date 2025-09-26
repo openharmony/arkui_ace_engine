@@ -26,6 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { Resource } from "global.resource"
 
 export class ArkRichTextPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -38,8 +39,22 @@ export class ArkRichTextPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setRichTextOptionsAttribute(content: string): void {
-        ArkUIGeneratedNativeModule._RichTextInterface_setRichTextOptions(this.peer.ptr, content)
+    setRichTextOptionsAttribute(content: string | Resource): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(content)
+        if (RuntimeType.STRING == value_type) {
+            thisSerializer.writeInt8(0 as int32)
+            const value_0 = content as string
+            thisSerializer.writeString(value_0)
+        }
+        else if (RuntimeType.OBJECT == value_type) {
+            thisSerializer.writeInt8(1 as int32)
+            const value_1 = content as Resource
+            thisSerializer.writeResource(value_1)
+        }
+        ArkUIGeneratedNativeModule._RichTextInterface_setRichTextOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     onStartAttribute(value: (() => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -66,12 +81,18 @@ export class ArkRichTextPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
 }
-export type RichTextInterface = (content: string) => RichTextAttribute;
+export type RichTextInterface = (content: string | Resource) => RichTextAttribute;
 export interface RichTextAttribute extends CommonMethod {
+    setRichTextOptions(content: string | Resource): this {
+        return this
+    }
     onStart(value: (() => void) | undefined): this
     onComplete(value: (() => void) | undefined): this
 }
 export class ArkRichTextStyle extends ArkCommonMethodStyle implements RichTextAttribute {
+    public setRichTextOptions(content: string | Resource): this {
+        return this
+    }
     onStart_value?: (() => void) | undefined
     onComplete_value?: (() => void) | undefined
     public onStart(value: (() => void) | undefined): this {
@@ -85,9 +106,9 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
     getPeer(): ArkRichTextPeer {
         return (this.peer as ArkRichTextPeer)
     }
-    public setRichTextOptions(content: string): this {
+    public setRichTextOptions(content: string | Resource): this {
         if (this.checkPriority("setRichTextOptions")) {
-            const content_casted = content as (string)
+            const content_casted = content as (string | Resource)
             this.getPeer()?.setRichTextOptionsAttribute(content_casted)
             return this
         }
@@ -109,7 +130,7 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
         }
         return this
     }
-    
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
@@ -119,7 +140,7 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
 export function RichText(
     /** @memo */
     style: ((attributes: RichTextAttribute) => void) | undefined,
-    content: string,
+    content: string | Resource,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {

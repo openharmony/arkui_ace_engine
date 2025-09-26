@@ -11733,7 +11733,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // RichTextModifier
     namespace RichTextInterfaceModifier {
     void SetRichTextOptionsImpl(Ark_NativePointer node,
-                                const Ark_String* content)
+                                const Ark_Union_String_Resource* value)
     {
         if (!needGroupedLog(1))
             return;
@@ -20027,6 +20027,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+
+    void OnActivateContentImpl(Ark_NativePointer node,
+                          const Opt_Callback_Void* value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("onActivateContent(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // WebAttributeModifier
     namespace WindowSceneModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -23310,6 +23321,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::BindSelectionMenuImpl,
             WebAttributeModifier::GestureFocusModeImpl,
             WebAttributeModifier::ForceEnableZoomImpl,
+            WebAttributeModifier::OnActivateContentImpl,
         };
         return &ArkUIWebModifierImpl;
     }

@@ -76,6 +76,14 @@ void WebModelStatic::SetHapPathCallback(FrameNode* frameNode, std::function<void
     webPatternStatic->SetSetHapPathCallback(std::move(hapPathCallback));
 }
 
+void WebModelStatic::SetWebDetachCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webDetachCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetSetWebDetachCallback(std::move(webDetachCallback));
+}
+
 void WebModelStatic::SetWebSrc(FrameNode* frameNode, const std::optional<std::string>& webSrc)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1294,5 +1302,15 @@ void WebModelStatic::SetForceEnableZoom(FrameNode* frameNode, bool isEnabled)
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateForceEnableZoom(isEnabled);
+}
+
+void WebModelStatic::SetActivateContentEventId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnActivateContentEvent(std::move(uiCallback));
 }
 } // namespace OHOS::Ace::NG

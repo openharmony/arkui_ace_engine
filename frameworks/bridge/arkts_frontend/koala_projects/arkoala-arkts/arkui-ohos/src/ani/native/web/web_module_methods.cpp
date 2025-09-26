@@ -16,6 +16,7 @@
 #include "web_module_methods.h"
 
 #include "load.h"
+#include "log/log.h"
 
 namespace OHOS::Ace::Ani {
 
@@ -78,14 +79,21 @@ void SetWebOptions(ani_env* env, ani_class aniClass, ani_long node, ani_object o
     auto setHapPathFunc = [vm, object = savePtr](const std::string& hapPath) {
         ani_string aniHapPath = nullptr;
         ani_env* envTemp = GetAniEnv(vm);
+        if (!envTemp || envTemp->String_NewUTF8(hapPath.c_str(), hapPath.size(), &aniHapPath) != ANI_OK ||
+            envTemp->Object_CallMethodByName_Void(
+                reinterpret_cast<ani_object>(object), "_setHapPath", "Lstd/core/String;:V", aniHapPath) != ANI_OK) {
+            return;
+        }
+    };
+
+    auto setWebDetachFunc = [vm, object = savePtr](int32_t nwebId) {
+        ani_env* envTemp = GetAniEnv(vm);
         if (!envTemp) {
             return;
         }
-        if (envTemp->String_NewUTF8(hapPath.c_str(), hapPath.size(), &aniHapPath) != ANI_OK ||
-            envTemp->Object_CallMethodByName_Void(
-                reinterpret_cast<ani_object>(object), "_setHapPath", "Lstd/core/String;:V", aniHapPath) != ANI_OK) {
-            envTemp->GlobalReference_Delete(object);
-            return;
+        if (envTemp->Object_CallMethodByName_Void(
+            reinterpret_cast<ani_object>(object), "setWebDetach", "I:V", static_cast<ani_int>(nwebId)) != ANI_OK) {
+            HILOGE("SetWebDetach call Object_CallMethodByName_Void failed");
         }
         envTemp->GlobalReference_Delete(object);
     };
@@ -97,6 +105,7 @@ void SetWebOptions(ani_env* env, ani_class aniClass, ani_long node, ani_object o
         .setHapPathFunc = std::move(setHapPathFunc),
         .getNativePtrFunc = std::move(getNativePtrFunc),
         .releaseRefFunc = std::move(releaseRefFunc),
+        .setWebDetachFunc = std::move(setWebDetachFunc),
     });
 }
 

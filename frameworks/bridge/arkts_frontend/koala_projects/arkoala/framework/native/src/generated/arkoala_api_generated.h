@@ -3301,7 +3301,7 @@ typedef struct Opt_NavigationToolbarOptions Opt_NavigationToolbarOptions;
 typedef struct Ark_PopupOptions Ark_PopupOptions;
 typedef struct Opt_PopupOptions Opt_PopupOptions;
 typedef struct Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
-typedef struct Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents; 
+typedef struct Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
 typedef struct Ark_SingleLengthDetent Ark_SingleLengthDetent;
 typedef struct Opt_SingleLengthDetent Opt_SingleLengthDetent;
 typedef struct Ark_DoubleLengthDetents Ark_DoubleLengthDetents;
@@ -22503,7 +22503,7 @@ typedef struct GENERATED_ArkUIRichTextModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setRichTextOptions)(Ark_NativePointer node,
-                               const Ark_String* content);
+                               const Ark_Union_String_Resource* value);
     void (*setOnStart)(Ark_NativePointer node,
                        const Opt_Callback_Void* value);
     void (*setOnComplete)(Ark_NativePointer node,
@@ -24208,6 +24208,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                 const Opt_GestureFocusMode* value);
     void (*setForceEnableZoom)(Ark_NativePointer node,
                                const Opt_Boolean* value);
+    void (*setOnActivateContent)(Ark_NativePointer node,
+                                const Opt_Callback_Void* value);
 } GENERATED_ArkUIWebModifier;
 
 typedef struct GENERATED_ArkUIWindowSceneModifier {

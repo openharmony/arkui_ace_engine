@@ -39,14 +39,14 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // RichTextModifier
 namespace RichTextInterfaceModifier {
 void SetRichTextOptionsImpl(Ark_NativePointer node,
-                            const Ark_String* content)
+                            const Ark_Union_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(content);
+    CHECK_NULL_VOID(value);
 #ifdef WEB_SUPPORTED
-    auto convValue = Converter::Convert<std::string>(*content);
-    RichTextModelStatic::SetRichTextOptions(frameNode, convValue);
+    auto convValue = Converter::OptConvert<std::string>(*value);
+    RichTextModelStatic::SetRichTextOptions(frameNode, convValue.value_or(""));
 #endif
 }
 } // RichTextInterfaceModifier
@@ -63,7 +63,7 @@ void OnStartImpl(Ark_NativePointer node,
         return;
     }
     auto onCallback = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* event) {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     RichTextModelStatic::SetOnPageStart(frameNode, std::move(onCallback));
 #endif
@@ -80,7 +80,7 @@ void OnCompleteImpl(Ark_NativePointer node,
         return;
     }
     auto onCallback = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* event) {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     RichTextModelStatic::SetOnPageFinish(frameNode, std::move(onCallback));
 #endif

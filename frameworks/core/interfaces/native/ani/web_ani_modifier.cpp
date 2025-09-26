@@ -41,8 +41,10 @@ void SetWebOptions(ArkUINodeHandle node, const WebviewControllerInfo& controller
     }
     auto setWebIdFunc = std::move(controllerInfo.setWebIdFunc);
     auto setHapPathFunc = std::move(controllerInfo.setHapPathFunc);
+    auto setWebDetachFunc = std::move(controllerInfo.setWebDetachFunc);
     WebModelStatic::SetWebIdCallback(frameNode, std::move(setWebIdFunc));
     WebModelStatic::SetHapPathCallback(frameNode, std::move(setHapPathFunc));
+    WebModelStatic::SetWebDetachCallback(frameNode, std::move(setWebDetachFunc));
 #endif // WEB_SUPPORTED
 }
 

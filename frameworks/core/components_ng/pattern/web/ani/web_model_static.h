@@ -28,6 +28,7 @@ public:
     static void SetPopup(FrameNode* frameNode, bool isPopup, int32_t parentWebId);
     static void SetWebIdCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webIdCallback);
     static void SetHapPathCallback(FrameNode* frameNode, std::function<void(const std::string&)>&& hapPathCallback);
+    static void SetWebDetachCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webDetachCallback);
     static void SetWebSrc(FrameNode* frameNode, const std::optional<std::string>& webSrc);
     static void SetRenderMode(FrameNode* frameNode, const std::optional<RenderMode>& renderMode);
     static void SetIncognitoMode(FrameNode* frameNode, const std::optional<bool>& incognitoMode);
@@ -200,6 +201,8 @@ public:
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
     static void SetGestureFocusMode(FrameNode* frameNode, const GestureFocusMode& mode);
     static void SetForceEnableZoom(FrameNode* frameNode, bool isEnabled);
+    static void SetActivateContentEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_ANI_WEB_MODEL_STATIC_H
