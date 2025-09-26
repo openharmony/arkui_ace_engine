@@ -83,11 +83,7 @@ export class PeerNode extends IncrementalNode {
     }
 
     /* reuse and recycle object on RootPeers */
-    override reuse(reuseKey: string | undefined, id: KoalaCallsiteKey): Disposable | undefined {
-        if (reuseKey === undefined) {
-            return undefined;
-        }
-
+    override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
         if (!this.isKind(RootPeerType))
             return this.parent?.reuse(reuseKey, id)
 
@@ -100,11 +96,7 @@ export class PeerNode extends IncrementalNode {
         return undefined;
     }
 
-    override recycle(reuseKey: string | undefined, child: Disposable, id: KoalaCallsiteKey): boolean {
-        if (reuseKey === undefined) {
-            return false;
-        }
-
+    override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
         if (!this.isKind(RootPeerType)) {
             return this.parent?.recycle(reuseKey, child, id) ?? false
         }
