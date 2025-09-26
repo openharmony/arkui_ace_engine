@@ -72,6 +72,11 @@ public:
         autoPlay_ = autoPlay;
     }
 
+    bool GetAutoPlay() const
+    {
+        return autoPlay_;
+    }
+
     void SetTotalDuration(const int32_t totalDuration);
 
     void SetIterations(const int32_t iterations);
@@ -81,6 +86,8 @@ public:
     void ControllAnimation(int32_t nodeId, bool play);
 
     RefPtr<ControlledAnimator> GetControlledAnimator(const std::string& id);
+
+    RefPtr<ControlledAnimator> GetControlledAnimator(const int32_t id);
 
     void RegisterUpdateCallback(int32_t nodeId, const UpdateCallback&& callback) override;
 

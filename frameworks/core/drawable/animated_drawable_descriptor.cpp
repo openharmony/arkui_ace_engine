@@ -109,6 +109,19 @@ RefPtr<ControlledAnimator> AnimatedDrawableDescriptor::GetControlledAnimator(con
     return it->second;
 }
 
+RefPtr<ControlledAnimator> AnimatedDrawableDescriptor::GetControlledAnimator(const int32_t id)
+{
+    if (animators_.size() == 1) {
+        return animators_.begin()->second;
+    }
+    
+    auto it = animators_.find(id);
+    if (it == animators_.end()) {
+        return nullptr;
+    }
+    return it->second;
+}
+
 RefPtr<PixelMap> AnimatedDrawableDescriptor::GetPixelMap()
 {
     if (!pixelMapList_.empty()) {

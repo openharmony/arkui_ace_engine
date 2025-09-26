@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/error/error_code.h"
 #include "core/common/resource/resource_object.h"
 #include "core/drawable/animated_drawable_descriptor.h"
 #include "core/drawable/drawable_descriptor_info.h"
@@ -153,6 +154,25 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_AnimatedDrawableDescriptor_SetDuration
     }
 }
 
+extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_AnimatedDrawableDescriptor_GetDurations(
+    void* object, uint32_t* durations, size_t* size)
+{
+    std::vector<int32_t> frameVec;
+    auto* drawable = reinterpret_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    if (drawable) {
+        frameVec = drawable->GetDurations();
+    } else {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (frameVec.size() != (*size)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    for (size_t i = 0; i < frameVec.size(); i++) {
+        durations[i] = frameVec[i];
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_AnimatedDrawableDescriptor_SetIterations(void* object, int32_t iterations)
 {
     auto* drawable = reinterpret_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
@@ -177,6 +197,17 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_AnimatedDrawableDescriptor_SetAutoPlay
     if (drawable) {
         drawable->SetAutoPlay(autoPlay);
     }
+}
+
+extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_AnimatedDrawableDescriptor_GetAutoPlay(void* object, uint32_t* autoPlay)
+{
+    auto* drawable = reinterpret_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    if (drawable) {
+        *autoPlay = drawable->GetAutoPlay();
+    } else {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return ERROR_CODE_NO_ERROR;
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_AnimatedDrawableDescriptorLoadSync(
@@ -240,6 +271,17 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_AnimatedDrawableDescriptor_GetAnimati
     auto* drawable = reinterpret_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
     if (drawable) {
         auto controller = drawable->GetControlledAnimator(std::string(id));
+        return AceType::RawPtr(controller);
+    }
+    return nullptr;
+}
+
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_AnimatedDrawableDescriptor_GetAnimationControllerById(
+    void* object, const int32_t id)
+{
+    auto* drawable = reinterpret_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    if (drawable) {
+        auto controller = drawable->GetControlledAnimator(id);
         return AceType::RawPtr(controller);
     }
     return nullptr;

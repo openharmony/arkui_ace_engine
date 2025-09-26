@@ -4230,5 +4230,49 @@
     {
         "first_introduced": "22",
         "name": "OH_ArkUI_Swiper_FinishAnimation"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_SetAnimationFrameDurations"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_GetAnimationFrameDurations"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_SetAnimationAutoPlay"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_GetAnimationAutoPlay"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_CreateAnimationController"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_DisposeAnimationController"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_StartAnimation"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_StopAnimation"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_ResumeAnimation"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_PauseAnimation"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_GetAnimationStatus"
     }
 ]

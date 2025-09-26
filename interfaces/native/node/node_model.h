@@ -194,6 +194,19 @@ void SetTotalDuration(void* object, int32_t duration);
 int32_t GetTotalDuration(void* object);
 void SetIterations(void* object, int32_t duration);
 int32_t GetIterations(void* object);
+int32_t SetFrameDurations(void* object, uint32_t* durations, size_t size);
+int32_t GetFrameDurations(void* object, uint32_t* durations, size_t* size);
+int32_t SetAutoPlay(void* object, uint32_t autoPlay);
+int32_t GetAutoPlay(void* object, uint32_t* autoPlay);
+int32_t CreateAnimationController(
+    void* object, ArkUI_NodeHandle node, ArkUI_DrawableDescriptor_AnimationController** controller);
+void DisposeAnimationController(ArkUI_DrawableDescriptor_AnimationController* controller);
+int32_t StartAnimation(ArkUI_DrawableDescriptor_AnimationController* controller);
+int32_t StopAnimation(ArkUI_DrawableDescriptor_AnimationController* controller);
+int32_t ResumeAnimation(ArkUI_DrawableDescriptor_AnimationController* controller);
+int32_t PauseAnimation(ArkUI_DrawableDescriptor_AnimationController* controller);
+int32_t GetAnimationStatus(
+    ArkUI_DrawableDescriptor_AnimationController* controller, DrawableDescriptor_AnimationStatus* status);
 bool CheckIsCNode(ArkUI_NodeHandle node);
 bool CheckIsCNodeOrCrossLanguage(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node);

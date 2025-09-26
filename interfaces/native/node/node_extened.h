@@ -230,6 +230,11 @@ struct ArkUI_ContentTransitionEffect {
     int32_t contentTransitionType;
 };
 
+struct ArkUI_DrawableDescriptor_AnimationController {
+    void* drawableDescriptor;
+    void* controller;
+};
+
 #ifdef __cplusplus
 };
 #endif
