@@ -1265,10 +1265,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NavDestinationAttribute_setMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _NavDestinationAttribute_setBackButtonIcon0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _NavDestinationAttribute_setMenus0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _NavDestinationAttribute_setOnReady(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavDestinationAttribute_setOnWillAppear(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1305,9 +1301,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NavDestinationAttribute_setHideTitleBar1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _NavDestinationAttribute_setBackButtonIcon1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _NavDestinationAttribute_setBackButtonIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _NavDestinationAttribute_setMenus1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _NavDestinationAttribute_setMenus(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavDestinationAttribute_setToolbarConfiguration(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -1331,8 +1327,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NavigationAttribute_setMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _NavigationAttribute_setBackButtonIcon0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _NavigationAttribute_setHideNavBar(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setHideTitleBar0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1340,8 +1334,6 @@ export class ArkUIGeneratedNativeModule {
     native static _NavigationAttribute_setHideBackButton(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setTitleMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _NavigationAttribute_setMenus0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setHideToolBar0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -1365,13 +1357,13 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NavigationAttribute_setEnableModeChangeAnimation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _NavigationAttribute_setBackButtonIcon1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _NavigationAttribute_setBackButtonIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setTitle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setHideTitleBar1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _NavigationAttribute_setMenus1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _NavigationAttribute_setMenus(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setToolbarConfiguration(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -1961,13 +1953,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SideBarContainerAttribute_setSideBarWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _SideBarContainerAttribute_setMinSideBarWidth0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _SideBarContainerAttribute_setMinSideBarWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _SideBarContainerAttribute_setMaxSideBarWidth0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _SideBarContainerAttribute_setMinSideBarWidth1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _SideBarContainerAttribute_setMaxSideBarWidth1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _SideBarContainerAttribute_setMaxSideBarWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SideBarContainerAttribute_setAutoHide(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
