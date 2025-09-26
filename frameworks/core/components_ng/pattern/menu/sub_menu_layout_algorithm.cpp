@@ -31,19 +31,15 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(props);
     auto parentMenuItem = menuPattern->GetParentMenuItem();
     CHECK_NULL_VOID(parentMenuItem);
-    auto parentItemPattern = parentMenuItem->GetPattern<MenuItemPattern>();
-    CHECK_NULL_VOID(parentItemPattern);
-    auto parentMenu = parentItemPattern->GetMenu(true);
-    CHECK_NULL_VOID(parentMenu);
-    auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(parentMenuPattern);
-    canExpandCurrentWindow_ = props->GetShowInSubWindowValue(false) || parentMenuPattern->IsContextMenu();
+    InitCanExpandCurrentWindow(props->GetShowInSubWindowValue(false), layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         ModifySubMenuWrapper(layoutWrapper);
     }
     CheckMenuPadding(layoutWrapper);
     const auto& geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    auto parentItemPattern = parentMenuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(parentItemPattern);
     auto expandingMode = parentItemPattern->GetExpandingMode();
     OffsetF position = GetSubMenuLayoutOffset(layoutWrapper, parentMenuItem, size, expandingMode);
     geometryNode->SetMarginFrameOffset(position);
@@ -450,7 +446,7 @@ void SubMenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(theme);
     if (!menuPattern->IsSelectOverlayExtensionMenu()) {
         margin_ = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
-        if (!(canExpandCurrentWindow_ && IsExpandDisplay())) {
+        if (!canExpandCurrentWindow_) {
             paddingStart_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
             paddingEnd_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
         } else {
