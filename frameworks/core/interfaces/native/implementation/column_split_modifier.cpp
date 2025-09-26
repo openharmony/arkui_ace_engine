@@ -30,9 +30,9 @@ struct DividerOptions {
 }
 namespace OHOS::Ace::NG::Converter {
 template<>
-ItemDivider Convert(const Ark_ColumnSplitDividerStyle& src)
+ColumnSplitDivider Convert(const Ark_ColumnSplitDividerStyle& src)
 {
-    ItemDivider divider;
+    ColumnSplitDivider divider;
     auto margin = OptConvert<Dimension>(src.startMargin);
     if (margin.has_value()) {
         divider.startMargin = margin.value();
@@ -80,7 +80,7 @@ void DividerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<ItemDivider>(*value);
+    auto divider = Converter::OptConvert<ColumnSplitDivider>(*value);
     LinearSplitModelNGStatic::SetDivider(frameNode, NG::SplitType::COLUMN_SPLIT, divider);
 }
 } // ColumnSplitAttributeModifier

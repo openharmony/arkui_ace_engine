@@ -152,6 +152,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest001, TestSize.Level0)
     EXPECT_NE(linearSPlitPattern, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
+    
     geometryNode->SetContentSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
     frameNode->SetGeometryNode(geometryNode);
     auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
