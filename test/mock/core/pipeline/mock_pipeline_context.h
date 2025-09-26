@@ -20,6 +20,7 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 
 namespace OHOS::Ace::NG {
 class MockPipelineContext : public PipelineContext {

@@ -480,6 +480,25 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_FindWindowScene004, Tes
 }
 
 /**
+ * @tc.name: MagnifierController_SetLocalOffset001
+ * @tc.desc: test SetLocalOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_SetLocalOffset001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> weakPattern(pattern);
+    MagnifierController controller(weakPattern);
+    auto windowNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG, 1, pattern, false);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, pattern, false);
+    columnNode->MountToParent(windowNode);
+    controller.SetLocalOffset(OffsetF(10.f, 10.f));
+    EXPECT_EQ(controller.globalOffset_, OffsetF(10.f, 10.f));
+    controller.SetLocalOffset(OffsetF(10.f, 10.f), OffsetF(20.f, 20.f));
+    EXPECT_EQ(controller.globalOffset_, OffsetF(20.f, 20.f));
+}
+
+/**
  * @tc.name: TextMenuController.disableSystemServiceMenuItems
  * @tc.desc: test disableSystemServiceMenuItems
  * @tc.type: FUNC
