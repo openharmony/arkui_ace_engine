@@ -102,6 +102,7 @@ public:
     void SetImageAccessEnabled(bool isImageAccessEnabled) override;
     void SetMixedMode(MixedModeContent mixedMode) override;
     void SetZoomAccessEnabled(bool isZoomAccessEnabled) override;
+    void SetZoomControlAccess(bool zoomControlAccess) override;
     void SetGeolocationAccessEnabled(bool isGeolocationAccessEnabled) override;
     void SetJsProxyCallback(std::function<void()>&& jsProxyCallback) override;
     void SetUserAgent(const std::string& userAgent) override;
@@ -268,6 +269,7 @@ public:
     static void SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled);
     static void SetMixedMode(FrameNode* frameNode, MixedModeContent mixedMode);
     static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
+    static void SetZoomControlAccess(FrameNode* frameNode, bool zoomControlAccess);
     static void SetCacheMode(FrameNode* frameNode, WebCacheMode cacheMode);
     static void SetDarkMode(FrameNode* frameNode, WebDarkMode mode);
     static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);

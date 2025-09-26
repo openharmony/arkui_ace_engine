@@ -31218,6 +31218,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebZoomAccessModifier.identity, WebZoomAccessModifier, zoomAccess);
     return this;
   }
+  zoomControlAccess(zoomControlAccess) {
+    modifierWithKey(this._modifiersWithKeys, WebZoomControlAccessModifier.identity, WebZoomControlAccessModifier, zoomControlAccess);
+    return this;
+  }
   geolocationAccess(geolocationAccess) {
     modifierWithKey(this._modifiersWithKeys, WebGeolocationAccessModifier.identity, WebGeolocationAccessModifier, geolocationAccess);
     return this;
@@ -31768,6 +31772,20 @@ class WebZoomAccessModifier extends ModifierWithKey {
   }
 }
 WebZoomAccessModifier.identity = Symbol('webZoomAccessModifier');
+
+class WebZoomControlAccessModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetZoomControlAccess(node);
+    } else {
+      getUINativeModule().web.setZoomControlAccess(node, this.value);
+    }
+}
+}
+WebZoomControlAccessModifier.identity = Symbol('webZoomControlAccessModifier');
 
 class WebCacheModeModifier extends ModifierWithKey {
     constructor(value) {

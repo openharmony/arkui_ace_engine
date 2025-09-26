@@ -84,6 +84,20 @@ class WebZoomAccessModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class WebZoomControlAccessModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webZoomControlAccess');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetZoomControlAccess(node);
+    } else {
+      getUINativeModule().web.setZoomControlAccess(node, this.value);
+    }
+  }
+}
+
 class WebCacheModeModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -1507,6 +1521,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   zoomAccess(zoomAccess: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebZoomAccessModifier.identity, WebZoomAccessModifier, zoomAccess);
+    return this;
+  }
+  zoomControlAccess(zoomControlAccess: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebZoomControlAccessModifier.identity, WebZoomControlAccessModifier, zoomControlAccess);
     return this;
   }
   geolocationAccess(geolocationAccess: boolean): this {

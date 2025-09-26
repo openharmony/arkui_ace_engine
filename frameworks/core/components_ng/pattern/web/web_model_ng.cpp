@@ -526,6 +526,13 @@ void WebModelNG::SetZoomAccessEnabled(bool isZoomAccessEnabled)
     webPattern->UpdateZoomAccessEnabled(isZoomAccessEnabled);
 }
 
+void WebModelNG::SetZoomControlAccess(bool zoomControlAccess)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateZoomControlAccess(zoomControlAccess);
+}
+
 void WebModelNG::SetGeolocationAccessEnabled(bool isGeolocationAccessEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1528,6 +1535,14 @@ void WebModelNG::SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEna
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateZoomAccessEnabled(isZoomAccessEnabled);
+}
+
+void WebModelNG::SetZoomControlAccess(FrameNode* frameNode, bool zoomControlAccess)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateZoomControlAccess(zoomControlAccess);
 }
 
 void WebModelNG::SetCacheMode(FrameNode* frameNode, WebCacheMode cacheMode)

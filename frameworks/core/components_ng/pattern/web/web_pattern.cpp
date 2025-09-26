@@ -3420,6 +3420,15 @@ void WebPattern::OnZoomAccessEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnZoomControlAccessUpdate(bool zoomControlAccess)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    if (delegate_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ZoomControlAccess :%{public}d", zoomControlAccess);
+        delegate_->UpdateZoomControlAccess(zoomControlAccess);
+    }
+}
+
 void WebPattern::OnGeolocationAccessEnabledUpdate(bool value)
 {
     if (delegate_) {
@@ -4004,6 +4013,7 @@ void WebPattern::OnModifyDone()
         } else {
             delegate_->UpdateSupportZoom(GetZoomAccessEnabledValue(true));
         }
+        delegate_->UpdateZoomControlAccess(GetZoomControlAccessValue(true));
         delegate_->UpdateDomStorageEnabled(GetDomStorageAccessEnabledValue(false));
         delegate_->UpdateGeolocationEnabled(GetGeolocationAccessEnabledValue(true));
         delegate_->UpdateCacheMode(GetCacheModeValue(WebCacheMode::DEFAULT));

@@ -738,6 +738,7 @@ void WebDelegate::Reload()
 #else
 #endif
 }
+void WebDelegate::UpdateZoomControlAccess(bool zoomControlAccess) {}
 void WebDelegate::UpdateUrl(const std::string& url) {}
 void WebDelegate::CallWebRouterBack() {}
 void WebDelegate::CallPopPageSuccessPageUrl(const std::string& url) {}

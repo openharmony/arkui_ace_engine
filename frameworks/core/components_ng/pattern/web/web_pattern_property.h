@@ -35,6 +35,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MixedMode, MixedModeContent);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BypassVsyncCondition, WebBypassVsyncCondition);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ZoomAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ZoomControlAccess, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(GeolocationAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(UserAgent, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CacheMode, WebCacheMode);

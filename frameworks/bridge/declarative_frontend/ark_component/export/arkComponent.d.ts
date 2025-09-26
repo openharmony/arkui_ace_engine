@@ -1394,6 +1394,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     imageAccess(imageAccess: boolean): this;
     mixedMode(mixedMode: MixedMode): this;
     zoomAccess(zoomAccess: boolean): this;
+    zoomControlAccess(zoomControlAccess: boolean): this;
     geolocationAccess(geolocationAccess: boolean): this;
     javaScriptProxy(javaScriptProxy: {
         object: object;

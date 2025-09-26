@@ -26,6 +26,7 @@ constexpr bool DEFAULT_FILE_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_DOM_STORAGE_ACCESS_ENABLED = false;
 constexpr MixedModeContent DEFAULT_MIXED_MODE = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW;
 constexpr int32_t DEFAULT_ZOOM_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_ZOOM_CONTROL_ACCESS = false;
 constexpr WebCacheMode DEFAULT_CACHE_MODE = WebCacheMode::DEFAULT;
 constexpr WebDarkMode DEFAULT_DARK_MODE = WebDarkMode::Off;
 constexpr int32_t DEFAULT_MULTIWINDOW_ACCESS_ENABLED = false;
@@ -150,6 +151,20 @@ void ResetZoomAccessEnabled(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WebModelNG::SetZoomAccessEnabled(frameNode, DEFAULT_ZOOM_ACCESS_ENABLED);
+}
+
+void SetZoomControlAccess(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetZoomControlAccess(frameNode, value);
+}
+
+void ResetZoomControlAccess(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetZoomControlAccess(frameNode, DEFAULT_ZOOM_CONTROL_ACCESS);
 }
 
 void SetCacheMode(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -2278,6 +2293,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetMixedMode = ResetMixedMode,
         .setZoomAccessEnabled = SetZoomAccessEnabled,
         .resetZoomAccessEnabled = ResetZoomAccessEnabled,
+        .setZoomControlAccess = SetZoomControlAccess,
+        .resetZoomControlAccess = ResetZoomControlAccess,
         .setCacheMode = SetCacheMode,
         .resetCacheMode = ResetCacheMode,
         .setDarkMode = SetDarkMode,
@@ -2499,6 +2516,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetMixedMode = ResetMixedMode,
         .setZoomAccessEnabled = SetZoomAccessEnabled,
         .resetZoomAccessEnabled = ResetZoomAccessEnabled,
+        .setZoomControlAccess = SetZoomControlAccess,
+        .resetZoomControlAccess = ResetZoomControlAccess,
         .setCacheMode = SetCacheMode,
         .resetCacheMode = ResetCacheMode,
         .setDarkMode = SetDarkMode,

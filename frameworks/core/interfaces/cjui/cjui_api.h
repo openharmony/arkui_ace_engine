@@ -1971,6 +1971,8 @@ struct CJUIWebModifier {
     void (*resetMixedMode)(ArkUINodeHandle node);
     void (*setZoomAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetZoomAccessEnabled)(ArkUINodeHandle node);
+    void (*setZoomControlAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetZoomControlAccess)(ArkUINodeHandle node);
     void (*setCacheMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetCacheMode)(ArkUINodeHandle node);
     void (*setDarkMode)(ArkUINodeHandle node, ArkUI_Int32 value);
