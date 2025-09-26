@@ -33,6 +33,27 @@ namespace {
         CustomNodeBuilder,
         Ark_TabBarOptions
     >;
+
+void SetTabBarCustomBuilder(FrameNode* frameNode, const CustomNodeBuilder& arkBuilder)
+{
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto arkNode = reinterpret_cast<Ark_NativePointer>(frameNode);
+    CallbackHelper(arkBuilder)
+        .BuildAsync([weakNode](const RefPtr<UINode>& uiNode) {
+            auto contentNode = weakNode.Upgrade();
+            CHECK_NULL_VOID(contentNode);
+            auto builder = [weakUINode = WeakPtr<UINode>(uiNode)]() {
+                auto uiNode = weakUINode.Upgrade();
+                CHECK_NULL_VOID(uiNode);
+                ViewStackProcessor::GetInstance()->Push(uiNode);
+            };
+            auto contentNodePtr = AceType::RawPtr(contentNode);
+            TabContentModelStatic::SetTabBarStyle(contentNodePtr, TabBarStyle::NOSTYLE);
+            TabContentModelStatic::SetTabBar(contentNodePtr, std::nullopt, std::nullopt, std::move(builder));
+            TabContentModelStatic::AddTabBarItem(contentNode, DEFAULT_NODE_SLOT, true);
+        },
+        arkNode);
+}
 } // namespace
 
 namespace Validator {
@@ -329,14 +350,8 @@ void SetTabBarImpl(Ark_NativePointer node,
             TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
             TabContentModelStatic::SetTabBar(frameNode, text, std::nullopt, nullptr);
         },
-        [frameNode, node](const CustomNodeBuilder& arkBuilder) {
-            CallbackHelper(arkBuilder).BuildAsync(
-                [frameNode](const RefPtr<UINode>& uiNode) {
-                    auto builder = [frameNode, uiNode]() { ViewStackProcessor::GetInstance()->Push(uiNode); };
-                    TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
-                    TabContentModelStatic::SetTabBar(frameNode, std::nullopt, std::nullopt, std::move(builder));
-                },
-                node);
+        [frameNode](const CustomNodeBuilder& arkBuilder) {
+            SetTabBarCustomBuilder(frameNode, arkBuilder);
         },
         [frameNode](const Ark_TabBarOptions& arkTabBarOptions) {
             std::optional<std::string> label;
