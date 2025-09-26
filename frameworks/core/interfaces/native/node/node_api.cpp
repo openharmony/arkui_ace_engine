@@ -1908,6 +1908,32 @@ ArkUI_Int32 PostIdleCallback(ArkUI_Int32 instanceId, void* userData,
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 PostIdleCallbackWithNodeHandle(ArkUI_Int32 instanceId, ArkUINodeHandle node,
+    void (*callback)(ArkUINodeHandle node, uint64_t nanoTimeLeft, uint32_t frameCount))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    if (pipeline == nullptr) {
+        LOGW("Cannot find pipeline context by contextHandle ID");
+        return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
+    }
+    if (!pipeline->CheckThreadSafe()) {
+        return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
+    }
+    auto onIdleCallbackFuncFromCAPI =
+        [node = AceType::WeakClaim(frameNode), callback](uint64_t nanoTimeLeft, uint32_t frameCount) -> void {
+            auto frameNode = node.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+            callback(nodeHandle, nanoTimeLeft, frameCount);
+        };
+
+    pipeline->AddFrameCallback(nullptr, std::move(onIdleCallbackFuncFromCAPI), 0);
+    return ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_Int32 GreatOrEqualTargetAPIVersion(ArkUI_Int32 version)
 {
     auto platformVersion = static_cast<PlatformVersion>(version);
@@ -1954,6 +1980,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         .getContextByNode = GetContextByNode,
         .postFrameCallback = PostFrameCallback,
         .postIdleCallback = PostIdleCallback,
+        .postIdleCallbackWithNodeHandle = PostIdleCallbackWithNodeHandle,
         .greatOrEqualTargetAPIVersion = GreatOrEqualTargetAPIVersion,
         .registerNodeAsyncCommonEventReceiver = RegisterNodeAsyncCommonEventReceiver,
         .unRegisterNodeAsyncCommonEventReceiver = UnRegisterNodeAsyncCommonEventReceiver,

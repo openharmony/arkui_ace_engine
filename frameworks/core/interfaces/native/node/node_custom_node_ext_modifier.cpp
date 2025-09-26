@@ -80,13 +80,16 @@ void SetCustomMeasureCallback(ArkUINodeHandle node,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onMeasure = [node, setCustomMeasure](LayoutConstraintF constraints) {
+    auto onMeasure = [node = AceType::WeakClaim(frameNode), setCustomMeasure](LayoutConstraintF constraints) {
         ArkUIConstraintSizeOptions options;
         options.minWidth = constraints.minSize.Width();
         options.minHeight = constraints.minSize.Height();
         options.maxWidth = constraints.maxSize.Width();
         options.maxHeight = constraints.maxSize.Height();
-        setCustomMeasure(node, options);
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        setCustomMeasure(nodeHandle, options);
     };
     CustomNodeExtModelNG::SetMeasureCallback(frameNode, std::move(onMeasure));
 }
@@ -95,13 +98,16 @@ void SetCustomLayoutCallback(ArkUINodeHandle node, void (*setCustomLayout)(ArkUI
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onLayout = [node, setCustomLayout](RectF rect) {
+    auto onLayout = [node = AceType::WeakClaim(frameNode), setCustomLayout](RectF rect) {
         ArkUIRect rect_;
         rect_.width = rect.Width();
         rect_.height = rect.Height();
         rect_.x = rect.GetX();
         rect_.y = rect.GetY();
-        setCustomLayout(node, rect_);
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        setCustomLayout(nodeHandle, rect_);
     };
     CustomNodeExtModelNG::SetLayoutCallback(frameNode, std::move(onLayout));
 }
@@ -110,12 +116,15 @@ void SetCustomContentDrawCallback(ArkUINodeHandle node, CustomDrawFunc drawFunc)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onContentDraw = [node, drawFunc](DrawingContext context) {
+    auto onContentDraw = [node = AceType::WeakClaim(frameNode), drawFunc](DrawingContext context) {
         ArkUIDrawingContext drawContext;
         drawContext.canvas = reinterpret_cast<ArkUICanvasHandle>(&context.canvas);
         drawContext.width = context.width;
         drawContext.height = context.height;
-        drawFunc(node, drawContext);
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        drawFunc(nodeHandle, drawContext);
     };
     CustomNodeExtModelNG::SetContentDrawCallback(frameNode, std::move(onContentDraw));
 }
@@ -124,12 +133,15 @@ void SetCustomForegroundDrawCallback(ArkUINodeHandle node, CustomDrawFunc drawFu
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onForegroundDraw = [node, drawFunc](DrawingContext context) {
+    auto onForegroundDraw = [node = AceType::WeakClaim(frameNode), drawFunc](DrawingContext context) {
         ArkUIDrawingContext drawContext;
         drawContext.canvas = reinterpret_cast<ArkUICanvasHandle>(&context.canvas);
         drawContext.width = context.width;
         drawContext.height = context.height;
-        drawFunc(node, drawContext);
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        drawFunc(nodeHandle, drawContext);
     };
     CustomNodeExtModelNG::SetForegroundDrawCallback(frameNode, std::move(onForegroundDraw));
 }
@@ -138,12 +150,15 @@ void SetCustomOverlayDrawCallback(ArkUINodeHandle node, CustomDrawFunc drawFunc)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onOverlayDraw = [node, drawFunc](DrawingContext context) {
+    auto onOverlayDraw = [node = AceType::WeakClaim(frameNode), drawFunc](DrawingContext context) {
         ArkUIDrawingContext drawContext;
         drawContext.canvas = reinterpret_cast<ArkUICanvasHandle>(&context.canvas);
         drawContext.width = context.width;
         drawContext.height = context.height;
-        drawFunc(node, drawContext);
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        drawFunc(nodeHandle, drawContext);
     };
     CustomNodeExtModelNG::SetOverlayDrawCallback(frameNode, std::move(onOverlayDraw));
 }
@@ -153,9 +168,12 @@ void SetOnConfigUpdateCallback(ArkUINodeHandle node,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onUpdate = [node, onConfigUpdate](ConfigurationType configType) {
+    auto onUpdate = [node = AceType::WeakClaim(frameNode), onConfigUpdate](ConfigurationType configType) {
         ArkUIConfigType type = static_cast<ArkUIConfigType>(configType);
-        onConfigUpdate(node, type);
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        onConfigUpdate(nodeHandle, type);
     };
     CustomNodeExtModelNG::SetOnConfigUpdateCallback(frameNode, std::move(onUpdate));
 }
@@ -164,8 +182,11 @@ void SetOnModifyDoneCallback(ArkUINodeHandle node, void (*onModifyDone)(ArkUINod
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onModifyDoneCallback = [node, onModifyDone]() {
-        onModifyDone(node);
+    auto onModifyDoneCallback = [node = AceType::WeakClaim(frameNode), onModifyDone]() {
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        onModifyDone(nodeHandle);
     };
     CustomNodeExtModelNG::SetOnModifyDoneCallback(frameNode, std::move(onModifyDoneCallback));
 }
@@ -175,7 +196,7 @@ void SetOnDirtyLayoutWrapperSwap(ArkUINodeHandle node,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onDirtySwapCallback = [node, onDirtySwap](const DirtySwapConfig& config) {
+    auto onDirtySwapCallback = [node = AceType::WeakClaim(frameNode), onDirtySwap](const DirtySwapConfig& config) {
         ArkUIDirtySwapConfig configuration;
         configuration.frameSizeChange = config.frameSizeChange;
         configuration.frameOffsetChange = config.frameOffsetChange;
@@ -183,7 +204,10 @@ void SetOnDirtyLayoutWrapperSwap(ArkUINodeHandle node,
         configuration.contentOffsetChange = config.contentOffsetChange;
         configuration.skipMeasure = config.skipMeasure;
         configuration.skipLayout = config.skipLayout;
-        onDirtySwap(node, configuration);
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        onDirtySwap(nodeHandle, configuration);
     };
     CustomNodeExtModelNG::SetOnDirtyLayoutWrapperSwap(frameNode, std::move(onDirtySwapCallback));
 }
@@ -199,8 +223,11 @@ void SetBeforeCreateLayoutWrapperCallback(ArkUINodeHandle node, void (*beforeCre
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto beforeCreateLayoutWrapperCallback = [node, beforeCreateLayoutWrapper]() {
-        beforeCreateLayoutWrapper(node);
+    auto beforeCreateLayoutWrapperCallback = [node = AceType::WeakClaim(frameNode), beforeCreateLayoutWrapper]() {
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        beforeCreateLayoutWrapper(nodeHandle);
     };
     CustomNodeExtModelNG::SetBeforeCreateLayoutWrapperCallback(frameNode, std::move(beforeCreateLayoutWrapperCallback));
 }
