@@ -2479,6 +2479,28 @@ void ForceEnableZoomImpl(Ark_NativePointer node,
     WebModelStatic::SetForceEnableZoom(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
+
+void OnActivateContentImpl(Ark_NativePointer node,
+                           const Opt_Callback_Void* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onActivateContent = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnActivateContent(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetActivateContentEventId(frameNode, onActivateContent);
+#endif // WEB_SUPPORTED
+}
+
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()
 {
@@ -2616,6 +2638,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::BindSelectionMenuImpl,
         WebAttributeModifier::GestureFocusModeImpl,
         WebAttributeModifier::ForceEnableZoomImpl,
+        WebAttributeModifier::OnActivateContentImpl,
     };
     return &ArkUIWebModifierImpl;
 }

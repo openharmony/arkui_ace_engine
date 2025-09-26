@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, InteropNativeModule } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -1495,7 +1495,6 @@ export class WebController implements MaterializedBase {
     }
 }
 export class ArkWebPeer extends ArkCommonMethodPeer {
-    private webviewController?: WebviewController
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -1509,7 +1508,6 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
     setWebOptionsAttribute(value: WebOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         if (TypeChecker.isWebviewControllerAni(value.controller)) {
-            this.webviewController = new WebviewController()
             const value_casted = {
                 src: value.src,
                 renderMode: value.renderMode,
@@ -3157,6 +3155,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_forceEnableZoom(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    onActivateContentAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onActivateContent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export type OnNavigationEntryCommittedCallback = (loadCommittedDetails: LoadCommittedDetails) => void;
 export type OnSslErrorEventCallback = (sslErrorEvent: SslErrorEvent) => void;
@@ -3845,6 +3855,7 @@ export interface WebAttribute extends CommonMethod {
     bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this
     gestureFocusMode(value: GestureFocusMode | undefined): this
     forceEnableZoom(value: boolean | undefined): this
+    onActivateContent(value: Callback<void> | undefined): this
 }
 export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     javaScriptAccess_value?: boolean | undefined
@@ -3976,6 +3987,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     nativeEmbedOptions_value?: EmbedOptions
     gestureFocusMode_value?: GestureFocusMode | undefined
     forceEnableZoom_value?: boolean | undefined
+    onActivateContent_value?: Callback<void> | undefined
     public javaScriptAccess(value: boolean | undefined): this {
         return this
     }
@@ -4367,6 +4379,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
         return this
     }
     public forceEnableZoom(value: boolean | undefined): this {
+        return this
+    }
+    public onActivateContent(value: Callback<void> | undefined): this {
         return this
     }
 }
@@ -5453,6 +5468,15 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
+    public onActivateContent(value: Callback<void> | undefined): this {
+        if (this.checkPriority("onActivateContent")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onActivateContentAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

@@ -76,6 +76,7 @@ typedef struct WebviewControllerInfo {
     std::function<void()> releaseRefFunc = nullptr;
     std::function<void(int32_t)> setWebIdFunc = nullptr;
     std::function<void(const std::string&)> setHapPathFunc = nullptr;
+    std::function<void(int32_t)> setWebDetachFunc = nullptr;
 } WebviewControllerInfo;
 
 class SharedPointerWrapper {

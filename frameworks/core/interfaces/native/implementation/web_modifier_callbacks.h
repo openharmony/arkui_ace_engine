@@ -144,7 +144,8 @@ WebKeyboardOption OnWebKeyboard(const CallbackHelper<WebKeyboardCallback>& arkCa
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnAdsBlocked(const CallbackHelper<OnAdsBlockedCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-
+void OnActivateContent(const CallbackHelper<Callback_Void>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
 

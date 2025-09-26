@@ -1258,6 +1258,15 @@ void OnAdsBlocked(const CallbackHelper<OnAdsBlockedCallback>& arkCallback,
     arkCallback.Invoke(parameter);
 }
 
+void OnActivateContent(const CallbackHelper<Callback_Void>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    arkCallback.InvokeSync();
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
 

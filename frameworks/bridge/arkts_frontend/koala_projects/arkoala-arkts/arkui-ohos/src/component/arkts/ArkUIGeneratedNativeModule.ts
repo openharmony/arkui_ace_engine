@@ -1230,9 +1230,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GridAttribute_onScrollFrameBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _GridAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    native static _GridAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _GridAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    native static _GridAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GridAttribute_edgeEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -1492,9 +1492,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ListAttribute_onScrollFrameBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _ListAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    native static _ListAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _ListAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    native static _ListAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ListAttribute_lanes(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -2009,8 +2009,8 @@ export class ArkUIGeneratedNativeModule {
     native static _RichEditorAttribute_placeholder(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichText_construct(id: KInt, flags: KInt): KPointer
-    @ani.unsafe.Quick
-    native static _RichTextInterface_setRichTextOptions(ptr: KPointer, content: KStringPtr): void
+    @ani.unsafe.Direct
+    native static _RichTextInterface_setRichTextOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichTextAttribute_onStart(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3588,6 +3588,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_forceEnableZoom(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _WebAttribute_onActivateContent(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _WindowScene_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _WindowSceneInterface_setWindowSceneOptions(ptr: KPointer, persistentId: number): void
@@ -3692,9 +3694,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WaterFlowAttribute_onScrollIndex(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _WaterFlowAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    native static _WaterFlowAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
-    native static _WaterFlowAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    native static _WaterFlowAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _UIExtensionComponent_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -3964,23 +3966,23 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNode_getUniqueId(point: KPointer): int32
     @ani.unsafe.Direct
-    native static _FrameNode_isVisible(point: KPointer): boolean 
+    native static _FrameNode_isVisible(point: KPointer): boolean
     @ani.unsafe.Direct
-    native static _FrameNode_isClipToFrame(point: KPointer): boolean 
+    native static _FrameNode_isClipToFrame(point: KPointer): boolean
     @ani.unsafe.Direct
-    native static _FrameNode_isAttached(point: KPointer): boolean 
+    native static _FrameNode_isAttached(point: KPointer): boolean
     @ani.unsafe.Quick
-    native static _FrameNode_getInspectorInfo(point: KPointer): string 
+    native static _FrameNode_getInspectorInfo(point: KPointer): string
     @ani.unsafe.Direct
-    native static _FrameNode_onDraw(point: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    native static _FrameNode_onDraw(point: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _FrameNode_invalidate(point: KPointer): void 
+    native static _FrameNode_invalidate(point: KPointer): void
     @ani.unsafe.Direct
-    native static _FrameNode_disposeTree(point: KPointer): void 
+    native static _FrameNode_disposeTree(point: KPointer): void
     @ani.unsafe.Direct
     native  static _FrameNode_setCrossLanguageOptions(point: KPointer, attributeSettings:boolean): KPointer
     @ani.unsafe.Direct
-    native static _FrameNode_getCrossLanguageOptions(point: KPointer): boolean 
+    native static _FrameNode_getCrossLanguageOptions(point: KPointer): boolean
     @ani.unsafe.Direct
     native static _UIContext_vp2px(ptr: KPointer, value: number): number
     @ani.unsafe.Direct
@@ -5748,7 +5750,7 @@ export class ArkUIGeneratedNativeModule {
     native static _OffscreenCanvasRenderingContext2D_transferToImageBitmap(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _OffscreenCanvas_construct(width: number, height: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
-    @ani.unsafe.Direct    
+    @ani.unsafe.Direct
     native static _OverlayOps_setOverlayAttribute(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _OffscreenCanvas_getFinalizer(): KPointer
