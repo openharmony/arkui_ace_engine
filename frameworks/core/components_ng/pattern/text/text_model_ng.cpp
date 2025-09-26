@@ -29,6 +29,7 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr uint32_t DEFAULT_MIN_LINES = 0;
 constexpr int32_t DEFAULT_ALPHA = 255;
 constexpr float DEFAULT_OPACITY = 0.2;
 
@@ -345,6 +346,16 @@ void TextModelNG::SetMaxLines(uint32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value);
 }
 
+void TextModelNG::SetMinLines(uint32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinLines, value);
+}
+
+void TextModelNG::ResetMinLines()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MinLines, PROPERTY_UPDATE_MEASURE);
+}
+
 void TextModelNG::SetTextIndent(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextIndent, value);
@@ -593,6 +604,16 @@ void TextModelNG::SetTextCase(FrameNode* frameNode, Ace::TextCase value)
 void TextModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value, frameNode);
+}
+
+void TextModelNG::SetMinLines(FrameNode* frameNode, uint32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinLines, value, frameNode);
+}
+
+void TextModelNG::ResetMinLines(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MinLines, PROPERTY_UPDATE_MEASURE, frameNode);
 }
 
 void TextModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
@@ -944,6 +965,15 @@ uint32_t TextModelNG::GetMaxLines(FrameNode* frameNode)
     auto& textLineStyle = layoutProperty->GetTextLineStyle();
     CHECK_NULL_RETURN(textLineStyle, defaultMaxLines);
     return textLineStyle->GetMaxLines().value_or(defaultMaxLines);
+}
+
+uint32_t TextModelNG::GetMinLines(FrameNode* frameNode)
+{
+    uint32_t defaultMinLines = DEFAULT_MIN_LINES;
+    CHECK_NULL_RETURN(frameNode, defaultMinLines);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultMinLines);
+    return layoutProperty->GetMinLines().value_or(defaultMinLines);
 }
 
 TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)

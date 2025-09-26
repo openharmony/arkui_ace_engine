@@ -33,6 +33,8 @@ constexpr float RK356_WIDTH = 720.0f;
 constexpr float RK356_HEIGHT = 1136.0f;
 constexpr float RK356_LOW_WIDTH = 50.0f;
 constexpr float RK356_LOW_HEIGHT = 20.0f;
+constexpr float RK356_MAX_WIDTH = 100.0f;
+constexpr float RK356_MAX_HEIGHT = 80.0f;
 constexpr float TEXT_WIDTH = 100.0f;
 constexpr float TEXT_HEIGHT = 75.0f;
 constexpr float LARGE_WIDTH = 1000000.0f;
@@ -70,6 +72,7 @@ constexpr Dimension ADAPT_FONT_SIZE_STEP_VALUE = Dimension(10, DimensionUnit::PX
 const std::string CREATE_VALUE = "Hello World";
 const std::u16string CREATE_VALUE_W = u"Hello World";
 const SizeF CONTAINER_SIZE(RK356_WIDTH, RK356_HEIGHT);
+const SizeF CONTAINER_MAX_SIZE(RK356_MAX_WIDTH, RK356_MAX_HEIGHT);
 const SizeF CONTAINER_LOW_SIZE(RK356_LOW_WIDTH, RK356_LOW_HEIGHT);
 const SizeF TEXT_SIZE(TEXT_WIDTH, TEXT_HEIGHT);
 const SizeF LARGE_CONTAINER_SIZE(LARGE_WIDTH, TEXT_HEIGHT);
@@ -161,6 +164,7 @@ struct TestProperty {
     std::optional<Ace::TextAlign> textAlignValue = std::nullopt;
     std::optional<Ace::TextOverflow> textOverflowValue = std::nullopt;
     std::optional<uint32_t> maxLinesValue = std::nullopt;
+    std::optional<uint32_t> minLinesValue = std::nullopt;
     std::optional<Dimension> lineHeightValue = std::nullopt;
     std::optional<Dimension> lineSpacingValue = std::nullopt;
     std::optional<bool> isOnlyBetweenLines = std::nullopt;

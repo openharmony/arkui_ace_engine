@@ -48,6 +48,8 @@ public:
     void SetTextAlign(TextAlign value) override;
     void SetTextOverflow(TextOverflow value) override;
     void SetMaxLines(uint32_t value) override;
+    void SetMinLines(uint32_t value) override {};
+    void ResetMinLines() override {};
     void SetTextIndent(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     void SetLineSpacing(const Dimension& value) override;

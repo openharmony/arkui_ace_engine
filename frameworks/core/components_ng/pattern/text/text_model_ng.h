@@ -51,6 +51,8 @@ public:
     void ReSetTextContentAlign() override;
     void SetTextOverflow(TextOverflow value) override;
     void SetMaxLines(uint32_t value) override;
+    void SetMinLines(uint32_t value) override;
+    void ResetMinLines() override;
     void SetTextIndent(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     void SetLineSpacing(const Dimension& value) override;
@@ -123,6 +125,8 @@ public:
     static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
     static void SetTextCase(FrameNode* frameNode, TextCase value);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
+    static void SetMinLines(FrameNode* frameNode, uint32_t value);
+    static void ResetMinLines(FrameNode* frameNode);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
@@ -165,6 +169,7 @@ public:
     static TextCase GetTextCase(FrameNode* frameNode);
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static uint32_t GetMaxLines(FrameNode* frameNode);
+    static uint32_t GetMinLines(FrameNode* frameNode);
     static TextAlign GetTextAlign(FrameNode* frameNode);
     static TextContentAlign GetTextContentAlign(FrameNode* frameNode);
     static TextOverflow GetTextOverflow(FrameNode* frameNode);

@@ -167,6 +167,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("textOverflow",
         V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
     json->PutExtAttr("maxLines", std::to_string(GetMaxLines().value_or(UINT32_MAX)).c_str(), filter);
+    json->PutExtAttr("minLines", std::to_string(GetMinLines().value_or(0)).c_str(), filter);
     json->PutExtAttr("enableAutoSpacing", std::to_string(GetEnableAutoSpacing().value_or(false)).c_str(), filter);
     json->PutExtAttr("textContentAlign", V2::ConvertWrapTextContentAlignToString(
         GetTextContentAlign().value_or(TextContentAlign::TOP)).c_str(), filter);

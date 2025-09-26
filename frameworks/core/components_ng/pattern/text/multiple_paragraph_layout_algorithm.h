@@ -114,6 +114,8 @@ protected:
     virtual void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
     void MeasureChildren(LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
+    void CalcHeightWithMinLines(TextStyle& textStyle, LayoutWrapper* layoutWrapper,
+        const LayoutConstraintF& contentConstraint);
     bool ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle& paraStyle, const TextStyle& textStyle,
         std::vector<TextStyle>& textStyles);
     void UpdateShaderStyle(const RefPtr<TextLayoutProperty>& layoutProperty, TextStyle& textStyle);
@@ -127,6 +129,7 @@ protected:
         return width;
     }
     virtual void MeasureWidthLayoutCalPolicy(LayoutWrapper* layoutWrapper) {}
+    virtual void MeasureHeightLayoutCalPolicy(LayoutWrapper* layoutWrapper) {}
 
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     RefPtr<ParagraphManager> paragraphManager_;

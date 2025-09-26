@@ -2629,6 +2629,19 @@ typedef enum {
      * @since 21
      */
      NODE_TEXT_CONTENT_ALIGN = 1036,
+     
+    /**
+     * @brief Sets the minimum number of lines in the text.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: minimum number of lines in the text.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: minimum number of lines in the text.\n
+     *
+     */
+    NODE_TEXT_MIN_LINES = 1037,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.

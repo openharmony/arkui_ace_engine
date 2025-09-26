@@ -43,6 +43,7 @@ public:
     static void SetTextShadow(const JSCallbackInfo& info);
     static void SetTextOverflow(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
+    static void SetMinLines(const JSCallbackInfo& info);
     static void SetTextIndent(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
     static void SetAlign(const JSCallbackInfo& info);
