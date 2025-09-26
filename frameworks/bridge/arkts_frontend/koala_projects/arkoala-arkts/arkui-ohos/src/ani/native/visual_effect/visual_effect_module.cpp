@@ -28,7 +28,6 @@ ani_long GetPropertyName(ani_env* env, ani_object obj, const char* name)
 
 ani_object CallFromPtrMethod(ani_env* env, const char* methodName, ani_long ptr)
 {
-    ani_status status;
     ani_static_method method;
     ani_class myClass;
     ani_ref resultRef;
