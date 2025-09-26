@@ -404,6 +404,8 @@ void SetPreferredOrientationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto ori = Converter::OptConvertPtr<Orientation>(value).value_or(Orientation::UNSPECIFIED);
+    NavDestinationModelStatic::SetPreferredOrientation(frameNode, ori);
 }
 void SetEnableNavigationIndicatorImpl(Ark_NativePointer node,
                                       const Opt_Boolean* value)
