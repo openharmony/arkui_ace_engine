@@ -55,6 +55,8 @@ private:
     napi_value ProcessDidClickUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessTabContentStateRegister(napi_env env, napi_callback_info info);
     napi_value ProcessTabContentStateUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessTabChangeRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessTabChangeUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessBeforePanStartRegister(napi_env env, napi_callback_info info);
     napi_value ProcessBeforePanStartUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessBeforePanEndRegister(napi_env env, napi_callback_info info);
@@ -79,6 +81,7 @@ private:
     bool isDidClickFuncSetted_ = false;
     bool isPanGestureHandleFuncSetted_ = false;
     bool isTabContentStateUpdateFuncSetted_ = false;
+    bool isTabChangeFuncSetted_ = false;
     bool isRouterPageHandleFuncSetted_ = false;
     bool isDestinationSwitchHandleFuncSetted_ = false;
     bool isTextChangeEventHandleFuncSetted_ = false;

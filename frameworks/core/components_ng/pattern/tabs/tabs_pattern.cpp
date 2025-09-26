@@ -79,6 +79,8 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         tabsLayoutProperty->UpdateIndex(currentIndex);
         tabBarPattern->OnTabBarIndexChange(currentIndex);
         pattern->FireTabContentStateCallback(preIndex, currentIndex);
+        /* TabChange callback */
+        pattern->FireTabChangeCallback(preIndex, currentIndex);
 
         /* js callback */
         if (jsEvent && tabsNode->IsOnMainTree()) {
@@ -131,6 +133,127 @@ void TabsPattern::FireTabContentStateCallback(int32_t oldIndex, int32_t nextInde
             id, uniqueId);
         UIObserverHandler::GetInstance().NotifyTabContentStateUpdate(nextTabContentInfo);
     }
+}
+
+/**
+ * @brief Fire TabChange event callback.
+ *
+ * This function is responsible for generating TabChange event data and sending it.
+ * The first time must be to send the show state event, and the client will receive
+ * the show state event. Then each subsequent transmission, the client will first
+ * receive a hide state event, followed by a show state event.
+ * It performs the following steps:
+ * 1. Based on the TabContent information corresponding to pretIndex, create TabChange
+ *    event data in hide state, send it out, and keep the sent information.
+ * 2. Based on the TabContent information corresponding to nextIndex, create TabChange
+ *    event data in show state, send it out, and keep the sent information.
+ *
+ * @param preIndex The previous index for TabContent. When sending the first TabChange event,
+ *                 the parameter must be -1.
+ * @param nextIndex The next index for TabContent.
+ */
+void TabsPattern::FireTabChangeCallback(int32_t preIndex, int32_t nextIndex)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    std::string id = tabsNode->GetInspectorId().value_or("");
+    int32_t uniqueId = tabsNode->GetId();
+    auto preTabContent = AceType::DynamicCast<TabContentNode>(swiperNode->GetChildByIndex(preIndex));
+    // The first event cannot be hide state.
+    if (preTabContent && lastTabChangeInfo_.has_value() && IsValidFireTabChange(lastTabChangeInfo_, preIndex, false)) {
+        std::string preTabContentId = preTabContent->GetInspectorId().value_or("");
+        int32_t preTabContentUniqueId = preTabContent->GetId();
+        TabContentInfo preTabContentInfo(preTabContentId, preTabContentUniqueId, TabContentState::ON_HIDE,
+            preIndex, id, uniqueId);
+        if (lastTabChangeInfo_->lastFocusIndex.has_value()) {
+            preTabContentInfo.lastIndex = lastTabChangeInfo_->lastFocusIndex;
+        }
+        UIObserverHandler::GetInstance().NotifyTabChange(preTabContentInfo);
+        lastTabChangeInfo_->index = preIndex;
+        lastTabChangeInfo_->isShow = false;
+    }
+    auto nextTabContent = AceType::DynamicCast<TabContentNode>(swiperNode->GetChildByIndex(nextIndex));
+    if (nextTabContent && IsValidFireTabChange(lastTabChangeInfo_, nextIndex, true)) {
+        std::string nextTabContentId = nextTabContent->GetInspectorId().value_or("");
+        int32_t nextTabContentUniqueId = nextTabContent->GetId();
+        TabContentInfo nextTabContentInfo(nextTabContentId, nextTabContentUniqueId, TabContentState::ON_SHOW,
+            nextIndex, id, uniqueId);
+        // The first callback to observer, lastIndex has no value
+        if (lastTabChangeInfo_.has_value() && lastTabChangeInfo_->lastFocusIndex.has_value()) {
+            nextTabContentInfo.lastIndex = lastTabChangeInfo_->lastFocusIndex;
+        }
+        UIObserverHandler::GetInstance().NotifyTabChange(nextTabContentInfo);
+        if (!lastTabChangeInfo_.has_value()) {
+            lastTabChangeInfo_ = TabChangeInfo();
+        }
+        lastTabChangeInfo_->index = nextIndex;
+        lastTabChangeInfo_->isShow = true;
+        lastTabChangeInfo_->lastFocusIndex = nextIndex;
+    }
+}
+
+bool TabsPattern::IsValidFireTabChange(const std::optional<TabChangeInfo>& lastTabChangeInfo,
+    int32_t index, bool isShow)
+{
+    if (lastTabChangeInfo.has_value() && lastTabChangeInfo->index == index && lastTabChangeInfo->isShow == isShow) {
+        // TabChange event will not be sent when this event is the same as the last one.
+        return false;
+    }
+    return true;
+}
+
+/**
+ * @brief Check the conditions for sending tabchange.
+ *
+ * This function depend on the logic of the swiper component.
+ *
+ * @param isInit The state representing whether the tabs component is in an initialized state.
+ * @param targetIndex The index representing the desired index to be displayed.
+ * @param currentIndex The index representing the currently displayed index of swiper component.
+ * @param preIndex The index representing the previous displayed index of swiper component.
+ */
+bool TabsPattern::IsNeedFireTabChange(bool isInit,
+    int32_t targetIndex, int32_t currentIndex, int32_t preIndex)
+{
+    if (isInit) {
+        // TabChange event needs to be fired during initialization state.
+        return true;
+    }
+    if (targetIndex != currentIndex || currentIndex != preIndex) {
+        // TabChange event is fired by the swiper When these three variables are not equal.
+        return false;
+    }
+    return true;
+}
+
+void TabsPattern::HandleTabChangeWhenChildrenUpdated(
+    bool isInit, int32_t tabContentNum, int32_t targetIndex)
+{
+    if (tabContentNum <= 0) {
+        // Reset when there is no TabContent.
+        lastTabChangeInfo_.reset();
+        return;
+    }
+    if (lastTabChangeInfo_.has_value()) {
+        // TabChange event can not be fired when TabChange event have been fired.
+        return;
+    }
+    // Only called when tabs initialize or children updated.
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    int32_t currentIndex = swiperPattern->GetCurrentIndex();
+    int32_t preIndex = swiperPattern->GetPreIndex();
+    if (!IsNeedFireTabChange(isInit, targetIndex, currentIndex, preIndex)) {
+        return;
+    }
+    targetIndex = ((targetIndex >= 0) && (targetIndex < tabContentNum)) ? targetIndex : 0;
+    FireTabChangeCallback(-1, targetIndex);
 }
 
 void TabsPattern::RecordChangeEvent(int32_t index)
@@ -621,6 +744,7 @@ void TabsPattern::BeforeCreateLayoutWrapper()
             auto willShowIndex = tabsLayoutProperty->GetIndex().value_or(0);
             swiperPattern->FireSelectedEvent(-1, willShowIndex);
             swiperPattern->FireWillShowEvent(willShowIndex);
+            HandleTabChangeWhenChildrenUpdated(true, swiperNode->TotalChildCount(), willShowIndex);
         }
         isInit_ = false;
     }
@@ -637,6 +761,7 @@ void TabsPattern::BeforeCreateLayoutWrapper()
             index = 0;
         }
         UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, index);
+        HandleTabChangeWhenChildrenUpdated(false, tabContentNum, index);
     }
 }
 

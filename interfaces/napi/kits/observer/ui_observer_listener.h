@@ -54,6 +54,7 @@ public:
         const RefPtr<NG::NGGestureRecognizer>& current, const RefPtr<NG::FrameNode> frameNode,
         NG::GestureActionPhase phase);
     void OnTabContentStateChange(const NG::TabContentInfo& tabContentInfo);
+    void OnTabChange(const NG::TabContentInfo& tabContentInfo);
     void OnNodeRenderStateChange(NG::FrameNode* frameNode, NG::NodeRenderState nodeRenderState);
     void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
     void OnTextChangeEvent(const NG::TextChangeEventInfo& info);

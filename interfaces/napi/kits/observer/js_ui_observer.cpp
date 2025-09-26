@@ -95,6 +95,7 @@ constexpr char DRAW_COMMAND_SEND[] = "willDraw";
 constexpr char NAVDESTINATION_SWITCH[] = "navDestinationSwitch";
 constexpr char WILLCLICK_UPDATE[] = "willClick";
 constexpr char DIDCLICK_UPDATE[] = "didClick";
+constexpr char TAB_CHANGE[] = "tabChange";
 constexpr char TAB_CONTENT_STATE[] = "tabContentUpdate";
 constexpr char BEFORE_PAN_START[] = "beforePanStart";
 constexpr char BEFORE_PAN_END[] = "beforePanEnd";
@@ -382,6 +383,7 @@ ObserverProcess::ObserverProcess()
         { NAVDESTINATION_SWITCH, &ObserverProcess::ProcessNavDestinationSwitchRegister },
         { WILLCLICK_UPDATE, &ObserverProcess::ProcessWillClickRegister },
         { DIDCLICK_UPDATE, &ObserverProcess::ProcessDidClickRegister },
+        { TAB_CHANGE, &ObserverProcess::ProcessTabChangeRegister },
         { TAB_CONTENT_STATE, &ObserverProcess::ProcessTabContentStateRegister },
         { BEFORE_PAN_START, &ObserverProcess::ProcessBeforePanStartRegister },
         { AFTER_PAN_START, &ObserverProcess::ProcessAfterPanStartRegister },
@@ -401,6 +403,7 @@ ObserverProcess::ObserverProcess()
         { NAVDESTINATION_SWITCH, &ObserverProcess::ProcessNavDestinationSwitchUnRegister },
         { WILLCLICK_UPDATE, &ObserverProcess::ProcessWillClickUnRegister },
         { DIDCLICK_UPDATE, &ObserverProcess::ProcessDidClickUnRegister },
+        { TAB_CHANGE, &ObserverProcess::ProcessTabChangeUnRegister },
         { TAB_CONTENT_STATE, &ObserverProcess::ProcessTabContentStateUnRegister },
         { BEFORE_PAN_START, &ObserverProcess::ProcessBeforePanStartUnRegister },
         { AFTER_PAN_START, &ObserverProcess::ProcessAfterPanStartUnRegister },
@@ -1106,6 +1109,55 @@ napi_value ObserverProcess::ProcessTabContentStateUnRegister(napi_env env, napi_
         }
     }
 
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessTabChangeRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+    if (!isTabChangeFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetHandleTabChangeFunc(&UIObserver::HandleTabChange);
+        isTabChangeFuncSetted_ = true;
+    }
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
+        UIObserver::RegisterTabChangeCallback(listener);
+    }
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)
+        && MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        std::string id;
+        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+            UIObserver::RegisterTabChangeCallback(id, listener);
+        }
+    }
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessTabChangeUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+    if (argc == PARAM_SIZE_ONE) {
+        UIObserver::UnRegisterTabChangeCallback(nullptr);
+    }
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        UIObserver::UnRegisterTabChangeCallback(argv[PARAM_INDEX_ONE]);
+    }
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
+        std::string id;
+        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
+            UIObserver::UnRegisterTabChangeCallback(id, nullptr);
+        }
+    }
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)
+        && MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        std::string id;
+        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
+            UIObserver::UnRegisterTabChangeCallback(id, argv[PARAM_INDEX_TWO]);
+        }
+    }
     napi_value result = nullptr;
     return result;
 }

@@ -177,6 +177,18 @@ private:
     void SetSwiperPaddingAndBorder();
     void RecordChangeEvent(int32_t index);
     void FireTabContentStateCallback(int32_t oldIndex, int32_t nextIndex) const;
+    void FireTabChangeCallback(int32_t preIndex, int32_t nextIndex);
+    // Information on TabChange event
+    struct TabChangeInfo {
+        int32_t index = 0;
+        bool  isShow = false;
+        std::optional<int32_t> lastFocusIndex;
+    };
+    static bool IsValidFireTabChange(const std::optional<TabChangeInfo>& lastTabChangeInfo,
+        int32_t index, bool isShow);
+    static bool IsNeedFireTabChange(bool isInit,
+        int32_t targetIndex, int32_t currentIndex, int32_t preIndex);
+    void HandleTabChangeWhenChildrenUpdated(bool isInit, int32_t tabContentNum, int32_t targetIndex);
     void UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<FrameNode>& tabBarNode,
         const RefPtr<FrameNode>& swiperNode, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty);
     void InitFocusEvent();
@@ -198,6 +210,7 @@ private:
     std::function<bool(int32_t, int32_t)> callback_;
     bool interceptStatus_ = false;
     BarPosition barPosition_ = BarPosition::END; // default accessibilityZIndex is consistent with BarPosition::END
+    std::optional<TabChangeInfo> lastTabChangeInfo_;
 };
 
 } // namespace OHOS::Ace::NG
