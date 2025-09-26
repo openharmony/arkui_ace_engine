@@ -398,6 +398,23 @@ class TextMaxLinesModifier extends ModifierWithKey<number> {
   }
 }
 
+class TextMinLinesModifier extends ModifierWithKey<number | undefined> {
+  constructor(value: number | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textMinLines');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetMinLines(node);
+    } else {
+      getUINativeModule().text.setMinLines(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextLetterSpacingModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
@@ -1051,6 +1068,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   maxLines(value: number): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMaxLinesModifier.identity, TextMaxLinesModifier, value);
+    return this;
+  }
+  minLines(value: number): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextMinLinesModifier.identity, TextMinLinesModifier, value);
     return this;
   }
   decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): TextAttribute {

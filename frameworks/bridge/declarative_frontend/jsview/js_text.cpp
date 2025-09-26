@@ -93,6 +93,7 @@ const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMod
     TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
+constexpr uint32_t MIN_LINES = 0;
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -471,6 +472,21 @@ void JSText::SetMaxLines(const JSCallbackInfo& info)
         ParseJsInt32(args, value);
     }
     TextModel::GetInstance()->SetMaxLines(value);
+}
+
+void JSText::SetMinLines(const JSCallbackInfo& info)
+{
+    auto minLines = MIN_LINES;
+    if (info.Length() == 1) {
+        auto tmpInfo = info[0];
+        if (tmpInfo->IsNumber() && tmpInfo->ToNumber<int32_t>() > 0) {
+            minLines = tmpInfo->ToNumber<uint32_t>();
+        } else {
+            TextModel::GetInstance()->ResetMinLines();
+            return;
+        }
+    }
+    TextModel::GetInstance()->SetMinLines(minLines);
 }
 
 void JSText::SetTextIndent(const JSCallbackInfo& info)
@@ -1284,6 +1300,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("copyOption", &JSText::SetCopyOption);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
     JSClass<JSText>::StaticMethod("onCopy", &JSText::SetOnCopy);
+    JSClass<JSText>::StaticMethod("minLines", &JSText::SetMinLines);
     JSClass<JSText>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);

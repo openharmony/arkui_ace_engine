@@ -3001,6 +3001,8 @@ struct ArkUITextModifier {
     void (*resetTextCase)(ArkUINodeHandle node);
     void (*setTextMaxLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine);
     void (*resetTextMaxLines)(ArkUINodeHandle node);
+    void (*setTextMinLines)(ArkUINodeHandle node, ArkUI_Uint32 minLine);
+    void (*resetTextMinLines)(ArkUINodeHandle node);
     void (*setTextMinFontSize)(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit, void* minFontSizeRawPtr);
     void (*resetTextMinFontSize)(ArkUINodeHandle node);
     void (*setTextDraggable)(ArkUINodeHandle node, ArkUI_Uint32 draggable);
@@ -3052,6 +3054,7 @@ struct ArkUITextModifier {
     ArkUI_Int32 (*getTextTextCase)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextLetterSpacing)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextMaxLines)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextMinLines)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextAlign)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextContentAlign)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextTextOverflow)(ArkUINodeHandle node);

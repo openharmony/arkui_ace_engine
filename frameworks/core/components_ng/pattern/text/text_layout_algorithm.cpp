@@ -1118,4 +1118,11 @@ void TextLayoutAlgorithm::MeasureWidthLayoutCalPolicy(LayoutWrapper* layoutWrapp
 {
     MeasureWithFixAtIdealSize(layoutWrapper);
 }
+
+void TextLayoutAlgorithm::MeasureHeightLayoutCalPolicy(LayoutWrapper* layoutWrapper)
+{
+    if (cachedCalcContentConstraint_.has_value()) {
+        CalcHeightWithMinLines(textStyle_, layoutWrapper, cachedCalcContentConstraint_.value());
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -94,6 +94,7 @@ protected:
     bool IsNeedParagraphReLayout() const override;
     double GetIndentMaxWidth(double width) const override;
     void MeasureWidthLayoutCalPolicy(LayoutWrapper* layoutWrapper) override;
+    void MeasureHeightLayoutCalPolicy(LayoutWrapper* layoutWrapper) override;
 
 private:
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;

@@ -40,6 +40,7 @@ constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr TextCase DEFAULT_TEXT_CASE = TextCase::NORMAL;
 constexpr uint32_t DEFAULT_MAX_LINE = Infinity<uint32_t>();
+constexpr uint32_t DEFAULT_MIN_LINE = 0;
 constexpr bool DEFAULT_TEXT_DRAGGABLE = false;
 constexpr bool DEFAULT_TEXT_SENSITIVE = false;
 constexpr Dimension DEFAULT_MAX_FONT_SIZE;
@@ -499,6 +500,27 @@ void ResetTextMaxLines(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetMaxLines(frameNode, DEFAULT_MAX_LINE);
+}
+
+void SetTextMinLines(ArkUINodeHandle node, ArkUI_Uint32 minLine)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMinLines(frameNode, minLine);
+}
+
+int32_t GetTextMinLines(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_MIN_LINE);
+    return TextModelNG::GetMinLines(frameNode);
+}
+
+void ResetTextMinLines(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetMinLines(frameNode);
 }
 
 void SetTextMinFontSize(ArkUINodeHandle node, ArkUI_Float32 number, const ArkUI_Int32 unit, void* minFontSizeRawPtr)
@@ -2090,6 +2112,8 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextCase = ResetTextTextCase,
         .setTextMaxLines = SetTextMaxLines,
         .resetTextMaxLines = ResetTextMaxLines,
+        .setTextMinLines = SetTextMinLines,
+        .resetTextMinLines = ResetTextMinLines,
         .setTextMinFontSize = SetTextMinFontSize,
         .resetTextMinFontSize = ResetTextMinFontSize,
         .setTextDraggable = SetTextDraggable,
@@ -2137,6 +2161,7 @@ const ArkUITextModifier* GetTextModifier()
         .getTextTextCase = GetTextTextCase,
         .getTextLetterSpacing = GetTextLetterSpacing,
         .getTextMaxLines = GetTextMaxLines,
+        .getTextMinLines = GetTextMinLines,
         .getTextAlign = GetTextAlign,
         .getTextContentAlign = GetTextContentAlign,
         .getTextTextOverflow = GetTextTextOverflow,

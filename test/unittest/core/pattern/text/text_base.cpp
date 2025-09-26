@@ -206,6 +206,9 @@ RefPtr<FrameNode> TextBases::CreateTextParagraph(const std::u16string& createVal
     if (testProperty.maxLinesValue.has_value()) {
         textModel.SetMaxLines(testProperty.maxLinesValue.value());
     }
+    if (testProperty.minLinesValue.has_value()) {
+        textModel.SetMinLines(testProperty.minLinesValue.value());
+    }
     if (testProperty.lineHeightValue.has_value()) {
         textModel.SetLineHeight(testProperty.lineHeightValue.value());
     }

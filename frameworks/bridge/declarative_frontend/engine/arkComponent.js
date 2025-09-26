@@ -13884,6 +13884,22 @@ class TextMaxLinesModifier extends ModifierWithKey {
   }
 }
 TextMaxLinesModifier.identity = Symbol('textMaxLines');
+class TextMinLinesModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetMinLines(node);
+    } else {
+      getUINativeModule().text.setMinLines(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextMinLinesModifier.identity = Symbol('textMinLines');
 class TextLetterSpacingModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14588,6 +14604,10 @@ class ArkTextComponent extends ArkComponent {
   }
   maxLines(value) {
     modifierWithKey(this._modifiersWithKeys, TextMaxLinesModifier.identity, TextMaxLinesModifier, value);
+    return this;
+  }
+  minLines(value) {
+    modifierWithKey(this._modifiersWithKeys, TextMinLinesModifier.identity, TextMinLinesModifier, value);
     return this;
   }
   decoration(value) {
