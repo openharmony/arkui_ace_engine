@@ -562,6 +562,10 @@ public:
     // for getting the offset to window.
     OffsetF GetPaintRectOffsetNG(bool excludeSelf = false, bool checkBoundary = false) const;
 
+    OffsetF ConvertPoint(OffsetF position, const RefPtr<FrameNode>& parent);
+
+    friend RefPtr<FrameNode> FindSameParentComponent(const RefPtr<FrameNode>& nodeA, const RefPtr<FrameNode>& nodeB);
+
     bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
 
     RectF GetPaintRectToWindowWithTransform();

@@ -4015,6 +4015,57 @@ OffsetF FrameNode::GetPaintRectOffsetNG(bool excludeSelf, bool checkBoundary) co
     return OffsetF(point.GetX(), point.GetY());
 }
 
+OffsetF FrameNode::ConvertPoint(OffsetF position, const RefPtr<FrameNode>& targetNode)
+{
+    if (!targetNode || targetNode == this) {
+        return position;
+    }
+    std::vector<RefPtr<FrameNode>> historyNodes;
+    auto sameParentNode = FindSameParentComponent(Claim(this), targetNode);
+    auto targetNodeParent = targetNode;
+    while (targetNodeParent) {
+        if (targetNodeParent->CheckTopWindowBoundary()) {
+            break;
+        }
+        historyNodes.push_back(targetNodeParent);
+        if (targetNodeParent == sameParentNode) {
+            break;
+        }
+        targetNodeParent = targetNodeParent->GetAncestorNodeOfFrame(false);
+    }
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    Point point = Point(position.GetX(), position.GetY());
+    auto parent = Claim(this);
+    while (parent) {
+        if (parent->CheckTopWindowBoundary()) {
+            break;
+        }
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        auto parentMatrix = Matrix4::Invert(renderContext->GetRevertMatrix());
+        point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
+        point = parentMatrix * point;
+        if (parent == sameParentNode) {
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame(false);
+    }
+    Point targetNodePoint = point;
+    while (!historyNodes.empty()) {
+        auto node = historyNodes.back();
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        auto revertMatrix = renderContext->GetRevertMatrix();
+        targetNodePoint = revertMatrix * targetNodePoint;
+        targetNodePoint = targetNodePoint - Offset(parentOffset.GetX(), parentOffset.GetY());
+        historyNodes.pop_back();
+    }
+    return OffsetF(targetNodePoint.GetX(), targetNodePoint.GetY());
+}
+
 std::vector<Point> GetRectPoints(SizeF& frameSize)
 {
     std::vector<Point> pointList;
