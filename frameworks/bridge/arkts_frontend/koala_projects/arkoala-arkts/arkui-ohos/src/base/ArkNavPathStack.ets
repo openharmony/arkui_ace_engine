@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { InteropNativeModule } from '@koalaui/interop'
+import { InteropNativeModule, runtimeType, RuntimeType } from '@koalaui/interop'
 import { int32 } from "@koalaui/common"
 import { LaunchMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo } from "../component/navigation"
 import { NavExtender } from "#generated"
@@ -195,7 +195,8 @@ export class PathStackUtils {
 
     static pop(pathStack: NavPathStack, result?: boolean | undefined | Object, animated?: boolean): NavPathInfo | undefined
     {
-        if (result instanceof Object) {
+        const result_type = runtimeType(result)
+        if (result_type === RuntimeType.OBJECT) {
             PathStackUtils.result = result as Object
         }
         let animated_value: boolean = true
