@@ -1264,6 +1264,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteBackward001, TestSize.L
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->SetStyledString(mutableStr);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 9);
 
     /**
      * @tc.steps: step3. delete backward

@@ -279,13 +279,22 @@ void SetRichEditorOptions1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     RichEditorModelStatic::SetStyledStringMode(frameNode, true);
-    CHECK_NULL_VOID(options->controller);
+    Ark_RichEditorStyledStringController styledStringControllerPeer = options->controller;
+    CHECK_NULL_VOID(styledStringControllerPeer);
+
     // obtain the internal Styled String RichEditorController
     RefPtr<RichEditorBaseControllerBase> controller =
         RichEditorModelStatic::GetRichEditorStyledStringController(frameNode);
     CHECK_NULL_VOID(controller);
+    styledStringControllerPeer->AddTargetController(controller);
 
-    options->controller->AddTargetController(controller);
+    // apply styledString cache
+    auto styledStringCache = styledStringControllerPeer->GetStyledStringCache();
+    CHECK_NULL_VOID(styledStringCache);
+    auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
+    CHECK_NULL_VOID(styledStringController);
+    styledStringController->SetStyledString(styledStringCache);
+    styledStringControllerPeer->SetStyledStringCache(nullptr);
 }
 } // RichEditorInterfaceModifier
 namespace RichEditorAttributeModifier {
