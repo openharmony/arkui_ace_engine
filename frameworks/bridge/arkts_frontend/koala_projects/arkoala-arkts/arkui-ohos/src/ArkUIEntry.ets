@@ -506,6 +506,7 @@ export class Application {
         registerNativeModuleLibraryName('TestNativeModule', 'ArkoalaNative_ark.z');
         registerNativeModuleLibraryName('ArkNativeAni', 'arkoala_native_ani');
         wrapSystemApiHandlerCallback();
+        loadNativeModuleLibrary('InteropNativeModule');
         loadNativeModuleLibrary('ArkNativeAni');
     }
 }
