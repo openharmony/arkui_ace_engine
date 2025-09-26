@@ -37,10 +37,10 @@ void HandleConfirmImpl(Ark_SslErrorHandler peer)
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->HandleConfirm();
 }
-void HandleCancelImpl(Ark_SslErrorHandler peer)
+void HandleCancelImpl(Ark_SslErrorHandler peer, const Ark_Boolean abortLoading)
 {
     CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->HandleCancel();
+    peer->handler->HandleCancel(abortLoading);
 }
 } // SslErrorHandlerAccessor
 const GENERATED_ArkUISslErrorHandlerAccessor* GetSslErrorHandlerAccessor()

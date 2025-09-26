@@ -43626,11 +43626,11 @@ void impl_SslErrorHandler_handleConfirm(Ark_NativePointer thisPtr) {
         GetAccessors()->getSslErrorHandlerAccessor()->handleConfirm(self);
 }
 KOALA_INTEROP_DIRECT_V1(SslErrorHandler_handleConfirm, Ark_NativePointer)
-void impl_SslErrorHandler_handleCancel(Ark_NativePointer thisPtr) {
+void impl_SslErrorHandler_handleCancel(Ark_NativePointer thisPtr, const Ark_Boolean abortLoading) {
         Ark_SslErrorHandler self = reinterpret_cast<Ark_SslErrorHandler>(thisPtr);
-        GetAccessors()->getSslErrorHandlerAccessor()->handleCancel(self);
+        GetAccessors()->getSslErrorHandlerAccessor()->handleCancel(self, abortLoading);
 }
-KOALA_INTEROP_DIRECT_V1(SslErrorHandler_handleCancel, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_V2(SslErrorHandler_handleCancel, Ark_NativePointer, Ark_Boolean)
 Ark_NativePointer impl_ClientAuthenticationHandler_ctor() {
         return GetAccessors()->getClientAuthenticationHandlerAccessor()->ctor();
 }
