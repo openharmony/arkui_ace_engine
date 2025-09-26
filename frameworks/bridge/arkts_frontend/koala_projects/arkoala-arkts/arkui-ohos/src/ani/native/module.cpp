@@ -68,12 +68,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     std::array staticMethods = {
         ani_native_function {
             "_Extractors_FromImagePixelMapPtr",
-            "J:L@ohos/multimedia/image/image/PixelMap;",
+            "l:C{@ohos.multimedia.image.image.PixelMap}",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromImagePixelMapPtr)
         },
         ani_native_function {
             "_Extractors_ToImagePixelMapPtr",
-            "L@ohos/multimedia/image/image/PixelMap;:J",
+            "C{@ohos.multimedia.image.image.PixelMap}:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToImagePixelMapPtr)
         },
         ani_native_function {
@@ -1245,7 +1245,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_ForEach_FinishRender",
-            "J:V",
+            "l:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ForEachFinishRender)
         },
         ani_native_function {
