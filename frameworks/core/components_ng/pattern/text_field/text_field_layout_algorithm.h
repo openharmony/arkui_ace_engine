@@ -21,6 +21,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
@@ -118,7 +119,9 @@ protected:
     float GetTextFieldDefaultHeight();
 
     void ConstructTextStyles(
-        const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::u16string& textContent, bool& showPlaceHolder);
+        LayoutWrapper* layoutWrapper, TextStyle& textStyle, std::u16string& textContent, bool& showPlaceHolder);
+    void ConstructTextStylesAppend(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle,
+        const RefPtr<TextFieldPattern>& pattern, bool showPlaceHolder);
     LayoutConstraintF CalculateContentMaxSizeWithCalculateConstraint(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
@@ -131,10 +134,14 @@ protected:
         RefPtr<Paragraph>& paragraph, float removeValue = 0.0f);
     SizeF GetConstraintSize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     std::optional<SizeF> InlineMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    SizeF PlaceHolderMeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth = 0.0f);
+    SizeF PlaceHolderMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    SizeF StyledPlaceHolderMeasureContent(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool adapter = false);
+    void StyledPlaceHolderCounterNodeMeasure(const LayoutConstraintF& textContentConstraint,
+        LayoutWrapper* layoutWrapper, const RefPtr<TextFieldPattern>& textFieldPattern, SizeF& conetentSize);
     SizeF TextInputMeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth);
+    void StyledPlaceHodlerLayout(LayoutWrapper* layoutWrapper, const RefPtr<TextFieldPattern>& pattern);
     SizeF TextAreaMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     bool AddAdaptFontSizeAndAnimations(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
@@ -150,6 +157,8 @@ protected:
 
     LayoutConstraintF CalculateFrameSizeConstraint(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    bool IsStyledPlaceholder(const RefPtr<TextFieldPattern>& pattern);
+    void UpdateStyledPlaceholderMaxlines(uint32_t maxLines, const RefPtr<TextFieldPattern>& pattern);
 
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> inlineParagraph_;
@@ -172,6 +181,17 @@ protected:
     bool isPlaceHolderOverSize_ = false;
 
 private:
+    void ConstructStyledPlaceholderStyle(
+        LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& frameNode, const RefPtr<TextFieldTheme>& theme);
+    void UpdateStyledPlaceholderProperty(LayoutWrapper* layoutWrapper,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
+    void UpdateStyledPlaceholderHeightAdaptivePolicy(const RefPtr<TextFieldPattern>& pattern);
+    void PlaceholderRemoveFromParent(const RefPtr<TextFieldPattern>& pattern);
+    void StylePlaceHolderMeasure(LayoutWrapper* layoutWrapper, const LayoutConstraintF& textContentConstraint,
+        SizeF& conetentSize);
+    void StylePlaceHolderReMeasure(LayoutWrapper* layoutWrapper, LayoutConstraintF textContentConstraint,
+        float counterNodeHeight, SizeF& conetentSize);
     void InlineFocusMeasure(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         double& safeBoundary, float& contentWidth);
     static void UpdateTextStyleSetTextColor(const RefPtr<FrameNode>& frameNode,
@@ -195,6 +215,8 @@ private:
     void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
     bool IsInlineFocusAdaptExceedLimit(const SizeF& maxSize);
     bool IsInlineFocusAdaptMinExceedLimit(const SizeF& maxSize, uint32_t maxViewLines);
+    void CalcInlineStatusAdvance(LayoutWrapper* layoutWrapper, const LayoutConstraintF& contentConstraint,
+        const RefPtr<TextFieldPattern>& pattern, double safeBoundary, float contentWidth);
     float CalculateContentWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         float imageWidth);
     float CalculateContentHeight(const LayoutConstraintF& contentConstraint);

@@ -87,6 +87,10 @@ struct TextConfig;
 #endif
 #endif
 
+namespace OHOS::Ace {
+class SpanString;
+}
+
 namespace OHOS::Ace::NG {
 
 enum class FocuseIndex { TEXT = 0, CANCEL, UNIT };
@@ -769,7 +773,7 @@ public:
         return connection_;
 #endif
     }
-    float PreferredLineHeight(bool isAlgorithmMeasure = false);
+    float PreferredLineHeight(bool isAlgorithmMeasure = false, bool isStyelPlaceholder = false);
 
     void SearchRequestKeyboard();
 
@@ -1304,6 +1308,11 @@ public:
         return cleanNodeResponseArea_;
     }
 
+    const RefPtr<TextInputResponseArea>& GetPlaceholderResponseArea()
+    {
+        return placeholderResponseArea_;
+    }
+
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
     std::optional<bool> IsShowPasswordText() const;
@@ -1742,6 +1751,7 @@ public:
     {
         contentScroller_.scrollingCallback = std::move(callback);
     }
+    void SetPlaceholderStyledString(const RefPtr<SpanString>& value);
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1826,6 +1836,7 @@ private:
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
     bool HasStateStyle(UIState state) const;
+    bool IsStyledPlaceholder();
 
     void OnTextInputScroll(float offset);
     void OnTextAreaScroll(float offset);
@@ -2209,6 +2220,7 @@ private:
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
     RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
+    RefPtr<TextInputResponseArea> placeholderResponseArea_;
     std::string lastAutoFillTextValue_;
     std::function<void()> processOverlayDelayTask_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;

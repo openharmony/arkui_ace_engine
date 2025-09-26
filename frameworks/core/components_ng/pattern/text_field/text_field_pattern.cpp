@@ -580,6 +580,30 @@ void TextFieldPattern::BeforeCreateLayoutWrapper()
     selectOverlay_->MarkOverlayDirty();
 }
 
+void TextFieldPattern::SetPlaceholderStyledString(const RefPtr<SpanString>& value)
+{
+    if (!placeholderResponseArea_) {
+        placeholderResponseArea_ = AceType::MakeRefPtr<PlaceholderResponseArea>(WeakClaim(this));
+        placeholderResponseArea_->InitResponseArea();
+    }
+    CHECK_NULL_VOID(placeholderResponseArea_);
+    auto placeholder = DynamicCast<PlaceholderResponseArea>(placeholderResponseArea_);
+    CHECK_NULL_VOID(placeholder);
+    placeholder->SetStyleString(value);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+bool TextFieldPattern::IsStyledPlaceholder()
+{
+    CHECK_NULL_RETURN(placeholderResponseArea_, false);
+    auto textNode = placeholderResponseArea_->GetFrameNode();
+    CHECK_NULL_RETURN(textNode, false);
+    auto value = textNode->GetParent() ? true : false;
+    return value;
+}
+
 bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
@@ -598,6 +622,8 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         skipUpdateParagraph = ShouldSkipUpdateParagraph();
         paragraph_ = paragraph;
         paragraphWidth = std::max(paragraph->GetLongestLine(), 0.0f);
+    } else if (IsStyledPlaceholder()) {
+        paragraph_ = nullptr;
     }
     UpdateParagraphForDragNode(skipUpdateParagraph);
     auto textRect = textFieldLayoutAlgorithm->GetTextRect();
@@ -5422,9 +5448,9 @@ float TextFieldPattern::FontSizeConvertToPx(const Dimension& fontSize)
     return fontSize.ConvertToPx();
 }
 
-float TextFieldPattern::PreferredLineHeight(bool isAlgorithmMeasure)
+float TextFieldPattern::PreferredLineHeight(bool isAlgorithmMeasure, bool isStyelPlaceholder)
 {
-    return PreferredTextHeight(contentController_->IsEmpty(), isAlgorithmMeasure);
+    return PreferredTextHeight(contentController_->IsEmpty() && !isStyelPlaceholder, isAlgorithmMeasure);
 }
 
 void TextFieldPattern::OnCursorMoveDone(TextAffinity textAffinity, std::optional<Offset> offset)
@@ -8311,13 +8337,16 @@ void TextFieldPattern::DumpAdvanceInfo()
                                        .append(", height:")
                                        .append(std::to_string(cursorInfo.height)));
 #endif
-    DumpLog::GetInstance().AddDesc(std::string("textRect: ").append(contentRect_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("textRect: ").append(textRect_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("contentRect: ").append(contentRect_.ToString()));
 }
 
 void TextFieldPattern::DumpPlaceHolderInfo()
 {
-    DumpLog::GetInstance().AddDesc(std::string("placeholder: ").append(UtfUtils::Str16DebugToStr8(GetPlaceHolder())));
+    DumpLog::GetInstance().AddDesc(std::string("placeholder: ")
+                                       .append(UtfUtils::Str16DebugToStr8(GetPlaceHolder()))
+                                       .append(" [IsStyledPlaceholder:")
+                                       .append(IsStyledPlaceholder() ? "true]" : "false]"));
     DumpLog::GetInstance().AddDesc(std::string("placeholderColor: ").append(GetPlaceholderColor()));
     DumpLog::GetInstance().AddDesc(std::string("placeholderFont: ").append(GetPlaceholderFont()));
 }

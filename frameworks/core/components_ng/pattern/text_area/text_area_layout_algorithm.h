@@ -37,6 +37,8 @@ protected:
 private:
     void CalcMeasureContentWithMinLines(
         std::optional<SizeF>& size, LayoutWrapper* layoutWrapper, const LayoutConstraintF& contentConstraint);
+    void StyledPlaceHolderConstraintWithMinLines(
+        LayoutWrapper* layoutWrapper, const RefPtr<TextFieldPattern>& pattern, float& contentHeight);
     std::optional<SizeF> ReMeasureContentForPlaceholder(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper, TextStyle& textStyle, LayoutConstraintF& textFieldContentConstraint);
 };

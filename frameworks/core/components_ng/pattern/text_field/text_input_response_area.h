@@ -240,6 +240,26 @@ private:
     float cancelHoverSize_ = 0.0f;
     float hoverIconPadding_ = 0.0f;
 };
+
+class PlaceholderResponseArea : public TextInputResponseArea {
+    DECLARE_ACE_TYPE(PlaceholderResponseArea, TextInputResponseArea);
+
+public:
+    PlaceholderResponseArea(const WeakPtr<Pattern>& hostPattern) : TextInputResponseArea(hostPattern) {}
+    ~PlaceholderResponseArea() = default;
+    void InitResponseArea() override;
+    void SetStyleString(const RefPtr<SpanString>& value);
+    void PlacehodlerMountToParent();
+    void PlaceholderRemoveFromParent();
+    SizeF MeasurePlaceholder(LayoutWrapper* layoutWrapper, int32_t index, const LayoutConstraintF& contentConstraint);
+    SizeF Measure(LayoutWrapper* layoutWrapper, int32_t index) override {return SizeF();}
+    void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
+    void Layout(LayoutWrapper* layoutWrapper, int32_t index, OffsetF textRectOffset);
+    const RefPtr<FrameNode> GetFrameNode() override;
+
+private:
+    RefPtr<FrameNode> placeholderNode_;
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_INPUT_TEXT_INPUT_RESPONSE_AREA_H

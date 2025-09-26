@@ -263,6 +263,11 @@ void JSSearch::Create(const JSCallbackInfo& info)
     auto controller = SearchModel::GetInstance()->Create(key, tip, src);
     if (jsController) {
         jsController->SetController(controller);
+        auto styledString = jsController->GetPlaceholderStyledString();
+        if (styledString && controller) {
+            controller->SetPlaceholderStyledString(styledString);
+            jsController->ClearPlaceholderStyledString();
+        }
     }
     SearchModel::GetInstance()->SetFocusable(true);
     SearchModel::GetInstance()->SetFocusNode(true);
