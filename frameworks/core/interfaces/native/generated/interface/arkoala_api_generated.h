@@ -21309,10 +21309,6 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
                         const Opt_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void* value);
     void (*setMode)(Ark_NativePointer node,
                     const Opt_NavDestinationMode* value);
-    void (*setBackButtonIcon0)(Ark_NativePointer node,
-                               const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* value);
-    void (*setMenus0)(Ark_NativePointer node,
-                      const Opt_Union_Array_NavigationMenuItem_CustomBuilder* value);
     void (*setOnReady)(Ark_NativePointer node,
                        const Opt_Callback_NavDestinationContext_Void* value);
     void (*setOnWillAppear)(Ark_NativePointer node,
@@ -21351,12 +21347,12 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
     void (*setHideTitleBar1)(Ark_NativePointer node,
                              const Opt_Boolean* hide,
                              const Opt_Boolean* animated);
-    void (*setBackButtonIcon1)(Ark_NativePointer node,
-                               const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* icon,
-                               const Opt_ResourceStr* accessibilityText);
-    void (*setMenus1)(Ark_NativePointer node,
-                      const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
-                      const Opt_NavigationMenuOptions* options);
+    void (*setBackButtonIcon)(Ark_NativePointer node,
+                              const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* icon,
+                              const Opt_ResourceStr* accessibilityText);
+    void (*setMenus)(Ark_NativePointer node,
+                     const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
+                     const Opt_NavigationMenuOptions* options);
     void (*setToolbarConfiguration)(Ark_NativePointer node,
                                     const Opt_Union_Array_ToolbarItem_CustomBuilder* toolbarParam,
                                     const Opt_NavigationToolbarOptions* options);
@@ -21386,8 +21382,6 @@ typedef struct GENERATED_ArkUINavigationModifier {
                                const Opt_Dimension* value);
     void (*setMode)(Ark_NativePointer node,
                     const Opt_NavigationMode* value);
-    void (*setBackButtonIcon0)(Ark_NativePointer node,
-                               const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* value);
     void (*setHideNavBar)(Ark_NativePointer node,
                           const Opt_Boolean* value);
     void (*setHideTitleBar0)(Ark_NativePointer node,
@@ -21396,8 +21390,6 @@ typedef struct GENERATED_ArkUINavigationModifier {
                               const Opt_Boolean* value);
     void (*setTitleMode)(Ark_NativePointer node,
                          const Opt_NavigationTitleMode* value);
-    void (*setMenus0)(Ark_NativePointer node,
-                      const Opt_Union_Array_NavigationMenuItem_CustomBuilder* value);
     void (*setHideToolBar0)(Ark_NativePointer node,
                             const Opt_Boolean* value);
     void (*setEnableToolBarAdaptation)(Ark_NativePointer node,
@@ -21420,18 +21412,18 @@ typedef struct GENERATED_ArkUINavigationModifier {
                              const Opt_Boolean* value);
     void (*setEnableModeChangeAnimation)(Ark_NativePointer node,
                                          const Opt_Boolean* value);
-    void (*setBackButtonIcon1)(Ark_NativePointer node,
-                               const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* icon,
-                               const Opt_ResourceStr* accessibilityText);
+    void (*setBackButtonIcon)(Ark_NativePointer node,
+                              const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* icon,
+                              const Opt_ResourceStr* accessibilityText);
     void (*setTitle)(Ark_NativePointer node,
                      const Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle* value,
                      const Opt_NavigationTitleOptions* options);
     void (*setHideTitleBar1)(Ark_NativePointer node,
                              const Opt_Boolean* hide,
                              const Opt_Boolean* animated);
-    void (*setMenus1)(Ark_NativePointer node,
-                      const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
-                      const Opt_NavigationMenuOptions* options);
+    void (*setMenus)(Ark_NativePointer node,
+                     const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
+                     const Opt_NavigationMenuOptions* options);
     void (*setToolbarConfiguration)(Ark_NativePointer node,
                                     const Opt_Union_Array_ToolbarItem_CustomBuilder* value,
                                     const Opt_NavigationToolbarOptions* options);
@@ -22163,14 +22155,10 @@ typedef struct GENERATED_ArkUISideBarContainerModifier {
                         const Opt_Callback_Boolean_Void* value);
     void (*setSideBarWidth)(Ark_NativePointer node,
                             const Opt_Union_Length_Bindable* value);
-    void (*setMinSideBarWidth0)(Ark_NativePointer node,
-                                const Opt_Number* value);
-    void (*setMaxSideBarWidth0)(Ark_NativePointer node,
-                                const Opt_Number* value);
-    void (*setMinSideBarWidth1)(Ark_NativePointer node,
-                                const Opt_Length* value);
-    void (*setMaxSideBarWidth1)(Ark_NativePointer node,
-                                const Opt_Length* value);
+    void (*setMinSideBarWidth)(Ark_NativePointer node,
+                               const Opt_Length* value);
+    void (*setMaxSideBarWidth)(Ark_NativePointer node,
+                               const Opt_Length* value);
     void (*setAutoHide)(Ark_NativePointer node,
                         const Opt_Boolean* value);
     void (*setSideBarPosition)(Ark_NativePointer node,

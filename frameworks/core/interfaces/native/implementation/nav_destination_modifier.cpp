@@ -123,74 +123,6 @@ void SetModeImpl(Ark_NativePointer node,
     auto mode = Converter::OptConvertPtr<NavDestinationMode>(value).value_or(NavDestinationMode::STANDARD);
     NavDestinationModelStatic::SetNavDestinationMode(frameNode, mode);
 }
-void SetBackButtonIcon0Impl(Ark_NativePointer node,
-                            const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    std::string src;
-    std::string bundleName;
-    std::string moduleName;
-    std::vector<std::string> nameList;
-    NG::ImageOption imageOption;
-    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
-    RefPtr<PixelMap> pixMap = nullptr;
-    bool isValidImage = false;
-    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto valueType = Converter::Convert<int32_t>(value->value.selector);
-        const uint32_t stringResourceType = 0;
-        const uint32_t pixelType = 1;
-        const uint32_t symbolType = 2;
-        switch (valueType) {
-            case stringResourceType: {
-                // src = Converter::Convert<std::string>(value->value.value0);
-                auto strType = Converter::Convert<int32_t>(value->value.value0.selector);
-                if (strType == 0) {
-                    src = Converter::Convert<std::string>(value->value.value0.value0);
-                } else if (strType == 1) {
-                    Converter::ResourceConverter converter(value->value.value0.value1);
-                    src = converter.ToString().value_or("");
-                }
-                imageOption.noPixMap = true;
-                imageOption.isValidImage = true;
-                break;
-            }
-            case pixelType: {
-                pixMap = Converter::OptConvert<RefPtr<PixelMap>>(value->value.value1).value_or(nullptr);
-                break;
-            }
-            case symbolType: {
-                break;
-            }
-            default:
-                break;
-        }
-    }
-    nameList.emplace_back(bundleName);
-    nameList.emplace_back(moduleName);
-    NavDestinationModelStatic::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap, nameList);
-}
-void SetMenus0Impl(Ark_NativePointer node,
-                   const Opt_Union_Array_NavigationMenuItem_CustomBuilder* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    NG::NavigationMenuOptions options;
-    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto typeValue = value->value.selector;
-        if (typeValue == 0) {
-            auto menuItemArray = Converter::Convert<std::vector<NG::BarItem>>(value->value.value0);
-            NavDestinationModelStatic::SetMenuItems(frameNode, std::move(menuItemArray));
-        } else if (typeValue == 1) {
-            CallbackHelper(value->value.value1).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-                NavDestinationModelStatic::SetCustomMenu(frameNode, std::move(uiNode));
-            }, node);
-        }
-    }
-    NavDestinationModelStatic::SetMenuOptions(frameNode, std::move(options));
-}
 void SetOnReadyImpl(Ark_NativePointer node,
                     const Opt_Callback_NavDestinationContext_Void* value)
 {
@@ -523,7 +455,7 @@ void SetHideTitleBar1Impl(Ark_NativePointer node,
     NavDestinationModelStatic::SetHideTitleBar(frameNode, Converter::OptConvertPtr<bool>(hide).value_or(false),
         Converter::OptConvertPtr<bool>(animated).value_or(false));
 }
-void SetBackButtonIcon1Impl(Ark_NativePointer node,
+void SetBackButtonIconImpl(Ark_NativePointer node,
                             const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* icon,
                             const Opt_ResourceStr* accessibilityText)
 {
@@ -584,7 +516,7 @@ void SetBackButtonIcon1Impl(Ark_NativePointer node,
     NavDestinationModelStatic::SetBackButtonIcon(
         frameNode, iconSymbol, src, imageOption, pixMap, nameList, true, backButtonAccessibilityText);
 }
-void SetMenus1Impl(Ark_NativePointer node,
+void SetMenusImpl(Ark_NativePointer node,
                    const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
                    const Opt_NavigationMenuOptions* options)
 {
@@ -735,8 +667,6 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
         NavDestinationAttributeModifier::SetOnBackPressedImpl,
         NavDestinationAttributeModifier::SetOnResultImpl,
         NavDestinationAttributeModifier::SetModeImpl,
-        NavDestinationAttributeModifier::SetBackButtonIcon0Impl,
-        NavDestinationAttributeModifier::SetMenus0Impl,
         NavDestinationAttributeModifier::SetOnReadyImpl,
         NavDestinationAttributeModifier::SetOnWillAppearImpl,
         NavDestinationAttributeModifier::SetOnWillDisappearImpl,
@@ -755,8 +685,8 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
         NavDestinationAttributeModifier::SetEnableNavigationIndicatorImpl,
         NavDestinationAttributeModifier::SetTitleImpl,
         NavDestinationAttributeModifier::SetHideTitleBar1Impl,
-        NavDestinationAttributeModifier::SetBackButtonIcon1Impl,
-        NavDestinationAttributeModifier::SetMenus1Impl,
+        NavDestinationAttributeModifier::SetBackButtonIconImpl,
+        NavDestinationAttributeModifier::SetMenusImpl,
         NavDestinationAttributeModifier::SetToolbarConfigurationImpl,
         NavDestinationAttributeModifier::SetHideToolBarImpl,
         NavDestinationAttributeModifier::SetIgnoreLayoutSafeAreaImpl,
