@@ -217,6 +217,8 @@ public:
     static void OnLoadFinished(const JSCallbackInfo& args);
     static void GestureFocusMode(int32_t gestureFocusMode);
     static void RotateRenderEffect(int32_t webRotateEffect);
+    static void OnDetectedBlankScreen(const JSCallbackInfo& args);
+    static void BlankScreenDetectionConfig(const JSCallbackInfo& args);
     static void OnPdfScrollAtBottom(const JSCallbackInfo& args);
     static void OnPdfLoadEvent(const JSCallbackInfo& args);
     static void OnSafeBrowsingCheckFinish(const JSCallbackInfo& args);
@@ -230,6 +232,9 @@ protected:
 private:
     static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems,
         ScriptItemsByOrder& scriptItemsByOrder);
+    static void GetDoubleVectorFromJSArray(const JSRef<JSArray>& jsArray, std::vector<double>& params);
+    static void GetBlankScreenDetectionMethodVectorFromJSArray(
+        const JSRef<JSArray>& jsArray, std::vector<int32_t>& params);
     static bool CheckNestedScrollMode(const int32_t& modeValue);
 };
 } // namespace OHOS::Ace::Framework

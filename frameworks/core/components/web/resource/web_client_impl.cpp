@@ -1630,6 +1630,15 @@ void WebClientImpl::OnRefreshAccessedHistoryV2(const std::string& url, bool isRe
     delegate->OnRefreshAccessedHistory(url, isReload, isMainFrame);
 }
 
+void WebClientImpl::OnDetectedBlankScreen(
+    const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnDetectedBlankScreen(url, blankScreenReason, detectedContentfulNodesCount);
+}
+
 void WebClientImpl::OnRemoveBlanklessFrameWithAnimation(int delayTime)
 {
     auto delegate = webDelegate_.Upgrade();

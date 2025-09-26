@@ -252,6 +252,9 @@ public:
     void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetGestureFocusMode(GestureFocusMode mode) override;
     void SetRotateRenderEffect(WebRotateEffect effect) override;
+    void SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo *info)> &&jsCallback) override;
+    void SetBlankScreenDetectionConfig(bool enable, const std::vector<double> &detectionTiming,
+        const std::vector<int32_t> &detectionMethods, int32_t contentfulNodesCountThreshold) override;
     void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetForceEnableZoom(bool isEnabled) override;

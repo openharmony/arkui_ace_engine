@@ -78,6 +78,10 @@ enum class WebLayoutMode {
     FIT_CONTENT,
 };
 
+enum class BlankScreenDetectionMethod : int32_t {
+    DETECTION_CONTENTFUL_NODES_SEVENTEEN = 0,
+};
+
 enum class WebKeyboardAvoidMode : int32_t {
     RESIZE_VISUAL = 0,
     RESIZE_CONTENT,
@@ -131,6 +135,21 @@ struct WebPreviewSelectionMenuParam {
         : type(_type), responseType(_responseType), menuBuilder(_menuBuilder), previewBuilder(_previewBuilder),
           menuParam(_menuParam)
     {}
+};
+
+struct BlankScreenDetectionConfig {
+    bool enable;
+    std::vector<double> detectionTiming;
+    std::vector<int32_t> detectionMethods;
+    int32_t contentfulNodesCountThreshold;
+    bool operator==(const BlankScreenDetectionConfig& config) const
+    {
+        if (enable == config.enable && contentfulNodesCountThreshold == config.contentfulNodesCountThreshold &&
+            detectionTiming == config.detectionTiming && detectionMethods == config.detectionMethods) {
+            return true;
+        }
+        return false;
+    }
 };
 
 struct WebMenuOptionsParam {

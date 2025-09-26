@@ -4537,6 +4537,12 @@ let IndicatorType;
   IndicatorType[IndicatorType.BACKGROUND = 1] = 'BACKGROUND';
 })(IndicatorType || (IndicatorType = {}));
 
+let BlankScreenDetectionMethod;
+(function (BlankScreenDetectionMethod) {
+  BlankScreenDetectionMethod[BlankScreenDetectionMethod.DETECTION_CONTENTFUL_NODES_SEVENTEEN = 0] =
+    'DETECTION_CONTENTFUL_NODES_SEVENTEEN';
+})(BlankScreenDetectionMethod || (BlankScreenDetectionMethod = {}));
+
 let ListItemSwipeActionDirection;
 (function (ListItemSwipeActionDirection) {
   ListItemSwipeActionDirection[ListItemSwipeActionDirection.START = 0] = 'START';

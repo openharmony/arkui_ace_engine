@@ -4071,6 +4071,12 @@ void WebPattern::OnModifyDone()
         if (GetInitialScale()) {
             delegate_->UpdateInitialScale(GetInitialScale().value());
         }
+        if (GetBlankScreenDetectionConfig()) {
+            delegate_->UpdateBlankScreenDetectionConfig(GetBlankScreenDetectionConfig().value().enable,
+                GetBlankScreenDetectionConfig().value().detectionTiming,
+                GetBlankScreenDetectionConfig().value().detectionMethods,
+                GetBlankScreenDetectionConfig().value().contentfulNodesCountThreshold);
+        }
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
@@ -4887,6 +4893,14 @@ void  WebPattern::OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMen
                 action(selectStr);
             }
         };
+    }
+}
+
+void WebPattern::OnBlankScreenDetectionConfigUpdate(const BlankScreenDetectionConfig& config)
+{
+    if (delegate_) {
+        delegate_->UpdateBlankScreenDetectionConfig(
+            config.enable, config.detectionTiming, config.detectionMethods, config.contentfulNodesCountThreshold);
     }
 }
 

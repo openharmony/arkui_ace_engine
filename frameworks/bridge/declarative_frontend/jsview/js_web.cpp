@@ -78,6 +78,7 @@ const int32_t PARAM_TWO = 2;
 constexpr Dimension PREVIEW_MENU_MARGIN_LEFT = 16.0_vp;
 constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
 const int32_t WEB_AUDIO_SESSION_TYPE_AMBIENT = 3;
+const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0f, 3.0f, 5.0f };
 
 void EraseSpace(std::string& data)
 {
@@ -2287,6 +2288,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onPdfScrollAtBottom", &JSWeb::OnPdfScrollAtBottom);
     JSClass<JSWeb>::StaticMethod("onPdfLoadEvent", &JSWeb::OnPdfLoadEvent);
     JSClass<JSWeb>::StaticMethod("forceEnableZoom", &JSWeb::SetForceEnableZoom);
+    JSClass<JSWeb>::StaticMethod("onDetectedBlankScreen", &JSWeb::OnDetectedBlankScreen);
+    JSClass<JSWeb>::StaticMethod("blankScreenDetectionConfig", &JSWeb::BlankScreenDetectionConfig);
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckFinish", &JSWeb::OnSafeBrowsingCheckFinish);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2424,6 +2427,19 @@ JSRef<JSVal> PdfLoadEventToJSValue(const PdfLoadEvent& eventInfo)
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("result", eventInfo.GetResult());
     obj->SetProperty("url", eventInfo.GetUrl());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> DetectedBlankScreenEventToJSValue(const DetectedBlankScreenEvent &eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetUrl());
+    obj->SetProperty("blankScreenReason", eventInfo.GetBlankScreenReason());
+    if (eventInfo.GetDetectedContentfulNodesCount()) {
+        JSRef<JSObject> detailsObj = JSRef<JSObject>::New();
+        detailsObj->SetProperty("detectedContentfulNodesCount", eventInfo.GetDetectedContentfulNodesCount());
+        obj->SetPropertyObject("blankScreenDetails", detailsObj);
+    }
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -6755,6 +6771,115 @@ void JSWeb::SetForceEnableZoom(const JSCallbackInfo& args)
     }
     bool enabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetForceEnableZoom(enabled);
+}
+
+void JSWeb::OnDetectedBlankScreen(const JSCallbackInfo& args)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnDetectedBlankScreen, callback set");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DetectedBlankScreenEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), DetectedBlankScreenEventToJSValue);
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        CHECK_NULL_VOID(func);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<DetectedBlankScreenEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetOnDetectedBlankScreen(jsCallback);
+}
+
+void JSWeb::GetDoubleVectorFromJSArray(const JSRef<JSArray>& jsArray, std::vector<double>& params)
+{
+    int length = static_cast<int>(jsArray->Length());
+    for (int i = 0; i < length; i++) {
+        JSRef<JSVal> jsValue = jsArray->GetValueAt(i);
+        if (!jsValue->IsNumber()) {
+            continue;
+        }
+        double number = jsValue->ToNumber<double>();
+        if (number <= 0.0f) {
+            continue;
+        }
+        params.emplace_back(number);
+    }
+}
+
+void JSWeb::GetBlankScreenDetectionMethodVectorFromJSArray(const JSRef<JSArray>& jsArray, std::vector<int32_t>& params)
+{
+    int length = static_cast<int>(jsArray->Length());
+    for (int i = 0; i < length; i++) {
+        JSRef<JSVal> jsValue = jsArray->GetValueAt(i);
+        if (!jsValue->IsNumber()) {
+            continue;
+        }
+        int32_t number = jsValue->ToNumber<int32_t>();
+        if (number != static_cast<int32_t>(BlankScreenDetectionMethod::DETECTION_CONTENTFUL_NODES_SEVENTEEN)) {
+            continue;
+        }
+        params.emplace_back(number);
+    }
+}
+
+void JSWeb::BlankScreenDetectionConfig(const JSCallbackInfo& args)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    TAG_LOGI(AceLogTag::ACE_WEB, "BlankScreenDetectionConfig");
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(args[0]);
+    bool enable = false;
+    std::vector<double> detectionTiming;
+    std::vector<int32_t> detectionMethods;
+    int32_t contentfulNodesCountThreshold = 0;
+
+    JSRef<JSVal> enableJsValue = paramObject->GetProperty("enable");
+    if (enableJsValue->IsBoolean()) {
+        enable = enableJsValue->ToBoolean();
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "SetBlankScreenDetectionConfig, no enable");
+        return;
+    }
+    JSRef<JSVal> detectionTimingJsValue = paramObject->GetProperty("detectionTiming");
+    if (detectionTimingJsValue->IsArray()) {
+        JSRef<JSArray> jsParamsArray = JSRef<JSArray>::Cast(detectionTimingJsValue);
+        GetDoubleVectorFromJSArray(jsParamsArray, detectionTiming);
+    }
+    std::sort(detectionTiming.begin(), detectionTiming.end());
+    if (!detectionTiming.size()) {
+        detectionTiming = BLANK_SCREEN_DETECTION_DEFAULT_TIMING;
+    }
+    JSRef<JSVal> detectionMethodsJsValue = paramObject->GetProperty("detectionMethods");
+    if (detectionMethodsJsValue->IsArray()) {
+        JSRef<JSArray> jsParamsArray = JSRef<JSArray>::Cast(detectionMethodsJsValue);
+        GetBlankScreenDetectionMethodVectorFromJSArray(jsParamsArray, detectionMethods);
+    }
+    if (!detectionMethods.size()) {
+        detectionMethods = { static_cast<int32_t>(BlankScreenDetectionMethod::DETECTION_CONTENTFUL_NODES_SEVENTEEN) };
+    }
+    JSRef<JSVal> contentfulNodesCountThresholdJsValue = paramObject->GetProperty("contentfulNodesCountThreshold");
+    if (contentfulNodesCountThresholdJsValue->IsNumber()) {
+        contentfulNodesCountThreshold = contentfulNodesCountThresholdJsValue->ToNumber<int32_t>();
+    }
+    if (contentfulNodesCountThreshold < 0) {
+        contentfulNodesCountThreshold = 0;
+    }
+    WebModel::GetInstance()->SetBlankScreenDetectionConfig(
+        enable, detectionTiming, detectionMethods, contentfulNodesCountThreshold);
 }
 
 void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)
