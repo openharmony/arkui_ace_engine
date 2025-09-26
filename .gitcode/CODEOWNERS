@@ -2590,7 +2590,7 @@ frameworks/core/components_ng/pattern/toggle/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/toolbaritem/ @ArkUI_Event
 frameworks/core/components_ng/pattern/ui_extension/ @ArkUI_ability_group
 frameworks/core/components_ng/pattern/video/ @arkuilayout1
-frameworks/core/components_ng/pattern/view_context/ @arkui_framework_xnode
+frameworks/core/components_ng/pattern/view_context/ @arkuicodepulse
 frameworks/core/components_ng/pattern/waterflow/ @arkuiscroll
 frameworks/core/components_ng/pattern/web/ @arkwebinarkuireview
 frameworks/core/components_ng/pattern/window_scene/
@@ -3523,7 +3523,7 @@ test/unittest/core/pattern/toggle/ @arkuipopupwindow_all
 test/unittest/core/pattern/ui_extension/ @ArkUI_ability_group
 test/unittest/core/pattern/ui_extension/mock/ @ArkUI_ability_group
 test/unittest/core/pattern/video/ @arkuilayout1
-test/unittest/core/pattern/view_context/ @arkui_framework_xnode
+test/unittest/core/pattern/view_context/ @arkuicodepulse
 test/unittest/core/pattern/waterflow/ @arkuiscroll
 test/unittest/core/pattern/web/ @arkwebinarkuireview
 test/unittest/core/pattern/xcomponent/ @arkuilayout1

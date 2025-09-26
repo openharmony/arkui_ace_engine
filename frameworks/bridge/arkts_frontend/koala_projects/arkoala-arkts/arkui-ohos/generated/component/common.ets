@@ -9443,17 +9443,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     // instructive change start
     public animationStart(value: AnimateParam | undefined): this {
         if (this.checkPriority("animationStart")) {
-            const value_casted = value as (AnimateParam | undefined)
-            _animationStart(value_casted, this.isFirstBuild);
+            _animationStart(this.getPeer()?.getPeerPtr(), value, this.isFirstBuild);
             return this
         }
         return this
     }
     public animationStop(value: AnimateParam | undefined): this {
         if (this.checkPriority("animationStop")) {
-            _animationStop(value, this.isFirstBuild, () => {
-                this.isFirstBuild = false
-            });
+            _animationStop(this.getPeer()?.getPeerPtr(), value, this.isFirstBuild);
             return this
         }
         return this

@@ -120,6 +120,21 @@ export class AnimationExtender {
     static CloseImplicitAnimation_serialize(): void {
         ArkUIGeneratedNativeModule._AnimationExtender_CloseImplicitAnimation()
     }
+    static OpenImplicitAnimationForAnimation_serialize(node: KPointer, param: AnimateParam | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (param !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const paramTmpValue  = param!
+            AnimateParam_serializer.write(thisSerializer, paramTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._AnimationExtender_OpenImplicitAnimationForAnimation(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static CloseImplicitAnimationForAnimation_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._AnimationExtender_CloseImplicitAnimationForAnimation(node)
+    }
     static StartDoubleAnimation_serialize(node: KPointer, param: DoubleAnimationParam): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         DoubleAnimationParam_serializer.write(thisSerializer, param)
@@ -166,6 +181,17 @@ export class AnimationExtender {
     }
     public static CloseImplicitAnimation(): void {
         AnimationExtender.CloseImplicitAnimation_serialize()
+        return
+    }
+    public static OpenImplicitAnimationForAnimation(node: KPointer, param: AnimateParam | undefined): void {
+        const node_casted = node as (KPointer)
+        const param_casted = param as (AnimateParam | undefined)
+        AnimationExtender.OpenImplicitAnimationForAnimation_serialize(node_casted, param_casted)
+        return
+    }
+    public static CloseImplicitAnimationForAnimation(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        AnimationExtender.CloseImplicitAnimationForAnimation_serialize(node_casted)
         return
     }
     public static StartDoubleAnimation(node: KPointer, param: DoubleAnimationParam): void {

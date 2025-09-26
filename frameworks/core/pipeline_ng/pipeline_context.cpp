@@ -5503,9 +5503,13 @@ void PipelineContext::OpenFrontendAnimation(
     AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback);
 }
 
-void PipelineContext::CloseFrontendAnimation()
+void PipelineContext::CloseFrontendAnimation(bool forceClose)
 {
     if (pendingFrontendAnimation_.empty()) {
+        if (forceClose) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION, "force close animation");
+            AnimationUtils::CloseImplicitAnimation();
+        }
         return;
     }
 
