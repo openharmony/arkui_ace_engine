@@ -1248,6 +1248,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::Component3DSetWidget)
         },
         ani_native_function {
+            "_Extractors_ToScenePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToScenePtr)
+        },
+        ani_native_function {
             "_XBar_Set_ComponentCreateFunc",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::XBarSetComponentCreateFunc)

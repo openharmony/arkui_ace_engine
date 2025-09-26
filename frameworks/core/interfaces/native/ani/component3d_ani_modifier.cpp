@@ -16,6 +16,7 @@
 #include "component3d_ani_modifier.h"
 
 #include "base/log/log.h"
+#if defined(MODEL_COMPONENT_SUPPORTED)
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/model/model_pattern.h"
 #include "core/components_ng/pattern/model/model_view_ng.h"
@@ -37,10 +38,12 @@ OHOS::Render3D::SurfaceType CheckModelType(int32_t modelType)
     return surfaceType;
 }
 } // namespace
+#endif
 
 namespace OHOS::Ace::NG {
 void SetScene(ArkUINodeHandle node, void* scene, int32_t modelType)
 {
+#if defined(MODEL_COMPONENT_SUPPORTED)
     LOGD("ace_lume frameNode setScene");
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -52,10 +55,12 @@ void SetScene(ArkUINodeHandle node, void* scene, int32_t modelType)
     auto sceneAdapter = *(reinterpret_cast<std::shared_ptr<Render3D::ISceneAdapter>*>(scene));
 
     ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType, sceneAdapter });
+#endif
 }
 
 void SetWidget(ArkUINodeHandle node, const std::string& srcPath, int32_t modelType)
 {
+#if defined(MODEL_COMPONENT_SUPPORTED)
     LOGD("ace_lume frameNode setWidget");
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -67,6 +72,7 @@ void SetWidget(ArkUINodeHandle node, const std::string& srcPath, int32_t modelTy
     ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType, nullptr });
     std::string ohosPath = "OhosRawFile://" + srcPath;
     ModelViewNG::SetModelSource(frameNode, ohosPath);
+#endif
 }
 
 const ArkUIAniComponent3DModifier* GetComponent3DModifier()

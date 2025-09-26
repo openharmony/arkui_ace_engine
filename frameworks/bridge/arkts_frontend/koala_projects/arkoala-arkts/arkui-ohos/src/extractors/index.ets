@@ -527,7 +527,7 @@ export namespace extractors {
   }
 
   export function toScenePtr(value: Scene): KPointer {
-    return 123;
+    return ArkUIAniModule._Extractors_ToScenePtr(value);
   }
   export function fromScenePtr(ptr: KPointer): Scene {
     const x: Object = {};
