@@ -1430,6 +1430,8 @@ void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
 void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
+void WebDelegate::OnStatusBarClick() {}
+void WebDelegate::WebScrollStopFling() {}
 bool WebDelegate::IsShowHandle() { return false; }
 bool WebDelegate::IsPcMode()
 {

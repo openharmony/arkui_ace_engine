@@ -30930,6 +30930,20 @@ void impl_WebAttribute_onActivateContent(Ark_NativePointer thisPtr, KSerializerB
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_onActivateContent, Ark_NativePointer, KSerializerBuffer, int32_t)
 
+void impl_WebAttribute_backToTop(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            value_value_buf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean value_value = value_value_buf;;
+        GetNodeModifiers()->getWebModifier()->setBackToTop(self, (const Opt_Boolean*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(WebAttribute_backToTop, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_WindowScene_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getWindowSceneModifier()->construct(id, flags);
 }

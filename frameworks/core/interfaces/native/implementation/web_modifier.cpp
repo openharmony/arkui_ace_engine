@@ -2501,6 +2501,21 @@ void OnActivateContentImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 
+void BackToTopImpl(Ark_NativePointer node,
+                   const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        WebModelStatic::SetBackToTop(frameNode, false);
+        return;
+    }
+    WebModelStatic::SetBackToTop(frameNode, *convValue);
+#endif // WEB_SUPPORTED
+}
+
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()
 {
@@ -2639,6 +2654,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::GestureFocusModeImpl,
         WebAttributeModifier::ForceEnableZoomImpl,
         WebAttributeModifier::OnActivateContentImpl,
+        WebAttributeModifier::BackToTopImpl,
     };
     return &ArkUIWebModifierImpl;
 }

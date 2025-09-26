@@ -24214,6 +24214,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                const Opt_Boolean* value);
     void (*setOnActivateContent)(Ark_NativePointer node,
                                 const Opt_Callback_Void* value);
+    void (*setBackToTop)(Ark_NativePointer node,
+                         const Opt_Boolean* value);
 } GENERATED_ArkUIWebModifier;
 
 typedef struct GENERATED_ArkUIWindowSceneModifier {

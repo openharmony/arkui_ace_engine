@@ -106,6 +106,8 @@ const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 const std::string RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
 const std::string RESOURCE_SENSOR = "TYPE_SENSOR";
 const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
+const int32_t DEFAULT_BACK_TO_TOP_TIME = 1000;
+const float DEFAULT_BACK_TO_TOP_OFFSET = 0.0;
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
 constexpr uint32_t DRAG_DELAY_MILLISECONDS = 300;
@@ -9034,6 +9036,20 @@ bool WebDelegate::OnNestedScroll(float& x, float& y, float& xVelocity, float& yV
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_RETURN(webPattern, false);
     return webPattern->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable);
+}
+
+void WebDelegate::OnStatusBarClick()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnStatusBarClick");
+    CHECK_NULL_VOID(nweb_);
+    nweb_->ScrollToWithAnime(DEFAULT_BACK_TO_TOP_OFFSET, DEFAULT_BACK_TO_TOP_OFFSET, DEFAULT_BACK_TO_TOP_TIME);
+}
+
+void WebDelegate::WebScrollStopFling()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::WebScrollStopFling");
+    CHECK_NULL_VOID(nweb_);
+    nweb_->StopFling();
 }
 
 bool WebDelegate::IsNWebEx()

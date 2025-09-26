@@ -2601,4 +2601,25 @@ HWTEST_F(WebModelStaticTest, SetForceEnableZoom001, TestSize.Level1)
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckForceEnableZoom(true), true);
 #endif
 }
+
+/**
+ * @tc.name: SetBackToTop001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetBackToTop001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    WebModelStatic::SetBackToTop(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckBackToTop(true), true);
+#endif
+}
 } // namespace OHOS::Ace::NG

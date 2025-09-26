@@ -1329,4 +1329,12 @@ void WebModelStatic::SetActivateContentEventId(
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnActivateContentEvent(std::move(uiCallback));
 }
+
+void WebModelStatic::SetBackToTop(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateBackToTop(isEnabled);
+}
 } // namespace OHOS::Ace::NG

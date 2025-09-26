@@ -1489,6 +1489,8 @@ public:
     void OnSafeBrowsingCheckFinish(int threat_type);
     bool IsPcMode();
     void OnSwitchFreeMultiWindow(bool enable);
+    void OnStatusBarClick();
+    void WebScrollStopFling();
 private:
     void InitWebEvent();
     void RegisterWebEvent();

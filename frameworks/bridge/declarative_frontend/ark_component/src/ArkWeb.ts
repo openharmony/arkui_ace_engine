@@ -1477,6 +1477,20 @@ class WebForceEnableZoomModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class WebBackToTopModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webBackToTopModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetBackToTop(node);
+    } else {
+      getUINativeModule().web.setBackToTop(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1991,6 +2005,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   rotateRenderEffect(effect: WebRotateEffect): this {
     modifierWithKey(this._modifiersWithKeys, WebRotateRenderEffectModifier.identity, WebRotateRenderEffectModifier, effect);
+    return this;
+  }
+  backToTop(backToTop: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebBackToTopModifier.identity, WebBackToTopModifier, backToTop);
     return this;
   }
 }

@@ -60,6 +60,7 @@ constexpr bool DEFAULT_IMAGE_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_ONLINE_IMAGE_ACCESS_ENABLED = false;
 constexpr bool MEDIA_PLAY_GESTURE_ACCESS_ENABLED = true;
 constexpr bool DEFAULT_MEDIA_OPTIONS_ENABLED = true;
+constexpr bool DEFAULT_BACK_TO_TOP_ENABLED = true;
 constexpr int32_t DEFAULT_RESUMEINTERVAL = 0;
 constexpr CopyOptions DEFAULT_COPY_OPTIONS_VALUE = CopyOptions::Local;
 constexpr bool DEFAULT_BLOCK_NETWORK_ENABLED = false;
@@ -2259,6 +2260,20 @@ void ResetForceEnableZoom(ArkUINodeHandle node)
     WebModelNG::SetForceEnableZoom(frameNode, DEFAULT_FORCE_ENABLE_ZOOM_ENABLED);
 }
 
+void SetBackToTop(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetBackToTop(frameNode, value);
+}
+
+void ResetBackToTop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetBackToTop(frameNode, DEFAULT_BACK_TO_TOP_ENABLED);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -2476,6 +2491,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetJavaScriptProxy = ResetJavaScriptProxy,
         .setForceEnableZoom = SetForceEnableZoom,
         .resetForceEnableZoom = ResetForceEnableZoom,
+        .setBackToTop = SetBackToTop,
+        .resetBackToTop = ResetBackToTop,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2697,6 +2714,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetJavaScriptProxy = ResetJavaScriptProxy,
         .setForceEnableZoom = SetForceEnableZoom,
         .resetForceEnableZoom = ResetForceEnableZoom,
+        .setBackToTop = SetBackToTop,
+        .resetBackToTop = ResetBackToTop,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
