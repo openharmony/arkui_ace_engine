@@ -2632,4 +2632,45 @@ HWTEST_F(ImagePatternTestNg, TestImageOnLoadSuccess001, TestSize.Level0)
 
     EXPECT_EQ(imagePattern->image_, nullptr);
 }
+
+/**
+ * @tc.name: altErrorCallback001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, altErrorCallback001, TestSize.Level0)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->isActive_ = true;
+
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageModelNG image;
+    image.SetAltError(ImageSourceInfo { RESOURCE_URL });
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    auto altImageSourceInfo = imageLayoutProperty->GetAltError().value_or(ImageSourceInfo(""));
+    imagePattern->LoadAltErrorImage(altImageSourceInfo);
+
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
+    auto callback1 = imagePattern->CreateDataReadyCallbackForAltError();
+    callback1(altImageSourceInfo);
+
+    ImageSourceInfo sourceInfo("testmsg");
+    imagePattern->LoadAltErrorImage(ImageSourceInfo { PNG_IMAGE });
+    auto callback2 = imagePattern->CreateDataReadyCallbackForAltError();
+    callback2(sourceInfo);
+
+    auto callback3 = imagePattern->CreateLoadSuccessCallbackForAltError();
+    callback3(altImageSourceInfo);
+
+    imagePattern->LoadAltErrorImage(ImageSourceInfo { PNG_IMAGE });
+    callback3(sourceInfo);
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
+}
 } // namespace OHOS::Ace::NG

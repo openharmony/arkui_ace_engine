@@ -80,6 +80,8 @@ public:
     void SetImageFillSetByUser(bool value) override {};
     void SetSupportSvg2(bool enable) override {};
     void SetContentTransition(ContentTransitionType contentTransition) override {};
+    void SetAltError(const ImageSourceInfo& src) override{};
+    void SetAltPlaceholder(const ImageSourceInfo& src) override{};
 };
 
 } // namespace OHOS::Ace::Framework

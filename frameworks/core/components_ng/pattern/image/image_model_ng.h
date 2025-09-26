@@ -81,6 +81,8 @@ public:
     void SetImageFillSetByUser(bool value) override;
     void SetSupportSvg2(bool enable) override;
     void SetContentTransition(ContentTransitionType contentTransition) override;
+    void SetAltError(const ImageSourceInfo& src) override;
+    void SetAltPlaceholder(const ImageSourceInfo& src) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode* frameNode, std::string& src);
@@ -166,6 +168,15 @@ public:
     static bool GetSupportSvg2(FrameNode* frameNode);
     static void SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition);
     static ContentTransitionType GetContentTransition(FrameNode* frameNode);
+    static void SetAltError(FrameNode* frameNode, const ImageSourceInfo& src);
+    static void SetAltErrorPixelMap(FrameNode* frameNode, void* pixelMap);
+    static void SetAltErrorResource(FrameNode* frameNode, void* resource);
+    static void ResetImageAltError(FrameNode* frameNode);
+    static ImageSourceInfo GetAltError(FrameNode* frameNode);
+    static void SetAltPlaceholder(FrameNode* frameNode, const ImageSourceInfo& src);
+    static void SetAltPlaceholderPixelMap(FrameNode* frameNode, void* pixelMap);
+    static void SetAltPlaceholderResource(FrameNode* frameNode, void* resource);
+    static ImageSourceInfo GetAltPlaceholder(FrameNode* frameNode);
 
 private:
     ImagePattern* GetImagePattern();

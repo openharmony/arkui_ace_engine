@@ -58,6 +58,7 @@ public:
     static void SetHdrBrightness(const JSCallbackInfo& info);
     static void SetEnhancedImageQuality(const JSCallbackInfo& info);
     static void SetOrientation(const JSCallbackInfo& info);
+    static void SetAltError(const JSCallbackInfo& args);
 
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);
@@ -84,6 +85,9 @@ public:
     static ImageType ParseImageType(const JSRef<JSVal>& jsValue);
     static bool ParseContentTransitionEffect(const JSRef<JSVal>& jsValue, ContentTransitionType& contentTransitionType);
     static void SetContentTransition(const JSCallbackInfo& info);
+    static bool IsImageAltObject(JSRef<JSVal> val);
+    static void ParseAltImageAlt(JSRef<JSVal> val, bool isCard, int32_t type);
+    static void HandleAltType(int32_t type, const ImageSourceInfo& srcInfo);
 
 protected:
     static void SetBorder(const Border& border);

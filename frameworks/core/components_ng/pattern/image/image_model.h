@@ -109,6 +109,8 @@ public:
     virtual void SetImageFillSetByUser(bool value) = 0;
     virtual void SetSupportSvg2(bool enable) = 0;
     virtual void SetContentTransition(ContentTransitionType contentTransition) = 0;
+    virtual void SetAltError(const ImageSourceInfo& src) = 0;
+    virtual void SetAltPlaceholder(const ImageSourceInfo& src) = 0;
 
 private:
     static std::unique_ptr<ImageModel> instance_;

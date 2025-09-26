@@ -14664,6 +14664,90 @@ const ArkUI_AttributeItem* GetContentTransition(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetAltPlaceholder(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item || (!item->string && !item->object)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    auto drawableDescriptor = reinterpret_cast<ArkUI_DrawableDescriptor*>(item->object);
+    ArkUIImageSourceInfo imageInfo;
+    imageInfo.url = item->string;
+    node->altDrawableDescriptor = drawableDescriptor;
+    if (drawableDescriptor && drawableDescriptor->resource) {
+        imageInfo.resource = drawableDescriptor->resource.get();
+    } else if (drawableDescriptor && drawableDescriptor->drawableDescriptor) {
+        imageInfo.pixelMap = drawableDescriptor->drawableDescriptor.get();
+    } else {
+        node->altDrawableDescriptor = nullptr;
+        if (!item->string) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
+    imageInfo.pixelMapArray = nullptr;
+    fullImpl->getNodeModifiers()->getImageModifier()->setAltPlaceholderSourceInfo(node->uiNodeHandle, &imageInfo);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetAltError(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item || (!item->string && !item->object)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    auto drawableDescriptor = reinterpret_cast<ArkUI_DrawableDescriptor*>(item->object);
+    ArkUIImageSourceInfo imageInfo;
+    imageInfo.url = item->string;
+    node->altDrawableDescriptor = drawableDescriptor;
+    if (drawableDescriptor && drawableDescriptor->resource) {
+        imageInfo.resource = drawableDescriptor->resource.get();
+    } else if (drawableDescriptor && drawableDescriptor->drawableDescriptor) {
+        imageInfo.pixelMap = drawableDescriptor->drawableDescriptor.get();
+    } else {
+        node->altDrawableDescriptor = nullptr;
+        if (!item->string) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
+    imageInfo.pixelMapArray = nullptr;
+    fullImpl->getNodeModifiers()->getImageModifier()->setAltErrorSourceInfo(node->uiNodeHandle, &imageInfo);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetAltPlaceholder(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto src = fullImpl->getNodeModifiers()->getImageModifier()->getAltPlaceholder(node->uiNodeHandle);
+    g_attributeItem.string = (src != nullptr ? src : EMPTY_STR.c_str());
+    if (node->altDrawableDescriptor) {
+        g_attributeItem.object = node->altDrawableDescriptor;
+    }
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetAltError(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto src = fullImpl->getNodeModifiers()->getImageModifier()->getAltError(node->uiNodeHandle);
+    g_attributeItem.string = (src != nullptr ? src : EMPTY_STR.c_str());
+    if (node->altDrawableDescriptor) {
+        g_attributeItem.object = node->altDrawableDescriptor;
+    }
+    return &g_attributeItem;
+}
+
+void ResetAltPlaceholder(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->resetAlt(node->uiNodeHandle);
+}
+
+void ResetAltError(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->resetAltError(node->uiNodeHandle);
+}
+
 int32_t SetCheckboxSelect(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
@@ -17346,7 +17430,8 @@ int32_t SetImageAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_
     static Setter* setters[] = { SetImageSrc, SetObjectFit, SetInterpolation, SetObjectRepeat, SetColorFilter,
         SetAutoResize, SetAlt, SetImageDraggable, SetRenderMode, SetFitOriginalSize, SetFillColor, SetResizable,
         SetSyncLoad, SetSourceSize, SetImageMatrix, SetMatchTextDirection, SetCopyOption, SetEnableAnalyzer,
-        SetDynamicRangeMode, SetHdrBrightness, SetImageRotateOrientation, SetSupportSvg2, SetContentTransition };
+        SetDynamicRangeMode, SetHdrBrightness, SetImageRotateOrientation, SetSupportSvg2, SetContentTransition,
+        SetAltPlaceholder, SetAltError };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -17359,7 +17444,8 @@ const ArkUI_AttributeItem* GetImageAttribute(ArkUI_NodeHandle node, int32_t subT
     static Getter* getters[] = { GetImageSrc, GetObjectFit, GetInterpolation, GetObjectRepeat, GetColorFilter,
         GetAutoResize, GetAlt, GetImageDraggable, GetRenderMode, GetFitOriginalSize, GetFillColor, GetResizable,
         GetSyncLoad, GetSourceSize, GetImageMatrix, GetMatchTextDirection, GetCopyOption, GetEnableAnalyzer,
-        GetDynamicRangeMode, GetHdrBrightness, GetImageRotateOrientation, GetSupportSvg2, GetContentTransition };
+        GetDynamicRangeMode, GetHdrBrightness, GetImageRotateOrientation, GetSupportSvg2, GetContentTransition,
+        GetAltPlaceholder, GetAltError };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -17373,7 +17459,8 @@ void ResetImageAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetColorFilter, ResetAutoResize, ResetAlt, ResetImageDraggable, ResetRenderMode,
         ResetFitOriginalSize, ResetFillColor, ResetResizable, ResetSyncLoad, ResetSourceSize,
         ResetImageMatrix, ResetMatchTextDirection, ResetCopyOption, ResetEnableAnalyzer,
-        ResetDynamicRangeMode, ResetHdrBrightness, ResetImageRotateOrientation, ResetSupportSvg2, ResetContentTransition };
+        ResetDynamicRangeMode, ResetHdrBrightness, ResetImageRotateOrientation, ResetSupportSvg2, ResetContentTransition,
+        ResetAltPlaceholder, ResetAltError };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

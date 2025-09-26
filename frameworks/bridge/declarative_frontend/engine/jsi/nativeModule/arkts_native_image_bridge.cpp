@@ -784,23 +784,52 @@ ArkUINativeModuleValue ImageBridge::SetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    std::string src;
-    RefPtr<ResourceObject> srcResObj;
-    if (!ArkTSUtils::ParseJsMedia(vm, secondArg, src, srcResObj)) {
-        return panda::JSValueRef::Undefined(vm);
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto setResource = [&](Local<JSValueRef> resourceArg, const char* resourceType) -> void {
+        std::string src;
+        RefPtr<ResourceObject> srcResObj;
+        if (!ArkTSUtils::ParseJsMedia(vm, resourceArg, src, srcResObj)) {
+            return;
+        }
+        if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK && strcmp(resourceType, "error") != 0) {
+            return;
+        }
+        std::string bundleName;
+        std::string moduleName;
+        auto srcRawPtr = AceType::RawPtr(srcResObj);
+        ArkTSUtils::GetJsMediaBundleInfo(vm, resourceArg, bundleName, moduleName);
+        auto nodeModifiers = GetArkUINodeModifiers();
+        CHECK_NULL_VOID(nodeModifiers);
+        if (strcmp(resourceType, "placeholder") == 0) {
+            nodeModifiers->getImageModifier()->setAltPlaceholder(
+                nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), srcRawPtr);
+        } else if (strcmp(resourceType, "error") == 0) {
+            nodeModifiers->getImageModifier()->setAltError(
+                nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), srcRawPtr);
+        } else {
+            nodeModifiers->getImageModifier()->setAltRes(
+                nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), srcRawPtr);
+        }
+        return;
+    };
+
+    if (info[1]->IsObject()) {
+        Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
+        if (jsObj->HasProperty("placeholder") || jsObj->HasProperty("error")) {
+            if (jsObj->HasProperty("placeholder")) {
+                Local<JSValueRef> placeholderVal = jsObj->GetProperty("placeholder")->GetLocalHandle();
+                setResource(placeholderVal, "placeholder");
+            }
+            if (jsObj->HasProperty("error")) {
+                Local<JSValueRef> errorVal = jsObj->GetProperty("error")->GetLocalHandle();
+                setResource(errorVal, "error");
+            }
+            return panda::JSValueRef::Undefined(vm);
+        }
     }
-    if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    std::string bundleName;
-    std::string moduleName;
-    auto srcRawPtr = AceType::RawPtr(srcResObj);
-    ArkTSUtils::GetJsMediaBundleInfo(vm, secondArg, bundleName, moduleName);
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getImageModifier()->setAltRes(
-        nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), srcRawPtr);
+    setResource(secondArg, "Alt");
     return panda::JSValueRef::Undefined(vm);
 }
 
