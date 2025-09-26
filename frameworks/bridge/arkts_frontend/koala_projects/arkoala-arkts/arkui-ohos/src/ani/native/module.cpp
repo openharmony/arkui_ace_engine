@@ -106,14 +106,14 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::Image_ColorFilter_TransferDynamic)
         },
         ani_native_function {
-            "_Web_SetWebOptions",
-            "lC{@ohos.web.webview.webview.WebviewController}:",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebOptions)
+            "_Extractors_ToWebviewWebviewControllerPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToWebviewWebviewControllerPtr)
         },
         ani_native_function {
-            "_Web_SetWebController_ControllerHandler",
-            "lC{@ohos.web.webview.webview.WebviewController}:",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebControllerControllerHandler)
+            "_Extractors_FromWebviewWebviewControllerPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromWebviewWebviewControllerPtr)
         },
         ani_native_function {
             "_TransferScreenCaptureHandlerToStatic",

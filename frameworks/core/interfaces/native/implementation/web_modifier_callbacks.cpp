@@ -632,16 +632,20 @@ static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
     auto handler = eventInfo->GetWebWindowNewHandler();
     if ((handler) && (!handler->IsFrist())) {
         int32_t parentId = -1;
-        auto controllerInfo = ControllerHandlerPeer::PopController(handler->GetId(), &parentId);
-        if (controllerInfo.getWebIdFunc) {
-            handler->SetWebController(controllerInfo.getWebIdFunc());
+        auto controller = ControllerHandlerPeer::PopController(handler->GetId(), &parentId);
+        if (!controller) {
+            return false;
         }
-        if (controllerInfo.completeWindowNewFunc) {
-            controllerInfo.completeWindowNewFunc(parentId);
+        if (controller->getWebIdFunc) {
+            handler->SetWebController(controller->getWebIdFunc());
         }
-        if (controllerInfo.releaseRefFunc) {
-            controllerInfo.releaseRefFunc();
+        if (controller->completeWindowNewFunc) {
+            controller->completeWindowNewFunc(parentId);
         }
+        if (controller->releaseRefFunc) {
+            controller->releaseRefFunc();
+        }
+        delete controller;
         return false;
     }
     return true;

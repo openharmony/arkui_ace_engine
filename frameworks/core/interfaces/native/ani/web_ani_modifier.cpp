@@ -43,42 +43,6 @@
 
 namespace OHOS::Ace::NG {
 
-void SetWebOptions(ArkUINodeHandle node, const WebviewControllerInfo& controllerInfo)
-{
-#ifdef WEB_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    if (!frameNode) {
-        if (controllerInfo.releaseRefFunc) {
-            controllerInfo.releaseRefFunc();
-        }
-        return;
-    }
-    if (controllerInfo.getNativePtrFunc) {
-        int32_t parentNWebId = -1;
-        bool isPopup = ControllerHandlerPeer::ExistController(controllerInfo.getNativePtrFunc(), parentNWebId);
-        WebModelStatic::SetPopup(frameNode, isPopup, parentNWebId);
-    }
-    auto setWebIdFunc = std::move(controllerInfo.setWebIdFunc);
-    auto setHapPathFunc = std::move(controllerInfo.setHapPathFunc);
-    WebModelStatic::SetWebIdCallback(frameNode, std::move(setWebIdFunc));
-    WebModelStatic::SetHapPathCallback(frameNode, std::move(setHapPathFunc));
-#endif // WEB_SUPPORTED
-}
-
-void SetWebControllerControllerHandler(void* controllerHandler, const WebviewControllerInfo& controllerInfo)
-{
-#ifdef WEB_SUPPORTED
-    ControllerHandlerPeer* peer = reinterpret_cast<ControllerHandlerPeer *>(controllerHandler);
-    if (!peer) {
-        if (controllerInfo.releaseRefFunc) {
-            controllerInfo.releaseRefFunc();
-        }
-        return;
-    }
-    peer->SetWebController(controllerInfo);
-#endif // WEB_SUPPORTED
-}
-
 bool TransferScreenCaptureHandlerToStatic(void* peer, void* nativePtr)
 {
 #ifdef WEB_SUPPORTED
@@ -533,8 +497,6 @@ napi_value TransferWebKeyboardControllerToDynamic(napi_env env, void* peer)
 const ArkUIAniWebModifier* GetWebAniModifier()
 {
     static const ArkUIAniWebModifier impl = {
-        .setWebOptions = OHOS::Ace::NG::SetWebOptions,
-        .setWebControllerControllerHandler = OHOS::Ace::NG::SetWebControllerControllerHandler,
         .transferScreenCaptureHandlerToStatic = OHOS::Ace::NG::TransferScreenCaptureHandlerToStatic,
         .transferJsGeolocationToStatic = OHOS::Ace::NG::TransferJsGeolocationToStatic,
         .transferJsResultToStatic = OHOS::Ace::NG::TransferJsResultToStatic,
