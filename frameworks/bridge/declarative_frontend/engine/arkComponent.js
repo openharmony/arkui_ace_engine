@@ -31662,6 +31662,18 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebDataDetectorConfigModifier.identity, WebDataDetectorConfigModifier, detectorConfig);
     return this;
   }
+  enableSelectedDataDetector(enable) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableSelectedDataDetectorModifier.identity, WebEnableSelectedDataDetectorModifier, enable);
+    return this;
+  }
+  selectedDataDetectorConfig(config) {
+    if (config !== undefined || config !== null) {
+      let detectorConfig = new TextDataDetectorConfig();
+      detectorConfig.types = config.types;
+    }
+    modifierWithKey(this._modifiersWithKeys, WebSelectedDataDetectorConfigModifier.identity, WebSelectedDataDetectorConfigModifier, detectorConfig);
+    return this;
+  }
   gestureFocusMode(mode) {
     modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
     return this;
@@ -33038,6 +33050,34 @@ class WebDataDetectorConfigModifier extends ModifierWithKey {
   }
 }
 WebDataDetectorConfigModifier.identity = Symbol('webDataDetectorConfigModifier');
+
+class WebEnableSelectedDataDetectorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableSelectedDataDetector(node);
+    } else {
+      getUINativeModule().web.setEnableSelectedDataDetector(node, this.value);
+    }
+  }
+}
+WebEnableSelectedDataDetectorModifier.identity = Symbol('webEnableSelectedDataDetectorModifier');
+
+class WebSelectedDataDetectorConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetSelectedDataDetectorConfig(node);
+    } else {
+      getUINativeModule().web.setSelectedDataDetectorConfig(node, this.value.types);
+    }
+  }
+}
+WebSelectedDataDetectorConfigModifier.identity = Symbol('webSelectedDataDetectorConfigModifier');
 
 class WebGestureFocusModeModifier extends ModifierWithKey {
   constructor(value) {

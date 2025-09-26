@@ -67,6 +67,7 @@ constexpr OverScrollMode DEFAULT_OVERSCROLL_MODE = OverScrollMode::NEVER;
 constexpr GestureFocusMode DEFAULT_GESTURE_FOCUS_MODE = GestureFocusMode::DEFAULT;
 constexpr WebRotateEffect DEFAULT_WEB_ROTATE_EFFECT = WebRotateEffect::TOPLEFT_EFFECT;
 constexpr bool DEFAULT_ENABLE_DATA_DETECTOR = false;
+constexpr bool DEFAULT_ENABLE_SELECTED_DATA_DETECTOR = true;
 } // namespace
 
 void SetJavaScriptAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -2048,6 +2049,38 @@ void ResetDataDetectorConfigWithEvent(ArkUINodeHandle node)
     WebModelNG::SetDataDetectorConfig(frameNode, detectConfig);
 }
 
+void SetEnableSelectedDataDetector(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableSelectedDataDetector(frameNode, value);
+}
+
+void ResetEnableSelectedDataDetector(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableSelectedDataDetector(frameNode, DEFAULT_ENABLE_DATA_DETECTOR);
+}
+
+void SetSelectedDataDetectorConfigWithEvent(
+    ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextDetectConfig detectConfig;
+    detectConfig.types = arkUITextDetectConfig->types;
+    WebModelNG::SetSelectedDataDetectorConfig(frameNode, detectConfig);
+}
+
+void ResetSelectedDataDetectorConfigWithEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextDetectConfig detectConfig;
+    WebModelNG::SetSelectedDataDetectorConfig(frameNode, detectConfig);
+}
+
 void SetOnSslErrorEventReceive(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2425,6 +2458,10 @@ const ArkUIWebModifier* GetWebModifier()
         .resetEnableDataDetector = ResetEnableDataDetector,
         .setDataDetectorConfigWithEvent = SetDataDetectorConfigWithEvent,
         .resetDataDetectorConfigWithEvent = ResetDataDetectorConfigWithEvent,
+        .setEnableSelectedDataDetector = SetEnableSelectedDataDetector,
+        .resetEnableSelectedDataDetector = ResetEnableSelectedDataDetector,
+        .setSelectedDataDetectorConfigWithEvent = SetSelectedDataDetectorConfigWithEvent,
+        .resetSelectedDataDetectorConfigWithEvent = ResetSelectedDataDetectorConfigWithEvent,
         .setOnSslErrorEventReceive = SetOnSslErrorEventReceive,
         .resetOnSslErrorEventReceive = ResetOnSslErrorEventReceive,
         .setOnClientAuthenticationRequest = SetOnClientAuthenticationRequest,
@@ -2642,6 +2679,10 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetEnableDataDetector = ResetEnableDataDetector,
         .setDataDetectorConfigWithEvent = SetDataDetectorConfigWithEvent,
         .resetDataDetectorConfigWithEvent = ResetDataDetectorConfigWithEvent,
+        .setEnableSelectedDataDetector = SetEnableSelectedDataDetector,
+        .resetEnableSelectedDataDetector = ResetEnableSelectedDataDetector,
+        .setSelectedDataDetectorConfigWithEvent = SetSelectedDataDetectorConfigWithEvent,
+        .resetSelectedDataDetectorConfigWithEvent = ResetSelectedDataDetectorConfigWithEvent,
         .setOnSslErrorEventReceive = SetOnSslErrorEventReceive,
         .resetOnSslErrorEventReceive = ResetOnSslErrorEventReceive,
         .setOnClientAuthenticationRequest = SetOnClientAuthenticationRequest,
