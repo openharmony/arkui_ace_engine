@@ -257,6 +257,9 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
     viewPortExtent_ = childSize;
+    if (axis != Axis::FREE && viewPortExtent_ < viewPort_) {
+        viewPortExtent_.SetMainSize(viewPortExtent_.MainSize(axis) - contentStartOffset_ - contentEndOffset_, axis);
+    }
     viewPortLength_ = axis == Axis::FREE ? viewPort_.Width() : GetMainAxisSize(viewPort_, axis);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_)
                                                 : OffsetF(currentOffset_, crossOffset_);

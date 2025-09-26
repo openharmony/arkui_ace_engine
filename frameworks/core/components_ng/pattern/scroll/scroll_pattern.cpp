@@ -246,7 +246,7 @@ void ScrollPattern::CheckScrollable()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (GreatNotEqual(scrollableDistance_, 0.0f)) {
+    if (GreatNotEqual(scrollableDistance_ + contentStartOffset_, 0.0f)) {
         SetScrollEnabled(layoutProperty->GetScrollEnabled().value_or(true));
     } else {
         SetScrollEnabled(layoutProperty->GetScrollEnabled().value_or(true) && GetAlwaysEnabled());
@@ -306,8 +306,11 @@ bool ScrollPattern::IsAtTop() const
 
 bool ScrollPattern::IsAtBottom(bool considerRepeat) const
 {
-    if (LessNotEqual(scrollableDistance_, 0.0f)) {
-        return LessOrEqual(currentOffset_, 0.0f);
+    if (LessNotEqual(scrollableDistance_, 0.0)) {
+        if (GreatNotEqual(scrollableDistance_ + contentStartOffset_, 0.0)) {
+            return LessOrEqual(currentOffset_ + scrollableDistance_, 0.0);
+        }
+        return LessOrEqual(currentOffset_, contentStartOffset_);
     }
     return LessOrEqual(currentOffset_, -scrollableDistance_);
 }
@@ -372,6 +375,8 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     overScrollPastStart = std::max(currentOffset_ - contentStartOffset_, 0.0);
     if (Positive(scrollableDistance_)) {
         overScrollPastEnd = std::max(-scrollableDistance_ + contentStartOffset_ - currentOffset_, 0.0);
+    } else if (Positive(scrollableDistance_ + contentStartOffset_)) {
+        overScrollPastEnd = std::max(-scrollableDistance_ - currentOffset_, 0.0);
     } else {
         overScrollPastEnd = std::abs(std::min(currentOffset_ - contentStartOffset_, 0.0));
     }
@@ -385,7 +390,7 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
 
 double ScrollPattern::ValidateOffset(int32_t source, double willScrollOffset)
 {
-    if (LessOrEqual(scrollableDistance_, 0.0) || source == SCROLL_FROM_JUMP) {
+    if (LessOrEqual(scrollableDistance_ + contentStartOffset_, 0.0) || source == SCROLL_FROM_JUMP) {
         return willScrollOffset;
     }
 
@@ -797,7 +802,7 @@ void ScrollPattern::ScrollTo(float position)
 void ScrollPattern::DoJump(float position, int32_t source)
 {
     float setPosition = (GetAxis() == Axis::HORIZONTAL && IsRowReverse()) ? -position : position;
-    if ((!NearEqual(currentOffset_, setPosition) && GreatOrEqual(scrollableDistance_, 0.0f)) ||
+    if ((!NearEqual(currentOffset_, setPosition) && GreatOrEqual(scrollableDistance_ + contentStartOffset_, 0.0f)) ||
         GetCanStayOverScroll()) {
         UpdateCurrentOffset(setPosition - currentOffset_, source);
     }
@@ -812,10 +817,11 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     });
     scrollEffect->SetLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
-        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse() && scroll->GetScrollableDistance() > 0) {
+        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse() &&
+            scroll->GetScrollableDistance() + scroll->GetContentStartOffset() > 0) {
             return -scroll->GetScrollableDistance();
         }
-        return 0.0;
+        return scroll->GetContentStartOffset();
     });
     scrollEffect->SetTrailingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
@@ -827,10 +833,11 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     });
     scrollEffect->SetInitLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
-        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse() && scroll->GetScrollableDistance() > 0) {
+        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse() &&
+            scroll->GetScrollableDistance() + scroll->GetContentStartOffset() > 0) {
             return -scroll->GetScrollableDistance();
         }
-        return 0.0;
+        return scroll->GetContentStartOffset();
     });
     scrollEffect->SetInitTrailingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();

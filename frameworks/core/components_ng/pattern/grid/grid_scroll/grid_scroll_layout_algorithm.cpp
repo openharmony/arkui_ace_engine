@@ -698,8 +698,9 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     float lengthOfItemsInViewport = info_.GetTotalHeightOfItemsInView(mainGap_);
     // scroll forward
     if (LessNotEqual(info_.prevOffset_, info_.currentOffset_)) {
-        if ((GreatOrEqual(info_.currentOffset_, info_.contentStartOffset_) && !canOverScrollStart_) ||
-            (NonPositive(info_.currentOffset_) && !canOverScrollEnd_)) {
+        if (scrollSource_ != SCROLL_FROM_ANIMATION_SPRING &&
+            ((GreatOrEqual(info_.currentOffset_, info_.contentStartOffset_) && !canOverScrollStart_) ||
+                (NonPositive(info_.currentOffset_) && !canOverScrollEnd_))) {
             info_.reachEnd_ = false;
             info_.offsetEnd_ = false;
             return;
