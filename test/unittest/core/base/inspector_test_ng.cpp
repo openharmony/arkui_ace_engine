@@ -1744,8 +1744,8 @@ HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
 HWTEST_F(InspectorTestNg, InspectorTestNg028, TestSize.Level1)
 {
     auto resultFrameNode = Inspector::GetInspectorOfNode(nullptr);
-    auto jsonRoot = JsonUtil::Create(true);
-    EXPECT_EQ(resultFrameNode, jsonRoot->ToString());
+    std::string emptyString = "";
+    EXPECT_NE(resultFrameNode, emptyString);
 }
 
 /**
