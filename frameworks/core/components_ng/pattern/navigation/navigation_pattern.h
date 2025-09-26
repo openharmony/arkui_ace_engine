@@ -576,14 +576,14 @@ public:
 
     bool CheckNeedCreate(int32_t index);
 
-    void SetEnableShowHideWithContentCover(bool isEnable)
+    void SetEnableVisibilityLifecycleWithContentCover(bool isEnable)
     {
-        enableShowHideWithContentCover_ = isEnable;
+        enableVisibilityLifecycleWithContentCover_ = isEnable;
     }
 
-    bool GetEnableShowHideWithContentCover() const
+    bool GetEnableVisibilityLifecycleWithContentCover() const
     {
-        return enableShowHideWithContentCover_;
+        return enableVisibilityLifecycleWithContentCover_;
     }
 
     bool CanForceSplitLayout() const
@@ -857,7 +857,7 @@ private:
     std::vector<WeakPtr<NavDestinationNodeBase>> preVisibleNodes_;
     int32_t runningTransitionCount_ = 0;
     bool isTransitionAnimationAborted_ = false;
-    bool enableShowHideWithContentCover_ = true;
+    bool enableVisibilityLifecycleWithContentCover_ = true;
 
     //-------for force split------- begin------
     bool forceSplitSuccess_ = false;
