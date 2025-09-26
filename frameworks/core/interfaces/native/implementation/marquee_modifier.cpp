@@ -132,6 +132,7 @@ void SetAllowScaleImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // Implement Reset value
+        MarqueeModelNG::SetAllowScale(frameNode, false);
         return;
     }
     MarqueeModelNG::SetAllowScale(frameNode, *convValue);
@@ -171,6 +172,7 @@ void SetOnStartImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         // Implement Reset value
+        MarqueeModelNG::SetOnStart(frameNode, nullptr);
         return;
     }
     auto onStart = [arkCallback = CallbackHelper(*optValue)]() -> void {
@@ -186,6 +188,7 @@ void SetOnBounceImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         // Implement Reset value
+        MarqueeModelNG::SetOnBounce(frameNode, nullptr);
         return;
     }
     auto onBounce = [arkCallback = CallbackHelper(*optValue)]() -> void {
@@ -201,6 +204,7 @@ void SetOnFinishImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         // Implement Reset value
+        MarqueeModelNG::SetOnFinish(frameNode, nullptr);
         return;
     }
     auto onFinish = [arkCallback = CallbackHelper(*optValue)]() -> void {
