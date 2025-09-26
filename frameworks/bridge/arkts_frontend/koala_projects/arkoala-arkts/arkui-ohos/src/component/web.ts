@@ -31,7 +31,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, Callback_KeyEvent_Boolean, KeyEvent, NestedScrollOptions, CustomBuilder, TouchEvent, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CopyOptions, NestedScrollMode } from "./enums"
-import { EditMenuOptions, MenuType } from "./textCommon"
+import { EditMenuOptions, MenuType, TextDataDetectorConfig } from "./textCommon"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Position, ResourceStr } from "./units"
 import { PixelMap } from "#external"
@@ -2997,6 +2997,30 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_enableWebAVSession(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    enableDataDetectorAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_enableDataDetector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    dataDetectorConfigAttribute(value: TextDataDetectorConfig | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeTextDataDetectorConfig(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_dataDetectorConfig(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     runJavaScriptOnDocumentStartAttribute(value: Array<ScriptItem> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -3811,6 +3835,8 @@ export interface WebAttribute extends CommonMethod {
     optimizeParserBudget(value: boolean | undefined): this
     enableFollowSystemFontWeight(value: boolean | undefined): this
     enableWebAVSession(value: boolean | undefined): this
+    enableDataDetector(value: boolean | undefined): this
+    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this
     runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this
     runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this
     runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this
@@ -3942,6 +3968,8 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     optimizeParserBudget_value?: boolean | undefined
     enableFollowSystemFontWeight_value?: boolean | undefined
     enableWebAVSession_value?: boolean | undefined
+    enableDataDetector_value?: boolean | undefined
+    dataDetectorConfig_value?: TextDataDetectorConfig | undefined
     runJavaScriptOnDocumentStart_value?: Array<ScriptItem> | undefined
     runJavaScriptOnDocumentEnd_value?: Array<ScriptItem> | undefined
     runJavaScriptOnHeadEnd_value?: Array<ScriptItem> | undefined
@@ -4309,6 +4337,12 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
         return this
     }
     public enableWebAVSession(value: boolean | undefined): this {
+        return this
+    }
+    public enableDataDetector(value: boolean | undefined): this {
+        return this
+    }
+    public dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
         return this
     }
     public runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
@@ -5339,6 +5373,22 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("enableWebAVSession")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.enableWebAVSessionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableDataDetector(value: boolean | undefined): this {
+        if (this.checkPriority("enableDataDetector")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableDataDetectorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
+        if (this.checkPriority("dataDetectorConfig")) {
+            const value_casted = value as (TextDataDetectorConfig | undefined)
+            this.getPeer()?.dataDetectorConfigAttribute(value_casted)
             return this
         }
         return this

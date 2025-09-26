@@ -30705,6 +30705,34 @@ void impl_WebAttribute_enableWebAVSession(Ark_NativePointer thisPtr, KSerializer
         GetNodeModifiers()->getWebModifier()->setEnableWebAVSession(self, (const Opt_Boolean*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_enableWebAVSession, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_WebAttribute_enableDataDetector(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            value_value_buf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean value_value = value_value_buf;;
+        GetNodeModifiers()->getWebModifier()->setEnableDataDetector(self, (const Opt_Boolean*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(WebAttribute_enableDataDetector, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_WebAttribute_dataDetectorConfig(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_TextDataDetectorConfig value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            value_value_buf.value = thisDeserializer.readTextDataDetectorConfig();
+        }
+        Opt_TextDataDetectorConfig value_value = value_value_buf;;
+        GetNodeModifiers()->getWebModifier()->setDataDetectorConfig(self, (const Opt_TextDataDetectorConfig*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(WebAttribute_dataDetectorConfig, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_runJavaScriptOnDocumentStart(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);

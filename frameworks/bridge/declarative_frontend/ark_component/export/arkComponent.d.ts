@@ -1603,6 +1603,8 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
         xOffset: number;
         yOffset: number;
     }) => void): this;
+    enableDataDetector(enable: boolean): this;
+    dataDetectorConfig(config: any): this;
     javaScriptOnDocumentStart(scripts: ScriptItem[]): this;
     layoutMode(mode: WebLayoutMode): this;
     nestedScroll(value: NestedScrollOptions): this;

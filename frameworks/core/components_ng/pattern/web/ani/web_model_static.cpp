@@ -281,6 +281,22 @@ void WebModelStatic::SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std
     (void)enable;
 }
 
+void WebModelStatic::SetEnableDataDetector(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEnableDataDetector(isEnabled);
+}
+
+void WebModelStatic::SetDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateDataDetectorConfig(config);
+}
+
 void WebModelStatic::JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems)
 {
     CHECK_NULL_VOID(frameNode);

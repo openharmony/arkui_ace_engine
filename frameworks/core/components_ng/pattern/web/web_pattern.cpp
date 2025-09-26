@@ -4914,6 +4914,7 @@ void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreate
 
 void WebPattern::UpdateDataDetectorConfig(const TextDetectConfig& config)
 {
+    RETURN_IF_CALLING_FROM_M114();
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::UpdateDataDetectorConfig");
     auto adapter = GetDataDetectorAdapter();
     CHECK_NULL_VOID(adapter);
@@ -8489,6 +8490,7 @@ void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool enable)
 
 void WebPattern::OnEnableDataDetectorUpdate(bool enable)
 {
+    RETURN_IF_CALLING_FROM_M114();
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnEnableDataDetectorUpdate enable:%{public}d", enable);
     auto adapter = GetDataDetectorAdapter();
     CHECK_NULL_VOID(adapter);
