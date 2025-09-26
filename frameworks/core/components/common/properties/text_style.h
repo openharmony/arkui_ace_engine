@@ -398,6 +398,20 @@ struct TextBackgroundStyle {
         std::function<void(const RefPtr<ResourceObject>&, TextBackgroundStyle&)> updateFunc;
     };
 
+    void ReloadResourcesByKey(const std::string& key)
+    {
+        auto res = textBackgroundStyleResMap_.find(key);
+        if (res != textBackgroundStyleResMap_.end()) {
+            auto resourceUpdater = res->second;
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
+
+    bool HasKey(const std::string& key) const
+    {
+        return textBackgroundStyleResMap_.find(key) != textBackgroundStyleResMap_.end();
+    }
+
     std::unordered_map<std::string, ResourceUpdater> textBackgroundStyleResMap_;
 };
 

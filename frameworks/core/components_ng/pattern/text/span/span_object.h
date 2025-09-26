@@ -140,6 +140,7 @@ public:
 
 private:
     void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    void AddColorResourceObj(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem);
 
     Font font_;
@@ -152,16 +153,18 @@ public:
     DecorationSpan() = default;
     // remove when richEditor ready
     explicit DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
-        std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options);
-    DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
         std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options,
-        int32_t start, int32_t end);
+        const RefPtr<ResourceObject>& colorResObj);
+    DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+        std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options, int32_t start,
+        int32_t end, const RefPtr<ResourceObject>& colorResObj);
     explicit DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
         std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
-        std::optional<TextDecorationOptions> options);
+        std::optional<TextDecorationOptions> options, const RefPtr<ResourceObject>& colorResObj);
     DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
         std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
-        std::optional<TextDecorationOptions> options, int32_t start, int32_t end);
+        std::optional<TextDecorationOptions> options, int32_t start, int32_t end,
+        const RefPtr<ResourceObject>& colorResObj);
     TextDecoration GetTextDecorationFirst() const;
     std::vector<TextDecoration> GetTextDecorationTypes() const;
     void SetTextDecorationTypes(const std::vector<TextDecoration>& types);
@@ -179,6 +182,7 @@ public:
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
     std::optional<float> GetLineThicknessScale() const;
+    const RefPtr<ResourceObject>& GetColorResObj() const;
 
 private:
     void AddDecorationStyle(const RefPtr<NG::SpanItem>& spanItem) const;
@@ -189,6 +193,8 @@ private:
     std::optional<TextDecorationStyle> style_;
     std::optional<float> lineThicknessScale_;
     std::optional<TextDecorationOptions> options_;
+
+    RefPtr<ResourceObject> colorResObj_;
 };
 
 class BaselineOffsetSpan : public SpanBase {

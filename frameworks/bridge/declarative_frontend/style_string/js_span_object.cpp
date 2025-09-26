@@ -136,12 +136,19 @@ void JSFontSpan::ParseJsFontColor(const JSRef<JSObject>& obj, Font& font)
     if (obj->HasProperty("fontColor")) {
         JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("fontColor"));
         Color color;
-        if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color)) {
+        RefPtr<ResourceObject> resObj;
+        if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color, resObj)) {
             auto context = PipelineBase::GetCurrentContextSafely();
             CHECK_NULL_VOID(context);
             auto theme = context->GetTheme<TextTheme>();
             CHECK_NULL_VOID(theme);
             color = theme->GetTextStyle().GetTextColor();
+        }
+        if (resObj) {
+            JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
+            JSViewAbstract::CompleteResourceObject(jsObj);
+            resObj = JSViewAbstract::GetResourceObject(jsObj);
+            font.fontColorResObj = resObj;
         }
         font.fontColor = color;
     }
@@ -239,11 +246,12 @@ void JSFontSpan::ParseJsStrokeWidth(const JSRef<JSObject>& obj, Font& font)
     font.strokeWidth = width;
 }
 
-void JSFontSpan::GetStrokeColorFallback(const JSRef<JSObject>& obj, const RefPtr<TextTheme>& theme, Color& color)
+void JSFontSpan::GetStrokeColorFallback(const JSRef<JSObject>& obj, const RefPtr<TextTheme>& theme, Color& color,
+    RefPtr<ResourceObject>& resObj, JSRef<JSVal>& colorObj)
 {
     if (obj->HasProperty("fontColor")) {
-        JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("fontColor"));
-        if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color)) {
+        colorObj = JSRef<JSVal>::Cast(obj->GetProperty("fontColor"));
+        if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color, resObj)) {
             color = theme->GetTextStyle().GetTextColor();
         }
     } else {
@@ -258,20 +266,28 @@ void JSFontSpan::ParseJsStrokeColor(const JSRef<JSObject>& obj, Font& font)
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
+    RefPtr<ResourceObject> resObj;
+    JSRef<JSVal> colorObj;
     if (obj->HasProperty("strokeColor")) {
-        JSRef<JSVal> strokeColorObj = JSRef<JSVal>::Cast(obj->GetProperty("strokeColor"));
-        if (!strokeColorObj->IsNull() && !JSViewAbstract::ParseJsColor(strokeColorObj, color)) {
-            GetStrokeColorFallback(obj, theme, color);
+        colorObj = JSRef<JSVal>::Cast(obj->GetProperty("strokeColor"));
+        if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color, resObj)) {
+            GetStrokeColorFallback(obj, theme, color, resObj, colorObj);
         }
         font.strokeColor = color;
     } else if (obj->HasProperty("fontColor")) {
-        JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("fontColor"));
-        if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color)) {
+        colorObj = JSRef<JSVal>::Cast(obj->GetProperty("fontColor"));
+        if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color, resObj)) {
             color = theme->GetTextStyle().GetTextColor();
         }
         font.strokeColor = color;
     } else {
         font.strokeColor = theme->GetTextStyle().GetTextColor();
+    }
+    if (resObj) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
+        JSViewAbstract::CompleteResourceObject(jsObj);
+        resObj = JSViewAbstract::GetResourceObject(jsObj);
+        font.strokeColorResObj = resObj;
     }
 }
 
@@ -444,7 +460,8 @@ RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSCallbackI
     std::optional<Color> colorOption;
     Color color;
     JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("color"));
-    if (!colorObj->IsNull() && JSViewAbstract::ParseJsColor(colorObj, color)) {
+    RefPtr<ResourceObject> resObj;
+    if (!colorObj->IsNull() && JSViewAbstract::ParseJsColor(colorObj, color, resObj)) {
         colorOption = color;
     }
     std::optional<TextDecorationStyle> styleOption;
@@ -467,8 +484,13 @@ RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSCallbackI
     if (args.Length() > 1 && args[1]->IsObject()) {
         options = JSDecorationSpan::ParseJsDecorationOptions(JSRef<JSObject>::Cast(args[1]));
     }
+    if (resObj) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
+        JSViewAbstract::CompleteResourceObject(jsObj);
+        resObj = JSViewAbstract::GetResourceObject(jsObj);
+    }
     return AceType::MakeRefPtr<DecorationSpan>(
-        std::vector<TextDecoration>({type}), colorOption, styleOption, lineThicknessScale, options);
+        std::vector<TextDecoration>({type}), colorOption, styleOption, lineThicknessScale, options, resObj);
 }
 
 TextDecorationOptions JSDecorationSpan::ParseJsDecorationOptions(const JSRef<JSObject>& obj)
@@ -782,7 +804,7 @@ void JSTextShadowSpan::Constructor(const JSCallbackInfo& args)
         std::vector<Shadow> shadows;
         span = AceType::MakeRefPtr<TextShadowSpan>(shadows);
     } else {
-        span = JSTextShadowSpan::ParseJSTextShadowSpan(JSRef<JSObject>::Cast(args[0]));
+        span = JSTextShadowSpan::ParseJSTextShadowSpan(JSRef<JSObject>::Cast(args[0]), true);
     }
     textShadowSpan->textShadowSpan_ = span;
     args.SetReturnValue(Referenced::RawPtr(textShadowSpan));
@@ -795,10 +817,10 @@ void JSTextShadowSpan::Destructor(JSTextShadowSpan* textShadowSpan)
     }
 }
 
-RefPtr<TextShadowSpan> JSTextShadowSpan::ParseJSTextShadowSpan(const JSRef<JSObject>& obj)
+RefPtr<TextShadowSpan> JSTextShadowSpan::ParseJSTextShadowSpan(const JSRef<JSObject>& obj, bool needResObj)
 {
     std::vector<Shadow> shadows;
-    ParseTextShadowFromShadowObject(obj, shadows);
+    ParseTextShadowFromShadowObject(obj, shadows, needResObj);
     return AceType::MakeRefPtr<TextShadowSpan>(shadows);
 }
 
@@ -1940,7 +1962,7 @@ void JSBackgroundColorSpan::Destructor(JSBackgroundColorSpan* backgroundColor)
 
 RefPtr<BackgroundColorSpan> JSBackgroundColorSpan::ParseJSBackgroundColorSpan(const JSCallbackInfo& info)
 {
-    auto textBackgroundValue = JSContainerSpan::ParseTextBackgroundStyle(info);
+    auto textBackgroundValue = JSContainerSpan::ParseTextBackgroundStyle(info, true);
     return AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundValue);
 }
 

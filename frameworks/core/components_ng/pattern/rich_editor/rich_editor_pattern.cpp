@@ -2873,8 +2873,8 @@ void RichEditorPattern::UpdateStyledStringDecorationType(int32_t start, int32_t 
     std::optional<TextDecorationStyle> styleOption;
     std::optional<TextDecorationOptions> options;
     std::optional<float> lineThicknessScale;
-    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
-        std::vector<TextDecoration>({ type }), colorOption, styleOption, lineThicknessScale, options, start, end);
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({ type }), colorOption,
+        styleOption, lineThicknessScale, options, start, end, nullptr);
     auto updateDecorationSpanFunc = [&type](const RefPtr<DecorationSpan>& oriDecorationSpan) -> RefPtr<DecorationSpan> {
         CHECK_NULL_RETURN(oriDecorationSpan, nullptr);
         if (type == TextDecoration::NONE) {

@@ -504,8 +504,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsDecorationSpan(int32_t start, int32_t leng
             decorationSpan->GetDecorationSpan()->GetColor(),
             decorationSpan->GetDecorationSpan()->GetTextDecorationStyle(),
             decorationSpan->GetDecorationSpan()->GetLineThicknessScale(),
-            decorationSpan->GetDecorationSpan()->GetTextDecorationOptions(),
-            start, start + length);
+            decorationSpan->GetDecorationSpan()->GetTextDecorationOptions(), start, start + length,
+            decorationSpan->GetDecorationSpan()->GetColorResObj());
     }
     return nullptr;
 }
