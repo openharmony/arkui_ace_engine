@@ -566,4 +566,41 @@ PaddingProperty ConvertToCalcPaddingProperty(const std::optional<CalcDimension>&
     }
     return paddings;
 }
+
+PaddingProperty ConstraintPaddingPropertyNonNegative(PaddingProperty padding)
+{
+    const CalcLength zeroPadding { 0.0, DimensionUnit::VP };
+    if (padding.left.has_value()) {
+        if (!padding.left.value().IsValid()) {
+            padding.left = zeroPadding;
+        }
+    }
+    if (padding.right.has_value()) {
+        if (!padding.right.value().IsValid()) {
+            padding.right = zeroPadding;
+        }
+    }
+    if (padding.top.has_value()) {
+        if (!padding.top.value().IsValid()) {
+            padding.top = zeroPadding;
+        }
+    }
+    if (padding.bottom.has_value()) {
+        if (!padding.bottom.value().IsValid()) {
+            padding.bottom = zeroPadding;
+        }
+    }
+    if (padding.start.has_value()) {
+        if (!padding.start.value().IsValid()) {
+            padding.start = zeroPadding;
+        }
+    }
+    if (padding.end.has_value()) {
+        if (!padding.end.value().IsValid()) {
+            padding.end = zeroPadding;
+        }
+    }
+    return padding;
+}
+
 } // namespace OHOS::Ace::NG
