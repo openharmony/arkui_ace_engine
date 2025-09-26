@@ -682,6 +682,12 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
         loadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
         loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
+    if (altErrorCtx_) {
+        altErrorCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
+        altErrorCtx_->SetImageQuality(GetImageQuality());
+        altErrorCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
+        altErrorCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
+    }
     if (altLoadingCtx_) {
         altLoadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         altLoadingCtx_->SetImageQuality(GetImageQuality());
@@ -816,6 +822,15 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
                 loadingCtx_->GetFrameCount());
         }
     }
+    if (altErrorCtx_) {
+        auto renderProp = GetPaintProperty<ImageRenderProperty>();
+        if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
+            altErrorImage_) {
+            altErrorCtx_->ResizableCalcDstSize();
+            SetImagePaintConfig(altErrorImage_, altErrorCtx_->GetSrcRect(), altErrorCtx_->GetDstRect(),
+                altErrorCtx_->GetSrc(), altErrorCtx_->GetFrameCount());
+        }
+    }
     if (altLoadingCtx_) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
@@ -828,7 +843,7 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (IsSupportImageAnalyzerFeature()) {
         UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
     }
-    return image_ || altImage_;
+    return image_ || altErrorImage_ || altImage_;
 }
 
 void ImagePattern::CreateObscuredImage()
@@ -927,9 +942,9 @@ void ImagePattern::LoadImageDataIfNeed()
     CHECK_NULL_VOID(host);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
-    loadFailed_ = false;
 
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageReloadNeeded_ || isOrientationChange_) {
+        loadFailed_ = false;
         bool needLayout = host->CheckNeedForceMeasureAndLayout() &&
                           imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::GONE;
         LoadImage(src, needLayout);
@@ -948,6 +963,10 @@ void ImagePattern::LoadImageDataIfNeed()
                 pattern->UpdateAnalyzerUIConfig(host->GetGeometryNode());
             },
             "ArkUIImageUpdateAnalyzerUIConfig");
+    }
+    if (loadFailed_ && imageLayoutProperty->GetAltError()) {
+        auto altErrorImageSourceInfo = imageLayoutProperty->GetAltError().value_or(ImageSourceInfo(""));
+        LoadAltErrorImage(altErrorImageSourceInfo);
     }
     if (loadingCtx_->NeedAlt()) {
         if (imageLayoutProperty->GetAltPlaceholder()) {
@@ -1421,6 +1440,8 @@ void ImagePattern::OnVisibleAreaChange(bool visible, double ratio)
     CHECK_NULL_VOID(host);
     if (image_) {
         image_->ControlAnimation(visible);
+    } else if (altErrorImage_) {
+        altErrorImage_->ControlAnimation(visible);
     } else if (altImage_) {
         altImage_->ControlAnimation(visible);
     } else if (imageType_ == ImageType::ANIMATED_DRAWABLE && drawable_) {

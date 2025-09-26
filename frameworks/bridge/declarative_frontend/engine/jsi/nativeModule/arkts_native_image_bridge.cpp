@@ -43,6 +43,9 @@ constexpr int32_t BORDER_RADIUS_INDEX_2 = 3;
 constexpr int32_t BORDER_RADIUS_INDEX_3 = 4;
 constexpr int32_t BORDER_RADIUS_INDEX_4 = 4;
 constexpr int32_t BORDER_RADIUS_VALUE = 0;
+constexpr int32_t IMAGE_ALT_PLACEHOLDER = 1;
+constexpr int32_t IMAGE_ALT_ERROR = 2;
+constexpr int32_t IMAGE_ALT_NORMAL = 3;
 constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
 
 void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32> &options)
@@ -787,13 +790,13 @@ ArkUINativeModuleValue ImageBridge::SetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo
 
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-    auto setResource = [&](Local<JSValueRef> resourceArg, const char* resourceType) -> void {
+    auto setResource = [&](Local<JSValueRef> resourceArg, int32_t type) -> void {
         std::string src;
         RefPtr<ResourceObject> srcResObj;
         if (!ArkTSUtils::ParseJsMedia(vm, resourceArg, src, srcResObj)) {
             return;
         }
-        if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK && strcmp(resourceType, "error") != 0) {
+        if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK && type != IMAGE_ALT_ERROR) {
             return;
         }
         std::string bundleName;
@@ -802,34 +805,40 @@ ArkUINativeModuleValue ImageBridge::SetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo
         ArkTSUtils::GetJsMediaBundleInfo(vm, resourceArg, bundleName, moduleName);
         auto nodeModifiers = GetArkUINodeModifiers();
         CHECK_NULL_VOID(nodeModifiers);
-        if (strcmp(resourceType, "placeholder") == 0) {
-            nodeModifiers->getImageModifier()->setAltPlaceholder(
-                nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), srcRawPtr);
-        } else if (strcmp(resourceType, "error") == 0) {
-            nodeModifiers->getImageModifier()->setAltError(
-                nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), srcRawPtr);
-        } else {
-            nodeModifiers->getImageModifier()->setAltRes(
-                nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), srcRawPtr);
+
+        switch (type) {
+            case IMAGE_ALT_PLACEHOLDER:
+                nodeModifiers->getImageModifier()->setAltPlaceholder(
+                    nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), srcRawPtr);
+                break;
+            case IMAGE_ALT_ERROR:
+                nodeModifiers->getImageModifier()->setAltError(
+                    nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), srcRawPtr);
+                break;
+            case IMAGE_ALT_NORMAL:
+                nodeModifiers->getImageModifier()->setAltRes(
+                    nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), srcRawPtr);
+                break;
+            default:
+                break;
         }
         return;
     };
-
     if (info[1]->IsObject()) {
         Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
         if (jsObj->HasProperty("placeholder") || jsObj->HasProperty("error")) {
             if (jsObj->HasProperty("placeholder")) {
                 Local<JSValueRef> placeholderVal = jsObj->GetProperty("placeholder")->GetLocalHandle();
-                setResource(placeholderVal, "placeholder");
+                setResource(placeholderVal, IMAGE_ALT_PLACEHOLDER);
             }
             if (jsObj->HasProperty("error")) {
                 Local<JSValueRef> errorVal = jsObj->GetProperty("error")->GetLocalHandle();
-                setResource(errorVal, "error");
+                setResource(errorVal, IMAGE_ALT_ERROR);
             }
             return panda::JSValueRef::Undefined(vm);
         }
     }
-    setResource(secondArg, "Alt");
+    setResource(secondArg, IMAGE_ALT_NORMAL);
     return panda::JSValueRef::Undefined(vm);
 }
 
