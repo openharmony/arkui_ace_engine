@@ -131,6 +131,7 @@ void PositionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto optValue = Converter::GetOptPtr(value);
+    CHECK_NULL_VOID(optValue);
     auto x = Converter::ConvertOrDefault(optValue->x, Dimension());
     auto y = Converter::ConvertOrDefault(optValue->y, Dimension());
     ViewAbstract::SetPosition(frameNode, { x, y });
@@ -142,6 +143,7 @@ void MarkAnchorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto optValue = Converter::GetOptPtr(value);
+    CHECK_NULL_VOID(optValue);
     auto x = Converter::ConvertOrDefault(optValue->x, Dimension());
     auto y = Converter::ConvertOrDefault(optValue->y, Dimension());
     ViewAbstract::MarkAnchor(frameNode, { x, y });
