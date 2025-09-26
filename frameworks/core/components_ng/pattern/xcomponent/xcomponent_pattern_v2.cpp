@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_surface_config_client.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "transaction/rs_transaction.h"
 #include "transaction/rs_transaction_handler.h"
@@ -59,6 +60,8 @@ void XComponentPatternV2::SetSurfaceHolder(OH_ArkUI_SurfaceHolder* surfaceHolder
     surfaceHolder_ = surfaceHolder;
     if (surfaceHolder_) {
         surfaceHolder_->nativeWindow_ = reinterpret_cast<OHNativeWindow*>(nativeWindow_);
+        surfaceHolder_->xComponentSurfaceConfigInterface_ =
+            AceType::MakeRefPtr<XComponentSurfaceConfigClient>(AceType::WeakClaim(this));
         hasGotSurfaceHolder_ = true;
     }
 }
@@ -284,6 +287,7 @@ void XComponentPatternV2::InitSurface()
         renderSurface_->SetRenderContext(renderContext);
         renderSurface_->SetIsTexture(true);
         renderContext->OnNodeNameUpdate(GetId());
+        renderSurface_->SetSurfaceBufferOpaque(isOpaque_);
     }
     renderSurface_->InitSurface();
     renderSurface_->UpdateSurfaceConfig();
@@ -515,6 +519,7 @@ void XComponentPatternV2::InitializeRenderContext()
     renderContextForSurface_->SetTransparentLayer(isTransparentLayer_);
     renderContextForSurface_->SetSecurityLayer(isEnableSecure_);
     renderContextForSurface_->SetSurfaceRotation(isSurfaceLock_);
+    renderContextForSurface_->SetSurfaceBufferOpaque(isOpaque_);
     renderContextForSurface_->SetRenderFit(renderFit_);
 }
 
@@ -552,6 +557,7 @@ void XComponentPatternV2::DumpInfo()
         std::string("xcomponentType: ").append(XComponentPattern::XComponentTypeToString(type_)));
     DumpLog::GetInstance().AddDesc(std::string("surfaceId: ").append(surfaceId_));
     DumpLog::GetInstance().AddDesc(std::string("surfaceRect: ").append(paintRect_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("isOpaque: ").append(isOpaque_ ? "true" : "false"));
 }
 
 void XComponentPatternV2::SetExpectedRateRange(int32_t min, int32_t max, int32_t expected)

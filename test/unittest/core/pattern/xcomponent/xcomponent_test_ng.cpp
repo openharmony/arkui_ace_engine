@@ -2060,4 +2060,42 @@ HWTEST_F(XComponentTestNg, DumpAdvanceInfo, TestSize.Level1)
     pattern->DumpAdvanceInfo();
     EXPECT_EQ(pattern->renderSurface_, nullptr);
 }
+
+/**
+ * @tc.name: SetSurfaceIsOpaque
+ * @tc.desc: Test set SurfaceIsOpaque for XComponent
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, SetSurfaceIsOpaque, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call SetSurfaceIsOpaque when type = XComponentType::SURFACE
+     * @tc.expected: isOpaque in pattern is true
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->renderContextForSurface_ = AceType::MakeRefPtr<MockRenderContext>();
+    EXPECT_CALL(
+        *AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_), SetSurfaceBufferOpaque(true))
+        .Times(1);
+    pattern->SetSurfaceIsOpaque(true);
+    EXPECT_TRUE(pattern->isOpaque_);
+
+    /**
+     * @tc.steps: step2. call SetSurfaceIsOpaque when type = XComponentType::TEXTURE
+     * @tc.expected: isOpaque in pattern is true
+     */
+    testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    pattern = frameNode->GetPattern<XComponentPattern>();
+    pattern->renderSurface_ = AceType::MakeRefPtr<MockRenderSurface>();
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), SetSurfaceBufferOpaque(true))
+        .Times(1);
+    pattern->SetSurfaceIsOpaque(true);
+    EXPECT_TRUE(pattern->isOpaque_);
+}
 } // namespace OHOS::Ace::NG

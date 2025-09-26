@@ -1265,6 +1265,51 @@ void OH_ArkUI_SurfaceCallback_SetSurfaceHideEvent(
     OH_ArkUI_SurfaceCallback* callback,
     void (*onSurfaceHide)(OH_ArkUI_SurfaceHolder* surfaceHolder));
 
+/**
+ * @brief Declares the config for Surface held by XComponent.
+ *
+ * @since 22
+ */
+typedef struct ArkUI_XComponentSurfaceConfig ArkUI_XComponentSurfaceConfig;
+
+/**
+ * @brief Create an <b>ArkUI_XComponentSurfaceConfig</b> object.
+ *
+ * @return A pointer to the object of the XComponent's surface config.
+ * @since 22
+ */
+ArkUI_XComponentSurfaceConfig* OH_ArkUI_XComponentSurfaceConfig_Create();
+
+/**
+ * @brief Dispose of an <b>ArkUI_XComponentSurfaceConfig</b> object.
+ *
+ * @param config A pointer to the object of the XComponent's surface config to be destroyed.
+ * @since 22
+ */
+void OH_ArkUI_XComponentSurfaceConfig_Dispose(ArkUI_XComponentSurfaceConfig* config);
+
+/**
+ * @brief Set whether the surface held by XComponent is opaque.
+ *
+ * @param config A pointer to the object of the XComponent's surface config.
+ * @param isOpaque Indicates whether the surface held by XComponent is opaque.
+ * @since 22
+ */
+void OH_ArkUI_XComponentSurfaceConfig_SetIsOpaque(ArkUI_XComponentSurfaceConfig* config, bool isOpaque);
+
+/**
+ * @brief Set surface config for this <b>OH_ArkUI_SurfaceHolder</b> instance.
+ *
+ * @param surfaceHolder Indicates the pointer to this <b>OH_ArkUI_SurfaceHolder</b> instance.
+ * @param config Indicates the pointer to the XComponent's surface config.
+ * @return Returns the status code of the execution.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 22
+ */
+int32_t OH_ArkUI_SurfaceHolder_SetSurfaceConfig(
+    OH_ArkUI_SurfaceHolder *surfaceHolder,
+    ArkUI_XComponentSurfaceConfig *config);
 #ifdef __cplusplus
 };
 #endif

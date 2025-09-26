@@ -132,6 +132,8 @@ void JSXComponentController::JSBind(BindingTarget globalObj)
         "getXComponentSurfaceRotation", &JSXComponentController::GetXComponentSurfaceRotation);
     JSClass<JSXComponentController>::CustomMethod("lockCanvas", &JSXComponentController::LockCanvas);
     JSClass<JSXComponentController>::CustomMethod("unlockCanvasAndPost", &JSXComponentController::UnlockCanvasAndPost);
+    JSClass<JSXComponentController>::CustomMethod(
+        "setXComponentSurfaceConfig", &JSXComponentController::SetXComponentSurfaceConfig);
     JSClass<JSXComponentController>::Bind(
         globalObj, JSXComponentController::Constructor, JSXComponentController::Destructor);
 }
@@ -348,5 +350,18 @@ void JSXComponentController::UnlockCanvasAndPost(const JSCallbackInfo& args)
     auto rsCanvas = unwrapCanvas->GetCanvas();
     CHECK_NULL_VOID(xcomponentController_);
     xcomponentController_->UnlockCanvasAndPost(rsCanvas);
+}
+
+void JSXComponentController::SetXComponentSurfaceConfig(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    bool isOpaque = false;
+    ConvertFromJSValue(obj->GetProperty("isOpaque"), isOpaque);
+    CHECK_NULL_VOID(xcomponentController_);
+    xcomponentController_->SetSurfaceConfig(isOpaque);
 }
 } // namespace OHOS::Ace::Framework

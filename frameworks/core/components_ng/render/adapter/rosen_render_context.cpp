@@ -5704,6 +5704,14 @@ void RosenRenderContext::SetTransparentLayer(bool isTransparentLayer)
     rsSurfaceNode->SetHardwareEnableHint(isTransparentLayer);
 }
 
+void RosenRenderContext::SetSurfaceBufferOpaque(bool isOpaque)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetSurfaceBufferOpaque(isOpaque);
+}
+
 void RosenRenderContext::SetScreenId(uint64_t screenId)
 {
     CHECK_NULL_VOID(rsNode_);

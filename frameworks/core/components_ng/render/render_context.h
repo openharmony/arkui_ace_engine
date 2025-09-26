@@ -308,6 +308,7 @@ public:
     virtual void SetImageHDRBrightness(float hdrBrightness) {}
     virtual void SetImageHDRPresent(bool hdrPresent) {}
     virtual void SetTransparentLayer(bool isTransparentLayer) {}
+    virtual void SetSurfaceBufferOpaque(bool isOpaque) {}
     virtual void SetScreenId(uint64_t screenId) {}
     virtual void SetAlwaysSnapshot(bool enable) {}
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
