@@ -937,6 +937,7 @@ void WebPattern::RemoveSnapshotFrameNode(bool isAnimate)
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "blankless RemoveSnapshotFrameNode with animation");
     auto snapshotNode = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value());
+    CHECK_NULL_VOID(snapshotNode);
     isSnapshotImageAnimating_ = true;
     auto webPattern = WeakClaim(this);
     AnimationOption option;
