@@ -6071,12 +6071,12 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     *.value[0].i32: alignment mode for the list snap position.
+     *.value[0].i32: scroll snap animation speed for the <b>List</b> component.
      * The parameter type is {@link ArkUI_ScrollSnapAnimationSpeed}.
      * Default value: <b>ARKUI_SCROLL_SNAP_ANIMATION_NORMAL</b>. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     *.value[0].i32: alignment mode for the list snap position.
+     *.value[0].i32: scroll snap animation speed for the <b>List</b> component.
      * The parameter type is {@link ArkUI_ScrollSnapAnimationSpeed}. \n
      *
      * @since 22
