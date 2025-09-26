@@ -5521,6 +5521,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ThemeOps_createAndBindTheme(themeScopeId: KInt, themeId: KInt, thisArray: KSerializerBuffer, thisLength: int32, colorMode: KInt): void
     @ani.unsafe.Direct
+    native static _ThemeOps_applyThemeScopeIdToNode(ptr: KPointer, themeScopeId: KInt): void
+    @ani.unsafe.Direct
     native static _TimePickerDialog_construct(): KPointer
     @ani.unsafe.Direct
     native static _TimePickerDialog_getFinalizer(): KPointer

@@ -35205,6 +35205,10 @@ void impl_ThemeOps_createAndBindTheme(Ark_Int32 themeScopeId, Ark_Int32 themeId,
         GetAccessors()->getThemeOpsAccessor()->createAndBindTheme(themeScopeId, themeId, static_cast<Array_ResourceColor*>(&colorArrayValueTemp), static_cast<Ark_ThemeColorMode>(colorMode), static_cast<Callback_Void*>(&onThemeScopeDestroyValueTemp));
 }
 KOALA_INTEROP_DIRECT_V5(ThemeOps_createAndBindTheme, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t, Ark_Int32)
+void impl_ThemeOps_applyThemeScopeIdToNode(Ark_NativePointer ptr, Ark_Int32 themeScopeId) {
+        GetAccessors()->getThemeOpsAccessor()->applyThemeScopeIdToNode(ptr, themeScopeId);
+}
+KOALA_INTEROP_DIRECT_V2(ThemeOps_applyThemeScopeIdToNode, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_TimePickerDialog_construct() {
         return GetAccessors()->getTimePickerDialogAccessor()->construct();
 }

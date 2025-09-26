@@ -2670,6 +2670,9 @@ export class ThemeOps {
         ArkUIGeneratedNativeModule._ThemeOps_createAndBindTheme(themeScopeId, themeId, thisSerializer.asBuffer(), thisSerializer.length(), colorMode.valueOf())
         thisSerializer.release()
     }
+    static applyThemeScopeIdToNode_serialize(ptr: KPointer, themeScopeId: int32): void {
+        ArkUIGeneratedNativeModule._ThemeOps_applyThemeScopeIdToNode(ptr, themeScopeId)
+    }
     public static sendThemeToNative(colorArray: Array<ResourceColor>, elmtId: int32): void {
         const colorArray_casted = colorArray as (Array<ResourceColor>)
         const elmtId_casted = elmtId as (int32)
@@ -2689,6 +2692,12 @@ export class ThemeOps {
         const colorMode_casted = colorMode as (ThemeColorMode)
         const onThemeScopeDestroy_casted = onThemeScopeDestroy as ((() => void))
         ThemeOps.createAndBindTheme_serialize(themeScopeId_casted, themeId_casted, colorArray_casted, colorMode_casted, onThemeScopeDestroy_casted)
+        return
+    }
+    public static applyThemeScopeIdToNode(ptr: int64, themeScopeId: int32): void {
+        const ptr_casted = ptr as (int64)
+        const themeScopeId_casted = themeScopeId as (int32)
+        ThemeOps.applyThemeScopeIdToNode_serialize(ptr_casted, themeScopeId_casted)
         return
     }
 }

@@ -30,6 +30,8 @@ import { ArkThemeWhiteList } from './ArkThemeWhiteList';
 import { ArkCommonMethodComponent } from 'arkui/component/common';
 import { GlobalStateManager, StateManagerImpl } from "@koalaui/runtime";
 import { findPeerNode } from "arkui/PeerNode";
+import { KPointer } from '@koalaui/interop';
+import { ThemeOps } from 'arkui/component/idlize';
 
 export class ArkThemeScopeManager {
     private static instance: ArkThemeScopeManager | undefined = undefined;
@@ -517,5 +519,13 @@ export class ArkThemeScopeManager {
 
     public getThemeOptionsById(withThemeId: int32): WithThemeOptions | undefined {
         return this.themeOptionsMap.get(withThemeId);
+    }
+
+    public applyThemeScopeIdToNode(ptr: KPointer) {
+        const stateManager = GlobalStateManager.instance;
+        const themeScopeId =  stateManager.stateBy<int32>("themeScopeId")?.value;
+        if (themeScopeId) {
+            ThemeOps.applyThemeScopeIdToNode(ptr, themeScopeId as int32);
+        }
     }
 }

@@ -41094,6 +41094,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void ApplyThemeScopeIdToNodeImpl(Ark_NativePointer ptr,
+                                     Ark_Int32 themeScopeId)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("applyThemeScopeIdToNode(");
+        WriteToString(&out, ptr);
+        out.append(", ");
+        WriteToString(&out, themeScopeId);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // ThemeOpsAccessor
     namespace TimePickerDialogAccessor {
     void DestroyPeerImpl(Ark_TimePickerDialog peer)

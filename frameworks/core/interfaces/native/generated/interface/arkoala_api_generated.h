@@ -26079,6 +26079,8 @@ typedef struct GENERATED_ArkUIThemeOpsAccessor {
                                const Array_ResourceColor* colorArray,
                                Ark_ThemeColorMode colorMode,
                                const Callback_Void* onThemeScopeDestroy);
+    void (*applyThemeScopeIdToNode)(Ark_NativePointer ptr,
+                                    Ark_Int32 themeScopeId);
 } GENERATED_ArkUIThemeOpsAccessor;
 
 typedef struct GENERATED_ArkUITimePickerDialogAccessor {

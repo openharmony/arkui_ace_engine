@@ -167,7 +167,7 @@ export class ArkThemeScope {
         if (this.components) {
             const index = this.components!.binarySearch(elmtId);
             if (index > -1) {
-                this.components!.splice(index, 1);
+                this.components!.splice(index as int32, 1);
             }
         }
     }

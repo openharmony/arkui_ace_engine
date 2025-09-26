@@ -89,13 +89,21 @@ void CreateAndBindThemeImpl(Ark_Int32 themeScopeId, Ark_Int32 themeId, const Arr
     };
     themeModifier->setOnThemeScopeDestroy(node, &func);
 }
-} // namespace ThemeOpsAccessor
+void ApplyThemeScopeIdToNodeImpl(Ark_NativePointer ptr,
+                                 Ark_Int32 themeScopeId)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(ptr);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetThemeScopeId(themeScopeId);
+}
+} // ThemeOpsAccessor
 const GENERATED_ArkUIThemeOpsAccessor* GetThemeOpsAccessor()
 {
     static const GENERATED_ArkUIThemeOpsAccessor ThemeOpsAccessorImpl {
         ThemeOpsAccessor::SendThemeToNativeImpl,
         ThemeOpsAccessor::SetDefaultThemeImpl,
         ThemeOpsAccessor::CreateAndBindThemeImpl,
+        ThemeOpsAccessor::ApplyThemeScopeIdToNodeImpl,
     };
     return &ThemeOpsAccessorImpl;
 }
