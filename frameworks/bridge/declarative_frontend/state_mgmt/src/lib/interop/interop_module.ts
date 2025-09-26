@@ -71,14 +71,14 @@ function registerCompatibleStaticComponentCallback(
     InteropExtractorModule.compatibleStaticComponent = callback;
 }
 
-function registerMakeBuilderParameterStaticProxy(callback: (name: string, value: Object, sourceGetter: Object) => Object) {
+function registerMakeBuilderParameterStaticProxy(callback: (name: string, value: Object, sourceGetter: Object) => Object): void {
     InteropExtractorModule.makeBuilderParameterStaticProxy = callback;
 }
 
-function registerUpdateInteropExtendableComponent(callback: (dynamicComponent: Object) => void) {
+function registerUpdateInteropExtendableComponent(callback: (dynamicComponent: Object) => void): void {
     InteropExtractorModule.updateInteropExtendableComponent = callback;
 }
 
-function registerResetInteropExtendableComponent(callback: () => void) {
+function registerResetInteropExtendableComponent(callback: () => void): void {
     InteropExtractorModule.resetInteropExtendableComponent = callback;
 }
