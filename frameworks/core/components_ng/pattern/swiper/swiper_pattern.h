@@ -909,6 +909,7 @@ protected:
 private:
     Framework::JSIndicatorController* indicatorController_ = nullptr;
     void OnModifyDone() override;
+    void OnHostChildUpdateDone() override;
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnAttachToFrameNodeMultiThread();
