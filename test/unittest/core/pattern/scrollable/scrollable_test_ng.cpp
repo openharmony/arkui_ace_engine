@@ -1680,6 +1680,54 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnTouchTestDone003
+ * @tc.desc: Test OnTouchTestDone with ClickJudge block
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, OnTouchTestDone003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize baseGestureEvent and activeRecognizers.
+     */
+    auto baseGestureEvent = std::make_shared<BaseGestureEvent>();
+    baseGestureEvent->SetSourceDevice(SourceType::TOUCH);
+    std::list<FingerInfo> fingerInfos;
+    FingerInfo fingerInfo;
+    fingerInfos.emplace_back(fingerInfo);
+    baseGestureEvent->SetFingerList(fingerInfos);
+    std::list<RefPtr<NGGestureRecognizer>> activeRecognizers;
+    PanDirection panDirection;
+    panDirection.type = PanDirection::HORIZONTAL;
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 5, false);
+    panRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    panRecognizer->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    activeRecognizers.emplace_back(panRecognizer);
+    RefPtr<LongPressRecognizer> longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(false, false);
+    longPressRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    longPressRecognizer->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
+    activeRecognizers.emplace_back(longPressRecognizer);
+    RefPtr<NGGestureRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(scroll_)));
+    clickRecognizer->SetRecognizerType(GestureTypeName::CLICK);
+    activeRecognizers.emplace_back(clickRecognizer);
+    auto scrollablePattern = scroll_->GetPattern<PartiallyMockedScrollable>();
+    RefPtr<Scrollable> scrollable = scrollablePattern->GetScrollable();
+    EXPECT_NE(scrollable, nullptr);
+    auto scrollableEvent = scrollablePattern->GetScrollableEvent();
+    scrollableEvent->SetClickJudgeCallback([](const PointF&){ return true; });
+    
+    /**
+     * @tc.steps: step2. call OnTouchTestDone.
+     * @tc.expected: isHitTestBlock_ is true, clickRecognizer and panRecognizer not prevent.
+     */
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_TRUE(scrollablePattern->isHitTestBlock_);
+    EXPECT_FALSE(panRecognizer->IsPreventBegin());
+    EXPECT_TRUE(longPressRecognizer->IsPreventBegin());
+    EXPECT_FALSE(clickRecognizer->IsPreventBegin());
+}
+
+/**
  * @tc.name: onScrollerAreaChangeEventTest001
  * @tc.desc: Test onScrollerAreaChangeEvent
  * @tc.type: FUNC
