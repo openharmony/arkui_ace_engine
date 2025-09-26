@@ -205,6 +205,9 @@ HWTEST_F(ScrollableCoverTestNg, SetScrollBarColorTest001, TestSize.Level1)
      * @tc.steps: step3. Set ScrollBarColor to blue with frameNode
      * @tc.expected: ScrollablePaintProperty ScrollBarColor is updated to blue
      */
+    ScrollableModelNG::ResetScrollBarColor(&(*scroll_));
+    auto scrollBarColor = scrollablePn->GetScrollBarColor();
+    EXPECT_EQ(scrollBarColor, std::nullopt);
     ScrollableModelNG::SetScrollBarColor(&(*scroll_), SCROLLBAR_COLOR_BLUE);
     scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
     EXPECT_EQ(scrollablePn->GetBarColor(), Color::FromString(SCROLLBAR_COLOR_BLUE));

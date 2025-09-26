@@ -40,6 +40,7 @@ public:
     void SetGridHeight(const Dimension& value) override;
     void SetScrollBarMode(DisplayMode value) override;
     void SetScrollBarColor(const std::string& value) override;
+    void SetScrollBarColor(const std::optional<Color>& scrollBarColor) override;
     void SetScrollBarWidth(const std::string& value) override;
     void SetCachedCount(int32_t value, bool show = false) override;
     void SetIsRTL(TextDirection direction) override;

@@ -666,6 +666,7 @@ HWTEST_F(GridScrollLayoutTestNg, PaintEdgeEffect001, TestSize.Level1)
 HWTEST_F(GridScrollLayoutTestNg, GridScrollTest006, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
+    ASSERT_NE(paintProperty_, nullptr);
     ScrollBarUpdateFunc scrollFunc = [](int32_t index, Dimension offset) {
         std::optional<float> horizontalOffset = offset.ConvertToPx();
         std::optional<float> verticalOffset = offset.ConvertToPx();
@@ -675,6 +676,10 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollTest006, TestSize.Level1)
     CreateFixedItems(2);
     model.SetGridHeight(Dimension(5));
     model.SetScrollBarMode(DisplayMode::AUTO);
+    model.SetScrollBarColor(Color());
+    model.SetScrollBarColor(std::nullopt);
+    auto scrollBarColor = paintProperty_->GetScrollBarColor();
+    EXPECT_EQ(scrollBarColor, std::nullopt);
     model.SetScrollBarColor("#FF0000");
     model.SetScrollBarWidth("10vp");
     model.SetIsRTL(TextDirection::LTR);

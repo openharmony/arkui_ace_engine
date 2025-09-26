@@ -603,10 +603,12 @@ void JSWaterFlow::SetScrollBar(const JSCallbackInfo& info)
 
 void JSWaterFlow::SetScrollBarColor(const JSCallbackInfo& info)
 {
+    Color color;
     RefPtr<ResourceObject> resObj;
-    auto scrollBarColor = JSScrollable::ParseBarColor(info, resObj);
-    if (!scrollBarColor.empty()) {
-        WaterFlowModel::GetInstance()->SetScrollBarColor(scrollBarColor);
+    if (JSViewAbstract::ParseJsColor(info[0], color, resObj)) {
+        WaterFlowModel::GetInstance()->SetScrollBarColor(color);
+    } else {
+        WaterFlowModel::GetInstance()->SetScrollBarColor(std::nullopt);
     }
     if (SystemProperties::ConfigChangePerform()) {
         WaterFlowModel::GetInstance()->ParseResObjScrollBarColor(resObj);
