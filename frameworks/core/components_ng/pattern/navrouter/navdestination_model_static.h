@@ -67,6 +67,7 @@ public:
     static void SetEnableStatusBar(FrameNode* frameNode, const std::optional<std::pair<bool, bool>>& statusBar);
     static void SetEnableNavigationIndicator(FrameNode* frameNode, const std::optional<bool>& navigationIndicator);
     static void SetHideItemText(FrameNode* frameNode, bool isHideItemText);
+    static void SetPreferredOrientation(FrameNode* frameNode, const std::optional<Orientation>& ori);
 };
 } // namespace OHOS::Ace::NG
 

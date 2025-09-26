@@ -653,4 +653,12 @@ void NavDestinationModelStatic::SetHideItemText(FrameNode* frameNode, bool isHid
     CHECK_NULL_VOID(navDestinationGroupNode);
     NavigationToolbarUtil::SetHideItemText(navDestinationGroupNode, isHideItemText);
 }
+
+void NavDestinationModelStatic::SetPreferredOrientation(FrameNode* frameNode, const std::optional<Orientation>& ori)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetOrientation(ori);
+}
 } // namespace OHOS::Ace::NG
