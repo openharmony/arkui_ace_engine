@@ -31,15 +31,6 @@
             "npisanov",
             "huaweimaxuchu"
         ],
-        "arkuiframework": [
-            "bitlepetit",
-            "yesiyuanjim",
-            "lushi1202",
-            "xiang-shouxing",
-            "ilyaerokhin",
-            "spirinandrey",
-            "huaweimaxuchu"
-        ],
         "ArkUI_Event": [
             "piggyguy",
             "yihao-lin",
@@ -78,7 +69,7 @@
             "huaweimaxuchu"
         ],
         "arkuieco3": [
-            "ZhangYu-Coder",
+            "ZhangYu-Home",
             "keerecles",
             "sunbees",
             "sd-wu",
@@ -124,7 +115,7 @@
         ],
         "arkuilayout1": [
             "lanshouren",
-            "little-bear-sleeps",
+            "Lichtschein",
             "zju_ljz",
             "camlostshi",
             "WendongPang",
@@ -199,7 +190,7 @@
         ],
         "arkui_framework_resource": [
             "demon_coffee",
-            "fanzhiyuan1",
+            "fangzhiyuan1",
             "lushi871202",
             "yesiyuanjim"
         ],
@@ -242,7 +233,7 @@
             "info": "[default group member forantar]"
         },
         "fironov-igor": {
-            "info": "[default group member forantar]"
+            "info": "[default group member fironov-igor]"
         },
         "jiangtao92": {
             "info": "[公共 jiangtao]"
@@ -286,14 +277,8 @@
         "zhanghangkai10241": {
             "info": "[无障碍 zhanghangkai]"
         },
-        "bitlepetit": {
-            "info": "[基础框架 fangzhiyuan]"
-        },
         "yesiyuanjim": {
-            "info": "[基础框架 yesiyuan]"
-        },
-        "lushi1202": {
-            "info": "[启动/窗口/资源管理/DFX lushi]"
+            "info": "[FrameworkResource yesiyuan]"
         },
         "piggyguy": {
             "info": "[Event jiadexiang]"
@@ -407,7 +392,7 @@
             "info": "[键盘相关 zhoukechen]"
         },
         "pssea": {
-            "info": "[文本大类]"
+            "info": "[文本大类 Lizhiqi]"
         },
         "yangfan229": {
             "info": "[文本大类&AutoFill yangfan]"
@@ -421,7 +406,7 @@
         "WendongPang": {
             "info": "[安全区&键盘避让相关 pangwendong]"
         },
-        "little-bear-sleeps": {
+        "Lichtschein": {
             "info": "[布局类组件 linhu]"
         },
         "zju_ljz": {
@@ -508,7 +493,7 @@
         "guozejun": {
             "info": "[idlize guozejun]"
         },
-        "ZhangYu-Coder": {
+        "ZhangYu-Home": {
             "info": "[逻辑&绘制组件 zhangyu]"
         },
         "keerecles": {
@@ -547,14 +532,14 @@
         "demon_coffee": {
             "info": "[FrameworkResource lice]"
         },
-        "fanzhiyuan1": {
-            "info": "[FrameworkResource fanzhiyuan]"
+        "fangzhiyuan1": {
+            "info": "[FrameworkResource fangzhiyuan]"
         },
         "lushi871202": {
             "info": "[FrameworkResource lushi]"
         },
         "happy2026": {
-            "info": "[TDD wanglili]"
+            "info": "[TDD wangxueli]"
         },
         "BlYynNe": {
             "info": "[toolchain yenan]"
