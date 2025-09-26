@@ -470,7 +470,7 @@ void SimplifiedInspector::GetWebContentIfNeed(const RefPtr<FrameNode>& node)
     if (params_.enableWeb && params_.webAccessibility && !params_.enableBackground) {
         auto pattern = node->GetPattern<WebPattern>();
         CHECK_NULL_VOID(pattern);
-        if (!pattern->GetActiveStatus()) {
+        if (params_.isVisibleOnly && !pattern->GetActiveStatus()) {
             return;
         }
         auto lambda = [collector = collector_](std::shared_ptr<JsonValue>& jsonValue, int32_t webId) {
@@ -485,7 +485,7 @@ void SimplifiedInspector::GetWebContentIfNeed(const RefPtr<FrameNode>& node)
     if (params_.enableWeb && !params_.webContentJs.empty()) {
         auto pattern = node->GetPattern<WebPattern>();
         CHECK_NULL_VOID(pattern);
-        if (!pattern->GetActiveStatus()) {
+        if (params_.isVisibleOnly && !pattern->GetActiveStatus()) {
             return;
         }
         auto lambda = [webId = node->GetId(), collector = collector_](const std::string& result) {

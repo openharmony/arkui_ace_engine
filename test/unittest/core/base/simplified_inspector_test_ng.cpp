@@ -98,6 +98,10 @@ HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg001, TestSize.Level
 */
 HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. context
+     * @tc.expected: expect context not nullptr
+     */
     auto id = ElementRegister::GetInstance()->MakeUniqueId();
     RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
     auto context = PipelineContext::GetCurrentContext();
@@ -168,5 +172,33 @@ HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg004, TestSize.Level
     inspector->GetInspectorBackgroundAsync(collector);
     EXPECT_FALSE(inspector->isBackground_);
     EXPECT_TRUE(inspector->isAsync_);
+}
+
+/**
+* @tc.name: SimplifiedInspectorTestNg005
+* @tc.desc: Test GetWebContentIfNeed
+* @tc.type: FUNC
+*/
+HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg005, TestSize.Level1)
+{
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    int32_t containerId = 100;
+    TreeParams params { true };
+    params.isVisibleOnly = false;
+    params.enableWeb = true;
+    params.webContentJs = "hello";
+    auto inspector = std::make_shared<SimplifiedInspector>(containerId, params);
+    auto collector = std::make_shared<Recorder::InspectorTreeCollector>(
+        [](const std::shared_ptr<std::string> result) {}, false);
+    inspector->isAsync_ = true;
+    inspector->collector_ = collector;
+    stageNode->tag_ = V2::WEB_ETS_TAG;
+    inspector->GetWebContentIfNeed(stageNode);
+    EXPECT_FALSE(inspector->isBackground_);
 }
 } // namespace OHOS::Ace::NG
