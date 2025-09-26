@@ -1565,4 +1565,12 @@ export class UIContextImpl extends UIContext {
     public checkThread(id: int32) : boolean {
         return ArkUIAniModule._CheckIsUIThread(id) !== 0;
     }
+
+    public setImageCacheCount(value: int): void {
+        ArkUIAniModule._Common_SetImageCacheCount(value, this.instanceId_);
+    }
+
+    public setImageRawDataCacheSize(value: int): void {
+        ArkUIAniModule._Common_SetImageRawDataCacheSize(value, this.instanceId_);
+    }
 }
