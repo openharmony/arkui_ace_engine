@@ -1291,14 +1291,14 @@ Gradient Convert(const Ark_LinearGradientOptions& value)
     if (gradientColors.size() == 1) {
         auto item = gradientColors.front();
         GradientColor gradientColor;
-        gradientColor.SetLinearColor(LinearColor(item.first));
+        gradientColor.SetColor(item.first);
         gradientColor.SetDimension(item.second);
         gradient.AddColor(gradientColor);
         gradient.AddColor(gradientColor);
     } else {
         for (auto item : gradientColors) {
             GradientColor gradientColor;
-            gradientColor.SetLinearColor(LinearColor(item.first));
+            gradientColor.SetColor(item.first);
             gradientColor.SetDimension(item.second);
             gradient.AddColor(gradientColor);
         }
