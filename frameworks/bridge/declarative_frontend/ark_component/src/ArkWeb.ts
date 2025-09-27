@@ -1121,6 +1121,38 @@ class WebOnShowFileSelectorModifier extends ModifierWithKey<(result: FileSelecto
   }
 }
 
+class WebOnDetectedBlankScreenModifier extends ModifierWithKey<OnDetectBlankScreenCallback> {
+  constructor (value: OnDetectBlankScreenCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnDetectedBlankScreenModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnDetectedBlankScreen(node);
+    } else {
+      getUINativeModule().web.setOnDetectedBlankScreen(node, this.value);
+    }
+  }
+}
+
+class WebBlankScreenDetectionConfigModifier extends ModifierWithKey<BlankScreenDetectionConfig> {
+  constructor(value: BlankScreenDetectionConfig) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webBlankScreenDetectionConfigModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetBlankScreenDetectionConfig(node);
+    } else {
+      getUINativeModule().web.setBlankScreenDetectionConfig(node,
+                                                            this.value.enable,
+                                                            this.value.detectionTiming,
+                                                            this.value.detectionMethods,
+                                                            this.value.contentfulNodesCountThreshold);
+    }
+  }
+}
+
 class WebOnContextMenuShowModifier extends ModifierWithKey<(param: WebContextMenuParam, result: WebContextMenuResult) => boolean> {
   constructor(value: (param: WebContextMenuParam, result: WebContextMenuResult) => boolean) {
     super(value);
@@ -1655,6 +1687,14 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   onFileSelectorShow(callback: (event?: { callback: Function; fileSelector: object; } | undefined) => void): this {
     throw new Error('Method not implemented.');
+  }
+  onDetectedBlankScreen(callback: OnDetectBlankScreenCallback): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnDetectedBlankScreenModifier.identity, WebOnDetectedBlankScreenModifier, callback);
+    return this;
+  }
+  blankScreenDetectionConfig(config: BlankScreenDetectionConfig): this {
+    modifierWithKey(this._modifiersWithKeys, WebBlankScreenDetectionConfigModifier.identity, WebBlankScreenDetectionConfigModifier, config);
+    return this;
   }
   onResourceLoad(callback: (event: { url: string; }) => void): this {
     modifierWithKey(this._modifiersWithKeys, WebOnResourceLoadModifier.identity, WebOnResourceLoadModifier, callback);
