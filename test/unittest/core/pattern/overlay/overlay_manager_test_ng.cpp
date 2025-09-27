@@ -383,37 +383,37 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet001, TestSize.Level1)
 
     // sheetStyle1.sheetHeight.sheetMode is null.
     sheetStyle1.sheetHeight.sheetMode = std::nullopt;
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
     sheetStyle1.sheetHeight.height->value_ = 2.0;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 2));
 
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
     sheetStyle1.sheetHeight.height->value_ = -2.0;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 2));
 
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
     sheetStyle1.sheetHeight.height->value_ = 0.1;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 1.0));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 1.0));
 
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::VP;
     sheetStyle1.sheetHeight.height->value_ = 2;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 2));
 
     // sheetStyle1.sheetHeight.sheetMode is not null.
     sheetStyle1.sheetHeight.sheetMode = SheetMode(5);
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
     sheetStyle1.sheetHeight.height->value_ = 2.0;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 0));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 0));
 
     std::string title = "11";
     std::string subtitle = "22";
@@ -500,37 +500,37 @@ HWTEST_F(OverlayManagerTestNg, OpenBindSheetByUIContext001, TestSize.Level1)
 
     // sheetStyle1.sheetHeight.sheetMode is null.
     sheetStyle1.sheetHeight.sheetMode = std::nullopt;
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
     sheetStyle1.sheetHeight.height->value_ = 2.0;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 2));
 
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
     sheetStyle1.sheetHeight.height->value_ = -2.0;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 2));
 
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
     sheetStyle1.sheetHeight.height->value_ = 0.1;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 1.0));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 1.0));
 
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::VP;
     sheetStyle1.sheetHeight.height->value_ = 2;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 2));
 
     // sheetStyle1.sheetHeight.sheetMode is not null.
     sheetStyle1.sheetHeight.sheetMode = SheetMode(5);
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     sheetStyle1.sheetHeight.height->unit_ = DimensionUnit::PERCENT;
     sheetStyle1.sheetHeight.height->value_ = 2.0;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 0));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 0));
 
     std::string title = "11";
     std::string subtitle = "22";
@@ -786,7 +786,7 @@ HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext003, TestSize.Level1)
     topSheetPattern->pageHeight_ = 1000;
     float expectSheetHeight = topSheetPattern->pageHeight_ * 0.6;
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, expectSheetHeight));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, expectSheetHeight));
 
     /**
      * @tc.steps: step5. UpdateBindSheetByUIContext
@@ -802,7 +802,7 @@ HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext003, TestSize.Level1)
     ASSERT_TRUE(currentStyle.sheetHeight.sheetMode.has_value());
     EXPECT_EQ(currentStyle.sheetHeight.sheetMode, sheetStyle.sheetHeight.sheetMode);
     EXPECT_EQ(currentStyle.backgroundColor, updateSheetStyle.backgroundColor);
-    EXPECT_EQ(overlayManager->sheetHeight_, expectSheetHeight);
+    EXPECT_EQ(topSheetPattern->sheetHeightForTranslate_, expectSheetHeight);
 
     /**
      * @tc.steps: step7. recover api version info.
@@ -1335,18 +1335,18 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet004, TestSize.Level1)
     topSheetPattern->pageHeight_ = 1000;
     auto setSheetSize = SizeF({ 500, 500 });
     topSheetNode->GetGeometryNode()->SetFrameSize(setSheetSize);
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 0));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 0));
 
     sheetStyle.sheetType = SheetType::SHEET_POPUP;
     layoutProperty->UpdateSheetStyle(sheetStyle);
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 0));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 0));
     sheetStyle.sheetType = SheetType::SHEET_BOTTOMLANDSPACE;
     layoutProperty->UpdateSheetStyle(sheetStyle);
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 0));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 0));
 }
 
 /**
@@ -1396,9 +1396,9 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet005, TestSize.Level1)
     SheetHeight detent;
     detent.sheetMode = SheetMode::MEDIUM;
     sheetStyle.detents.emplace_back(detent);
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_FALSE(NearEqual(overlayManager->sheetHeight_, 500));
+    EXPECT_FALSE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 500));
     sheetStyle.detents.clear();
 
     /**
@@ -1407,9 +1407,9 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet005, TestSize.Level1)
      */
     detent.sheetMode = SheetMode::LARGE;
     sheetStyle.detents.emplace_back(detent);
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 992));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 992));
 
     /**
      * @tc.steps: step6. test sheetStyle.detents.height has value, height unit is %.
@@ -1420,9 +1420,9 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet005, TestSize.Level1)
     Dimension detentHeight { 0.5, DimensionUnit::PERCENT };
     detent.height = detentHeight;
     sheetStyle.detents.emplace_back(detent);
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 500));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 500));
 
     /**
      * @tc.steps: step7. test sheetStyle.detents.height has value, height unit is vp.
@@ -1432,9 +1432,9 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet005, TestSize.Level1)
     detent.height->unit_ = DimensionUnit::VP;
     detent.height->value_ = 600;
     sheetStyle.detents.emplace_back(detent);
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 600));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 600));
 
     /**
      * @tc.steps: step8. test sheetStyle.detents.height has value, height unit is vp, setHeight > maxHeight.
@@ -1444,9 +1444,9 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet005, TestSize.Level1)
     detent.height->unit_ = DimensionUnit::VP;
     detent.height->value_ = 1500;
     sheetStyle.detents.emplace_back(detent);
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 992));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 992));
 
     /**
      * @tc.steps: step9. test sheetStyle.detents.height has value, height unit is vp, setHeight < 0.
@@ -1456,9 +1456,9 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet005, TestSize.Level1)
     detent.height->unit_ = DimensionUnit::VP;
     detent.height->value_ = -100;
     sheetStyle.detents.emplace_back(detent);
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 992));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 992));
 }
 
 /**
@@ -1498,7 +1498,7 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet006, TestSize.Level1)
      * @tc.steps: step3. test PlayBubbleStyleSheetTransition().
      */
     overlayManager->PlayBubbleStyleSheetTransition(topSheetNode, true);
-    EXPECT_EQ(topSheetPattern->height_, overlayManager->sheetHeight_);
+    EXPECT_EQ(topSheetPattern->height_, topSheetPattern->sheetHeightForTranslate_);
 }
 
 /**
@@ -4262,9 +4262,9 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern15, TestSize.Level1)
     SheetHeight detent;
     detent.sheetMode = SheetMode::MEDIUM;
     sheetStyle.detents.emplace_back(detent);
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 300));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 300));
     sheetStyle.detents.clear();
 
     /**
@@ -4275,9 +4275,9 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern15, TestSize.Level1)
     Dimension detentHeight { 0.5, DimensionUnit::PERCENT };
     detent.height = detentHeight;
     sheetStyle.detents.emplace_back(detent);
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 234));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 234));
 
     /**
      * @tc.steps: step6. test sheetStyle.detents.height has value, height unit is vp, setHeight > maxHeight.
@@ -4286,9 +4286,9 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern15, TestSize.Level1)
     detent.height->unit_ = DimensionUnit::VP;
     detent.height->value_ = 1500;
     sheetStyle.detents.emplace_back(detent);
-    overlayManager->sheetHeight_ = 0;
+    topSheetPattern->sheetHeightForTranslate_ = 0;
     overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
-    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 460));
+    EXPECT_TRUE(NearEqual(topSheetPattern->sheetHeightForTranslate_, 460));
 }
 
 /**
@@ -4956,12 +4956,12 @@ HWTEST_F(OverlayManagerTestNg, PlaySheetTransition001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     /**
-     * @tc.steps: step. set sheetHeight_ is 0.0f, PlaySheetTransition.
-     * @tc.expected: NearZero(overlayManager->sheetHeight_) is true.
+     * @tc.steps: step. set sheetHeightForTranslate_ is 0.0f, PlaySheetTransition.
+     * @tc.expected: NearZero(sheetPattern->sheetHeightForTranslate_) is true.
      */
-    overlayManager->sheetHeight_ = 0.0f;
+    sheetPattern->sheetHeightForTranslate_ = 0.0f;
     overlayManager->PlaySheetTransition(sheetNode, true, true);
-    EXPECT_TRUE(NearZero(overlayManager->sheetHeight_));
+    EXPECT_TRUE(NearZero(sheetPattern->sheetHeightForTranslate_));
 }
 
 /**

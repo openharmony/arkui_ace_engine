@@ -190,9 +190,9 @@ void SheetObject::InitAnimationForOverlay(bool isTransitionIn, bool isFirstTrans
     auto sheetParent = AceType::DynamicCast<FrameNode>(sheetNode->GetParent());
     CHECK_NULL_VOID(sheetParent);
     if (isTransitionIn) {
-        sheetPattern->SetCurrentHeight(overlayManager->GetSheetHeight());
+        sheetPattern->SetCurrentHeight(sheetPattern->GetSheetHeightForTranslate());
         if (isFirstTransition) {
-            float offset = sheetPattern->ComputeTransitionOffset(overlayManager->GetSheetHeight());
+            float offset = sheetPattern->ComputeTransitionOffset(sheetPattern->GetSheetHeightForTranslate());
             sheetPattern->SheetTransitionAction(offset, true, isTransitionIn);
         }
         sheetPattern->FireOnTypeDidChange();
@@ -221,7 +221,7 @@ void SheetObject::SetFinishEventForAnimationOption(
             pattern->AvoidAiBar();
             const auto& overlay = pattern->GetOverlayManager();
             CHECK_NULL_VOID(overlay);
-            pattern->FireOnDetentsDidChange(overlay->GetSheetHeight());
+            pattern->FireOnDetentsDidChange(pattern->GetSheetHeightForTranslate());
             auto sheetObject = pattern->GetSheetObject();
             CHECK_NULL_VOID(sheetObject);
             sheetObject->FireHeightDidChange();
@@ -269,7 +269,7 @@ std::function<void()> SheetObject::GetAnimationPropertyCallForOverlay(bool isTra
     const auto& overlayManager = sheetPattern->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, nullptr);
     // compute the starting point of animation
-    float offset = sheetPattern->ComputeTransitionOffset(overlayManager->GetSheetHeight());
+    float offset = sheetPattern->ComputeTransitionOffset(sheetPattern->GetSheetHeightForTranslate());
     const std::function<void()> event = [sheetWK = WeakClaim(RawPtr(sheetNode)), offset, isTransitionIn]() {
         auto sheetNode = sheetWK.Upgrade();
         CHECK_NULL_VOID(sheetNode);
