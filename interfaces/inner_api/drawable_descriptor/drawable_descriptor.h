@@ -132,24 +132,27 @@ class DRAWABLE_FORCE_EXPORT LayeredDrawableDescriptor : public DrawableDescripto
 public:
     LayeredDrawableDescriptor() = default;
 
-    LayeredDrawableDescriptor(UINT8 jsonBuf, size_t len, const SharedResourceManager& resourceMgr)
-        : jsonBuf_(std::move(jsonBuf)), len_(len)
+    LayeredDrawableDescriptor(
+        UINT8 jsonBuf, size_t len, const SharedResourceManager& resourceMgr, bool foregroundOverBackground = false)
+        : jsonBuf_(std::move(jsonBuf)), len_(len), foregroundOverBackground_(foregroundOverBackground)
     {
         InitialResource(resourceMgr);
         jsonBuf_.reset();
     }
 
     LayeredDrawableDescriptor(UINT8 jsonBuf, size_t len, const SharedResourceManager& resourceMgr, std::string path,
-        uint32_t iconType, uint32_t density)
-        : jsonBuf_(std::move(jsonBuf)), len_(len), maskPath_(std::move(path)), iconType_(iconType), density_(density)
+        uint32_t iconType, uint32_t density, bool foregroundOverBackground = false)
+        : jsonBuf_(std::move(jsonBuf)), len_(len), maskPath_(std::move(path)), iconType_(iconType), density_(density),
+          foregroundOverBackground_(foregroundOverBackground)
     {
         InitialResource(resourceMgr);
         jsonBuf_.reset();
     }
 
     LayeredDrawableDescriptor(UINT8 jsonBuf, size_t len, const SharedResourceManager& resourceMgr, std::string path,
-        uint32_t iconType, DataInfo& foregroundInfo, DataInfo& backgroundInfo)
-        : jsonBuf_(std::move(jsonBuf)), len_(len), maskPath_(std::move(path)), iconType_(iconType)
+        uint32_t iconType, DataInfo& foregroundInfo, DataInfo& backgroundInfo, bool foregroundOverBackground = false)
+        : jsonBuf_(std::move(jsonBuf)), len_(len), maskPath_(std::move(path)), iconType_(iconType),
+          foregroundOverBackground_(foregroundOverBackground)
     {
         InitLayeredParam(foregroundInfo, backgroundInfo);
         InitialResource(resourceMgr);
@@ -158,8 +161,9 @@ public:
 
     LayeredDrawableDescriptor(size_t len, std::string path, uint32_t iconType, DataInfo& foregroundInfo,
         DataInfo& backgroundInfo, const std::pair<int32_t, int32_t>& decoderSize,
-        const SharedResourceManager& resourceMgr = nullptr)
-        : len_(len), maskPath_(std::move(path)), iconType_(iconType)
+        const SharedResourceManager& resourceMgr = nullptr, bool foregroundOverBackground = false)
+        : len_(len), maskPath_(std::move(path)), iconType_(iconType),
+          foregroundOverBackground_(foregroundOverBackground)
     {
         SetDecodeSize(decoderSize.first, decoderSize.second);
         InitLayeredParam(foregroundInfo, backgroundInfo);
@@ -234,6 +238,7 @@ private:
     OptionalPixelMap mask_;
     OptionalPixelMap layeredPixelMap_;
     bool customized_ = false;
+    bool foregroundOverBackground_ = false; // default: foreground uses SRC_OVER mode
 };
 
 class DRAWABLE_FORCE_EXPORT DrawableDescriptorFactory {

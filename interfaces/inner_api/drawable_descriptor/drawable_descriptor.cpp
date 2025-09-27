@@ -208,7 +208,7 @@ RSImageInfo CreateRSImageInfo(OptionalPixelMap pixelmap, int32_t width, int32_t 
 }
 
 void BlendForeground(RSCanvas& bitmapCanvas, RSBrush& brush, RSImage& image, const SharedBitMap& background,
-    const SharedBitMap& foreground)
+    const SharedBitMap& foreground, bool foregroundOverBackground)
 {
     if (!foreground || !background || NearEqual(foreground->GetWidth(), 0.0) ||
         NearEqual(foreground->GetHeight(), 0.0)) {
@@ -225,7 +225,8 @@ void BlendForeground(RSCanvas& bitmapCanvas, RSBrush& brush, RSImage& image, con
     auto dstOffsetY = static_cast<float>((background->GetHeight() - destHeight) * HALF);
     Rosen::Drawing::Rect rsSrcRect(0.0, 0.0, foreground->GetWidth(), foreground->GetHeight());
     Rosen::Drawing::Rect rsDstRect(dstOffsetX, dstOffsetY, destWidth + dstOffsetX, destHeight + dstOffsetY);
-    brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_ATOP);
+    brush.SetBlendMode(
+        foregroundOverBackground ? Rosen::Drawing::BlendMode::SRC_OVER : Rosen::Drawing::BlendMode::SRC_ATOP);
     bitmapCanvas.AttachBrush(brush);
     image.BuildFromBitmap(*foreground);
     bitmapCanvas.DrawImageRect(image, rsSrcRect, rsDstRect, Rosen::Drawing::SamplingOptions(),
@@ -647,6 +648,9 @@ bool LayeredDrawableDescriptor::CompositeIconAdaptive(
     Rosen::Drawing::Rect dstRect(
         0.0, 0.0, static_cast<float>(background->GetWidth()), static_cast<float>(background->GetHeight()));
     RSImage image;
+    if (foregroundOverBackground_ && foreground) {
+        BlendForeground(bitmapCanvas, brush, image, background, foreground, foregroundOverBackground_);
+    }
     if (mask) {
         Rosen::Drawing::Rect srcRect(
             0.0, 0.0, static_cast<float>(mask->GetWidth()), static_cast<float>(mask->GetHeight()));
@@ -657,8 +661,8 @@ bool LayeredDrawableDescriptor::CompositeIconAdaptive(
             Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
         bitmapCanvas.DetachBrush();
     }
-    if (foreground) {
-        BlendForeground(bitmapCanvas, brush, image, background, foreground);
+    if (!foregroundOverBackground_ && foreground) {
+        BlendForeground(bitmapCanvas, brush, image, background, foreground, foregroundOverBackground_);
     }
     // convert bitmap back to pixelMap
     bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
@@ -685,13 +689,19 @@ void LayeredDrawableDescriptor::CompositeIconNotAdaptive(
         DrawOntoCanvas(background, SIDE, SIDE, bitmapCanvas);
         bitmapCanvas.DetachBrush();
     }
+    if (foregroundOverBackground_ && foreground) {
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_OVER);
+        bitmapCanvas.AttachBrush(brush);
+        DrawOntoCanvas(foreground, SIDE, SIDE, bitmapCanvas);
+        bitmapCanvas.DetachBrush();
+    }
     if (mask) {
         brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_IN);
         bitmapCanvas.AttachBrush(brush);
         DrawOntoCanvas(mask, SIDE, SIDE, bitmapCanvas);
         bitmapCanvas.DetachBrush();
     }
-    if (foreground) {
+    if (!foregroundOverBackground_ && foreground) {
         brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_ATOP);
         bitmapCanvas.AttachBrush(brush);
         DrawOntoCanvas(foreground, SIDE, SIDE, bitmapCanvas);
