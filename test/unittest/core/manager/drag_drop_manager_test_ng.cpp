@@ -2341,7 +2341,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerResetPullIdTest001, TestSize.Leve
      * @tc.expected: All fields reset to default state.
      */
     dragDropManager->ResetPullId();
-
     EXPECT_TRUE(dragDropManager->summaryMap_.empty());
     EXPECT_TRUE(dragDropManager->parentHitNodes_.empty());
     EXPECT_EQ(dragDropManager->currentPullId_, INVALID_PULL_ID);
