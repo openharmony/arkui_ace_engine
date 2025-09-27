@@ -85,6 +85,8 @@ void RichEditorAccessibilityTestNg::SetUp()
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->InitScrollablePattern();
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
 }
 
 void RichEditorAccessibilityTestNg::TearDown()
@@ -104,6 +106,8 @@ void RichEditorAccessibilityTestNg::SetSpanStringMode(bool isSpanStringMode)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     if (isSpanStringMode) {
         richEditorPattern->SetSpanStringMode(true);
+        richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+        richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
         richEditorPattern->SetRichEditorStyledStringController(
             AceType::MakeRefPtr<RichEditorStyledStringController>());
         richEditorPattern->GetRichEditorStyledStringController()->SetPattern(WeakPtr(richEditorPattern));

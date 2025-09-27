@@ -481,6 +481,8 @@ HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset002, TestSize.Level1)
         .testParagraphRects = { paragraphRect } };
     AddParagraph(paragraphItem);
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     auto childNode1 = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<RichEditorPattern>(), true);
     host->AddChild(childNode1);
     childNode1->SetParent(host);
