@@ -8919,29 +8919,35 @@ void CreateClonedTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUIT
 
 void SetOnFocusExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onFocus = [node, eventReceiver]() {
-        eventReceiver(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onFocus = [node = AceType::WeakClaim(frameNode), eventReceiver]() {
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle);
     };
     ViewAbstract::SetOnFocus(reinterpret_cast<FrameNode*>(node), std::move(onFocus));
 }
 
 void SetOnBlurExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onBlur = [node, eventReceiver]() {
-        eventReceiver(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onBlur = [node = AceType::WeakClaim(frameNode), eventReceiver]() {
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle);
     };
     ViewAbstract::SetOnBlur(reinterpret_cast<FrameNode*>(node), std::move(onBlur));
 }
 
 void SetOnTouchExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onTouch = [node, eventReceiver](TouchEventInfo& eventInfo) {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onTouch = [node = AceType::WeakClaim(frameNode), eventReceiver](TouchEventInfo& eventInfo) {
         ArkUINodeEvent event;
         auto target = eventInfo.GetTarget();
         event.touchEvent.target.id = target.id.c_str();
@@ -8951,41 +8957,53 @@ void SetOnTouchExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle n
             TouchLocationInfo front = changeTouch.front();
             event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
         }
-        eventReceiver(node, event);
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle, event);
     };
     ViewAbstract::SetOnTouch(reinterpret_cast<FrameNode*>(node), std::move(onTouch));
 }
 
 void SetOnHoverExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isHover))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onHover = [node, eventReceiver](bool isHover, HoverInfo& info) {
-        eventReceiver(node, isHover);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onHover = [node = AceType::WeakClaim(frameNode), eventReceiver](bool isHover, HoverInfo& info) {
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle, isHover);
     };
     ViewAbstract::SetOnHover(reinterpret_cast<FrameNode*>(node), std::move(onHover));
 }
 
 void SetOnHoverMoveExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onHoverMove = [node, eventReceiver](HoverInfo& info) {
-        eventReceiver(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onHoverMove = [node = AceType::WeakClaim(frameNode), eventReceiver](HoverInfo& info) {
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle);
     };
     ViewAbstract::SetOnHoverMove(reinterpret_cast<FrameNode*>(node), std::move(onHoverMove));
 }
 
 void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isOn))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onChange = [node, eventReceiver](const bool isOn) {
-        eventReceiver(node, isOn);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [node = AceType::WeakClaim(frameNode), eventReceiver](const bool isOn) {
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle, isOn);
     };
-    if (uiNode->GetTag() == V2::SWITCH_ETS_TAG) {
+    if (frameNode->GetTag() == V2::SWITCH_ETS_TAG) {
         ToggleModelNG::OnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
-    } else if (uiNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
+    } else if (frameNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
         CheckBoxModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
     } else {
         RadioModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
@@ -8994,9 +9012,9 @@ void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
 
 void SetOnClickExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onClick = [node, eventReceiver](GestureEvent& info) {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onClick = [node = AceType::WeakClaim(frameNode), eventReceiver](GestureEvent& info) {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.componentAsyncEvent.subKind = ON_CLICK;
@@ -9027,11 +9045,14 @@ void SetOnClickExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle n
         event.componentAsyncEvent.data[6].f32 = screenOffset.GetX();
         // displayY
         event.componentAsyncEvent.data[7].f32 = screenOffset.GetY();
-        eventReceiver(node, event);
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle, event);
     };
-    if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
-        SpanModelNG::SetOnClick(uiNode, std::move(onClick));
-    } else if (uiNode->GetTag() == V2::TEXT_ETS_TAG) {
+    if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
+        SpanModelNG::SetOnClick(frameNode, std::move(onClick));
+    } else if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
         TextModelNG::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onClick));
     }  else {
         ViewAbstract::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onClick));
@@ -9081,7 +9102,10 @@ void SetOnAppearExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onAppear = [node, weak = AceType::WeakClaim(frameNode), eventReceiver]() {
-        eventReceiver(node);
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle);
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
 }

@@ -7602,6 +7602,9 @@ struct ArkUIBasicAPI {
 
     ArkUI_Int32 (*postIdleCallback)(ArkUI_Int32 instanceId, void* userData,
     void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData));
+    
+    ArkUI_Int32 (*postIdleCallbackWithNodeHandle)(ArkUI_Int32 instanceId, ArkUINodeHandle node,
+    void (*callback)(ArkUINodeHandle node, uint64_t nanoTimeLeft, uint32_t frameCount));
 
     ArkUI_Int32 (*greatOrEqualTargetAPIVersion)(ArkUI_Int32 version);
     void (*registerNodeAsyncCommonEventReceiver)(EventReceiver eventReceiver);
