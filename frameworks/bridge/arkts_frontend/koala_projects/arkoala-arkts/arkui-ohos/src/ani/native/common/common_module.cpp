@@ -377,7 +377,6 @@ void SetDrawModifier(
     if (drawModifier == nullptr) {
         // fnObj should not be nullptr;
         HILOGE("DrawModifier is undefined.");
-        abort();
     }
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
