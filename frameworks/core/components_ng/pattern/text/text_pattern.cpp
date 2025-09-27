@@ -218,6 +218,7 @@ void TextPattern::ResetSelection()
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        MarkContentNodeForRender();
     }
 }
 
