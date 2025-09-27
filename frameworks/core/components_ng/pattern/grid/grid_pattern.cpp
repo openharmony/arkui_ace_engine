@@ -43,28 +43,19 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, nullptr);
-    std::vector<std::string> cols;
-    StringUtils::StringSplitter(gridLayoutProperty->GetColumnsTemplate().value_or(""), ' ', cols);
-    std::vector<std::string> rows;
-    StringUtils::StringSplitter(gridLayoutProperty->GetRowsTemplate().value_or(""), ' ', rows);
-
+    auto cols = gridLayoutProperty->GetColumnsTemplate().value_or("");
+    auto rows = gridLayoutProperty->GetRowsTemplate().value_or("");
     // When rowsTemplate and columnsTemplate is both not setting, use adaptive layout algorithm.
     if (rows.empty() && cols.empty()) {
         return MakeRefPtr<GridAdaptiveLayoutAlgorithm>(info_);
     }
 
-    auto crossCount = cols.empty() ? Infinity<int32_t>() : static_cast<int32_t>(cols.size());
-    auto mainCount = rows.empty() ? Infinity<int32_t>() : static_cast<int32_t>(rows.size());
-    if (!gridLayoutProperty->IsVertical()) {
-        std::swap(crossCount, mainCount);
-    }
-    info_.crossCount_ = crossCount;
     if (targetIndex_.has_value()) {
         info_.targetIndex_ = targetIndex_;
     }
     // When rowsTemplate and columnsTemplate is both setting, use static layout algorithm.
     if (!rows.empty() && !cols.empty()) {
-        return MakeRefPtr<GridLayoutAlgorithm>(info_, crossCount, mainCount);
+        return MakeRefPtr<GridLayoutAlgorithm>(info_);
     }
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
@@ -79,9 +70,9 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     }
     RefPtr<GridScrollLayoutAlgorithm> result;
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
-        result = MakeRefPtr<GridScrollLayoutAlgorithm>(info_, crossCount, mainCount);
+        result = MakeRefPtr<GridScrollLayoutAlgorithm>(info_);
     } else {
-        result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(info_, crossCount, mainCount);
+        result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(info_);
     }
     result->SetCanOverScrollStart(canOverScrollStart);
     result->SetCanOverScrollEnd(canOverScrollEnd && (info_.repeatDifference_ == 0));

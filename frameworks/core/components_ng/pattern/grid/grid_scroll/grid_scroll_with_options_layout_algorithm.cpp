@@ -326,7 +326,7 @@ int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateStartCachedCount(
 
     if (!options.getSizeByIndex) {
         auto iter = options.irregularIndexes.lower_bound(info_.startIndex_);
-        auto crossCount = static_cast<int32_t>(crossCount_);
+        auto crossCount = info_.crossCount_;
         if (iter == options.irregularIndexes.end()) {
             return start;
         }
@@ -388,7 +388,7 @@ int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateEndCachedCount(
 
     if (!options.getSizeByIndex) {
         auto iter = options.irregularIndexes.upper_bound(info_.endIndex_);
-        auto crossCount = static_cast<int32_t>(crossCount_);
+        auto crossCount = info_.crossCount_;
         if (iter == options.irregularIndexes.end()) {
             return end;
         }

@@ -242,7 +242,7 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollTest002, TestSize.Level1)
     model.SetRowsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(5));
     UpdateLayoutInfo();
-    auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->info_, 2, 0);
+    auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->info_);
     ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
     auto ret = gridScrollLayoutAlgorithm->CalculateLargeItemOffset(OffsetF(100, 100), 0, 1, 0);
     EXPECT_EQ(ret.GetY(), 100.f - ITEM_MAIN_SIZE);
@@ -267,7 +267,7 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollTest003, TestSize.Level1)
     model.SetRowsGap(Dimension(5));
     CreateFixedItems(10);
     UpdateLayoutInfo();
-    auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->info_, 2, 0);
+    auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->info_);
     ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
     auto ret = gridScrollLayoutAlgorithm->CalculateLargeItemOffset(OffsetF(0, 100), 1, 1, 0);
     EXPECT_EQ(ret.GetY(), 100.0f);
@@ -291,7 +291,8 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollTest004, TestSize.Level1)
     model.SetRowsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(5));
     UpdateLayoutInfo();
-    auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->info_, 2, 0);
+    auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->info_);
+    gridScrollLayoutAlgorithm->crossCount_ = 2;
     auto ret1 = gridScrollLayoutAlgorithm->CalculateLargeItemOffset(OffsetF(0, 100), 1, 1, 0);
     EXPECT_EQ(ret1.GetY(), 100.0f);
     EXPECT_EQ(ret1.GetX(), 0.0f);
@@ -469,9 +470,9 @@ HWTEST_F(GridScrollLayoutTestNg, GridLayout004, TestSize.Level1)
     int32_t curRow = 0;
     int32_t curCol = 0;
     auto pattern = frameNode_->GetPattern<GridPattern>();
-    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 2, 5);
-    EXPECT_EQ(algorithm->crossCount_, 2);
-    EXPECT_EQ(algorithm->mainCount_, 5);
+    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {});
+    algorithm->crossCount_ = 2;
+    algorithm->mainCount_ = 5;
     algorithm->GetNextGrid(curRow, curCol);
     EXPECT_EQ(curRow, 0);
     EXPECT_EQ(curCol, 1);

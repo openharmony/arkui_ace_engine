@@ -699,7 +699,7 @@ HWTEST_F(GridTestNg, SkipLargeLineHeightLines001, TestSize.Level1)
     gridLayoutInfo.prevOffset_ = 8.0f;
     gridLayoutInfo.lineHeightMap_[0] = 4.0f;
     gridLayoutInfo.lineHeightMap_[1] = 6.0f;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->mainGap_ = 0.0f;
     auto result = layout->SkipLargeLineHeightLines(2.0f);
@@ -720,7 +720,7 @@ HWTEST_F(GridTestNg, SkipLargeLineHeightLines002, TestSize.Level1)
     gridLayoutInfo.prevOffset_ = -8.0f;
     gridLayoutInfo.lineHeightMap_[0] = 4.0f;
     gridLayoutInfo.lineHeightMap_[1] = 6.0f;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->mainGap_ = 0.0f;
     auto result = layout->SkipLargeLineHeightLines(2.0f);
@@ -747,7 +747,7 @@ HWTEST_F(GridTestNg, SkipLargeLineHeightLines003, TestSize.Level1)
     gridMatrix[2] = { { 5, 6 } };
     gridMatrix[3] = { { 7, 8 } };
     gridLayoutInfo.gridMatrix_ = gridMatrix;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->mainGap_ = 0.0f;
     auto result = layout->SkipLargeLineHeightLines(2.0f);
@@ -774,7 +774,7 @@ HWTEST_F(GridTestNg, SkipLargeLineHeightLines004, TestSize.Level1)
     gridMatrix[2] = { { 5, 6 } };
     gridMatrix.emplace();
     gridLayoutInfo.gridMatrix_ = gridMatrix;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->mainGap_ = 0.0f;
     auto result = layout->SkipLargeLineHeightLines(2.0f);
@@ -799,7 +799,7 @@ HWTEST_F(GridTestNg, SkipLargeLineHeightLines005, TestSize.Level1)
     gridMatrix[0] = { { 1, 2 } };
     gridMatrix[1] = { { 3, 4 } };
     gridLayoutInfo.gridMatrix_ = gridMatrix;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->mainGap_ = 0.0f;
     auto result = layout->SkipLargeLineHeightLines(2.0f);
@@ -816,7 +816,7 @@ HWTEST_F(GridTestNg, GetNextGrid001, TestSize.Level1)
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.startMainLineIndex_ = 0;
     gridLayoutInfo.endMainLineIndex_ = 2;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     int32_t curMain = 0;
     int32_t curCross = 0;
@@ -835,7 +835,7 @@ HWTEST_F(GridTestNg, GetNextGrid002, TestSize.Level1)
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.startMainLineIndex_ = 0;
     gridLayoutInfo.endMainLineIndex_ = 2;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     int32_t curMain = 0;
     int32_t curCross = 2;
@@ -858,7 +858,7 @@ HWTEST_F(GridTestNg, SkipRegularLines001, TestSize.Level1)
     gridLayoutInfo.lineHeightMap_[3] = 6.0f;
     gridLayoutInfo.startIndex_ = 1;
     gridLayoutInfo.currentOffset_ = 24.0f;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->mainGap_ = -20.0f;
     layout->crossCount_ = 4;
@@ -880,7 +880,7 @@ HWTEST_F(GridTestNg, SkipRegularLinesForward, TestSize.Level1)
     gridLayoutInfo.currentOffset_ = 240.0f;
     gridLayoutInfo.childrenCount_ = 100;
     gridLayoutInfo.crossCount_ = 3;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->mainGap_ = 0;
     layout->crossCount_ = 3;
@@ -904,7 +904,7 @@ HWTEST_F(GridTestNg, SkipIrregularLines001, TestSize.Level1)
     gridLayoutInfo.prevOffset_ = 30.0f;
     gridLayoutInfo.gridMatrix_[0] = { { 1, -2 }, { 3, -4 } };
     gridLayoutInfo.gridMatrix_[1] = { { 5, -6 }, { 7, -8 } };
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->crossCount_ = 4;
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
@@ -943,7 +943,7 @@ HWTEST_F(GridTestNg, SkipIrregularLines002, TestSize.Level1)
     gridLayoutInfo.prevOffset_ = 30.0f;
     gridLayoutInfo.gridMatrix_[0] = { { 1, 2 }, { 3, 4 } };
     gridLayoutInfo.gridMatrix_[1] = { { 5, 6 }, { 7, 8 } };
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->crossCount_ = 4;
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
@@ -983,7 +983,7 @@ HWTEST_F(GridTestNg, FillNewLineBackward001, TestSize.Level1)
     gridLayoutInfo.endIndex_ = 5;
     gridLayoutInfo.gridMatrix_[0] = { { 1, 2 }, { 3, 4 } };
     gridLayoutInfo.gridMatrix_[1] = { { 5, 6 }, { 7, 8 } };
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->crossCount_ = 4;
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
@@ -1024,7 +1024,7 @@ HWTEST_F(GridTestNg, MeasureNewChild001, TestSize.Level1)
     gridLayoutInfo.endIndex_ = 5;
     gridLayoutInfo.gridMatrix_[0] = { { 1, 2 }, { 3, 4 } };
     gridLayoutInfo.gridMatrix_[1] = { { 5, 6 }, { 7, 8 } };
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->crossCount_ = 4;
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
@@ -1069,7 +1069,7 @@ HWTEST_F(GridTestNg, MeasureChildPlaced001, TestSize.Level1)
     gridLayoutInfo.endIndex_ = 5;
     gridLayoutInfo.gridMatrix_[0] = { { 1, 2 }, { 3, 4 } };
     gridLayoutInfo.gridMatrix_[1] = { { 5, 6 }, { 7, 8 } };
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
@@ -1105,7 +1105,7 @@ HWTEST_F(GridTestNg, CheckNeedMeasure001, TestSize.Level1)
 {
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.clearStretch_ = true;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
@@ -1143,7 +1143,7 @@ HWTEST_F(GridTestNg, CheckNeedMeasure002, TestSize.Level1)
 {
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.clearStretch_ = true;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
@@ -1185,7 +1185,7 @@ HWTEST_F(GridTestNg, CheckGridPlaced001, TestSize.Level1)
     gridLayoutInfo.lineHeightMap_[1] = 2.0f;
     gridLayoutInfo.startMainLineIndex_ = 0;
     gridLayoutInfo.endMainLineIndex_ = 2;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->crossCount_ = 4;
     auto result = layout->CheckGridPlaced(2, 2, 3, 2, 5);
@@ -1204,7 +1204,7 @@ HWTEST_F(GridTestNg, ComputeItemCrossPosition001, TestSize.Level1)
     gridLayoutInfo.lineHeightMap_[1] = 2.0f;
     gridLayoutInfo.startMainLineIndex_ = 0;
     gridLayoutInfo.endMainLineIndex_ = 2;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->crossCount_ = 4;
     layout->itemsCrossSize_[0] = 1.0f;
@@ -1224,7 +1224,7 @@ HWTEST_F(GridTestNg, MeasureCachedChild001, TestSize.Level1)
 {
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.clearStretch_ = true;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
@@ -1262,7 +1262,7 @@ HWTEST_F(GridTestNg, MeasureCachedChild002, TestSize.Level1)
 {
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.clearStretch_ = true;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
@@ -1302,7 +1302,7 @@ HWTEST_F(GridTestNg, MeasureCachedChild003, TestSize.Level1)
 {
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.clearStretch_ = true;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
@@ -1343,7 +1343,7 @@ HWTEST_F(GridTestNg, MeasureCachedChild004, TestSize.Level1)
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.lineHeightMap_[0] = 1.0f;
     gridLayoutInfo.lineHeightMap_[1] = 2.0f;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
@@ -1384,7 +1384,7 @@ HWTEST_F(GridTestNg, MeasureCachedChild005, TestSize.Level1)
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.lineHeightMap_[0] = 1.0f;
     gridLayoutInfo.lineHeightMap_[1] = 2.0f;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
@@ -1425,7 +1425,7 @@ HWTEST_F(GridTestNg, MeasureCachedChild006, TestSize.Level1)
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.lineHeightMap_[0] = 1.0f;
     gridLayoutInfo.lineHeightMap_[1] = 2.0f;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
@@ -1466,7 +1466,7 @@ HWTEST_F(GridTestNg, MeasureCachedChild007, TestSize.Level1)
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.lineHeightMap_[0] = 1.0f;
     gridLayoutInfo.lineHeightMap_[1] = 2.0f;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
@@ -1509,7 +1509,7 @@ HWTEST_F(GridTestNg, MeasureCachedChild008, TestSize.Level1)
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.lineHeightMap_[0] = 1.0f;
     gridLayoutInfo.lineHeightMap_[1] = 2.0f;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
@@ -1552,7 +1552,7 @@ HWTEST_F(GridTestNg, MeasureCachedChild009, TestSize.Level1)
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.lineHeightMap_[0] = 1.0f;
     gridLayoutInfo.lineHeightMap_[1] = 2.0f;
-    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
@@ -1598,7 +1598,7 @@ HWTEST_F(GridTestNg, CalculateStartCachedCount001, TestSize.Level1)
     gridLayoutInfo.startIndex_ = 1;
     gridLayoutInfo.startMainLineIndex_ = 4;
     RefPtr<GridScrollWithOptionsLayoutAlgorithm> layout =
-        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     GridLayoutOptions options;
     options.irregularIndexes.insert(3);
@@ -1618,7 +1618,7 @@ HWTEST_F(GridTestNg, CalculateStartCachedCount002, TestSize.Level1)
     gridLayoutInfo.startIndex_ = 8;
     gridLayoutInfo.startMainLineIndex_ = 4;
     RefPtr<GridScrollWithOptionsLayoutAlgorithm> layout =
-        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     GridLayoutOptions options;
     options.irregularIndexes.insert(3);
@@ -1642,10 +1642,11 @@ HWTEST_F(GridTestNg, CalculateStartCachedCount003, TestSize.Level1)
     gridLayoutInfo.startIndex_ = 8;
     gridLayoutInfo.startMainLineIndex_ = 4;
     RefPtr<GridScrollWithOptionsLayoutAlgorithm> layout =
-        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     GridLayoutOptions options;
     options.irregularIndexes = { 7, 8 };
+    layout->info_.crossCount_ = 0;
     auto result = layout->CalculateStartCachedCount(options, 2);
     EXPECT_EQ(result, 0);
 }
@@ -1662,10 +1663,11 @@ HWTEST_F(GridTestNg, CalculateStartCachedCount004, TestSize.Level1)
     gridLayoutInfo.startIndex_ = 8;
     gridLayoutInfo.startMainLineIndex_ = 4;
     RefPtr<GridScrollWithOptionsLayoutAlgorithm> layout =
-        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     GridLayoutOptions options;
     options.irregularIndexes = { 7, 9 };
+    layout->info_.crossCount_ = 0;
     auto result = layout->CalculateStartCachedCount(options, 2);
     EXPECT_EQ(result, 0);
 }
@@ -1682,10 +1684,11 @@ HWTEST_F(GridTestNg, CalculateStartCachedCount005, TestSize.Level1)
     gridLayoutInfo.startIndex_ = 8;
     gridLayoutInfo.startMainLineIndex_ = 4;
     RefPtr<GridScrollWithOptionsLayoutAlgorithm> layout =
-        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     GridLayoutOptions options;
     options.irregularIndexes = { 7, 9 };
+    layout->info_.crossCount_ = 0;
     auto result = layout->CalculateStartCachedCount(options, 2);
     EXPECT_EQ(result, 0);
 }
@@ -1702,7 +1705,7 @@ HWTEST_F(GridTestNg, CalculateStartCachedCount006, TestSize.Level1)
     gridLayoutInfo.startIndex_ = 8;
     gridLayoutInfo.startMainLineIndex_ = 4;
     RefPtr<GridScrollWithOptionsLayoutAlgorithm> layout =
-        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     GridLayoutOptions options;
     options.irregularIndexes = { 7, 9 };
@@ -1722,7 +1725,7 @@ HWTEST_F(GridTestNg, CalculateStartCachedCount007, TestSize.Level1)
     gridLayoutInfo.startIndex_ = 8;
     gridLayoutInfo.startMainLineIndex_ = 4;
     RefPtr<GridScrollWithOptionsLayoutAlgorithm> layout =
-        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     GridLayoutOptions options;
     options.irregularIndexes = { 6, 7, 9 };
@@ -1742,7 +1745,7 @@ HWTEST_F(GridTestNg, CalculateStartCachedCount008, TestSize.Level1)
     gridLayoutInfo.startIndex_ = 8;
     gridLayoutInfo.startMainLineIndex_ = 4;
     RefPtr<GridScrollWithOptionsLayoutAlgorithm> layout =
-        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     GridLayoutOptions options;
     options.irregularIndexes = { 7, 6 };
@@ -1762,7 +1765,7 @@ HWTEST_F(GridTestNg, CalculateStartCachedCount009, TestSize.Level1)
     gridLayoutInfo.startIndex_ = 8;
     gridLayoutInfo.startMainLineIndex_ = 4;
     RefPtr<GridScrollWithOptionsLayoutAlgorithm> layout =
-        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+        AceType::MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     GridLayoutOptions options;
     options.irregularIndexes = { 1, 2, 3, 4, 5, 6, 7 };
