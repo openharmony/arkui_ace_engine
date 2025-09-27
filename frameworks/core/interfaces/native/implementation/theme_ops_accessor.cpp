@@ -16,8 +16,10 @@
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/base/frame_node.h"
+#if !defined(PREVIEW)
 #include "core/interfaces/native/ani/ani_theme.h"
 #include "core/interfaces/native/ani/ani_theme_module.h"
+#endif
 #include "core/interfaces/native/node/theme_modifier.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -26,6 +28,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ThemeOpsAccessor {
 void SendThemeToNativeImpl(const Array_ResourceColor* colorArray, Ark_Int32 elmtId)
 {
+#if !defined(PREVIEW)
     CHECK_NULL_VOID(colorArray);
     std::vector<Ark_ResourceColor> colorArrayVec;
     for (int32_t i = 0; i < colorArray->length; i++) {
@@ -45,9 +48,11 @@ void SendThemeToNativeImpl(const Array_ResourceColor* colorArray, Ark_Int32 elmt
         std::optional<NG::AniTheme> themeOpt = std::make_optional(AniThemeScope::GetAniTheme(themeScopeId));
         AniThemeScope::aniCurrentTheme.swap(themeOpt);
     }
+#endif
 }
 void SetDefaultThemeImpl(const Array_ResourceColor* colorArray, Ark_Boolean isDark)
 {
+#if !defined(PREVIEW)
     CHECK_NULL_VOID(colorArray);
     std::vector<Ark_ResourceColor> colorArrayVec;
     for (int32_t i = 0; i < colorArray->length; i++) {
@@ -57,10 +62,12 @@ void SetDefaultThemeImpl(const Array_ResourceColor* colorArray, Ark_Boolean isDa
     std::vector<uint32_t> colors;
     AniThemeModule::ConvertToColorArray(colorArrayVec, colors);
     NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue);
+#endif
 }
 void CreateAndBindThemeImpl(Ark_Int32 themeScopeId, Ark_Int32 themeId, const Array_ResourceColor* colorArray,
     Ark_ThemeColorMode colorMode, const Callback_Void* onThemeScopeDestroy)
 {
+#if !defined(PREVIEW)
     CHECK_NULL_VOID(colorArray);
     std::vector<Ark_ResourceColor> colorArrayVec;
     for (int32_t i = 0; i < colorArray->length; i++) {
@@ -88,6 +95,7 @@ void CreateAndBindThemeImpl(Ark_Int32 themeScopeId, Ark_Int32 themeId, const Arr
         callback.InvokeSync();
     };
     themeModifier->setOnThemeScopeDestroy(node, &func);
+#endif
 }
 void ApplyThemeScopeIdToNodeImpl(Ark_NativePointer ptr,
                                  Ark_Int32 themeScopeId)
