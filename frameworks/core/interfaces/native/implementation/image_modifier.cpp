@@ -23,6 +23,8 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
+#include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
+#include "core/interfaces/native/implementation/drawing_lattice_peer.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -407,8 +409,10 @@ void SetResizableImpl(Ark_NativePointer node,
     } else {
         ImageModelNG::SetResizableSlice(frameNode, defSliceValue);
     }
-    // lattice .. This parameter will need to be implemented when Ark_DrawingLattice is supported.
-    LOGE("Arkoala: Image.ResizableImpl - method not implemented");
+    if (optValue->lattice.value) {
+        ImageModelStatic::SetResizableLattice(frameNode, optValue->lattice.value->drawingLattice);
+        drawing_LatticePeer::Destroy(optValue->lattice.value);
+    }
 }
 void SetPrivacySensitiveImpl(Ark_NativePointer node,
                              const Opt_Boolean* value)

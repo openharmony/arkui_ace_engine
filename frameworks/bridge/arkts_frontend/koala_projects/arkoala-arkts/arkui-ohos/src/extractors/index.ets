@@ -173,7 +173,7 @@ export namespace extractors {
   export function toDrawingColorFilterPtr(
     value: drawing.ColorFilter
   ): KPointer {
-    return 123;
+    return ArkUIAniModule._Extractors_ToDrawingColorFilterPtr(value);
   }
   export function fromDrawingColorFilterPtr(
     ptr: KPointer
@@ -183,7 +183,7 @@ export namespace extractors {
   }
 
   export function toDrawingLatticePtr(value: drawing.Lattice): KPointer {
-    return 123;
+    return ArkUIAniModule._Extractors_ToDrawingLatticePtr(value);
   }
   export function fromDrawingLatticePtr(ptr: KPointer): drawing.Lattice {
     const x: Object = {};

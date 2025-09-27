@@ -14,6 +14,9 @@
  */
 #include "core/interfaces/native/implementation/image_common_methods.h"
 
+#include "core/components_ng/pattern/image/image_model_static.h"
+#include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 void ImageCommonMethods::ApplyColorFilterValues(
     Ark_NativePointer node, const Opt_Union_ColorFilter_DrawingColorFilter* value)
@@ -30,8 +33,12 @@ void ImageCommonMethods::ApplyColorFilterValues(
                 return;
             }
         },
-        [frameNode](const Ark_drawing_ColorFilter& colorStrategy) {
-            LOGE("Arkoala: Image.ColorFilterImpl - doesn't support DrawinColorFilter");
+        [frameNode, &isValid](const Ark_drawing_ColorFilter& colorStrategy) {
+            if (colorStrategy->drawingColorFilter) {
+                isValid = true;
+                ImageModelNG::SetDrawingColorFilter(frameNode, colorStrategy->drawingColorFilter);
+                drawing_ColorFilterPeer::Destroy(colorStrategy);
+            }
         },
         []() {});
     if (isValid)
