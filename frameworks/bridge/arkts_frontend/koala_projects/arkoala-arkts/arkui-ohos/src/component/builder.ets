@@ -3,6 +3,7 @@ import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { conditionScopeImpl, conditionBranchImpl } from './conditionScope'
+import { isDynamicObject } from "./interop"
 
 export class WrappedBuilder<T> {
     /** @memo */
@@ -33,6 +34,10 @@ export function ConditionBranch(
 }
 
 export function makeBuilderParameterProxy<T extends Object>(instance: T, source: Map<string, () => Any>, initializer?: (t: T) => void): T {
+    if (isDynamicObject) {
+        initializer!(instance);
+        return instance;
+    }
     const proxiedInstance = proxy.Proxy.create(instance, new BuilderLiteralProxyHandler<T>(source));
     if (initializer) {
         initializer!(proxiedInstance);
