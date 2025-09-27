@@ -33,7 +33,8 @@ class ACE_FORCE_EXPORT UIExtensionStatic : public AceType {
 public:
     static RefPtr<FrameNode> CreateFrameNode(
         int32_t nodeId, NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY);
-    static void UpdateUecConfig(FrameNode* frameNode, bool isTransferringCaller, bool densityDpi);
+    static void UpdateUecConfig(FrameNode* frameNode, bool isTransferringCaller, bool densityDpi,
+        bool isWindowModeFollowHost, const std::map<PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap);
     static void UpdateWant(FrameNode* frameNode, const AAFwk::Want& want);
     static void SetOnError(FrameNode* frameNode,
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError);
@@ -45,6 +46,7 @@ public:
     static void SetOnResult(FrameNode* frameNode, std::function<void(int32_t, const AAFwk::Want&)>&& onResult);
     static void SetOnTerminated(FrameNode* frameNode,
         std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated);
+    static void SetOnDrawReady(FrameNode* frameNode, std::function<void()>&& OnDrawReady);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_STATIC_NG_H

@@ -1698,7 +1698,8 @@ HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
     ASSERT_NE(context, nullptr);
 
     auto id = ElementRegister::GetInstance()->MakeUniqueId();
-    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("sageNode", id, AceType::MakeRefPtr<Pattern>(), true);
+    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode(
+        "sageNode", id, AceType::MakeRefPtr<Pattern>(), true);
     context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
     stageNode->children_.clear();
 

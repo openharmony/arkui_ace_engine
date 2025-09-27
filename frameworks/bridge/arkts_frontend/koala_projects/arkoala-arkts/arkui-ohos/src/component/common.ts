@@ -49,7 +49,7 @@ import { Tuple_Number_Number } from "./arkui-synthetics"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./button"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { AnimationRange_Number } from "./type-replacements"
-import { Matrix4Transit } from "#external"
+import { Matrix4Transit, AbilityWant } from "#external"
 import { ScrollState } from "./list"
 import { _animateTo, _animationStart, _animationStop } from "./../handwritten/ArkAnimation"
 import { GlobalScope } from "./GlobalScope"
@@ -102,6 +102,10 @@ export class ICurveInternal implements MaterializedBase,ICurve {
         obj.peer = new Finalizable(ptr, ICurveInternal.getFinalizer())
         return obj
     }
+}
+export interface TerminationInfo {
+    code: int;
+    want?: AbilityWant;
 }
 export class TransitionEffectInternal {
     public static fromPtr(ptr: KPointer): TransitionEffect {

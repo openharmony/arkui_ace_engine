@@ -22,7 +22,7 @@ import { CallbackKind } from "./CallbackKind"
 import { Serializer } from "./Serializer"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignParam, VerticalAlignParam, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback, DividerStyle, BlendMode, PopupCommonOptions, DismissPopupActionInternal, ContentModifier } from "./../common"
+import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignParam, VerticalAlignParam, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback, DividerStyle, BlendMode, PopupCommonOptions, DismissPopupActionInternal, ContentModifier, TerminationInfo } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions, ButtonConfiguration } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
 import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, RestrictedWorker, RestrictedWorkerInternal, Callback_CreateItem, LengthMetricsCustom } from "./../arkui-custom"
@@ -162,7 +162,7 @@ import { WindowSceneAttribute } from "./../windowScene"
 import { Callback_Array_String_Void, Callback_Array_TextMenuItem_Void, Callback_Buffer_Void, Callback_ComputedBarAttribute_Void, Callback_CustomBuilder_Void, Callback_GestureJudgeResult_Void, Callback_GestureRecognizer_Void, Callback_HitTestMode_Void, Callback_Literal_Number_offsetRemain_Void, Callback_OffsetResult_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_Opt_Array_NavDestinationTransition_Void, Callback_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Pointer_Void, Callback_StyledStringMarshallingValue_Void, Callback_TouchResult_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_Tuple_Number_Number_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_WebKeyboardOptions_Void, Callback_WebResourceResponse_Void, Callback_WithThemeAttribute_Void } from "./../generatorSynthetic"
 import { Callback_DismissDialogAction_Void, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions, DismissDialogActionInternal } from "./../actionSheet"
 import { Want } from "./../ohos.app.ability"
-import { Callback_TerminationInfo_Void, TerminationInfo } from "./../embeddedComponent"
+import { Callback_TerminationInfo_Void } from "./../embeddedComponent"
 import { BusinessError } from "#external"
 import { Profiler } from "./../inspector"
 import { ASTCResource } from "./../mediaCachedImage"
@@ -12642,54 +12642,6 @@ export class Deserializer extends DeserializerBase {
         let value : TranslateOptions = ({x: x_result, y: y_result, z: z_result} as TranslateOptions)
         return value
     }
-    readUIExtensionOptions(): UIExtensionOptions {
-        let valueDeserializer : Deserializer = this
-        const isTransferringCaller_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let isTransferringCaller_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (isTransferringCaller_buf_runtimeType))
-        {
-            isTransferringCaller_buf = valueDeserializer.readBoolean()
-        }
-        const isTransferringCaller_result : boolean | undefined = isTransferringCaller_buf
-        const placeholder_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let placeholder_buf : ComponentContent | undefined
-        if ((RuntimeType.UNDEFINED) != (placeholder_buf_runtimeType))
-        {
-            placeholder_buf = (valueDeserializer.readComponentContent() as ComponentContent)
-        }
-        const placeholder_result : ComponentContent | undefined = placeholder_buf
-        const areaChangePlaceholder_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let areaChangePlaceholder_buf : Map<string, ComponentContent> | undefined
-        if ((RuntimeType.UNDEFINED) != (areaChangePlaceholder_buf_runtimeType))
-        {
-            const areaChangePlaceholder_buf__size : int32 = valueDeserializer.readInt32()
-            let areaChangePlaceholder_buf_ : Map<string, ComponentContent> = new Map<string, ComponentContent>()
-            // TODO: TS map resize
-            for (let areaChangePlaceholder_buf__i = 0; areaChangePlaceholder_buf__i < areaChangePlaceholder_buf__size; areaChangePlaceholder_buf__i++) {
-                const areaChangePlaceholder_buf__key : string = (valueDeserializer.readString() as string)
-                const areaChangePlaceholder_buf__value : ComponentContent = (valueDeserializer.readComponentContent() as ComponentContent)
-                areaChangePlaceholder_buf_.set(areaChangePlaceholder_buf__key, areaChangePlaceholder_buf__value)
-            }
-            areaChangePlaceholder_buf = areaChangePlaceholder_buf_
-        }
-        const areaChangePlaceholder_result : Map<string, ComponentContent> | undefined = areaChangePlaceholder_buf
-        const dpiFollowStrategy_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let dpiFollowStrategy_buf : DpiFollowStrategy | undefined
-        if ((RuntimeType.UNDEFINED) != (dpiFollowStrategy_buf_runtimeType))
-        {
-            dpiFollowStrategy_buf = TypeChecker.DpiFollowStrategy_FromNumeric(valueDeserializer.readInt32())
-        }
-        const dpiFollowStrategy_result : DpiFollowStrategy | undefined = dpiFollowStrategy_buf
-        const windowModeFollowStrategy_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let windowModeFollowStrategy_buf : WindowModeFollowStrategy | undefined
-        if ((RuntimeType.UNDEFINED) != (windowModeFollowStrategy_buf_runtimeType))
-        {
-            windowModeFollowStrategy_buf = TypeChecker.WindowModeFollowStrategy_FromNumeric(valueDeserializer.readInt32())
-        }
-        const windowModeFollowStrategy_result : WindowModeFollowStrategy | undefined = windowModeFollowStrategy_buf
-        let value : UIExtensionOptions = ({isTransferringCaller: isTransferringCaller_result, placeholder: placeholder_result, areaChangePlaceholder: areaChangePlaceholder_result, dpiFollowStrategy: dpiFollowStrategy_result, windowModeFollowStrategy: windowModeFollowStrategy_result} as UIExtensionOptions)
-        return value
-    }
     readUIFontConfig(): UIFontConfig {
         let valueDeserializer : Deserializer = this
         const fontDir_buf_length : int32 = valueDeserializer.readInt32()
@@ -20497,15 +20449,8 @@ export class Deserializer extends DeserializerBase {
     }
     readTerminationInfo(): TerminationInfo {
         let valueDeserializer : Deserializer = this
-        const code_result : number = (valueDeserializer.readNumber() as number)
-        const want_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let want_buf : Want | undefined
-        if ((RuntimeType.UNDEFINED) != (want_buf_runtimeType))
-        {
-            want_buf = valueDeserializer.readWant()
-        }
-        const want_result : Want | undefined = want_buf
-        let value : TerminationInfo = ({code: code_result, want: want_result} as TerminationInfo)
+        // this is AbilityWant, Not Support
+        let value : TerminationInfo = ({code: 0, want: undefined} as TerminationInfo)
         return value
     }
     readTextAreaOptions(): TextAreaOptions {

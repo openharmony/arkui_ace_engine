@@ -22,7 +22,7 @@
  
  
 namespace OHOS::Ace {
-void AniThrow(ani_env *env, const std::string &errMsg);
+void AniThrow(ani_env *env, const std::string &errMsg, int32_t errorCode = 0);
 ani_status ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str, std::string& str);
 NG::InspectorFilter GetInspectorFilter(ani_env *env, const ani_array_ref& filters, bool& isLayoutInspector);
 bool IsUndefinedRef(ani_env *env, ani_ref object_ref);

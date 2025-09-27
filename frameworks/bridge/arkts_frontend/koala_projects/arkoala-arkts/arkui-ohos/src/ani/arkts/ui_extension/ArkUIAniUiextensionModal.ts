@@ -65,5 +65,5 @@ export class ArkUIAniUiextensionModal {
     native static _Uiextension_Set_OnReciveCallback(nodePointer: KLong, value?: ReciveCallback) : void;
     native static _Uiextension_Set_OnTerminationCallback(nodePointer: KLong, value?: TerminationCallback) : void;
     native static _Uiextension_Set_OnReleaseCallback(nodePointer: KLong, value?: ReleaseCallback) : void;
-    native static _Uiextension_Set_OnDrawReadyCallback(nodePointer: KLong, value: DrawReadyCallback) : void;
+    native static _Uiextension_Set_OnDrawReadyCallback(nodePointer: KLong, value?: DrawReadyCallback) : void;
 }
