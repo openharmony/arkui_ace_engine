@@ -17,6 +17,8 @@
 
 #include <cstdint>
 
+#include "ui/resource/resource_object.h"
+
 #include "core/common/resource/resource_manager.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/interfaces/native/node/theme_modifier.h"
@@ -26,30 +28,36 @@
 namespace OHOS::Ace::NG {
 void AniThemeModule::UpdateColorMode(int32_t colorMode)
 {
-//     ColorMode colorModeValue = MapAniColorModeToColorMode(colorMode);
-//     if (colorModeValue != ColorMode::COLOR_MODE_UNDEFINED) {
-// #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-//         UpdateColorModeForThemeConstants(colorModeValue);
-// #else
-//         ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
-// #endif
-//         auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
-//         pipelineContext->SetLocalColorMode(colorModeValue);
-//     }
+    ColorMode colorModeValue = MapAniColorModeToColorMode(colorMode);
+    if (colorModeValue != ColorMode::COLOR_MODE_UNDEFINED) {
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+        UpdateColorModeForThemeConstants(colorModeValue);
+#else
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        ResourceManager::GetInstance().UpdateColorMode(
+            container->GetBundleName(), container->GetModuleName(), container->GetInstanceId(), colorModeValue);
+#endif
+        auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
+        pipelineContext->SetLocalColorMode(colorModeValue);
+    }
 }
 
 void AniThemeModule::RestoreColorMode()
 {
-//     auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
-//     CHECK_NULL_VOID(pipelineContext);
-//     pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
 
-//     auto colorModeValue = pipelineContext->GetColorMode();
-// #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-//     UpdateColorModeForThemeConstants(colorModeValue);
-// #else
-//     ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
-// #endif
+    auto colorModeValue = pipelineContext->GetColorMode();
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    UpdateColorModeForThemeConstants(colorModeValue);
+#else
+    auto container = Container::GetContainer(pipelineContext->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    ResourceManager::GetInstance().UpdateColorMode(
+        container->GetBundleName(), container->GetModuleName(), container->GetInstanceId(), colorModeValue);
+#endif
 }
 
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
@@ -114,7 +122,7 @@ ArkUINodeHandle AniThemeModule::CreateWithThemeNode(int32_t themeScopeId)
 
 RefPtr<ResourceObject> AniThemeModule::ConvertToResObj(const Ark_ResourceColor& color)
 {
-    if (color.selector != 3) {
+    if (color.selector != 3) { // 3 mean the color is Resource.
         return nullptr;
     }
     auto resource = color.value3;
@@ -127,7 +135,7 @@ RefPtr<ResourceObject> AniThemeModule::ConvertToResObj(const Ark_ResourceColor& 
     if (resource.params.tag != INTEROP_TAG_UNDEFINED) {
         for (int i = 0; i < resource.params.value.length; i++) {
             ResourceObjectParams param { .value = std::make_optional(resource.params.value.array[i].chars),
-                .type = ResourceObjectParams::STRING };
+                .type = ResourceObjectParamType::STRING };
             params.emplace_back(param);
         }
     }
