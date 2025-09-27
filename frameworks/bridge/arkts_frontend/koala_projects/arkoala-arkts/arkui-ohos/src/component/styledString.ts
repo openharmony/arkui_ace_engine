@@ -40,6 +40,7 @@ export class StyledStringInternal {
     public static fromPtr(ptr: KPointer): StyledString {
         const obj : StyledString = new StyledString(undefined, undefined)
         obj.peer = new Finalizable(ptr, StyledString.getFinalizer())
+        obj.length = obj.getLength()
         return obj
     }
 }
@@ -132,7 +133,7 @@ export class StyledString implements MaterializedBase {
         const buffer_casted = buffer as (NativeBuffer)
         return StyledString.unmarshalling1_serialize(buffer_casted)
     }
-    private getLength(): number {
+    public getLength(): number {
         return this.getLength_serialize()
     }
     private getString_serialize(): string {
