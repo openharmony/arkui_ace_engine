@@ -763,36 +763,28 @@ class ArkThemeScope {
             return;
         }
         if (!this.components) {
-            this.components = new ArkThemeScopeArray();
+            this.components = new Map();
         }
-        this.components.push({ elmtId: elmtId, ownerId: owner.id__(), owner: owner, name: componentName });
+        this.components.set(elmtId, { elmtId: elmtId, ownerId: owner.id__(), owner: owner, name: componentName });
     }
     addCustomListenerInScope(listener) {
-        const len = this.components ? this.components.length : -1;
+        const len = this.components ? this.components.size : -1;
         if (len <= 0) {
             return;
         }
         const listenerId = listener.id__();
-        let themeScopeItem = this.components[len - 1];
-        if (themeScopeItem.elmtId === listenerId) {
-            themeScopeItem.listener = listener;
-            return;
-        }
-        themeScopeItem = this.components.find((item) => item.elmtId === listenerId);
+        let themeScopeItem = this.components.get(listenerId);
         if (themeScopeItem) {
             themeScopeItem.listener = listener;
         }
     }
     removeComponentFromScope(elmtId) {
         if (this.components) {
-            const index = this.components.binarySearch(elmtId);
-            if (index > -1) {
-                this.components.splice(index, 1);
-            }
+            this.components.delete(elmtId);
         }
     }
     isComponentInScope(elmtId) {
-        return this.components && (this.components.binarySearch(elmtId) > -1);
+        return this.components && (this.components.has(elmtId));
     }
     componentsInScope() {
         return this.components;
