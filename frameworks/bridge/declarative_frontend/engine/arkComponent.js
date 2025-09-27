@@ -3592,7 +3592,7 @@ class OnVisibleAreaChangeModifier extends ModifierWithKey {
       getUINativeModule().common.resetOnVisibleAreaChange(node);
     } 
     else {
-      getUINativeModule().common.setOnVisibleAreaChange(node, this.value.ratios, this.value.event);
+      getUINativeModule().common.setOnVisibleAreaChange(node, this.value.ratios, this.value.event, this.value.measureFromViewport);
     }
   }
 }
@@ -5691,7 +5691,8 @@ class UICommonEvent {
   }
   setOnVisibleAreaApproximateChange(options, callback) {
     this._onVisibleAreaApproximateChange = callback;
-    getUINativeModule().frameNode.setOnVisibleAreaApproximateChange(this._nodePtr, callback, this._instanceId, options.ratios, options.expectedUpdateInterval ? options.expectedUpdateInterval : 1000);
+    getUINativeModule().frameNode.setOnVisibleAreaApproximateChange(this._nodePtr, callback, this._instanceId, options.ratios,
+      options.expectedUpdateInterval ? options.expectedUpdateInterval : 1000, options.measureFromViewport);
   }
 }
 
@@ -19309,12 +19310,13 @@ class TextDataDetectorConfig {
   }
 }
 class ArkOnVisibleAreaChange {
-  constructor(ratios, event) {
+  constructor(ratios, event, measureFromViewport) {
     this.ratios = ratios;
     this.event = event;
+    this.measureFromViewport = measureFromViewport;
   }
   isEqual(another) {
-    return this.ratios === another.ratios && this.event === another.event;
+    return this.ratios === another.ratios && this.event === another.event && this.measureFromViewport === another.measureFromViewport;
   }
 }
 class ArkSliderStepOptions {

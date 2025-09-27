@@ -2828,12 +2828,20 @@
         "name": "OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval"
     },
     {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_SetMeasureFromViewport"
+    },
+    {
         "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_GetRatios"
     },
     {
         "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_GetMeasureFromViewport"
     },
     {
         "first_introduced": "18",

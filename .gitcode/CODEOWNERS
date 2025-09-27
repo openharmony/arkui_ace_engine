@@ -2790,6 +2790,7 @@ frameworks/core/pipeline_ng/ @arkui_architecture
 
 [Native Node Interfaces]
 frameworks/core/interfaces/arkoala/arkoala_api.h @arkui_architecture
+frameworks/core/interfaces/cjui/cjui_api.h @arkui_architecture
 frameworks/core/interfaces/native/common/ @arkui_framework_xnode
 frameworks/core/interfaces/native/BUILD.gn @arkui_architecture
 frameworks/core/interfaces/native/node/alphabet_indexer_modifier.cpp @arkuicodepulse
@@ -3399,6 +3400,7 @@ test/unittest/core/accessibility/ @ArkUI_ability_group
 test/unittest/core/animation/ @arkuicodepulse
 test/unittest/core/base/ @arkui_framework_xnode
 test/unittest/core/base/frame_node_test_ng.cpp @arkui_framework_xnode
+test/unittest/core/base/frame_node_test_ng_v3.cpp @arkui_framework_xnode
 test/unittest/core/common/ace_engine/ @arkui_framework_xnode
 test/unittest/core/common/asset/ @arkui_framework_xnode
 test/unittest/core/common/clipboard/ @huawei_g_five

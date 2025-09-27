@@ -1874,6 +1874,23 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[...].f32: threshold array. \n
      *
+     * @since 12
+     */
+    /**
+     * @brief Defines the visible area ratio (visible area/total area of the component) threshold for invoking the
+     * visible area change event of the component, this enum extends the configuration capability.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[...].f32: threshold array. The value range is 0 to 1.
+     * .?object: pass in one {@link ArkUI_VisibleAreaEventOptions} object for configuring the ratio or other options.
+     * Please note, when use this param, the ratios set through .value[...].f32 will be ignored, and the update
+     * interval from it is always ignored too.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[...].f32: threshold array. \n
+     * .object: the {@link ArkUI_VisibleAreaEventOptions} object.
+     *
+     * @since 21
      */
     NODE_VISIBLE_AREA_CHANGE_RATIO = 93,
 

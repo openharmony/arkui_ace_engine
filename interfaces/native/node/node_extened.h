@@ -224,6 +224,7 @@ struct ArkUI_CrossLanguageOption {
 struct ArkUI_VisibleAreaEventOptions {
     std::vector<float> ratios;
     int32_t expectedUpdateInterval;
+    bool measureFromViewport;
 };
 
 struct ArkUI_ContentTransitionEffect {

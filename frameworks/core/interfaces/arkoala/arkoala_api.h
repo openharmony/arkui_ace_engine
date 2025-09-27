@@ -2754,8 +2754,8 @@ struct ArkUICommonModifier {
     void (*getOutlineColor)(ArkUINodeHandle node, ArkUI_Uint32 (*values)[4]);
     void (*getSize)(ArkUINodeHandle node, ArkUI_Float32 (*values)[2], ArkUI_Int32 unit);
     ArkUI_Bool (*getRenderGroup)(ArkUINodeHandle node);
-    void (*setOnVisibleAreaChange)(
-        ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size);
+    void (*setOnVisibleAreaChange)(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values,
+        ArkUI_Int32 size, ArkUI_Bool measureFromViewport);
     ArkUI_CharPtr (*getGeometryTransition)(ArkUINodeHandle node, ArkUIGeometryTransitionOptions* options);
     void (*setChainStyle)(ArkUINodeHandle node, ArkUI_Int32 direction, ArkUI_Int32 style);
     void (*getChainStyle)(ArkUINodeHandle node, ArkUI_Int32 (*values)[2]);
@@ -2833,7 +2833,8 @@ struct ArkUICommonModifier {
     ArkUIBackdropBlur (*getNodeBackdropBlur)(ArkUINodeHandle node);
     void (*setDisableDataPrefetch)(ArkUINodeHandle node, ArkUI_Bool disable);
     void (*setOnVisibleAreaApproximateChange)(
-        ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Int32 interval);
+        ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Int32 interval,
+        ArkUI_Bool measureFromViewport);
     void (*setPrivacySensitive)(ArkUINodeHandle node, ArkUI_Int32 sensitive);
     void (*resetPrivacySensitive)(ArkUINodeHandle node);
     void (*freezeUINodeById)(ArkUI_CharPtr id, ArkUI_Bool isFreeze);

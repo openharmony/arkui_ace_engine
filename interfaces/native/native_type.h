@@ -5342,6 +5342,31 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(
     ArkUI_VisibleAreaEventOptions *option, int32_t value);
 
 /**
+* @brief Sets the flag for controlling if the child components can exceed the parent's bounds.
+* if set to false, the part that exceeds the parent's bounds will be considered as invisible area,
+* set to true to allow the exceeding, the part that exceeds will be considered as visible area.
+*
+* Please note that if the parent component set clip(true), the measureFromViewport configuration
+* will be ignored.
+*
+* @param option Instance of visible area change event parameters.
+* @param measureFromViewport When this parameter is set to true, the parts of the component
+*    that exceed the parent component's area will also be included in the visible area calculation. However, this
+*    only applies if the parent component does not explicitly set the clip property to true. If the parent component
+*    sets clip to true, regardless of the value of this parameter, the parts that exceed the parent component's area
+*    will still be treated as invisible in the visible area calculation.
+* Default measureFromViewport: <b>false</b>.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+*         If an error code is returned, it may be due to a failure in parameter validation;
+*         the parameter must not be null.
+* @since 21
+*/
+int32_t OH_ArkUI_VisibleAreaEventOptions_SetMeasureFromViewport(
+    ArkUI_VisibleAreaEventOptions* option, bool measureFromViewport);
+
+/**
  * @brief Obtains the threshold ratios for visible area changes.
  *
  * @param option Instance of visible area change event parameters.
@@ -5365,6 +5390,16 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions
  * @since 17
  */
 int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_VisibleAreaEventOptions* option);
+
+/**
+ * @brief Obtains the value set through {@link OH_ArkUI_VisibleAreaEventOptions_SetMeasureFromViewport} .
+ *
+ * @param option Instance of visible area change event parameters.
+ * @return Returns the flag for controlling of the visible area calculation. Default value: <b>false</b>.
+ *
+ * @since 21
+ */
+bool OH_ArkUI_VisibleAreaEventOptions_GetMeasureFromViewport(ArkUI_VisibleAreaEventOptions* option);
 
 /**
  *@brief Creates a TextPickerRangeContent instance.

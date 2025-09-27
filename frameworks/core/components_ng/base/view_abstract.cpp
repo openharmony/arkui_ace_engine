@@ -2806,7 +2806,7 @@ void ViewAbstract::SetOnSizeChanged(std::function<void(const RectF &oldRect, con
 }
 
 void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
-    const std::vector<double> &ratioList, bool isOutOfBoundsAllowed)
+    const std::vector<double> &ratioList, bool measureFromViewport)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -2817,7 +2817,7 @@ void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisi
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto& visibleAreaUserCallback = eventHub->GetVisibleAreaCallback(true);
-    visibleAreaUserCallback.isOutOfBoundsAllowed = isOutOfBoundsAllowed;
+    visibleAreaUserCallback.measureFromViewport = measureFromViewport;
 }
 
 void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
@@ -9026,7 +9026,7 @@ void ViewAbstract::ClearJSFrameNodeOnSizeChange(FrameNode* frameNode)
 
 void ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(FrameNode* frameNode,
     const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
-    int32_t interval)
+    int32_t interval, bool measureFromViewport)
 {
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
@@ -9041,6 +9041,7 @@ void ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(FrameNode* f
     callback.callback = std::move(jsCallback);
     callback.isCurrentVisible = false;
     callback.period = static_cast<uint32_t>(interval);
+    callback.measureFromViewport = measureFromViewport;
     pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
     frameNode->SetVisibleAreaUserCallback(ratioList, callback);
 }
@@ -9330,7 +9331,7 @@ bool ViewAbstract::GetRenderGroup(FrameNode* frameNode)
 }
 
 void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)>&& onVisibleChange,
-    const std::vector<double> &ratioList)
+    const std::vector<double> &ratioList, bool measureFromViewport)
 {
     FREE_NODE_CHECK(frameNode, SetOnVisibleChange, frameNode, std::move(onVisibleChange), ratioList);
     CHECK_NULL_VOID(frameNode);
@@ -9338,11 +9339,15 @@ void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(b
     CHECK_NULL_VOID(pipeline);
     frameNode->CleanVisibleAreaUserCallback();
     pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto& visibleAreaUserCallback = eventHub->GetVisibleAreaCallback(true);
+    visibleAreaUserCallback.measureFromViewport = measureFromViewport;
 }
 
 void ViewAbstract::SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
     const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
-    int32_t expectedUpdateInterval)
+    int32_t expectedUpdateInterval, bool measureFromViewport)
 {
     FREE_NODE_CHECK(frameNode, SetOnVisibleAreaApproximateChange, frameNode, std::move(onVisibleChange),
         ratioList, expectedUpdateInterval);
@@ -9359,12 +9364,13 @@ void ViewAbstract::SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
     callback.callback = std::move(onVisibleChange);
     callback.isCurrentVisible = false;
     callback.period = static_cast<uint32_t>(expectedUpdateInterval);
+    callback.measureFromViewport = measureFromViewport;
     pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
     frameNode->SetVisibleAreaUserCallback(ratioList, callback);
 }
 
 void ViewAbstract::SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
-    const std::vector<double>& ratioList, int32_t expectedUpdateInterval)
+    const std::vector<double>& ratioList, int32_t expectedUpdateInterval, bool measureFromViewport)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -9380,6 +9386,7 @@ void ViewAbstract::SetOnVisibleAreaApproximateChange(const std::function<void(bo
     callback.callback = std::move(onVisibleChange);
     callback.isCurrentVisible = false;
     callback.period = static_cast<uint32_t>(expectedUpdateInterval);
+    callback.measureFromViewport = measureFromViewport;
     pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
     frameNode->SetVisibleAreaUserCallback(ratioList, callback);
 }
