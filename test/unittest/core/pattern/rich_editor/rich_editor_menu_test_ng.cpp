@@ -201,6 +201,23 @@ HWTEST_F(RichEditorMenuTestNg, CopySelectionMenuParams001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CopySelectionMenuParams002
+ * @tc.desc: test CopySelectionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, CopySelectionMenuParams002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuBuilder = [] () {};
+    richEditorPattern->selectedType_ = TextSpanType::TEXT;
+    richEditorPattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
+    EXPECT_EQ(selectInfo.menuInfo.menuBuilder, nullptr);
+}
+
+/**
  * @tc.name: BindSelectionMenu001
  * @tc.desc: test BindSelectionMenu
  * @tc.type: FUNC
