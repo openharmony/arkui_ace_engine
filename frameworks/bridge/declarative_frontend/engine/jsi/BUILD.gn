@@ -374,8 +374,10 @@ template("declarative_js_engine_ark") {
       deps += [ "${ace_root}/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform" ]
 
       if (is_ohos_standard_system) {
+        defines += [ "OHOS_STANDARD_FORM_SUPPORT" ]
         external_deps += [
           "ability_base:want",
+          "ability_base:extractortool",
           "ability_runtime:app_manager",
           "bundle_framework:appexecfwk_core",
           "form_fwk:fmskit_native",

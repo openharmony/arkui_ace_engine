@@ -150,6 +150,7 @@ public:
     void SetMultiInstanceFlag(bool isMultiInstanceEnable);
     bool IsFormBundleExempt(int64_t formId);
     bool IsFormBundleProtected(const std::string &bundleName, int64_t formId);
+    bool IsFormBundleDebugSignature(const std::string &bundleName);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);

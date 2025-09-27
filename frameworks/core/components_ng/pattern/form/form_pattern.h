@@ -85,6 +85,16 @@ enum class FormChildNodeType : int32_t {
      * app locked image node
     */
     APP_LOCKED_IMAGE_NODE,
+
+    /**
+     * developer mode tips text node
+    */
+    DEVELOPER_MODE_TIPS_TEXT_NODE,
+
+    /**
+     * developer mode tips node
+    */
+    DEVELOPER_MODE_TIPS_IMAGE_NODE,
 };
 
 class FormPattern : public Pattern {
@@ -263,6 +273,7 @@ private:
     void InitUpdateFormDoneCallback(int32_t instanceID);
     bool IsFormBundleExempt(int64_t formId) const;
     bool IsFormBundleProtected(const std::string &bundleName, int64_t formId) const;
+    bool IsFormBundleDebugSignature(const std::string &bundleName) const;
     void HandleLockEvent(bool isLock);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);

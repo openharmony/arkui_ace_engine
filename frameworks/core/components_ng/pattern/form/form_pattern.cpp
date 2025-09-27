@@ -77,6 +77,7 @@ constexpr double ONE_DIMENSION_TIME_LIMIT_FONT_SIZE_BASE = 14.0;
 constexpr float MAX_FONT_SCALE = 1.3f;
 constexpr char TIME_LIMIT_RESOURCE_NAME[] = "form_disable_time_limit";
 constexpr char APP_LOCKED_RESOURCE_NAME[] = "form_disable_app_locked";
+constexpr char DEVELOPER_MODE_TIPS_RESOURCE_NAME[] = "desc_developer_mode_tips";
 constexpr float FORBIDDEN_STYLE_PADDING = 12;
 constexpr uint32_t ROOT_BG_COLOR_DARK = 0xFF2E3033;
 constexpr uint32_t ROOT_BG_COLOR_LIGHT = 0xFFF1F3F5;
@@ -863,17 +864,22 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
     }
     bool isFormBundleForbidden = CheckFormBundleForbidden(info.bundleName);
     bool isFormProtected = IsFormBundleProtected(info.bundleName, info.id);
-    cardInfo_.obscuredMode |= isFormBundleForbidden || isFormProtected;
+    bool isShowDeveloperTips = false;
+    if (!SystemProperties::GetDeveloperModeOn()) {
+        isShowDeveloperTips = IsFormBundleDebugSignature(info.bundleName);
+    }
+    cardInfo_.obscuredMode |= isFormBundleForbidden || isFormProtected || isShowDeveloperTips;
 #if OHOS_STANDARD_SYSTEM
     formManagerBridge_->AddForm(pipeline, cardInfo_, formInfo);
 #else
     formManagerBridge_->AddForm(pipeline, cardInfo_);
 #endif
 
-    if (!info.exemptAppLock && (isFormProtected || isFormBundleForbidden))  {
+    if (!info.exemptAppLock && (isFormProtected || isFormBundleForbidden || isShowDeveloperTips))  {
         auto newFormSpecialStyle = formSpecialStyle_;
         newFormSpecialStyle.SetIsLockedByAppLock(isFormProtected);
         newFormSpecialStyle.SetIsForbiddenByParentControl(isFormBundleForbidden);
+        newFormSpecialStyle.SetIsShowDeveloperTips(isShowDeveloperTips);
         newFormSpecialStyle.SetInitDone();
         PostUITask([weak = WeakClaim(this), info, newFormSpecialStyle] {
             ACE_SCOPED_TRACE("ArkUILoadDisableFormStyle");
@@ -1059,6 +1065,10 @@ void FormPattern::UpdateSpecialStyleCfg()
         UpdateForbiddenIcon(FormChildNodeType::APP_LOCKED_IMAGE_NODE);
         UpdateForbiddenText(FormChildNodeType::APP_LOCKED_TEXT_NODE);
     }
+    if (attribution == FormStyleAttribution::DEVELOPER_MODE_TIPS) {
+        UpdateForbiddenIcon(FormChildNodeType::DEVELOPER_MODE_TIPS_IMAGE_NODE);
+        UpdateForbiddenText(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE);
+    }
 }
 
 void FormPattern::UpdateForbiddenText(FormChildNodeType nodeType)
@@ -1135,6 +1145,8 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
     RemoveFormChildNode(FormChildNodeType::APP_LOCKED_TEXT_NODE);
     RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
     RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_IMAGE_NODE);
+    RemoveFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE);
+    RemoveFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_IMAGE_NODE);
     RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     int32_t dimensionHeight = GetFormDimensionHeight(cardInfo_.dimension);
     if (dimensionHeight <= 0) {
@@ -1184,6 +1196,10 @@ RefPtr<FrameNode> FormPattern::CreateIconNode(bool isRowStyle)
         imageNode = CreateForbiddenImageNode(InternalResource::ResourceId::APP_LOCK_SVG, isRowStyle);
         AddFormChildNode(FormChildNodeType::APP_LOCKED_IMAGE_NODE, imageNode);
     }
+    if (attribution == FormStyleAttribution::DEVELOPER_MODE_TIPS) {
+        imageNode = CreateForbiddenImageNode(InternalResource::ResourceId::APP_LOCK_SVG, isRowStyle);
+        AddFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_IMAGE_NODE, imageNode);
+    }
     return imageNode;
 }
 
@@ -1199,6 +1215,10 @@ RefPtr<FrameNode> FormPattern::CreateTextNode(bool isRowStyle)
         textNode = CreateForbiddenTextNode(APP_LOCKED_RESOURCE_NAME, isRowStyle);
         AddFormChildNode(FormChildNodeType::APP_LOCKED_TEXT_NODE, textNode);
     }
+    if (attribution == FormStyleAttribution::DEVELOPER_MODE_TIPS) {
+        imageNode = CreateForbiddenTextNode(DEVELOPER_MODE_TIPS_RESOURCE_NAME, isRowStyle);
+        AddFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE, imageNode);
+    }
     return textNode;
 }
 
@@ -1212,6 +1232,8 @@ void FormPattern::RemoveDisableFormStyle(const RequestFormInfo& info)
         RemoveFormChildNode(FormChildNodeType::APP_LOCKED_TEXT_NODE);
         RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
         RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_IMAGE_NODE);
+        RemoveFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE);
+        RemoveFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_IMAGE_NODE);
         RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
         return;
     }
@@ -2126,12 +2148,15 @@ void FormPattern::OnLanguageConfigurationUpdate()
 {
     RefPtr<FrameNode> textNode = nullptr;
     std::string content;
-    if (formSpecialStyle_.GetFormStyleAttribution() != FormStyleAttribution::PARENT_CONTROL) {
-        GetResourceContent(APP_LOCKED_RESOURCE_NAME, content);
-        textNode = GetFormChildNode(FormChildNodeType::APP_LOCKED_TEXT_NODE);
-    } else {
+    if (formSpecialStyle_.GetFormStyleAttribution() == FormStyleAttribution::PARENT_CONTROL) {
         GetResourceContent(TIME_LIMIT_RESOURCE_NAME, content);
         textNode = GetFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
+    } else if (formSpecialStyle_.GetFormStyleAttribution() == FormStyleAttribution::DEVELOPER_MODE_TIPS) {
+        GetResourceContent(DEVELOPER_MODE_TIPS_RESOURCE_NAME, content);
+        textNode = GetFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE);
+    } else {
+        GetResourceContent(APP_LOCKED_RESOURCE_NAME, content);
+        textNode = GetFormChildNode(FormChildNodeType::APP_LOCKED_TEXT_NODE);
     }
     CHECK_NULL_VOID(textNode);
     auto host = GetHost();
@@ -2815,6 +2840,12 @@ bool FormPattern::IsFormBundleProtected(const std::string& bundleName, int64_t f
 {
     CHECK_NULL_RETURN(formManagerBridge_, false);
     return formManagerBridge_->IsFormBundleProtected(bundleName, formId);
+}
+
+bool FormPattern::IsFormBundleDebugSignature(const std::string& bundleName) const
+{
+    CHECK_NULL_RETURN(formManagerBridge_, false);
+    return formManagerBridge_->IsFormBundleDebugSignature(bundleName);
 }
 
 void FormPattern::HandleLockEvent(bool isLock)

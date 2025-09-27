@@ -36,6 +36,9 @@
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
 #endif
+#if OHOS_STANDARD_FORM_SUPPORT
+#include "extractor.h"
+#endif
 
 #include "ace_forward_compatibility.h"
 #include "scope_manager/native_scope_manager.h"
@@ -1694,9 +1697,11 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
             }
             return true;
         }
+#if !defined(OHOS_STANDARD_FORM_SUPPORT)
         if (!delegate->GetAssetContent(FORM_ES_MODULE_CARD_PATH, content)) {
             return false;
         }
+#endif
         const std::string bundleName = frontEnd->GetBundleName();
         std::string moduleName = frontEnd->GetModuleName();
 #ifdef PREVIEW
@@ -1717,6 +1722,29 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
 #else
         abcPath = moduleName.append("/").append(fileName);
 #endif
+#if OHOS_STANDARD_FORM_SUPPORT
+        {
+            bool flag = false;
+            const std::string hapFilePath = container->GetHapPath();
+            std::shared_ptr<AbilityBase::Extractor> extractor =
+                AbilityBase::ExtractorUtil::GetExtractor(hapFilePath, flag, false);
+            if (extractor == nullptr) {
+                TAG_LOGE(AceLogTag::ACE_ROUTER, "hapFilePath %{private}s GetExtractor failed", hapFilePath.c_str());
+                return false;
+            }
+            auto data = extractor->GetSafeData(FORM_ES_MODULE_CARD_PATH);
+            if (!data) {
+                TAG_LOGE(AceLogTag::ACE_ROUTER, "null data");
+                return false;
+            }
+            if (arkRuntime->IsStaticOrInvalidFile(data->GetDataPtr(), data->GetDataLen())) {
+                return false;
+            }
+            if (!arkRuntime->ExecuteModuleBufferSecure(data->GetDataPtr(), data->GetDataLen(), abcPath, true)) {
+                return false;
+            }
+        }
+#else
         {
             if (arkRuntime->IsStaticOrInvalidFile(content.data(), content.size())) {
                 return false;
@@ -1727,6 +1755,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
                 return false;
             }
         }
+#endif
         return true;
     } else {
         auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
