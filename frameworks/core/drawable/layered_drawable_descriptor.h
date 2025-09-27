@@ -25,9 +25,10 @@ class ACE_FORCE_EXPORT LayeredDrawableDescriptor : public DrawableDescriptor {
 public:
     LayeredDrawableDescriptor() = default;
     ~LayeredDrawableDescriptor() = default;
-    explicit LayeredDrawableDescriptor(
-        const RefPtr<PixelMap>& foreground, const RefPtr<PixelMap>& background, const RefPtr<PixelMap>& mask)
-        : foreground_(foreground), background_(background), mask_(mask)
+    explicit LayeredDrawableDescriptor(const RefPtr<PixelMap>& foreground, const RefPtr<PixelMap>& background,
+        const RefPtr<PixelMap>& mask, bool foregroundOverBackground = false)
+        : foreground_(foreground), background_(background), mask_(mask),
+          foregroundOverBackground_(foregroundOverBackground)
     {}
 
     DrawableType GetDrawableType() const override
@@ -102,6 +103,7 @@ private:
     RefPtr<PixelMap> background_;
     RefPtr<PixelMap> mask_;
     RefPtr<PixelMap> composePixelMap_;
+    bool foregroundOverBackground_ = false; // default: foreground uses SRC_OVER mode
 };
 } // namespace OHOS::Ace
 
