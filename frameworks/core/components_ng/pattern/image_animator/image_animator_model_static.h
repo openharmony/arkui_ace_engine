@@ -23,6 +23,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ImageAnimatorModelStatic {
 public:
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetDuration(FrameNode* frameNode, const std::optional<int32_t>& duration);
     static void SetState(FrameNode* frameNode, const std::optional<int32_t>& state);
     static void SetFillMode(FrameNode* frameNode, const std::optional<int32_t>& fillMode);

@@ -40,7 +40,11 @@ void PatternLockModelStatic::SetActiveColor(FrameNode* frameNode, const std::opt
 void PatternLockModelStatic::SetCircleRadius(FrameNode* frameNode, const std::optional<Dimension>& radius)
 {
     if (radius.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, CircleRadius, radius.value(), frameNode);
+        if (radius.value().IsValid()) {
+            ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, CircleRadius, radius.value(), frameNode);
+        } else {
+            ACE_RESET_NODE_PAINT_PROPERTY(PatternLockPaintProperty, CircleRadius, frameNode);
+        }
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(PatternLockPaintProperty, CircleRadius, frameNode);
     }

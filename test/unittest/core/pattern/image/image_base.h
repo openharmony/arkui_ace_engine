@@ -52,6 +52,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/image/image_model_static.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"

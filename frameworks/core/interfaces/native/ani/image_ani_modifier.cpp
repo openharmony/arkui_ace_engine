@@ -22,6 +22,9 @@
 #include "core/components_ng/pattern/image/image_model_static.h"
 #include "core/interfaces/native/implementation/color_filter_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
+#include "core/interfaces/native/implementation/drawing_lattice_peer.h"
+#include "core/interfaces/native/implementation/drawable_descriptor_peer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -87,6 +90,21 @@ ani_long GetColorFilter(ani_long colorFilterPeer)
     return pointer;
 }
 
+void* GetDrawingColorFilterPeer(void* colorFilterMapPtr)
+{
+    return reinterpret_cast<void*>(drawing_ColorFilterPeer::Create(colorFilterMapPtr));
+}
+
+void* GetDrawingLatticePeer(void* drawingLatticePeerPtr)
+{
+    return reinterpret_cast<void*>(drawing_LatticePeer::Create(drawingLatticePeerPtr));
+}
+
+void* GetDrawableDescriptorPeer(void* drawableDescriptorPeer, int32_t type)
+{
+    return reinterpret_cast<void*>(DrawableDescriptorPeer::Create(drawableDescriptorPeer, type));
+}
+
 const ArkUIAniImageModifier* GetImageAniModifier()
 {
     static const ArkUIAniImageModifier impl = {
@@ -97,6 +115,9 @@ const ArkUIAniImageModifier* GetImageAniModifier()
         .getPixelMapPeer = OHOS::Ace::NG::GetPixelMapPeer,
         .createColorFilterPeer = OHOS::Ace::NG::CreateColorFilterPeer,
         .getColorFilter = OHOS::Ace::NG::GetColorFilter,
+        .getDrawingColorFilterPeer = OHOS::Ace::NG::GetDrawingColorFilterPeer,
+        .getDrawingLatticePeer = OHOS::Ace::NG::GetDrawingLatticePeer,
+        .getDrawableDescriptorPeer = OHOS::Ace::NG::GetDrawableDescriptorPeer,
     };
     return &impl;
 }
