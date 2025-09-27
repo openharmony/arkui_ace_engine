@@ -337,6 +337,79 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest010)
 }
 
 /**
+ * @tc.name: ArkoalaLazyNodeTest011
+ * @tc.desc: Test ArkoalaLazyNode GetChildren.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest011)
+{
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    EXPECT_EQ(lazyNode->children_.size(), 0);
+    CreateChildren(lazyNode, TOTAL_COUNT);
+    auto ret = lazyNode->GetChildren();
+    EXPECT_EQ(ret.size(), TOTAL_COUNT);
+
+    lazyNode->children_.clear();
+    ret = lazyNode->GetChildren();
+    EXPECT_EQ(ret.size(), TOTAL_COUNT);
+}
+
+/**
+ * @tc.name: ArkoalaLazyNodeTest012
+ * @tc.desc: Test ArkoalaLazyNode ForEachL1Node.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest012)
+{
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    CreateChildren(lazyNode, TOTAL_COUNT);
+    std::list<RefPtr<UINode>> ret;
+    lazyNode->ForEachL1Node([&ret, this](int32_t index, const RefPtr<UINode>& node) {
+        ret.push_back(node);
+    });
+    EXPECT_EQ(ret.size(), TOTAL_COUNT);
+}
+
+/**
+ * @tc.name: ArkoalaLazyNodeTest013
+ * @tc.desc: Test ArkoalaLazyNode DumpUINode.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest013)
+{
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    EXPECT_EQ(lazyNode->DumpUINode(nullptr), "UINode: nullptr");
+    int32_t nodeId = GetNextId();
+    auto node = CreateTestUINode(nodeId);
+    const std::string ret = "UINode: TestUINode(" + std::to_string(nodeId) + ")";
+    EXPECT_EQ(lazyNode->DumpUINode(node), ret);
+}
+
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest014)
+{
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    CreateChildren(lazyNode, TOTAL_COUNT);
+    lazyNode->children_.clear();
+    lazyNode->RequestSyncTree();
+    EXPECT_EQ(lazyNode->children_.size(), 0);
+}
+
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest015)
+{
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    CreateChildren(lazyNode, TOTAL_COUNT);
+
+    lazyNode->postUpdateTaskHasBeenScheduled_ = true;
+    lazyNode->PostIdleTask();
+    EXPECT_TRUE(lazyNode->postUpdateTaskHasBeenScheduled_);
+
+    lazyNode->postUpdateTaskHasBeenScheduled_ = false;
+    lazyNode->PostIdleTask();
+    EXPECT_EQ(lazyNode->children_.size(), 0);
+    EXPECT_TRUE(lazyNode->postUpdateTaskHasBeenScheduled_);
+}
+
+/**
  * @tc.name: ConvertFromToIndex001
  * @tc.desc: Test ArkoalaLazyNode ConvertFromToIndex and ConvertFromToIndexRevert.
  * @tc.type: FUNC
