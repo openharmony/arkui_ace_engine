@@ -582,7 +582,11 @@ void ToggleModelNG::SetSwitchPointColor(FrameNode* frameNode, const std::optiona
         CHECK_NULL_VOID(theme);
         color = theme->GetPointColor();
     }
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SwitchPointColor, color, frameNode);
+    // Protection against misuse of 'switchPointColor' function on non-switch nodes.
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (paintProperty) {
+        paintProperty->UpdateSwitchPointColor(color);
+    }
 }
 
 void ToggleModelNG::SetSwitchPointColorSetByUser(FrameNode* frameNode, const bool flag)
