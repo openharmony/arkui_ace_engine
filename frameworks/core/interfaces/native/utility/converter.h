@@ -611,8 +611,6 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_String& src);
     template<> RefPtr<Curve> Convert(const Ark_curves_ICurve& src);
     template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
-    template<> RefPtr<Gesture> Convert(const Ark_RotationGesture& src);
-    template<> RefPtr<Gesture> Convert(const Ark_SwipeGesture& src);
     template<> RefPtr<PixelMap> Convert(const Ark_image_PixelMap& src);
     template<> RotateOptions Convert(const Ark_RotateOptions& src);
     template<> ScaleOpt Convert(const Ark_ScaleOptions& src);
