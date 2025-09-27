@@ -335,6 +335,8 @@ private:
     float paddingTop_ = 0.0f;
     float paddingBottom_ = 0.0f;
     float optionPadding_ = 0.0f;
+    float selectMenuAdditionX_ = 0.0f;
+    float selectMenuAdditionY_ = 0.0f;
     float top_ = 0.0;
     float bottom_ = 0.0;
     float left_ = 0.0;

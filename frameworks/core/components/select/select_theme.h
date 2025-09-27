@@ -38,6 +38,8 @@ constexpr double NONE_SHADOW_VALUE = 6.0;
 constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
 constexpr Dimension MENU_END_ICON_WIDTH = 24.0_vp;
 constexpr Dimension MENU_END_ICON_HEIGHT = 24.0_vp;
+constexpr Dimension SELECT_MENU_END_ICON_WIDTH = 32.0_vp;
+constexpr Dimension SELECT_MENU_END_ICON_HEIGHT = 32.0_vp;
 constexpr Dimension DEFAULT_MENU_WIDTH = 0.0_vp;
 constexpr Dimension MIN_MENU_WIDTH = 64.0_vp;
 constexpr double TITLE_LEFT_PADDING = 16.0;
@@ -46,6 +48,7 @@ constexpr double TITLE_RIGHT_PADDING = 8.0;
 constexpr double TITLE_BOTTOM_PADDING = 16.0;
 constexpr double SELECT_OPTION_INTERVAL = 6.0;
 constexpr FontWeight SELECT_MENU_CHECK_MARK_FONT_WEIGHT = FontWeight::REGULAR;
+constexpr FontWeight SELECT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr Dimension SELECT_MENU_CHECK_MARK_FONT_SIZE = 24.0_vp;
 constexpr uint32_t SELECT_MENU_CHECK_MARK_DEFAULT_COLOR = 0xFF182431;
 
@@ -121,6 +124,7 @@ public:
             ParsePartTwo(theme, pattern);
             ParsePartThree(theme, pattern);
             ParsePartFourth(theme, pattern);
+            ParsePartFifth(theme, pattern);
         }
 
         void ParseNewPattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SelectTheme>& theme) const
@@ -139,7 +143,8 @@ public:
             theme->fontFamily_ = "sans-serif";
             theme->fontSize_ = pattern->GetAttr<Dimension>("text_font_size", 16.0_fp);
             theme->fontColor_ = pattern->GetAttr<Color>("select_font_color", Color(0xe5000000));
-            theme->fontWeight_ = FontWeight::NORMAL;
+            theme->fontWeight_ = FontWeight(static_cast<int32_t>(pattern->GetAttr<double>(
+                "select_font_weight", static_cast<double>(SELECT_FONT_WEIGHT))));
             theme->textDecoration_ = TextDecoration::NONE;
             auto optionSize = pattern->GetAttr<int>("select_option_show_count", INT32_MAX);
             theme->optionSize_ = optionSize < 0 ? theme->optionSize_ : static_cast<size_t>(optionSize);
@@ -202,8 +207,6 @@ public:
             theme->defaultPaddingTop_ = pattern->GetAttr<Dimension>("default_padding_top", theme->defaultPaddingTop_);
             theme->defaultPaddingBottomFixed_ =
                 pattern->GetAttr<Dimension>("default_padding_bottom_fixed", theme->defaultPaddingBottomFixed_);
-            theme->contentSpinnerPadding_ =
-                pattern->GetAttr<Dimension>("content_spinner_padding", theme->contentSpinnerPadding_);
             theme->menuAnimationOffset_ =
                 pattern->GetAttr<Dimension>("menu_animation_offset", theme->menuAnimationOffset_);
             theme->spinnerWidth_ = pattern->GetAttr<Dimension>("spinner_width", theme->spinnerWidth_);
@@ -242,8 +245,8 @@ public:
                     ControlSize::SMALL, pattern->GetAttr<Dimension>("small_select_min_height", 0.0_vp)));
             }
             theme->iconSideLength_ = pattern->GetAttr<Dimension>("icon_side_length", theme->iconSideLength_);
-            theme->endIconWidth_ = MENU_END_ICON_WIDTH;
-            theme->endIconHeight_ = MENU_END_ICON_HEIGHT;
+            theme->endIconWidth_ = theme->isTV_ ? SELECT_MENU_END_ICON_WIDTH : MENU_END_ICON_WIDTH;
+            theme->endIconHeight_ = theme->isTV_ ? SELECT_MENU_END_ICON_HEIGHT : MENU_END_ICON_HEIGHT;
             theme->contentMargin_ = pattern->GetAttr<Dimension>("content_margin", theme->contentMargin_);
             theme->selectDefaultBgColor_ =
                 pattern->GetAttr<Color>("select_default_bg_color", theme->selectDefaultBgColor_);
@@ -349,6 +352,47 @@ public:
                 pattern->GetAttr<Dimension>("select_check_mark_font_size", SELECT_MENU_CHECK_MARK_FONT_SIZE);
             theme->checkMarkColor_ =
                 pattern->GetAttr<Color>("select_check_mark_color", Color(SELECT_MENU_CHECK_MARK_DEFAULT_COLOR));
+        }
+
+        void ParsePartFifth(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
+        {
+            theme->spinnerSymbolSize_ = pattern->GetAttr<Dimension>("select_spinner_symbol_size", 16.0_fp);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->selectSpinnerSymbolSizeMap_.insert(
+                    std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->spinnerSymbolSize_));
+                theme->selectSpinnerSymbolSizeMap_.insert(std::pair<ControlSize, Dimension>(
+                    ControlSize::SMALL, pattern->GetAttr<Dimension>("select_small_spinner_symbol_size", 14.0_fp)));
+            }
+            theme->disabledBackgroundColorAlpha_ =
+                pattern->GetAttr<double>("select_disabled_background_color_alpha", 1.0);
+            theme->contentSpinnerPadding_ =
+                pattern->GetAttr<Dimension>("content_spinner_padding", theme->contentSpinnerPadding_);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->selectContentSpinnerPaddingMap_.insert(
+                    std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->contentSpinnerPadding_));
+                theme->selectContentSpinnerPaddingMap_.insert(std::pair<ControlSize, Dimension>(
+                    ControlSize::SMALL, pattern->GetAttr<Dimension>("small_content_spinner_padding", 8.0_vp)));
+            }
+            theme->selectLeftMargin_ =
+                pattern->GetAttr<Dimension>("select_normal_left_margin", 8.0_vp);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->selectLeftMarginMap_.insert(
+                    std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->selectLeftMargin_));
+                theme->selectLeftMarginMap_.insert(std::pair<ControlSize, Dimension>(
+                    ControlSize::SMALL, pattern->GetAttr<Dimension>("select_small_left_margin", 4.0_vp)));
+            }
+            theme->selectRightMargin_ =
+                pattern->GetAttr<Dimension>("select_normal_right_margin", 8.0_vp);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->selectRightMarginMap_.insert(
+                    std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->selectRightMargin_));
+                theme->selectRightMarginMap_.insert(std::pair<ControlSize, Dimension>(
+                    ControlSize::SMALL, pattern->GetAttr<Dimension>("select_small_right_margin", 4.0_vp)));
+            }
+            theme->selectMenuAdditionX_ = pattern->GetAttr<Dimension>("select_menu_addition_x", 0.0_vp);
+            theme->selectMenuAdditionY_ = pattern->GetAttr<Dimension>("select_menu_addition_y", 0.0_vp);
+            theme->menuFontWeight_ = FontWeight(static_cast<int32_t>(
+                pattern->GetAttr<double>("select_font_weight", static_cast<double>(SELECT_FONT_WEIGHT))));
         }
 
         void ParseAttribute(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
@@ -539,6 +583,13 @@ public:
         theme->menuItemHorIntervalPadding_ = menuItemHorIntervalPadding_;
         theme->menuPadding_ = menuPadding_;
         theme->menuWordBreak_ = menuWordBreak_;
+        theme->selectLeftMargin_ = selectLeftMargin_;
+        theme->selectRightMargin_ = selectRightMargin_;
+        theme->disabledBackgroundColorAlpha_ = disabledBackgroundColorAlpha_;
+        theme->spinnerSymbolSize_ = spinnerSymbolSize_;
+        theme->selectMenuAdditionX_ = selectMenuAdditionX_;
+        theme->selectMenuAdditionY_ = selectMenuAdditionY_;
+        theme->menuFontWeight_ = menuFontWeight_;
     }
 
     void CloneWideScreenAttrs(RefPtr<SelectTheme>& theme)
@@ -1543,6 +1594,75 @@ public:
     {
         return menuAnimationScale_;
     }
+ 
+    const Dimension& GetSelectLeftMargin(ControlSize controlSize) const
+    {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto result = selectLeftMarginMap_.find(controlSize);
+            if (result != selectLeftMarginMap_.end()) {
+                return result->second;
+            }
+        }
+        return selectLeftMargin_;
+    }
+
+    const Dimension& GetSelectRightMargin(ControlSize controlSize) const
+    {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto result = selectRightMarginMap_.find(controlSize);
+            if (result != selectRightMarginMap_.end()) {
+                return result->second;
+            }
+        }
+        return selectRightMargin_;
+    }
+
+    const Dimension& GetContentSpinnerPadding(ControlSize controlSize) const
+    {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto result = selectContentSpinnerPaddingMap_.find(controlSize);
+            if (result != selectContentSpinnerPaddingMap_.end()) {
+                return result->second;
+            }
+        }
+        return contentSpinnerPadding_;
+    }
+
+    const Dimension& GetSpinnerSymbolSize() const
+    {
+        return spinnerSymbolSize_;
+    }
+
+    const Dimension& GetSpinnerSymbolSize(ControlSize controlSize) const
+    {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto result = selectSpinnerSymbolSizeMap_.find(controlSize);
+            if (result != selectSpinnerSymbolSizeMap_.end()) {
+                return result->second;
+            }
+        }
+        return spinnerSymbolSize_;
+    }
+
+    const Dimension& GetSelectMenuAdditionX() const
+    {
+        return selectMenuAdditionX_;
+    }
+
+    const Dimension& GetSelectMenuAdditionY() const
+    {
+        return selectMenuAdditionY_;
+    }
+
+    double GetDisabledBackgroundColorAlpha() const
+    {
+        return disabledBackgroundColorAlpha_;
+    }
+
+    FontWeight GetMenuFontWeight() const
+    {
+        return menuFontWeight_;
+    }
 
     RefPtr<Curve> GetMenuAnimationCurve() const
     {
@@ -1579,6 +1699,19 @@ private:
     Color menuFontColor_;
     Color disabledMenuFontColor_;
     Color menuTitleFontColor_;
+
+    std::unordered_map<ControlSize, Dimension> selectLeftMarginMap_;
+    std::unordered_map<ControlSize, Dimension> selectRightMarginMap_;
+    std::unordered_map<ControlSize, Dimension> selectContentSpinnerPaddingMap_;
+    std::unordered_map<ControlSize, Dimension> selectSpinnerSymbolSizeMap_;
+    Dimension selectLeftMargin_ = 8.0_vp;
+    Dimension selectRightMargin_ = 8.0_vp;
+    Dimension contentSpinnerPadding_ = 8.0_vp;
+    Dimension spinnerSymbolSize_ = 16.0_fp;
+    Dimension selectMenuAdditionX_ = 0.0_vp;
+    Dimension selectMenuAdditionY_ = 0.0_vp;
+    double disabledBackgroundColorAlpha_ = 1.0;
+    FontWeight menuFontWeight_ { FontWeight::NORMAL };
 
     bool allowScale_ = true;
     Dimension fontSize_;
@@ -1629,7 +1762,6 @@ private:
     Dimension defaultPaddingEnd_;
     Dimension defaultPaddingTop_;
     Dimension defaultPaddingBottomFixed_;
-    Dimension contentSpinnerPadding_;
     Dimension menuAnimationOffset_;
     Dimension spinnerWidth_;
     Dimension spinnerHeight_;

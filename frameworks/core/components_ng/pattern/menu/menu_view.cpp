@@ -2059,7 +2059,7 @@ RefPtr<FrameNode> MenuView::CreateSymbol(const std::function<void(WeakPtr<NG::Fr
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    props->UpdateFontSize(theme->GetEndIconWidth());
+    props->UpdateFontSize(theme->GetIconSideLength());
     props->UpdateSymbolColorList({theme->GetMenuIconColor()});
     props->UpdateAlignment(Alignment::CENTER_LEFT);
     MarginProperty margin;
@@ -2104,7 +2104,7 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
         textProperty->UpdateMaxLines(std::numeric_limits<int32_t>::max());
     }
     textProperty->UpdateFontSize(theme->GetMenuFontSize());
-    textProperty->UpdateFontWeight(FontWeight::REGULAR);
+    textProperty->UpdateFontWeight(theme->GetMenuFontWeight());
     textProperty->UpdateTextColor(theme->GetMenuFontColor());
     // set default foregroundColor
     auto textRenderContext = textNode->GetRenderContext();

@@ -371,10 +371,12 @@ void JSSelect::ResetFontSize(SelectFontType type)
 
 void JSSelect::ResetFontWeight(SelectFontType type)
 {
+    auto selectTheme = GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
     if (type == SelectFontType::SELECT) {
         SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
     } else if (type == SelectFontType::OPTION) {
-        SelectModel::GetInstance()->SetOptionFontWeight(FontWeight::REGULAR);
+        SelectModel::GetInstance()->SetOptionFontWeight(selectTheme->GetMenuFontWeight());
     } else if (type == SelectFontType::SELECTED_OPTION) {
         SelectModel::GetInstance()->SetSelectedOptionFontWeight(FontWeight::REGULAR);
     }

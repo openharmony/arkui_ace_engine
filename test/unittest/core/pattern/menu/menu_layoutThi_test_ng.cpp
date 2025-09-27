@@ -67,6 +67,8 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr uint32_t GRID_COUNTS = 8;
+constexpr uint32_t TV_MIN_GRID_COUNTS = 3;
 constexpr int32_t DEFAULT_CHILD_COUNT = 5;
 constexpr int32_t TARGET_ID = 3;
 constexpr int32_t TARGET = 0;
@@ -80,6 +82,7 @@ constexpr int32_t MENU_Y_TOP = 100;
 constexpr int32_t MENU_Y_BOTTOM = 1400;
 constexpr int32_t MENU_Y_MIDDLE = 1100;
 constexpr int32_t NODE_ID = 1;
+constexpr float TV_MAX_WIDTH = 1000.0f;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float TARGET_SIZE_WIDTH = 50.0f;
@@ -2064,5 +2067,76 @@ HWTEST_F(MenuLayout3TestNg, CalcSubMenuMaxHeightConstraint001, TestSize.Level1)
     menuPattern->UpdateLastPlacement(Placement::RIGHT);
     menuAlgorithm->CalcSubMenuMaxHeightConstraint(parentLayoutConstraint, menuItem);
     EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::RIGHT);
+}
+ 
+/**
+ * @tc.name: GetMaxGridCounts001
+ * @tc.desc: Verify GetMaxGridCounts.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, GetMaxGridCounts001, TestSize.Level1)
+{
+    auto menuAlgorithm = CreateMenuLayoutAlgorithm(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuAlgorithm, nullptr);
+    auto menuNode = GetOrCreateMenu(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto props = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+
+    auto geometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    LayoutWrapperNode layoutWrapper(menuNode, geometryNode, props);
+
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    selectTheme->isTV_ = true;
+    auto childConstraint = props->CreateChildConstraint();
+
+    auto columnInfo = AceType::MakeRefPtr<GridColumnInfo>();
+    ASSERT_NE(columnInfo, nullptr);
+    auto parent = AceType::MakeRefPtr<GridContainerInfo>();
+    parent->columns_ = GRID_COUNTS;
+    columnInfo->parent_ = parent;
+    childConstraint.maxSize.SetWidth(TV_MAX_WIDTH);
+    menuAlgorithm->UpdateConstraintWidth(&layoutWrapper, childConstraint);
+    EXPECT_TRUE(selectTheme->IsTV());
+}
+
+/**
+ * @tc.name: UpdateConstraintBaseOnOptions001
+ * @tc.desc: Verify UpdateConstraintBaseOnOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, UpdateConstraintBaseOnOptions001, TestSize.Level1)
+{
+    auto menuAlgorithm = CreateMenuLayoutAlgorithm(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuAlgorithm, nullptr);
+    auto menuNode = GetOrCreateMenu(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto props = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+
+    auto geometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    LayoutWrapperNode layoutWrapper(menuNode, geometryNode, props);
+
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    selectTheme->isTV_ = true;
+    auto childConstraint = props->CreateChildConstraint();
+
+    menuAlgorithm->optionPadding_ = 0.0f;
+    auto columnInfo = AceType::MakeRefPtr<GridColumnInfo>();
+    ASSERT_NE(columnInfo, nullptr);
+    auto parent = AceType::MakeRefPtr<GridContainerInfo>();
+    parent->columns_ = TV_MIN_GRID_COUNTS;
+    columnInfo->parent_ = parent;
+    childConstraint.maxSize.SetWidth(TV_MAX_WIDTH);
+    menuAlgorithm->UpdateConstraintBaseOnOptions(&layoutWrapper, childConstraint);
+    EXPECT_TRUE(selectTheme->IsTV());
 }
 } // namespace OHOS::Ace::NG

@@ -786,8 +786,8 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
         NG::PaddingProperty paddings;
         paddings.top = std::nullopt;
         paddings.bottom = std::nullopt;
-        paddings.left = NG::CalcLength(pattern->GetSelectLeftRightMargin());
-        paddings.right = NG::CalcLength(pattern->GetSelectLeftRightMargin());
+        paddings.left = NG::CalcLength(pattern->GetSelectLeftMargin(ControlSize::NORMAL));
+        paddings.right = NG::CalcLength(pattern->GetSelectRightMargin(ControlSize::NORMAL));
         ViewAbstract::SetPadding(frameNode, paddings);
     }
 
