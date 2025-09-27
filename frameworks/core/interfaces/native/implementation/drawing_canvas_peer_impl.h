@@ -19,17 +19,17 @@
 
 struct drawing_CanvasPeer {
 public:
-    explicit drawing_CanvasPeer(const std::shared_ptr<OHOS::Rosen::Drawing::Canvas>& rsCanvas)
+    explicit drawing_CanvasPeer(OHOS::Rosen::Drawing::Canvas* rsCanvas)
     {
         rsCanvas_ = rsCanvas;
     }
     ~drawing_CanvasPeer() = default;
-    std::shared_ptr<OHOS::Rosen::Drawing::Canvas> GetCanvas() const
+    OHOS::Rosen::Drawing::Canvas* GetCanvas() const
     {
         return rsCanvas_;
     }
     friend OHOS::Ace::NG::PeerUtils;
 private:
-    std::shared_ptr<OHOS::Rosen::Drawing::Canvas> rsCanvas_;
+    OHOS::Rosen::Drawing::Canvas* rsCanvas_;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DRAW_CANVAS_PEER_IMPL_H

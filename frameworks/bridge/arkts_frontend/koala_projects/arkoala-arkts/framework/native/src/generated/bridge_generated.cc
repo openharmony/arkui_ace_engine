@@ -27293,15 +27293,19 @@ KInteropReturnBuffer impl_CanvasRenderer_getFillStyle(Ark_NativePointer thisPtr)
         } else if (retValue.selector == 1) {
             _retSerializer.writeInt8(1);
             const auto retValueForIdx1 = retValue.value1;
-            _retSerializer.writeInt32(retValueForIdx1);
+            _retSerializer.writeInt32(static_cast<Ark_Color>(retValueForIdx1));
         } else if (retValue.selector == 2) {
             _retSerializer.writeInt8(2);
             const auto retValueForIdx2 = retValue.value2;
-            CanvasGradient_serializer::write(_retSerializer, retValueForIdx2);
+            _retSerializer.writeInt32(retValueForIdx2);
         } else if (retValue.selector == 3) {
             _retSerializer.writeInt8(3);
             const auto retValueForIdx3 = retValue.value3;
-            CanvasPattern_serializer::write(_retSerializer, retValueForIdx3);
+            CanvasGradient_serializer::write(_retSerializer, retValueForIdx3);
+        } else if (retValue.selector == 4) {
+            _retSerializer.writeInt8(4);
+            const auto retValueForIdx4 = retValue.value4;
+            CanvasPattern_serializer::write(_retSerializer, retValueForIdx4);
         }
         return _retSerializer.toReturnBuffer();
 }
@@ -27310,25 +27314,28 @@ void impl_CanvasRenderer_setFillStyle(Ark_NativePointer thisPtr, KSerializerBuff
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 fillStyleValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_String_I32_CanvasGradient_CanvasPattern fillStyleValueTempTmpBuf = {};
+        Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern fillStyleValueTempTmpBuf = {};
         fillStyleValueTempTmpBuf.selector = fillStyleValueTempTmpBufUnionSelector;
         if (fillStyleValueTempTmpBufUnionSelector == 0) {
             fillStyleValueTempTmpBuf.selector = 0;
             fillStyleValueTempTmpBuf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
         } else if (fillStyleValueTempTmpBufUnionSelector == 1) {
             fillStyleValueTempTmpBuf.selector = 1;
-            fillStyleValueTempTmpBuf.value1 = thisDeserializer.readInt32();
+            fillStyleValueTempTmpBuf.value1 = static_cast<Ark_Color>(thisDeserializer.readInt32());
         } else if (fillStyleValueTempTmpBufUnionSelector == 2) {
             fillStyleValueTempTmpBuf.selector = 2;
-            fillStyleValueTempTmpBuf.value2 = static_cast<Ark_CanvasGradient>(CanvasGradient_serializer::read(thisDeserializer));
+            fillStyleValueTempTmpBuf.value2 = thisDeserializer.readInt32();
         } else if (fillStyleValueTempTmpBufUnionSelector == 3) {
             fillStyleValueTempTmpBuf.selector = 3;
-            fillStyleValueTempTmpBuf.value3 = static_cast<Ark_CanvasPattern>(CanvasPattern_serializer::read(thisDeserializer));
+            fillStyleValueTempTmpBuf.value3 = static_cast<Ark_CanvasGradient>(CanvasGradient_serializer::read(thisDeserializer));
+        } else if (fillStyleValueTempTmpBufUnionSelector == 4) {
+            fillStyleValueTempTmpBuf.selector = 4;
+            fillStyleValueTempTmpBuf.value4 = static_cast<Ark_CanvasPattern>(CanvasPattern_serializer::read(thisDeserializer));
         } else {
             INTEROP_FATAL("One of the branches for fillStyleValueTempTmpBuf has to be chosen through deserialisation.");
         }
-        Ark_Union_String_I32_CanvasGradient_CanvasPattern fillStyleValueTemp = static_cast<Ark_Union_String_I32_CanvasGradient_CanvasPattern>(fillStyleValueTempTmpBuf);;
-        GetAccessors()->getCanvasRendererAccessor()->setFillStyle(self, static_cast<Ark_Union_String_I32_CanvasGradient_CanvasPattern*>(&fillStyleValueTemp));
+        Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern fillStyleValueTemp = static_cast<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern>(fillStyleValueTempTmpBuf);;
+        GetAccessors()->getCanvasRendererAccessor()->setFillStyle(self, static_cast<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern*>(&fillStyleValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CanvasRenderer_setFillStyle, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_CanvasRenderer_getStrokeStyle(Ark_NativePointer thisPtr) {
@@ -27342,15 +27349,19 @@ KInteropReturnBuffer impl_CanvasRenderer_getStrokeStyle(Ark_NativePointer thisPt
         } else if (retValue.selector == 1) {
             _retSerializer.writeInt8(1);
             const auto retValueForIdx1 = retValue.value1;
-            _retSerializer.writeInt32(retValueForIdx1);
+            _retSerializer.writeInt32(static_cast<Ark_Color>(retValueForIdx1));
         } else if (retValue.selector == 2) {
             _retSerializer.writeInt8(2);
             const auto retValueForIdx2 = retValue.value2;
-            CanvasGradient_serializer::write(_retSerializer, retValueForIdx2);
+            _retSerializer.writeInt32(retValueForIdx2);
         } else if (retValue.selector == 3) {
             _retSerializer.writeInt8(3);
             const auto retValueForIdx3 = retValue.value3;
-            CanvasPattern_serializer::write(_retSerializer, retValueForIdx3);
+            CanvasGradient_serializer::write(_retSerializer, retValueForIdx3);
+        } else if (retValue.selector == 4) {
+            _retSerializer.writeInt8(4);
+            const auto retValueForIdx4 = retValue.value4;
+            CanvasPattern_serializer::write(_retSerializer, retValueForIdx4);
         }
         return _retSerializer.toReturnBuffer();
 }
@@ -27359,25 +27370,28 @@ void impl_CanvasRenderer_setStrokeStyle(Ark_NativePointer thisPtr, KSerializerBu
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 strokeStyleValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_String_I32_CanvasGradient_CanvasPattern strokeStyleValueTempTmpBuf = {};
+        Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern strokeStyleValueTempTmpBuf = {};
         strokeStyleValueTempTmpBuf.selector = strokeStyleValueTempTmpBufUnionSelector;
         if (strokeStyleValueTempTmpBufUnionSelector == 0) {
             strokeStyleValueTempTmpBuf.selector = 0;
             strokeStyleValueTempTmpBuf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
         } else if (strokeStyleValueTempTmpBufUnionSelector == 1) {
             strokeStyleValueTempTmpBuf.selector = 1;
-            strokeStyleValueTempTmpBuf.value1 = thisDeserializer.readInt32();
+            strokeStyleValueTempTmpBuf.value1 = static_cast<Ark_Color>(thisDeserializer.readInt32());
         } else if (strokeStyleValueTempTmpBufUnionSelector == 2) {
             strokeStyleValueTempTmpBuf.selector = 2;
-            strokeStyleValueTempTmpBuf.value2 = static_cast<Ark_CanvasGradient>(CanvasGradient_serializer::read(thisDeserializer));
+            strokeStyleValueTempTmpBuf.value2 = thisDeserializer.readInt32();
         } else if (strokeStyleValueTempTmpBufUnionSelector == 3) {
             strokeStyleValueTempTmpBuf.selector = 3;
-            strokeStyleValueTempTmpBuf.value3 = static_cast<Ark_CanvasPattern>(CanvasPattern_serializer::read(thisDeserializer));
+            strokeStyleValueTempTmpBuf.value3 = static_cast<Ark_CanvasGradient>(CanvasGradient_serializer::read(thisDeserializer));
+        } else if (strokeStyleValueTempTmpBufUnionSelector == 4) {
+            strokeStyleValueTempTmpBuf.selector = 4;
+            strokeStyleValueTempTmpBuf.value4 = static_cast<Ark_CanvasPattern>(CanvasPattern_serializer::read(thisDeserializer));
         } else {
             INTEROP_FATAL("One of the branches for strokeStyleValueTempTmpBuf has to be chosen through deserialisation.");
         }
-        Ark_Union_String_I32_CanvasGradient_CanvasPattern strokeStyleValueTemp = static_cast<Ark_Union_String_I32_CanvasGradient_CanvasPattern>(strokeStyleValueTempTmpBuf);;
-        GetAccessors()->getCanvasRendererAccessor()->setStrokeStyle(self, static_cast<Ark_Union_String_I32_CanvasGradient_CanvasPattern*>(&strokeStyleValueTemp));
+        Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern strokeStyleValueTemp = static_cast<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern>(strokeStyleValueTempTmpBuf);;
+        GetAccessors()->getCanvasRendererAccessor()->setStrokeStyle(self, static_cast<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern*>(&strokeStyleValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CanvasRenderer_setStrokeStyle, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_String impl_CanvasRenderer_getFilter(Ark_NativePointer thisPtr) {
@@ -28562,6 +28576,33 @@ void impl_DrawingRenderingContext_setSize(Ark_NativePointer thisPtr, KSerializer
         GetAccessors()->getDrawingRenderingContextAccessor()->setSize(self, static_cast<Ark_Size*>(&sizeValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(DrawingRenderingContext_setSize, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_DrawingRenderingContext_getCanvas(Ark_NativePointer thisPtr) {
+        Ark_DrawingRenderingContext self = reinterpret_cast<Ark_DrawingRenderingContext>(thisPtr);
+        const auto &retValue = GetAccessors()->getDrawingRenderingContextAccessor()->getCanvas(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            drawing_Canvas_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(DrawingRenderingContext_getCanvas, KInteropReturnBuffer, Ark_NativePointer)
+void impl_DrawingRenderingContext_setCanvas(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_DrawingRenderingContext self = reinterpret_cast<Ark_DrawingRenderingContext>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto canvasValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_drawing_Canvas canvasValueTempTmpBuf = {};
+        canvasValueTempTmpBuf.tag = canvasValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((canvasValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            canvasValueTempTmpBuf.value = static_cast<Ark_drawing_Canvas>(drawing_Canvas_serializer::read(thisDeserializer));
+        }
+        Opt_drawing_Canvas canvasValueTemp = canvasValueTempTmpBuf;;
+        GetAccessors()->getDrawingRenderingContextAccessor()->setCanvas(self, static_cast<Opt_drawing_Canvas*>(&canvasValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(DrawingRenderingContext_setCanvas, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_DrawModifier_construct() {
         return GetAccessors()->getDrawModifierAccessor()->construct();
 }

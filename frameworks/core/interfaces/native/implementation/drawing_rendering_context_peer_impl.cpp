@@ -60,7 +60,7 @@ void DrawingRenderingContextPeerImpl::SetRSCanvasCallback(RefPtr<AceType>& canva
         width /= density;
         context->size_.SetHeight(height);
         context->size_.SetWidth(width);
-        context->rsCanvas_ = std::make_shared<drawing_CanvasPeer>(std::shared_ptr<RSCanvas>(canvas));
+        context->rsCanvas_ = std::make_shared<drawing_CanvasPeer>(canvas);
     };
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern);
     if (customPaintPattern) {

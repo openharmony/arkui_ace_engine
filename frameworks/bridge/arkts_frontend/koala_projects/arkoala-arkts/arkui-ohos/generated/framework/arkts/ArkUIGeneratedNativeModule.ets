@@ -3843,6 +3843,10 @@ export class ArkUIGeneratedNativeModule {
     native static _DrawingRenderingContext_getSize(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _DrawingRenderingContext_setSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _DrawingRenderingContext_getCanvas(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _DrawingRenderingContext_setCanvas(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _DrawModifier_construct(): KPointer
     @ani.unsafe.Direct
