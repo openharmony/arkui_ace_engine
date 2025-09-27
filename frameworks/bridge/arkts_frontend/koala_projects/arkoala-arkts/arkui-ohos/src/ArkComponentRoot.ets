@@ -18,12 +18,12 @@ import { PeerNode } from "./PeerNode";
 import { ArkCustomComponentRootPeer } from "#generated";
 import { ArkCustomComponent } from "./ArkCustomComponent"
 import { InteropNativeModule } from "@koalaui/interop"
-let _isNeedCreate: boolean = false
+import { __context, GlobalStateManager, StateManager } from "@koalaui/runtime"
 
 export function setNeedCreate(isNeedCreate: boolean): boolean
 {
-    const temp = _isNeedCreate
-    _isNeedCreate = isNeedCreate
+    const temp = GlobalStateManager.instance._isNeedCreate
+    GlobalStateManager.instance._isNeedCreate = isNeedCreate
     return temp
 }
 
@@ -37,7 +37,7 @@ export function ArkComponentRoot(
     NodeAttach<PeerNode>(
         () => ArkCustomComponentRootPeer.create(component),
         (node: PeerNode) => {
-            if (_isNeedCreate) {
+            if ((__context() as StateManager)._isNeedCreate) {
                 rememberDisposable(() => {
                     let state = mutableState(false)
                     scheduleCallback(() => { })

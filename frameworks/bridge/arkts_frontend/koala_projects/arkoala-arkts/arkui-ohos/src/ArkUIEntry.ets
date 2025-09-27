@@ -14,7 +14,7 @@
  */
 
 import { memo } from "@koalaui/runtime/annotations"
-import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks } from "@koalaui/runtime"
+import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, RuntimeProfiler } from "@koalaui/runtime"
 import { int32, int64 } from "@koalaui/common"
 import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback, loadNativeModuleLibrary } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
@@ -35,6 +35,7 @@ import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { registerArkuiApiHandler } from "./framework/peers/CallbackDeserializeCall"
 import { ObserveSingleton } from './stateManagement/base/observeSingleton'
 import { StateUpdateLoop } from './stateManagement'
+import { AceTrace } from 'arkui/base/AceTrace'
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -243,6 +244,8 @@ export class Application {
     }
 
     start(): pointer {
+        RuntimeProfiler.initTrace(AceTrace.begin, AceTrace.end)
+        RuntimeProfiler.initNativeLog(InteropNativeModule._NativeLog)
         if (this.withLog) UserView.startNativeLog(1)
         let root: PeerNode | undefined = undefined
         try {
