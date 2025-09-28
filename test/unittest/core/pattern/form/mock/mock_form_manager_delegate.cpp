@@ -139,6 +139,11 @@ bool FormManagerDelegate::IsFormBundleProtected(const std::string &bundleName, i
     return false;
 }
 
+bool FormManagerDelegate::IsFormBundleDebugSignature(const std::string &bundleName)
+{
+    return false;
+}
+
 void FormManagerDelegate::AddFormUpdateDoneCallback(UpdateFormDoneCallback&& callback) {}
 
 void FormManagerDelegate::OnFormUpdateDone(const int64_t formId) {}

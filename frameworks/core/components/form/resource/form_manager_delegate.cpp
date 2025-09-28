@@ -1023,6 +1023,11 @@ bool FormManagerDelegate::IsFormBundleProtected(const std::string& bundleName, i
     return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleProtected(bundleName, formId);
 }
 
+bool FormManagerDelegate::IsFormBundleDebugSignature(const std::string& bundleName)
+{
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleDebugSignature(bundleName);
+}
+
 void FormManagerDelegate::NotifyFormDump(const std::vector<std::string>& params,
     std::vector<std::string>& info)
 {
