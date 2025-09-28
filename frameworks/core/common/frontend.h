@@ -429,6 +429,8 @@ public:
 
     virtual void OpenStateMgmtInterop() {}
 
+    virtual void CallJSCleanUpIdleTaskFunc(int64_t maxTimeInNs) {}
+
     // For arkts 1.2
     virtual void NotifyArkoalaConfigurationChange(bool isNeedUpdate) {}
 

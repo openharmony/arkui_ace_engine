@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,39 +15,182 @@
 
 #include "frameworks/core/pipeline/base/element_register.h"
 
+#include <atomic>
+
 #include "base/utils/multi_thread.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace {
-thread_local ElementRegister* ElementRegister::instance_ = nullptr;
-std::atomic<ElementIdType> ElementRegister::nextUniqueElementId_ = 0;
-std::mutex ElementRegister::mutex_;
+class ElementRegisterImpl {
+public:
+    RefPtr<Element> GetElementById(ElementIdType elementId);
+    RefPtr<V2::ElementProxy> GetElementProxyById(ElementIdType elementId);
+
+    RefPtr<AceType> GetNodeById(ElementIdType elementId);
+    /**
+     * version of GetNodeById(elmtId) function to return an Element of
+     * given class. returns nullptr if Element with this elmtId baddest found
+     * or class mismatch
+     */
+    template<class E>
+    RefPtr<E> GetSpecificItemById(ElementIdType elmtId)
+    {
+        return AceType::DynamicCast<E>(GetNodeById(elmtId));
+    }
+
+    bool AddElementProxy(const WeakPtr<V2::ElementProxy>& element);
+    bool AddElement(const RefPtr<Element>& element);
+
+    RefPtr<NG::UINode> GetUINodeById(ElementIdType elementId);
+    NG::FrameNode* GetFrameNodePtrById(ElementIdType elementId);
+
+    bool AddUINode(const RefPtr<NG::UINode>& node);
+    bool Exists(ElementIdType elementId);
+
+    /**
+     * When a custom node is created from recycle, update its element id.
+     */
+    void UpdateRecycleElmtId(int32_t oldElmtId, int32_t newElmtId);
+
+    /**
+     * remove Element with given elmtId from the Map
+     * means GetElementById on this elmtId no longer returns an Element
+     * method adds the elmtId to the removed Element Set
+     */
+    bool RemoveItem(ElementIdType elementId);
+
+    /**
+     * remove Element with given elmtId from the Map
+     * means GetElementById on this elmtId no longer returns an Element
+     * method does NOT add the elmtId to the removed Element Set
+     * Use with caution: e.g. only use when knowing the Element will
+     * be added with new ElementId shortly
+     */
+    bool RemoveItemSilently(ElementIdType elementId);
+
+    void MoveRemovedItems(RemovedElementsType& removedItems);
+
+    /**
+     * does a complete reset
+     * clears the Map of Elements and Set of removed Elements
+     */
+    void Clear();
+
+    ElementIdType MakeUniqueId();
+
+    /**
+     * For ArkTS 1.2
+     *
+     * Based on the incoming capacity, generate the starting value for arkoala node IDs
+     * and adjust the nextUniqueElementId_ value.
+     */
+    ElementIdType RequireArkoalaNodeId(int32_t capacity);
+
+    RefPtr<NG::GeometryTransition> GetOrCreateGeometryTransition(
+        const std::string& id, bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
+    void DumpGeometryTransition();
+
+    void ReSyncGeometryTransition(
+        const WeakPtr<NG::FrameNode>& trigger = nullptr, const AnimationOption& option = AnimationOption());
+
+    void AddPendingRemoveNode(const RefPtr<NG::UINode>& node);
+    void ClearPendingRemoveNodes();
+    uint32_t GetNodeNum() const
+
+    {
+        return itemMap_.size();
+    }
+
+    ElementIdType GetLastestElementId() const
+    {
+        return lastestElementId_;
+    }
+
+    RefPtr<NG::FrameNode> GetAttachedFrameNodeById(const std::string& key, bool willGetAll = false);
+
+    void AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node);
+
+    void RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId);
+
+    void RegisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node);
+
+    void UnregisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node);
+
+    WeakPtr<NG::FrameNode> GetEmbedNodeBySurfaceId(const uint64_t surfaceId);
+
+    bool IsEmbedNode(NG::FrameNode* node);
+
+    uint64_t GetSurfaceIdByEmbedNode(NG::FrameNode* node);
+
+    bool AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced);
+
+private:
+    // ElementID assigned during initial render
+    // first to Component, then synced to Element
+    static std::atomic<ElementIdType> nextUniqueElementId_;
+
+    ElementIdType lastestElementId_ = 0;
+
+    // Map for created elements
+    std::unordered_map<ElementIdType, WeakPtr<AceType>> itemMap_;
+
+    // Map for inspectorId
+    std::unordered_map<std::string, std::list<WeakPtr<NG::FrameNode>>> inspectorIdMap_;
+
+    RemovedElementsType removedItems_;
+
+    std::unordered_map<std::string, RefPtr<NG::GeometryTransition>> geometryTransitionMap_;
+
+    std::list<RefPtr<NG::UINode>> pendingRemoveNodes_;
+
+    std::unordered_map<uint64_t, WeakPtr<NG::FrameNode>> surfaceIdEmbedNodeMap_;
+
+    std::unordered_map<NG::FrameNode*, uint64_t> embedNodeSurfaceIdMap_;
+};
+
+thread_local ElementRegisterImpl* instance_;
+
+class ElementRegisterHolder {
+public:
+    ElementRegisterHolder()
+    {
+        instance_ = new ElementRegisterImpl();
+    }
+    ~ElementRegisterHolder()
+    {
+        if (instance_) {
+            delete instance_;
+            instance_ = nullptr;
+        }
+    }
+};
+
+thread_local ElementRegisterHolder instanceHolder_;
+
+std::atomic<ElementIdType> ElementRegisterImpl::nextUniqueElementId_ = 0;
 
 ElementRegister* ElementRegister::GetInstance()
 {
-    if (ElementRegister::instance_ == nullptr) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!ElementRegister::instance_) {
-            ElementRegister::instance_ = new ElementRegister();
-        }
-    }
-    return (ElementRegister::instance_);
+    thread_local ElementRegisterHolder instanceHolder_;
+    static_assert(sizeof(ElementRegister) == 1, "");
+    static ElementRegister instance;
+    return &instance;
 }
 
-ElementIdType ElementRegister::MakeUniqueId()
+ElementIdType ElementRegisterImpl::MakeUniqueId()
 {
-    return ElementRegister::nextUniqueElementId_++;
+    return ElementRegisterImpl::nextUniqueElementId_++;
 }
 
-ElementIdType ElementRegister::RequireArkoalaNodeId(int32_t capacity)
+ElementIdType ElementRegisterImpl::RequireArkoalaNodeId(int32_t capacity)
 {
-    int32_t nodeId = ElementRegister::nextUniqueElementId_.load();
-    ElementRegister::nextUniqueElementId_ += capacity;
+    int32_t nodeId = ElementRegisterImpl::nextUniqueElementId_.load();
+    ElementRegisterImpl::nextUniqueElementId_ += capacity;
     return nodeId;
 }
 
-RefPtr<Element> ElementRegister::GetElementById(ElementIdType elementId)
+RefPtr<Element> ElementRegisterImpl::GetElementById(ElementIdType elementId)
 {
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
@@ -56,7 +199,7 @@ RefPtr<Element> ElementRegister::GetElementById(ElementIdType elementId)
     return position == itemMap_.end() ? nullptr : AceType::DynamicCast<Element>(position->second).Upgrade();
 }
 
-RefPtr<AceType> ElementRegister::GetNodeById(ElementIdType elementId)
+RefPtr<AceType> ElementRegisterImpl::GetNodeById(ElementIdType elementId)
 {
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
@@ -65,18 +208,18 @@ RefPtr<AceType> ElementRegister::GetNodeById(ElementIdType elementId)
     return position == itemMap_.end() ? nullptr : position->second.Upgrade();
 }
 
-RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType elementId)
+RefPtr<V2::ElementProxy> ElementRegisterImpl::GetElementProxyById(ElementIdType elementId)
 {
     auto position = itemMap_.find(elementId);
     return (position == itemMap_.end()) ? nullptr : AceType::DynamicCast<V2::ElementProxy>(position->second).Upgrade();
 }
 
-bool ElementRegister::Exists(ElementIdType elementId)
+bool ElementRegisterImpl::Exists(ElementIdType elementId)
 {
     return (itemMap_.find(elementId) != itemMap_.end());
 }
 
-void ElementRegister::UpdateRecycleElmtId(int32_t oldElmtId, int32_t newElmtId)
+void ElementRegisterImpl::UpdateRecycleElmtId(int32_t oldElmtId, int32_t newElmtId)
 {
     if (!Exists(oldElmtId)) {
         return;
@@ -88,7 +231,7 @@ void ElementRegister::UpdateRecycleElmtId(int32_t oldElmtId, int32_t newElmtId)
     }
 }
 
-bool ElementRegister::AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced)
+bool ElementRegisterImpl::AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced)
 {
     auto result = itemMap_.emplace(elmtId, referenced);
     if (!result.second) {
@@ -98,7 +241,7 @@ bool ElementRegister::AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>
     return result.second;
 }
 
-bool ElementRegister::AddElement(const RefPtr<Element>& element)
+bool ElementRegisterImpl::AddElement(const RefPtr<Element>& element)
 {
     if ((element == nullptr) || (element->GetElementId() == ElementRegister::UndefinedElementId)) {
         return false;
@@ -107,7 +250,7 @@ bool ElementRegister::AddElement(const RefPtr<Element>& element)
     return AddReferenced(element->GetElementId(), element);
 }
 
-bool ElementRegister::AddElementProxy(const WeakPtr<V2::ElementProxy>& elementProxy)
+bool ElementRegisterImpl::AddElementProxy(const WeakPtr<V2::ElementProxy>& elementProxy)
 {
     auto elmt = elementProxy.Upgrade();
     if (!elmt) {
@@ -123,7 +266,7 @@ bool ElementRegister::AddElementProxy(const WeakPtr<V2::ElementProxy>& elementPr
     return AddReferenced(elmt->GetElementId(), elementProxy);
 }
 
-RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
+RefPtr<NG::UINode> ElementRegisterImpl::GetUINodeById(ElementIdType elementId)
 {
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
@@ -132,7 +275,7 @@ RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
     return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
 }
 
-NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
+NG::FrameNode* ElementRegisterImpl::GetFrameNodePtrById(ElementIdType elementId)
 {
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
@@ -145,7 +288,7 @@ NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
     return AceType::RawPtr(node); // warning: returning an unsafe rawptr !!!
 }
 
-bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
+bool ElementRegisterImpl::AddUINode(const RefPtr<NG::UINode>& node)
 {
     FREE_NODE_CHECK(node, ElementRegisterMultiThread::GetInstance()->AddUINode, node);
     if (!node || (node->GetId() == ElementRegister::UndefinedElementId)) {
@@ -155,7 +298,7 @@ bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
     return AddReferenced(node->GetId(), node);
 }
 
-bool ElementRegister::RemoveItem(ElementIdType elementId)
+bool ElementRegisterImpl::RemoveItem(ElementIdType elementId)
 {
     if (elementId == ElementRegister::UndefinedElementId) {
         return false;
@@ -167,7 +310,7 @@ bool ElementRegister::RemoveItem(ElementIdType elementId)
     return removed;
 }
 
-bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
+bool ElementRegisterImpl::RemoveItemSilently(ElementIdType elementId)
 {
     if (elementId == ElementRegister::UndefinedElementId) {
         return false;
@@ -177,13 +320,13 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
     return removed;
 }
 
-void ElementRegister::MoveRemovedItems(RemovedElementsType& removedItems)
+void ElementRegisterImpl::MoveRemovedItems(RemovedElementsType& removedItems)
 {
     removedItems = removedItems_;
     removedItems_.clear();
 }
 
-void ElementRegister::Clear()
+void ElementRegisterImpl::Clear()
 {
     itemMap_.clear();
     removedItems_.clear();
@@ -191,7 +334,7 @@ void ElementRegister::Clear()
     pendingRemoveNodes_.clear();
 }
 
-RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(
+RefPtr<NG::GeometryTransition> ElementRegisterImpl::GetOrCreateGeometryTransition(
     const std::string& id, bool followWithoutTransition, bool doRegisterSharedTransition)
 {
     if (id.empty()) {
@@ -209,7 +352,7 @@ RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(
     return nullptr;
 }
 
-void ElementRegister::DumpGeometryTransition()
+void ElementRegisterImpl::DumpGeometryTransition()
 {
     auto iter = geometryTransitionMap_.begin();
     while (iter != geometryTransitionMap_.end()) {
@@ -222,7 +365,7 @@ void ElementRegister::DumpGeometryTransition()
     }
 }
 
-void ElementRegister::ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger, const AnimationOption& option)
+void ElementRegisterImpl::ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger, const AnimationOption& option)
 {
     for (auto iter = geometryTransitionMap_.begin(); iter != geometryTransitionMap_.end();) {
         if (!iter->second || iter->second->IsInAndOutEmpty()) {
@@ -234,17 +377,17 @@ void ElementRegister::ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& tri
     }
 }
 
-void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node)
+void ElementRegisterImpl::AddPendingRemoveNode(const RefPtr<NG::UINode>& node)
 {
     pendingRemoveNodes_.emplace_back(node);
 }
 
-void ElementRegister::ClearPendingRemoveNodes()
+void ElementRegisterImpl::ClearPendingRemoveNodes()
 {
     pendingRemoveNodes_.clear();
 }
 
-RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(const std::string& key, bool willGetAll)
+RefPtr<NG::FrameNode> ElementRegisterImpl::GetAttachedFrameNodeById(const std::string& key, bool willGetAll)
 {
     auto it = inspectorIdMap_.find(key);
     CHECK_NULL_RETURN(it != inspectorIdMap_.end(), nullptr);
@@ -266,7 +409,7 @@ RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(const std::strin
     return frameNode;
 }
 
-void ElementRegister::AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node)
+void ElementRegisterImpl::AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node)
 {
     auto it = inspectorIdMap_.find(key);
     if (it != inspectorIdMap_.end()) {
@@ -277,7 +420,7 @@ void ElementRegister::AddFrameNodeByInspectorId(const std::string& key, const We
     }
 }
 
-void ElementRegister::RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId)
+void ElementRegisterImpl::RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId)
 {
     auto it = inspectorIdMap_.find(key);
     CHECK_NULL_VOID(it != inspectorIdMap_.end());
@@ -290,7 +433,7 @@ void ElementRegister::RemoveFrameNodeByInspectorId(const std::string& key, int32
     }
 }
 
-void ElementRegister::RegisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node)
+void ElementRegisterImpl::RegisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node)
 {
     surfaceIdEmbedNodeMap_[surfaceId] = node;
     auto nodeRef = node.Upgrade();
@@ -298,7 +441,7 @@ void ElementRegister::RegisterEmbedNode(const uint64_t surfaceId, const WeakPtr<
     embedNodeSurfaceIdMap_[AceType::RawPtr(nodeRef)] = surfaceId;
 }
 
-void ElementRegister::UnregisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node)
+void ElementRegisterImpl::UnregisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node)
 {
     surfaceIdEmbedNodeMap_.erase(surfaceId);
     auto nodeRef = node.Upgrade();
@@ -307,7 +450,7 @@ void ElementRegister::UnregisterEmbedNode(const uint64_t surfaceId, const WeakPt
     embedNodeSurfaceIdMap_.erase(nodePtr);
 }
 
-WeakPtr<NG::FrameNode> ElementRegister::GetEmbedNodeBySurfaceId(const uint64_t surfaceId)
+WeakPtr<NG::FrameNode> ElementRegisterImpl::GetEmbedNodeBySurfaceId(const uint64_t surfaceId)
 {
     auto it = surfaceIdEmbedNodeMap_.find(surfaceId);
     if (SystemProperties::GetDebugEnabled()) {
@@ -317,12 +460,12 @@ WeakPtr<NG::FrameNode> ElementRegister::GetEmbedNodeBySurfaceId(const uint64_t s
     return (it == surfaceIdEmbedNodeMap_.end()) ? nullptr : it->second;
 }
 
-bool ElementRegister::IsEmbedNode(NG::FrameNode* node)
+bool ElementRegisterImpl::IsEmbedNode(NG::FrameNode* node)
 {
     return (embedNodeSurfaceIdMap_.find(node) != embedNodeSurfaceIdMap_.end());
 }
 
-uint64_t ElementRegister::GetSurfaceIdByEmbedNode(NG::FrameNode* node)
+uint64_t ElementRegisterImpl::GetSurfaceIdByEmbedNode(NG::FrameNode* node)
 {
     auto it = embedNodeSurfaceIdMap_.find(node);
     if (SystemProperties::GetDebugEnabled()) {
@@ -330,5 +473,171 @@ uint64_t ElementRegister::GetSurfaceIdByEmbedNode(NG::FrameNode* node)
             (node == nullptr ? -1 : node->GetId()), (it == embedNodeSurfaceIdMap_.end()) ? 0U : (it->second));
     }
     return (it == embedNodeSurfaceIdMap_.end()) ? 0U : it->second;
+}
+
+#define DELEGATE(method, ret...)                      \
+    /*(void)instanceHolder_; we must keep this line*/ \
+    if (instance_) {                                  \
+        return instance_->method;                     \
+    }                                                 \
+    return ret;
+
+RefPtr<Element> ElementRegister::GetElementById(ElementIdType elementId)
+{
+    DELEGATE(GetElementById(elementId), nullptr);
+}
+
+RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType elementId)
+{
+    DELEGATE(GetElementProxyById(elementId), nullptr);
+}
+
+RefPtr<AceType> ElementRegister::GetNodeById(ElementIdType elementId)
+{
+    DELEGATE(GetNodeById(elementId), nullptr);
+}
+
+bool ElementRegister::AddElementProxy(const WeakPtr<V2::ElementProxy>& element)
+{
+    DELEGATE(AddElementProxy(element), false);
+}
+
+bool ElementRegister::AddElement(const RefPtr<Element>& element)
+{
+    DELEGATE(AddElement(element), false);
+}
+
+RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
+{
+    DELEGATE(GetUINodeById(elementId), nullptr);
+}
+
+NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
+{
+    DELEGATE(GetFrameNodePtrById(elementId), nullptr);
+}
+
+bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
+{
+    DELEGATE(AddUINode(node), false);
+}
+
+bool ElementRegister::Exists(ElementIdType elementId)
+{
+    DELEGATE(Exists(elementId), false);
+}
+
+void ElementRegister::UpdateRecycleElmtId(int32_t oldElmtId, int32_t newElmtId)
+{
+    DELEGATE(UpdateRecycleElmtId(oldElmtId, newElmtId));
+}
+
+bool ElementRegister::RemoveItem(ElementIdType elementId)
+{
+    DELEGATE(RemoveItem(elementId), false);
+}
+
+bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
+{
+    DELEGATE(RemoveItemSilently(elementId), false);
+}
+
+void ElementRegister::MoveRemovedItems(RemovedElementsType& removedItems)
+{
+    DELEGATE(MoveRemovedItems(removedItems));
+}
+void ElementRegister::Clear()
+{
+    DELEGATE(Clear());
+}
+
+ElementIdType ElementRegister::MakeUniqueId()
+{
+    DELEGATE(MakeUniqueId(), static_cast<ElementIdType>(-1));
+}
+
+ElementIdType ElementRegister::RequireArkoalaNodeId(int32_t capacity)
+{
+    DELEGATE(RequireArkoalaNodeId(capacity), static_cast<ElementIdType>(-1));
+}
+
+RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(
+    const std::string& id, bool followWithoutTransition, bool doRegisterSharedTransition)
+{
+    DELEGATE(GetOrCreateGeometryTransition(id, followWithoutTransition, doRegisterSharedTransition), nullptr);
+}
+
+void ElementRegister::DumpGeometryTransition()
+{
+    DELEGATE(DumpGeometryTransition());
+}
+
+void ElementRegister::ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger, const AnimationOption& option)
+{
+    DELEGATE(ReSyncGeometryTransition(trigger, option));
+}
+
+void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node)
+{
+    DELEGATE(AddPendingRemoveNode(node));
+}
+void ElementRegister::ClearPendingRemoveNodes()
+{
+    DELEGATE(ClearPendingRemoveNodes());
+}
+
+uint32_t ElementRegister::GetNodeNum() const
+{
+    DELEGATE(GetNodeNum(), 0);
+}
+
+ElementIdType ElementRegister::GetLastestElementId() const
+{
+    DELEGATE(GetLastestElementId(), static_cast<ElementIdType>(-1));
+}
+
+RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(const std::string& key, bool willGetAll)
+{
+    DELEGATE(GetAttachedFrameNodeById(key, willGetAll), nullptr);
+}
+
+void ElementRegister::AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node)
+{
+    DELEGATE(AddFrameNodeByInspectorId(key, node));
+}
+
+void ElementRegister::RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId)
+{
+    DELEGATE(RemoveFrameNodeByInspectorId(key, nodeId));
+}
+
+void ElementRegister::RegisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node)
+{
+    DELEGATE(RegisterEmbedNode(surfaceId, node));
+}
+
+void ElementRegister::UnregisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node)
+{
+    DELEGATE(UnregisterEmbedNode(surfaceId, node));
+}
+
+WeakPtr<NG::FrameNode> ElementRegister::GetEmbedNodeBySurfaceId(const uint64_t surfaceId)
+{
+    DELEGATE(GetEmbedNodeBySurfaceId(surfaceId), nullptr);
+}
+
+bool ElementRegister::IsEmbedNode(NG::FrameNode* node)
+{
+    DELEGATE(IsEmbedNode(node), false);
+}
+
+uint64_t ElementRegister::GetSurfaceIdByEmbedNode(NG::FrameNode* node)
+{
+    DELEGATE(GetSurfaceIdByEmbedNode(node), -1);
+}
+
+bool AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced)
+{
+    DELEGATE(AddReferenced(elmtId, referenced), false);
 }
 } // namespace OHOS::Ace

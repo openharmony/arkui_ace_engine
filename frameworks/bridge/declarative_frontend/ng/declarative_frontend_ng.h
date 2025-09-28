@@ -182,6 +182,13 @@ public:
         }
     }
 
+    void CallJSCleanUpIdleTaskFunc(int64_t maxTimeInNs) override
+    {
+        if (jsEngine_) {
+            jsEngine_->CallJSCleanUpIdleTaskFunc(maxTimeInNs);
+        }
+    }
+
     void SetPageProfile(const std::string& pageProfile)
     {
         pageProfile_ = pageProfile;

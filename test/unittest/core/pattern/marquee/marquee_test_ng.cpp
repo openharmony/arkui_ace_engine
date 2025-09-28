@@ -998,7 +998,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest013, TestSize.Level1)
     /**
      * @tc.steps: step2. Set up the created frameNode.
      */
-    ElementRegister::GetInstance()->itemMap_[nodeId] = frameNode;
+    ElementRegister::GetInstance()->AddReferenced(nodeId, frameNode);
 
     /**
      * @tc.steps: step3. Call Create.
@@ -1031,7 +1031,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest014, TestSize.Level1)
     /**
      * @tc.steps: step2. Set up the created frameNode.
      */
-    ElementRegister::GetInstance()->itemMap_[nodeId] = frameNode;
+    ElementRegister::GetInstance()->AddReferenced(nodeId, frameNode);
 
     /**
      * @tc.steps: step3. Call Create.
@@ -1087,7 +1087,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest015, TestSize.Level1)
     /**
      * @tc.steps: step2. Set up the created frameNode.
      */
-    ElementRegister::GetInstance()->itemMap_[nodeId] = frameNode;
+    ElementRegister::GetInstance()->AddReferenced(nodeId, frameNode);
 
     /**
      * @tc.steps: step3. Call Create.

@@ -2373,10 +2373,10 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0118, TestSize.Level1)
     paintProperty->UpdateCheckBoxSelect(true);
     frameNode3->paintProperty_ = paintProperty;
     groupManager->AddCheckBoxToGroup(GROUP_NAME, frameNode3);
-    ElementRegister::GetInstance()->itemMap_[2] = AceType::WeakClaim(AceType::RawPtr(frameNode2));
-    ElementRegister::GetInstance()->itemMap_[3] = AceType::WeakClaim(AceType::RawPtr(frameNode3));
-    ElementRegister::GetInstance()->itemMap_[4] = nullptr;
-    ElementRegister::GetInstance()->itemMap_[5] = AceType::WeakClaim(AceType::RawPtr(checkBoxFrameNode));
+    ElementRegister::GetInstance()->AddReferenced(2, AceType::WeakClaim(AceType::RawPtr(frameNode2)));
+    ElementRegister::GetInstance()->AddReferenced(3, AceType::WeakClaim(AceType::RawPtr(frameNode3)));
+    ElementRegister::GetInstance()->AddReferenced(4, nullptr);
+    ElementRegister::GetInstance()->AddReferenced(5, AceType::WeakClaim(AceType::RawPtr(checkBoxFrameNode)));
 
     /*
      * @tc.steps: step5. call CheckBoxGroupIsTrue,
@@ -2459,8 +2459,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0119, TestSize.Level1)
     paintProperty->UpdateCheckBoxSelect(false);
     frameNode3->paintProperty_ = paintProperty;
     groupManager->AddCheckBoxToGroup(GROUP_NAME, frameNode3);
-    ElementRegister::GetInstance()->itemMap_[2] = AceType::WeakClaim(AceType::RawPtr(frameNode2));
-    ElementRegister::GetInstance()->itemMap_[3] = AceType::WeakClaim(AceType::RawPtr(frameNode3));
+    ElementRegister::GetInstance()->AddReferenced(2, AceType::WeakClaim(AceType::RawPtr(frameNode2)));
+    ElementRegister::GetInstance()->AddReferenced(3, AceType::WeakClaim(AceType::RawPtr(frameNode3)));
 
     /*
      * @tc.steps: step5. call CheckBoxGroupIsTrue
@@ -2525,9 +2525,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0120, TestSize.Level1)
     paintProperty->ResetCheckBoxSelect();
     frameNode3->paintProperty_ = paintProperty;
     groupManager->AddCheckBoxToGroup(GROUP_NAME, frameNode3);
-    ElementRegister::GetInstance()->itemMap_[2] = AceType::WeakClaim(AceType::RawPtr(frameNode2));
-    ElementRegister::GetInstance()->itemMap_[3] = AceType::WeakClaim(AceType::RawPtr(frameNode3));
-    ElementRegister::GetInstance()->itemMap_[4] = nullptr;
+    ElementRegister::GetInstance()->AddReferenced(2, AceType::WeakClaim(AceType::RawPtr(frameNode2)));
+    ElementRegister::GetInstance()->AddReferenced(3, AceType::WeakClaim(AceType::RawPtr(frameNode3)));
+    ElementRegister::GetInstance()->AddReferenced(4, nullptr);
 
     /*
      * @tc.steps: step5. call CheckBoxGroupIsTrue,
