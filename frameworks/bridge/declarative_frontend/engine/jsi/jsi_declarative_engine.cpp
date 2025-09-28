@@ -36,7 +36,7 @@
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
 #endif
-#if OHOS_STANDARD_FORM_SUPPORT
+#ifdef OHOS_STANDARD_FORM_SUPPORT
 #include "extractor.h"
 #endif
 
@@ -1722,7 +1722,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
 #else
         abcPath = moduleName.append("/").append(fileName);
 #endif
-#if OHOS_STANDARD_FORM_SUPPORT
+#ifdef OHOS_STANDARD_FORM_SUPPORT
         {
             bool flag = false;
             const std::string hapFilePath = container->GetHapPath();
