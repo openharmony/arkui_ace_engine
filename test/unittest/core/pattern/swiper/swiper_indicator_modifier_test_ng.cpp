@@ -2063,6 +2063,57 @@ HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier013, TestSize.Level1
 }
 
 /**
+ * @tc.name: DotIndicatorModifier014
+ * @tc.desc: Test CalCBoundsRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.longPointDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
+    dotIndicatorModifier.indicatorPadding_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0f);
+    dotIndicatorModifier.indicatorMargin_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(5.0f, 5.0f));
+    LinearVector<float> itemHalfSizes = { 15.0f, 20.0f, 25.0f, 30.0f };
+    dotIndicatorModifier.itemHalfSizes_ = AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(itemHalfSizes);
+
+    /**
+     * @tc.steps: step2.Call CalCBoundsRect when vectorBlackPointCenterX_ is null
+     */
+    auto result = dotIndicatorModifier.CalCBoundsRect();
+    float rectLeft = std::get<0>(result);
+    EXPECT_EQ(rectLeft, 0.0f);
+
+    /**
+     * @tc.steps: step3.Call CalCBoundsRect when vectorBlackPointCenterX_ is not null
+     */
+    dotIndicatorModifier.vectorBlackPointCenterX_ =
+        AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float> { 100.0f, 200.0f, 300.0f });
+    result = dotIndicatorModifier.CalCBoundsRect();
+    rectLeft = std::get<0>(result);
+    EXPECT_EQ(rectLeft, 0.0f);
+
+    /**
+     * @tc.steps: step4.Call CalCBoundsRect when axis_ is Axis::VERTICAL
+     */
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    result = dotIndicatorModifier.CalCBoundsRect();
+    rectLeft = std::get<0>(result);
+    EXPECT_EQ(rectLeft, -30.0f);
+
+    /**
+     * @tc.steps: step5.Call CalCBoundsRect when targetVectorBlackPointCenterX_ is not null
+     */
+    dotIndicatorModifier.axis_ = Axis::HORIZONTAL;
+    dotIndicatorModifier.targetVectorBlackPointCenterX_ = { 120.0f, 220.0f, 320.0f };
+    result = dotIndicatorModifier.CalCBoundsRect();
+    rectLeft = std::get<0>(result);
+    EXPECT_EQ(rectLeft, 0.0f);
+}
+
+/**
  * @tc.name: CircleDotIndicatorModifier001
  * @tc.desc: Test DotIndicatorModifier
  * @tc.type: FUNC
