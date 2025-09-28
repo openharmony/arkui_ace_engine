@@ -18,7 +18,8 @@ import { ArkScrollableNode } from "./ArkScrollableNode";
 import { Length } from "../component/units";
 import { Color, BarState, EdgeEffect } from "../component/enums";
 import { CustomBuilder } from "../component/builder";
-import { ItemDragInfo, NestedScrollOptions, OnWillScrollCallback, OnScrollCallback, EdgeEffectOptions } from "../component/common";
+import { ItemDragInfo, NestedScrollOptions, OnWillScrollCallback, OnScrollCallback, EdgeEffectOptions, AttributeModifier,
+    ScrollableCommonMethod, CommonMethod } from "../component/common";
 import { Scroller, OnScrollFrameBeginCallback } from "../component/scroll";
 import { ArkGridPeer, ComputedBarAttribute, GridDirection, GridItemAlignment, GridAttribute, GridLayoutOptions } from "../component/grid";
 import { Resource } from "global.resource"
@@ -275,5 +276,8 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         this.getPeer()?.setEdgeEffectAttribute(value_casted, options_casted)
         this.markDirty()
         return this
+    }
+    attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
     }
 }
