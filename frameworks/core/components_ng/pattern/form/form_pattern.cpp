@@ -1139,13 +1139,7 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
     }
 
     TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::LoadDisableFormStyle");
-    RemoveFormChildNode(FormChildNodeType::APP_LOCKED_IMAGE_NODE);
-    RemoveFormChildNode(FormChildNodeType::APP_LOCKED_TEXT_NODE);
-    RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
-    RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_IMAGE_NODE);
-    RemoveFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE);
-    RemoveFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_IMAGE_NODE);
-    RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    RemoveFormStyleChildNode();
     int32_t dimensionHeight = GetFormDimensionHeight(cardInfo_.dimension);
     if (dimensionHeight <= 0) {
         TAG_LOGE(AceLogTag::ACE_FORM, "LoadDisableFormStyle failed, invalid dimensionHeight!");
@@ -1156,9 +1150,11 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
 #ifdef ARKUI_WEARABLE
     rootNode =  CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
 #else
-    rootNode = (cardInfo_.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_2)) 
-               ? CreateRowNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
-               : CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    if (cardInfo_.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_2)) {
+        rootNode = CreateRowNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    } else {
+        rootNode = CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    }
 #endif
     CHECK_NULL_VOID(rootNode);
     auto renderContext = rootNode->GetRenderContext();
@@ -2956,5 +2952,16 @@ void FormPattern::GetRSUIContext()
     if (!rsUIContext_) {
         TAG_LOGE(AceLogTag::ACE_FORM, "FormPattern: rsUIContext_ is nullptr");
     }
+}
+
+void FormPattern::RemoveFormStyleChildNode()
+{
+    RemoveFormChildNode(FormChildNodeType::APP_LOCKED_IMAGE_NODE);
+    RemoveFormChildNode(FormChildNodeType::APP_LOCKED_TEXT_NODE);
+    RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
+    RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_IMAGE_NODE);
+    RemoveFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE);
+    RemoveFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_IMAGE_NODE);
+    RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
 }
 } // namespace OHOS::Ace::NG

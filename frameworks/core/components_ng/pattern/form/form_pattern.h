@@ -285,6 +285,7 @@ private:
     void GetRSUIContext();
     void GetWantParam(RequestFormInfo& info);
     void UpdateFormSurface(const RequestFormInfo& info);
+    void RemoveFormStyleChildNode();
 
     RefPtr<RenderContext> externalRenderContext_;
 
