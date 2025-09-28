@@ -1866,4 +1866,18 @@ HWTEST_F(SheetShowInSubwindowTestNg, TestBreakpoint001, TestSize.Level1)
     auto type8 = state.HandleType(sheetStyle);
     EXPECT_EQ(type8, SheetType::SHEET_SIDE);
 }
+
+/**
+ * @tc.name: GetCurrentSubwindowKey001
+ * @tc.desc: Branch: if (searchKey.windowType == SubwindowType::TYPE_SHEET)
+ *           Condition: windowType == SubwindowType::TYPE_SHEET
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, GetCurrentSubwindowKey001, TestSize.Level1)
+{
+    MockContainer::Current()->GetMockDisplayInfo()->SetFoldStatus(FoldStatus::HALF_FOLD);
+    auto subwindowKey =
+        SubwindowManager::GetInstance()->GetCurrentSubwindowKey(Container::CurrentId(), SubwindowType::TYPE_SHEET);
+    EXPECT_EQ(subwindowKey.foldStatus, FoldStatus::UNKNOWN);
+}
 } // namespace OHOS::Ace::NG
