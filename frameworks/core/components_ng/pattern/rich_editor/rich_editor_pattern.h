@@ -541,6 +541,7 @@ public:
     }
 
     void RecreateUndoManager();
+    void CreateStyledString();
 
     void SetStyledString(const RefPtr<SpanString>& value);
 

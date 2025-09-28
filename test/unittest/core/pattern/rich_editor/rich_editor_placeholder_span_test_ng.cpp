@@ -266,6 +266,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, InitPlaceholderSpansMap002, TestSize.L
     size_t placeholderGains = 0;
     spanItem->spanItemType = SpanItemType::CustomSpan;
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->InitPlaceholderSpansMap(newSpanItem, spanItem, index, placeholderGains);
     EXPECT_EQ(placeholderGains, placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH);
 }
@@ -302,6 +304,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithCustomSpan001, T
     size_t index = 1;
     size_t textIndex = 1;
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->ReplacePlaceholderWithCustomSpan(spanItem, index, textIndex);
     EXPECT_EQ(richEditorPattern->textSelector_.IsValid(), false);
     EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);
@@ -345,6 +349,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithCustomSpan003, T
     size_t index = 1;
     size_t textIndex = 1;
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     spanItem->onMeasure.emplace();
     spanItem->onDraw.emplace();
     richEditorPattern->ReplacePlaceholderWithCustomSpan(spanItem, index, textIndex);
@@ -365,6 +371,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithImageSpan001, Te
     size_t index = 1;
     size_t textIndex = 1;
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->ReplacePlaceholderWithImageSpan(spanItem, index, textIndex);
     EXPECT_EQ(richEditorPattern->textSelector_.IsValid(), false);
     EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);

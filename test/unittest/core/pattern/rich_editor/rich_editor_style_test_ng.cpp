@@ -316,6 +316,8 @@ HWTEST_F(RichEditorStyleTestNg, TestRichEditorHandleSelectFontStyle001, TestSize
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     KeyCode code = KeyCode::KEY_UNKNOWN;
     richEditorPattern->HandleSelectFontStyle(code);
     EXPECT_EQ(richEditorPattern->isSpanStringMode_, true);
@@ -843,6 +845,8 @@ HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyle001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->textSelector_.baseOffset = -2;
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_SEARCH);
     EXPECT_TRUE(richEditorPattern->textSelector_.SelectNothing());
 }

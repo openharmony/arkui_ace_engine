@@ -795,6 +795,8 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragInsertStyledString004, TestSize.Level
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->isDragSponsor_ = false;
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->dragRange_ = { 0, 10 };
@@ -925,6 +927,8 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropStyledString002, TestSize.Level1)
     OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->undoManager_ =
         std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->HandleOnDragDropStyledString(event);
@@ -1037,6 +1041,8 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropStyledString005, TestSize.Level1)
     OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->undoManager_ =
         std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->HandleOnDragDropStyledString(event);
@@ -1075,6 +1081,8 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropStyledString006, TestSize.Level1)
     OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->undoManager_ =
         std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->HandleOnDragDropStyledString(event);
