@@ -144,10 +144,19 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
         Color endColor;
         Color beginColor;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal, resObj)) {
-            endColor = theme->GetRingProgressEndSideColor();
-            beginColor = theme->GetRingProgressBeginSideColor();
             colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedSelectColor()
                                                                  : theme->GetTrackParseFailedSelectedColor();
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+                endColor = (g_progressType == ProgressType::RING || g_progressType == ProgressType::SCALE)
+                               ? theme->GetRingProgressEndSideColor()
+                               : colorVal;
+                beginColor = (g_progressType == ProgressType::RING || g_progressType == ProgressType::SCALE)
+                                 ? theme->GetRingProgressBeginSideColor()
+                                 : colorVal;
+            } else {
+                endColor = theme->GetRingProgressEndSideColor();
+                beginColor = theme->GetRingProgressBeginSideColor();
+            }
             gradientColorByUser = false;
         } else {
             endColor = colorVal;

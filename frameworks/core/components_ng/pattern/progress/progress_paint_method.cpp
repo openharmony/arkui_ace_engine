@@ -38,8 +38,13 @@ void ProgressPaintMethod::GetThemeData(int32_t themeScopeId)
     scaleCount_ = progressTheme->GetScaleNumber();
     borderColor_ = progressTheme->GetBorderColor();
     capsuleBorderWidth_ = progressTheme->GetBorderWidth();
-    ringProgressEndSideColor_ = progressTheme->GetRingProgressEndSideColor();
-    ringProgressBeginSideColor_ = progressTheme->GetRingProgressBeginSideColor();
+    ringProgressEndSideColor_ = progressType_ == ProgressType::RING || progressType_ == ProgressType::SCALE
+                                    ? progressTheme->GetRingProgressEndSideColor()
+                                    : color_;
+    
+    ringProgressBeginSideColor_ = progressType_ == ProgressType::RING || progressType_ == ProgressType::SCALE
+                                      ? progressTheme->GetRingProgressBeginSideColor()
+                                      : color_;
     capsuleBgFocusedColor_ = progressTheme->GetCapsuleBgFocusedColor();
     capsuleSelectFocusedColor_ = progressTheme->GetCapsuleSelectFocusedColor();
     capsuleInprogressBorderColor_ = progressTheme->GetCapsuleInprogressBorderColor();

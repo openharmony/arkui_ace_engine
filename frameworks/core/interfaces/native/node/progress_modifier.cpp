@@ -217,6 +217,14 @@ void ResetProgressColor(ArkUINodeHandle node)
         isGradientColor = true;
     } else if (progresstype == ProgressType::CAPSULE) {
         colorVal = progressTheme->GetCapsuleParseFailedSelectColor();
+        endColor = colorVal;
+        beginColor = colorVal;
+        isGradientColor = true;
+    } else if (progresstype == ProgressType::LINEAR) {
+        colorVal = progressTheme->GetTrackParseFailedSelectedColor();
+        endColor = colorVal;
+        beginColor = colorVal;
+        isGradientColor = true;
     } else {
         colorVal = progressTheme->GetTrackParseFailedSelectedColor();
     }

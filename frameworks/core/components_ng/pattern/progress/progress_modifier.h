@@ -87,6 +87,7 @@ private:
 
     void ContentDrawWithFunction(DrawingContext& context);
     void PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintLinearWithGradient(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintLinearSweeping(
         RSCanvas& canvas, const OffsetF& offset, const RSPath& path, bool isHorizontal, const SizeF& contentSize) const;
     void PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -102,7 +103,11 @@ private:
     void PaintTrailing(RSCanvas& canvas, const RingProgressData& ringProgressData) const;
     void PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintCapsuleGradient(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius, RSBrush& brush) const;
     void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
+    void PaintCapsuleWithGradient(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize,
         const float borderRadius) const;
     void PaintCapsuleLeftBorder(RSPath& path, const OffsetF& offset, const SizeF& contentSize,
         const float borderRadius) const;
@@ -111,6 +116,8 @@ private:
     void PaintCapsuleProgressLessRadiusScene(RSPath& path, const OffsetF& offset, const SizeF& contentSize,
         const float borderRadius) const;
     void PaintCapsuleProgressGreaterRadiusScene(RSPath& path, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
+    void PaintVerticalCapsuleWithGradient(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize,
         const float borderRadius) const;
     void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize,
         const float borderRadius) const;
