@@ -158,7 +158,8 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg003, TestSize.L
     auto geometryNode = stageNode->GetGeometryNode();
     EXPECT_NE(geometryNode, nullptr);
     EXPECT_TRUE(geometryNode->GetMarginFrameSize().IsPositive());
-    auto frameNodeRef = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNodeRef =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(frameNodeRef, nullptr);
     FrameNode* frameNode = &(*frameNodeRef);
     geometryNode->frame_.rect_.SetWidth(NEGATIVE_SIZE);

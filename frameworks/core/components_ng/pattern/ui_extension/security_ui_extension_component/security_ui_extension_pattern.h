@@ -140,6 +140,23 @@ public:
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
     void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
 
+    bool GetIsTransferringCaller()
+    {
+        return isTransferringCaller_;
+    }
+    void SetIsTransferringCaller(bool isTransferringCaller)
+    {
+        isTransferringCaller_ = isTransferringCaller;
+    }
+    void SetIsWindowModeFollowHost(bool isWindowModeFollowHost)
+    {
+        isWindowModeFollowHost_ = isWindowModeFollowHost;
+    }
+    bool GetIsWindowModeFollowHost()
+    {
+        return isWindowModeFollowHost_;
+    }
+
 protected:
     void InitializeAccessibility();
     bool HandleKeyEvent(const KeyEvent& event) override;
@@ -176,6 +193,10 @@ protected:
     bool isVisible_ = true;
     bool isShowPlaceholder_ = false;
     bool densityDpi_ = false;
+
+    bool isTransferringCaller_ = false;
+    bool isWindowModeFollowHost_ = false;
+
     int32_t callbackId_ = 0;
     RectF displayArea_;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;

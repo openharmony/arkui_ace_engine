@@ -35,6 +35,7 @@ export class ArkUIAniDynamicModal {
         ArkUIAniUiextensionLoadLibraryHelp.LoadLibrary();
     }
 
+    native static _Dynamic_Construct(id: KInt, flag: KInt): KLong;
     native static _Dynamic_Set_Option(nodePointer: KLong, option: ArkUIAniDynamicOptions): void;
     native static _Dynamic_Set_OnErrorCallback(nodePointer: KLong, value: DcErrorCallback) : void;
     native static _Dynamic_Set_IsReportFrameEvent(nodePointer: KLong, value: boolean) : void;
