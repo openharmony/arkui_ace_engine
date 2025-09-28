@@ -20,6 +20,7 @@
 namespace OHOS::Ace::NG {
 constexpr char TIME_LIMIT_RESOURCE_NAME[] = "form_disable_time_limit";
 constexpr char APP_LOCK_RESOURCE_NAME[] = "ohos_app_has_locked";
+constexpr char DEVELOPER_MODE_TIPS_RESOURCE_NAME[] = "desc_developer_mode_tips";
 
 void FormSpecialStyle::SetIsForbiddenByParentControl(bool isForbiddenByParentControl)
 {
