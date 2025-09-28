@@ -83,7 +83,7 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
             stateMgmtConsole.debug(`      - func - no ObservedPropertybstract - ret value ${funcRet}`);
             return funcRet;
         }, // get
-        has(target, prop) {
+        has(target, prop) :boolean {
             if (InteropConfigureStateMgmt.instance.needsInterop() && prop === '__static_interop_hook') {
                 return true;
             }

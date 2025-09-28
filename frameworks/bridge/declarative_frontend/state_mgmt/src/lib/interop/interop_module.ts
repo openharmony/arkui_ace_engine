@@ -69,6 +69,6 @@ function registerCompatibleStaticComponentCallback(
     InteropExtractorModule.compatibleStaticComponent = callback;
 }
 
-function registerMakeBuilderParameterStaticProxy(callback: (name: string, value: Object, sourceGetter: Object) => Object) {
+function registerMakeBuilderParameterStaticProxy(callback: (name: string, value: Object, sourceGetter: Object) => Object) :void {
     InteropExtractorModule.makeBuilderParameterStaticProxy = callback;
 }
