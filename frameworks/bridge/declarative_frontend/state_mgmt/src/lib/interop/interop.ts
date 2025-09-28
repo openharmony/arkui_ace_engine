@@ -147,3 +147,17 @@ function __Interop_ResetInteropExtendableComponent_Internal(): void {
     }
     return InteropExtractorModule.resetInteropExtendableComponent();
 }
+
+function __Interop_TransferCompatibleBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleBuilder === undefined) {
+        throw new Error("Non Method For Transfer CompatibleBuilder");
+    }
+    return InteropExtractorModule.transferCompatibleBuilder(builder);
+}
+
+function __Interop_transferCompatibleDynamicBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder === undefined) {
+        throw new Error("Non Method For Transfer Compatible Dynamic Builder");
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder(builder);
+}
