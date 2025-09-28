@@ -17,35 +17,28 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_PICKER_CONTAINER_PICKER_LAYOUT_ALGORITHM_H
 
 #include <optional>
+
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
+#include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 
 namespace OHOS::Ace::NG {
 
-struct PickerItemInfo {
-    float startPos = 0.0f;
-    float endPos = 0.0f;
-    RefPtr<FrameNode> node = nullptr;
-    OffsetF finalOffset = OffsetF();
-    CancelableCallback<void()> task = CancelableCallback<void()>();
-    bool isFinishAnimation = false;
-};
-
 class ACE_EXPORT ContainerPickerLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ContainerPickerLayoutAlgorithm, LayoutAlgorithm);
+
 public:
     ContainerPickerLayoutAlgorithm() = default;
     ~ContainerPickerLayoutAlgorithm() override = default;
 
-    using PositionMap = std::map<int32_t, PickerItemInfo>;
-
-    void SetItemsPosition(const PositionMap& itemPosition)
+    void SetItemPosition(const ContainerPickerUtils::PositionMap& itemPosition)
     {
         itemPosition_ = itemPosition;
     }
 
-    PositionMap&& GetItemPosition()
+    ContainerPickerUtils::PositionMap&& GetItemPosition()
     {
         return std::move(itemPosition_);
     }
@@ -77,9 +70,6 @@ public:
         if (itemPosition_.empty()) {
             return 0.0f;
         }
-        if (GetEndIndex() == totalItemCount_ - 1 && !isLoop_) {
-            return itemPosition_.rbegin()->second.endPos;
-        }
         return itemPosition_.rbegin()->second.endPos;
     }
 
@@ -93,22 +83,14 @@ public:
         return itemPosition_.empty() ? 0 : itemPosition_.rbegin()->first;
     }
 
-    int32_t GetLoopIndex(int32_t originalIndex) const
+    void SetIsLoop(bool isLoop)
     {
-        if (totalItemCount_ <= 0) {
-            return originalIndex;
-        }
-        auto loopIndex = originalIndex;
-        while (loopIndex < 0) {
-            loopIndex = loopIndex + totalItemCount_;
-        }
-        loopIndex %= totalItemCount_;
-        return loopIndex;
+        isLoop_ = isLoop;
     }
 
-    void SetCurrentIndex(int32_t currentIndex)
+    void SetSelectedIndex(int32_t index)
     {
-        currentIndex_ = currentIndex;
+        selectedIndex_ = index;
     }
 
     float GetCurrentOffset() const
@@ -119,13 +101,24 @@ public:
     void SetContentMainSize(float contentMainSize)
     {
         contentMainSize_ = contentMainSize;
-        oldContentMainSize_ = contentMainSize;
     }
 
     float GetContentMainSize() const
     {
         return contentMainSize_;
     }
+
+    void SetHeight(float height)
+    {
+        height_ = height;
+    }
+
+    float GetHeight() const
+    {
+        return height_;
+    }
+
+    void CalcMainAndMiddlePos();
 
     const LayoutConstraintF& GetLayoutConstraint() const
     {
@@ -134,56 +127,54 @@ public:
 
 private:
     void LayoutItem(LayoutWrapper* layoutWrapper, OffsetF offset, std::pair<int32_t, PickerItemInfo> pos);
-    void MeasureSize(LayoutConstraintF& contentConstraint);
-    void HandleLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
-    void MeasurePicker(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
+    void MeasureSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
+    void MeasureHeight(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
+    void MeasureWidth(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
+    float GetChildMaxWidth(LayoutWrapper* layoutWrapper) const;
+    void MeasurePickerItems(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
     void SetPatternContentMainSize(LayoutWrapper* layoutWrapper);
-    void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex,
+    void MeasureBelow(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex,
         float startPos, bool cachedLayout = false);
-    void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex,
+    void MeasureAbove(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex,
         float endPos, bool cachedLayout = false);
-    bool LayoutForwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+    bool MeasureBelowItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t& currentIndex, float startPos, float& endPos);
-    bool LayoutBackwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+    bool MeasureAboveItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t& currentIndex, float endPos, float& startPos);
-    void SetInactiveOnForward(LayoutWrapper* layoutWrapper);
-    void SetInactiveOnBackward(LayoutWrapper* layoutWrapper);
-    bool NeedMeasureForward(int32_t currentIndex, float currentEndPos, float forwardEndPos, bool cachedLayout) const;
-    bool NeedMeasureBackward(
-        int32_t currentIndex, float currentStartPos, float backwardStartPos, bool isStretch, bool cachedLayout) const;
-    void AdjustOffsetOnForward(float currentEndPos);
-    void AdjustOffsetOnBackward(float currentStartPos);
+    bool NeedMeasureBelow(int32_t currentIndex, float currentStartPos, float endMainPos, bool cachedLayout) const;
+    bool NeedMeasureAbove(int32_t currentIndex, float currentEndPos, float startMainPos, bool cachedLayout) const;
+    void AdjustOffsetOnBelow(float currentEndPos);
+    void AdjustOffsetOnAbove(float currentStartPos);
     float GetChildMainAxisSize(const RefPtr<LayoutWrapper>& childWrapper);
-    void ResetOffscreenItemPosition(LayoutWrapper* layoutWrapper, int32_t index, bool isForward) const;
-    void AdjustStartInfoOnSwipeByGroup(
-        int32_t startIndex, const PositionMap& itemPosition, int32_t& startIndexInVisibleWindow, float& startPos);
+    std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
+
     LayoutConstraintF childLayoutConstraint_;
-    PositionMap itemPosition_;
-    PositionMap prevItemPosition_;
-    PositionMap itemPositionInAnimation_;
+    LayoutCalPolicy widthLayoutPolicy = LayoutCalPolicy::NO_MATCH;
+    ContainerPickerUtils::PositionMap itemPosition_;
+    ContainerPickerUtils::PositionMap prevItemPosition_;
+    ContainerPickerUtils::PositionMap itemPositionInAnimation_;
     Axis axis_ = Axis::VERTICAL;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
     std::set<int32_t> measuredItems_;
 
-    int32_t showCount_ = 7;
     int32_t totalItemCount_ = 0;
-    int32_t currentIndex_ = 0;
+    int32_t selectedIndex_ = 0;
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
-    float targetStartPos_ = 0.0f;
-    float contentMainSize_ = 0.0f;
-    float oldContentMainSize_ = 0.0f;
-    float contentCrossSize_ = 0.0f;
+    float topPadding_ = 0.0f;
+    float height_ = 0.0f;          // usage: record picker real height
+    float contentMainSize_ = 0.0f; // usage: picker content area height
+    float middleItemStartPos_ = 0.0f;
+    float middleItemEndPos_ = 0.0f;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
-    float pickerItemHeight_ = 40.0f;
     float dividerSpacingFontScale_ = 1.0f;
     float gradientFontScale_ = 1.0f;
     bool mainSizeIsMeasured_ = false;
     bool measured_ = false;
-    bool isLoop_ = true;
+    bool isLoop_ = false;
     bool overScrollFeature_ = false;
     bool canOverScroll_ = false;
 

@@ -16,20 +16,25 @@
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/syntax/for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
-    const std::string CONTAINER_PICKER_DRAG_SCENE = "container_picker_drag_scene";
-    constexpr double MOVE_THRESHOLD = 2.0;
-    constexpr int32_t CLICK_ANIMATION_DURATION = 300;
-    constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
-    constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
-    constexpr float DEFAULT_SPRING_DAMP = 0.99F;
-    constexpr float ITEM_HEIGHT_PX = 40.0 * 3.25;
-    constexpr int32_t VELOCITY_TRANS = 1000;
-    constexpr float PICKER_SPEED_TH = 0.25f;
+const std::string CONTAINER_PICKER_DRAG_SCENE = "container_picker_drag_scene";
+constexpr double MOVE_THRESHOLD = 2.0;
+constexpr int32_t CLICK_ANIMATION_DURATION = 300;
+constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
+constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
+constexpr float DEFAULT_SPRING_DAMP = 0.99f;
+constexpr float ITEM_HEIGHT_PX = 40.0 * 3.25;
+constexpr int32_t VELOCITY_TRANS = 1000;
+constexpr float PICKER_SPEED_TH = 0.25f;
+constexpr int32_t DEFAULT_FONT_SIZE = 20;
 } // namespace
 
 RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
@@ -40,10 +45,19 @@ RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
     CHECK_NULL_RETURN(host, nullptr);
     layoutAlgorithm->SetTotalItemCount(host->TotalChildCount());
     layoutAlgorithm->SetCurrentDelta(currentDelta_);
-    layoutAlgorithm->SetCurrentIndex(currentIndex_);
-    layoutAlgorithm->SetItemsPosition(itemPosition_);
+    layoutAlgorithm->SetSelectedIndex(selectedIndex_);
+    layoutAlgorithm->SetItemPosition(itemPosition_);
+    layoutAlgorithm->SetContentMainSize(contentMainSize_);
+    layoutAlgorithm->SetHeight(height_);
+    layoutAlgorithm->SetIsLoop(IsLoop());
     totalOffset_ = currentIndexOffset_;
     return layoutAlgorithm;
+}
+
+RefPtr<NodePaintMethod> ContainerPickerPattern::CreateNodePaintMethod()
+{
+    auto paint = MakeRefPtr<ContainerPickerPaintMethod>();
+    return paint;
 }
 
 bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -58,20 +72,25 @@ bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
     auto pickerAlgorithm = DynamicCast<ContainerPickerLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(pickerAlgorithm, false);
     GetLayoutProperties(pickerAlgorithm);
+    SetDefaultTextStyle();
     return false;
 }
 
-void ContainerPickerPattern::GetLayoutProperties(const RefPtr<ContainerPickerLayoutAlgorithm>& pickerAlgorithm)
+void ContainerPickerPattern::GetLayoutProperties(const RefPtr<ContainerPickerLayoutAlgorithm>& algo)
 {
-    CHECK_NULL_VOID(pickerAlgorithm);
-    itemPosition_ = std::move(pickerAlgorithm->GetItemPosition());
-    contentMainSize_ = pickerAlgorithm->GetContentMainSize();
+    CHECK_NULL_VOID(algo);
+    layoutConstraint_ = algo->GetLayoutConstraint();
+    itemPosition_ = std::move(algo->GetItemPosition());
+    currentOffset_ -= algo->GetCurrentOffset();
+    contentMainSize_ = algo->GetContentMainSize();
+    height_ = algo->GetHeight();
 }
 
 void ContainerPickerPattern::OnAttachToFrameNode()
 {
     CreateAnimation();
     UpdatePanEvent();
+    UpdateClipEdge();
 }
 
 void ContainerPickerPattern::OnModifyDone()
@@ -81,6 +100,92 @@ void ContainerPickerPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     containerPickerId_ = host->GetId();
+    totalItemCount_ = host->TotalChildCount();
+    auto props = GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    if (props->GetCanLoopValue(true) != isLoop_) {
+        isLoop_ = props->GetCanLoopValue(true);
+        itemPosition_.clear();
+    }
+    PickerMarkDirty(PROPERTY_UPDATE_RENDER);
+}
+
+void ContainerPickerPattern::FireChangeEvent()
+{
+    auto pickerEventHub = GetEventHub<ContainerPickerEventHub>();
+    CHECK_NULL_VOID(pickerEventHub);
+    pickerEventHub->FireChangeEvent(selectedIndex_);
+}
+
+void ContainerPickerPattern::FireScrollStopEvent()
+{
+    auto pickerEventHub = GetEventHub<ContainerPickerEventHub>();
+    CHECK_NULL_VOID(pickerEventHub);
+    pickerEventHub->FireScrollStopEvent(selectedIndex_);
+}
+
+void ContainerPickerPattern::UpdateClipEdge()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateClipEdge(true);
+}
+
+bool ContainerPickerPattern::IsLoop() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (displayCount_ > totalItemCount_) {
+        return false;
+    }
+    auto props = GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_RETURN(props, true);
+    return props->GetCanLoopValue(true);
+}
+
+void ContainerPickerPattern::SetDefaultTextStyle() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (const auto& item : itemPosition_) {
+        auto index = ContainerPickerUtils::GetLoopIndex(item.first, totalItemCount_);
+        auto child = DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(index));
+        SetDefaultTextStyle(child);
+    }
+}
+
+void ContainerPickerPattern::SetDefaultTextStyle(RefPtr<FrameNode> node) const
+{
+    CHECK_NULL_VOID(node);
+    if (node->GetTag() == V2::TEXT_ETS_TAG) {
+        auto textLayoutProperty = node->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        bool modified = false;
+        if (!textLayoutProperty->GetFontSize().has_value()) {
+            textLayoutProperty->UpdateFontSize(Dimension(DEFAULT_FONT_SIZE, DimensionUnit::FP));
+            modified = true;
+        }
+        if (!textLayoutProperty->GetTextColor().has_value()) {
+            textLayoutProperty->UpdateTextColor(Color::FromString("#66182431"));
+            modified = true;
+        }
+
+        if (modified) {
+            node->MarkModifyDone();
+            node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    } else {
+        auto& children = node->GetChildren();
+        for (const auto& child : children) {
+            if (!child) {
+                continue;
+            }
+            auto childNode = DynamicCast<FrameNode>(child);
+            SetDefaultTextStyle(childNode);
+        }
+    }
 }
 
 void ContainerPickerPattern::OnAroundButtonClick(RefPtr<ContainerPickerEventParam> param)
@@ -89,7 +194,7 @@ void ContainerPickerPattern::OnAroundButtonClick(RefPtr<ContainerPickerEventPara
     CHECK_NULL_VOID(host);
 
     int32_t realIndex = 0;
-    int32_t middleIndex = showCount_ / 2;
+    int32_t middleIndex = displayCount_ / 2;
     for (auto& pos : itemPosition_) {
         if (param->itemNodeId == pos.second.node->GetId()) {
             break;
@@ -188,10 +293,8 @@ void ContainerPickerPattern::AddPanEvent(const RefPtr<GestureEventHub>& gestureH
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStart), std::move(actionUpdate), std::move(actionEnd), std::move(actionCancel));
 
-    PanDistanceMap distanceMap = {
-        { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
-        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() }
-    };
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
     panDirection_.type = PanDirection::VERTICAL;
     gestureHub->AddPanEvent(panEvent_, panDirection_, 1, distanceMap);
 }
@@ -284,8 +387,8 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
     auto velocity = info.GetMainVelocity();
     UpdateDragFRCSceneInfo(velocity, SceneStatus::RUNNING);
 
-    auto offsetY = info.GetGlobalPoint().GetY() +
-        (info.GetInputEventType() == InputEventType::AXIS ? info.GetOffsetY() : 0.0);
+    auto offsetY =
+        info.GetGlobalPoint().GetY() + (info.GetInputEventType() == InputEventType::AXIS ? info.GetOffsetY() : 0.0);
     if (NearEqual(offsetY, yLast_, MOVE_THRESHOLD)) {
         return;
     }
@@ -319,8 +422,8 @@ void ContainerPickerPattern::HandleDragEnd(double dragVelocity, float mainDelta)
     }
 
     // Adjust the position to ensure it is centered.
-    ContainerPickerDirection dir = GreatNotEqual(totalOffset_, 0.0) ?
-        ContainerPickerDirection::UP : ContainerPickerDirection::DOWN;
+    ContainerPickerDirection dir =
+        GreatNotEqual(totalOffset_, 0.0) ? ContainerPickerDirection::UP : ContainerPickerDirection::DOWN;
     int32_t n = std::trunc(totalOffset_) / ITEM_HEIGHT_PX;
     float distance = std::abs(totalOffset_ - ITEM_HEIGHT_PX * n);
     float resetOffset = 0.0f;
@@ -347,8 +450,8 @@ void ContainerPickerPattern::CalcEndOffset(float& endOffset, double velocity)
 
     // Adjust the position to ensure it is centered.
     float totalOffset = endOffset + totalOffset_;
-    ContainerPickerDirection dir = GreatNotEqual(totalOffset_, 0.0) ?
-        ContainerPickerDirection::UP : ContainerPickerDirection::DOWN;
+    ContainerPickerDirection dir =
+        GreatNotEqual(totalOffset_, 0.0) ? ContainerPickerDirection::UP : ContainerPickerDirection::DOWN;
     int32_t n = std::trunc(totalOffset) / ITEM_HEIGHT_PX;
     float distance = std::abs(totalOffset - ITEM_HEIGHT_PX * n);
     float resetOffset = 0.0f;
@@ -377,10 +480,8 @@ bool ContainerPickerPattern::Play(double dragVelocity)
     CalcEndOffset(endOffset, dragVelocity);
     snapOffsetProperty_->Set(0.0f);
     snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
-    snapOffsetProperty_->AnimateWithVelocity(option, -endOffset,
-        dragVelocity, [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
-            ContainerScope scope(id);
-        });
+    snapOffsetProperty_->AnimateWithVelocity(option, -endOffset, dragVelocity,
+        [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() { ContainerScope scope(id); });
     return true;
 }
 
@@ -394,6 +495,7 @@ void ContainerPickerPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sce
 ScrollResult ContainerPickerPattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
 {
     UpdateCurrentOffset(offset);
+    FireEvent();
     return { 0.0f, false };
 }
 
@@ -461,9 +563,9 @@ double ContainerPickerPattern::GetDragDeltaLessThanJumpInterval(
 void ContainerPickerPattern::UpdateColumnChildPosition(double offsetY)
 {
     double dragDelta = offsetY - yLast_;
-    ContainerPickerDirection dir = GreatNotEqual(dragDelta, 0.0) ?
-        ContainerPickerDirection::DOWN : ContainerPickerDirection::UP;
-    auto shiftDistance = (dir == ContainerPickerDirection::UP) ? -ITEM_HEIGHT_PX: ITEM_HEIGHT_PX;
+    ContainerPickerDirection dir =
+        GreatNotEqual(dragDelta, 0.0) ? ContainerPickerDirection::DOWN : ContainerPickerDirection::UP;
+    auto shiftDistance = (dir == ContainerPickerDirection::UP) ? -ITEM_HEIGHT_PX : ITEM_HEIGHT_PX;
     auto useRebound = !IsLoop();
     auto stopMove = SpringCurveTailMoveProcess(useRebound, dragDelta);
 
@@ -533,12 +635,15 @@ void ContainerPickerPattern::CreateAnimation(double from, double to)
     option.SetDuration(CLICK_ANIMATION_DURATION);
     scrollProperty_->Set(from);
     auto host = GetHost();
-    auto context = host? host->GetContextRefPtr(): nullptr;
-    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), to]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->scrollProperty_->Set(to);
-    }, nullptr, nullptr, context);
+    auto context = host ? host->GetContextRefPtr() : nullptr;
+    AnimationUtils::Animate(
+        option,
+        [weak = AceType::WeakClaim(this), to]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->scrollProperty_->Set(to);
+        },
+        nullptr, nullptr, context);
 }
 
 void ContainerPickerPattern::PickerMarkDirty(PropertyChangeFlag extraFlag)
@@ -548,4 +653,14 @@ void ContainerPickerPattern::PickerMarkDirty(PropertyChangeFlag extraFlag)
     host->MarkDirtyNode(extraFlag);
 }
 
+void ContainerPickerPattern::FireEvent()
+{
+    auto currentMiddleItem =
+        ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, height_, totalItemCount_, IsLoop());
+    auto newSelectedIndex_ = currentMiddleItem.first;
+    if (newSelectedIndex_ != selectedIndex_) {
+        selectedIndex_ = newSelectedIndex_;
+        FireChangeEvent();
+    }
+}
 } // namespace OHOS::Ace::NG
