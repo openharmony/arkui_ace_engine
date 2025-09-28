@@ -207,7 +207,7 @@ void SetMeshImpl(Ark_NativePointer node,
     auto columnValue = Converter::OptConvertPtr<int32_t>(column).value_or(0);
     auto rowValue = Converter::OptConvertPtr<int32_t>(row).value_or(0);
     auto meshSize = mesh->size();
-    auto tempMeshSize = static_cast<size_t>(columnValue + 1) * (rowValue + 1) * 2;
+    auto tempMeshSize = static_cast<size_t>(columnValue + 1) * static_cast<size_t>(rowValue + 1) * 2;
     if (tempMeshSize != meshSize) {
         ShapeModelNG::SetBitmapMesh(frameNode, std::move(*mesh), 0, 0);
         return;
