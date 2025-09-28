@@ -207,7 +207,6 @@
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
-#include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #ifdef EFFECT_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_effect_component.h"
 #endif
