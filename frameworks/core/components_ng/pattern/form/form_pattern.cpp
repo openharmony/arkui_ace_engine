@@ -1130,11 +1130,9 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
             TAG_LOGE(AceLogTag::ACE_FORM, "LoadDisableFormStyle failed, form manager deleget is null!");
             return;
         }
-
         formManagerBridge_->SetObscured(isFormObscured_);
         return;
     }
-
     if (!isRefresh && GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE) != nullptr) {
         TAG_LOGW(AceLogTag::ACE_FORM, "Form disable style node already exist.");
         return;
