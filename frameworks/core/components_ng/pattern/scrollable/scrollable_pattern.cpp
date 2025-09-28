@@ -604,7 +604,7 @@ void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>&
     const std::list<RefPtr<NGGestureRecognizer>>& activeRecognizers)
 {
     CHECK_NULL_VOID(scrollableEvent_);
-    std::list<FingerInfo> fingerInfos = baseGestureEvent->GetFingerList();
+    const std::list<FingerInfo>& fingerInfos = baseGestureEvent->GetFingerList();
     if (fingerInfos.empty()) {
         return;
     }
@@ -628,21 +628,30 @@ void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>&
         CHECK_NULL_CONTINUE(frameNode);
         if (frameNode == scrollableNode) {
             isChild = false;
+            if (!isHitTestBlock) {
+                return;
+            }
         }
-        if (IsNeedPreventRecognizer(recognizer, isChild)) {
+        if (IsNeedPreventRecognizer(recognizer, isChild, isHitTestBlock)) {
             recognizer->SetPreventBegin(true);
         }
     }
 }
 
-bool ScrollablePattern::IsNeedPreventRecognizer(const RefPtr<NGGestureRecognizer>& recognizer, bool isChild) const
+bool ScrollablePattern::IsNeedPreventRecognizer(const RefPtr<NGGestureRecognizer>& recognizer,
+    bool isChild, bool isHitTestBlock) const
 {
-    auto gestureInfo = recognizer->GetGestureInfo();
-    CHECK_NULL_RETURN(gestureInfo, false);
-    GestureTypeName type = gestureInfo->GetRecognizerType();
-    if (isChild && (type == GestureTypeName::CLICK || type == GestureTypeName::LONG_PRESS_GESTURE ||
-        type == GestureTypeName::TAP_GESTURE)) {
-        return true;
+    if (isChild) {
+        auto gestureInfo = recognizer->GetGestureInfo();
+        CHECK_NULL_RETURN(gestureInfo, false);
+        GestureTypeName type = gestureInfo->GetRecognizerType();
+        if (type == GestureTypeName::CLICK || type == GestureTypeName::LONG_PRESS_GESTURE ||
+            type == GestureTypeName::TAP_GESTURE) {
+            return true;
+        }
+    }
+    if (!isHitTestBlock) {
+        return false;
     }
     auto panRecognizer = AceType::DynamicCast<NG::PanRecognizer>(recognizer);
     if (panRecognizer) {
