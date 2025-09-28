@@ -68,3 +68,8 @@ export interface DynamicNode {
     onMove(handler?: OnMoveHandler): this;
     onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this;
 }
+
+export function applyStyles<T extends CommonMethod>(this: T, customStyles: CustomStyles): T {
+    customStyles(this);
+    return this;
+}
