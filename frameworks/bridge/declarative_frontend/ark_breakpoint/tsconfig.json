@@ -6,10 +6,10 @@
         "src/WindowSizeLayoutBreakpoint.ts"
     ],
     "compilerOptions": {
-        "module": "none",
-        "target": "ES2016",
-        "outDir": "../engine/",
-        "rootDir": "./src/",
+        "module": "ESNext",
+        "target": "ESNext",
+        "outDir": "../engine",
+        "rootDir": "src",
         "declaration": false,
         "noEmitOnError": true,
         "experimentalDecorators": true,

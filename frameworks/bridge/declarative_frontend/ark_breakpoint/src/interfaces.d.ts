@@ -13,33 +13,24 @@
  * limitations under the License.
  */
 
-declare enum WidthBreakpoint {
-  WIDTH_XS = 0,
-  WIDTH_SM = 1,
-  WIDTH_MD = 2,
-  WIDTH_LG = 3,
-  WIDTH_XL = 4,
+interface Callback<T> {
+  (data: T): void;
 }
-
-declare enum HeightBreakpoint {
-  HEIGHT_SM = 0,
-  HEIGHT_MD = 1,
-  HEIGHT_LG = 2,
-}
-
-declare class WindowSizeLayoutBreakpointInfo {
+declare enum WidthBreakpoint {}
+declare enum HeightBreakpoint {}
+declare namespace uiObserver {
+  class WindowSizeLayoutBreakpointInfo {
     widthBreakpoint: WidthBreakpoint;
     heightBreakpoint: HeightBreakpoint;
+  }
 }
-
-declare type BreakpointCallback = (breakPoint: WindowSizeLayoutBreakpointInfo) => void;
 
 declare class UIObserver {
-    on(type: 'windowSizeLayoutBreakpointChange', callback: BreakpointCallback): void;
-    off(type: 'windowSizeLayoutBreakpointChange', callback?: BreakpointCallback): void;
+  on(type: 'windowSizeLayoutBreakpointChange', callback: Callback<uiObserver.WindowSizeLayoutBreakpointInfo>): void;
+  off(type: 'windowSizeLayoutBreakpointChange', callback?: Callback<uiObserver.WindowSizeLayoutBreakpointInfo>): void;
 }
-
 declare class UIContext {
-    getUIObserver(): UIObserver;
+  getUIObserver(): UIObserver;
+  getWindowWidthBreakpoint(): WidthBreakpoint;
+  getWindowHeightBreakpoint(): HeightBreakpoint;
 }
-

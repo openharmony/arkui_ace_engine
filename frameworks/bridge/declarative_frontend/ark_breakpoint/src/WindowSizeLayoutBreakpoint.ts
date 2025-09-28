@@ -13,36 +13,49 @@
  * limitations under the License.
  */
 
-///<reference path="./interfaces.d.ts" />
+/// <reference path="../../state_mgmt/src/lib/common/ace_console.native.d.ts" />
+type ConstructorV2 = {
+    new (...args: any[]): any;
+};
+declare function ObservedV2<T extends ConstructorV2>(BaseClass: T): T;
+interface IEnvironmentValue<T> {
+  value: T;
+  update(newValue: T): void;
+  destroy(): void;
+}
+declare const Trace: (target: Object, propertyKey: string) => void;
 
-export class WindowSizeLayoutBreakpoint implements WindowSizeLayoutBreakpointInfo {
-  public widthBreakpoint: WidthBreakpoint;
-  public heightBreakpoint: HeightBreakpoint;
+@ObservedV2
+class WindowSizeLayoutBreakpoint implements IEnvironmentValue<uiObserver.WindowSizeLayoutBreakpointInfo> {
+  @Trace public widthBreakpoint: WidthBreakpoint;
+  @Trace public heightBreakpoint: HeightBreakpoint;
   public uiContext: UIContext;
   public uiObserver: UIObserver;
 
-  private breakPointCallback= (breakPoint: WindowSizeLayoutBreakpointInfo) => {
+  private breakPointCallback= (breakPoint: uiObserver.WindowSizeLayoutBreakpointInfo) => {
     this.update(breakPoint);
   };
 
   constructor(context: UIContext) {
-    this.widthBreakpoint = WidthBreakpoint.WIDTH_MD;
-    this.heightBreakpoint = HeightBreakpoint.HEIGHT_MD;
     this.uiContext = context;
     this.uiObserver = this.uiContext.getUIObserver();
+    this.widthBreakpoint = this.uiContext.getWindowWidthBreakpoint();
+    this.heightBreakpoint = this.uiContext.getWindowHeightBreakpoint();
     if (this.uiObserver && typeof this.uiObserver.on === 'function') {
       this.uiObserver.on('windowSizeLayoutBreakpointChange', this.breakPointCallback);
+    } else {
+        aceConsole.warn("Failed to register window size change listener");
     }
   }
 
-  get value(): WindowSizeLayoutBreakpointInfo {
-    return {
-      widthBreakpoint: this.widthBreakpoint,
-      heightBreakpoint: this.heightBreakpoint
-    };
+  get value(): uiObserver.WindowSizeLayoutBreakpointInfo {
+    const windowSizeLayoutBreakpointInfo = new uiObserver.WindowSizeLayoutBreakpointInfo();
+    windowSizeLayoutBreakpointInfo.widthBreakpoint = this.widthBreakpoint;
+    windowSizeLayoutBreakpointInfo.heightBreakpoint = this.heightBreakpoint;
+    return windowSizeLayoutBreakpointInfo;
   }
 
-  update(payload: WindowSizeLayoutBreakpointInfo) {
+  update(payload: uiObserver.WindowSizeLayoutBreakpointInfo) {
     this.widthBreakpoint = payload.widthBreakpoint;
     this.heightBreakpoint = payload.heightBreakpoint;
   }
@@ -50,6 +63,11 @@ export class WindowSizeLayoutBreakpoint implements WindowSizeLayoutBreakpointInf
   destroy(): void {
     if (this.uiObserver && typeof this.uiObserver.off === 'function') {
       this.uiObserver.off('windowSizeLayoutBreakpointChange', this.breakPointCallback);
+    } else {
+        aceConsole.warn("Failed to unregister window size change listener");
     }
   }
+}
+export default {
+  WindowSizeLayoutBreakpoint,
 }
