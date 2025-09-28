@@ -207,6 +207,7 @@
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
+#include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #ifdef EFFECT_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_effect_component.h"
 #endif
@@ -336,6 +337,7 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     if (cleanUpIdleTask->IsFunction()) {
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
         const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
+            JAVASCRIPT_EXECUTION_SCOPE_STATIC;
             auto params = ConvertToJSValues(maxTimeInNs / 1e6);
             jsFunc->Call(globalObject, params.size(), params.data());
         };
