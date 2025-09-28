@@ -4609,7 +4609,16 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
         ResetDragAction();
     }
     if (isDragging_) {
-        ResetDragStateValue();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (!pipeline) {
+            ResetDragStateValue();
+        } else {
+            auto manager = pipeline->GetDragDropManager();
+            if (!manager || !manager->IsMSDPDragging()) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "HandleTouchUp, system not in dragging, reset drag state.");
+                ResetDragStateValue();
+            }
+        }
     }
     HideMagnifier();
     std::list<TouchInfo> touchInfos;

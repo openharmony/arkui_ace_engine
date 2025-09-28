@@ -20,17 +20,19 @@
 #include "gtest/gtest.h"
 
 #include "base/memory/ace_type.h"
-#include "core/event/touch_event.h"
 
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_interaction_interface.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/common/interaction/interaction_interface.h"
+#include "core/event/touch_event.h"
 #undef protected
 #undef private
 #include "test/mock/core/common/mock_udmf.h"
@@ -1291,6 +1293,57 @@ HWTEST_F(WebPatternAddTestNg, handleOnDragEnterId001, TestSize.Level1)
     webPattern->InitWebEventHubDragDropStart(eventHub);
     std::string extraParams = "123";
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_ENTER, nullptr, extraParams);
+    EXPECT_FALSE(webPattern->isDragging_);
+#endif
+}
+
+/**
+ * @tc.name: HandleTouchUpResetDragState001
+ * @tc.desc: WebPatternAddTestNg.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, HandleTouchUpResetDragState001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    TouchEventInfo info("info");
+    TouchLocationInfo touchInfo(1);
+    info.changedTouches_.push_back(touchInfo);
+    webPattern->isDragging_ = true;
+    webPattern->isReceivedArkDrag_ = true;
+    EXPECT_CALL(
+        *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), IsDragStart())
+        .WillOnce(testing::Return(false));
+    webPattern->HandleTouchUp(info, true);
+    EXPECT_FALSE(webPattern->isDragging_);
+
+    webPattern->isDragging_ = true;
+    webPattern->isReceivedArkDrag_ = true;
+    EXPECT_CALL(
+        *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), IsDragStart())
+        .WillOnce(testing::Return(true));
+    webPattern->HandleTouchUp(info, true);
+    EXPECT_TRUE(webPattern->isDragging_);
+
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    pipeline->dragDropManager_ = nullptr;
+    webPattern->isDragging_ = true;
+    webPattern->isReceivedArkDrag_ = true;
+    webPattern->HandleTouchUp(info, true);
+    EXPECT_FALSE(webPattern->isDragging_);
+
+    MockPipelineContext::TearDown();
+    webPattern->isDragging_ = true;
+    webPattern->isReceivedArkDrag_ = true;
+    webPattern->HandleTouchUp(info, true);
     EXPECT_FALSE(webPattern->isDragging_);
 #endif
 }
