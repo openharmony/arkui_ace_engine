@@ -63,3 +63,8 @@ export type CustomStyles =  (instance: CommonMethod) => void;
 export interface GestureModifier {
     applyGesture(event: UIGestureEvent): void
 }
+
+export interface DynamicNode {
+    onMove(handler?: OnMoveHandler): this;
+    onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this;
+}
