@@ -37,6 +37,7 @@ struct SurfaceBufferNode {
     OffsetF orgin_ { 0, 0 };
     uint32_t bufferId_ {};
     uint32_t sendTimes_ = 0;
+    bool isOpaque_ = false;
 };
 #endif
 
@@ -495,6 +496,7 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
     auto surfaceNode = std::make_shared<SurfaceBufferNode>(surfaceBuffer, acquireFence, orgin_);
     CHECK_NULL_VOID(surfaceNode);
     surfaceNode->bufferId_ = surfaceBuffer->GetSeqNum();
+    surfaceNode->isOpaque_ = isOpaque_;
     InsertSurfaceNode(surfaceNode);
     ACE_SCOPED_TRACE("ConsumeXComponentBuffer[id:%u][sendTimes:%d][size:%u]", surfaceNode->bufferId_,
         surfaceNode->sendTimes_, static_cast<uint32_t>(buffersToDraw_.size()));
@@ -588,7 +590,8 @@ void RosenRenderSurface::DrawBufferForXComponent(
         ? GraphicTransformType::GRAPHIC_ROTATE_NONE
         : surfaceNode->buffer_->GetSurfaceBufferTransform();
     Rosen::DrawingSurfaceBufferInfo info { surfaceNode->buffer_, offsetX, offsetY, static_cast<int32_t>(width),
-        static_cast<int32_t>(height), getpid(), GetUniqueIdNum(), surfaceNode->acquireFence_, transform };
+        static_cast<int32_t>(height), getpid(), GetUniqueIdNum(), surfaceNode->acquireFence_, transform, {},
+        surfaceNode->isOpaque_ };
     recordingCanvas.DrawSurfaceBuffer(info);
 #endif
 }
@@ -734,6 +737,11 @@ void RosenRenderSurface::OnWindowStateChange(bool isShow)
             sendCount_.store(-1);
         }
     }
+}
+
+void RosenRenderSurface::SetSurfaceBufferOpaque(bool isOpaque)
+{
+    isOpaque_ = isOpaque;
 }
 
 void DrawBufferListener::OnBufferAvailable()

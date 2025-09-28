@@ -364,6 +364,7 @@ public:
     void NativeStartImageAnalyzer(std::function<void(int32_t)>& callback);
     RSCanvas* LockCanvas();
     void UnlockCanvasAndPost(RSCanvas* canvas);
+    void SetSurfaceIsOpaque(bool isOpaque);
     ArkUI_AccessibilityProvider* GetNativeProvider();
 
 protected:
@@ -410,6 +411,7 @@ protected:
     bool isTransparentLayer_ = false;
     bool isEnableSecure_ = false;
     bool isSurfaceLock_ = false;
+    bool isOpaque_ = false;
     RenderFit renderFit_ = RenderFit::RESIZE_FILL;
     RefPtr<UIXComponentDisplaySync> displaySync_ = AceType::MakeRefPtr<UIXComponentDisplaySync>();
     bool needRecoverDisplaySync_ = false;

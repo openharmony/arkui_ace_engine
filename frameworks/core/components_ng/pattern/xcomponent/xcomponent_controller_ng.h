@@ -68,8 +68,11 @@ public:
 
     void UnlockCanvasAndPost(RSCanvas* canvas) override;
 
+    void SetSurfaceConfig(bool isOpaque) override;
+
 private:
     WeakPtr<XComponentPattern> pattern_;
+    bool isOpaque_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_XCOMPONENT_XCOMPONENT_CONTROLLER_NG_H

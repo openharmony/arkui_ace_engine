@@ -1946,6 +1946,45 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest050, TestSize.Level1)
 }
 
 /**
+ * @tc.name: XComponentModelNGTest051
+ * @tc.desc: Test XComponentModelNG SetPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest051, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ComponentController.
+     *            case: type = XComponentType::SURFACE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    XComponentModelNG xComponent;
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call SetPattern when pattern is null and isOpaque is true
+     * @tc.expected: isOpaque in pattern is false
+     */
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    xComponentController->isOpaque_ = true;
+    ASSERT_TRUE(pattern);
+    xComponentController->SetPattern(nullptr);
+    EXPECT_FALSE(pattern->isOpaque_);
+
+    /**
+     * @tc.steps: step3. call SetPattern when pattern is not null and isOpaque is true
+     * @tc.expected: isOpaque in pattern is true
+     */
+    ASSERT_TRUE(pattern);
+    xComponentController->SetPattern(pattern);
+    EXPECT_TRUE(pattern->isOpaque_);
+}
+
+/**
  * @tc.name: XComponentNodeTypeToStringTest
  * @tc.desc: Test XComponentNodeTypeToString Func.
  * @tc.type: FUNC

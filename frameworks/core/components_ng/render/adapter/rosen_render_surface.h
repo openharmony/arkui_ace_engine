@@ -190,6 +190,8 @@ public:
 
     void OnWindowStateChange(bool isShow) override;
 
+    void SetSurfaceBufferOpaque(bool isOpaque) override;
+
 private:
     void MarkDirtyIfNeeded();
 
@@ -232,6 +234,7 @@ private:
     std::atomic_bool isShow_ = true;
     std::atomic_bool isUniRender_ = true;
     std::atomic_int32_t sendCount_ = -1;
+    std::atomic_bool isOpaque_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderSurface);
 };

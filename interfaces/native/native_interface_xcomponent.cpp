@@ -417,6 +417,11 @@ void OH_ArkUI_SurfaceHolder_Dispose(OH_ArkUI_SurfaceHolder* surfaceHolder)
             CHECK_NULL_VOID(xComponentModifier);
             xComponentModifier->dispose(node->uiNodeHandle);
         }
+        auto config = surfaceHolder->config_;
+        if (config) {
+            config->surfaceHolders_.erase(surfaceHolder);
+        }
+        surfaceHolder->config_ = nullptr;
     }
     delete surfaceHolder;
 }
@@ -718,6 +723,46 @@ void OH_ArkUI_SurfaceCallback_SetSurfaceHideEvent(
 {
     CHECK_NULL_VOID(callback);
     callback->onSurfaceHide = onSurfaceHide;
+}
+
+ArkUI_XComponentSurfaceConfig* OH_ArkUI_XComponentSurfaceConfig_Create()
+{
+    ArkUI_XComponentSurfaceConfig* surfaceConfig = new ArkUI_XComponentSurfaceConfig();
+    return surfaceConfig;
+}
+
+void OH_ArkUI_XComponentSurfaceConfig_Dispose(ArkUI_XComponentSurfaceConfig* config)
+{
+    if (config) {
+        for (auto holder : config->surfaceHolders_) {
+            if (holder) {
+                holder->config_ = nullptr;
+            }
+        }
+        config->surfaceHolders_.clear();
+    }
+    delete config;
+}
+
+void OH_ArkUI_XComponentSurfaceConfig_SetIsOpaque(ArkUI_XComponentSurfaceConfig* config, bool isOpaque)
+{
+    CHECK_NULL_VOID(config);
+    config->isOpaque_ = isOpaque;
+    for (auto holder : config->surfaceHolders_) {
+        if (holder) {
+            holder->SetSurfaceConfig(config);
+        }
+    }
+}
+
+int32_t OH_ArkUI_SurfaceHolder_SetSurfaceConfig(
+    OH_ArkUI_SurfaceHolder* surfaceHolder, ArkUI_XComponentSurfaceConfig* config)
+{
+    if ((surfaceHolder == nullptr) || (config == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    config->surfaceHolders_.insert(surfaceHolder);
+    return surfaceHolder->SetSurfaceConfig(config);
 }
 
 #ifdef __cplusplus
