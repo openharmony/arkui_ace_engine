@@ -1277,6 +1277,20 @@ void ResetSearchMargin(ArkUINodeHandle node)
     SearchModelNG::SetUserMargin(frameNode);
 }
 
+void SetSearchCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetCustomKeyboardWithNode(frameNode, reinterpret_cast<FrameNode*>(contentNode), supportAvoidance);
+}
+
+void ResetSearchCustomKeyboard(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetCustomKeyboardWithNode(frameNode, nullptr);
+}
+
 } // namespace
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
@@ -1396,6 +1410,8 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
         .setSearchMargin = SetSearchMargin,
         .resetSearchMargin = ResetSearchMargin,
+        .setSearchCustomKeyboard = SetSearchCustomKeyboard,
+        .resetSearchCustomKeyboard = ResetSearchCustomKeyboard,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

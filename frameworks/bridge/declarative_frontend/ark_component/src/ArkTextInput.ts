@@ -543,6 +543,20 @@ class TextInputTypeModifier extends ModifierWithKey<number> {
   }
 }
 
+class TextInputCustomKeyboardModifier extends ModifierWithKey<ArkCustomKeyboard> {
+  constructor(value: ArkCustomKeyboard) {
+    super(value);
+  }
+  static identity = Symbol('textInputCustomKeyboard');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetCustomKeyboard(node);
+    } else {
+      getUINativeModule().textInput.setCustomKeyboard(node, this.value.value, this.value.supportAvoidance);
+    }
+  }
+}
+
 class TextInputCaretPositionModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textInputCaretPosition');
   applyPeer(node: KNode, reset: boolean): void {
@@ -1740,8 +1754,13 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     modifierWithKey(this._modifiersWithKeys, TextInputFontFeatureModifier.identity, TextInputFontFeatureModifier, value);
     return this;
   }
-  customKeyboard(event: () => void): TextInputAttribute {
-    throw new Error('Method not implemented.');
+  customKeyboard(value: ComponentContent, options?: { supportAvoidance?: boolean }): TextInputAttribute {
+    let arkValue: ArkCustomKeyboard = new ArkCustomKeyboard();
+    arkValue.value = value;
+    arkValue.supportAvoidance = options?.supportAvoidance;
+    modifierWithKey(this._modifiersWithKeys, TextInputCustomKeyboardModifier.identity,
+      TextInputCustomKeyboardModifier, arkValue);
+    return this;
   }
   decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputDecorationModifier.identity, TextInputDecorationModifier, value);

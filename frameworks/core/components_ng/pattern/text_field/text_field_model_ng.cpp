@@ -944,6 +944,17 @@ void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc
     }
 }
 
+void TextFieldModelNG::SetCustomKeyboard(
+    FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    if (pattern) {
+        pattern->SetCustomKeyboard(std::move(buildFunc));
+        pattern->SetCustomKeyboardOption(supportAvoidance);
+    }
+}
+
 void TextFieldModelNG::SetPasswordRules(const std::string& passwordRules)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, passwordRules);
@@ -2054,7 +2065,18 @@ void TextFieldModelNG::SetOnEditChanged(FrameNode* frameNode, std::function<void
     eventHub->SetOnEditChanged(std::move(func));
 }
 
-void TextFieldModelNG::SetCustomKeyboard(FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance)
+void TextFieldModelNG::SetCustomKeyboardWithNode(FrameNode* customKeyboard, bool supportAvoidance)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    if (pattern) {
+        pattern->SetCustomKeyboardWithNode(AceType::Claim<UINode>(customKeyboard));
+        pattern->SetCustomKeyboardOption(supportAvoidance);
+    }
+}
+
+void TextFieldModelNG::SetCustomKeyboardWithNode(FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();

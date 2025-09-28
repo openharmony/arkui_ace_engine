@@ -823,7 +823,7 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     }
     CallbackHelper(*optValue).BuildAsync([frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
         auto customKeyboard = AceType::DynamicCast<FrameNode>(uiNode);
-        TextFieldModelNG::SetCustomKeyboard(
+        TextFieldModelNG::SetCustomKeyboardWithNode(
             frameNode, AceType::RawPtr(customKeyboard), supportAvoidance);
         }, node);
 }

@@ -321,6 +321,18 @@ class ArkLinearGradientBlur {
   }
 }
 
+class ArkCustomKeyboard {
+  value: ComponentContent | undefined;
+  supportAvoidance?: boolean | undefined;
+  constructor() {
+    this.value = undefined;
+    this.supportAvoidance = undefined;
+  }
+  isEqual(another: ArkCustomKeyboard): boolean {
+    return ((this.value === another.value) && (this.supportAvoidance === another.supportAvoidance));
+  }
+}
+
 class ArkOverlay {
   value: string | CustomBuilder | undefined;
   align: number | undefined;

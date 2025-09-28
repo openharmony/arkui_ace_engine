@@ -11465,6 +11465,19 @@ class SearchTypeModifier extends ModifierWithKey {
   }
 }
 SearchTypeModifier.identity = Symbol('searchType');
+class SearchCustomKeyboardModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetCustomKeyboard(node);
+    } else {
+      getUINativeModule().search.setCustomKeyboard(node, this.value.value, this.value.supportAvoidance);
+    }
+  }
+}
+SearchCustomKeyboardModifier.identity = Symbol('searchCustomKeyboard');
 class SearchOnEditChangeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -11858,8 +11871,12 @@ class ArkSearchComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SearchOnEditChangeModifier.identity, SearchOnEditChangeModifier, callback);
     return this;
   }
-  customKeyboard(event) {
-    throw new Error('Method not implemented.');
+  customKeyboard(value, options) {
+    let arkValue = new ArkCustomKeyboard();
+    arkValue.value = value;
+    arkValue.supportAvoidance = options?.supportAvoidance;
+    modifierWithKey(this._modifiersWithKeys, SearchCustomKeyboardModifier.identity,
+      SearchCustomKeyboardModifier, arkValue);
   }
   showUnit(event) {
     throw new Error('Method not implemented.');
@@ -15557,6 +15574,19 @@ class TextAreaTypeModifier extends ModifierWithKey {
   }
 }
 TextAreaTypeModifier.identity = Symbol('textAreaType');
+class TextAreaCustomKeyboardModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetCustomKeyboard(node);
+    } else {
+      getUINativeModule().textArea.setCustomKeyboard(node, this.value.value, this.value.supportAvoidance);
+    }
+  }
+}
+TextAreaCustomKeyboardModifier.identity = Symbol('textAreaCustomKeyboard');
 class TextAreaPaddingModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16266,8 +16296,12 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaMinLinesModifier.identity, TextAreaMinLinesModifier, value);
     return this;
   }
-  customKeyboard(value) {
-    throw new Error('Method not implemented.');
+  customKeyboard(value, options) {
+    let arkValue = new ArkCustomKeyboard();
+    arkValue.value = value;
+    arkValue.supportAvoidance = options?.supportAvoidance;
+    modifierWithKey(this._modifiersWithKeys, TextAreaCustomKeyboardModifier.identity,
+      TextAreaCustomKeyboardModifier, arkValue);
   }
   decoration(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaDecorationModifier.identity, TextAreaDecorationModifier, value);
@@ -17110,6 +17144,19 @@ class TextInputTypeModifier extends ModifierWithKey {
   }
 }
 TextInputTypeModifier.identity = Symbol('textInputType');
+class TextInputCustomKeyboardModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetCustomKeyboard(node);
+    } else {
+      getUINativeModule().textInput.setCustomKeyboard(node, this.value.value, this.value.supportAvoidance);
+    }
+  }
+}
+TextInputCustomKeyboardModifier.identity = Symbol('TextInputCustomKeyboard');
 class TextInputCaretPositionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -18299,8 +18346,12 @@ class ArkTextInputComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextInputMaxLinesModifier.identity, TextInputMaxLinesModifier, value);
     return this;
   }
-  customKeyboard(event) {
-    throw new Error('Method not implemented.');
+  customKeyboard(value, options) {
+    let arkValue = new ArkCustomKeyboard();
+    arkValue.value = value;
+    arkValue.supportAvoidance = options?.supportAvoidance;
+    modifierWithKey(this._modifiersWithKeys, TextInputCustomKeyboardModifier.identity,
+      TextInputCustomKeyboardModifier, arkValue);
   }
   decoration(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputDecorationModifier.identity, TextInputDecorationModifier, value);
@@ -19160,6 +19211,15 @@ class ArkLinearGradientBlur {
     return (this.blurRadius === another.blurRadius &&
       deepCompareArrays(this.fractionStops, another.fractionStops) &&
       this.direction === another.direction);
+  }
+}
+class ArkCustomKeyboard {
+  constructor() {
+    this.value = undefined;
+    this.supportAvoidance = undefined;
+  }
+  isEqual(another) {
+    return ((this.value === another.value) && (this.supportAvoidance === another.supportAvoidance));
   }
 }
 class ArkOverlay {

@@ -376,6 +376,7 @@ public:
     virtual void SetFocusableAndFocusNode() {};
     virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) = 0;
+    virtual void SetCustomKeyboardWithNode(NG::FrameNode* customKeyboard, bool supportAvoidance = false) {};
     virtual void SetPasswordRules(const std::string& passwordRules) = 0;
     virtual void SetEnableAutoFill(bool enableAutoFill) = 0;
     virtual void SetEnableAutoFillAnimation(bool enableAutoFillAnimation) = 0;

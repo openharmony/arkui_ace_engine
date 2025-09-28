@@ -4096,8 +4096,22 @@ typedef enum {
      *
      * @since 22
      */
-    NODE_TEXT_AREA_SCROLL_BAR_COLOR = 8033,
+    NODE_TEXT_AREA_SCROLL_BAR_COLOR = 8035,
 
+    /**
+     * @brief Sets up a custom keyboard.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: custom keyboard,The parameter type is {@Link ArkUI_NodeHandle}.\n
+     * .value[0]?.i32: Sets whether the custom keyboard supports the avoidance feature, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object:custom keyboard,The parameter type is {@Link ArkUI_NodeHandle}.\n
+     * .value[0].i32: Set whether the custom keyboard supports the avoidance function.\n
+     *
+     * @since 22
+     */
+    NODE_TEXT_AREA_CUSTOM_KEYBOARD = 8036,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
