@@ -46,6 +46,11 @@ public:
                 rawPtr->OnDetectedClaimDeathObj(isNewOrRecycle);
             }
         } else {
+            if constexpr (HasMaybeOnDeleteFunc<T>::value) {
+                if (rawPtr && rawPtr->MaybeOnDelete()) {
+                    return RefPtr<T>(nullptr);
+                }
+            }
             if (rawPtr && !rawPtr->RefCount()) {
                 rawPtr->OnDetectedClaimDeathObj(isNewOrRecycle);
             }
@@ -122,6 +127,17 @@ protected:
     }
 
 private:
+    template <typename T>
+    struct HasMaybeOnDeleteFunc {
+        template <typename U>
+        static auto Test(int) -> std::is_convertible<decltype(std::declval<U>().MaybeOnDelete()), bool>;
+
+        template <typename U>
+        static auto Test(...) -> std::false_type;
+
+        static constexpr bool value = decltype(Test<T>(0))::value;
+    };
+
     template<class T>
     friend class RefPtr;
     template<class T>

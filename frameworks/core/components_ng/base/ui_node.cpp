@@ -104,6 +104,11 @@ UINode::~UINode()
     }
 }
 
+bool UINode::MaybeOnDelete() const
+{
+    return (uiNodeGcEnable_ && RefCount() == 0);
+}
+
 bool UINode::MaybeRelease()
 {
     if (!isThreadSafeNode_ || MultiThreadBuildManager::IsOnUIThread()) {

@@ -101,6 +101,7 @@ public:
 
     void RegisterReleaseFunc(bool enableRegister);
     virtual void OnDelete();
+    bool MaybeOnDelete() const;
 
     // atomic node is like button, image, custom node and so on.
     // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
