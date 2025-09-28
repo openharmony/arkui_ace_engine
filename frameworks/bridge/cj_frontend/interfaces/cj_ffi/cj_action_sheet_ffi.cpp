@@ -156,7 +156,7 @@ void ParseDialogAlignment(DialogProperties& properties, NativeOptionInt32& optio
         return;
     }
     auto alignment = options.value;
-    if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+    if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
         properties.alignment = DIALOG_ALIGNMENT[alignment];
     }
     if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
