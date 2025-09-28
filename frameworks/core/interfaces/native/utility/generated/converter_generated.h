@@ -4284,6 +4284,7 @@ ASSIGN_OPT(Opt_GridRowColumnOption)
 ASSIGN_OPT(Opt_HapModuleInfo)
 ASSIGN_OPT(Opt_Header)
 ASSIGN_OPT(Opt_HierarchicalSymbolEffect)
+ASSIGN_OPT(Opt_HorizontalAlignParam)
 ASSIGN_OPT(Opt_HoverEventParam)
 ASSIGN_OPT(Opt_ImageAIOptions)
 ASSIGN_OPT(Opt_ImageAnalyzerConfig)
@@ -4893,6 +4894,7 @@ ASSIGN_OPT(Opt_Union_RichEditorImageSpanResult_RichEditorTextSpanResult)
 ASSIGN_OPT(Opt_Union_RichEditorTextSpanResult_RichEditorImageSpanResult)
 ASSIGN_OPT(Opt_RichEditorSpan)
 ASSIGN_OPT(Opt_Union_ImageAttachmentInterface_Opt_AttachmentType)
+ASSIGN_OPT(Opt_VerticalAlignParam)
 #undef ASSIGN_OPT
 }
 

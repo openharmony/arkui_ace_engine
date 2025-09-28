@@ -219,6 +219,7 @@ HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest1, TestSize.Level1)
     std::string moduleName = "entry";
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
     auto updateFunc = [](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {};
+    
     GuidelineInfo guidelineInfo;
     guidelineInfo.AddResource("relativeContainer.guideLine.position.start", resObj, std::move(updateFunc));
     EXPECT_EQ(guidelineInfo.resMap_.empty(), false);
