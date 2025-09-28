@@ -35,6 +35,7 @@ public:
     ~TxtFontCollection() override = default;
 
     static RefPtr<FontCollection> GetInstance();
+    static RefPtr<FontCollection> GetFormLocalInstance();
 
     const std::shared_ptr<RSFontCollection>& GetRawFontCollection()
     {

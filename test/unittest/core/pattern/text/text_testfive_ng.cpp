@@ -1820,6 +1820,10 @@ HWTEST_F(TextTestFiveNg, FontRegisterCallback001, TestSize.Level1)
     textLayoutAlgorithm->FontRegisterCallback(frameNode, textStyle);
     EXPECT_EQ(pattern->GetIsCustomFont(), false);
 
+    pipeline->SetIsFormRender(true);
+    textLayoutAlgorithm->FontRegisterCallback(frameNode, textStyle);
+    EXPECT_EQ(pattern->GetIsCustomFont(), false);
+
     pipeline->fontManager_ = oldFontManager;
 }
 
