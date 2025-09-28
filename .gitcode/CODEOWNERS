@@ -726,8 +726,8 @@ frameworks/bridge/declarative_frontend/declarative_frontend.cpp @arkui_framework
 frameworks/bridge/declarative_frontend/declarative_frontend.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/arkComponent.js
 frameworks/bridge/declarative_frontend/engine/arkModifier.js
-frameworks/bridge/declarative_frontend/engine/arkThemeControl.js
-frameworks/bridge/declarative_frontend/engine/arkTheme.js
+frameworks/bridge/declarative_frontend/engine/arkThemeControl.js @arkui_framework_resource
+frameworks/bridge/declarative_frontend/engine/arkTheme.js @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/bindings_defines.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/bindings.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/bindings_implementation.cpp @arkui_statemgmt
