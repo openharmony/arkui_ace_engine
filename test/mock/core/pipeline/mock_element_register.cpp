@@ -232,10 +232,6 @@ void ElementRegisterImpl::UpdateRecycleElmtId(int32_t oldElmtId, int32_t newElmt
 bool ElementRegisterImpl::AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced)
 {
     auto result = itemMap_.emplace(elmtId, referenced);
-    if (!result.second) {
-        LOGE("Duplicate elmtId %{public}d error.", elmtId);
-    }
-    lastestElementId_ = elmtId;
     return result.second;
 }
 
@@ -276,11 +272,9 @@ NG::FrameNode* ElementRegisterImpl::GetFrameNodePtrById(ElementIdType elementId)
 
 bool ElementRegisterImpl::AddUINode(const RefPtr<NG::UINode>& node)
 {
-    FREE_NODE_CHECK(node, ElementRegisterMultiThread::GetInstance()->AddUINode, node);
     if (!node || (node->GetId() == ElementRegister::UndefinedElementId)) {
         return false;
     }
-
     return AddReferenced(node->GetId(), node);
 }
 
@@ -301,15 +295,13 @@ bool ElementRegisterImpl::RemoveItemSilently(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return false;
     }
-
-    auto removed = itemMap_.erase(elementId);
-    return removed;
+    return itemMap_.erase(elementId);
 }
 
 void ElementRegisterImpl::MoveRemovedItems(RemovedElementsType& removedItems)
 {
     removedItems = removedItems_;
-    removedItems_.clear();
+    removedItems_ = std::unordered_set<ElementIdType>();
 }
 
 void ElementRegisterImpl::Clear()
@@ -326,16 +318,16 @@ RefPtr<NG::GeometryTransition> ElementRegisterImpl::GetOrCreateGeometryTransitio
     if (id.empty()) {
         return nullptr;
     }
-    auto it = geometryTransitionMap_.find(id);
-    if (it == geometryTransitionMap_.end()) {
-        auto geometryTransition =
+    RefPtr<NG::GeometryTransition> geometryTransition;
+    if (geometryTransitionMap_.find(id) == geometryTransitionMap_.end()) {
+        geometryTransition =
             AceType::MakeRefPtr<NG::GeometryTransition>(id, followWithoutTransition, doRegisterSharedTransition);
         geometryTransitionMap_.emplace(id, geometryTransition);
-        return geometryTransition;
+
     } else {
-        return it->second;
+        geometryTransition = geometryTransitionMap_[id];
     }
-    return nullptr;
+    return geometryTransition;
 }
 
 void ElementRegisterImpl::DumpGeometryTransition()
@@ -353,12 +345,9 @@ void ElementRegisterImpl::DumpGeometryTransition()
 
 void ElementRegisterImpl::ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger, const AnimationOption& option)
 {
-    for (auto iter = geometryTransitionMap_.begin(); iter != geometryTransitionMap_.end();) {
-        if (!iter->second || iter->second->IsInAndOutEmpty()) {
-            iter = geometryTransitionMap_.erase(iter);
-        } else {
-            iter->second->OnReSync(trigger, option);
-            ++iter;
+    for (const auto& [itemId, item] : geometryTransitionMap_) {
+        if (item) {
+            item->OnReSync(trigger, option);
         }
     }
 }
@@ -439,10 +428,6 @@ void ElementRegisterImpl::UnregisterEmbedNode(const uint64_t surfaceId, const We
 WeakPtr<NG::FrameNode> ElementRegisterImpl::GetEmbedNodeBySurfaceId(const uint64_t surfaceId)
 {
     auto it = surfaceIdEmbedNodeMap_.find(surfaceId);
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGI("[GetEmbedNodeBySurfaceId] surfaceId: %{public}" PRId64 ", result: %{public}s", surfaceId,
-            (it == surfaceIdEmbedNodeMap_.end()) ? "false" : "true");
-    }
     return (it == surfaceIdEmbedNodeMap_.end()) ? nullptr : it->second;
 }
 
@@ -454,10 +439,6 @@ bool ElementRegisterImpl::IsEmbedNode(NG::FrameNode* node)
 uint64_t ElementRegisterImpl::GetSurfaceIdByEmbedNode(NG::FrameNode* node)
 {
     auto it = embedNodeSurfaceIdMap_.find(node);
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGI("[GetSurfaceIdByEmbedNode] frameNodeId: %{public}d, surfaceId: %{public}" PRId64 "",
-            (node == nullptr ? -1 : node->GetId()), (it == embedNodeSurfaceIdMap_.end()) ? 0U : (it->second));
-    }
     return (it == embedNodeSurfaceIdMap_.end()) ? 0U : it->second;
 }
 
@@ -475,7 +456,7 @@ RefPtr<Element> ElementRegister::GetElementById(ElementIdType elementId)
 
 RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType elementId)
 {
-    DELEGATE(GetElementProxyById(elementId), nullptr);
+    return nullptr;
 }
 
 RefPtr<AceType> ElementRegister::GetNodeById(ElementIdType elementId)
@@ -496,6 +477,11 @@ bool ElementRegister::AddElement(const RefPtr<Element>& element)
 NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
 {
     DELEGATE(GetFrameNodePtrById(elementId), nullptr);
+}
+
+RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
+{
+    DELEGATE(GetUINodeById(elementId), nullptr);
 }
 
 bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
