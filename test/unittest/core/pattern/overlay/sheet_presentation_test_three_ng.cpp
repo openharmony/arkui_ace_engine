@@ -47,6 +47,8 @@ public:
     static RefPtr<SheetTheme> sheetTheme_;
     static void SetUpTestCase();
     static void TearDownTestCase();
+    static void SetSheetTheme(RefPtr<SheetTheme> sheetTheme);
+    static void SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType);
 };
 
 RefPtr<SheetTheme> SheetPresentationTestThreeNg::sheetTheme_ = nullptr;
@@ -72,6 +74,40 @@ void SheetPresentationTestThreeNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+void SheetPresentationTestThreeNg::SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType)
+{
+    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = sheetType;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    sheetPattern->sheetThemeType_ = "popup";
+    Rect windowRect = { 0.0f, 0.0f, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx(), 0.0f };
+    MockPipelineContext::SetCurrentWindowRect(windowRect);
+    sheetPattern->sheetKey_.hasValidTargetNode = true;
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->sheetType_ = "popup";
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    SheetPresentationTestThreeNg::SetSheetTheme(sheetTheme);
+}
+
+void SheetPresentationTestThreeNg::SetSheetTheme(RefPtr<SheetTheme> sheetTheme)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(
+        [sheetTheme = AceType::WeakClaim(AceType::RawPtr(sheetTheme))](ThemeType type) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return sheetTheme.Upgrade();
+        } else {
+            return nullptr;
+        }
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
 /**
@@ -1640,6 +1676,285 @@ HWTEST_F(SheetPresentationTestThreeNg, SetWindowUseImplicitAnimation001, TestSiz
     EXPECT_EQ(isUseImplicit, true);
     pipelineContext->windowManager_->useImplicitAnimationCallback_ = nullptr;
     pipelineContext->windowManager_ = nullptr;
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetBottomStyleHotAreaInSubwindow001
+ * @tc.desc: Branch:  if (IsShowInSubWindow() && IsSheetBottom())
+ *           Condition: (IsShowInSubWindow() && IsSheetBottom()) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, SetBottomStyleHotAreaInSubwindow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->sheetObject_, nullptr);
+
+    /**
+     * @tc.steps: step2. set IsShowInSubWindow true, set IsSheetBottom false.
+     */
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.showInSubWindow = true;
+    SheetPresentationTestThreeNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step3. test SetBottomStyleHotAreaInSubwindow.
+     */
+    sheetPattern->SetBottomStyleHotAreaInSubwindow();
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_CENTER);
+    EXPECT_EQ(sheetPattern->IsShowInSubWindow(), true);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetBottomStyleHotAreaInSubwindow002
+ * @tc.desc: Branch:  if (IsShowInSubWindow() && IsSheetBottom())
+ *           Condition: (IsShowInSubWindow() && IsSheetBottom()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, SetBottomStyleHotAreaInSubwindow002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->sheetObject_, nullptr);
+
+    /**
+     * @tc.steps: step2. set IsShowInSubWindow true, set IsSheetBottom true.
+     */
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.showInSubWindow = true;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step3. test SetBottomStyleHotAreaInSubwindow.
+     */
+    sheetPattern->SetBottomStyleHotAreaInSubwindow();
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_BOTTOM);
+    EXPECT_EQ(sheetPattern->IsShowInSubWindow(), true);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetBottomStyleHotAreaInSubwindow003
+ * @tc.desc: Branch:  if (IsShowInSubWindow() && IsSheetBottom())
+ *           Condition: (IsShowInSubWindow() && IsSheetBottom()) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, SetBottomStyleHotAreaInSubwindow003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->sheetObject_, nullptr);
+
+    /**
+     * @tc.steps: step2. set IsShowInSubWindow false, set IsSheetBottom false.
+     */
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.showInSubWindow = false;
+    SheetPresentationTestThreeNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step3. test SetBottomStyleHotAreaInSubwindow.
+     */
+    sheetPattern->SetBottomStyleHotAreaInSubwindow();
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_CENTER);
+    EXPECT_EQ(sheetPattern->IsShowInSubWindow(), false);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetBottomStyleHotAreaInSubwindow004
+ * @tc.desc: Branch:  if (IsShowInSubWindow() && IsSheetBottom())
+ *           Condition: (IsShowInSubWindow() && IsSheetBottom()) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, SetBottomStyleHotAreaInSubwindow004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->sheetObject_, nullptr);
+
+    /**
+     * @tc.steps: step2. set IsShowInSubWindow false, set IsSheetBottom true.
+     */
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.showInSubWindow = false;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step3. test SetBottomStyleHotAreaInSubwindow.
+     */
+    sheetPattern->SetBottomStyleHotAreaInSubwindow();
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_BOTTOM);
+    EXPECT_EQ(sheetPattern->IsShowInSubWindow(), false);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnAttachToFrameNode001
+ * @tc.desc: Branch:  if (IsShowInSubWindow())
+ *           Condition: (IsShowInSubWindow() && IsSheetBottom()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, OnAttachToFrameNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    sheetPattern->targetTag_ = "Sheet";
+    sheetPattern->targetId_ = 101;
+    auto targetNode = FrameNode::GetFrameNode(sheetPattern->targetTag_, sheetPattern->targetId_);
+    ASSERT_NE(targetNode, nullptr);
+    /**
+     * @tc.steps: step2. set IsShowInSubWindow true
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.showInSubWindow = true;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    /**
+     * @tc.steps: step3. test OnAttachToFrameNode
+     */
+    sheetPattern->OnAttachToFrameNode();
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto innerOnAreaChangeCallback = eventHub->onAreaChangedInnerCallbacks_[sheetNode->GetId()];
+    EXPECT_NE(innerOnAreaChangeCallback, nullptr);
+    EXPECT_EQ(sheetPattern->IsShowInSubWindow(), true);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetSheetBorderWidth001
+ * @tc.desc: Branch:  if (sheetStyle.borderWidth.has_value())
+ *           Condition: (sheetStyle.borderWidth.has_value()) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, SetSheetBorderWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    sheetPattern->targetTag_ = "Sheet";
+    sheetPattern->targetId_ = 101;
+    auto targetNode = FrameNode::GetFrameNode(sheetPattern->targetTag_, sheetPattern->targetId_);
+    ASSERT_NE(targetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test SetSheetBorderWidth.
+     */
+    sheetPattern->SetSheetBorderWidth();
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBorderWidth().has_value(), false);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetSheetBorderWidth002
+ * @tc.desc: Branch:  if (sheetStyle.borderWidth.has_value())
+ *           Condition: (sheetStyle.borderWidth.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, SetSheetBorderWidth002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    sheetPattern->targetTag_ = "Sheet";
+    sheetPattern->targetId_ = 101;
+    auto targetNode = FrameNode::GetFrameNode(sheetPattern->targetTag_, sheetPattern->targetId_);
+    ASSERT_NE(targetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create sheet object.
+     */
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->sheetObject_, nullptr);
+
+    /**
+     * @tc.steps: step3. set borderWidth.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.borderWidth = { 1.0_vp, 1.0_vp, 1.0_vp, 0.0_vp };
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step4. test SetSheetBorderWidth.
+     */
+    sheetPattern->SetSheetBorderWidth();
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBorderWidth().has_value(), true);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG
