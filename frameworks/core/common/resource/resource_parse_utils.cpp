@@ -257,6 +257,30 @@ void ReplaceHolder(std::string& originStr, const std::vector<ResourceObjectParam
     }
 }
 
+void ResourceParseUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
+    Color& color, const std::string& nodeTag)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto instanceId = Container::CurrentIdSafely();
+    auto invertFunc = ColorInverter::GetInstance().GetInvertFunc(instanceId, nodeTag);
+    CHECK_NULL_VOID(invertFunc);
+
+    auto colorMode = Container::CurrentColorMode();
+    Color curColor = color;
+    if (colorMode == ColorMode::DARK) {
+        color = Color(invertFunc(color.GetValue()));
+    }
+    resObj = AceType::MakeRefPtr<ResourceObject>();
+    resObj->SetIsResource(false);
+    resObj->SetInstanceId(instanceId);
+    resObj->SetNodeTag(nodeTag);
+    resObj->SetColorMode(colorMode);
+    resObj->SetHasDarkRes(false);
+    resObj->SetColor(((colorMode == ColorMode::DARK) ? curColor : color));
+}
+
 bool ResourceParseUtils::ParseResInteger(const RefPtr<ResourceObject>& resObj, uint32_t& result)
 {
     return ParseResInteger<uint32_t>(resObj, result);
