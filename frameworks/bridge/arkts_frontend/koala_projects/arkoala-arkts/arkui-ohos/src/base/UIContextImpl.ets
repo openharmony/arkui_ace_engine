@@ -33,28 +33,30 @@ import { KeyEvent, PopupCommonOptions, MenuOptions } from 'arkui/component/commo
 import { GlobalScope_ohos_font } from '#generated';
 import router from '@ohos/router';
 import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
-    AlertDialogParamWithOptions }from 'arkui/component/alertDialog';
-import { ActionSheetOptions } from 'arkui/component/actionSheet';
-import inspector from '@ohos/arkui/inspector';
-import { ComponentContent } from 'arkui/ComponentContent';
-import overlayManager from '@ohos/overlayManager';
-import promptAction, { LevelOrder } from '@ohos/promptAction';
-import { ArkUIAniModule } from 'arkui.ani';
-import { default as font } from '@ohos/font';
-import { MeasureOptions } from '@ohos/measure';
-import { GlobalScope_ohos_measure_utils } from '#generated';
-import { SizeOptions, ResourceColor } from 'arkui/component/units';
-import { Frame } from 'arkui/Graphics';
-import { TextMenuOptions } from 'arkui/component/textCommon';
-import { focusController } from '@ohos/arkui/focusController';
-import { KeyProcessingMode } from 'arkui/component/focus';
-import { componentUtils } from '@ohos/arkui/componentUtils';
-import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
-import { dragController } from '@ohos/arkui/dragController';
-import { UIContextAtomicServiceBar } from '#generated';
-import { GlobalScope } from '#generated';
-import { default as mediaquery } from '@ohos/mediaquery';
-import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework';
+    AlertDialogParamWithOptions }from "arkui/component/alertDialog"
+import { ActionSheetOptions } from "arkui/component/actionSheet"
+import inspector from "@ohos/arkui/inspector"
+import { ComponentContent } from 'arkui/ComponentContent'
+import overlayManager from '@ohos/overlayManager'
+import promptAction, { LevelOrder } from '@ohos/promptAction'
+import { ArkUIAniModule } from "arkui.ani"
+import { default as font } from "@ohos/font"
+import { MeasureOptions } from "@ohos/measure"
+import { GlobalScope_ohos_measure_utils } from "#generated"
+import { GlobalScopeUicontextTextMenu } from "#generated"
+import { GlobalScopeUicontextFontScale } from "#generated"
+import { SizeOptions, ResourceColor } from "arkui/component/units"
+import { Frame } from "arkui/Graphics"
+import { TextMenuOptions } from "arkui/component/textCommon"
+import { focusController } from "@ohos/arkui/focusController"
+import { KeyProcessingMode } from "arkui/component/focus"
+import { componentUtils } from "@ohos/arkui/componentUtils"
+import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
+import { dragController } from "@ohos/arkui/dragController"
+import { UIContextAtomicServiceBar } from "#generated"
+import { GlobalScope } from "#generated"
+import { default as mediaquery } from '@ohos/mediaquery'
+import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework'
 import { AsyncCallback } from 'arkui/base';
 import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
 import { PeerNode, findPeerNode } from 'arkui/PeerNode';
@@ -86,13 +88,12 @@ export class FontImpl extends Font {
         ArkUIAniModule._Common_Restore_InstanceId();
         return arrayResult_;
     }
-    // public getFontByName(fontName : string) : FontInfo {
-        
-    //     ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-    //     let fontInfo : FontInfo = GlobalScope_ohos_font.getFontByName(fontName);
-    //     ArkUIAniModule._Common_Restore_InstanceId();
-    //     return fontInfo;
-    // }
+    public getFontByName(fontName : string) : font.FontInfo {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let fontInfo : font.FontInfo = GlobalScope_ohos_font.getFontByName(fontName);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return fontInfo;
+    }
 }
 
 export class MediaQueryImpl extends MediaQuery {
@@ -134,11 +135,11 @@ export class TextMenuControllerImpl extends TextMenuController {
         super()
         this.instanceId_ = instanceId;
     }
-    // public setMenuOptions(options: TextMenuOptions) : void {
-    //     ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-    //     GlobalScopeUicontextTextMenu.setMenuOptions(options);
-    //     ArkUIAniModule._Common_Restore_InstanceId();
-    // }
+    public setMenuOptions(options: TextMenuOptions) : void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        GlobalScopeUicontextTextMenu.setMenuOptions(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
 }
 
 // export class AtomicServiceBarInternal implements AtomicServiceBar {
@@ -1249,12 +1250,16 @@ export class UIContextImpl extends UIContext {
         return this.textMenuController_;
     }
     public isFollowingSystemFontScale() : boolean {
-        throw new Error("no impl");
-        
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let follow = GlobalScopeUicontextFontScale.isFollowingSystemFontScale();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return follow;
     }
     public getMaxFontScale() : number {
-        throw new Error("no impl");
-        
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let fontScale = GlobalScopeUicontextFontScale.getMaxFontScale();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return fontScale;
     }
     public getFrameNodeById(id: string): FrameNode | null {
         const id_casted = id as (string);

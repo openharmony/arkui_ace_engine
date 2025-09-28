@@ -49,26 +49,19 @@
 #include "core/interfaces/native/implementation/dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/focus_axis_event_peer.h"
-#include "core/interfaces/native/implementation/gesture_group_interface_peer.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 #include "core/interfaces/native/implementation/long_press_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/long_press_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/long_press_recognizer_peer.h"
 #include "core/interfaces/native/implementation/pan_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/pan_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/pan_recognizer_peer.h"
 #include "core/interfaces/native/implementation/pinch_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/pinch_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/pinch_recognizer_peer.h"
 #include "core/interfaces/native/implementation/progress_mask_peer.h"
 #include "core/interfaces/native/implementation/rotation_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/rotation_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/rotation_recognizer_peer.h"
 #include "core/interfaces/native/implementation/swipe_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/swipe_gesture_peer.h"
 #include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/tap_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/tap_recognizer_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
@@ -398,6 +391,7 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
     popupParam->SetEnableArrow(OptConvert<bool>(src.enableArrow).value_or(popupParam->EnableArrow()));
     auto popupTransitionEffectsOpt = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(src.transition);
     if (popupTransitionEffectsOpt.has_value()) {
+        popupParam->SetHasTransition(true);
         popupParam->SetTransitionEffects(popupTransitionEffectsOpt.value());
     }
 };
@@ -4580,30 +4574,6 @@ void SetFocusScopePriorityImpl(Ark_NativePointer node,
     auto optPriority = Converter::OptConvertPtr<uint32_t>(priority);
     ViewAbstractModelStatic::SetFocusScopePriority(frameNode, *convIdValue, optPriority);
 }
-void GestureImplInternal(Ark_NativePointer node, const Opt_GestureType* gesture, const Opt_GestureMask* mask,
-    GesturePriority priority)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::optional<RefPtr<Gesture>> aceGestureOpt;
-    Converter::VisitUnionPtr(gesture,
-        [&aceGestureOpt](const Ark_Gesture& arkGesture) {
-            aceGestureOpt = arkGesture->GetGesture();
-        },
-        [](const Ark_GestureGroup& arkGestureGroup) {
-            LOGE("GestureImplInternal: GestureGroup processing is not implemented yet");
-        },
-        []() {}
-    );
-    CHECK_NULL_VOID(aceGestureOpt);
-    auto aceGesture = aceGestureOpt.value();
-    auto gestureMask = (Converter::OptConvertPtr<GestureMask>(mask)).value_or(GestureMask::Normal);
-    aceGesture->SetGestureMask(gestureMask);
-    aceGesture->SetPriority(priority);
-    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureEventHub);
-    gestureEventHub->AddGesture(aceGesture);
-}
 void SetTransition1Impl(Ark_NativePointer node,
                         const Opt_TransitionEffect* effect,
                         const Opt_TransitionFinishCallback* onFinish)
@@ -4629,24 +4599,6 @@ void SetTransition1Impl(Ark_NativePointer node,
     } else {
         // ViewAbstract::CleanTransition(frameNode);
     }
-}
-void SetGestureImpl(Ark_NativePointer node,
-                    const Opt_GestureType* gesture,
-                    const Opt_GestureMask* mask)
-{
-    GestureImplInternal(node, gesture, mask, GesturePriority::Low);
-}
-void SetPriorityGestureImpl(Ark_NativePointer node,
-                            const Opt_GestureType* gesture,
-                            const Opt_GestureMask* mask)
-{
-    GestureImplInternal(node, gesture, mask, GesturePriority::High);
-}
-void SetParallelGestureImpl(Ark_NativePointer node,
-                            const Opt_GestureType* gesture,
-                            const Opt_GestureMask* mask)
-{
-    GestureImplInternal(node, gesture, mask, GesturePriority::Parallel);
 }
 void SetBlurImpl(Ark_NativePointer node,
                  const Opt_Number* blurRadius,
@@ -5625,9 +5577,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetFocusScopeIdImpl,
         CommonMethodModifier::SetFocusScopePriorityImpl,
         CommonMethodModifier::SetTransition1Impl,
-        CommonMethodModifier::SetGestureImpl,
-        CommonMethodModifier::SetPriorityGestureImpl,
-        CommonMethodModifier::SetParallelGestureImpl,
         CommonMethodModifier::SetBlurImpl,
         CommonMethodModifier::SetLinearGradientBlurImpl,
         CommonMethodModifier::SetSystemBarEffectImpl,

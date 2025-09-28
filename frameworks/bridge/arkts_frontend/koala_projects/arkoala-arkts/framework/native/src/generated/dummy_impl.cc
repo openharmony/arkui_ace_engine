@@ -3401,7 +3401,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetTransformImpl(Ark_NativePointer node,
-                          const Opt_Object* value)
+                          const Opt_matrix4_Matrix4Transit* value)
     {
         if (!needGroupedLog(1))
         {
@@ -5275,24 +5275,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return new TreeNode("ComponentRoot", id, flags);;
     }
     } // ComponentRootModifier
-    namespace ConditionScopeModifier {
-    Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                    Ark_Int32 flags)
-    {
-        if (!needGroupedLog(1))
-        {
-            return new TreeNode("ConditionScope", id, flags);;
-        }
-        string out("construct(");
-        WriteToString(&out, id);
-        out.append(", ");
-        WriteToString(&out, flags);
-        out.append(") \n");
-        out.append("[return nullptr] \n");
-        appendGroupedLog(1, out);
-        return new TreeNode("ConditionScope", id, flags);;
-    }
-    } // ConditionScopeModifier
     namespace ContainerSpanModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -9651,18 +9633,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setOnNavigationModeChange(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void SetNavDestinationImpl(Ark_NativePointer node,
-                               const Opt_PageMapBuilder* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setNavDestination(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -14660,6 +14630,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetAutoPlay0Impl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setAutoPlay0(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetIntervalImpl(Ark_NativePointer node,
                          const Opt_Number* value)
     {
@@ -14936,15 +14918,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetAutoPlayImpl(Ark_NativePointer node,
-                         const Opt_Boolean* autoPlay,
-                         const Opt_AutoPlayOptions* options)
+    void SetAutoPlay1Impl(Ark_NativePointer node,
+                          const Opt_Boolean* autoPlay,
+                          const Opt_AutoPlayOptions* options)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setAutoPlay(");
+        string out("setAutoPlay1(");
         WriteToString(&out, autoPlay);
         out.append(", ");
         WriteToString(&out, options);
@@ -17129,7 +17111,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_Number_FontWeight_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17427,7 +17409,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -21341,14 +21323,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &ArkUIComponentRootModifierImpl;
     }
 
-    const GENERATED_ArkUIConditionScopeModifier* GetConditionScopeModifier()
-    {
-        static const GENERATED_ArkUIConditionScopeModifier ArkUIConditionScopeModifierImpl {
-            ConditionScopeModifier::ConstructImpl,
-        };
-        return &ArkUIConditionScopeModifierImpl;
-    }
-
     const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()
     {
         static const GENERATED_ArkUIContainerSpanModifier ArkUIContainerSpanModifierImpl {
@@ -21942,7 +21916,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavigationAttributeModifier::SetOnTitleModeChangeImpl,
             NavigationAttributeModifier::SetOnNavBarStateChangeImpl,
             NavigationAttributeModifier::SetOnNavigationModeChangeImpl,
-            NavigationAttributeModifier::SetNavDestinationImpl,
             NavigationAttributeModifier::SetCustomNavContentTransitionImpl,
             NavigationAttributeModifier::SetSystemBarStyleImpl,
             NavigationAttributeModifier::SetRecoverableImpl,
@@ -22584,6 +22557,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SwiperModifier::ConstructImpl,
             SwiperInterfaceModifier::SetSwiperOptionsImpl,
             SwiperAttributeModifier::SetIndexImpl,
+            SwiperAttributeModifier::SetAutoPlay0Impl,
             SwiperAttributeModifier::SetIntervalImpl,
             SwiperAttributeModifier::SetIndicatorImpl,
             SwiperAttributeModifier::SetLoopImpl,
@@ -22607,7 +22581,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SwiperAttributeModifier::SetIndicatorInteractiveImpl,
             SwiperAttributeModifier::SetPageFlipModeImpl,
             SwiperAttributeModifier::SetOnContentWillScrollImpl,
-            SwiperAttributeModifier::SetAutoPlayImpl,
+            SwiperAttributeModifier::SetAutoPlay1Impl,
             SwiperAttributeModifier::SetDisplayArrowImpl,
             SwiperAttributeModifier::SetCachedCount1Impl,
             SwiperAttributeModifier::SetDisplayCountImpl,
@@ -23244,7 +23218,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetCommonShapeMethodModifier,
             GetComponent3DModifier,
             GetComponentRootModifier,
-            GetConditionScopeModifier,
             GetContainerSpanModifier,
             GetCounterModifier,
             GetCustomBuilderRootModifier,
@@ -29583,19 +29556,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
-                                     Ark_Boolean options)
+    Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
+                                            Ark_Boolean options)
     {
         if (!needGroupedLog(1))
         {
-            return;
+            return 0;
         }
         string out("setCrossLanguageOptions(");
         WriteToString(&out, peer);
         out.append(", ");
         WriteToString(&out, options);
         out.append(") \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
+        return 0;
     }
     Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
     {
@@ -30733,7 +30708,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // GlobalScope_ohos_arkui_performanceMonitorAccessor
     namespace GlobalScope_ohos_fontAccessor {
-    void RegisterFontImpl(const Ark_CustomObject* options)
+    void RegisterFontImpl(const Ark_font_FontOptions* options)
     {
         if (!needGroupedLog(1))
         {
@@ -30756,7 +30731,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_CustomObject GetFontByNameImpl(const Ark_String* fontName)
+    Ark_font_FontInfo GetFontByNameImpl(const Ark_String* fontName)
     {
         if (!needGroupedLog(1))
         {
@@ -30764,6 +30739,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         string out("getFontByName(");
         WriteToString(&out, fontName);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_font_UIFontConfig GetUIFontConfigImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getUIFontConfig(");
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
@@ -30798,6 +30785,45 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // GlobalScope_ohos_measure_utilsAccessor
+    namespace GlobalScopeUicontextFontScaleAccessor {
+    Ark_Boolean IsFollowingSystemFontScaleImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("isFollowingSystemFontScale(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Float64 GetMaxFontScaleImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("getMaxFontScale(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    } // GlobalScopeUicontextFontScaleAccessor
+    namespace GlobalScopeUicontextTextMenuAccessor {
+    void SetMenuOptionsImpl(const Ark_TextMenuOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setMenuOptions(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // GlobalScopeUicontextTextMenuAccessor
     namespace HierarchicalSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_HierarchicalSymbolEffect peer)
     {
@@ -39259,7 +39285,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void ChangeIndexImpl(Ark_SwiperController peer,
-                         const Ark_Number* index,
+                         const Opt_Number* index,
                          const Opt_Union_SwiperAnimationMode_Boolean* animationMode)
     {
         if (!needGroupedLog(1))
@@ -44503,6 +44529,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_fontAccessor::RegisterFontImpl,
             GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
             GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
+            GlobalScope_ohos_fontAccessor::GetUIFontConfigImpl,
         };
         return &GlobalScope_ohos_fontAccessorImpl;
     }
@@ -44514,6 +44541,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_measure_utilsAccessor::MeasureTextSizeImpl,
         };
         return &GlobalScope_ohos_measure_utilsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicontextFontScaleAccessor()
+    {
+        static const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor GlobalScopeUicontextFontScaleAccessorImpl {
+            GlobalScopeUicontextFontScaleAccessor::IsFollowingSystemFontScaleImpl,
+            GlobalScopeUicontextFontScaleAccessor::GetMaxFontScaleImpl,
+        };
+        return &GlobalScopeUicontextFontScaleAccessorImpl;
+    }
+
+    const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* GetGlobalScopeUicontextTextMenuAccessor()
+    {
+        static const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor GlobalScopeUicontextTextMenuAccessorImpl {
+            GlobalScopeUicontextTextMenuAccessor::SetMenuOptionsImpl,
+        };
+        return &GlobalScopeUicontextTextMenuAccessorImpl;
     }
 
     const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor()
@@ -46730,6 +46774,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
             GetGlobalScope_ohos_fontAccessor,
             GetGlobalScope_ohos_measure_utilsAccessor,
+            GetGlobalScopeUicontextFontScaleAccessor,
+            GetGlobalScopeUicontextTextMenuAccessor,
             GetHierarchicalSymbolEffectAccessor,
             GetHoverEventAccessor,
             GetHttpAuthHandlerAccessor,

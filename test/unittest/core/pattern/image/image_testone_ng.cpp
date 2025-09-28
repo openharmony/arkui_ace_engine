@@ -2050,4 +2050,27 @@ HWTEST_F(ImageTestOneNg, ImageDynamicRangeMode001, TestSize.Level1)
     imagePattern->DumpRenderInfo();
     EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), DynamicRangeMode::STANDARD);
 }
+
+/**
+ * @tc.name: ParseImageModelStaticFillColor001
+ * @tc.desc: parse fill color
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, ParseImageModelStaticFillColor001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ImageModelStatic::SetImageFill(frameNode, std::nullopt);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(theme);
+    auto fillColor = theme->GetFillColor();
+    Color color;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ImageRenderProperty, SvgFillColor, color, frameNode, Color::RED);
+    ASSERT_EQ(fillColor, color);
+    ImageModelStatic::SetImageFill(frameNode, Color::BLACK);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ImageRenderProperty, SvgFillColor, color, frameNode, Color::RED);
+    ASSERT_EQ(Color::BLACK, color);
+}
 } // namespace OHOS::Ace::NG

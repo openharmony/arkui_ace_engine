@@ -30,15 +30,15 @@ Ark_Boolean IsFollowingSystemFontScaleImpl()
     follow = pipelineContext->IsFollowSystem();
     return Converter::ArkValue<Ark_Boolean>(follow);
 }
-Ark_Number GetMaxFontScaleImpl()
+Ark_Float64 GetMaxFontScaleImpl()
 {
     float maxFontScale = 0.0f;
     auto container = Container::CurrentSafely();
-    CHECK_NULL_RETURN(container, Converter::ArkValue<Ark_Number>(maxFontScale));
+    CHECK_NULL_RETURN(container, Converter::ArkValue<Ark_Float64>(maxFontScale));
     auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, Converter::ArkValue<Ark_Number>(maxFontScale));
+    CHECK_NULL_RETURN(pipelineContext, Converter::ArkValue<Ark_Float64>(maxFontScale));
     maxFontScale = pipelineContext->GetMaxAppFontScale();
-    return Converter::ArkValue<Ark_Number>(maxFontScale);
+    return Converter::ArkValue<Ark_Float64>(maxFontScale);
 }
 } // GlobalScopeUicontextFontScaleAccessor
 const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicontextFontScaleAccessor()

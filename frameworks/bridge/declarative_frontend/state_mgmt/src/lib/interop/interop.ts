@@ -66,11 +66,11 @@ function createStateVariable<T>(value: T, setValueCallback: setValue<T>, notifyC
     return proxy;
 }
 
-function updateSetValueCallback(observedProperty, setValueCallback) {
+function updateSetValueCallback(observedProperty, setValueCallback): void {
     observedProperty._setInteropValueForStaticState = setValueCallback;
 }
 
-function updateNotifyCallback(observedProperty, notifyCallback) {
+function updateNotifyCallback(observedProperty, notifyCallback): void {
     observedProperty._notifyInteropFireChange = notifyCallback;
 }
 
@@ -134,16 +134,30 @@ function __Interop_CreateStaticComponent_Internal(
     return InteropExtractorModule.compatibleStaticComponent(factory, options, content);
 }
 
-function __Interop_UpdateInteropExtendableComponent_Internal(dynamicComponent: Object) {
+function __Interop_UpdateInteropExtendableComponent_Internal(dynamicComponent: Object): void {
     if (InteropExtractorModule.updateInteropExtendableComponent === undefined) {
-        throw new Error("Non Method For update InteropExtendableComponent");
+        throw new Error('Non Method For update InteropExtendableComponent');
     }
     return InteropExtractorModule.updateInteropExtendableComponent(dynamicComponent);
 }
 
-function __Interop_ResetInteropExtendableComponent_Internal() {
+function __Interop_ResetInteropExtendableComponent_Internal(): void {
     if (InteropExtractorModule.resetInteropExtendableComponent === undefined) {
-        throw new Error("Non Method For reset InteropExtendableComponent");
+        throw new Error('Non Method For reset InteropExtendableComponent');
     }
     return InteropExtractorModule.resetInteropExtendableComponent();
+}
+
+function __Interop_TransferCompatibleBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleBuilder === undefined) {
+        throw new Error("Non Method For Transfer CompatibleBuilder");
+    }
+    return InteropExtractorModule.transferCompatibleBuilder(builder);
+}
+
+function __Interop_transferCompatibleDynamicBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder === undefined) {
+        throw new Error("Non Method For Transfer Compatible Dynamic Builder");
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder(builder);
 }

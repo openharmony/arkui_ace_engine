@@ -20,7 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGestureModifier, hookCustomPropertyImpl, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from "#handwritten"
+import { extractors, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from "#handwritten"
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics } from "arkui.Graphics"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisModel, MouseButton, MouseAction } from "./enums"
@@ -36,7 +36,6 @@ import { FocusBoxStyle_serializer, FocusBoxStyle, FocusPriority } from "./focus"
 import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
-import { Gesture_serializer, GestureGroup_serializer, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, Gesture, GestureGroup, GestureMask, GestureMode, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
 import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -45,6 +44,7 @@ import { default as matrix4 } from "@ohos.matrix4"
 import { CustomBuilder, CustomBuilderT } from "./builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
 import { AsyncCallback, BusinessError } from "@ohos.base"
@@ -4989,87 +4989,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setTransition1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setGestureAttribute(gesture: GestureType | undefined, mask?: GestureMask): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (gesture !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const gestureTmpValue  = gesture!
-            if (gestureTmpValue instanceof Gesture) {
-                thisSerializer.writeInt8((0).toChar())
-                const gestureTmpValueForIdx0  = gestureTmpValue as Gesture
-                Gesture_serializer.write(thisSerializer, gestureTmpValueForIdx0)
-            } else if (gestureTmpValue instanceof GestureGroup) {
-                thisSerializer.writeInt8((1).toChar())
-                const gestureTmpValueForIdx1  = gestureTmpValue as GestureGroup
-                GestureGroup_serializer.write(thisSerializer, gestureTmpValueForIdx1)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (mask !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const maskTmpValue  = (mask as GestureMask)
-            thisSerializer.writeInt32(maskTmpValue.valueOf())
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setPriorityGestureAttribute(gesture: GestureType | undefined, mask?: GestureMask): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (gesture !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const gestureTmpValue  = gesture!
-            if (gestureTmpValue instanceof Gesture) {
-                thisSerializer.writeInt8((0).toChar())
-                const gestureTmpValueForIdx0  = gestureTmpValue as Gesture
-                Gesture_serializer.write(thisSerializer, gestureTmpValueForIdx0)
-            } else if (gestureTmpValue instanceof GestureGroup) {
-                thisSerializer.writeInt8((1).toChar())
-                const gestureTmpValueForIdx1  = gestureTmpValue as GestureGroup
-                GestureGroup_serializer.write(thisSerializer, gestureTmpValueForIdx1)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (mask !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const maskTmpValue  = (mask as GestureMask)
-            thisSerializer.writeInt32(maskTmpValue.valueOf())
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setPriorityGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setParallelGestureAttribute(gesture: GestureType | undefined, mask?: GestureMask): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (gesture !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const gestureTmpValue  = gesture!
-            if (gestureTmpValue instanceof Gesture) {
-                thisSerializer.writeInt8((0).toChar())
-                const gestureTmpValueForIdx0  = gestureTmpValue as Gesture
-                Gesture_serializer.write(thisSerializer, gestureTmpValueForIdx0)
-            } else if (gestureTmpValue instanceof GestureGroup) {
-                thisSerializer.writeInt8((1).toChar())
-                const gestureTmpValueForIdx1  = gestureTmpValue as GestureGroup
-                GestureGroup_serializer.write(thisSerializer, gestureTmpValueForIdx1)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (mask !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const maskTmpValue  = (mask as GestureMask)
-            thisSerializer.writeInt32(maskTmpValue.valueOf())
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setParallelGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setBlurAttribute(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (blurRadius !== undefined) {
@@ -6516,7 +6435,13 @@ export interface HorizontalAlignParam {
     align: HorizontalAlign;
 }
 export interface AlignRuleOption {
-    _stub: int32;
+    left?: HorizontalAlignParam;
+    right?: HorizontalAlignParam;
+    middle?: HorizontalAlignParam;
+    top?: VerticalAlignParam;
+    bottom?: VerticalAlignParam;
+    center?: VerticalAlignParam;
+    bias?: Bias;
 }
 export interface LocalizedHorizontalAlignParam {
     anchor: string;
@@ -10335,28 +10260,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("gesture")) {
-            const gesture_casted = gesture as (GestureType | undefined)
-            const mask_casted = mask as (GestureMask | undefined)
-            this.getPeer()?.setGestureAttribute(gesture_casted, mask_casted)
-            return this
+            hookGesture(this, gesture, mask)
         }
         return this
     }
     public priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("priorityGesture")) {
-            const gesture_casted = gesture as (GestureType | undefined)
-            const mask_casted = mask as (GestureMask | undefined)
-            this.getPeer()?.setPriorityGestureAttribute(gesture_casted, mask_casted)
-            return this
+            hookPriorityGesture(this, gesture, mask)
         }
         return this
     }
     public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("parallelGesture")) {
-            const gesture_casted = gesture as (GestureType | undefined)
-            const mask_casted = mask as (GestureMask | undefined)
-            this.getPeer()?.setParallelGestureAttribute(gesture_casted, mask_casted)
-            return this
+            hookParallelGesture(this, gesture, mask)
         }
         return this
     }
@@ -11081,16 +10997,19 @@ export class UICommonEvent_serializer {
         return UICommonEventInternal.fromPtr(ptr)
     }
 }
-export class AlignRuleOption_serializer {
-    public static write(buffer: SerializerBase, value: AlignRuleOption): void {
+export class VerticalAlignParam_serializer {
+    public static write(buffer: SerializerBase, value: VerticalAlignParam): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderFor_stub  = value._stub
-        valueSerializer.writeInt32(valueHolderFor_stub)
+        const valueHolderForAnchor  = value.anchor
+        valueSerializer.writeString(valueHolderForAnchor)
+        const valueHolderForAlign  = value.align
+        valueSerializer.writeInt32(valueHolderForAlign.valueOf())
     }
-    public static read(buffer: DeserializerBase): AlignRuleOption {
+    public static read(buffer: DeserializerBase): VerticalAlignParam {
         let valueDeserializer : DeserializerBase = buffer
-        const _stubTmpResult : int32 = valueDeserializer.readInt32()
-        let value : AlignRuleOption = ({_stub: _stubTmpResult} as AlignRuleOption)
+        const anchorTmpResult : string = (valueDeserializer.readString() as string)
+        const alignTmpResult : VerticalAlign = VerticalAlign.fromValue(valueDeserializer.readInt32())
+        let value : VerticalAlignParam = ({anchor: anchorTmpResult, align: alignTmpResult} as VerticalAlignParam)
         return value
     }
 }
@@ -11998,6 +11917,22 @@ export class GeometryTransitionOptions_serializer {
         }
         const hierarchyStrategyTmpResult : TransitionHierarchyStrategy | undefined = hierarchyStrategyTmpBuf
         let value : GeometryTransitionOptions = ({follow: followTmpResult, hierarchyStrategy: hierarchyStrategyTmpResult} as GeometryTransitionOptions)
+        return value
+    }
+}
+export class HorizontalAlignParam_serializer {
+    public static write(buffer: SerializerBase, value: HorizontalAlignParam): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForAnchor  = value.anchor
+        valueSerializer.writeString(valueHolderForAnchor)
+        const valueHolderForAlign  = value.align
+        valueSerializer.writeInt32(valueHolderForAlign.valueOf())
+    }
+    public static read(buffer: DeserializerBase): HorizontalAlignParam {
+        let valueDeserializer : DeserializerBase = buffer
+        const anchorTmpResult : string = (valueDeserializer.readString() as string)
+        const alignTmpResult : HorizontalAlign = HorizontalAlign.fromValue(valueDeserializer.readInt32())
+        let value : HorizontalAlignParam = ({anchor: anchorTmpResult, align: alignTmpResult} as HorizontalAlignParam)
         return value
     }
 }
@@ -13390,6 +13325,114 @@ export class VisibleAreaEventOptions_serializer {
         }
         const expectedUpdateIntervalTmpResult : number | undefined = expectedUpdateIntervalTmpBuf
         let value : VisibleAreaEventOptions = ({ratios: ratiosTmpResult, expectedUpdateInterval: expectedUpdateIntervalTmpResult} as VisibleAreaEventOptions)
+        return value
+    }
+}
+export class AlignRuleOption_serializer {
+    public static write(buffer: SerializerBase, value: AlignRuleOption): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForLeft  = value.left
+        if (valueHolderForLeft !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLeftTmpValue  = valueHolderForLeft!
+            HorizontalAlignParam_serializer.write(valueSerializer, valueHolderForLeftTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForRight  = value.right
+        if (valueHolderForRight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRightTmpValue  = valueHolderForRight!
+            HorizontalAlignParam_serializer.write(valueSerializer, valueHolderForRightTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMiddle  = value.middle
+        if (valueHolderForMiddle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMiddleTmpValue  = valueHolderForMiddle!
+            HorizontalAlignParam_serializer.write(valueSerializer, valueHolderForMiddleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForTop  = value.top
+        if (valueHolderForTop !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTopTmpValue  = valueHolderForTop!
+            VerticalAlignParam_serializer.write(valueSerializer, valueHolderForTopTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBottom  = value.bottom
+        if (valueHolderForBottom !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBottomTmpValue  = valueHolderForBottom!
+            VerticalAlignParam_serializer.write(valueSerializer, valueHolderForBottomTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForCenter  = value.center
+        if (valueHolderForCenter !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCenterTmpValue  = valueHolderForCenter!
+            VerticalAlignParam_serializer.write(valueSerializer, valueHolderForCenterTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBias  = value.bias
+        if (valueHolderForBias !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBiasTmpValue  = valueHolderForBias!
+            Bias_serializer.write(valueSerializer, valueHolderForBiasTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): AlignRuleOption {
+        let valueDeserializer : DeserializerBase = buffer
+        const leftTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let leftTmpBuf : HorizontalAlignParam | undefined = undefined
+        if ((leftTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            leftTmpBuf = HorizontalAlignParam_serializer.read(valueDeserializer)
+        }
+        const leftTmpResult : HorizontalAlignParam | undefined = leftTmpBuf
+        const rightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let rightTmpBuf : HorizontalAlignParam | undefined = undefined
+        if ((rightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            rightTmpBuf = HorizontalAlignParam_serializer.read(valueDeserializer)
+        }
+        const rightTmpResult : HorizontalAlignParam | undefined = rightTmpBuf
+        const middleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let middleTmpBuf : HorizontalAlignParam | undefined = undefined
+        if ((middleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            middleTmpBuf = HorizontalAlignParam_serializer.read(valueDeserializer)
+        }
+        const middleTmpResult : HorizontalAlignParam | undefined = middleTmpBuf
+        const topTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let topTmpBuf : VerticalAlignParam | undefined = undefined
+        if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            topTmpBuf = VerticalAlignParam_serializer.read(valueDeserializer)
+        }
+        const topTmpResult : VerticalAlignParam | undefined = topTmpBuf
+        const bottomTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let bottomTmpBuf : VerticalAlignParam | undefined = undefined
+        if ((bottomTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            bottomTmpBuf = VerticalAlignParam_serializer.read(valueDeserializer)
+        }
+        const bottomTmpResult : VerticalAlignParam | undefined = bottomTmpBuf
+        const centerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let centerTmpBuf : VerticalAlignParam | undefined = undefined
+        if ((centerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            centerTmpBuf = VerticalAlignParam_serializer.read(valueDeserializer)
+        }
+        const centerTmpResult : VerticalAlignParam | undefined = centerTmpBuf
+        const biasTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let biasTmpBuf : Bias | undefined = undefined
+        if ((biasTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            biasTmpBuf = Bias_serializer.read(valueDeserializer)
+        }
+        const biasTmpResult : Bias | undefined = biasTmpBuf
+        let value : AlignRuleOption = ({left: leftTmpResult, right: rightTmpResult, middle: middleTmpResult, top: topTmpResult, bottom: bottomTmpResult, center: centerTmpResult, bias: biasTmpResult} as AlignRuleOption)
         return value
     }
 }
@@ -15448,15 +15491,15 @@ export class DividerStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStrokeWidthTmpValue  = valueHolderForStrokeWidth!
             if (valueHolderForStrokeWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toChar())
                 const valueHolderForStrokeWidthTmpValueForIdx0  = valueHolderForStrokeWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForStrokeWidthTmpValueForIdx0)
             } else if (valueHolderForStrokeWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toChar())
                 const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForStrokeWidthTmpValueForIdx1)
             } else if (valueHolderForStrokeWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toChar())
                 const valueHolderForStrokeWidthTmpValueForIdx2  = valueHolderForStrokeWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueForIdx2)
             }
@@ -15541,9 +15584,9 @@ export class DividerStyle_serializer {
                 strokeWidthTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (strokeWidthTmpBuf_UnionSelector == (2).toChar()) {
                 strokeWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
-            } else {
+        } else {
                 throw new Error("One of the branches for strokeWidthTmpBuf_ has to be chosen through deserialisation.")
-            }
+        }
             strokeWidthTmpBuf = (strokeWidthTmpBuf_ as string | number | Resource)
         }
         const strokeWidthTmpResult : Length | undefined = strokeWidthTmpBuf

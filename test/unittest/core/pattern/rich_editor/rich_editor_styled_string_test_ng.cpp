@@ -1378,6 +1378,8 @@ HWTEST_F(RichEditorStyledStringTestNg, CreatePasteCallback001, TestSize.Level1)
      */
     richEditorPattern->spans_.clear();
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     pasteCallback(arrs, text, isMulitiTypeRecord);
     EXPECT_EQ(2, richEditorPattern->spans_.size());
 }

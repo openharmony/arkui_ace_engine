@@ -107,14 +107,14 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::Image_ColorFilter_TransferDynamic)
         },
         ani_native_function {
-            "_Web_SetWebOptions",
-            "lC{@ohos.web.webview.webview.WebviewController}:",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebOptions)
+            "_Extractors_ToWebviewWebviewControllerPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToWebviewWebviewControllerPtr)
         },
         ani_native_function {
-            "_Web_SetWebController_ControllerHandler",
-            "lC{@ohos.web.webview.webview.WebviewController}:",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebControllerControllerHandler)
+            "_Extractors_FromWebviewWebviewControllerPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromWebviewWebviewControllerPtr)
         },
         ani_native_function {
             "_TransferScreenCaptureHandlerToStatic",
@@ -1257,6 +1257,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Component3D_SetWidget",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::Component3DSetWidget)
+        },
+        ani_native_function {
+            "_Extractors_ToScenePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToScenePtr)
         },
         ani_native_function {
             "_XBar_Set_ComponentCreateFunc",

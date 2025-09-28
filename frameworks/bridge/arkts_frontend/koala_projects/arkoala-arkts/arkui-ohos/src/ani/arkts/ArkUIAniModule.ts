@@ -59,14 +59,14 @@ export class ArkUIAniModule {
     native static _Extractors_ToUiEffectVisualEffectPtr(value: uiEffect.VisualEffect): KPointer;
     native static _Extractors_ToDrawContextPtr(value: DrawContext): KPointer;
     native static _Extractors_FromDrawContextPtr(ptr: KPointer): DrawContext;
+    native static _Extractors_ToWebviewWebviewControllerPtr(value: webview.WebviewController): KPointer;
+    native static _Extractors_FromWebviewWebviewControllerPtr(ptr: KPointer): webview.WebviewController;
     native static _Image_ColorFilter_TransferStatic(ptr: KPointer): KPointer
     native static _Image_ColorFilter_TransferDynamic(ptr: KPointer): KPointer
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
     native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
     native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
     native static _Image_DrawingColorFilter(ptr: KPointer, value: drawing.ColorFilter): void
-    native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
-    native static _Web_SetWebController_ControllerHandler(ptr: KPointer, webviewController: webview.WebviewController): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
     native static _Common_GetHostContext(key: KInt): common.Context
@@ -367,6 +367,7 @@ export class ArkUIAniModule {
     // for Component3D
     native static _Component3D_SetScene(ptr: KPointer, scene: Scene, modelType: KInt): void
     native static _Component3D_SetWidget(ptr: KPointer, scenePath: string, modelType: KInt): void
+    native static _Extractors_ToScenePtr(scene: Scene): KPointer;
     // for AppBar
     native static _XBar_Set_ComponentCreateFunc(value: (isTitlebar: KInt, instanceID: KInt) => KLong): void;
     native static _XBar_Set_JsFunc(ptr: KLong, component: Any): void

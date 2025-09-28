@@ -1291,14 +1291,14 @@ Gradient Convert(const Ark_LinearGradientOptions& value)
     if (gradientColors.size() == 1) {
         auto item = gradientColors.front();
         GradientColor gradientColor;
-        gradientColor.SetLinearColor(LinearColor(item.first));
+        gradientColor.SetColor(item.first);
         gradientColor.SetDimension(item.second);
         gradient.AddColor(gradientColor);
         gradient.AddColor(gradientColor);
     } else {
         for (auto item : gradientColors) {
             GradientColor gradientColor;
-            gradientColor.SetLinearColor(LinearColor(item.first));
+            gradientColor.SetColor(item.first);
             gradientColor.SetDimension(item.second);
             gradient.AddColor(gradientColor);
         }
@@ -3413,5 +3413,35 @@ void AssignCast(std::optional<OHOS::Rosen::Filter*>& dst, const Ark_uiEffect_Fil
         return;
     }
     dst = reinterpret_cast<OHOS::Rosen::Filter*>(src);
+}
+
+template<>
+void AssignCast(std::optional<Orientation>& dst, const Ark_window_Orientation& src)
+{
+    switch (src) {
+        case ARK_WINDOW_ORIENTATION_UNSPECIFIED: dst = Orientation::UNSPECIFIED; break;
+        case ARK_WINDOW_ORIENTATION_PORTRAIT: dst = Orientation::VERTICAL; break;
+        case ARK_WINDOW_ORIENTATION_LANDSCAPE: dst = Orientation::HORIZONTAL; break;
+        case ARK_WINDOW_ORIENTATION_PORTRAIT_INVERTED: dst = Orientation::REVERSE_VERTICAL; break;
+        case ARK_WINDOW_ORIENTATION_LANDSCAPE_INVERTED: dst = Orientation::REVERSE_HORIZONTAL; break;
+        case ARK_WINDOW_ORIENTATION_AUTO_ROTATION: dst = Orientation::SENSOR; break;
+        case ARK_WINDOW_ORIENTATION_AUTO_ROTATION_PORTRAIT: dst = Orientation::SENSOR_VERTICAL; break;
+        case ARK_WINDOW_ORIENTATION_AUTO_ROTATION_LANDSCAPE: dst = Orientation::SENSOR_HORIZONTAL; break;
+        case ARK_WINDOW_ORIENTATION_AUTO_ROTATION_RESTRICTED: dst = Orientation::AUTO_ROTATION_RESTRICTED; break;
+        case ARK_WINDOW_ORIENTATION_AUTO_ROTATION_PORTRAIT_RESTRICTED:
+            dst = Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED; break;
+        case ARK_WINDOW_ORIENTATION_AUTO_ROTATION_LANDSCAPE_RESTRICTED:
+            dst = Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED; break;
+        case ARK_WINDOW_ORIENTATION_LOCKED: dst = Orientation::LOCKED; break;
+        case ARK_WINDOW_ORIENTATION_AUTO_ROTATION_UNSPECIFIED: dst = Orientation::AUTO_ROTATION_UNSPECIFIED; break;
+        case ARK_WINDOW_ORIENTATION_USER_ROTATION_PORTRAIT: dst = Orientation::USER_ROTATION_PORTRAIT; break;
+        case ARK_WINDOW_ORIENTATION_USER_ROTATION_LANDSCAPE: dst = Orientation::USER_ROTATION_LANDSCAPE; break;
+        case ARK_WINDOW_ORIENTATION_USER_ROTATION_PORTRAIT_INVERTED:
+            dst = Orientation::USER_ROTATION_PORTRAIT_INVERTED; break;
+        case ARK_WINDOW_ORIENTATION_USER_ROTATION_LANDSCAPE_INVERTED:
+            dst = Orientation::USER_ROTATION_LANDSCAPE_INVERTED; break;
+        case ARK_WINDOW_ORIENTATION_FOLLOW_DESKTOP: dst = Orientation::FOLLOW_DESKTOP; break;
+        default: LOGE("Unexpected enum value in Ark_window_Orientation: %{public}d", src);
+    }
 }
 } // namespace OHOS::Ace::NG::Converter

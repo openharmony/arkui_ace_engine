@@ -47,6 +47,12 @@ public:
     static void SetOnWillShow(FrameNode* node, std::function<void()>&& onWillShow);
     static void SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void UpdateDefaultSymbol(RefPtr<TabTheme>& tabTheme, RefPtr<TextLayoutProperty> symbolProperty);
+    static void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive);
+    static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);
+    static RefPtr<TabsNode> FindTabsNode(const RefPtr<UINode>& tabContent);
+    static void AddTabBarItem(
+        const RefPtr<UINode>& tabContent, int32_t position = DEFAULT_NODE_SLOT, bool update = false);
 };
 } // namespace OHOS::Ace::NG
 

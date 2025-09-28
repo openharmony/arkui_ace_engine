@@ -339,13 +339,13 @@ void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<Popup
         popupParam->SetChildWidth(widthOpt.value());
     }
     auto arrowWidthOpt = Converter::OptConvert<CalcDimension>(src.arrowWidth);
-    Validator::ValidateNonNegative(arrowWidthOpt);
+    Validator::ValidatePositive(arrowWidthOpt);
     Validator::ValidateNonPercent(arrowWidthOpt);
     if (arrowWidthOpt.has_value()) {
         popupParam->SetArrowWidth(arrowWidthOpt.value());
     }
     auto arrowHeightOpt = Converter::OptConvert<CalcDimension>(src.arrowHeight);
-    Validator::ValidateNonNegative(arrowHeightOpt);
+    Validator::ValidatePositive(arrowHeightOpt);
     Validator::ValidateNonPercent(arrowHeightOpt);
     if (arrowHeightOpt.has_value()) {
         popupParam->SetArrowHeight(arrowHeightOpt.value());
@@ -373,6 +373,7 @@ void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<Popup
     popupParam->SetFocusable(Converter::OptConvert<bool>(src.focusable).value_or(popupParam->GetFocusable()));
     auto popupTransitionEffectsOpt = Converter::OptConvert<RefPtr<NG::ChainedTransitionEffect>>(src.transition);
     if (popupTransitionEffectsOpt.has_value()) {
+        popupParam->SetHasTransition(true);
         popupParam->SetTransitionEffects(popupTransitionEffectsOpt.value());
     }
     g_onWillDismissPopup(src.onWillDismiss, popupParam);

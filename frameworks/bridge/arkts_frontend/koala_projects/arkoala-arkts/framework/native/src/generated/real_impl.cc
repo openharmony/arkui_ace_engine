@@ -1880,7 +1880,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetTransformImpl(Ark_NativePointer node,
-                          const Opt_Object* value)
+                          const Opt_matrix4_Matrix4Transit* value)
     {
     }
     void SetOnAppearImpl(Ark_NativePointer node,
@@ -2510,13 +2510,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // ComponentRootModifier
-    namespace ConditionScopeModifier {
-    Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                    Ark_Int32 flags)
-    {
-        return {};
-    }
-    } // ConditionScopeModifier
     namespace ContainerSpanModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -4090,10 +4083,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetOnNavigationModeChangeImpl(Ark_NativePointer node,
                                        const Opt_Callback_NavigationMode_Void* value)
-    {
-    }
-    void SetNavDestinationImpl(Ark_NativePointer node,
-                               const Opt_PageMapBuilder* value)
     {
     }
     void SetCustomNavContentTransitionImpl(Ark_NativePointer node,
@@ -5881,6 +5870,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Opt_Union_Number_Bindable* value)
     {
     }
+    void SetAutoPlay0Impl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
+    {
+    }
     void SetIntervalImpl(Ark_NativePointer node,
                          const Opt_Number* value)
     {
@@ -5973,9 +5966,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                     const Opt_ContentWillScrollCallback* value)
     {
     }
-    void SetAutoPlayImpl(Ark_NativePointer node,
-                         const Opt_Boolean* autoPlay,
-                         const Opt_AutoPlayOptions* options)
+    void SetAutoPlay1Impl(Ark_NativePointer node,
+                          const Opt_Boolean* autoPlay,
+                          const Opt_AutoPlayOptions* options)
     {
     }
     void SetDisplayArrowImpl(Ark_NativePointer node,
@@ -6730,7 +6723,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_Number_FontWeight_String* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -6833,7 +6826,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -8475,14 +8468,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &ArkUIComponentRootModifierImpl;
     }
 
-    const GENERATED_ArkUIConditionScopeModifier* GetConditionScopeModifier()
-    {
-        static const GENERATED_ArkUIConditionScopeModifier ArkUIConditionScopeModifierImpl {
-            ConditionScopeModifier::ConstructImpl,
-        };
-        return &ArkUIConditionScopeModifierImpl;
-    }
-
     const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()
     {
         static const GENERATED_ArkUIContainerSpanModifier ArkUIContainerSpanModifierImpl {
@@ -9076,7 +9061,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavigationAttributeModifier::SetOnTitleModeChangeImpl,
             NavigationAttributeModifier::SetOnNavBarStateChangeImpl,
             NavigationAttributeModifier::SetOnNavigationModeChangeImpl,
-            NavigationAttributeModifier::SetNavDestinationImpl,
             NavigationAttributeModifier::SetCustomNavContentTransitionImpl,
             NavigationAttributeModifier::SetSystemBarStyleImpl,
             NavigationAttributeModifier::SetRecoverableImpl,
@@ -9718,6 +9702,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SwiperModifier::ConstructImpl,
             SwiperInterfaceModifier::SetSwiperOptionsImpl,
             SwiperAttributeModifier::SetIndexImpl,
+            SwiperAttributeModifier::SetAutoPlay0Impl,
             SwiperAttributeModifier::SetIntervalImpl,
             SwiperAttributeModifier::SetIndicatorImpl,
             SwiperAttributeModifier::SetLoopImpl,
@@ -9741,7 +9726,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SwiperAttributeModifier::SetIndicatorInteractiveImpl,
             SwiperAttributeModifier::SetPageFlipModeImpl,
             SwiperAttributeModifier::SetOnContentWillScrollImpl,
-            SwiperAttributeModifier::SetAutoPlayImpl,
+            SwiperAttributeModifier::SetAutoPlay1Impl,
             SwiperAttributeModifier::SetDisplayArrowImpl,
             SwiperAttributeModifier::SetCachedCount1Impl,
             SwiperAttributeModifier::SetDisplayCountImpl,
@@ -10378,7 +10363,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetCommonShapeMethodModifier,
             GetComponent3DModifier,
             GetComponentRootModifier,
-            GetConditionScopeModifier,
             GetContainerSpanModifier,
             GetCounterModifier,
             GetCustomBuilderRootModifier,
@@ -12847,9 +12831,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void DisposeTreeImpl(Ark_FrameNode peer)
     {
     }
-    void SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
-                                     Ark_Boolean options)
+    Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
+                                            Ark_Boolean options)
     {
+        return {};
     }
     Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
     {
@@ -13256,14 +13241,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // GlobalScope_ohos_arkui_performanceMonitorAccessor
     namespace GlobalScope_ohos_fontAccessor {
-    void RegisterFontImpl(const Ark_CustomObject* options)
+    void RegisterFontImpl(const Ark_font_FontOptions* options)
     {
     }
     Array_String GetSystemFontListImpl()
     {
         return {};
     }
-    Ark_CustomObject GetFontByNameImpl(const Ark_String* fontName)
+    Ark_font_FontInfo GetFontByNameImpl(const Ark_String* fontName)
+    {
+        return {};
+    }
+    Ark_font_UIFontConfig GetUIFontConfigImpl()
     {
         return {};
     }
@@ -13278,6 +13267,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // GlobalScope_ohos_measure_utilsAccessor
+    namespace GlobalScopeUicontextFontScaleAccessor {
+    Ark_Boolean IsFollowingSystemFontScaleImpl()
+    {
+        return {};
+    }
+    Ark_Float64 GetMaxFontScaleImpl()
+    {
+        return {};
+    }
+    } // GlobalScopeUicontextFontScaleAccessor
+    namespace GlobalScopeUicontextTextMenuAccessor {
+    void SetMenuOptionsImpl(const Ark_TextMenuOptions* options)
+    {
+    }
+    } // GlobalScopeUicontextTextMenuAccessor
     namespace HierarchicalSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_HierarchicalSymbolEffect peer)
     {
@@ -16503,7 +16507,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void ChangeIndexImpl(Ark_SwiperController peer,
-                         const Ark_Number* index,
+                         const Opt_Number* index,
                          const Opt_Union_SwiperAnimationMode_Boolean* animationMode)
     {
     }
@@ -19198,6 +19202,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_fontAccessor::RegisterFontImpl,
             GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
             GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
+            GlobalScope_ohos_fontAccessor::GetUIFontConfigImpl,
         };
         return &GlobalScope_ohos_fontAccessorImpl;
     }
@@ -19209,6 +19214,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_measure_utilsAccessor::MeasureTextSizeImpl,
         };
         return &GlobalScope_ohos_measure_utilsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicontextFontScaleAccessor()
+    {
+        static const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor GlobalScopeUicontextFontScaleAccessorImpl {
+            GlobalScopeUicontextFontScaleAccessor::IsFollowingSystemFontScaleImpl,
+            GlobalScopeUicontextFontScaleAccessor::GetMaxFontScaleImpl,
+        };
+        return &GlobalScopeUicontextFontScaleAccessorImpl;
+    }
+
+    const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* GetGlobalScopeUicontextTextMenuAccessor()
+    {
+        static const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor GlobalScopeUicontextTextMenuAccessorImpl {
+            GlobalScopeUicontextTextMenuAccessor::SetMenuOptionsImpl,
+        };
+        return &GlobalScopeUicontextTextMenuAccessorImpl;
     }
 
     const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor()
@@ -21425,6 +21447,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
             GetGlobalScope_ohos_fontAccessor,
             GetGlobalScope_ohos_measure_utilsAccessor,
+            GetGlobalScopeUicontextFontScaleAccessor,
+            GetGlobalScopeUicontextTextMenuAccessor,
             GetHierarchicalSymbolEffectAccessor,
             GetHoverEventAccessor,
             GetHttpAuthHandlerAccessor,

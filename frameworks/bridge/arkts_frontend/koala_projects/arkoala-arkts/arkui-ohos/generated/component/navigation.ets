@@ -1017,34 +1017,6 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavigationAttribute_setMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBackButtonIcon0Attribute(value: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof image.PixelMap) {
-                thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as image.PixelMap
-                image_PixelMap_serializer.write(thisSerializer, valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof SymbolGlyphModifier) {
-                thisSerializer.writeInt8((3).toChar())
-                const valueTmpValueForIdx3  = valueTmpValue as SymbolGlyphModifier
-                SymbolGlyphModifier_serializer.write(thisSerializer, valueTmpValueForIdx3)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._NavigationAttribute_setBackButtonIcon0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setHideNavBarAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1091,30 +1063,6 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setTitleMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setMenus0Attribute(value: Array<NavigationMenuItem> | CustomBuilder | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (TypeChecker.isArray_NavigationMenuItem(valueTmpValue)) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as Array<NavigationMenuItem>
-                thisSerializer.writeInt32((valueTmpValueForIdx0.length).toInt())
-                for (let valueTmpValueForIdx0CounterI = 0; valueTmpValueForIdx0CounterI < valueTmpValueForIdx0.length; valueTmpValueForIdx0CounterI++) {
-                    const valueTmpValueForIdx0TmpElement : NavigationMenuItem = valueTmpValueForIdx0[valueTmpValueForIdx0CounterI]
-                    NavigationMenuItem_serializer.write(thisSerializer, valueTmpValueForIdx0TmpElement)
-                }
-            } else if (valueTmpValue instanceof CustomBuilder) {
-                thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as CustomBuilder
-                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._NavigationAttribute_setMenus0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setHideToolBar0Attribute(value: boolean | undefined): void {
@@ -1237,7 +1185,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavigationAttribute_setEnableModeChangeAnimation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBackButtonIcon1Attribute(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): void {
+    setBackButtonIconAttribute(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (icon !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1277,7 +1225,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._NavigationAttribute_setBackButtonIcon1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavigationAttribute_setBackButtonIcon(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTitleAttribute(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): void {
@@ -1342,7 +1290,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavigationAttribute_setHideTitleBar1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMenus1Attribute(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): void {
+    setMenusAttribute(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (items !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1370,7 +1318,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._NavigationAttribute_setMenus1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavigationAttribute_setMenus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setToolbarConfigurationAttribute(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): void {
@@ -1583,9 +1531,6 @@ export interface NavigationAttribute extends CommonMethod {
     mode(value: NavigationMode | undefined): this {
         throw new Error("Unimplemented method mode")
     }
-    backButtonIcon(value: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined): this {
-        throw new Error("Unimplemented method backButtonIcon")
-    }
     hideNavBar(value: boolean | undefined): this {
         throw new Error("Unimplemented method hideNavBar")
     }
@@ -1597,9 +1542,6 @@ export interface NavigationAttribute extends CommonMethod {
     }
     titleMode(value: NavigationTitleMode | undefined): this {
         throw new Error("Unimplemented method titleMode")
-    }
-    menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this {
-        throw new Error("Unimplemented method menus")
     }
     hideToolBar(value: boolean | undefined): this {
         throw new Error("Unimplemented method hideToolBar")
@@ -1665,12 +1607,10 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     navBarWidthRange_value?: [ Dimension, Dimension ] | undefined
     minContentWidth_value?: Dimension | undefined
     mode_value?: NavigationMode | undefined
-    backButtonIcon_value?: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined
     hideNavBar_value?: boolean | undefined
     hideTitleBar_value?: boolean | undefined
     hideBackButton_value?: boolean | undefined
     titleMode_value?: NavigationTitleMode | undefined
-    menus_value?: Array<NavigationMenuItem> | CustomBuilder | undefined
     hideToolBar_value?: boolean | undefined
     enableToolBarAdaptation_value?: boolean | undefined
     onTitleModeChange_value?: ((titleMode: NavigationTitleMode) => void) | undefined
@@ -1700,9 +1640,6 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     mode(value: NavigationMode | undefined): this {
         return this
     }
-    backButtonIcon(value: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined): this {
-        return this
-    }
     hideNavBar(value: boolean | undefined): this {
         return this
     }
@@ -1713,9 +1650,6 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
         return this
     }
     titleMode(value: NavigationTitleMode | undefined): this {
-        return this
-    }
-    menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this {
         return this
     }
     hideToolBar(value: boolean | undefined): this {
@@ -1853,14 +1787,6 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public backButtonIcon(value: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined): this {
-        if (this.checkPriority("backButtonIcon")) {
-            const value_casted = value as (string | image.PixelMap | Resource | SymbolGlyphModifier | undefined)
-            this.getPeer()?.setBackButtonIcon0Attribute(value_casted)
-            return this
-        }
-        return this
-    }
     public hideNavBar(value: boolean | undefined): this {
         if (this.checkPriority("hideNavBar")) {
             const value_casted = value as (boolean | undefined)
@@ -1889,14 +1815,6 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("titleMode")) {
             const value_casted = value as (NavigationTitleMode | undefined)
             this.getPeer()?.setTitleModeAttribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this {
-        if (this.checkPriority("menus")) {
-            const value_casted = value as (Array<NavigationMenuItem> | CustomBuilder | undefined)
-            this.getPeer()?.setMenus0Attribute(value_casted)
             return this
         }
         return this
@@ -1991,7 +1909,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("backButtonIcon")) {
             const icon_casted = icon as (string | image.PixelMap | Resource | SymbolGlyphModifier | undefined)
             const accessibilityText_casted = accessibilityText as (ResourceStr | undefined)
-            this.getPeer()?.setBackButtonIcon1Attribute(icon_casted, accessibilityText_casted)
+            this.getPeer()?.setBackButtonIconAttribute(icon_casted, accessibilityText_casted)
             return this
         }
         return this
@@ -2018,7 +1936,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("menus")) {
             const items_casted = items as (Array<NavigationMenuItem> | CustomBuilder | undefined)
             const options_casted = options as (NavigationMenuOptions | undefined)
-            this.getPeer()?.setMenus1Attribute(items_casted, options_casted)
+            this.getPeer()?.setMenusAttribute(items_casted, options_casted)
             return this
         }
         return this

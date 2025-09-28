@@ -19,18 +19,17 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
 import { ArkNavDestinationPeer, NavDestinationMode, NavDestinationContext, NavigationSystemTransitionType, NestedScrollInfo, NavDestinationActiveReason, NavDestinationTransitionDelegate, NavDestinationCommonTitle, NavDestinationCustomTitle, NavDestinationAttribute } from "./component/navDestination"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
-import { ResourceStr } from "./component/units"
-import { Resource } from "global.resource"
-import { default as image } from "@ohos.multimedia.image"
-import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
-import { NavigationMenuItem, NavigationOperation, NavigationTitleOptions, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions } from "./component/navigation"
-import { CustomBuilder } from "./component/builder"
 import { default as window } from "@ohos.window"
 import { Scroller } from "./component/scroll"
+import { NavigationOperation, NavigationTitleOptions, NavigationMenuItem, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions } from "./component/navigation"
+import { CustomBuilder } from "./component/builder"
+import { Resource } from "global.resource"
+import { ResourceStr } from "./component/units"
+import { default as image } from "@ohos.multimedia.image"
+import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 export class NavDestinationModifier extends CommonMethodModifier implements NavDestinationAttribute,AttributeModifier<NavDestinationAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
@@ -56,10 +55,6 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
     _onResult_0_0value?: ((value0: Object | null | undefined) => void) | undefined
     _mode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _mode_0_0value?: NavDestinationMode | undefined
-    _backButtonIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _backButtonIcon_0_0value?: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined
-    _menus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _menus_0_0value?: Array<NavigationMenuItem> | CustomBuilder | undefined
     _onReady_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onReady_0_0value?: ((value0: NavDestinationContext) => void) | undefined
     _onWillAppear_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -98,12 +93,12 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
     _hideTitleBar_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hideTitleBar_1_0value?: boolean | undefined
     _hideTitleBar_1_1value?: boolean | undefined
-    _backButtonIcon_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _backButtonIcon_1_0value?: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined
-    _backButtonIcon_1_1value?: ResourceStr | undefined
-    _menus_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _menus_1_0value?: Array<NavigationMenuItem> | CustomBuilder | undefined
-    _menus_1_1value?: NavigationMenuOptions | undefined
+    _backButtonIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _backButtonIcon_0_0value?: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined
+    _backButtonIcon_0_1value?: ResourceStr | undefined
+    _menus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _menus_0_0value?: Array<NavigationMenuItem> | CustomBuilder | undefined
+    _menus_0_1value?: NavigationMenuOptions | undefined
     _toolbarConfiguration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _toolbarConfiguration_0_0value?: Array<ToolbarItem> | CustomBuilder | undefined
     _toolbarConfiguration_0_1value?: NavigationToolbarOptions | undefined
@@ -116,9 +111,8 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
     _enableStatusBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableStatusBar_0_0value?: boolean | undefined
     _enableStatusBar_0_1value?: boolean | undefined
-    applyModifierPatch(node: PeerNode): void {
-        super.applyModifierPatch(node)
-        const peer = node as ArkNavDestinationPeer;
+    applyModifierPatch(peer: ArkNavDestinationPeer): void {
+        super.applyModifierPatch(peer)
         if (this._hideTitleBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._hideTitleBar_0_flag) {
@@ -242,42 +236,6 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
                 default: {
                     this._mode_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setModeAttribute((undefined as NavDestinationMode | undefined));
-                }
-            }
-        }
-        if (this._backButtonIcon_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._backButtonIcon_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackButtonIcon0Attribute((this._backButtonIcon_0_0value as ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined));
-                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBackButtonIcon0Attribute((undefined as ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined));
-                }
-            }
-        }
-        if (this._menus_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._menus_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMenus0Attribute((this._menus_0_0value as Array<NavigationMenuItem> | CustomBuilder | undefined));
-                    this._menus_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._menus_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._menus_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMenus0Attribute((undefined as Array<NavigationMenuItem> | CustomBuilder | undefined));
                 }
             }
         }
@@ -605,39 +563,39 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
                 }
             }
         }
-        if (this._backButtonIcon_1_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._backButtonIcon_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._backButtonIcon_1_flag) {
+            switch (this._backButtonIcon_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackButtonIcon1Attribute((this._backButtonIcon_1_0value as ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined), (this._backButtonIcon_1_1value as ResourceStr | undefined | undefined));
-                    this._backButtonIcon_1_flag = AttributeUpdaterFlag.RESET;
+                    peer.setBackButtonIconAttribute((this._backButtonIcon_0_0value as ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined), (this._backButtonIcon_0_1value as ResourceStr | undefined));
+                   this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._backButtonIcon_1_flag = AttributeUpdaterFlag.RESET;
+                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._backButtonIcon_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBackButtonIcon1Attribute((undefined as ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined), (undefined as ResourceStr | undefined | undefined));
+                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBackButtonIconAttribute((undefined as ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined), (undefined as ResourceStr | undefined | undefined));
                 }
             }
         }
-        if (this._menus_1_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._menus_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._menus_1_flag) {
+            switch (this._menus_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMenus1Attribute((this._menus_1_0value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus_1_1value as NavigationMenuOptions | undefined | undefined));
-                    this._menus_1_flag = AttributeUpdaterFlag.RESET;
+                    peer.setMenusAttribute((this._menus_0_0value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus_0_1value as NavigationMenuOptions | undefined));
+                    this._menus_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._menus_1_flag = AttributeUpdaterFlag.RESET;
+                    this._menus_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._menus_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMenus1Attribute((undefined as Array<NavigationMenuItem> | CustomBuilder | undefined), (undefined as NavigationMenuOptions | undefined | undefined));
+                    this._menus_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMenusAttribute((undefined as Array<NavigationMenuItem> | CustomBuilder | undefined), (undefined as NavigationMenuOptions | undefined | undefined));
                 }
             }
         }
@@ -804,32 +762,6 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
                 }
                 default: {
                     this.mode((undefined as NavDestinationMode | undefined));
-                }
-            }
-        }
-        if (modifier._backButtonIcon_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._backButtonIcon_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.backButtonIcon(modifier._backButtonIcon_0_0value);
-                    break;
-                }
-                default: {
-                    this.backButtonIcon((undefined as ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined));
-                }
-            }
-        }
-        if (modifier._menus_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._menus_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.menus(modifier._menus_0_0value);
-                    break;
-                }
-                default: {
-                    this.menus((undefined as Array<NavigationMenuItem> | CustomBuilder | undefined));
                 }
             }
         }
@@ -1067,12 +999,12 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
                 }
             }
         }
-        if (modifier._backButtonIcon_1_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._backButtonIcon_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._backButtonIcon_1_flag) {
+            switch (modifier._backButtonIcon_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.backButtonIcon(modifier._backButtonIcon_1_0value, modifier._backButtonIcon_1_1value);
+                    this.backButtonIcon(modifier._backButtonIcon_0_0value, modifier._backButtonIcon_0_1value);
                     break;
                 }
                 default: {
@@ -1080,12 +1012,12 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
                 }
             }
         }
-        if (modifier._menus_1_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._menus_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._menus_1_flag) {
+            switch (modifier._menus_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.menus(modifier._menus_1_0value, modifier._menus_1_1value);
+                    this.menus(modifier._menus_0_0value, modifier._menus_0_1value);
                     break;
                 }
                 default: {
@@ -1220,28 +1152,6 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         } else
         {
             this._mode_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    backButtonIcon(value: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined): this {
-        if (((this._backButtonIcon_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._backButtonIcon_0_flag = AttributeUpdaterFlag.UPDATE
-            this._backButtonIcon_0_0value = value
-        } else
-        {
-            this._backButtonIcon_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this {
-        if (((this._menus_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._menus_0_flag = AttributeUpdaterFlag.UPDATE
-            this._menus_0_0value = value
-        } else
-        {
-            this._menus_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1446,26 +1356,26 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         return this
     }
     backButtonIcon(icon: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
-        if (((this._backButtonIcon_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        if (((this._backButtonIcon_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
-            this._backButtonIcon_1_flag = AttributeUpdaterFlag.UPDATE
-            this._backButtonIcon_1_0value = icon
-            this._backButtonIcon_1_1value = accessibilityText
+            this._backButtonIcon_0_flag = AttributeUpdaterFlag.UPDATE
+            this._backButtonIcon_0_0value = icon
+            this._backButtonIcon_0_1value = accessibilityText
         } else
         {
-            this._backButtonIcon_1_flag = AttributeUpdaterFlag.SKIP
+            this._backButtonIcon_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
-        if (((this._menus_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        if (((this._menus_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
-            this._menus_1_flag = AttributeUpdaterFlag.UPDATE
-            this._menus_1_0value = items
-            this._menus_1_1value = options
+            this._menus_0_flag = AttributeUpdaterFlag.UPDATE
+            this._menus_0_0value = items
+            this._menus_0_1value = options
         } else
         {
-            this._menus_1_flag = AttributeUpdaterFlag.SKIP
+            this._menus_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

@@ -552,6 +552,7 @@ namespace Converter {
     template<> FingerInfo Convert(const Ark_FingerInfo& src);
     template<> Font Convert(const Ark_Font& src);
     template<> FontFamilies Convert(const Ark_String& src);
+    template<> FontInfo Convert(const Ark_font_FontInfo& src);
     template<> FontMetaData Convert(const Ark_Font& src);
     template<> FontWeightInt Convert(const Ark_FontWeight& src);
     template<> FontWeightInt Convert(const Ark_Int32& src);
@@ -611,8 +612,6 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_String& src);
     template<> RefPtr<Curve> Convert(const Ark_curves_ICurve& src);
     template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
-    template<> RefPtr<Gesture> Convert(const Ark_RotationGesture& src);
-    template<> RefPtr<Gesture> Convert(const Ark_SwipeGesture& src);
     template<> RefPtr<PixelMap> Convert(const Ark_image_PixelMap& src);
     template<> RotateOptions Convert(const Ark_RotateOptions& src);
     template<> ScaleOpt Convert(const Ark_ScaleOptions& src);
@@ -872,6 +871,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<Matrix4>& dst, const Ark_matrix4_Matrix4Transit& src);
     template<> void AssignCast(std::optional<OHOS::Rosen::VisualEffect*>& dst, const Ark_uiEffect_VisualEffect& src);
     template<> void AssignCast(std::optional<OHOS::Rosen::Filter*>& dst, const Ark_uiEffect_Filter& src);
+    template<> void AssignCast(std::optional<Orientation>& dst, const Ark_window_Orientation& src);
 
     // Long declarations goes below. DO NOT ADD SHORT DECLARATIONS HERE!
     template<>

@@ -17,9 +17,10 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/ani/web_model_static.h"
-#include "core/interfaces/native/implementation/web_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/webview_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/web_modifier_callbacks.h"
+#include "core/interfaces/native/implementation/controller_handler_peer_impl.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #endif // WEB_SUPPORTED
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -197,11 +198,29 @@ void SetWebOptionsImpl(Ark_NativePointer node,
                        const Ark_WebOptions* value)
 {
 #ifdef WEB_SUPPORTED
+    LOGI("SetWebOptionsImpl set options");
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto webSrc = Converter::OptConvert<std::string>(value->src);
     WebModelStatic::SetWebSrc(frameNode, webSrc);
+    auto controller = value->controller;
+    if (controller) {
+        if (controller->getNativePtrFunc) {
+            int32_t parentNWebId = -1;
+            bool isPopup = ControllerHandlerPeer::ExistController(
+                controller->getNativePtrFunc(), parentNWebId);
+            WebModelStatic::SetPopup(frameNode, isPopup, parentNWebId);
+        }
+        WebModelStatic::SetWebIdCallback(frameNode, std::move(controller->setWebIdFunc));
+        WebModelStatic::SetHapPathCallback(frameNode, std::move(controller->setHapPathFunc));
+        /* This controller is only used to pass the hook function for initializing the webviewController.
+         * After passing, the corresponding memory needs to be released.
+         */
+        delete controller;
+    } else {
+        LOGE("SetWebOptionsImpl controller is nullptr");
+    }
     auto renderMode = Converter::OptConvert<RenderMode>(value->renderMode);
     WebModelStatic::SetRenderMode(frameNode, renderMode);
     auto incognitoMode = Converter::OptConvert<bool>(value->incognitoMode);

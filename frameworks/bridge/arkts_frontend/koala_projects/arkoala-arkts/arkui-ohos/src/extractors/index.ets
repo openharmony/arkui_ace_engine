@@ -269,13 +269,13 @@ export namespace extractors {
   export function toWebviewWebviewControllerPtr(
     value: webview.WebviewController
   ): KPointer {
-    return 123;
+    let result = ArkUIAniModule._Extractors_ToWebviewWebviewControllerPtr(value);
+    return result;
   }
   export function fromWebviewWebviewControllerPtr(
     ptr: KPointer
   ): webview.WebviewController {
-    const x: Object = {};
-    return x as webview.WebviewController;
+    return ArkUIAniModule._Extractors_FromWebviewWebviewControllerPtr(ptr);
   }
 
   export function toDrawableDescriptorPtr(value: DrawableDescriptor): KPointer {
@@ -527,7 +527,7 @@ export namespace extractors {
   }
 
   export function toScenePtr(value: Scene): KPointer {
-    return 123;
+    return ArkUIAniModule._Extractors_ToScenePtr(value);
   }
   export function fromScenePtr(ptr: KPointer): Scene {
     const x: Object = {};

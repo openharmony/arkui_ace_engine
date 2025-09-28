@@ -31,8 +31,6 @@ void SetToolBarItemOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //ToolBarItemModelNG::SetToolBarItemOptions(frameNode, convValue);
 }
 } // ToolBarItemInterfaceModifier
 const GENERATED_ArkUIToolBarItemModifier* GetToolBarItemModifier()

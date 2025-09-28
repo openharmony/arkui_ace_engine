@@ -77,14 +77,14 @@ typedef int32_t ArkUIAniCurve;
 typedef const char* ArkUIAniString;
 struct Array_ResourceColor;
 struct Ark_ResourceColor;
-typedef struct WebviewControllerInfo {
+typedef struct webview_WebviewControllerPeer {
     std::function<int32_t()> getWebIdFunc = nullptr;
     std::function<void(int32_t)> completeWindowNewFunc = nullptr;
     std::function<long()> getNativePtrFunc = nullptr;
     std::function<void()> releaseRefFunc = nullptr;
     std::function<void(int32_t)> setWebIdFunc = nullptr;
     std::function<void(const std::string&)> setHapPathFunc = nullptr;
-} WebviewControllerInfo;
+} WebviewControllerPeer;
 
 typedef struct NodeAdapterInfo {
     std::function<void(ani_double)> onAttachToNode = nullptr;
@@ -398,8 +398,6 @@ struct ArkUIWaterFlowSection {
     std::function<float(int32_t)> onGetItemMainSizeByIndex;
 };
 struct ArkUIAniWebModifier {
-    void (*setWebOptions)(ArkUINodeHandle node, const WebviewControllerInfo& controllerInfo);
-    void (*setWebControllerControllerHandler)(void* controllerHandler, const WebviewControllerInfo& controllerInfo);
     bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
     bool (*transferJsGeolocationToStatic)(void* peer, void* nativePtr);
     bool (*transferJsResultToStatic)(void* peer, void* nativePtr);

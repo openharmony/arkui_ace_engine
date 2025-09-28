@@ -26,6 +26,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t UNION_ONE = 1;
 // similar as in the js_image.cpp
 constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
 constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
@@ -151,6 +152,10 @@ void SetFillColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (value->value.selector == UNION_ONE) {
+        ImageModelNG::ResetImageFill(frameNode);
+        return;
+    }
     ImageModelStatic::SetImageFill(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SetObjectFitImpl(Ark_NativePointer node,

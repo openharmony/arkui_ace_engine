@@ -228,11 +228,10 @@ import { ArkWithThemeComponent, WithThemeAttribute } from "./../../component/wit
 import { WithThemeModifier } from "./../../WithThemeModifier"
 import { ArkXComponentComponent, XComponentAttribute } from "./../../component/xcomponent"
 import { XComponentModifier } from "./../../XComponentModifier"
-import { ArkRootComponent, Root, ArkComponentRootComponent, ComponentRoot, ArkCustomBuilderRootComponent, CustomBuilderRoot, ArkConditionScopeComponent, ConditionScope, ArkCustomLayoutRootComponent, CustomLayoutRoot } from "./../../component/idlize"
+import { ArkRootComponent, Root, ArkComponentRootComponent, ComponentRoot, ArkCustomBuilderRootComponent, CustomBuilderRoot, ArkCustomLayoutRootComponent, CustomLayoutRoot } from "./../../component/idlize"
 import { RootModifier } from "./../../RootModifier"
 import { ComponentRootModifier } from "./../../ComponentRootModifier"
 import { CustomBuilderRootModifier } from "./../../CustomBuilderRootModifier"
-import { ConditionScopeModifier } from "./../../ConditionScopeModifier"
 import { CustomLayoutRootModifier } from "./../../CustomLayoutRootModifier"
 import { applyAttributeModifierBase, applyCommonModifier, applyAttributeModifierNoCommonMethod } from  './ArkCommonModifier';
 import { CommonModifier } from '../../CommonModifier';
@@ -340,7 +339,38 @@ export function hookCircleAttributeModifier(component: ArkCircleComponent, modif
 export function hookCommonMethodAttributeModifier(componenet: ArkCommonMethodComponent, value: AttributeModifier<CommonMethod> | undefined):void {}
 export function hookCommonShapeMethodAttributeModifier(componenet: ArkCommonShapeMethodComponent, value: AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookScrollableCommonMethodAttributeModifier(componenet: ArkScrollableCommonMethodComponent, value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookComponent3DAttributeModifier(componenet: ArkComponent3DComponent, value: AttributeModifier<Component3DAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookComponent3DAttributeModifier(component: ArkComponent3DComponent, modifier: AttributeModifier<Component3DAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): Component3DModifier => {
+        let isComponent3DModifier: boolean = modifier instanceof Component3DModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new Component3DModifier();
+        if (isComponent3DModifier) {
+            let component3DModifier = modifier as object as Component3DModifier;
+            initModifier.mergeModifier(component3DModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkComponent3DComponent => {
+        let componentNew: ArkComponent3DComponent = new ArkComponent3DComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<Component3DAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
 export function hookEffectComponentAttributeModifier(componenet: ArkEffectComponentComponent, value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookEllipseAttributeModifier(component: ArkEllipseComponent, modifier: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {
       if (modifier === undefined) {
@@ -944,7 +974,6 @@ export function hookXComponentAttributeModifier(component: ArkXComponentComponen
 export function hookRootAttributeModifier(componenet: ArkRootComponent, value: AttributeModifier<Root> | undefined):void {}
 export function hookComponentRootAttributeModifier(componenet: ArkComponentRootComponent, value: AttributeModifier<ComponentRoot> | undefined):void {}
 export function hookCustomBuilderRootAttributeModifier(componenet: ArkCustomBuilderRootComponent, value: AttributeModifier<CustomBuilderRoot> | undefined):void {}
-export function hookConditionScopeAttributeModifier(componenet: ArkConditionScopeComponent, value: AttributeModifier<ConditionScope> | undefined):void {}
 export function hookCustomLayoutRootAttributeModifier(componenet: ArkCustomLayoutRootComponent, value: AttributeModifier<CustomLayoutRoot> | undefined):void {}
 export function hookFormComponentAttributeModifier(component: ArkFormComponentComponent, value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined) {}
 export function hookPasteButtonAttributeModifier(componenet: ArkPasteButtonComponent, value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined):void {}

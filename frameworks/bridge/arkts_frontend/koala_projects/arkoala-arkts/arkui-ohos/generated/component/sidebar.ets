@@ -146,31 +146,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setSideBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinSideBarWidth0Attribute(value: number | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMinSideBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setMaxSideBarWidth0Attribute(value: number | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMaxSideBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setMinSideBarWidth1Attribute(value: Length | undefined): void {
+    setMinSideBarWidthAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -191,10 +167,10 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMinSideBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMinSideBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxSideBarWidth1Attribute(value: Length | undefined): void {
+    setMaxSideBarWidthAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -215,7 +191,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMaxSideBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMaxSideBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAutoHideAttribute(value: boolean | undefined): void {
@@ -323,12 +299,6 @@ export interface SideBarContainerAttribute extends CommonMethod {
     sideBarWidth(value: Length | Bindable<Length> | undefined): this {
         throw new Error("Unimplemented method sideBarWidth")
     }
-    minSideBarWidth(value: number | undefined): this {
-        throw new Error("Unimplemented method minSideBarWidth")
-    }
-    maxSideBarWidth(value: number | undefined): this {
-        throw new Error("Unimplemented method maxSideBarWidth")
-    }
     minSideBarWidth(value: Length | undefined): this {
         throw new Error("Unimplemented method minSideBarWidth")
     }
@@ -357,8 +327,8 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     showControlButton_value?: boolean | undefined
     onChange_value?: ((value: boolean) => void) | undefined
     sideBarWidth_value?: Length | Bindable<Length> | undefined
-    minSideBarWidth_value?: number | undefined
-    maxSideBarWidth_value?: number | undefined
+    minSideBarWidth_value?: Length | undefined
+    maxSideBarWidth_value?: Length | undefined
     autoHide_value?: boolean | undefined
     sideBarPosition_value?: SideBarPosition | undefined
     divider_value?: DividerStyle | null | undefined
@@ -379,12 +349,6 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
         return this
     }
     sideBarWidth(value: Length | Bindable<Length> | undefined): this {
-        return this
-    }
-    minSideBarWidth(value: number | undefined): this {
-        return this
-    }
-    maxSideBarWidth(value: number | undefined): this {
         return this
     }
     minSideBarWidth(value: Length | undefined): this {
@@ -465,26 +429,10 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    public minSideBarWidth(value: number | undefined): this {
-        if (this.checkPriority("minSideBarWidth")) {
-            const value_casted = value as (number | undefined)
-            this.getPeer()?.setMinSideBarWidth0Attribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public maxSideBarWidth(value: number | undefined): this {
-        if (this.checkPriority("maxSideBarWidth")) {
-            const value_casted = value as (number | undefined)
-            this.getPeer()?.setMaxSideBarWidth0Attribute(value_casted)
-            return this
-        }
-        return this
-    }
     public minSideBarWidth(value: Length | undefined): this {
         if (this.checkPriority("minSideBarWidth")) {
             const value_casted = value as (Length | undefined)
-            this.getPeer()?.setMinSideBarWidth1Attribute(value_casted)
+            this.getPeer()?.setMinSideBarWidthAttribute(value_casted)
             return this
         }
         return this
@@ -492,7 +440,7 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
     public maxSideBarWidth(value: Length | undefined): this {
         if (this.checkPriority("maxSideBarWidth")) {
             const value_casted = value as (Length | undefined)
-            this.getPeer()?.setMaxSideBarWidth1Attribute(value_casted)
+            this.getPeer()?.setMaxSideBarWidthAttribute(value_casted)
             return this
         }
         return this
