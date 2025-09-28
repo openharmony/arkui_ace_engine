@@ -1456,7 +1456,7 @@ HWTEST_F(OverlayManagerTestOneNG, PlayBubbleStyleSheetTransition001, TestSize.Le
      * @tc.steps: step3. test PlayBubbleStyleSheetTransition().
      */
     overlayManager->PlayBubbleStyleSheetTransition(topSheetNode, false);
-    EXPECT_EQ(topSheetPattern->height_, overlayManager->sheetHeight_);
+    EXPECT_EQ(topSheetPattern->height_, topSheetPattern->sheetHeightForTranslate_);
 }
 
 /**

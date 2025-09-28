@@ -2316,7 +2316,7 @@ void SheetPresentationPattern::ChangeSheetHeight(float height)
     if (!NearEqual(height_, height)) {
         isDirectionUp_ = GreatNotEqual(height, height_);
         height_ = height;
-        SetCurrentHeightToOverlay(height_);
+        SetSheetHeightForTranslate(height_);
     }
 }
 
@@ -3887,7 +3887,7 @@ void SheetPresentationPattern::SendMessagesBeforeFirstTransitionIn(bool isFirstT
     TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup start");
     const auto& overlayManager = GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    UpdateAccessibilityDetents(overlayManager->GetSheetHeight());
+    UpdateAccessibilityDetents(GetSheetHeightForTranslate());
     auto sheetParent = DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(sheetParent);
     auto levelOrder = overlayManager->GetLevelOrder(sheetParent);

@@ -1655,10 +1655,10 @@ HWTEST_F(SheetPresentationTestFiveNg, SheetTransitionForOverlay001, TestSize.Lev
     sheetPattern->isDismissProcess_ = true;
 
     /**
-     * @tc.steps: step. set sheetHeight_ is 800.0f, SheetTransitionForOverlay.
+     * @tc.steps: step. set sheetHeightForTranslate_ is 800.0f, SheetTransitionForOverlay.
      * @tc.expected: GetTransformTranslate()->y.ConvertToPx() is 100.0f.
      */
-    overlayManager->sheetHeight_ = 800.0f;
+    sheetPattern->sheetHeightForTranslate_ = 800.0f;
     sheetPattern->SheetTransitionForOverlay(true, true);
     EXPECT_EQ(context->GetTransformTranslate()->y.ConvertToPx(), 100.0f);
     SheetPresentationTestFiveNg::TearDownTestCase();
