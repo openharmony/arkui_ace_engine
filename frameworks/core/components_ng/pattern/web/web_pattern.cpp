@@ -2438,7 +2438,7 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         "HandleDragStart DragDrop event actionStart, isDragStartFromWeb_:%{public}d, isMouseEvent_:%{public}d",
         (int)isDragStartFromWeb_, (int)isMouseEvent_);
     if (!isDragStartFromWeb_ && !isMouseEvent_) {
-        if(IsPreviewImageNodeExist()) {
+        if (IsPreviewImageNodeExist()) {
             TAG_LOGI(AceLogTag::ACE_WEB, "Drag start remove preview node.");
             RemovePreviewMenuNode();
         }
