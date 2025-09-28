@@ -74,7 +74,8 @@ const Rosen::Blender* CreateRSBlenderFromNapiValue(JSRef<JSVal> obj);
 std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args);
 std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args);
 bool IsDisableEventVersion();
-void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vector<Shadow>& shadows);
+void ParseTextShadowFromShadowObject(
+    const JSRef<JSVal>& shadowObject, std::vector<Shadow>& shadows, bool needResObj = false);
 bool IsDrawable(const JSRef<JSVal>& jsValue);
 RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj);
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngine* localNativeEngine = nullptr);
