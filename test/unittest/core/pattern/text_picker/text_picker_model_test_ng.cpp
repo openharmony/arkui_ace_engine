@@ -70,6 +70,27 @@ namespace {
         { "/data/resource/1.svg", "share" },
         { "/data/resource/2.svg", "translate" }
     };
+    const std::string TEXT_PICKER_CONTENT_0 = "a";
+    const std::string TEXT_PICKER_CONTENT_1 = "b";
+    const std::string TEXT_PICKER_CONTENT_2 = "c";
+    const std::string TEXT_PICKER_CONTENT_3 = "d";
+    const std::string TEXT_PICKER_CONTENT_4 = "e";
+    const Dimension FONT_SIZE_VALUE = 20.0_px;
+    const Color TEXT_COLOR_VALUE = Color::RED;
+    const FontWeight FONT_WEIGHT_VALUE = FontWeight::BOLD;
+    const std::vector<std::string> FONT_FAMILY_VALUE = { "Arial" };
+    const Ace::FontStyle FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
+    const Dimension PICKER_ITEM_HEIGHT = 50.0_px;
+    const Dimension GRADIENT_HEIGHT = 100.0_px;
+    const int32_t DIGITAL_CROWN_SENSITIVITY = 5;
+    const std::string SELECTED_VALUE = "b";
+    const std::vector<std::string> SELECTED_VALUES = { "b", "d" };
+    const uint32_t SELECTED_INDEX = 1;
+    const std::vector<uint32_t> SELECTED_INDEXES = { 1, 3 };
+    const bool CAN_LOOP = false;
+    const bool ENABLE_HAPTIC_FEEDBACK = false;
+    const bool DISABLE_TEXT_STYLE_ANIMATION = true;
+    const bool DEFAULT_ENABLE_HAPTIC_FEEDBACK = true;
     RefPtr<Theme> GetTheme(ThemeType type)
     {
         if (type == IconTheme::TypeId()) {
@@ -1647,5 +1668,717 @@ HWTEST_F(TextPickerModelTestNg, GetMaxCount001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     EXPECT_EQ(TextPickerModelStatic::GetMaxCount(frameNode), 1);
+}
+/**
+ * @tc.name: TextPickerModelTestNg001
+ * @tc.desc: Test InitialSetupSinglePicker with empty children
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Call InitialSetupSinglePicker
+     * @tc.expected: Children should be created
+     */
+    textPickerModel.SetColumnKind(frameNode, TEXT);
+    std::vector<NG::RangeContent> range = {
+        { TEXT_PICKER_CONTENT_0, "" },
+        { TEXT_PICKER_CONTENT_1, "" },
+        { TEXT_PICKER_CONTENT_2, "" }
+    };
+    textPickerModel.SetRange(frameNode, range);
+    EXPECT_FALSE(frameNode->GetChildren().empty());
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg002
+ * @tc.desc: Test CreateColumnNode with different column kinds
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic
+     */
+    TextPickerModelStatic textPickerModel;
+    
+    /**
+     * @tc.steps: step2. Call CreateColumnNode with ICON kind
+     * @tc.expected: ColumnNode with image children should be created
+     */
+    auto iconColumnNode = textPickerModel.CreateColumnNode(ICON, 3);
+    EXPECT_NE(iconColumnNode, nullptr);
+    EXPECT_EQ(iconColumnNode->GetChildren().size(), 3);
+    
+    /**
+     * @tc.steps: step3. Call CreateColumnNode with TEXT kind
+     * @tc.expected: ColumnNode with text children should be created
+     */
+    auto textColumnNode = textPickerModel.CreateColumnNode(TEXT, 3);
+    EXPECT_NE(textColumnNode, nullptr);
+    EXPECT_EQ(textColumnNode->GetChildren().size(), 3);
+    
+    /**
+     * @tc.steps: step4. Call CreateColumnNode with MIXTURE kind
+     * @tc.expected: ColumnNode with row children should be created
+     */
+    auto mixtureColumnNode = textPickerModel.CreateColumnNode(MIXTURE, 3);
+    EXPECT_NE(mixtureColumnNode, nullptr);
+    EXPECT_EQ(mixtureColumnNode->GetChildren().size(), 3);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg003
+ * @tc.desc: Test SetColumnWidths and GetColumnWidths
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set column widths
+     */
+    std::vector<Dimension> widths = { 100.0_px, 150.0_px, 200.0_px };
+    textPickerModel.SetColumnWidths(frameNode, widths);
+    
+    /**
+     * @tc.steps: step3. Get column widths
+     * @tc.expected: Widths should match
+     */
+    auto getColumnWidths = textPickerModel.GetColumnWidths(frameNode);
+    EXPECT_EQ(getColumnWidths.size(), widths.size());
+    for (size_t i = 0; i < widths.size(); i++) {
+        EXPECT_EQ(getColumnWidths[i], widths[i]);
+    }
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg004
+ * @tc.desc: Test textStyle getters
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Get text styles
+     * @tc.expected: Valid text styles should be returned
+     */
+    auto disappearTextStyle = textPickerModel.getDisappearTextStyle(frameNode);
+    auto normalTextStyle = textPickerModel.getNormalTextStyle(frameNode);
+    auto selectedTextStyle = textPickerModel.getSelectedTextStyle(frameNode);
+    
+    EXPECT_NE(disappearTextStyle.fontSize.value(), Dimension());
+    EXPECT_NE(normalTextStyle.fontSize.value(), Dimension());
+    EXPECT_NE(selectedTextStyle.fontSize.value(), Dimension());
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg005
+ * @tc.desc: Test range and selection related functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set range
+     */
+    std::vector<NG::RangeContent> range = {
+        { TEXT_PICKER_CONTENT_0, "" },
+        { TEXT_PICKER_CONTENT_1, "" },
+        { TEXT_PICKER_CONTENT_2, "" },
+        { TEXT_PICKER_CONTENT_3, "" },
+        { TEXT_PICKER_CONTENT_4, "" }
+    };
+    textPickerModel.SetRange(frameNode, range);
+    
+    /**
+     * @tc.steps: step3. Test range related functions
+     * @tc.expected: Functions should return correct values
+     */
+    EXPECT_TRUE(textPickerModel.IsSingle(frameNode));
+    
+    std::vector<NG::RangeContent> rangeValue;
+    EXPECT_TRUE(textPickerModel.GetSingleRange(frameNode, rangeValue));
+    EXPECT_EQ(rangeValue.size(), range.size());
+    
+    textPickerModel.SetTextPickerRangeType(frameNode, 1);
+    EXPECT_EQ(textPickerModel.GetTextPickerRangeType(frameNode), 1);
+    
+    textPickerModel.SetValue(frameNode, SELECTED_VALUE);
+    EXPECT_EQ(textPickerModel.getTextPickerValue(frameNode), SELECTED_VALUE);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg006
+ * @tc.desc: Test cascade related functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Test cascade functions with false value
+     * @tc.expected: Functions should return false values
+     */
+    EXPECT_TRUE(textPickerModel.IsCascade(frameNode));
+    
+    std::vector<NG::TextCascadePickerOptions> options;
+    EXPECT_TRUE(textPickerModel.GetMultiOptions(frameNode, options));
+    
+    textPickerModel.SetIsCascade(frameNode, true);
+    EXPECT_TRUE(textPickerModel.IsCascade(frameNode));
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg007
+ * @tc.desc: Test SetValues and related functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set values
+     */
+    textPickerModel.SetValues(frameNode, SELECTED_VALUES);
+    
+    /**
+     * @tc.steps: step3. Test value related functions
+     * @tc.expected: Functions should return correct values
+     */
+    EXPECT_EQ(textPickerModel.getTextPickerValues(frameNode), "b;d");
+    EXPECT_EQ(textPickerModel.GetSelectedSize(frameNode), 3);
+    
+    auto selecteds = textPickerModel.getTextPickerSelecteds(frameNode);
+    EXPECT_EQ(selecteds.size(), 3);
+    EXPECT_EQ(selecteds[0], SELECTED_INDEXES[0]);
+    EXPECT_EQ(selecteds[2], SELECTED_INDEXES[1]);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg008
+ * @tc.desc: Test SetSelected and related functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set selected
+     */
+    textPickerModel.SetSelected(frameNode, SELECTED_INDEX);
+    
+    /**
+     * @tc.steps: step3. Test selection related functions
+     * @tc.expected: Functions should return correct values
+     */
+    EXPECT_EQ(textPickerModel.getTextPickerSelectedIndex(frameNode), SELECTED_INDEX);
+    EXPECT_EQ(textPickerModel.GetSelectedSize(frameNode), 3);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg009
+ * @tc.desc: Test SetSelecteds and related functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set selecteds
+     */
+    textPickerModel.SetSelecteds(frameNode, SELECTED_INDEXES);
+    
+    /**
+     * @tc.steps: step3. Test selection related functions
+     * @tc.expected: Functions should return correct values
+     */
+    auto selecteds = textPickerModel.getTextPickerSelecteds(frameNode);
+    EXPECT_EQ(selecteds.size(), 2);
+    EXPECT_EQ(selecteds[0], SELECTED_INDEXES[0]);
+    EXPECT_EQ(selecteds[1], SELECTED_INDEXES[1]);
+    EXPECT_EQ(textPickerModel.GetSelectedSize(frameNode), 2);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg010
+ * @tc.desc: Test SetCanLoop and GetCanLoop
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set can loop
+     */
+    textPickerModel.SetCanLoop(frameNode, CAN_LOOP);
+    
+    /**
+     * @tc.steps: step3. Get can loop
+     * @tc.expected: Value should match
+     */
+    EXPECT_EQ(textPickerModel.GetCanLoop(frameNode), CAN_LOOP);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg011
+ * @tc.desc: Test SetDigitalCrownSensitivity with valid and invalid values
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set digital crown sensitivity with valid value
+     */
+    std::optional<int32_t> validValue = DIGITAL_CROWN_SENSITIVITY;
+    textPickerModel.SetDigitalCrownSensitivity(frameNode, validValue);
+    
+    /**
+     * @tc.steps: step3. Set digital crown sensitivity with invalid value
+     */
+    std::optional<int32_t> invalidValue = 100;
+    textPickerModel.SetDigitalCrownSensitivity(frameNode, invalidValue);
+    
+    /**
+     * @tc.steps: step4. Reset digital crown sensitivity
+     */
+    std::optional<int32_t> nulloptValue;
+    textPickerModel.SetDigitalCrownSensitivity(frameNode, nulloptValue);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg012
+ * @tc.desc: Test SetDefaultPickerItemHeight and GetDefaultPickerItemHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set default picker item height
+     */
+    std::optional<Dimension> heightValue = PICKER_ITEM_HEIGHT;
+    textPickerModel.SetDefaultPickerItemHeight(frameNode, heightValue);
+    
+    /**
+     * @tc.steps: step3. Get default picker item height
+     * @tc.expected: Value should match
+     */
+    EXPECT_EQ(textPickerModel.GetDefaultPickerItemHeight(frameNode), PICKER_ITEM_HEIGHT);
+    
+    /**
+     * @tc.steps: step4. Reset default picker item height
+     */
+    std::optional<Dimension> nulloptValue;
+    textPickerModel.SetDefaultPickerItemHeight(frameNode, nulloptValue);
+    EXPECT_EQ(textPickerModel.GetDefaultPickerItemHeight(frameNode), Dimension(0.0f));
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg013
+ * @tc.desc: Test SetGradientHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set gradient height
+     */
+    std::optional<Dimension> heightValue = GRADIENT_HEIGHT;
+    textPickerModel.SetGradientHeight(frameNode, heightValue);
+    
+    /**
+     * @tc.steps: step3. Reset gradient height
+     */
+    std::optional<Dimension> nulloptValue;
+    textPickerModel.SetGradientHeight(frameNode, nulloptValue);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg014
+ * @tc.desc: Test SetDisableTextStyleAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set disable text style animation
+     */
+    textPickerModel.SetDisableTextStyleAnimation(frameNode, DISABLE_TEXT_STYLE_ANIMATION);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg015
+ * @tc.desc: Test SetEnableHapticFeedback and GetEnableHapticFeedback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set enable haptic feedback with value
+     */
+    std::optional<bool> hapticValue = ENABLE_HAPTIC_FEEDBACK;
+    textPickerModel.SetEnableHapticFeedback(frameNode, hapticValue);
+    
+    /**
+     * @tc.steps: step3. Get enable haptic feedback
+     * @tc.expected: Value should match
+     */
+    EXPECT_EQ(textPickerModel.GetEnableHapticFeedback(frameNode), ENABLE_HAPTIC_FEEDBACK);
+    
+    /**
+     * @tc.steps: step4. Set enable haptic feedback without value
+     */
+    std::optional<bool> nulloptValue;
+    textPickerModel.SetEnableHapticFeedback(frameNode, nulloptValue);
+    EXPECT_EQ(textPickerModel.GetEnableHapticFeedback(frameNode), DEFAULT_ENABLE_HAPTIC_FEEDBACK);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg016
+ * @tc.desc: Test textStyle setters
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto context = frameNode->GetContext();
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    auto textTheme = context->GetTheme<TextTheme>();
+    
+    /**
+     * @tc.steps: step2. Set text styles
+     */
+    NG::PickerTextStyle normalStyle;
+    normalStyle.fontSize = FONT_SIZE_VALUE;
+    normalStyle.textColor = TEXT_COLOR_VALUE;
+    normalStyle.fontWeight = FONT_WEIGHT_VALUE;
+    normalStyle.fontFamily = FONT_FAMILY_VALUE;
+    normalStyle.fontStyle = FONT_STYLE_VALUE;
+    
+    textPickerModel.SetNormalTextStyle(frameNode, pickerTheme, normalStyle);
+    textPickerModel.SetSelectedTextStyle(frameNode, pickerTheme, normalStyle);
+    textPickerModel.SetDisappearTextStyle(frameNode, pickerTheme, normalStyle);
+    textPickerModel.SetDefaultTextStyle(frameNode, textTheme, normalStyle);
+    textPickerModel.SetDefaultTextStyle(frameNode, normalStyle);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg017
+ * @tc.desc: Test SetDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set divider
+     */
+    ItemDivider divider;
+    divider.strokeWidth = 2.0_px;
+    divider.startMargin = 10.0_px;
+    divider.endMargin = 10.0_px;
+    divider.color = Color::BLACK;
+    textPickerModel.SetDivider(frameNode, divider);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg018
+ * @tc.desc: Test SetColumnKind
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set column kind
+     */
+    textPickerModel.SetColumnKind(frameNode, MIXTURE);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg019
+ * @tc.desc: Test SetHasSelectAttr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set has select attr
+     */
+    textPickerModel.SetHasSelectAttr(frameNode, true);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg020
+ * @tc.desc: Test SetBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set background color
+     */
+    textPickerModel.SetBackgroundColor(frameNode, Color::BLUE);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg022
+ * @tc.desc: Test GetColumnWidthsSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Get column widths size
+     * @tc.expected: Should return 0 for empty column widths
+     */
+    EXPECT_EQ(textPickerModel.GetColumnWidthsSize(frameNode), 3);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg023
+ * @tc.desc: Test GetMaxCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Get max count
+     * @tc.expected: Should return 1
+     */
+    EXPECT_EQ(textPickerModel.GetMaxCount(frameNode), 1);
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg024
+ * @tc.desc: Test GetSelectedObjectStr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     */
+    TextPickerModelStatic textPickerModel;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Get selected object str
+     * @tc.expected: Should not be null
+     */
+    auto result = textPickerModel.GetSelectedObjectStr(frameNode, SELECTED_VALUE, SELECTED_INDEX);
+    EXPECT_NE(result, "framenode null");
+    EXPECT_NE(result, "pattern null");
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg025
+ * @tc.desc: Test ConvertFontScaleValue with different conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ConvertFontScaleValue with VP unit
+     * @tc.expected: Should return original value
+     */
+    Dimension vpValue(20.0, DimensionUnit::VP);
+    auto result = TextPickerModelStatic::ConvertFontScaleValue(vpValue);
+    EXPECT_EQ(result, vpValue);
+    
+    /**
+     * @tc.steps: step2. Test ConvertFontScaleValue with zero font scale
+     * @tc.expected: Should return original value
+     */
+    Dimension pxValue(20.0, DimensionUnit::PX);
+    auto result2 = TextPickerModelStatic::ConvertFontScaleValue(pxValue);
+    EXPECT_EQ(result2.Value(), pxValue.Value());
+}
+
+/**
+ * @tc.name: TextPickerModelTestNg026
+ * @tc.desc: Test ValidateData function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare test data
+     */
+    NG::TextCascadePickerOptions options;
+    options.rangeResult = { "a", "b", "c" };
+    std::vector<std::string> values = { "b" };
+    uint32_t index = 0;
+    std::vector<std::string> selectedValues;
+    std::vector<uint32_t> valuesIndex;
+    
+    /**
+     * @tc.steps: step2. Call ValidateData with existing value
+     * @tc.expected: Should find the value and its index
+     */
+    TextPickerModelStatic::ValidateData(options, values, index, selectedValues, valuesIndex);
+    EXPECT_EQ(selectedValues[0], "b");
+    EXPECT_EQ(valuesIndex[0], 1);
+    
+    /**
+     * @tc.steps: step3. Call ValidateData with non-existing value
+     * @tc.expected: Should use the first value and index 0
+     */
+    std::vector<std::string> values2 = { "d" };
+    std::vector<std::string> selectedValues2;
+    std::vector<uint32_t> valuesIndex2;
+    TextPickerModelStatic::ValidateData(options, values2, index, selectedValues2, valuesIndex2);
+    EXPECT_EQ(selectedValues2[0], "a");
+    EXPECT_EQ(valuesIndex2[0], 0);
+    
+    /**
+     * @tc.steps: step4. Call ValidateData with empty values
+     * @tc.expected: Should use empty string and index 0
+     */
+    std::vector<std::string> values3;
+    std::vector<std::string> selectedValues3;
+    std::vector<uint32_t> valuesIndex3;
+    options.rangeResult.clear();
+    TextPickerModelStatic::ValidateData(options, values3, index, selectedValues3, valuesIndex3);
+    EXPECT_EQ(selectedValues3[0], "");
+    EXPECT_EQ(valuesIndex3[0], 0);
 }
 } // namespace OHOS::Ace::NG
