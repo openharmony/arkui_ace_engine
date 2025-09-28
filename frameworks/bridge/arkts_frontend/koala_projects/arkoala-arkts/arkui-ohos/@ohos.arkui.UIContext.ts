@@ -16,37 +16,36 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { FrameNode } from "arkui/FrameNode"
-import { default as font } from "@ohos/font"
-import { MeasureOptions } from "@ohos/measure"
-import { SizeOptions } from 'arkui/framework'
-import { AnimateParam } from 'arkui/framework'
-import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from "@ohos/animator"
-import { Context, PointerStyle, PixelMap } from "#external"
-import { componentUtils } from "@ohos/arkui/componentUtils"
-import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
-import { dragController } from "@ohos/arkui/dragController"
-import { focusController } from "@ohos/arkui/focusController"
-import { Frame } from "arkui/Graphics"
-import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions } from 'arkui/framework'
-import { TextMenuOptions } from 'arkui/framework'
-import { Nullable, WidthBreakpoint, HeightBreakpoint } from 'arkui/framework'
-import { KeyProcessingMode } from 'arkui/framework'
-import { default as uiObserver } from "@ohos/arkui/observer"
-import { default as mediaquery } from '@ohos/mediaquery'
-import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
-    AlertDialogParamWithOptions }from 'arkui/framework'
-import { ActionSheetOptions} from 'arkui/framework'
-import inspector from "@ohos/arkui/inspector"
-import router from '@ohos/router'
-import { ComponentContent } from 'arkui/ComponentContent'
-import overlayManager from '@ohos/overlayManager'
-import promptAction, { LevelOrder } from '@ohos/promptAction'
+import { FrameNode } from 'arkui/FrameNode';
+import { default as font } from '@ohos/font';
+import { MeasureOptions } from '@ohos/measure';
+import { SizeOptions } from 'arkui/framework';
+import { AnimateParam } from 'arkui/framework';
+import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from '@ohos/animator';
+import { Context, PointerStyle, PixelMap } from '#external';
+import { componentUtils } from '@ohos/arkui/componentUtils';
+import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
+import { dragController } from '@ohos/arkui/dragController';
+import { focusController } from '@ohos/arkui/focusController';
+import { Frame } from 'arkui/Graphics';
+import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions } from 'arkui/framework';
+import { TextMenuOptions } from 'arkui/framework';
+import { Nullable, WidthBreakpoint, HeightBreakpoint } from 'arkui/framework';
+import { KeyProcessingMode } from 'arkui/framework';
+import { default as uiObserver } from '@ohos/arkui/observer';
+import { default as mediaquery } from '@ohos/mediaquery';
+import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions }from 'arkui/framework';
+import { ActionSheetOptions} from 'arkui/framework';
+import inspector from '@ohos/arkui/inspector';
+import router from '@ohos/router';
+import { ComponentContent } from 'arkui/ComponentContent';
+import overlayManager from '@ohos/overlayManager';
+import promptAction, { LevelOrder } from '@ohos/promptAction';
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
-import { CustomBuilder, CustomBuilderT, DragItemInfo, Callback } from 'arkui/framework'
+import { CustomBuilder, CustomBuilderT, DragItemInfo, Callback } from 'arkui/framework';
 import { Router as RouterExt, AsyncCallback } from 'arkui/base';
-import { ComputableState, IncrementalNode } from '@koalaui/runtime'
-import { PeerNode } from 'arkui/PeerNode'
+import { ComputableState, IncrementalNode } from '@koalaui/runtime';
+import { PeerNode } from 'arkui/PeerNode';
 import { ArkUIAniModule } from 'arkui.ani';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 
@@ -420,6 +419,14 @@ export class CursorController {
     }
 }
 
+export const enum KeyboardAvoidMode {
+    OFFSET = 0,
+    RESIZE = 1,
+    OFFSET_WITH_CARET = 2,
+    RESIZE_WITH_CARET = 3,
+    NONE = 4,
+}
+
 export class UIContext {
     constructor() {
     }
@@ -467,6 +474,14 @@ export class UIContext {
     }
     getHostContext(): Context | undefined {
         throw Error("getHostContext not implemented in UIContext!")
+    }
+
+    public getKeyboardAvoidMode(): KeyboardAvoidMode {
+        throw Error("getKeyboardAvoidMode not implemented in UIContext!")
+    }
+
+    public setKeyboardAvoidMode(mode: KeyboardAvoidMode) {
+        throw Error("setKeyboardAvoidMode not implemented in UIContext!")
     }
 
     public getAtomicServiceBar(): Nullable<AtomicServiceBar> {

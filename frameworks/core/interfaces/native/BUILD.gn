@@ -155,6 +155,7 @@ template("ace_core_interfaces_native_node") {
       "ani/component_snapshot_ani_modifier.cpp",
       "ani/content_slot_ani_modifier.cpp",
       "ani/custom_node_ani_modifier.cpp",
+      "ani/keyboard_avoid_mode_ani_modifier.cpp",
       "ani/drag_ani_modifier.cpp",
       "ani/node_adapter_ani_modifier.cpp",
       "ani/interop_ani_modifier.cpp",
