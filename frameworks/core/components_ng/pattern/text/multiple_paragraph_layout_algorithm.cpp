@@ -129,6 +129,9 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     FontRegisterCallback(frameNode, textStyle);
     textStyle.SetTextDirection(ParagraphUtil::GetTextDirection(content, layoutWrapper));
     textStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
+    textStyle.SetLineHeightMultiply(textLayoutProperty->GetLineHeightMultiply());
+    textStyle.SetMinimumLineHeight(textLayoutProperty->GetMinimumLineHeight());
+    textStyle.SetMaximumLineHeight(textLayoutProperty->GetMaximumLineHeight());
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle, textColor);
     inheritTextStyle_ = textStyle;
@@ -1000,7 +1003,6 @@ void MultipleParagraphLayoutAlgorithm::CalcHeightWithMinLines(TextStyle& textSty
 {
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
 
     if (textLayoutProperty->HasMinLines() && textLayoutProperty->GetMinLines().value() >= DEFAULT_MIN_LINES) {
         auto minLines = textLayoutProperty->GetMinLines().value();
@@ -1026,7 +1028,7 @@ void MultipleParagraphLayoutAlgorithm::CalcHeightWithMinLines(TextStyle& textSty
                 perLineHeight = MeasureUtil::MeasureTextSize(textStyle, data).Height();
             }
         }
-
+        auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
         float finalMinHeight = paragraphHeight + perLineHeight * (minLines - lineCount);
         finalMinHeight =
             std::clamp(finalMinHeight, contentConstraint.minSize.Height(), contentConstraint.maxSize.Height());

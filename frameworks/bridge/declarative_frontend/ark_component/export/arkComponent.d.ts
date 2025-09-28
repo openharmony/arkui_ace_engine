@@ -743,6 +743,9 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     fontWeight(value: number | FontWeight | string): TextAttribute;
     textAlign(value: TextAlign): TextAttribute;
     lineHeight(value: number | string | Resource): TextAttribute;
+    lineHeightMultiple(value: number): TextAttribute;
+    minLineHeight(value: LengthMetrics): TextAttribute;
+    maxLineHeight(value: LengthMetrics): TextAttribute;
     textOverflow(value: {
         overflow: TextOverflow;
     }): TextAttribute;

@@ -371,6 +371,67 @@ void TextModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value, frameNode);
 }
 
+void TextModelNG::ResetLineHeightMultiply()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, LineHeightMultiply, PROPERTY_UPDATE_MEASURE);
+}
+
+void TextModelNG::SetLineHeightMultiply(double value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeightMultiply, value);
+}
+
+void TextModelNG::ResetLineHeightMultiply(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, LineHeightMultiply, PROPERTY_UPDATE_MEASURE,
+        frameNode);
+}
+
+void TextModelNG::SetLineHeightMultiply(FrameNode* frameNode, double value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeightMultiply, value, frameNode);
+}
+
+void TextModelNG::ResetMinimumLineHeight()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MinimumLineHeight, PROPERTY_UPDATE_MEASURE);
+}
+
+void TextModelNG::SetMinimumLineHeight(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinimumLineHeight, value);
+}
+
+void TextModelNG::ResetMinimumLineHeight(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MinimumLineHeight, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
+void TextModelNG::SetMinimumLineHeight(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinimumLineHeight, value, frameNode);
+}
+
+void TextModelNG::ResetMaximumLineHeight()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MaximumLineHeight, PROPERTY_UPDATE_MEASURE);
+}
+
+void TextModelNG::SetMaximumLineHeight(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaximumLineHeight, value);
+}
+
+void TextModelNG::ResetMaximumLineHeight(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MaximumLineHeight, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
+void TextModelNG::SetMaximumLineHeight(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaximumLineHeight, value, frameNode);
+}
+
 void TextModelNG::SetLineSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineSpacing, value);
@@ -902,6 +963,35 @@ float TextModelNG::GetLineHeight(FrameNode* frameNode)
     CHECK_NULL_RETURN(layoutProperty, 0.0f);
     Dimension defaultLineHeight(0);
     auto value = layoutProperty->GetLineHeight().value_or(defaultLineHeight);
+    return static_cast<float>(value.Value());
+}
+
+double TextModelNG::GetTextLineHeightMultiply(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0);
+    auto value = layoutProperty->GetLineHeightMultiply().value_or(0.0);
+    return value;
+}
+
+float TextModelNG::GetTextMaximumLineHeight(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    Dimension defaultLineHeight(0);
+    auto value = layoutProperty->GetMaximumLineHeight().value_or(defaultLineHeight);
+    return static_cast<float>(value.Value());
+}
+
+float TextModelNG::GetTextMinimumLineHeight(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    Dimension defaultLineHeight(0);
+    auto value = layoutProperty->GetMinimumLineHeight().value_or(defaultLineHeight);
     return static_cast<float>(value.Value());
 }
 

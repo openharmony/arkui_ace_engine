@@ -94,6 +94,7 @@ const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMod
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 constexpr uint32_t MIN_LINES = 0;
+const int32_t DEFAULT_LINE_HEIGHT = 28;
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -574,6 +575,60 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
         value.Reset();
     }
     TextModel::GetInstance()->SetLineHeight(value);
+}
+
+void JSText::SetLineHeightMultiply(const JSCallbackInfo& info)
+{
+    double value;
+    JSRef<JSVal> args = info[0];
+    RefPtr<ResourceObject> resObj;
+
+    if (!ParseJsDouble(args, value, resObj) || LessNotEqual(value, 0.0)) {
+        TextModel::GetInstance()->ResetLineHeightMultiply();
+        UnRegisterResource("LineHeightMultiply");
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("LineHeightMultiply", resObj, value);
+    }
+    TextModel::GetInstance()->SetLineHeight(CalcDimension(DEFAULT_LINE_HEIGHT, DimensionUnit::PX));
+    TextModel::GetInstance()->SetLineHeightMultiply(value);
+}
+
+void JSText::SetMinimumLineHeight(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    JSRef<JSVal> args = info[0];
+    RefPtr<ResourceObject> resObj;
+
+    if (!ParseLengthMetricsToDimension(args, value, resObj) || value.IsNegative()) {
+        value.Reset();
+        TextModel::GetInstance()->ResetMinimumLineHeight();
+        UnRegisterResource("MinimumLineHeight");
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("MinimumLineHeight", resObj, value);
+    }
+    TextModel::GetInstance()->SetMinimumLineHeight(value);
+}
+
+void JSText::SetMaximumLineHeight(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    JSRef<JSVal> args = info[0];
+    RefPtr<ResourceObject> resObj;
+
+    if (!ParseLengthMetricsToDimension(args, value, resObj) || value.IsNegative()) {
+        value.Reset();
+        TextModel::GetInstance()->ResetMaximumLineHeight();
+        UnRegisterResource("MaximumLineHeight");
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("MaximumLineHeight", resObj, value);
+    }
+    TextModel::GetInstance()->SetMaximumLineHeight(value);
 }
 
 void JSText::SetLineSpacing(const JSCallbackInfo& info)
@@ -1325,6 +1380,9 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("enableAutoSpacing", &JSText::SetEnableAutoSpacing);
     JSClass<JSText>::StaticMethod("textVerticalAlign", &JSText::SetTextVerticalAlign);
     JSClass<JSText>::StaticMethod("shaderStyle", &JSText::SetShaderStyle);
+    JSClass<JSText>::StaticMethod("lineHeightMultiple", &JSText::SetLineHeightMultiply);
+    JSClass<JSText>::StaticMethod("maxLineHeight", &JSText::SetMaximumLineHeight);
+    JSClass<JSText>::StaticMethod("minLineHeight", &JSText::SetMinimumLineHeight);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

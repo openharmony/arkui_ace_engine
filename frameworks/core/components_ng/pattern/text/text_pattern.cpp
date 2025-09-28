@@ -6846,6 +6846,9 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
             }
         },
         DEFINE_PROP_HANDLER(LetterSpacing, CalcDimension, UpdateLetterSpacing),
+        DEFINE_PROP_HANDLER(LineHeightMultiply, double, UpdateLineHeightMultiply),
+        DEFINE_PROP_HANDLER(MinimumLineHeight, CalcDimension, UpdateMinimumLineHeight),
+        DEFINE_PROP_HANDLER(MaximumLineHeight, CalcDimension, UpdateMaximumLineHeight),
     };
     auto it = handlers.find(key);
     if (it != handlers.end()) {

@@ -1475,6 +1475,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetLineHeight));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetLineHeight));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLineHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetMaximumLineHeight));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLineHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetMaximumLineHeight));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinLineHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetMinimumLineHeight));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinLineHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetMinimumLineHeight));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLineHeightMultiple"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetLineHeightMultiply));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineHeightMultiple"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetLineHeightMultiply));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextOverflow"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextOverflow));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextOverflow"),

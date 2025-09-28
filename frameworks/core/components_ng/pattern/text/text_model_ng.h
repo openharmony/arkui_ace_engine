@@ -55,6 +55,12 @@ public:
     void ResetMinLines() override;
     void SetTextIndent(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
+    void ResetLineHeightMultiply() override;
+    void ResetMinimumLineHeight() override;
+    void ResetMaximumLineHeight() override;
+    void SetLineHeightMultiply(double value) override;
+    void SetMinimumLineHeight(const Dimension& value) override;
+    void SetMaximumLineHeight(const Dimension& value) override;
     void SetLineSpacing(const Dimension& value) override;
     void SetIsOnlyBetweenLines(bool isOnlyBetweenLines) override;
     void SetTextDecoration(TextDecoration value) override;
@@ -118,6 +124,9 @@ public:
     static void ResetTextColor(FrameNode* frameNode);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetLineHeightMultiply(FrameNode* frameNode, double value);
+    static void SetMinimumLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetMaximumLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetLineSpacing(FrameNode* frameNode, const Dimension& value, bool isOnlyBetweenLines);
     static void SetTextOverflow(FrameNode* frameNode, TextOverflow value);
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
@@ -162,6 +171,9 @@ public:
     static Font GetFont(FrameNode* frameNode);
     static std::u16string GetContent(FrameNode* frameNode);
     static float GetLineHeight(FrameNode* frameNode);
+    static double GetTextLineHeightMultiply(FrameNode* frameNode);
+    static float GetTextMaximumLineHeight(FrameNode* frameNode);
+    static float GetTextMinimumLineHeight(FrameNode* frameNode);
     static float GetLineSpacing(FrameNode* frameNode);
     static TextDecoration GetDecoration(FrameNode* frameNode);
     static Color GetTextDecorationColor(FrameNode* frameNode);
@@ -222,6 +234,9 @@ public:
         FrameNode* frameNode, TextEffectStrategy value, TextFlipDirection direction, bool enableBlur);
     static void ResetContentTransition(FrameNode* frameNode);
     static void ReSetTextContentAlign(FrameNode* frameNode);
+    static void ResetLineHeightMultiply(FrameNode* frameNode);
+    static void ResetMinimumLineHeight(FrameNode* frameNode);
+    static void ResetMaximumLineHeight(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 
