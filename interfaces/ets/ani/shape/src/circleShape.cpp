@@ -132,12 +132,12 @@ ani_object ANICircleShapeSize(ani_env* env, [[maybe_unused]] ani_object object, 
         return object;
     }
     CalcDimension width;
-    ParseOption(env, aniOption, width, "width", "Larkui/component/units/SizeOptions;");
+    ParseOption(env, aniOption, width, "width", "arkui.component.units.SizeOptions");
     if (circleObj->circleShape) {
         circleObj->circleShape->SetWidth(width);
     }
     CalcDimension height;
-    ParseOption(env, aniOption, height, "height", "Larkui/component/units/SizeOptions;");
+    ParseOption(env, aniOption, height, "height", "arkui.component.units.SizeOptions");
     if (circleObj->circleShape) {
         circleObj->circleShape->SetHeight(height);
     }
@@ -155,9 +155,9 @@ ani_object ANICircleShapePosition(
         return object;
     }
     CalcDimension dx;
-    ParseOption(env, aniOption, dx, "x", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dx, "x", "arkui.component.units.Position");
     CalcDimension dy;
-    ParseOption(env, aniOption, dy, "y", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dy, "y", "arkui.component.units.Position");
     DimensionOffset position(dx, dy);
     if (circleObj->circleShape) {
         circleObj->circleShape->SetPosition(position);
@@ -175,9 +175,9 @@ ani_object ANICircleShapeOffset(ani_env* env, [[maybe_unused]] ani_object object
         return object;
     }
     CalcDimension dx;
-    ParseOption(env, aniOption, dx, "x", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dx, "x", "arkui.component.units.Position");
     CalcDimension dy;
-    ParseOption(env, aniOption, dy, "y", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dy, "y", "arkui.component.units.Position");
     DimensionOffset position(dx, dy);
     if (circleObj->circleShape) {
         circleObj->circleShape->SetOffset(position);
@@ -204,6 +204,11 @@ ani_object ANICircleShapeColor(ani_env* env, ani_object object, [[maybe_unused]]
     return object;
 }
 
+ani_object CircleShape::ANICircleShapeFromPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
+{
+    return ANIShapeFromPtr<CirclePeer>(env, ptr, ANI_SHAPE_NAME, "circleShapeResult");
+}
+
 ani_status CircleShape::BindCircleShape(ani_env* env)
 {
     ani_class cls;
@@ -214,9 +219,9 @@ ani_status CircleShape::BindCircleShape(ani_env* env)
     }
 
     std::array methods = {
-        ani_native_function { "<ctor>", ":V", reinterpret_cast<void*>(ANICreateCircleShape) },
+        ani_native_function { "<ctor>", ":", reinterpret_cast<void*>(ANICreateCircleShape) },
         ani_native_function {
-            "<ctor>", "L@ohos/arkui/shape/ShapeSize;:V", reinterpret_cast<void*>(ANICreateCircleShapeWithParam) },
+            "<ctor>", "C{@ohos.arkui.shape.ShapeSize}:", reinterpret_cast<void*>(ANICreateCircleShapeWithParam) },
         ani_native_function { "width", nullptr, reinterpret_cast<void*>(ANICircleShapeWidth) },
         ani_native_function { "height", nullptr, reinterpret_cast<void*>(ANICircleShapeHeight) },
         ani_native_function { "size", nullptr, reinterpret_cast<void*>(ANICircleShapeSize) },

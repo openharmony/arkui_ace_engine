@@ -64,48 +64,44 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // ColumnModifier
 namespace ColumnInterfaceModifier {
-void SetColumnOptions0Impl(Ark_NativePointer node,
-                           const Opt_ColumnOptions* options)
+void SetColumnOptionsImpl(Ark_NativePointer node,
+                          const Opt_Union_ColumnOptions_ColumnOptionsV2* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opts = Converter::OptConvert<ColumnOptions>(*options);
-    if (opts) {
-        ColumnModelNGStatic::SetSpace(frameNode, opts->space);
-    }
-}
-void SetColumnOptions1Impl(Ark_NativePointer node,
-                           const Opt_Union_ColumnOptions_ColumnOptionsV2* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //ColumnModelNG::SetSetColumnOptions1(frameNode, convValue);
+    Converter::VisitUnionPtr(options,
+        [frameNode](const Ark_ColumnOptions& colOptions) {
+            auto opts = Converter::Convert<ColumnOptions>(colOptions);
+            ColumnModelNGStatic::SetSpace(frameNode, opts.space);
+        },
+        [](const Ark_ColumnOptionsV2& colOptionsV2) {
+            LOGE("ColumnInterfaceModifier::SetColumnOptionsImpl Ark_ColumnOptionsV2 is not supported");
+        },
+        []() {});
 }
 } // ColumnInterfaceModifier
 namespace ColumnAttributeModifier {
-void AlignItemsImpl(Ark_NativePointer node,
-                    const Opt_HorizontalAlign* value)
+void SetAlignItemsImpl(Ark_NativePointer node,
+                       const Opt_HorizontalAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ColumnModelNGStatic::SetAlignItems(frameNode, Converter::OptConvert<FlexAlign>(*value));
+    ColumnModelNGStatic::SetAlignItems(frameNode, Converter::OptConvertPtr<FlexAlign>(value));
 }
-void JustifyContentImpl(Ark_NativePointer node,
-                        const Opt_FlexAlign* value)
+void SetJustifyContentImpl(Ark_NativePointer node,
+                           const Opt_FlexAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ColumnModelNGStatic::SetJustifyContent(frameNode, Converter::OptConvert<FlexAlign>(*value));
+    ColumnModelNGStatic::SetJustifyContent(frameNode, Converter::OptConvertPtr<FlexAlign>(value));
 }
-void PointLightImpl(Ark_NativePointer node,
-                    const Opt_PointLightStyle* value)
+void SetPointLightImpl(Ark_NativePointer node,
+                       const Opt_PointLightStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef POINT_LIGHT_ENABLE
-    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    auto pointLightStyle = Converter::OptConvertPtr<Converter::PointLightStyle>(value);
     auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
     auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
     CHECK_NULL_VOID(themeConstants);
@@ -135,17 +131,14 @@ void PointLightImpl(Ark_NativePointer node,
     }
 #endif
 }
-void ReverseImpl(Ark_NativePointer node,
-                 const Opt_Boolean* value)
+void SetReverseImpl(Ark_NativePointer node,
+                    const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value) {
-        // TODO: Reset value
-        if (auto reversed = Converter::OptConvert<bool>(*value); reversed) {
-            ColumnModelNG::SetIsReverse(frameNode, *reversed);
-        }
+    // Implement Reset value
+    if (auto reversed = Converter::OptConvertPtr<bool>(value); reversed) {
+        ColumnModelNG::SetIsReverse(frameNode, *reversed);
     }
 }
 } // ColumnAttributeModifier
@@ -153,12 +146,10 @@ const GENERATED_ArkUIColumnModifier* GetColumnModifier()
 {
     static const GENERATED_ArkUIColumnModifier ArkUIColumnModifierImpl {
         ColumnModifier::ConstructImpl,
-        ColumnInterfaceModifier::SetColumnOptions0Impl,
-        ColumnInterfaceModifier::SetColumnOptions1Impl,
-        ColumnAttributeModifier::AlignItemsImpl,
-        ColumnAttributeModifier::JustifyContentImpl,
-        ColumnAttributeModifier::PointLightImpl,
-        ColumnAttributeModifier::ReverseImpl,
+        ColumnInterfaceModifier::SetColumnOptionsImpl,
+        ColumnAttributeModifier::SetAlignItemsImpl,
+        ColumnAttributeModifier::SetJustifyContentImpl,
+        ColumnAttributeModifier::SetReverseImpl,
     };
     return &ArkUIColumnModifierImpl;
 }

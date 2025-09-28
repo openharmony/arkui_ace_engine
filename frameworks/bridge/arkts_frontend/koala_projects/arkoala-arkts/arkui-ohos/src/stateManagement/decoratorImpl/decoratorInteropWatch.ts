@@ -13,22 +13,24 @@
  * limitations under the License.
  */
 import { WatchFuncType, WatchFunc } from '../index';
-import { UIContextImpl } from 'arkui/handwritten/UIContextImpl';
-import { UIContextUtil } from 'arkui/handwritten/UIContextUtil';
+import { UIContextImpl } from 'arkui/base/UIContextImpl';
+import { UIContextUtil } from 'arkui/base/UIContextUtil';
 
 export class InteropWatchFunc extends WatchFunc {
-    checkThread: ()=>boolean = () => { throw new Error('not implement') }
+    checkThread: () => boolean = () => {
+        throw new Error('not implement');
+    };
 
     constructor(func: WatchFuncType) {
-        super(func)
+        super(func);
         let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
         let instanceId = uiContext.getInstanceId();
-        this.checkThread = () => uiContext.checkThread(instanceId)
+        this.checkThread = () => uiContext.checkThread(instanceId);
     }
 
     execute(propertyName: string): void {
         if (!this.checkThread()) {
-            throw new Error('prohibited to modify a state which binds to UI when not in UI thread')
+            throw new Error('prohibited to modify a state which binds to UI when not in UI thread');
         }
         this.func_(propertyName);
     }

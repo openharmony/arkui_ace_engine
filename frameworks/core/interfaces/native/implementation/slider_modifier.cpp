@@ -20,33 +20,30 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
-namespace OHOS::Ace::NG::Converter {
-struct SliderOptions {
-    std::optional<float> value;
-    std::optional<float> min;
-    std::optional<float> max;
-    std::optional<float> step;
-    std::optional<SliderModel::SliderMode> style;
-    std::optional<Axis> direction;
-    std::optional<bool> reverse;
-};
-
-template<>
-SliderOptions Convert(const Ark_SliderOptions& src)
+namespace OHOS::Ace::NG {
+namespace {
+std::optional<float> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_Number_Bindable& value)
 {
-    return {
-        .value = Converter::OptConvert<float>(src.value),
-        .min = Converter::OptConvert<float>(src.min),
-        .max = Converter::OptConvert<float>(src.max),
-        .step = Converter::OptConvert<float>(src.step),
-        .style = Converter::OptConvert<SliderModel::SliderMode>(src.style),
-        .direction = Converter::OptConvert<Axis>(src.direction),
-        .reverse = Converter::OptConvert<bool>(src.reverse),
-    };
+    std::optional<float> result;
+    Converter::VisitUnion(value,
+        [&result](const Ark_Number& src) {
+            result = Converter::OptConvert<float>(src);
+        },
+        [&result, frameNode](const Ark_Bindable_Number& src) {
+            result = Converter::OptConvert<float>(src.value);
+            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+            auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](float value) {
+                PipelineContext::SetCallBackNode(weakNode);
+                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+            };
+            SliderModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
+        },
+        [] {});
+    return result;
 }
-
+} // namespace
+namespace Converter {
 struct SliderRange {
     std::optional<float> from;
     std::optional<float> to;
@@ -93,10 +90,13 @@ SliderBlockStyle Convert(const Ark_SliderBlockStyle& src)
     return {
         .type = Converter::OptConvert<SliderModel::BlockStyleType>(src.type),
         .image = Converter::OptConvert<ImageSourceInfo>(src.image),
+#ifdef WRONG_GEN
         .shape = Converter::OptConvert<std::string>(src.shape)
+#endif
     };
 }
-}
+} // namespace Converter
+} // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SliderModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -114,39 +114,37 @@ void SetSliderOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = options ? Converter::OptConvert<Converter::SliderOptions>(*options) : std::nullopt;
+    auto optOptions = Converter::GetOptPtr(options);
+    CHECK_NULL_VOID(optOptions);
+    auto value = ProcessBindableValue(frameNode, optOptions->value);
+    auto minVal = Converter::OptConvert<float>(optOptions->min);
+    auto maxVal = Converter::OptConvert<float>(optOptions->max);
+    auto step = Converter::OptConvert<float>(optOptions->step);
+    auto style = Converter::OptConvert<SliderModel::SliderMode>(optOptions->style);
+    auto direction = Converter::OptConvert<Axis>(optOptions->direction);
+    auto reverse = Converter::OptConvert<bool>(optOptions->reverse);
 
-    if (convValue.has_value()) {
-        SliderModelStatic::SetMinLabel(frameNode, convValue.value().min);
-        SliderModelStatic::SetMaxLabel(frameNode, convValue.value().max);
-        Validator::ValidatePositive(convValue.value().step);
-        SliderModelStatic::SetStep(frameNode, convValue.value().step);
-        SliderModelStatic::SetSliderValue(frameNode, convValue.value().value);
-        SliderModelStatic::SetDirection(frameNode, convValue.value().direction);
-        SliderModelStatic::SetReverse(frameNode, convValue.value().reverse);
-        SliderModelStatic::SetSliderMode(frameNode, convValue.value().style);
-    } else {
-        SliderModelStatic::SetSliderValue(frameNode, std::nullopt);
-        SliderModelStatic::SetMinLabel(frameNode, std::nullopt);
-        SliderModelStatic::SetMaxLabel(frameNode, std::nullopt);
-        SliderModelStatic::SetDirection(frameNode, std::nullopt);
-        SliderModelStatic::SetStep(frameNode, std::nullopt);
-        SliderModelStatic::SetReverse(frameNode, std::nullopt);
-        SliderModelStatic::SetSliderMode(frameNode, std::nullopt);
-    }
+    SliderModelStatic::SetMinLabel(frameNode, minVal);
+    SliderModelStatic::SetMaxLabel(frameNode, maxVal);
+    Validator::ValidatePositive(step);
+    SliderModelStatic::SetStep(frameNode, step);
+    SliderModelStatic::SetSliderValue(frameNode, value);
+    SliderModelStatic::SetDirection(frameNode, direction);
+    SliderModelStatic::SetReverse(frameNode, reverse);
+    SliderModelStatic::SetSliderMode(frameNode, style);
 }
 } // SliderInterfaceModifier
 namespace SliderAttributeModifier {
-void BlockColorImpl(Ark_NativePointer node,
-                    const Opt_ResourceColor* value)
+void SetBlockColorImpl(Ark_NativePointer node,
+                       const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     SliderModelStatic::SetBlockColor(frameNode, convValue);
 }
-void TrackColorImpl(Ark_NativePointer node,
-                    const Opt_Union_ResourceColor_LinearGradient* value)
+void SetTrackColorImpl(Ark_NativePointer node,
+                       const Opt_Union_ResourceColor_LinearGradient* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -164,16 +162,8 @@ void TrackColorImpl(Ark_NativePointer node,
         []() {}
     );
 }
-void SelectedColor0Impl(Ark_NativePointer node,
-                        const Opt_ResourceColor* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
-    SliderModelStatic::SetSelectColor(frameNode, convValue);
-}
-void SelectedColor1Impl(Ark_NativePointer node,
-                        const Opt_Union_ResourceColor_LinearGradient* value)
+void SetSelectedColorImpl(Ark_NativePointer node,
+                          const Opt_Union_ResourceColor_LinearGradient* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -191,47 +181,35 @@ void SelectedColor1Impl(Ark_NativePointer node,
         []() {}
     );
 }
-void MinLabelImpl(Ark_NativePointer node,
-                  const Opt_String* value)
+void SetShowStepsImpl(Ark_NativePointer node,
+                      const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
-    SliderModelStatic::SetMinLabel(frameNode, convValue);
-}
-void MaxLabelImpl(Ark_NativePointer node,
-                  const Opt_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
-    SliderModelStatic::SetMaxLabel(frameNode, convValue);
-}
-void ShowStepsImpl(Ark_NativePointer node,
-                   const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    if (!convValue) {
+        // Implement Reset value
+        return;
+    }
     SliderModelNG::SetShowSteps(frameNode, *convValue);
 }
-void TrackThicknessImpl(Ark_NativePointer node,
-                        const Opt_Length* value)
+void SetTrackThicknessImpl(Ark_NativePointer node,
+                           const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidatePositive(convValue);
     SliderModelStatic::SetThickness(frameNode, convValue);
 }
-void OnChangeImpl(Ark_NativePointer node,
-                  const Opt_Callback_Number_SliderChangeMode_Void* value)
+void SetOnChangeImpl(Ark_NativePointer node,
+                     const Opt_Callback_Number_SliderChangeMode_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](float newValue, int32_t mode) {
@@ -242,65 +220,66 @@ void OnChangeImpl(Ark_NativePointer node,
     };
     SliderModelNG::SetOnChange(frameNode, std::move(onChange));
 }
-void BlockBorderColorImpl(Ark_NativePointer node,
-                          const Opt_ResourceColor* value)
+void SetBlockBorderColorImpl(Ark_NativePointer node,
+                             const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     SliderModelStatic::SetBlockBorderColor(frameNode, convValue);
 }
-void BlockBorderWidthImpl(Ark_NativePointer node,
-                          const Opt_Length* value)
+void SetBlockBorderWidthImpl(Ark_NativePointer node,
+                             const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
     SliderModelStatic::SetBlockBorderWidth(frameNode, convValue);
 }
-void StepColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
+void SetStepColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     SliderModelStatic::SetStepColor(frameNode, convValue);
 }
-void TrackBorderRadiusImpl(Ark_NativePointer node,
-                           const Opt_Length* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
-    Validator::ValidateNonNegative(convValue);
-    Validator::ValidateNonPercent(convValue);
-    SliderModelStatic::SetTrackBorderRadius(frameNode, convValue);
-}
-void SelectedBorderRadiusImpl(Ark_NativePointer node,
+void SetTrackBorderRadiusImpl(Ark_NativePointer node,
                               const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
+    SliderModelStatic::SetTrackBorderRadius(frameNode, convValue);
+}
+void SetSelectedBorderRadiusImpl(Ark_NativePointer node,
+                                 const Opt_Dimension* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
     SliderModelStatic::SetSelectedBorderRadius(frameNode, convValue);
 }
-void BlockSizeImpl(Ark_NativePointer node,
-                   const Opt_SizeOptions* value)
+void SetBlockSizeImpl(Ark_NativePointer node,
+                      const Opt_SizeOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Converter::SliderBlockSizeOptions>(*value).value_or(Converter::SliderBlockSizeOptions{});
+    auto convValue = Converter::OptConvertPtr<Converter::SliderBlockSizeOptions>(value)
+        .value_or(Converter::SliderBlockSizeOptions{});
     SliderModelStatic::SetBlockSize(frameNode, convValue.width, convValue.height);
 }
-void BlockStyleImpl(Ark_NativePointer node,
-                    const Opt_SliderBlockStyle* value)
+void SetBlockStyleImpl(Ark_NativePointer node,
+                       const Opt_SliderBlockStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Converter::SliderBlockStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<Converter::SliderBlockStyle>(value);
     if (convValue.has_value()) {
         SliderModelStatic::SetBlockType(frameNode, convValue.value().type);
         if (convValue.value().image.has_value()) {
@@ -312,97 +291,75 @@ void BlockStyleImpl(Ark_NativePointer node,
         LOGE("SliderModifier::BlockStyleImpl is not implemented, raw pointer is not supported!");
     }
 }
-void StepSizeImpl(Ark_NativePointer node,
-                  const Opt_Length* value)
+void SetStepSizeImpl(Ark_NativePointer node,
+                     const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
     SliderModelStatic::SetStepSize(frameNode, convValue);
 }
-void SliderInteractionModeImpl(Ark_NativePointer node,
-                               const Opt_SliderInteraction* value)
+void SetSliderInteractionModeImpl(Ark_NativePointer node,
+                                  const Opt_SliderInteraction* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<SliderModel::SliderInteraction>(*value);
+    auto convValue = Converter::OptConvertPtr<SliderModel::SliderInteraction>(value);
     SliderModelStatic::SetSliderInteractionMode(frameNode, convValue);
 }
-void MinResponsiveDistanceImpl(Ark_NativePointer node,
-                               const Opt_Number* value)
+void SetMinResponsiveDistanceImpl(Ark_NativePointer node,
+                                  const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<float>(value);
     Validator::ValidateNonNegative(convValue);
     SliderModelStatic::SetMinResponsiveDistance(frameNode, convValue);
 }
-void ContentModifierImpl(Ark_NativePointer node,
-                         const Opt_ContentModifier* value)
+void SetSlideRangeImpl(Ark_NativePointer node,
+                       const Opt_SlideRange* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SliderModelNG::SetContentModifier(frameNode, convValue);
-    LOGE("SliderModifier::ContentModifierImpl is not implemented, Ark_CustomObject is not supported!");
-}
-void SlideRangeImpl(Ark_NativePointer node,
-                    const Opt_SlideRange* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Converter::SliderRange>(*value).value_or(Converter::SliderRange{});
+    auto convValue = Converter::OptConvertPtr<Converter::SliderRange>(value).value_or(Converter::SliderRange{});
     SliderModelStatic::SetValidSlideRange(frameNode, convValue.from, convValue.to);
 }
-void DigitalCrownSensitivityImpl(Ark_NativePointer node,
-                                 const Opt_CrownSensitivity* value)
+void SetDigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                    const Opt_CrownSensitivity* value)
 {
-// #ifdef SUPPORT_DIGITAL_CROWN
-//     auto frameNode = reinterpret_cast<FrameNode *>(node);
-//     CHECK_NULL_VOID(frameNode);
-//     auto convValue = value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt;
-//     SliderModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
-// #endif
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<CrownSensitivity>(value);
+    SliderModelStatic::SetDigitalCrownSensitivity(frameNode, convValue);
+#endif
 }
-void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                              const Opt_Boolean* value)
+void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        // TODO: Reset value
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    if (!convValue.has_value()) {
+        // Implement Reset value
         return;
     }
     SliderModelNG::SetEnableHapticFeedback(frameNode, *convValue);
 }
-void ShowTipsImpl(Ark_NativePointer node,
-                  const Opt_Boolean* value,
-                  const Opt_ResourceStr* content)
+void SetShowTipsImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value,
+                     const Opt_ResourceStr* content)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
-    auto convContent = content ? Converter::OptConvert<std::string>(*content) : std::nullopt;
+    auto convContent = Converter::OptConvertPtr<std::string>(content);
     SliderModelNG::SetShowTips(frameNode, *convValue, convContent);
-}
-void _onChangeEvent_valueImpl(Ark_NativePointer node,
-                              const Callback_Number_Void* callback)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](float value) {
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
-    };
-    SliderModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // SliderAttributeModifier
 const GENERATED_ArkUISliderModifier* GetSliderModifier()
@@ -410,31 +367,26 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
     static const GENERATED_ArkUISliderModifier ArkUISliderModifierImpl {
         SliderModifier::ConstructImpl,
         SliderInterfaceModifier::SetSliderOptionsImpl,
-        SliderAttributeModifier::BlockColorImpl,
-        SliderAttributeModifier::TrackColorImpl,
-        SliderAttributeModifier::SelectedColor0Impl,
-        SliderAttributeModifier::SelectedColor1Impl,
-        SliderAttributeModifier::MinLabelImpl,
-        SliderAttributeModifier::MaxLabelImpl,
-        SliderAttributeModifier::ShowStepsImpl,
-        SliderAttributeModifier::TrackThicknessImpl,
-        SliderAttributeModifier::OnChangeImpl,
-        SliderAttributeModifier::BlockBorderColorImpl,
-        SliderAttributeModifier::BlockBorderWidthImpl,
-        SliderAttributeModifier::StepColorImpl,
-        SliderAttributeModifier::TrackBorderRadiusImpl,
-        SliderAttributeModifier::SelectedBorderRadiusImpl,
-        SliderAttributeModifier::BlockSizeImpl,
-        SliderAttributeModifier::BlockStyleImpl,
-        SliderAttributeModifier::StepSizeImpl,
-        SliderAttributeModifier::SliderInteractionModeImpl,
-        SliderAttributeModifier::MinResponsiveDistanceImpl,
-        SliderAttributeModifier::ContentModifierImpl,
-        SliderAttributeModifier::SlideRangeImpl,
-        SliderAttributeModifier::DigitalCrownSensitivityImpl,
-        SliderAttributeModifier::EnableHapticFeedbackImpl,
-        SliderAttributeModifier::ShowTipsImpl,
-        SliderAttributeModifier::_onChangeEvent_valueImpl,
+        SliderAttributeModifier::SetBlockColorImpl,
+        SliderAttributeModifier::SetTrackColorImpl,
+        SliderAttributeModifier::SetSelectedColorImpl,
+        SliderAttributeModifier::SetShowStepsImpl,
+        SliderAttributeModifier::SetTrackThicknessImpl,
+        SliderAttributeModifier::SetOnChangeImpl,
+        SliderAttributeModifier::SetBlockBorderColorImpl,
+        SliderAttributeModifier::SetBlockBorderWidthImpl,
+        SliderAttributeModifier::SetStepColorImpl,
+        SliderAttributeModifier::SetTrackBorderRadiusImpl,
+        SliderAttributeModifier::SetSelectedBorderRadiusImpl,
+        SliderAttributeModifier::SetBlockSizeImpl,
+        SliderAttributeModifier::SetBlockStyleImpl,
+        SliderAttributeModifier::SetStepSizeImpl,
+        SliderAttributeModifier::SetSliderInteractionModeImpl,
+        SliderAttributeModifier::SetMinResponsiveDistanceImpl,
+        SliderAttributeModifier::SetSlideRangeImpl,
+        SliderAttributeModifier::SetDigitalCrownSensitivityImpl,
+        SliderAttributeModifier::SetEnableHapticFeedbackImpl,
+        SliderAttributeModifier::SetShowTipsImpl,
     };
     return &ArkUISliderModifierImpl;
 }

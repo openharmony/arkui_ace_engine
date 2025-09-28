@@ -119,4 +119,24 @@ void PatternLockModelStatic::SetEnableWaveEffect(FrameNode* frameNode, const std
         ACE_RESET_NODE_PAINT_PROPERTY(PatternLockPaintProperty, EnableWaveEffect, frameNode);
     }
 }
+
+void PatternLockModelStatic::SetEnableForeground(FrameNode* frameNode, const std::optional<bool>& enableForeground)
+{
+    if (enableForeground.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, EnableForeground,
+            enableForeground.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(PatternLockPaintProperty, EnableForeground, frameNode);
+    }
+}
+
+void PatternLockModelStatic::SetSkipUnselectedPoint(FrameNode* frameNode, const std::optional<bool>& skipValue)
+{
+    if (skipValue.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, SkipUnselectedPoint, skipValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(PatternLockPaintProperty, SkipUnselectedPoint, frameNode);
+    }
+}
+
 } // namespace OHOS::Ace::NG

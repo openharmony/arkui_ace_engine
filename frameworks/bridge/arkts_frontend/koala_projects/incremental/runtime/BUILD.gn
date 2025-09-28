@@ -22,7 +22,7 @@ action("runtime_annotate") {
 
   args = [
     rebase_path("."),
-    rebase_path("annotate-config.json"),
+    rebase_path("annotate-config.json")
   ]
 }
 
@@ -40,7 +40,11 @@ generate_static_abc("runtime_compile_abc") {
 }
 
 ohos_copy("runtime_abc") {
-  sources = [ target_out_dir + "/runtime_compile_abc/modules_static.abc" ]
-  outputs = [ target_out_dir + "/runtime.abc" ]
+  sources = [
+    target_out_dir + "/runtime_compile_abc/modules_static.abc"
+  ]
+  outputs = [
+    target_out_dir + "/runtime.abc"
+  ]
   deps = [ ":runtime_compile_abc" ]
 }

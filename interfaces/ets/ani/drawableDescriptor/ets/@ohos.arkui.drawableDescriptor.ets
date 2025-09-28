@@ -15,23 +15,73 @@
 
 import image from '@ohos.multimedia.image';
 
+class NativeDestructor {
+  private ptr: long = 0
+  constructor(ptr: long) {
+    this.ptr = ptr
+  }
+
+  clean(): void {
+    DrawableDescriptorInner.destructDrawable(this.ptr)
+  }
+}
+
+let destroyRegister = new FinalizationRegistry<NativeDestructor>((destructor: NativeDestructor) => {
+  destructor.clean()
+})
+
+function finalizerRegister(target: Object, thunk: NativeDestructor) {
+  destroyRegister.register(target, thunk)
+}
+
+function finalizerUnregister(target: Object) {
+  destroyRegister.unregister(target)
+}
 
 export class DrawableDescriptor {
-  protected pixelMap?: image.PixelMap = undefined
-  protected nativeObj: long = 0
+  @JSONStringifyIgnore protected pixelMap?: image.PixelMap = undefined
+  @JSONStringifyIgnore protected nativeObj: long = 0
 
   constructor() { }
 
   getPixelMap(): image.PixelMap | undefined {
     return this.pixelMap
   }
+
+  static transferStatic(input: Any): Object {
+    if (typeof (input) !== 'object' || input === null) {
+      return new Object();
+    }
+    let inputVal = ESValue.wrap(input) as ESValue;
+    return DrawableDescriptorInner.nativeTransferStatic(inputVal);
+  }
+
+  static transferDynamic(input: Object): Any {
+    if (input == null) {
+      return undefined;
+    }
+    let drawableDescriptor = input as DrawableDescriptor;
+    if (drawableDescriptor) {
+      let module = ESValue.load("@ohos.arkui.drawableDescriptor");
+      let initFunc = module.getProperty("__createTransfer__");
+      if (initFunc) {
+        let drawableRet = initFunc.invoke(ESObject.wrap(drawableDescriptor.nativeObj));
+        return drawableRet;
+      }
+    }
+    return undefined;
+  }
 }
 
 export class PixelMapDrawableDescriptor extends DrawableDescriptor {
+  @JSONStringifyIgnore private finalization: NativeDestructor
+
   constructor(src?: image.PixelMap) {
     super()
     this.pixelMap = src
     DrawableDescriptorInner.createPixelMapDrawable(this, src)
+    this.finalization = new NativeDestructor(this.nativeObj)
+    finalizerRegister(this, this.finalization)
   }
 
   getPixelMap(): image.PixelMap | undefined {
@@ -44,9 +94,10 @@ export class PixelMapDrawableDescriptor extends DrawableDescriptor {
 }
 
 export class LayeredDrawableDescriptor extends DrawableDescriptor {
-  private foreground?: DrawableDescriptor = undefined
-  private background?: DrawableDescriptor = undefined
-  private mask?: DrawableDescriptor = undefined
+  @JSONStringifyIgnore private foreground?: DrawableDescriptor = undefined
+  @JSONStringifyIgnore private background?: DrawableDescriptor = undefined
+  @JSONStringifyIgnore private mask?: DrawableDescriptor = undefined
+  @JSONStringifyIgnore private finalization: NativeDestructor
 
   constructor(foreground?: DrawableDescriptor, background?: DrawableDescriptor, mask?: DrawableDescriptor) {
     super();
@@ -55,6 +106,8 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
     this.mask = mask
     DrawableDescriptorInner.createLayeredDrawable(
       this, foreground?.getPixelMap(), background?.getPixelMap(), mask?.getPixelMap())
+    this.finalization = new NativeDestructor(this.nativeObj)
+    finalizerRegister(this, this.finalization)
   }
 
   getPixelMap(): image.PixelMap | undefined {
@@ -99,9 +152,16 @@ export interface AnimationOptions {
   iterations?: number;
 }
 
+class AnimationOptionsImpl implements AnimationOptions {
+  duration?: number;
+  iterations?: number;
+  constructor() { }
+}
+
 export class AnimatedDrawableDescriptor extends DrawableDescriptor {
-  private pixelMaps: Array<image.PixelMap>
-  private options: AnimationOptions | undefined = undefined
+  @JSONStringifyIgnore private pixelMaps: Array<image.PixelMap>
+  @JSONStringifyIgnore private options: AnimationOptions | undefined = undefined
+  @JSONStringifyIgnore private finalization: NativeDestructor
   constructor(pixelMaps: Array<image.PixelMap>, options?: AnimationOptions) {
     super()
     if (pixelMaps.length > 0) {
@@ -110,10 +170,12 @@ export class AnimatedDrawableDescriptor extends DrawableDescriptor {
     this.pixelMaps = pixelMaps
     this.options = options
     DrawableDescriptorInner.createAnimatedDrawable(this, pixelMaps, options)
+    this.finalization = new NativeDestructor(this.nativeObj)
+    finalizerRegister(this, this.finalization)
   }
 }
 
-export class DrawableDescriptorInner {
+class DrawableDescriptorInner {
   static { loadLibrary("drawable_descriptor_ani") }
   native static createPixelMapDrawable(value: PixelMapDrawableDescriptor, pixelmap?: image.PixelMap): void;
   native static createLayeredDrawable(value: LayeredDrawableDescriptor, foreground?: image.PixelMap,
@@ -126,4 +188,6 @@ export class DrawableDescriptorInner {
   native static createBackground(value: LayeredDrawableDescriptor): DrawableDescriptor;
   native static createMask(value: LayeredDrawableDescriptor): DrawableDescriptor;
   native static getMaskClipPath(): string;
+  native static nativeTransferStatic(input: ESValue): DrawableDescriptor;
+  native static destructDrawable(ptr: long): void;
 }

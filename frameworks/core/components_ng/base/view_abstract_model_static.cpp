@@ -39,7 +39,6 @@ namespace {
 const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
 const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
 const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
-constexpr float DEFAULT_BIAS = 0.5f;
 constexpr int32_t LONG_PRESS_DURATION = 800;
 constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
 constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
@@ -807,11 +806,11 @@ void ViewAbstractModelStatic::SetCompositingFilter(FrameNode* frameNode,
     ACE_UPDATE_NODE_RENDER_CONTEXT(CompositingFilter, compositingFilter, frameNode);
 }
 
-void ViewAbstractModelStatic::SetBlender(FrameNode* frameNode,
-    const OHOS::Rosen::Blender* brightnessBlender)
+void ViewAbstractModelStatic::SetBrightnessBlender(FrameNode* frameNode,
+    const OHOS::Rosen::BrightnessBlender* brightnessBlender)
 {
-    CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(Blender, brightnessBlender, frameNode);
+    // CHECK_NULL_VOID(frameNode);
+    // ACE_UPDATE_NODE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender, frameNode);
 }
 
 void ViewAbstractModelStatic::SetBloom(FrameNode *frameNode, const std::optional<float>& value,
@@ -1156,14 +1155,14 @@ void ViewAbstractModelStatic::SetBias(FrameNode* frameNode, const std::optional<
 void ViewAbstractModelStatic::SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
     const std::optional<float>& vertical)
 {
-    auto biasPair = BiasPair(DEFAULT_BIAS, DEFAULT_BIAS);
-    if (horisontal.has_value()) {
-        biasPair.first = horisontal.value();
-    }
-    if (vertical.has_value()) {
-        biasPair.second = vertical.value();
-    }
-    ViewAbstract::SetBias(frameNode, biasPair);
+    // auto biasPair = BiasPair(DEFAULT_BIAS, DEFAULT_BIAS);
+    // if (horisontal.has_value()) {
+    //     biasPair.first = horisontal.value();
+    // }
+    // if (vertical.has_value()) {
+    //     biasPair.second = vertical.value();
+    // }
+    // ViewAbstract::SetBias(frameNode, biasPair);
 }
 
 void ViewAbstractModelStatic::SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
@@ -1396,13 +1395,13 @@ void ViewAbstractModelStatic::SetFocusScopeId(FrameNode* frameNode, const std::s
 }
 
 void ViewAbstractModelStatic::SetFocusScopePriority(
-    FrameNode* frameNode, const std::string& focusScopeId, const std::optional<uint32_t>& focusPriority)
+    FrameNode* frameNode, const std::optional<std::string>& focusScopeId, const std::optional<uint32_t>& focusPriority)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     auto proirity = focusPriority.value_or(static_cast<uint32_t>(FocusPriority::AUTO));
-    focusHub->SetFocusScopePriority(focusScopeId, proirity);
+    focusHub->SetFocusScopePriority(focusScopeId.value_or(""), proirity);
 }
 
 void ViewAbstractModelStatic::SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale)
@@ -1650,5 +1649,82 @@ int32_t ViewAbstractModelStatic::GetMenuParam(NG::MenuParam& menuParam, const Re
     auto menuProperties = wrapperPattern->GetMenuParam();
     menuParam = menuProperties;
     return ERROR_CODE_NO_ERROR;
+}
+
+void ViewAbstractModelStatic::SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [basicShape, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
+            CHECK_NULL_VOID(basicShapeValue);
+            basicShapeValue->ReloadResources();
+            CHECK_NULL_VOID(frameNode);
+            auto target = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(target);
+            if (target->GetClipEdge().has_value()) {
+                target->UpdateClipEdge(false);
+            }
+            target->UpdateClipShape(basicShapeValue);
+            target->OnClipShapeUpdate(basicShapeValue);
+            frameNode->MarkModifyDone();
+            frameNode->MarkDirtyNode();
+        };
+        pattern->AddResObj("clipShape", resObj, std::move(updateFunc));
+    }
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetClipEdge().has_value()) {
+            target->UpdateClipEdge(false);
+        }
+        if (basicShape) {
+            target->UpdateClipShape(basicShape);
+        } else {
+            target->ResetClipShape();
+        }
+    }
+}
+
+void ViewAbstractModelStatic::SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [basicShape, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
+            CHECK_NULL_VOID(basicShapeValue);
+            basicShapeValue->ReloadResources();
+            auto target = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(target);
+            if (target->HasProgressMask()) {
+                target->ResetProgressMask();
+                target->OnProgressMaskUpdate(nullptr);
+            }
+            target->UpdateClipMask(basicShapeValue);
+            target->OnClipMaskUpdate(basicShapeValue);
+        };
+        pattern->AddResObj("maskShape", resObj, std::move(updateFunc));
+    }
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->HasProgressMask()) {
+            target->ResetProgressMask();
+            target->OnProgressMaskUpdate(nullptr);
+        }
+        if (basicShape) {
+            target->UpdateClipMask(basicShape);
+        } else {
+            target->ResetClipMask();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

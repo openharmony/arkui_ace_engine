@@ -200,4 +200,11 @@ double CanvasRenderingContext2DPeerImpl::GetWidth()
     width /= density;
     return width;
 }
+int32_t CanvasRenderingContext2DPeerImpl::GetCanvasId()
+{
+    CHECK_NULL_RETURN(renderingContext2DModel_, -1);
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_RETURN(canvasRenderingContext2DModel, -1);
+    return canvasRenderingContext2DModel->GetId();
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier

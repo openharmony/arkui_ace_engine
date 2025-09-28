@@ -55,8 +55,6 @@ void OnDownloadStart(const CallbackHelper<Callback_OnDownloadStartEvent_Void>& a
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnRefreshAccessedHistory(const CallbackHelper<Callback_OnRefreshAccessedHistoryEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnUrlLoadIntercept(const CallbackHelper<Type_WebAttribute_onUrlLoadIntercept_callback>& arkCallback,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnRenderExited(const CallbackHelper<Callback_OnRenderExitedEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 bool OnShowFileSelector(const CallbackHelper<Callback_OnShowFileSelectorEvent_Boolean>& arkCallback,
@@ -144,8 +142,7 @@ WebKeyboardOption OnWebKeyboard(const CallbackHelper<WebKeyboardCallback>& arkCa
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnAdsBlocked(const CallbackHelper<OnAdsBlockedCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnActivateContent(const CallbackHelper<Callback_Void>& arkCallback,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
 

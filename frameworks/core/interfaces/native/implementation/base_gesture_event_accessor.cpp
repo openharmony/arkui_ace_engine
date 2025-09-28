@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_BaseGestureEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_BaseGestureEvent CtorImpl()
+Ark_BaseGestureEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<BaseGestureEventPeerImpl>();
 }
@@ -50,12 +50,18 @@ void SetFingerListImpl(Ark_BaseGestureEvent peer,
     std::list<FingerInfo> list = Converter::Convert<std::list<FingerInfo>>(*fingerList);
     eventInfo->SetFingerList(list);
 }
+
+Ark_GestureControl_GestureType GetTypeImpl(Ark_BaseGestureEvent peer)
+{
+    CHECK_NULL_RETURN(peer, static_cast<Ark_GestureControl_GestureType>(-1));
+    return Converter::ArkValue<Ark_GestureControl_GestureType>(peer->GetRecognizerType());
+}
 } // BaseGestureEventAccessor
 const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
 {
     static const GENERATED_ArkUIBaseGestureEventAccessor BaseGestureEventAccessorImpl {
         BaseGestureEventAccessor::DestroyPeerImpl,
-        BaseGestureEventAccessor::CtorImpl,
+        BaseGestureEventAccessor::ConstructImpl,
         BaseGestureEventAccessor::GetFinalizerImpl,
         BaseGestureEventAccessor::GetFingerListImpl,
         BaseGestureEventAccessor::SetFingerListImpl,

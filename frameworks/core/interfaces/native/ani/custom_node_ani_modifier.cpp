@@ -40,6 +40,7 @@ ani_long ConstructCustomNode(ani_int id, ArkUICustomNodeInfo&& customNodeInfo)
     customNode->SetPageTransitionFunc(std::move(customNodeInfo.pageTransitionFunc));
     customNode->SetOnCleanupFunc(std::move(customNodeInfo.onCleanupFunc));
     customNode->SetOnDumpInspectorFunc(std::move(customNodeInfo.onDumpInspectorFunc));
+    customNode->SetSetActiveFunc(std::move(customNodeInfo.setActiveFunc));
 
     if (customNode) {
         return reinterpret_cast<ani_long>(AceType::RawPtr(customNode));
@@ -99,7 +100,7 @@ void QueryRouterPageInfo(ani_long node, ArkUIRouterPageInfo& info)
 {
     auto customNode = reinterpret_cast<CustomNode*>(node);
     CHECK_NULL_VOID(customNode);
-
+    
     auto curNode = GetTargetNode(AceType::Claim(customNode), V2::PAGE_ETS_TAG, false, false);
     auto pageNode = AceType::DynamicCast<FrameNode>(curNode);
     CHECK_NULL_VOID(pageNode);
@@ -115,6 +116,19 @@ void QueryRouterPageInfo(ani_long node, ArkUIRouterPageInfo& info)
     return;
 }
 
+bool QueryRouterPageInfo1(ArkUI_Int32 uniqueId, ArkUIRouterPageInfo& info)
+{
+    auto nodePtr =  AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(uniqueId));
+    auto routerPageResult = OHOS::Ace::NG::UIObserverHandler::GetInstance().GetRouterPageState(nodePtr);
+    CHECK_NULL_RETURN(routerPageResult, false);
+    info.index = routerPageResult->index;
+    info.name = routerPageResult->name;
+    info.path = routerPageResult->path;
+    info.state = static_cast<ani_size>(routerPageResult->state);
+    info.pageId = routerPageResult->pageId;
+    return true;
+}
+
 void GetNavDestinationInfo(RefPtr<UINode> node, ArkUINavDestinationInfo& info)
 {
     auto nav = AceType::DynamicCast<FrameNode>(node);
@@ -127,7 +141,6 @@ void GetNavDestinationInfo(RefPtr<UINode> node, ArkUINavDestinationInfo& info)
     CHECK_NULL_VOID(pathInfo);
     NavDestinationState state = NavDestinationState::NONE;
     NavDestinationMode mode = host->GetNavDestinationMode();
-    auto uniqueId = host->GetId();
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         state = pattern->GetNavDestinationState();
         if (state == NavDestinationState::NONE) {
@@ -151,7 +164,7 @@ void QueryNavDestinationInfo(ani_long node, ArkUINavDestinationInfo& info)
 {
     auto customNode = reinterpret_cast<CustomNode*>(node);
     CHECK_NULL_VOID(customNode);
-
+    
     // get navdestination node
     auto current = GetTargetNode(AceType::Claim(customNode), V2::NAVDESTINATION_VIEW_ETS_TAG, false, false);
     CHECK_NULL_VOID(current);
@@ -172,14 +185,32 @@ void QueryNavDestinationInfo0(ani_long node, ArkUINavDestinationInfo& info, ani_
     return;
 }
 
+bool QueryNavDestinationInfo1(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& info)
+{
+    auto nodePtr = AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(uniqueId));
+    auto navDestinationResult = OHOS::Ace::NG::UIObserverHandler::GetInstance().GetNavigationState(nodePtr);
+    CHECK_NULL_RETURN(navDestinationResult, false);
+    info.uniqueId = static_cast<ani_double>(navDestinationResult->uniqueId);
+    info.index = navDestinationResult->index;
+    info.name = navDestinationResult->name;
+    info.navDestinationId = navDestinationResult->navDestinationId;
+    info.navigationId = navDestinationResult->navigationId;
+    info.state = static_cast<ani_size>(navDestinationResult->state);
+    info.mode = static_cast<ani_size>(navDestinationResult->mode);
+    return true;
+}
 const ArkUIAniCustomNodeModifier* GetCustomNodeAniModifier()
 {
-    static const ArkUIAniCustomNodeModifier impl = { .constructCustomNode = OHOS::Ace::NG::ConstructCustomNode,
+    static const ArkUIAniCustomNodeModifier impl = {
+        .constructCustomNode = OHOS::Ace::NG::ConstructCustomNode,
         .requestFrame = OHOS::Ace::NG::RequestFrame,
         .queryNavigationInfo = OHOS::Ace::NG::QueryNavigationInfo,
-        .queryRouterPageInfo = OHOS::Ace::NG::QueryRouterPageInfo,
         .queryNavDestinationInfo = OHOS::Ace::NG::QueryNavDestinationInfo,
-        .queryNavDestinationInfo0 = OHOS::Ace::NG::QueryNavDestinationInfo0 };
+        .queryNavDestinationInfo0 = OHOS::Ace::NG::QueryNavDestinationInfo0,
+        .queryRouterPageInfo = OHOS::Ace::NG::QueryRouterPageInfo,
+        .queryNavDestinationInfo1 = OHOS::Ace::NG::QueryNavDestinationInfo1,
+        .queryRouterPageInfo1 = OHOS::Ace::NG::QueryRouterPageInfo1
+    };
     return &impl;
 }
 

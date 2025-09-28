@@ -1,0 +1,4533 @@
+/*
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { ActionSheetOptions_serializer, ActionSheetOptions, DismissDialogAction, DismissDialogAction_serializer } from "./actionSheet"
+import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { CallbackTransformer } from "./../CallbackTransformer"
+import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from "./alertDialog"
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
+import { Resource_serializer } from "./../framework/resource"
+import { SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from "./units"
+import { Resource } from "global.resource"
+import { Color, BorderStyle } from "./enums"
+import { ContentModifier, extractors, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from "#handwritten"
+import { ButtonConfiguration } from "./button"
+import { CheckBoxConfiguration } from "./checkbox"
+import { DataPanelConfiguration } from "./dataPanel"
+import { GaugeConfiguration } from "./gauge"
+import { LoadingProgressConfiguration } from "./loadingProgress"
+import { ProgressConfiguration } from "./progress"
+import { RadioConfiguration } from "./radio"
+import { RatingConfiguration } from "./rating"
+import { MenuItemConfiguration } from "./select"
+import { SliderConfiguration } from "./slider"
+import { TextClockConfiguration } from "./textClock"
+import { TextTimerConfiguration } from "./textTimer"
+import { ToggleConfiguration } from "./toggle"
+import { Size_serializer, Frame_serializer, LengthMetrics_serializer } from "./../Graphics"
+import { LayoutConstraint_serializer } from "./../FrameNode"
+import { FrameNode, LayoutConstraint } from "arkui.FrameNode"
+import { Size, Frame, LengthMetrics } from "arkui.Graphics"
+import { default as image } from "@ohos.multimedia.image"
+import { MeasureOptions_serializer } from "./../framework/ohos.measure"
+import { MeasureOptions } from "@ohos.measure"
+import { CustomBuilder } from "./builder"
+import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
+import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
+import { TargetInfo } from "@ohos.arkui.UIContext"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { CallbackKind } from "./../framework/peers/CallbackKind"
+import { memo, memo_stable } from "@koalaui/runtime/annotations"
+import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { default as curves } from "@ohos.curves"
+import { CustomDialogController } from "./customDialogController"
+import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos.promptAction"
+import { RootModifier } from "./../RootModifier"
+import { NodeAttach, remember } from "@koalaui/runtime"
+import { ComponentRootModifier } from "./../ComponentRootModifier"
+import { CustomBuilderRootModifier } from "./../CustomBuilderRootModifier"
+import { CustomLayoutRootModifier } from "./../CustomLayoutRootModifier"
+import { GlobalScope } from "./../framework/GlobalScope"
+import { curves_ICurve_serializer } from "./../framework/ohos.curves"
+import { LevelOrder_serializer } from "./../framework/ohos.promptAction"
+export class ActionSheet {
+    static show_serialize(options: ActionSheetOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        ActionSheetOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._ActionSheet_show(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static show(options: ActionSheetOptions): void {
+        const options_casted = options as (ActionSheetOptions)
+        ActionSheet.show_serialize(options_casted)
+        return
+    }
+}
+export class AlertDialog {
+    static show_serialize(options: AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options instanceof AlertDialogParamWithConfirm) {
+            thisSerializer.writeInt8((0).toChar())
+            const optionsForIdx0  = options as AlertDialogParamWithConfirm
+            AlertDialogParamWithConfirm_serializer.write(thisSerializer, optionsForIdx0)
+        } else if (options instanceof AlertDialogParamWithButtons) {
+            thisSerializer.writeInt8((1).toChar())
+            const optionsForIdx1  = options as AlertDialogParamWithButtons
+            AlertDialogParamWithButtons_serializer.write(thisSerializer, optionsForIdx1)
+        } else if (options instanceof AlertDialogParamWithOptions) {
+            thisSerializer.writeInt8((2).toChar())
+            const optionsForIdx2  = options as AlertDialogParamWithOptions
+            AlertDialogParamWithOptions_serializer.write(thisSerializer, optionsForIdx2)
+        }
+        ArkUIGeneratedNativeModule._AlertDialog_show(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static show(options: AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions): void {
+        const options_casted = options as (AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions)
+        AlertDialog.show_serialize(options_casted)
+        return
+    }
+}
+export class AnimationExtender {
+    static SetClipRect_serialize(node: KPointer, x: float, y: float, width: float, height: float): void {
+        ArkUIGeneratedNativeModule._AnimationExtender_SetClipRect(node, x, y, width, height)
+    }
+    static OpenImplicitAnimation_serialize(param: AnimateParam): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        AnimateParam_serializer.write(thisSerializer, param)
+        ArkUIGeneratedNativeModule._AnimationExtender_OpenImplicitAnimation(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static CloseImplicitAnimation_serialize(): void {
+        ArkUIGeneratedNativeModule._AnimationExtender_CloseImplicitAnimation()
+    }
+    static StartDoubleAnimation_serialize(node: KPointer, param: DoubleAnimationParam): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        DoubleAnimationParam_serializer.write(thisSerializer, param)
+        ArkUIGeneratedNativeModule._AnimationExtender_StartDoubleAnimation(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static AnimationTranslate_serialize(node: KPointer, options: TranslateOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TranslateOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._AnimationExtender_AnimationTranslate(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static AnimateToImmediatelyImpl_serialize(param: AnimateParam, event: (() => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        AnimateParam_serializer.write(thisSerializer, param)
+        thisSerializer.holdAndWriteCallback(event)
+        ArkUIGeneratedNativeModule._AnimationExtender_AnimateToImmediatelyImpl(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static KeyframeAnimationImpl_serialize(param: KeyframeAnimateParam, keyfames: Array<KeyframeState>): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        KeyframeAnimateParam_serializer.write(thisSerializer, param)
+        thisSerializer.writeInt32((keyfames.length).toInt())
+        for (let keyfamesCounterI = 0; keyfamesCounterI < keyfames.length; keyfamesCounterI++) {
+            const keyfamesTmpElement : KeyframeState = keyfames[keyfamesCounterI]
+            KeyframeState_serializer.write(thisSerializer, keyfamesTmpElement)
+        }
+        ArkUIGeneratedNativeModule._AnimationExtender_KeyframeAnimationImpl(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static SetClipRect(node: KPointer, x: float, y: float, width: float, height: float): void {
+        const node_casted = node as (KPointer)
+        const x_casted = x as (float)
+        const y_casted = y as (float)
+        const width_casted = width as (float)
+        const height_casted = height as (float)
+        AnimationExtender.SetClipRect_serialize(node_casted, x_casted, y_casted, width_casted, height_casted)
+        return
+    }
+    public static OpenImplicitAnimation(param: AnimateParam): void {
+        const param_casted = param as (AnimateParam)
+        AnimationExtender.OpenImplicitAnimation_serialize(param_casted)
+        return
+    }
+    public static CloseImplicitAnimation(): void {
+        AnimationExtender.CloseImplicitAnimation_serialize()
+        return
+    }
+    public static StartDoubleAnimation(node: KPointer, param: DoubleAnimationParam): void {
+        const node_casted = node as (KPointer)
+        const param_casted = param as (DoubleAnimationParam)
+        AnimationExtender.StartDoubleAnimation_serialize(node_casted, param_casted)
+        return
+    }
+    public static AnimationTranslate(node: KPointer, options: TranslateOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (TranslateOptions)
+        AnimationExtender.AnimationTranslate_serialize(node_casted, options_casted)
+        return
+    }
+    public static AnimateToImmediatelyImpl(param: AnimateParam, event: (() => void)): void {
+        const param_casted = param as (AnimateParam)
+        const event_casted = event as ((() => void))
+        AnimationExtender.AnimateToImmediatelyImpl_serialize(param_casted, event_casted)
+        return
+    }
+    public static KeyframeAnimationImpl(param: KeyframeAnimateParam, keyfames: Array<KeyframeState>): void {
+        const param_casted = param as (KeyframeAnimateParam)
+        const keyfames_casted = keyfames as (Array<KeyframeState>)
+        AnimationExtender.KeyframeAnimationImpl_serialize(param_casted, keyfames_casted)
+        return
+    }
+}
+export class BaseShapeInternal {
+    public static fromPtr(ptr: KPointer): BaseShape {
+        return new BaseShape(ptr)
+    }
+}
+export class BaseShape implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, BaseShape.getFinalizer())
+    }
+    constructor() {
+        this(BaseShape.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._BaseShape_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._BaseShape_getFinalizer()
+    }
+    public width(width: Length): BaseShape {
+        const width_casted = width as (Length)
+        return this.width_serialize(width_casted)
+    }
+    public height(height: Length): BaseShape {
+        const height_casted = height as (Length)
+        return this.height_serialize(height_casted)
+    }
+    public size(size: SizeOptions): BaseShape {
+        const size_casted = size as (SizeOptions)
+        return this.size_serialize(size_casted)
+    }
+    width_serialize(width: Length): BaseShape {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (width instanceof string) {
+            thisSerializer.writeInt8((0).toChar())
+            const widthForIdx0  = width as string
+            thisSerializer.writeString(widthForIdx0)
+        } else if (width instanceof number) {
+            thisSerializer.writeInt8((1).toChar())
+            const widthForIdx1  = width as number
+            thisSerializer.writeNumber(widthForIdx1)
+        } else if (width instanceof Resource) {
+            thisSerializer.writeInt8((2).toChar())
+            const widthForIdx2  = width as Resource
+            Resource_serializer.write(thisSerializer, widthForIdx2)
+        }
+        const retval  = ArkUIGeneratedNativeModule._BaseShape_width(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : BaseShape = BaseShapeInternal.fromPtr(retval)
+        return obj
+    }
+    height_serialize(height: Length): BaseShape {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (height instanceof string) {
+            thisSerializer.writeInt8((0).toChar())
+            const heightForIdx0  = height as string
+            thisSerializer.writeString(heightForIdx0)
+        } else if (height instanceof number) {
+            thisSerializer.writeInt8((1).toChar())
+            const heightForIdx1  = height as number
+            thisSerializer.writeNumber(heightForIdx1)
+        } else if (height instanceof Resource) {
+            thisSerializer.writeInt8((2).toChar())
+            const heightForIdx2  = height as Resource
+            Resource_serializer.write(thisSerializer, heightForIdx2)
+        }
+        const retval  = ArkUIGeneratedNativeModule._BaseShape_height(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : BaseShape = BaseShapeInternal.fromPtr(retval)
+        return obj
+    }
+    size_serialize(size: SizeOptions): BaseShape {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        SizeOptions_serializer.write(thisSerializer, size)
+        const retval  = ArkUIGeneratedNativeModule._BaseShape_size(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : BaseShape = BaseShapeInternal.fromPtr(retval)
+        return obj
+    }
+}
+export class BuilderNodeOpsInternal {
+    public static fromPtr(ptr: KPointer): BuilderNodeOps {
+        return new BuilderNodeOps(ptr)
+    }
+}
+export class BuilderNodeOps implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, BuilderNodeOps.getFinalizer())
+    }
+    constructor() {
+        this(BuilderNodeOps.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._BuilderNodeOps_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._BuilderNodeOps_getFinalizer()
+    }
+    public create(buildFunc: (() => void)): void {
+        const buildFunc_casted = buildFunc as ((() => void))
+        this.create_serialize(buildFunc_casted)
+        return
+    }
+    public disposeNode(): void {
+        this.disposeNode_serialize()
+        return
+    }
+    public setUpdateConfigurationCallback(configurationUpdateFunc: (() => void)): void {
+        const configurationUpdateFunc_casted = configurationUpdateFunc as ((() => void))
+        this.setUpdateConfigurationCallback_serialize(configurationUpdateFunc_casted)
+        return
+    }
+    public setOptions(options: BuilderNodeOptions): void {
+        const options_casted = options as (BuilderNodeOptions)
+        this.setOptions_serialize(options_casted)
+        return
+    }
+    public postTouchEvent(event: TouchEvent): boolean {
+        const event_casted = event as (TouchEvent)
+        return this.postTouchEvent_serialize(event_casted)
+    }
+    public setRootFrameNodeInBuilderNode(node: KPointer): KPointer {
+        const node_casted = node as (KPointer)
+        return this.setRootFrameNodeInBuilderNode_serialize(node_casted)
+    }
+    create_serialize(buildFunc: (() => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(buildFunc)
+        ArkUIGeneratedNativeModule._BuilderNodeOps_create(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    disposeNode_serialize(): void {
+        ArkUIGeneratedNativeModule._BuilderNodeOps_disposeNode(this.peer!.ptr)
+    }
+    setUpdateConfigurationCallback_serialize(configurationUpdateFunc: (() => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(configurationUpdateFunc)
+        ArkUIGeneratedNativeModule._BuilderNodeOps_setUpdateConfigurationCallback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOptions_serialize(options: BuilderNodeOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        BuilderNodeOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._BuilderNodeOps_setOptions(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    postTouchEvent_serialize(event: TouchEvent): boolean {
+        const retval  = ArkUIGeneratedNativeModule._BuilderNodeOps_postTouchEvent(this.peer!.ptr, toPeerPtr(event))
+        return retval
+    }
+    setRootFrameNodeInBuilderNode_serialize(node: KPointer): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._BuilderNodeOps_setRootFrameNodeInBuilderNode(this.peer!.ptr, node)
+        return retval
+    }
+}
+export class CommonShapeInternal {
+    public static fromPtr(ptr: KPointer): CommonShape {
+        return new CommonShape(ptr)
+    }
+}
+export class CommonShape implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, CommonShape.getFinalizer())
+    }
+    constructor() {
+        this(CommonShape.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._CommonShape_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._CommonShape_getFinalizer()
+    }
+    public offset(offset: Position): CommonShape {
+        const offset_casted = offset as (Position)
+        return this.offset_serialize(offset_casted)
+    }
+    public fill(color: ResourceColor): CommonShape {
+        const color_casted = color as (ResourceColor)
+        return this.fill_serialize(color_casted)
+    }
+    public position(position: Position): CommonShape {
+        const position_casted = position as (Position)
+        return this.position_serialize(position_casted)
+    }
+    offset_serialize(offset: Position): CommonShape {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Position_serializer.write(thisSerializer, offset)
+        const retval  = ArkUIGeneratedNativeModule._CommonShape_offset(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : CommonShape = CommonShapeInternal.fromPtr(retval)
+        return obj
+    }
+    fill_serialize(color: ResourceColor): CommonShape {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (color instanceof Color) {
+            thisSerializer.writeInt8((0).toChar())
+            const colorForIdx0  = color as Color
+            thisSerializer.writeInt32(colorForIdx0.valueOf())
+        } else if (color instanceof number) {
+            thisSerializer.writeInt8((1).toChar())
+            const colorForIdx1  = color as number
+            thisSerializer.writeNumber(colorForIdx1)
+        } else if (color instanceof string) {
+            thisSerializer.writeInt8((2).toChar())
+            const colorForIdx2  = color as string
+            thisSerializer.writeString(colorForIdx2)
+        } else if (color instanceof Resource) {
+            thisSerializer.writeInt8((3).toChar())
+            const colorForIdx3  = color as Resource
+            Resource_serializer.write(thisSerializer, colorForIdx3)
+        }
+        const retval  = ArkUIGeneratedNativeModule._CommonShape_fill(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : CommonShape = CommonShapeInternal.fromPtr(retval)
+        return obj
+    }
+    position_serialize(position: Position): CommonShape {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Position_serializer.write(thisSerializer, position)
+        const retval  = ArkUIGeneratedNativeModule._CommonShape_position(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : CommonShape = CommonShapeInternal.fromPtr(retval)
+        return obj
+    }
+}
+export class ContentModifierHelper {
+    static contentModifierButton_serialize(node: KPointer, contentModifier: ContentModifier<ButtonConfiguration>, builder: ((parentNode: KPointer,config: ButtonConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierButton(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierButton_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierButton(node)
+    }
+    static contentModifierCheckBox_serialize(node: KPointer, contentModifier: ContentModifier<CheckBoxConfiguration>, builder: ((parentNode: KPointer,config: CheckBoxConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierCheckBox(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierCheckBox_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierCheckBox(node)
+    }
+    static contentModifierDataPanel_serialize(node: KPointer, contentModifier: ContentModifier<DataPanelConfiguration>, builder: ((parentNode: KPointer,config: DataPanelConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierDataPanel(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierDataPanel_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierDataPanel(node)
+    }
+    static contentModifierGauge_serialize(node: KPointer, contentModifier: ContentModifier<GaugeConfiguration>, builder: ((parentNode: KPointer,config: GaugeConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierGauge(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierGauge_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierGauge(node)
+    }
+    static contentModifierLoadingProgress_serialize(node: KPointer, contentModifier: ContentModifier<LoadingProgressConfiguration>, builder: ((parentNode: KPointer,config: LoadingProgressConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierLoadingProgress(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierLoadingProgress_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierLoadingProgress(node)
+    }
+    static contentModifierProgress_serialize(node: KPointer, contentModifier: ContentModifier<ProgressConfiguration>, builder: ((parentNode: KPointer,config: ProgressConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierProgress(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierProgress_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierProgress(node)
+    }
+    static contentModifierRadio_serialize(node: KPointer, contentModifier: ContentModifier<RadioConfiguration>, builder: ((parentNode: KPointer,config: RadioConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierRadio(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierRadio_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierRadio(node)
+    }
+    static contentModifierRating_serialize(node: KPointer, contentModifier: ContentModifier<RatingConfiguration>, builder: ((parentNode: KPointer,config: RatingConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierRating(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierRating_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierRating(node)
+    }
+    static contentModifierMenuItem_serialize(node: KPointer, contentModifier: ContentModifier<MenuItemConfiguration>, builder: ((parentNode: KPointer,config: MenuItemConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierMenuItem(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierMenuItem_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierMenuItem(node)
+    }
+    static contentModifierSlider_serialize(node: KPointer, contentModifier: ContentModifier<SliderConfiguration>, builder: ((parentNode: KPointer,config: SliderConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierSlider(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierSlider_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierSlider(node)
+    }
+    static contentModifierTextClock_serialize(node: KPointer, contentModifier: ContentModifier<TextClockConfiguration>, builder: ((parentNode: KPointer,config: TextClockConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierTextClock(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierTextClock_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierTextClock(node)
+    }
+    static contentModifierTextTimer_serialize(node: KPointer, contentModifier: ContentModifier<TextTimerConfiguration>, builder: ((parentNode: KPointer,config: TextTimerConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierTextTimer(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierTextTimer_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierTextTimer(node)
+    }
+    static contentModifierToggle_serialize(node: KPointer, contentModifier: ContentModifier<ToggleConfiguration>, builder: ((parentNode: KPointer,config: ToggleConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierToggle(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierToggle_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierToggle(node)
+    }
+    public static contentModifierButton(node: KPointer, contentModifier: ContentModifier<ButtonConfiguration>, builder: ((parentNode: KPointer,config: ButtonConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<ButtonConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: ButtonConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierButton_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierButton(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierButton_serialize(node_casted)
+        return
+    }
+    public static contentModifierCheckBox(node: KPointer, contentModifier: ContentModifier<CheckBoxConfiguration>, builder: ((parentNode: KPointer,config: CheckBoxConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<CheckBoxConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: CheckBoxConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierCheckBox_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierCheckBox(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierCheckBox_serialize(node_casted)
+        return
+    }
+    public static contentModifierDataPanel(node: KPointer, contentModifier: ContentModifier<DataPanelConfiguration>, builder: ((parentNode: KPointer,config: DataPanelConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<DataPanelConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: DataPanelConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierDataPanel_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierDataPanel(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierDataPanel_serialize(node_casted)
+        return
+    }
+    public static contentModifierGauge(node: KPointer, contentModifier: ContentModifier<GaugeConfiguration>, builder: ((parentNode: KPointer,config: GaugeConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<GaugeConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: GaugeConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierGauge_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierGauge(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierGauge_serialize(node_casted)
+        return
+    }
+    public static contentModifierLoadingProgress(node: KPointer, contentModifier: ContentModifier<LoadingProgressConfiguration>, builder: ((parentNode: KPointer,config: LoadingProgressConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<LoadingProgressConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: LoadingProgressConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierLoadingProgress_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierLoadingProgress(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierLoadingProgress_serialize(node_casted)
+        return
+    }
+    public static contentModifierProgress(node: KPointer, contentModifier: ContentModifier<ProgressConfiguration>, builder: ((parentNode: KPointer,config: ProgressConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<ProgressConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: ProgressConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierProgress_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierProgress(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierProgress_serialize(node_casted)
+        return
+    }
+    public static contentModifierRadio(node: KPointer, contentModifier: ContentModifier<RadioConfiguration>, builder: ((parentNode: KPointer,config: RadioConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<RadioConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: RadioConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierRadio_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierRadio(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierRadio_serialize(node_casted)
+        return
+    }
+    public static contentModifierRating(node: KPointer, contentModifier: ContentModifier<RatingConfiguration>, builder: ((parentNode: KPointer,config: RatingConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<RatingConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: RatingConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierRating_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierRating(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierRating_serialize(node_casted)
+        return
+    }
+    public static contentModifierMenuItem(node: KPointer, contentModifier: ContentModifier<MenuItemConfiguration>, builder: ((parentNode: KPointer,config: MenuItemConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<MenuItemConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: MenuItemConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierMenuItem_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierMenuItem(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierMenuItem_serialize(node_casted)
+        return
+    }
+    public static contentModifierSlider(node: KPointer, contentModifier: ContentModifier<SliderConfiguration>, builder: ((parentNode: KPointer,config: SliderConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<SliderConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: SliderConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierSlider_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierSlider(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierSlider_serialize(node_casted)
+        return
+    }
+    public static contentModifierTextClock(node: KPointer, contentModifier: ContentModifier<TextClockConfiguration>, builder: ((parentNode: KPointer,config: TextClockConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<TextClockConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: TextClockConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierTextClock_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierTextClock(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierTextClock_serialize(node_casted)
+        return
+    }
+    public static contentModifierTextTimer(node: KPointer, contentModifier: ContentModifier<TextTimerConfiguration>, builder: ((parentNode: KPointer,config: TextTimerConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<TextTimerConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: TextTimerConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierTextTimer_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierTextTimer(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierTextTimer_serialize(node_casted)
+        return
+    }
+    public static contentModifierToggle(node: KPointer, contentModifier: ContentModifier<ToggleConfiguration>, builder: ((parentNode: KPointer,config: ToggleConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<ToggleConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: ToggleConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierToggle_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierToggle(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierToggle_serialize(node_casted)
+        return
+    }
+}
+export class CustomDialogControllerExtenderInternal {
+    public static fromPtr(ptr: KPointer): CustomDialogControllerExtender {
+        return new CustomDialogControllerExtender(false, ptr)
+    }
+}
+export class CustomDialogControllerExtender implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(_0: boolean, peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, CustomDialogControllerExtender.getFinalizer())
+    }
+    constructor(value: CustomDialogControllerOptionsExtender) {
+        this(false, CustomDialogControllerExtender.construct(value))
+    }
+    static construct(value: CustomDialogControllerOptionsExtender): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        CustomDialogControllerOptionsExtender_serializer.write(thisSerializer, value)
+        const retval  = ArkUIGeneratedNativeModule._CustomDialogControllerExtender_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._CustomDialogControllerExtender_getFinalizer()
+    }
+    public open(): void {
+        this.open_serialize()
+        return
+    }
+    public close(): void {
+        this.close_serialize()
+        return
+    }
+    public setOwnerView(content: KPointer): void {
+        const content_casted = content as (KPointer)
+        this.setOwnerView_serialize(content_casted)
+        return
+    }
+    public getExternalOptions(): CustomDialogControllerExternalOptionsExtender {
+        return this.getExternalOptions_serialize()
+    }
+    open_serialize(): void {
+        ArkUIGeneratedNativeModule._CustomDialogControllerExtender_open(this.peer!.ptr)
+    }
+    close_serialize(): void {
+        ArkUIGeneratedNativeModule._CustomDialogControllerExtender_close(this.peer!.ptr)
+    }
+    setOwnerView_serialize(content: KPointer): void {
+        ArkUIGeneratedNativeModule._CustomDialogControllerExtender_setOwnerView(this.peer!.ptr, content)
+    }
+    getExternalOptions_serialize(): CustomDialogControllerExternalOptionsExtender {
+        const retval  = ArkUIGeneratedNativeModule._CustomDialogControllerExtender_getExternalOptions(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : CustomDialogControllerExternalOptionsExtender = CustomDialogControllerExternalOptionsExtender_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+}
+export class EventEmulator {
+    static emitClickEvent_serialize(node: KPointer, event: ClickEvent): void {
+        ArkUIGeneratedNativeModule._EventEmulator_emitClickEvent(node, toPeerPtr(event))
+    }
+    static emitTextInputEvent_serialize(node: KPointer, text: string): void {
+        ArkUIGeneratedNativeModule._EventEmulator_emitTextInputEvent(node, text)
+    }
+    public static emitClickEvent(node: KPointer, event: ClickEvent): void {
+        const node_casted = node as (KPointer)
+        const event_casted = event as (ClickEvent)
+        EventEmulator.emitClickEvent_serialize(node_casted, event_casted)
+        return
+    }
+    public static emitTextInputEvent(node: KPointer, text: string): void {
+        const node_casted = node as (KPointer)
+        const text_casted = text as (string)
+        EventEmulator.emitTextInputEvent_serialize(node_casted, text_casted)
+        return
+    }
+}
+export class FocusController {
+    static requestFocus_serialize(key: string): void {
+        ArkUIGeneratedNativeModule._FocusController_requestFocus(key)
+    }
+    public static requestFocus(key: string): void {
+        const key_casted = key as (string)
+        FocusController.requestFocus_serialize(key_casted)
+        return
+    }
+}
+export class FrameNodeExtender {
+    static constructorFrameNode_serialize(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_constructorFrameNode()
+        return retval
+    }
+    static getDestroy_serialize(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getDestroy()
+        return retval
+    }
+    static destroyPeer_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_destroyPeer(extractors.toFrameNodePtr(peer))
+    }
+    static isModifiable_serialize(peer: KPointer): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isModifiable(peer)
+        return retval
+    }
+    static appendChild_serialize(peer: FrameNode, child: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_appendChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
+    }
+    static insertChildAfter_serialize(peer: KPointer, child: KPointer, sibling: KPointer): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_insertChildAfter(peer, child, sibling)
+    }
+    static removeChild_serialize(peer: FrameNode, child: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_removeChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
+    }
+    static clearChildren_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_clearChildren(extractors.toFrameNodePtr(peer))
+    }
+    static getChild_serialize(peer: FrameNode, index: number, expandMode: number): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getChild(extractors.toFrameNodePtr(peer), index, expandMode)
+        return retval
+    }
+    static getFirstChild_serialize(peer: FrameNode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFirstChild(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getNextSibling_serialize(peer: FrameNode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getNextSibling(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getPreviousSibling_serialize(peer: FrameNode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPreviousSibling(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getParent_serialize(peer: FrameNode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getParent(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getChildrenCount_serialize(peer: FrameNode): int32 {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getChildrenCount(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static dispose_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_dispose(extractors.toFrameNodePtr(peer))
+    }
+    static getPositionToWindow_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToWindow(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getPositionToParent_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToParent(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getMeasuredSize_serialize(peer: FrameNode): Size {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getMeasuredSize(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Size = Size_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getLayoutPosition_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getLayoutPosition(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getId_serialize(peer: FrameNode): string {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getId(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getUniqueId_serialize(peer: FrameNode): number {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getUniqueId(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getNodeType_serialize(peer: FrameNode): string {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getOpacity_serialize(peer: FrameNode): number {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getOpacity(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static isVisible_serialize(peer: FrameNode): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isVisible(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static isClipToFrame_serialize(peer: FrameNode): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isClipToFrame(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static isAttached_serialize(peer: FrameNode): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isAttached(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getInspectorInfo_serialize(peer: FrameNode): string {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getInspectorInfo(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static invalidate_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_invalidate(extractors.toFrameNodePtr(peer))
+    }
+    static disposeTree_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_disposeTree(extractors.toFrameNodePtr(peer))
+    }
+    static setCrossLanguageOptions_serialize(peer: FrameNode, options: boolean): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_setCrossLanguageOptions(extractors.toFrameNodePtr(peer), options ? 1 : 0)
+        return retval
+    }
+    static getCrossLanguageOptions_serialize(peer: FrameNode): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getCrossLanguageOptions(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static setMeasuredSize_serialize(peer: FrameNode, size: Size): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Size_serializer.write(thisSerializer, size)
+        ArkUIGeneratedNativeModule._FrameNodeExtender_setMeasuredSize(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setLayoutPosition_serialize(peer: FrameNode, position: Position): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Position_serializer.write(thisSerializer, position)
+        ArkUIGeneratedNativeModule._FrameNodeExtender_setLayoutPosition(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static measure_serialize(peer: FrameNode, constraint: LayoutConstraint): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        LayoutConstraint_serializer.write(thisSerializer, constraint)
+        ArkUIGeneratedNativeModule._FrameNodeExtender_measure(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static layout_serialize(peer: FrameNode, position: Position): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Position_serializer.write(thisSerializer, position)
+        ArkUIGeneratedNativeModule._FrameNodeExtender_layout(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setNeedsLayout_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_setNeedsLayout(extractors.toFrameNodePtr(peer))
+    }
+    static getPositionToScreen_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToScreen(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getPositionToWindowWithTransform_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToWindowWithTransform(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getPositionToParentWithTransform_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToParentWithTransform(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getPositionToScreenWithTransform_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToScreenWithTransform(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getFrameNodeByKey_serialize(name: string): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeByKey(name)
+        return retval
+    }
+    static getIdByFrameNode_serialize(node: KPointer): number {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getIdByFrameNode(node)
+        return retval
+    }
+    static moveTo_serialize(peer: FrameNode, targetParent: FrameNode, index: number): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_moveTo(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(targetParent), index)
+    }
+    static getFirstChildIndexWithoutExpand_serialize(peer: FrameNode): number {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFirstChildIndexWithoutExpand(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getLastChildIndexWithoutExpand_serialize(peer: FrameNode): number {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getLastChildIndexWithoutExpand(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getAttachedFrameNodeById_serialize(id: string): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getAttachedFrameNodeById(id)
+        return retval
+    }
+    static getFrameNodeById_serialize(id: number): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeById(id)
+        return retval
+    }
+    static getFrameNodeByUniqueId_serialize(id: number): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeByUniqueId(id)
+        return retval
+    }
+    static reuse_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_reuse(extractors.toFrameNodePtr(peer))
+    }
+    static recycle_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_recycle(extractors.toFrameNodePtr(peer))
+    }
+    static getFrameNodePtr_serialize(node: FrameNode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodePtr(extractors.toFrameNodePtr(node))
+        return retval
+    }
+    static createTypedFrameNode_serialize(type: string): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_createTypedFrameNode(type)
+        return retval
+    }
+    static createByRawPtr_serialize(peer: FrameNode, pointer: FrameNode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_createByRawPtr(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(pointer))
+        return retval
+    }
+    static unWrapRawPtr_serialize(peer: FrameNode, pointer: KPointer): FrameNode {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_unWrapRawPtr(extractors.toFrameNodePtr(peer), pointer)
+        const obj : FrameNode = extractors.fromFrameNodePtr(retval)
+        return obj
+    }
+    static getCommonEvent_serialize(peer: FrameNode): UICommonEvent {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getCommonEvent(extractors.toFrameNodePtr(peer))
+        const obj : UICommonEvent = UICommonEventInternal.fromPtr(retval)
+        return obj
+    }
+    public static constructorFrameNode(): KPointer {
+        return FrameNodeExtender.constructorFrameNode_serialize()
+    }
+    public static getDestroy(): KPointer {
+        return FrameNodeExtender.getDestroy_serialize()
+    }
+    public static destroyPeer(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.destroyPeer_serialize(peer_casted)
+        return
+    }
+    public static isModifiable(peer: KPointer): boolean {
+        const peer_casted = peer as (KPointer)
+        return FrameNodeExtender.isModifiable_serialize(peer_casted)
+    }
+    public static appendChild(peer: FrameNode, child: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        const child_casted = child as (FrameNode)
+        FrameNodeExtender.appendChild_serialize(peer_casted, child_casted)
+        return
+    }
+    public static insertChildAfter(peer: KPointer, child: KPointer, sibling: KPointer): void {
+        const peer_casted = peer as (KPointer)
+        const child_casted = child as (KPointer)
+        const sibling_casted = sibling as (KPointer)
+        FrameNodeExtender.insertChildAfter_serialize(peer_casted, child_casted, sibling_casted)
+        return
+    }
+    public static removeChild(peer: FrameNode, child: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        const child_casted = child as (FrameNode)
+        FrameNodeExtender.removeChild_serialize(peer_casted, child_casted)
+        return
+    }
+    public static clearChildren(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.clearChildren_serialize(peer_casted)
+        return
+    }
+    public static getChild(peer: FrameNode, index: number, expandMode: number): KPointer {
+        const peer_casted = peer as (FrameNode)
+        const index_casted = index as (number)
+        const expandMode_casted = expandMode as (number)
+        return FrameNodeExtender.getChild_serialize(peer_casted, index_casted, expandMode_casted)
+    }
+    public static getFirstChild(peer: FrameNode): KPointer {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getFirstChild_serialize(peer_casted)
+    }
+    public static getNextSibling(peer: FrameNode): KPointer {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getNextSibling_serialize(peer_casted)
+    }
+    public static getPreviousSibling(peer: FrameNode): KPointer {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPreviousSibling_serialize(peer_casted)
+    }
+    public static getParent(peer: FrameNode): KPointer {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getParent_serialize(peer_casted)
+    }
+    public static getChildrenCount(peer: FrameNode): int32 {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getChildrenCount_serialize(peer_casted)
+    }
+    public static dispose(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.dispose_serialize(peer_casted)
+        return
+    }
+    public static getPositionToWindow(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPositionToWindow_serialize(peer_casted)
+    }
+    public static getPositionToParent(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPositionToParent_serialize(peer_casted)
+    }
+    public static getMeasuredSize(peer: FrameNode): Size {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getMeasuredSize_serialize(peer_casted)
+    }
+    public static getLayoutPosition(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getLayoutPosition_serialize(peer_casted)
+    }
+    public static getId(peer: FrameNode): string {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getId_serialize(peer_casted)
+    }
+    public static getUniqueId(peer: FrameNode): number {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getUniqueId_serialize(peer_casted)
+    }
+    public static getNodeType(peer: FrameNode): string {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getNodeType_serialize(peer_casted)
+    }
+    public static getOpacity(peer: FrameNode): number {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getOpacity_serialize(peer_casted)
+    }
+    public static isVisible(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.isVisible_serialize(peer_casted)
+    }
+    public static isClipToFrame(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.isClipToFrame_serialize(peer_casted)
+    }
+    public static isAttached(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.isAttached_serialize(peer_casted)
+    }
+    public static getInspectorInfo(peer: FrameNode): string {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getInspectorInfo_serialize(peer_casted)
+    }
+    public static invalidate(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.invalidate_serialize(peer_casted)
+        return
+    }
+    public static disposeTree(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.disposeTree_serialize(peer_casted)
+        return
+    }
+    public static setCrossLanguageOptions(peer: FrameNode, options: boolean): boolean {
+        const peer_casted = peer as (FrameNode)
+        const options_casted = options as (boolean)
+        return FrameNodeExtender.setCrossLanguageOptions_serialize(peer_casted, options_casted)
+    }
+    public static getCrossLanguageOptions(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getCrossLanguageOptions_serialize(peer_casted)
+    }
+    public static setMeasuredSize(peer: FrameNode, size: Size): void {
+        const peer_casted = peer as (FrameNode)
+        const size_casted = size as (Size)
+        FrameNodeExtender.setMeasuredSize_serialize(peer_casted, size_casted)
+        return
+    }
+    public static setLayoutPosition(peer: FrameNode, position: Position): void {
+        const peer_casted = peer as (FrameNode)
+        const position_casted = position as (Position)
+        FrameNodeExtender.setLayoutPosition_serialize(peer_casted, position_casted)
+        return
+    }
+    public static measure(peer: FrameNode, constraint: LayoutConstraint): void {
+        const peer_casted = peer as (FrameNode)
+        const constraint_casted = constraint as (LayoutConstraint)
+        FrameNodeExtender.measure_serialize(peer_casted, constraint_casted)
+        return
+    }
+    public static layout(peer: FrameNode, position: Position): void {
+        const peer_casted = peer as (FrameNode)
+        const position_casted = position as (Position)
+        FrameNodeExtender.layout_serialize(peer_casted, position_casted)
+        return
+    }
+    public static setNeedsLayout(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.setNeedsLayout_serialize(peer_casted)
+        return
+    }
+    public static getPositionToScreen(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPositionToScreen_serialize(peer_casted)
+    }
+    public static getPositionToWindowWithTransform(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPositionToWindowWithTransform_serialize(peer_casted)
+    }
+    public static getPositionToParentWithTransform(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPositionToParentWithTransform_serialize(peer_casted)
+    }
+    public static getPositionToScreenWithTransform(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPositionToScreenWithTransform_serialize(peer_casted)
+    }
+    public static getFrameNodeByKey(name: string): KPointer {
+        const name_casted = name as (string)
+        return FrameNodeExtender.getFrameNodeByKey_serialize(name_casted)
+    }
+    public static getIdByFrameNode(node: KPointer): number {
+        const node_casted = node as (KPointer)
+        return FrameNodeExtender.getIdByFrameNode_serialize(node_casted)
+    }
+    public static moveTo(peer: FrameNode, targetParent: FrameNode, index: number): void {
+        const peer_casted = peer as (FrameNode)
+        const targetParent_casted = targetParent as (FrameNode)
+        const index_casted = index as (number)
+        FrameNodeExtender.moveTo_serialize(peer_casted, targetParent_casted, index_casted)
+        return
+    }
+    public static getFirstChildIndexWithoutExpand(peer: FrameNode): number {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getFirstChildIndexWithoutExpand_serialize(peer_casted)
+    }
+    public static getLastChildIndexWithoutExpand(peer: FrameNode): number {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getLastChildIndexWithoutExpand_serialize(peer_casted)
+    }
+    public static getAttachedFrameNodeById(id: string): KPointer {
+        const id_casted = id as (string)
+        return FrameNodeExtender.getAttachedFrameNodeById_serialize(id_casted)
+    }
+    public static getFrameNodeById(id: number): KPointer {
+        const id_casted = id as (number)
+        return FrameNodeExtender.getFrameNodeById_serialize(id_casted)
+    }
+    public static getFrameNodeByUniqueId(id: number): KPointer {
+        const id_casted = id as (number)
+        return FrameNodeExtender.getFrameNodeByUniqueId_serialize(id_casted)
+    }
+    public static reuse(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.reuse_serialize(peer_casted)
+        return
+    }
+    public static recycle(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.recycle_serialize(peer_casted)
+        return
+    }
+    public static getFrameNodePtr(node: FrameNode): KPointer {
+        const node_casted = node as (FrameNode)
+        return FrameNodeExtender.getFrameNodePtr_serialize(node_casted)
+    }
+    public static createTypedFrameNode(type: string): KPointer {
+        const type_casted = type as (string)
+        return FrameNodeExtender.createTypedFrameNode_serialize(type_casted)
+    }
+    public static createByRawPtr(peer: FrameNode, pointer: FrameNode): KPointer {
+        const peer_casted = peer as (FrameNode)
+        const pointer_casted = pointer as (FrameNode)
+        return FrameNodeExtender.createByRawPtr_serialize(peer_casted, pointer_casted)
+    }
+    public static unWrapRawPtr(peer: FrameNode, pointer: KPointer): FrameNode {
+        const peer_casted = peer as (FrameNode)
+        const pointer_casted = pointer as (KPointer)
+        return FrameNodeExtender.unWrapRawPtr_serialize(peer_casted, pointer_casted)
+    }
+    public static getCommonEvent(peer: FrameNode): UICommonEvent {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getCommonEvent_serialize(peer_casted)
+    }
+}
+export class GlobalScope_ohos_arkui_componentSnapshot {
+    static get_serialize(id: string, callback: ((result: image.PixelMap) => void), options?: SnapshotOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            SnapshotOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_componentSnapshot_get(id, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static get(id: string, callback: ((result: image.PixelMap) => void), options?: SnapshotOptions): void {
+        const id_casted = id as (string)
+        const callback_casted = callback as (((result: image.PixelMap) => void))
+        const options_casted = options as (SnapshotOptions | undefined)
+        GlobalScope_ohos_arkui_componentSnapshot.get_serialize(id_casted, callback_casted, options_casted)
+        return
+    }
+}
+export class GlobalScope_ohos_arkui_performanceMonitor {
+    static begin_serialize(scene: string, startInputType: PerfMonitorActionType, note?: string): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (note !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const noteTmpValue  = note!
+            thisSerializer.writeString(noteTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_begin(scene, startInputType.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static end_serialize(scene: string): void {
+        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_end(scene)
+    }
+    static recordInputEventTime_serialize(actionType: PerfMonitorActionType, sourceType: PerfMonitorSourceType, time: int64): void {
+        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_recordInputEventTime(actionType.valueOf(), sourceType.valueOf(), time)
+    }
+    public static begin(scene: string, startInputType: PerfMonitorActionType, note?: string): void {
+        const scene_casted = scene as (string)
+        const startInputType_casted = startInputType as (PerfMonitorActionType)
+        const note_casted = note as (string | undefined)
+        GlobalScope_ohos_arkui_performanceMonitor.begin_serialize(scene_casted, startInputType_casted, note_casted)
+        return
+    }
+    public static end(scene: string): void {
+        const scene_casted = scene as (string)
+        GlobalScope_ohos_arkui_performanceMonitor.end_serialize(scene_casted)
+        return
+    }
+    public static recordInputEventTime(actionType: PerfMonitorActionType, sourceType: PerfMonitorSourceType, time: int64): void {
+        const actionType_casted = actionType as (PerfMonitorActionType)
+        const sourceType_casted = sourceType as (PerfMonitorSourceType)
+        const time_casted = time as (int64)
+        GlobalScope_ohos_arkui_performanceMonitor.recordInputEventTime_serialize(actionType_casted, sourceType_casted, time_casted)
+        return
+    }
+}
+export class GlobalScope_ohos_font {
+    static registerFont_serialize(options: object): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeCustomObject('object', options)
+        ArkUIGeneratedNativeModule._GlobalScope_ohos_font_registerFont(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static getSystemFontList_serialize(): Array<string> {
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getSystemFontList()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<string> = new Array<string>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
+        }
+        const returnResult : Array<string> = buffer
+        return returnResult
+    }
+    static getFontByName_serialize(fontName: string): object {
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getFontByName(fontName)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    public static registerFont(options: object): void {
+        const options_casted = options as (object)
+        GlobalScope_ohos_font.registerFont_serialize(options_casted)
+        return
+    }
+    public static getSystemFontList(): Array<string> {
+        return GlobalScope_ohos_font.getSystemFontList_serialize()
+    }
+    public static getFontByName(fontName: string): object {
+        const fontName_casted = fontName as (string)
+        return GlobalScope_ohos_font.getFontByName_serialize(fontName_casted)
+    }
+}
+export class GlobalScope_ohos_measure_utils {
+    static measureText_serialize(options: MeasureOptions): double {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        MeasureOptions_serializer.write(thisSerializer, options)
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_measure_utils_measureText(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static measureTextSize_serialize(options: MeasureOptions): SizeOptions {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        MeasureOptions_serializer.write(thisSerializer, options)
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_measure_utils_measureTextSize(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : SizeOptions = SizeOptions_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    public static measureText(options: MeasureOptions): double {
+        const options_casted = options as (MeasureOptions)
+        return GlobalScope_ohos_measure_utils.measureText_serialize(options_casted)
+    }
+    public static measureTextSize(options: MeasureOptions): SizeOptions {
+        const options_casted = options as (MeasureOptions)
+        return GlobalScope_ohos_measure_utils.measureTextSize_serialize(options_casted)
+    }
+}
+export class IUIContext {
+    static freezeUINode0_serialize(id: string, isFrozen: boolean): void {
+        ArkUIGeneratedNativeModule._IUIContext_freezeUINode0(id, isFrozen ? 1 : 0)
+    }
+    static freezeUINode1_serialize(id: number, isFrozen: boolean): void {
+        ArkUIGeneratedNativeModule._IUIContext_freezeUINode1(id, isFrozen ? 1 : 0)
+    }
+    public static freezeUINode(id: string, isFrozen: boolean): void {
+        const id_casted = id as (string)
+        const isFrozen_casted = isFrozen as (boolean)
+        IUIContext.freezeUINode0_serialize(id_casted, isFrozen_casted)
+        return
+    }
+    public static freezeUINode(id: number, isFrozen: boolean): void {
+        const id_casted = id as (number)
+        const isFrozen_casted = isFrozen as (boolean)
+        IUIContext.freezeUINode1_serialize(id_casted, isFrozen_casted)
+        return
+    }
+}
+export class LazyBuild {
+    static ApplyLazyBuilder_serialize(): void {
+        ArkUIGeneratedNativeModule._LazyBuild_ApplyLazyBuilder()
+    }
+    static SetListItemLazyBuilder_serialize(node: KPointer, builder: CustomBuilder): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builder))
+        ArkUIGeneratedNativeModule._LazyBuild_SetListItemLazyBuilder(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static SetTabContentLazyBuilder_serialize(node: KPointer, builder: CustomBuilder): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builder))
+        ArkUIGeneratedNativeModule._LazyBuild_SetTabContentLazyBuilder(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static ApplyLazyBuilder(): void {
+        LazyBuild.ApplyLazyBuilder_serialize()
+        return
+    }
+    public static SetListItemLazyBuilder(node: KPointer, builder: CustomBuilder): void {
+        const node_casted = node as (KPointer)
+        const builder_casted = builder as (CustomBuilder)
+        LazyBuild.SetListItemLazyBuilder_serialize(node_casted, builder_casted)
+        return
+    }
+    public static SetTabContentLazyBuilder(node: KPointer, builder: CustomBuilder): void {
+        const node_casted = node as (KPointer)
+        const builder_casted = builder as (CustomBuilder)
+        LazyBuild.SetTabContentLazyBuilder_serialize(node_casted, builder_casted)
+        return
+    }
+}
+export class LazyForEachOps {
+    static NotifyChange_serialize(node: KPointer, startIndex: int32, endIndex: int32, count: int32): void {
+        ArkUIGeneratedNativeModule._LazyForEachOps_NotifyChange(node, startIndex, endIndex, count)
+    }
+    static Sync_serialize(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(creator)
+        thisSerializer.holdAndWriteCallback(updater)
+        ArkUIGeneratedNativeModule._LazyForEachOps_Sync(node, totalCount, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static SyncOnMoveOps_serialize(node: KPointer, onMoveFromToOps: Callback_OnMoveFromTo, onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onMoveFromToOps)
+        if (onMoveOps !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onMoveOpsTmpValue  = onMoveOps!
+            thisSerializer.holdAndWriteCallback(onMoveOpsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (onMoveDragEventOps !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onMoveDragEventOpsTmpValue  = onMoveDragEventOps!
+            ItemDragEventHandler_serializer.write(thisSerializer, onMoveDragEventOpsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyForEachOps_SyncOnMoveOps(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static NotifyChange(node: KPointer, startIndex: int32, endIndex: int32, count: int32): void {
+        const node_casted = node as (KPointer)
+        const startIndex_casted = startIndex as (int32)
+        const endIndex_casted = endIndex as (int32)
+        const count_casted = count as (int32)
+        LazyForEachOps.NotifyChange_serialize(node_casted, startIndex_casted, endIndex_casted, count_casted)
+        return
+    }
+    public static Sync(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate): void {
+        const node_casted = node as (KPointer)
+        const totalCount_casted = totalCount as (int32)
+        const creator_casted = creator as (Callback_CreateItem)
+        const updater_casted = updater as (Callback_RangeUpdate)
+        LazyForEachOps.Sync_serialize(node_casted, totalCount_casted, creator_casted, updater_casted)
+        return
+    }
+    public static SyncOnMoveOps(node: KPointer, onMoveFromToOps: Callback_OnMoveFromTo, onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
+        const node_casted = node as (KPointer)
+        const onMoveFromToOps_casted = onMoveFromToOps as (Callback_OnMoveFromTo)
+        const onMoveOps_casted = onMoveOps as (OnMoveHandler | undefined)
+        const onMoveDragEventOps_casted = onMoveDragEventOps as (ItemDragEventHandler | undefined)
+        LazyForEachOps.SyncOnMoveOps_serialize(node_casted, onMoveFromToOps_casted, onMoveOps_casted, onMoveDragEventOps_casted)
+        return
+    }
+}
+export class NavExtender {
+    static setNavigationOptions_serialize(ptr: KPointer, pathStack: NavPathStack): void {
+        ArkUIGeneratedNativeModule._NavExtender_setNavigationOptions(ptr, toPeerPtr(pathStack))
+    }
+    static setUpdateStackCallback_serialize(peer: NavPathStack, callback: NavExtender_OnUpdateStack): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        ArkUIGeneratedNativeModule._NavExtender_setUpdateStackCallback(toPeerPtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static syncStack_serialize(peer: NavPathStack): void {
+        ArkUIGeneratedNativeModule._NavExtender_syncStack(toPeerPtr(peer))
+    }
+    static checkNeedCreate_serialize(navigation: KPointer, index: int32): boolean {
+        const retval  = ArkUIGeneratedNativeModule._NavExtender_checkNeedCreate(navigation, index)
+        return retval
+    }
+    static setNavDestinationNode_serialize(peer: NavPathStack, index: int32, node: KPointer): void {
+        ArkUIGeneratedNativeModule._NavExtender_setNavDestinationNode(toPeerPtr(peer), index, node)
+    }
+    static pushPath_serialize(pathStack: NavPathStack, info: NavPathInfo, options: NavigationOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        NavigationOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._NavExtender_pushPath(toPeerPtr(pathStack), toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static replacePath_serialize(pathStack: NavPathStack, info: NavPathInfo, options: NavigationOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        NavigationOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._NavExtender_replacePath(toPeerPtr(pathStack), toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static pop_serialize(pathStack: NavPathStack, animated: boolean): string {
+        const retval  = ArkUIGeneratedNativeModule._NavExtender_pop(toPeerPtr(pathStack), animated ? 1 : 0)
+        return retval
+    }
+    static setOnPopCallback_serialize(pathStack: NavPathStack, popCallback: ((breakpoints: string) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(popCallback)
+        ArkUIGeneratedNativeModule._NavExtender_setOnPopCallback(toPeerPtr(pathStack), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static getIdByIndex_serialize(pathStack: NavPathStack, index: int32): string {
+        const retval  = ArkUIGeneratedNativeModule._NavExtender_getIdByIndex(toPeerPtr(pathStack), index)
+        return retval
+    }
+    static getIdByName_serialize(pathStack: NavPathStack, name: string): Array<string> {
+        const retval  = ArkUIGeneratedNativeModule._NavExtender_getIdByName(toPeerPtr(pathStack), name)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<string> = new Array<string>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
+        }
+        const returnResult : Array<string> = buffer
+        return returnResult
+    }
+    static popToIndex_serialize(pathStack: NavPathStack, index: int32, animated: boolean): void {
+        ArkUIGeneratedNativeModule._NavExtender_popToIndex(toPeerPtr(pathStack), index, animated ? 1 : 0)
+    }
+    static popToName_serialize(pathStack: NavPathStack, name: string, animated: boolean): number {
+        const retval  = ArkUIGeneratedNativeModule._NavExtender_popToName(toPeerPtr(pathStack), name, animated ? 1 : 0)
+        return retval
+    }
+    public static setNavigationOptions(ptr: KPointer, pathStack: NavPathStack): void {
+        const ptr_casted = ptr as (KPointer)
+        const pathStack_casted = pathStack as (NavPathStack)
+        NavExtender.setNavigationOptions_serialize(ptr_casted, pathStack_casted)
+        return
+    }
+    public static setUpdateStackCallback(peer: NavPathStack, callback: NavExtender_OnUpdateStack): void {
+        const peer_casted = peer as (NavPathStack)
+        const callback_casted = callback as (NavExtender_OnUpdateStack)
+        NavExtender.setUpdateStackCallback_serialize(peer_casted, callback_casted)
+        return
+    }
+    public static syncStack(peer: NavPathStack): void {
+        const peer_casted = peer as (NavPathStack)
+        NavExtender.syncStack_serialize(peer_casted)
+        return
+    }
+    public static checkNeedCreate(navigation: KPointer, index: int32): boolean {
+        const navigation_casted = navigation as (KPointer)
+        const index_casted = index as (int32)
+        return NavExtender.checkNeedCreate_serialize(navigation_casted, index_casted)
+    }
+    public static setNavDestinationNode(peer: NavPathStack, index: int32, node: KPointer): void {
+        const peer_casted = peer as (NavPathStack)
+        const index_casted = index as (int32)
+        const node_casted = node as (KPointer)
+        NavExtender.setNavDestinationNode_serialize(peer_casted, index_casted, node_casted)
+        return
+    }
+    public static pushPath(pathStack: NavPathStack, info: NavPathInfo, options: NavigationOptions): void {
+        const pathStack_casted = pathStack as (NavPathStack)
+        const info_casted = info as (NavPathInfo)
+        const options_casted = options as (NavigationOptions)
+        NavExtender.pushPath_serialize(pathStack_casted, info_casted, options_casted)
+        return
+    }
+    public static replacePath(pathStack: NavPathStack, info: NavPathInfo, options: NavigationOptions): void {
+        const pathStack_casted = pathStack as (NavPathStack)
+        const info_casted = info as (NavPathInfo)
+        const options_casted = options as (NavigationOptions)
+        NavExtender.replacePath_serialize(pathStack_casted, info_casted, options_casted)
+        return
+    }
+    public static pop(pathStack: NavPathStack, animated: boolean): string {
+        const pathStack_casted = pathStack as (NavPathStack)
+        const animated_casted = animated as (boolean)
+        return NavExtender.pop_serialize(pathStack_casted, animated_casted)
+    }
+    public static setOnPopCallback(pathStack: NavPathStack, popCallback: ((breakpoints: string) => void)): void {
+        const pathStack_casted = pathStack as (NavPathStack)
+        const popCallback_casted = popCallback as (((breakpoints: string) => void))
+        NavExtender.setOnPopCallback_serialize(pathStack_casted, popCallback_casted)
+        return
+    }
+    public static getIdByIndex(pathStack: NavPathStack, index: int32): string {
+        const pathStack_casted = pathStack as (NavPathStack)
+        const index_casted = index as (int32)
+        return NavExtender.getIdByIndex_serialize(pathStack_casted, index_casted)
+    }
+    public static getIdByName(pathStack: NavPathStack, name: string): Array<string> {
+        const pathStack_casted = pathStack as (NavPathStack)
+        const name_casted = name as (string)
+        return NavExtender.getIdByName_serialize(pathStack_casted, name_casted)
+    }
+    public static popToIndex(pathStack: NavPathStack, index: int32, animated: boolean): void {
+        const pathStack_casted = pathStack as (NavPathStack)
+        const index_casted = index as (int32)
+        const animated_casted = animated as (boolean)
+        NavExtender.popToIndex_serialize(pathStack_casted, index_casted, animated_casted)
+        return
+    }
+    public static popToName(pathStack: NavPathStack, name: string, animated: boolean): number {
+        const pathStack_casted = pathStack as (NavPathStack)
+        const name_casted = name as (string)
+        const animated_casted = animated as (boolean)
+        return NavExtender.popToName_serialize(pathStack_casted, name_casted, animated_casted)
+    }
+}
+export class NodeContainerOps {
+    static nodeContainerOpsConstruct_serialize(id: int32, flags: int32): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._NodeContainerOps_nodeContainerOpsConstruct(id, flags)
+        return retval
+    }
+    static nodeContainerSetNodeContainerOptions_serialize(ptr: KPointer, controller: KPointer): void {
+        ArkUIGeneratedNativeModule._NodeContainerOps_nodeContainerSetNodeContainerOptions(ptr, controller)
+    }
+    static addNodeContainerRootNode_serialize(self: KPointer, child: KPointer): void {
+        ArkUIGeneratedNativeModule._NodeContainerOps_addNodeContainerRootNode(self, child)
+    }
+    static setAboutToAppear_serialize(self: KPointer, value: (() => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerOps_setAboutToAppear(self, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setAboutToDisappear_serialize(self: KPointer, value: (() => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerOps_setAboutToDisappear(self, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setAboutToResize_serialize(self: KPointer, value: Callback_Size_Void): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerOps_setAboutToResize(self, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOnAttach_serialize(self: KPointer, value: (() => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerOps_setOnAttach(self, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOnDetach_serialize(self: KPointer, value: (() => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerOps_setOnDetach(self, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOnTouchEvent_serialize(self: KPointer, value?: ((event: TouchEvent) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._NodeContainerOps_setOnTouchEvent(self, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static nodeContainerOpsConstruct(id: int32, flags: int32): KPointer {
+        const id_casted = id as (int32)
+        const flags_casted = flags as (int32)
+        return NodeContainerOps.nodeContainerOpsConstruct_serialize(id_casted, flags_casted)
+    }
+    public static nodeContainerSetNodeContainerOptions(ptr: KPointer, controller: KPointer): void {
+        const ptr_casted = ptr as (KPointer)
+        const controller_casted = controller as (KPointer)
+        NodeContainerOps.nodeContainerSetNodeContainerOptions_serialize(ptr_casted, controller_casted)
+        return
+    }
+    public static addNodeContainerRootNode(self: KPointer, child: KPointer): void {
+        const self_casted = self as (KPointer)
+        const child_casted = child as (KPointer)
+        NodeContainerOps.addNodeContainerRootNode_serialize(self_casted, child_casted)
+        return
+    }
+    public static setAboutToAppear(self: KPointer, value: (() => void)): void {
+        const self_casted = self as (KPointer)
+        const value_casted = value as ((() => void))
+        NodeContainerOps.setAboutToAppear_serialize(self_casted, value_casted)
+        return
+    }
+    public static setAboutToDisappear(self: KPointer, value: (() => void)): void {
+        const self_casted = self as (KPointer)
+        const value_casted = value as ((() => void))
+        NodeContainerOps.setAboutToDisappear_serialize(self_casted, value_casted)
+        return
+    }
+    public static setAboutToResize(self: KPointer, value: Callback_Size_Void): void {
+        const self_casted = self as (KPointer)
+        const value_casted = value as (Callback_Size_Void)
+        NodeContainerOps.setAboutToResize_serialize(self_casted, value_casted)
+        return
+    }
+    public static setOnAttach(self: KPointer, value: (() => void)): void {
+        const self_casted = self as (KPointer)
+        const value_casted = value as ((() => void))
+        NodeContainerOps.setOnAttach_serialize(self_casted, value_casted)
+        return
+    }
+    public static setOnDetach(self: KPointer, value: (() => void)): void {
+        const self_casted = self as (KPointer)
+        const value_casted = value as ((() => void))
+        NodeContainerOps.setOnDetach_serialize(self_casted, value_casted)
+        return
+    }
+    public static setOnTouchEvent(self: KPointer, value?: ((event: TouchEvent) => void)): void {
+        const self_casted = self as (KPointer)
+        const value_casted = value as (((event: TouchEvent) => void) | undefined)
+        NodeContainerOps.setOnTouchEvent_serialize(self_casted, value_casted)
+        return
+    }
+}
+export class PromptActionExtender {
+    static openPopup_serialize(content: KPointer, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TargetInfo_serializer.write(thisSerializer, target)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            PopupCommonOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._PromptActionExtender_openPopup(content, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static updatePopup_serialize(content: KPointer, options: PopupCommonOptions, partialUpdate?: boolean): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        PopupCommonOptions_serializer.write(thisSerializer, options)
+        if (partialUpdate !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const partialUpdateTmpValue  = partialUpdate!
+            thisSerializer.writeBoolean(partialUpdateTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._PromptActionExtender_updatePopup(content, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static closePopup_serialize(content: KPointer): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._PromptActionExtender_closePopup(content, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static openMenu_serialize(content: KPointer, target: TargetInfo, options?: MenuOptions): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TargetInfo_serializer.write(thisSerializer, target)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            MenuOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._PromptActionExtender_openMenu(content, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static updateMenu_serialize(content: KPointer, options: MenuOptions, partialUpdate?: boolean): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        MenuOptions_serializer.write(thisSerializer, options)
+        if (partialUpdate !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const partialUpdateTmpValue  = partialUpdate!
+            thisSerializer.writeBoolean(partialUpdateTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._PromptActionExtender_updateMenu(content, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static closeMenu_serialize(content: KPointer): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._PromptActionExtender_closeMenu(content, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    public static openPopup(content: KPointer, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
+        const content_casted = content as (KPointer)
+        const target_casted = target as (TargetInfo)
+        const options_casted = options as (PopupCommonOptions | undefined)
+        return PromptActionExtender.openPopup_serialize(content_casted, target_casted, options_casted)
+    }
+    public static updatePopup(content: KPointer, options: PopupCommonOptions, partialUpdate?: boolean): Promise<void> {
+        const content_casted = content as (KPointer)
+        const options_casted = options as (PopupCommonOptions)
+        const partialUpdate_casted = partialUpdate as (boolean | undefined)
+        return PromptActionExtender.updatePopup_serialize(content_casted, options_casted, partialUpdate_casted)
+    }
+    public static closePopup(content: KPointer): Promise<void> {
+        const content_casted = content as (KPointer)
+        return PromptActionExtender.closePopup_serialize(content_casted)
+    }
+    public static openMenu(content: KPointer, target: TargetInfo, options?: MenuOptions): Promise<void> {
+        const content_casted = content as (KPointer)
+        const target_casted = target as (TargetInfo)
+        const options_casted = options as (MenuOptions | undefined)
+        return PromptActionExtender.openMenu_serialize(content_casted, target_casted, options_casted)
+    }
+    public static updateMenu(content: KPointer, options: MenuOptions, partialUpdate?: boolean): Promise<void> {
+        const content_casted = content as (KPointer)
+        const options_casted = options as (MenuOptions)
+        const partialUpdate_casted = partialUpdate as (boolean | undefined)
+        return PromptActionExtender.updateMenu_serialize(content_casted, options_casted, partialUpdate_casted)
+    }
+    public static closeMenu(content: KPointer): Promise<void> {
+        const content_casted = content as (KPointer)
+        return PromptActionExtender.closeMenu_serialize(content_casted)
+    }
+}
+export class RenderServiceNode {
+    static getNodeId_serialize(nodeId: string): int32 {
+        const retval  = ArkUIGeneratedNativeModule._RenderServiceNode_getNodeId(nodeId)
+        return retval
+    }
+    public static getNodeId(nodeId: string): int32 {
+        const nodeId_casted = nodeId as (string)
+        return RenderServiceNode.getNodeId_serialize(nodeId_casted)
+    }
+}
+export class RestrictedWorkerInternal {
+    public static fromPtr(ptr: KPointer): RestrictedWorker {
+        return new RestrictedWorker(false, false, ptr)
+    }
+}
+export class RestrictedWorker implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get onexit(): RestrictedWorker_onexit_Callback | undefined {
+        return this.getOnexit()
+    }
+    set onexit(onexit: RestrictedWorker_onexit_Callback | undefined) {
+        const onexit_NonNull  = (onexit as RestrictedWorker_onexit_Callback)
+        this.setOnexit(onexit_NonNull)
+    }
+    get onerror(): RestrictedWorker_onerror_Callback | undefined {
+        return this.getOnerror()
+    }
+    set onerror(onerror: RestrictedWorker_onerror_Callback | undefined) {
+        const onerror_NonNull  = (onerror as RestrictedWorker_onerror_Callback)
+        this.setOnerror(onerror_NonNull)
+    }
+    get onmessage(): RestrictedWorker_onmessage_Callback | undefined {
+        return this.getOnmessage()
+    }
+    set onmessage(onmessage: RestrictedWorker_onmessage_Callback | undefined) {
+        const onmessage_NonNull  = (onmessage as RestrictedWorker_onmessage_Callback)
+        this.setOnmessage(onmessage_NonNull)
+    }
+    get onmessageerror(): RestrictedWorker_onmessage_Callback | undefined {
+        return this.getOnmessageerror()
+    }
+    set onmessageerror(onmessageerror: RestrictedWorker_onmessage_Callback | undefined) {
+        const onmessageerror_NonNull  = (onmessageerror as RestrictedWorker_onmessage_Callback)
+        this.setOnmessageerror(onmessageerror_NonNull)
+    }
+    constructor(_0: boolean, _1: boolean, peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, RestrictedWorker.getFinalizer())
+    }
+    constructor(scriptURL: string, options?: WorkerOptions) {
+        this(false, false, RestrictedWorker.construct(scriptURL, options))
+    }
+    static construct(scriptURL: string, options?: WorkerOptions): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            WorkerOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._RestrictedWorker_construct(scriptURL, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._RestrictedWorker_getFinalizer()
+    }
+    public postMessage(message: Object, transfer: Array<ArrayBuffer>): void {
+        const message_casted = message as (Object)
+        const transfer_casted = transfer as (Array<ArrayBuffer>)
+        this.postMessage0_serialize(message_casted, transfer_casted)
+        return
+    }
+    public postMessage(message: Object, options?: PostMessageOptions): void {
+        const message_casted = message as (Object)
+        const options_casted = options as (PostMessageOptions | undefined)
+        this.postMessage1_serialize(message_casted, options_casted)
+        return
+    }
+    public postMessageWithSharedSendable(message: Object, transfer?: Array<ArrayBuffer>): void {
+        const message_casted = message as (Object)
+        const transfer_casted = transfer as (Array<ArrayBuffer> | undefined)
+        this.postMessageWithSharedSendable_serialize(message_casted, transfer_casted)
+        return
+    }
+    public on(Type: string, listener: WorkerEventListener): void {
+        const Type_casted = Type as (string)
+        const listener_casted = listener as (WorkerEventListener)
+        this.on_serialize(Type_casted, listener_casted)
+        return
+    }
+    public once(Type: string, listener: WorkerEventListener): void {
+        const Type_casted = Type as (string)
+        const listener_casted = listener as (WorkerEventListener)
+        this.once_serialize(Type_casted, listener_casted)
+        return
+    }
+    public off(Type: string, listener?: WorkerEventListener): void {
+        const Type_casted = Type as (string)
+        const listener_casted = listener as (WorkerEventListener | undefined)
+        this.off_serialize(Type_casted, listener_casted)
+        return
+    }
+    public terminate(): void {
+        this.terminate_serialize()
+        return
+    }
+    public addEventListener(Type: string, listener: WorkerEventListener): void {
+        const Type_casted = Type as (string)
+        const listener_casted = listener as (WorkerEventListener)
+        this.addEventListener_serialize(Type_casted, listener_casted)
+        return
+    }
+    public dispatchEvent(event: Event): boolean {
+        const event_casted = event as (Event)
+        return this.dispatchEvent_serialize(event_casted)
+    }
+    public removeEventListener(Type: string, callback_?: WorkerEventListener): void {
+        const Type_casted = Type as (string)
+        const callback__casted = callback_ as (WorkerEventListener | undefined)
+        this.removeEventListener_serialize(Type_casted, callback__casted)
+        return
+    }
+    public removeAllListener(): void {
+        this.removeAllListener_serialize()
+        return
+    }
+    public registerGlobalCallObject(instanceName: string, globalCallObject: Object): void {
+        const instanceName_casted = instanceName as (string)
+        const globalCallObject_casted = globalCallObject as (Object)
+        this.registerGlobalCallObject_serialize(instanceName_casted, globalCallObject_casted)
+        return
+    }
+    public unregisterGlobalCallObject(instanceName?: string): void {
+        const instanceName_casted = instanceName as (string | undefined)
+        this.unregisterGlobalCallObject_serialize(instanceName_casted)
+        return
+    }
+    private getOnexit(): RestrictedWorker_onexit_Callback | undefined {
+        return this.getOnexit_serialize()
+    }
+    private setOnexit(onexit: RestrictedWorker_onexit_Callback | undefined): void {
+        const onexit_casted = onexit as (RestrictedWorker_onexit_Callback | undefined)
+        this.setOnexit_serialize(onexit_casted)
+        return
+    }
+    private getOnerror(): RestrictedWorker_onerror_Callback | undefined {
+        return this.getOnerror_serialize()
+    }
+    private setOnerror(onerror: RestrictedWorker_onerror_Callback | undefined): void {
+        const onerror_casted = onerror as (RestrictedWorker_onerror_Callback | undefined)
+        this.setOnerror_serialize(onerror_casted)
+        return
+    }
+    private getOnmessage(): RestrictedWorker_onmessage_Callback | undefined {
+        return this.getOnmessage_serialize()
+    }
+    private setOnmessage(onmessage: RestrictedWorker_onmessage_Callback | undefined): void {
+        const onmessage_casted = onmessage as (RestrictedWorker_onmessage_Callback | undefined)
+        this.setOnmessage_serialize(onmessage_casted)
+        return
+    }
+    private getOnmessageerror(): RestrictedWorker_onmessage_Callback | undefined {
+        return this.getOnmessageerror_serialize()
+    }
+    private setOnmessageerror(onmessageerror: RestrictedWorker_onmessage_Callback | undefined): void {
+        const onmessageerror_casted = onmessageerror as (RestrictedWorker_onmessage_Callback | undefined)
+        this.setOnmessageerror_serialize(onmessageerror_casted)
+        return
+    }
+    postMessage0_serialize(message: Object, transfer: Array<ArrayBuffer>): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(message)
+        thisSerializer.writeInt32((transfer.length).toInt())
+        for (let transferCounterI = 0; transferCounterI < transfer.length; transferCounterI++) {
+            const transferTmpElement : ArrayBuffer = transfer[transferCounterI]
+            thisSerializer.writeBuffer(transferTmpElement)
+        }
+        ArkUIGeneratedNativeModule._RestrictedWorker_postMessage0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    postMessage1_serialize(message: Object, options?: PostMessageOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(message)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            PostMessageOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RestrictedWorker_postMessage1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    postMessageWithSharedSendable_serialize(message: Object, transfer?: Array<ArrayBuffer>): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(message)
+        if (transfer !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const transferTmpValue  = transfer!
+            thisSerializer.writeInt32((transferTmpValue.length).toInt())
+            for (let transferTmpValueCounterI = 0; transferTmpValueCounterI < transferTmpValue.length; transferTmpValueCounterI++) {
+                const transferTmpValueTmpElement : ArrayBuffer = transferTmpValue[transferTmpValueCounterI]
+                thisSerializer.writeBuffer(transferTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RestrictedWorker_postMessageWithSharedSendable(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    on_serialize(Type: string, listener: WorkerEventListener): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(listener)
+        ArkUIGeneratedNativeModule._RestrictedWorker_on(this.peer!.ptr, Type, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    once_serialize(Type: string, listener: WorkerEventListener): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(listener)
+        ArkUIGeneratedNativeModule._RestrictedWorker_once(this.peer!.ptr, Type, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    off_serialize(Type: string, listener?: WorkerEventListener): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (listener !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const listenerTmpValue  = listener!
+            thisSerializer.holdAndWriteCallback(listenerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RestrictedWorker_off(this.peer!.ptr, Type, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    terminate_serialize(): void {
+        ArkUIGeneratedNativeModule._RestrictedWorker_terminate(this.peer!.ptr)
+    }
+    addEventListener_serialize(Type: string, listener: WorkerEventListener): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(listener)
+        ArkUIGeneratedNativeModule._RestrictedWorker_addEventListener(this.peer!.ptr, Type, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    dispatchEvent_serialize(event: Event): boolean {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Event_serializer.write(thisSerializer, event)
+        const retval  = ArkUIGeneratedNativeModule._RestrictedWorker_dispatchEvent(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    removeEventListener_serialize(Type: string, callback_?: WorkerEventListener): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RestrictedWorker_removeEventListener(this.peer!.ptr, Type, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    removeAllListener_serialize(): void {
+        ArkUIGeneratedNativeModule._RestrictedWorker_removeAllListener(this.peer!.ptr)
+    }
+    registerGlobalCallObject_serialize(instanceName: string, globalCallObject: Object): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(globalCallObject)
+        ArkUIGeneratedNativeModule._RestrictedWorker_registerGlobalCallObject(this.peer!.ptr, instanceName, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    unregisterGlobalCallObject_serialize(instanceName?: string): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (instanceName !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const instanceNameTmpValue  = instanceName!
+            thisSerializer.writeString(instanceNameTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RestrictedWorker_unregisterGlobalCallObject(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getOnexit_serialize(): RestrictedWorker_onexit_Callback | undefined {
+        const retval  = ArkUIGeneratedNativeModule._RestrictedWorker_getOnexit(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : RestrictedWorker_onexit_Callback | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
+            buffer = (code: number):void => {
+                const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                buffer_BufArgsSerializer.writeNumber(code);
+                InteropNativeModule._CallCallbackSync(10, -2095497263, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const returnResult : RestrictedWorker_onexit_Callback | undefined = buffer
+        return returnResult
+    }
+    private setOnexit_serialize(onexit: RestrictedWorker_onexit_Callback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (onexit !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onexitTmpValue  = onexit!
+            thisSerializer.holdAndWriteCallback(onexitTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RestrictedWorker_setOnexit(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getOnerror_serialize(): RestrictedWorker_onerror_Callback | undefined {
+        const retval  = ArkUIGeneratedNativeModule._RestrictedWorker_getOnerror(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : RestrictedWorker_onerror_Callback | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
+            buffer = (ev: ErrorEvent):void => {
+                const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                ErrorEvent_serializer.write(buffer_BufArgsSerializer, ev);
+                InteropNativeModule._CallCallbackSync(10, -1213708823, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const returnResult : RestrictedWorker_onerror_Callback | undefined = buffer
+        return returnResult
+    }
+    private setOnerror_serialize(onerror: RestrictedWorker_onerror_Callback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (onerror !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onerrorTmpValue  = onerror!
+            thisSerializer.holdAndWriteCallback(onerrorTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RestrictedWorker_setOnerror(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getOnmessage_serialize(): RestrictedWorker_onmessage_Callback | undefined {
+        const retval  = ArkUIGeneratedNativeModule._RestrictedWorker_getOnmessage(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : RestrictedWorker_onmessage_Callback | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
+            buffer = (event: MessageEvents):void => {
+                const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                MessageEvents_serializer.write(buffer_BufArgsSerializer, event);
+                InteropNativeModule._CallCallbackSync(10, 1614214490, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const returnResult : RestrictedWorker_onmessage_Callback | undefined = buffer
+        return returnResult
+    }
+    private setOnmessage_serialize(onmessage: RestrictedWorker_onmessage_Callback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (onmessage !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onmessageTmpValue  = onmessage!
+            thisSerializer.holdAndWriteCallback(onmessageTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RestrictedWorker_setOnmessage(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getOnmessageerror_serialize(): RestrictedWorker_onmessage_Callback | undefined {
+        const retval  = ArkUIGeneratedNativeModule._RestrictedWorker_getOnmessageerror(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : RestrictedWorker_onmessage_Callback | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
+            buffer = (event: MessageEvents):void => {
+                const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                MessageEvents_serializer.write(buffer_BufArgsSerializer, event);
+                InteropNativeModule._CallCallbackSync(10, 1614214490, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const returnResult : RestrictedWorker_onmessage_Callback | undefined = buffer
+        return returnResult
+    }
+    private setOnmessageerror_serialize(onmessageerror: RestrictedWorker_onmessage_Callback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (onmessageerror !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onmessageerrorTmpValue  = onmessageerror!
+            thisSerializer.holdAndWriteCallback(onmessageerrorTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RestrictedWorker_setOnmessageerror(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export class RouterExtender {
+    static push_serialize(jsView: KPointer, url: string, recover?: boolean, finishCallback?: RouterFinishCallback): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (recover !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const recoverTmpValue  = recover!
+            thisSerializer.writeBoolean(recoverTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (finishCallback !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const finishCallbackTmpValue  = finishCallback!
+            thisSerializer.holdAndWriteCallback(finishCallbackTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._RouterExtender_push(jsView, url, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static replace_serialize(jsView: KPointer, url: string, recover?: boolean, enterFinishCallback?: RouterFinishCallback): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (recover !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const recoverTmpValue  = recover!
+            thisSerializer.writeBoolean(recoverTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (enterFinishCallback !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const enterFinishCallbackTmpValue  = enterFinishCallback!
+            thisSerializer.holdAndWriteCallback(enterFinishCallbackTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._RouterExtender_replace(jsView, url, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static moveCommonUnderPageNode_serialize(commonNode: KPointer, pageNode: KPointer): void {
+        ArkUIGeneratedNativeModule._RouterExtender_moveCommonUnderPageNode(commonNode, pageNode)
+    }
+    static back_serialize(): void {
+        ArkUIGeneratedNativeModule._RouterExtender_back()
+    }
+    static backWithOptions_serialize(url: string, params?: Object): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (params !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const paramsTmpValue  = params!
+            thisSerializer.holdAndWriteObject(paramsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RouterExtender_backWithOptions(url, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static runPage_serialize(jsView: KPointer, url: string, recover?: boolean, finishCallback?: RouterFinishCallback): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (recover !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const recoverTmpValue  = recover!
+            thisSerializer.writeBoolean(recoverTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (finishCallback !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const finishCallbackTmpValue  = finishCallback!
+            thisSerializer.holdAndWriteCallback(finishCallbackTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._RouterExtender_runPage(jsView, url, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static clear_serialize(): void {
+        ArkUIGeneratedNativeModule._RouterExtender_clear()
+    }
+    static showAlertBeforeBackPage_serialize(message: string): void {
+        ArkUIGeneratedNativeModule._RouterExtender_showAlertBeforeBackPage(message)
+    }
+    static hideAlertBeforeBackPage_serialize(): void {
+        ArkUIGeneratedNativeModule._RouterExtender_hideAlertBeforeBackPage()
+    }
+    public static push(jsView: KPointer, url: string, recover?: boolean, finishCallback?: RouterFinishCallback): KPointer {
+        const jsView_casted = jsView as (KPointer)
+        const url_casted = url as (string)
+        const recover_casted = recover as (boolean | undefined)
+        const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
+        return RouterExtender.push_serialize(jsView_casted, url_casted, recover_casted, finishCallback_casted)
+    }
+    public static replace(jsView: KPointer, url: string, recover?: boolean, enterFinishCallback?: RouterFinishCallback): KPointer {
+        const jsView_casted = jsView as (KPointer)
+        const url_casted = url as (string)
+        const recover_casted = recover as (boolean | undefined)
+        const enterFinishCallback_casted = enterFinishCallback as (RouterFinishCallback | undefined)
+        return RouterExtender.replace_serialize(jsView_casted, url_casted, recover_casted, enterFinishCallback_casted)
+    }
+    public static moveCommonUnderPageNode(commonNode: KPointer, pageNode: KPointer): void {
+        const commonNode_casted = commonNode as (KPointer)
+        const pageNode_casted = pageNode as (KPointer)
+        RouterExtender.moveCommonUnderPageNode_serialize(commonNode_casted, pageNode_casted)
+        return
+    }
+    public static back(): void {
+        RouterExtender.back_serialize()
+        return
+    }
+    public static backWithOptions(url: string, params?: Object): void {
+        const url_casted = url as (string)
+        const params_casted = params as (Object | undefined)
+        RouterExtender.backWithOptions_serialize(url_casted, params_casted)
+        return
+    }
+    public static runPage(jsView: KPointer, url: string, recover?: boolean, finishCallback?: RouterFinishCallback): KPointer {
+        const jsView_casted = jsView as (KPointer)
+        const url_casted = url as (string)
+        const recover_casted = recover as (boolean | undefined)
+        const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
+        return RouterExtender.runPage_serialize(jsView_casted, url_casted, recover_casted, finishCallback_casted)
+    }
+    public static clear(): void {
+        RouterExtender.clear_serialize()
+        return
+    }
+    public static showAlertBeforeBackPage(message: string): void {
+        const message_casted = message as (string)
+        RouterExtender.showAlertBeforeBackPage_serialize(message_casted)
+        return
+    }
+    public static hideAlertBeforeBackPage(): void {
+        RouterExtender.hideAlertBeforeBackPage_serialize()
+        return
+    }
+}
+export class ScreenshotService {
+    static requestScreenshot_serialize(target: string, name: string): boolean {
+        const retval  = ArkUIGeneratedNativeModule._ScreenshotService_requestScreenshot(target, name)
+        return retval
+    }
+    public static requestScreenshot(target: string, name: string): boolean {
+        const target_casted = target as (string)
+        const name_casted = name as (string)
+        return ScreenshotService.requestScreenshot_serialize(target_casted, name_casted)
+    }
+}
+export class StateStylesOps {
+    static onStateStyleChange_serialize(node: KPointer, stateStyleChange: Callback_StateStylesChange): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(stateStyleChange)
+        ArkUIGeneratedNativeModule._StateStylesOps_onStateStyleChange(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static onStateStyleChange(node: KPointer, stateStyleChange: Callback_StateStylesChange): void {
+        const node_casted = node as (KPointer)
+        const stateStyleChange_casted = stateStyleChange as (Callback_StateStylesChange)
+        StateStylesOps.onStateStyleChange_serialize(node_casted, stateStyleChange_casted)
+        return
+    }
+}
+export class SystemOps {
+    static StartFrame_serialize(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._SystemOps_StartFrame()
+        return retval
+    }
+    static EndFrame_serialize(root: KPointer): void {
+        ArkUIGeneratedNativeModule._SystemOps_EndFrame(root)
+    }
+    static syncInstanceId_serialize(instanceId: int32): void {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(instanceId)
+    }
+    static restoreInstanceId_serialize(): void {
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId()
+    }
+    static getResourceId_serialize(bundleName: string, moduleName: string, params: Array<string>): int32 {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((params.length).toInt())
+        for (let paramsCounterI = 0; paramsCounterI < params.length; paramsCounterI++) {
+            const paramsTmpElement : string = params[paramsCounterI]
+            thisSerializer.writeString(paramsTmpElement)
+        }
+        const retval  = ArkUIGeneratedNativeModule._SystemOps_getResourceId(bundleName, moduleName, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static resourceManagerReset_serialize(): void {
+        ArkUIGeneratedNativeModule._SystemOps_resourceManagerReset()
+    }
+    static setFrameCallback_serialize(onFrameCallback: ((value0: number) => void), onIdleCallback: ((value0: number) => void), delayTime: number): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onFrameCallback)
+        thisSerializer.holdAndWriteCallback(onIdleCallback)
+        ArkUIGeneratedNativeModule._SystemOps_setFrameCallback(thisSerializer.asBuffer(), thisSerializer.length(), delayTime)
+        thisSerializer.release()
+    }
+    static colorMetricsResourceColor_serialize(color: Resource): Array<number> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Resource_serializer.write(thisSerializer, color)
+        const retval  = ArkUIGeneratedNativeModule._SystemOps_colorMetricsResourceColor(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<number> = new Array<number>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readNumber() as number)
+        }
+        const returnResult : Array<number> = buffer
+        return returnResult
+    }
+    static resourceToLengthMetrics_serialize(res: Resource): LengthMetricsCustom {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Resource_serializer.write(thisSerializer, res)
+        const retval  = ArkUIGeneratedNativeModule._SystemOps_resourceToLengthMetrics(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : LengthMetricsCustom = LengthMetricsCustom_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static blendColorByColorMetrics_serialize(color: number, overlayColor: number): Array<number> {
+        const retval  = ArkUIGeneratedNativeModule._SystemOps_blendColorByColorMetrics(color, overlayColor)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<number> = new Array<number>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readNumber() as number)
+        }
+        const returnResult : Array<number> = buffer
+        return returnResult
+    }
+    public static StartFrame(): KPointer {
+        return SystemOps.StartFrame_serialize()
+    }
+    public static EndFrame(root: KPointer): void {
+        const root_casted = root as (KPointer)
+        SystemOps.EndFrame_serialize(root_casted)
+        return
+    }
+    public static syncInstanceId(instanceId: int32): void {
+        const instanceId_casted = instanceId as (int32)
+        SystemOps.syncInstanceId_serialize(instanceId_casted)
+        return
+    }
+    public static restoreInstanceId(): void {
+        SystemOps.restoreInstanceId_serialize()
+        return
+    }
+    public static getResourceId(bundleName: string, moduleName: string, params: Array<string>): int32 {
+        const bundleName_casted = bundleName as (string)
+        const moduleName_casted = moduleName as (string)
+        const params_casted = params as (Array<string>)
+        return SystemOps.getResourceId_serialize(bundleName_casted, moduleName_casted, params_casted)
+    }
+    public static resourceManagerReset(): void {
+        SystemOps.resourceManagerReset_serialize()
+        return
+    }
+    public static setFrameCallback(onFrameCallback: ((value0: number) => void), onIdleCallback: ((value0: number) => void), delayTime: number): void {
+        const onFrameCallback_casted = onFrameCallback as (((value0: number) => void))
+        const onIdleCallback_casted = onIdleCallback as (((value0: number) => void))
+        const delayTime_casted = delayTime as (number)
+        SystemOps.setFrameCallback_serialize(onFrameCallback_casted, onIdleCallback_casted, delayTime_casted)
+        return
+    }
+    public static colorMetricsResourceColor(color: Resource): Array<number> {
+        const color_casted = color as (Resource)
+        return SystemOps.colorMetricsResourceColor_serialize(color_casted)
+    }
+    public static resourceToLengthMetrics(res: Resource): LengthMetricsCustom {
+        const res_casted = res as (Resource)
+        return SystemOps.resourceToLengthMetrics_serialize(res_casted)
+    }
+    public static blendColorByColorMetrics(color: number, overlayColor: number): Array<number> {
+        const color_casted = color as (number)
+        const overlayColor_casted = overlayColor as (number)
+        return SystemOps.blendColorByColorMetrics_serialize(color_casted, overlayColor_casted)
+    }
+}
+export class UIContextAtomicServiceBar {
+    static getBarRect_serialize(): Frame {
+        const retval  = ArkUIGeneratedNativeModule._UIContextAtomicServiceBar_getBarRect()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Frame = Frame_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    public static getBarRect(): Frame {
+        return UIContextAtomicServiceBar.getBarRect_serialize()
+    }
+}
+export class ArkRootPeer extends PeerNode {
+    attributeSet?: RootModifier;
+    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component?: ComponentBase, flags: int32 = 0): ArkRootPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Root_construct(peerId, flags)
+        const _peer  = new ArkRootPeer(_peerPtr, peerId, 'Root', flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+}
+export class ArkComponentRootPeer extends PeerNode {
+    attributeSet?: ComponentRootModifier;
+    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component?: ComponentBase, flags: int32 = 0): ArkComponentRootPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._ComponentRoot_construct(peerId, flags)
+        const _peer  = new ArkComponentRootPeer(_peerPtr, peerId, 'ComponentRoot', flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+}
+export class ArkCustomBuilderRootPeer extends PeerNode {
+    attributeSet?: CustomBuilderRootModifier;
+    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component?: ComponentBase, flags: int32 = 0): ArkCustomBuilderRootPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._CustomBuilderRoot_construct(peerId, flags)
+        const _peer  = new ArkCustomBuilderRootPeer(_peerPtr, peerId, 'CustomBuilderRoot', flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+}
+export class ArkCustomLayoutRootPeer extends PeerNode {
+    attributeSet?: CustomLayoutRootModifier;
+    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component?: ComponentBase, flags: int32 = 0): ArkCustomLayoutRootPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._CustomLayoutRoot_construct(peerId, flags)
+        const _peer  = new ArkCustomLayoutRootPeer(_peerPtr, peerId, 'CustomLayoutRoot', flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setSubscribeOnMeasureSizeAttribute(value: Callback_onMeasureSize_SizeResult): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._CustomLayoutRoot_setSubscribeOnMeasureSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setSubscribeOnPlaceChildrenAttribute(value: Callback_onPlaceChildren_Void): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._CustomLayoutRoot_setSubscribeOnPlaceChildren(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export type RouterFinishCallback = (value: KPointer) => void;
+export type Callback_Extender_OnProgress = (value: float) => void;
+export type Callback_Extender_OnFinish = () => void;
+export interface DoubleAnimationParam {
+    propertyName: string;
+    startValue: float;
+    endValue: float;
+    duration: int32;
+    delay: int32;
+    curve: curves.Curve | string | curves.ICurve;
+    onProgress?: Callback_Extender_OnProgress;
+    onFinish?: Callback_Extender_OnFinish;
+}
+export interface ComponentInfo {
+    size: Size;
+    localOffset: Offset_componentutils;
+    windowOffset: Offset_componentutils;
+    screenOffset: Offset_componentutils;
+    translate: TranslateResult;
+    scale: ScaleResult;
+    rotate: RotateResult;
+    transform: Matrix4Result;
+}
+export interface Offset_componentutils {
+    x: number;
+    y: number;
+}
+export interface TranslateResult {
+    x: number;
+    y: number;
+    z: number;
+}
+export interface ScaleResult {
+    x: number;
+    y: number;
+    z: number;
+    centerX: number;
+    centerY: number;
+}
+export interface RotateResult {
+    x: number;
+    y: number;
+    z: number;
+    centerX: number;
+    centerY: number;
+    angle: number;
+}
+export type Matrix4Result = [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number
+]
+export interface CustomDialogBuildOptions {
+    controller?: CustomDialogController;
+}
+export interface CustomDialogControllerBuilder {
+    buildOptions: CustomDialogBuildOptions;
+    build: CustomBuilder;
+}
+export interface CustomDialogControllerOptionsExtender {
+    builder: CustomBuilder;
+    cancel?: (() => void);
+    autoCancel?: boolean;
+    alignment?: DialogAlignment;
+    offset?: Offset;
+    customStyle?: boolean;
+    gridCount?: number;
+    maskColor?: ResourceColor;
+    maskRect?: Rectangle;
+    openAnimation?: AnimateParam;
+    closeAnimation?: AnimateParam;
+    showInSubWindow?: boolean;
+    backgroundColor?: ResourceColor;
+    cornerRadius?: Dimension | BorderRadiuses;
+    isModal?: boolean;
+    onWillDismiss?: ((value0: DismissDialogAction) => void);
+    width?: Dimension;
+    height?: Dimension;
+    borderWidth?: Dimension | EdgeWidths;
+    borderColor?: ResourceColor | EdgeColors;
+    borderStyle?: BorderStyle | EdgeStyles;
+    shadow?: ShadowOptions | ShadowStyle;
+    backgroundBlurStyle?: BlurStyle;
+    backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+    backgroundEffect?: BackgroundEffectOptions;
+    keyboardAvoidMode?: KeyboardAvoidMode;
+    enableHoverMode?: boolean;
+    hoverModeArea?: HoverModeAreaType;
+    onDidAppear?: (() => void);
+    onDidDisappear?: (() => void);
+    onWillAppear?: (() => void);
+    onWillDisappear?: (() => void);
+    keyboardAvoidDistance?: LengthMetrics;
+    levelMode?: LevelMode;
+    levelUniqueId?: number;
+    immersiveMode?: ImmersiveMode;
+    levelOrder?: LevelOrder;
+    focusable?: boolean;
+}
+export interface CustomDialogControllerExternalOptionsExtender {
+    customStyle?: boolean;
+}
+export type Callback_RangeUpdate = (start: int32, end: int32) => void;
+export type Callback_CreateItem = (index: int32) => KPointer;
+export type Callback_OnMoveFromTo = (from: int32, to: int32) => void;
+export interface LengthMetricsCustom {
+    unit: number;
+    value: number;
+}
+export interface CustomColors {
+    brand?: ResourceColor;
+    warning?: ResourceColor;
+    alert?: ResourceColor;
+    confirm?: ResourceColor;
+    fontPrimary?: ResourceColor;
+    fontSecondary?: ResourceColor;
+    fontTertiary?: ResourceColor;
+    fontFourth?: ResourceColor;
+    fontEmphasize?: ResourceColor;
+    fontOnPrimary?: ResourceColor;
+    fontOnSecondary?: ResourceColor;
+    fontOnTertiary?: ResourceColor;
+    fontOnFourth?: ResourceColor;
+    iconPrimary?: ResourceColor;
+    iconSecondary?: ResourceColor;
+    iconTertiary?: ResourceColor;
+    iconFourth?: ResourceColor;
+    iconEmphasize?: ResourceColor;
+    iconSubEmphasize?: ResourceColor;
+    iconOnPrimary?: ResourceColor;
+    iconOnSecondary?: ResourceColor;
+    iconOnTertiary?: ResourceColor;
+    iconOnFourth?: ResourceColor;
+    backgroundPrimary?: ResourceColor;
+    backgroundSecondary?: ResourceColor;
+    backgroundTertiary?: ResourceColor;
+    backgroundFourth?: ResourceColor;
+    backgroundEmphasize?: ResourceColor;
+    compForegroundPrimary?: ResourceColor;
+    compBackgroundPrimary?: ResourceColor;
+    compBackgroundPrimaryTran?: ResourceColor;
+    compBackgroundPrimaryContrary?: ResourceColor;
+    compBackgroundGray?: ResourceColor;
+    compBackgroundSecondary?: ResourceColor;
+    compBackgroundTertiary?: ResourceColor;
+    compBackgroundEmphasize?: ResourceColor;
+    compBackgroundNeutral?: ResourceColor;
+    compEmphasizeSecondary?: ResourceColor;
+    compEmphasizeTertiary?: ResourceColor;
+    compDivider?: ResourceColor;
+    compCommonContrary?: ResourceColor;
+    compBackgroundFocus?: ResourceColor;
+    compFocusedPrimary?: ResourceColor;
+    compFocusedSecondary?: ResourceColor;
+    compFocusedTertiary?: ResourceColor;
+    interactiveHover?: ResourceColor;
+    interactivePressed?: ResourceColor;
+    interactiveFocus?: ResourceColor;
+    interactiveActive?: ResourceColor;
+    interactiveSelect?: ResourceColor;
+    interactiveClick?: ResourceColor;
+}
+export interface WorkerOptions {
+    type?: string;
+    name?: string;
+    shared?: boolean;
+}
+export interface Event {
+    readonly type: string;
+    readonly timeStamp: int64;
+}
+export interface ErrorEvent extends Event {
+    readonly message: string;
+    readonly filename: string;
+    readonly lineno: number;
+    readonly colno: number;
+    readonly error: Object;
+}
+export interface MessageEvents extends Event {
+    readonly data: object;
+}
+export type WorkerEventListener = (event: Event) => void;
+export interface PostMessageOptions {
+    transfer?: Array<Object>;
+}
+export type RestrictedWorker_onexit_Callback = (code: number) => void;
+export type RestrictedWorker_onerror_Callback = (ev: ErrorEvent) => void;
+export type RestrictedWorker_onmessage_Callback = (event: MessageEvents) => void;
+export type Callback_StateStylesChange = (currentState: int32) => void;
+export interface BuilderNodeOptions {
+    selfIdealSize?: Size;
+    type?: number;
+    surfaceId?: string;
+}
+export type Callback_Size_Void = (size: Size) => void;
+export interface WebHeader {
+    headerKey: string;
+    headerValue: string;
+}
+export interface SnapshotOptions {
+    scale?: number;
+    waitUntilRenderFinished?: boolean;
+}
+export enum PerfMonitorActionType {
+    LAST_DOWN = 0,
+    LAST_UP = 1,
+    FIRST_MOVE = 2
+}
+export enum PerfMonitorSourceType {
+    PERF_TOUCH_EVENT = 0,
+    PERF_MOUSE_EVENT = 1,
+    PERF_TOUCHPAD_EVENT = 2,
+    PERF_JOYSTICK_EVENT = 3,
+    PERF_KEY_EVENT = 4
+}
+export interface IndicatorStyle {
+    height?: Length;
+    width?: Length;
+    borderRadius?: Length;
+    marginTop?: Length;
+    color?: ResourceColor;
+    selectedColor?: ResourceColor;
+    left?: Length;
+    top?: Length;
+    right?: Length;
+    bottom?: Length;
+    size?: Length;
+    mask?: boolean;
+}
+export type CustomNodeBuilder = (parentNode: KPointer) => KPointer;
+export type NavExtender_OnUpdateStack = () => void;
+export interface Root {
+    attributeModifier(value: AttributeModifier<Root> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
+}
+export class ArkRootStyle implements Root {
+    public attributeModifier(value: AttributeModifier<Root> | undefined): this {
+        throw new Error("Not implemented")
+    }
+}
+export interface ComponentRoot {
+    attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
+}
+export class ArkComponentRootStyle implements ComponentRoot {
+    public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
+        throw new Error("Not implemented")
+    }
+}
+export interface CustomBuilderRoot {
+    attributeModifier(value: AttributeModifier<CustomBuilderRoot> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
+}
+export class ArkCustomBuilderRootStyle implements CustomBuilderRoot {
+    public attributeModifier(value: AttributeModifier<CustomBuilderRoot> | undefined): this {
+        throw new Error("Not implemented")
+    }
+}
+export type Callback_onMeasureSize_SizeResult = (selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions) => SizeResult;
+export type Callback_onPlaceChildren_Void = (selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions) => void;
+export interface CustomLayoutRoot {
+    subscribeOnMeasureSize(value: Callback_onMeasureSize_SizeResult): this {
+        throw new Error("Unimplemented method subscribeOnMeasureSize")
+    }
+    subscribeOnPlaceChildren(value: Callback_onPlaceChildren_Void): this {
+        throw new Error("Unimplemented method subscribeOnPlaceChildren")
+    }
+    attributeModifier(value: AttributeModifier<CustomLayoutRoot> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
+}
+export class ArkCustomLayoutRootStyle implements CustomLayoutRoot {
+    subscribeOnMeasureSize_value?: Callback_onMeasureSize_SizeResult
+    subscribeOnPlaceChildren_value?: Callback_onPlaceChildren_Void
+    subscribeOnMeasureSize(value: Callback_onMeasureSize_SizeResult): this {
+        return this
+    }
+    subscribeOnPlaceChildren(value: Callback_onPlaceChildren_Void): this {
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<CustomLayoutRoot> | undefined): this {
+        throw new Error("Not implemented")
+    }
+}
+export interface TransformationMatrix {
+    matrix4x4: Array<number>;
+}
+export class ArkRootComponent extends ComponentBase implements Root {
+    getPeer(): ArkRootPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
+        return (this.peer as ArkRootPeer)
+    }
+    public attributeModifier(value: AttributeModifier<Root> | undefined): this {
+        hookRootAttributeModifier(this, value);
+        return this
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
+}
+export class ArkComponentRootComponent extends ComponentBase implements ComponentRoot {
+    getPeer(): ArkComponentRootPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
+        return (this.peer as ArkComponentRootPeer)
+    }
+    public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
+        hookComponentRootAttributeModifier(this, value);
+        return this
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
+}
+export class ArkCustomBuilderRootComponent extends ComponentBase implements CustomBuilderRoot {
+    getPeer(): ArkCustomBuilderRootPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
+        return (this.peer as ArkCustomBuilderRootPeer)
+    }
+    public attributeModifier(value: AttributeModifier<CustomBuilderRoot> | undefined): this {
+        hookCustomBuilderRootAttributeModifier(this, value);
+        return this
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
+}
+export class ArkCustomLayoutRootComponent extends ComponentBase implements CustomLayoutRoot {
+    getPeer(): ArkCustomLayoutRootPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
+        return (this.peer as ArkCustomLayoutRootPeer)
+    }
+    public subscribeOnMeasureSize(value: Callback_onMeasureSize_SizeResult): this {
+        if (this.checkPriority("subscribeOnMeasureSize")) {
+            const value_casted = value as (Callback_onMeasureSize_SizeResult)
+            this.getPeer()?.setSubscribeOnMeasureSizeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public subscribeOnPlaceChildren(value: Callback_onPlaceChildren_Void): this {
+        if (this.checkPriority("subscribeOnPlaceChildren")) {
+            const value_casted = value as (Callback_onPlaceChildren_Void)
+            this.getPeer()?.setSubscribeOnPlaceChildrenAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<CustomLayoutRoot> | undefined): this {
+        hookCustomLayoutRootAttributeModifier(this, value);
+        return this
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
+}
+export function getRectangleById(id: string): ComponentInfo {
+    return GlobalScope.getRectangleById(id)
+}
+export class BaseShape_serializer {
+    public static write(buffer: SerializerBase, value: BaseShape): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): BaseShape {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return BaseShapeInternal.fromPtr(ptr)
+    }
+}
+export class BuilderNodeOps_serializer {
+    public static write(buffer: SerializerBase, value: BuilderNodeOps): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): BuilderNodeOps {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return BuilderNodeOpsInternal.fromPtr(ptr)
+    }
+}
+export class CommonShape_serializer {
+    public static write(buffer: SerializerBase, value: CommonShape): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): CommonShape {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return CommonShapeInternal.fromPtr(ptr)
+    }
+}
+export class CustomDialogControllerExtender_serializer {
+    public static write(buffer: SerializerBase, value: CustomDialogControllerExtender): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): CustomDialogControllerExtender {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return CustomDialogControllerExtenderInternal.fromPtr(ptr)
+    }
+}
+export class Offset_componentutils_serializer {
+    public static write(buffer: SerializerBase, value: Offset_componentutils): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
+    }
+    public static read(buffer: DeserializerBase): Offset_componentutils {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : Offset_componentutils = ({x: xTmpResult, y: yTmpResult} as Offset_componentutils)
+        return value
+    }
+}
+export class RotateResult_serializer {
+    public static write(buffer: SerializerBase, value: RotateResult): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
+        const valueHolderForZ  = value.z
+        valueSerializer.writeNumber(valueHolderForZ)
+        const valueHolderForCenterX  = value.centerX
+        valueSerializer.writeNumber(valueHolderForCenterX)
+        const valueHolderForCenterY  = value.centerY
+        valueSerializer.writeNumber(valueHolderForCenterY)
+        const valueHolderForAngle  = value.angle
+        valueSerializer.writeNumber(valueHolderForAngle)
+    }
+    public static read(buffer: DeserializerBase): RotateResult {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const zTmpResult : number = (valueDeserializer.readNumber() as number)
+        const centerXTmpResult : number = (valueDeserializer.readNumber() as number)
+        const centerYTmpResult : number = (valueDeserializer.readNumber() as number)
+        const angleTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : RotateResult = ({x: xTmpResult, y: yTmpResult, z: zTmpResult, centerX: centerXTmpResult, centerY: centerYTmpResult, angle: angleTmpResult} as RotateResult)
+        return value
+    }
+}
+export class ScaleResult_serializer {
+    public static write(buffer: SerializerBase, value: ScaleResult): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
+        const valueHolderForZ  = value.z
+        valueSerializer.writeNumber(valueHolderForZ)
+        const valueHolderForCenterX  = value.centerX
+        valueSerializer.writeNumber(valueHolderForCenterX)
+        const valueHolderForCenterY  = value.centerY
+        valueSerializer.writeNumber(valueHolderForCenterY)
+    }
+    public static read(buffer: DeserializerBase): ScaleResult {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const zTmpResult : number = (valueDeserializer.readNumber() as number)
+        const centerXTmpResult : number = (valueDeserializer.readNumber() as number)
+        const centerYTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : ScaleResult = ({x: xTmpResult, y: yTmpResult, z: zTmpResult, centerX: centerXTmpResult, centerY: centerYTmpResult} as ScaleResult)
+        return value
+    }
+}
+export class TranslateResult_serializer {
+    public static write(buffer: SerializerBase, value: TranslateResult): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
+        const valueHolderForZ  = value.z
+        valueSerializer.writeNumber(valueHolderForZ)
+    }
+    public static read(buffer: DeserializerBase): TranslateResult {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const zTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : TranslateResult = ({x: xTmpResult, y: yTmpResult, z: zTmpResult} as TranslateResult)
+        return value
+    }
+}
+export class BuilderNodeOptions_serializer {
+    public static write(buffer: SerializerBase, value: BuilderNodeOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForSelfIdealSize  = value.selfIdealSize
+        if (valueHolderForSelfIdealSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSelfIdealSizeTmpValue  = valueHolderForSelfIdealSize!
+            Size_serializer.write(valueSerializer, valueHolderForSelfIdealSizeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForType  = value.type
+        if (valueHolderForType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTypeTmpValue  = valueHolderForType!
+            valueSerializer.writeNumber(valueHolderForTypeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSurfaceId  = value.surfaceId
+        if (valueHolderForSurfaceId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSurfaceIdTmpValue  = valueHolderForSurfaceId!
+            valueSerializer.writeString(valueHolderForSurfaceIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): BuilderNodeOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const selfIdealSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let selfIdealSizeTmpBuf : Size | undefined = undefined
+        if ((selfIdealSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            selfIdealSizeTmpBuf = Size_serializer.read(valueDeserializer)
+        }
+        const selfIdealSizeTmpResult : Size | undefined = selfIdealSizeTmpBuf
+        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let typeTmpBuf : number | undefined = undefined
+        if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            typeTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const typeTmpResult : number | undefined = typeTmpBuf
+        const surfaceIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let surfaceIdTmpBuf : string | undefined = undefined
+        if ((surfaceIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            surfaceIdTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const surfaceIdTmpResult : string | undefined = surfaceIdTmpBuf
+        let value : BuilderNodeOptions = ({selfIdealSize: selfIdealSizeTmpResult, type: typeTmpResult, surfaceId: surfaceIdTmpResult} as BuilderNodeOptions)
+        return value
+    }
+}
+export class CustomDialogControllerExternalOptionsExtender_serializer {
+    public static write(buffer: SerializerBase, value: CustomDialogControllerExternalOptionsExtender): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForCustomStyle  = value.customStyle
+        if (valueHolderForCustomStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCustomStyleTmpValue  = valueHolderForCustomStyle!
+            valueSerializer.writeBoolean(valueHolderForCustomStyleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): CustomDialogControllerExternalOptionsExtender {
+        let valueDeserializer : DeserializerBase = buffer
+        const customStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let customStyleTmpBuf : boolean | undefined = undefined
+        if ((customStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            customStyleTmpBuf = valueDeserializer.readBoolean()
+        }
+        const customStyleTmpResult : boolean | undefined = customStyleTmpBuf
+        let value : CustomDialogControllerExternalOptionsExtender = ({customStyle: customStyleTmpResult} as CustomDialogControllerExternalOptionsExtender)
+        return value
+    }
+}
+export class DoubleAnimationParam_serializer {
+    public static write(buffer: SerializerBase, value: DoubleAnimationParam): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForPropertyName  = value.propertyName
+        valueSerializer.writeString(valueHolderForPropertyName)
+        const valueHolderForStartValue  = value.startValue
+        valueSerializer.writeFloat32(valueHolderForStartValue)
+        const valueHolderForEndValue  = value.endValue
+        valueSerializer.writeFloat32(valueHolderForEndValue)
+        const valueHolderForDuration  = value.duration
+        valueSerializer.writeInt32(valueHolderForDuration)
+        const valueHolderForDelay  = value.delay
+        valueSerializer.writeInt32(valueHolderForDelay)
+        const valueHolderForCurve  = value.curve
+        if (valueHolderForCurve instanceof curves.Curve) {
+            valueSerializer.writeInt8((0).toChar())
+            const valueHolderForCurveForIdx0  = valueHolderForCurve as curves.Curve
+            valueSerializer.writeInt32(valueHolderForCurveForIdx0.valueOf())
+        } else if (valueHolderForCurve instanceof string) {
+            valueSerializer.writeInt8((1).toChar())
+            const valueHolderForCurveForIdx1  = valueHolderForCurve as string
+            valueSerializer.writeString(valueHolderForCurveForIdx1)
+        } else if (valueHolderForCurve instanceof curves.ICurve) {
+            valueSerializer.writeInt8((2).toChar())
+            const valueHolderForCurveForIdx2  = valueHolderForCurve as curves.ICurve
+            curves_ICurve_serializer.write(valueSerializer, valueHolderForCurveForIdx2)
+        }
+        const valueHolderForOnProgress  = value.onProgress
+        if (valueHolderForOnProgress !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnProgressTmpValue  = valueHolderForOnProgress!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnProgressTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnFinish  = value.onFinish
+        if (valueHolderForOnFinish !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnFinishTmpValue  = valueHolderForOnFinish!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnFinishTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): DoubleAnimationParam {
+        let valueDeserializer : DeserializerBase = buffer
+        const propertyNameTmpResult : string = (valueDeserializer.readString() as string)
+        const startValueTmpResult : float = valueDeserializer.readFloat32()
+        const endValueTmpResult : float = valueDeserializer.readFloat32()
+        const durationTmpResult : int32 = valueDeserializer.readInt32()
+        const delayTmpResult : int32 = valueDeserializer.readInt32()
+        const curveTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let curveTmpBuf : curves.Curve | string | curves.ICurve | undefined
+        if (curveTmpBufUnionSelector == (0).toChar()) {
+            curveTmpBuf = curves.Curve.fromValue(valueDeserializer.readInt32())
+        } else if (curveTmpBufUnionSelector == (1).toChar()) {
+            curveTmpBuf = (valueDeserializer.readString() as string)
+        } else if (curveTmpBufUnionSelector == (2).toChar()) {
+            curveTmpBuf = (curves_ICurve_serializer.read(valueDeserializer) as curves.ICurve)
+        } else {
+            throw new Error("One of the branches for curveTmpBuf has to be chosen through deserialisation.")
+        }
+        const curveTmpResult : curves.Curve | string | curves.ICurve = (curveTmpBuf as curves.Curve | string | curves.ICurve)
+        const onProgressTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onProgressTmpBuf : Callback_Extender_OnProgress | undefined = undefined
+        if ((onProgressTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onProgressTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onProgressTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onProgressTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onProgressTmpBuf = (value: float):void => {
+                const onProgressTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onProgressTmpBuf_BufArgsSerializer.writeInt32(onProgressTmpBuf_BufResource.resourceId);
+                onProgressTmpBuf_BufArgsSerializer.writePointer(onProgressTmpBuf_BufCall);
+                onProgressTmpBuf_BufArgsSerializer.writePointer(onProgressTmpBuf_BufCallSync);
+                onProgressTmpBuf_BufArgsSerializer.writeFloat32(value);
+                InteropNativeModule._CallCallbackSync(10, 1264236374, onProgressTmpBuf_BufArgsSerializer.asBuffer(), onProgressTmpBuf_BufArgsSerializer.length());
+                onProgressTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onProgressTmpResult : Callback_Extender_OnProgress | undefined = onProgressTmpBuf
+        const onFinishTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onFinishTmpBuf : Callback_Extender_OnFinish | undefined = undefined
+        if ((onFinishTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onFinishTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onFinishTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onFinishTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onFinishTmpBuf = ():void => {
+                const onFinishTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onFinishTmpBuf_BufArgsSerializer.writeInt32(onFinishTmpBuf_BufResource.resourceId);
+                onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCall);
+                onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -733525640, onFinishTmpBuf_BufArgsSerializer.asBuffer(), onFinishTmpBuf_BufArgsSerializer.length());
+                onFinishTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onFinishTmpResult : Callback_Extender_OnFinish | undefined = onFinishTmpBuf
+        let value : DoubleAnimationParam = ({propertyName: propertyNameTmpResult, startValue: startValueTmpResult, endValue: endValueTmpResult, duration: durationTmpResult, delay: delayTmpResult, curve: curveTmpResult, onProgress: onProgressTmpResult, onFinish: onFinishTmpResult} as DoubleAnimationParam)
+        return value
+    }
+}
+export class ErrorEvent_serializer {
+    public static write(buffer: SerializerBase, value: ErrorEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForType  = value.type
+        valueSerializer.writeString(valueHolderForType)
+        const valueHolderForTimeStamp  = value.timeStamp
+        valueSerializer.writeInt64(valueHolderForTimeStamp)
+        const valueHolderForMessage  = value.message
+        valueSerializer.writeString(valueHolderForMessage)
+        const valueHolderForFilename  = value.filename
+        valueSerializer.writeString(valueHolderForFilename)
+        const valueHolderForLineno  = value.lineno
+        valueSerializer.writeNumber(valueHolderForLineno)
+        const valueHolderForColno  = value.colno
+        valueSerializer.writeNumber(valueHolderForColno)
+        const valueHolderForError  = value.error
+        valueSerializer.holdAndWriteObject(valueHolderForError)
+    }
+    public static read(buffer: DeserializerBase): ErrorEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        const typeTmpResult : string = (valueDeserializer.readString() as string)
+        const timeStampTmpResult : int64 = valueDeserializer.readInt64()
+        const messageTmpResult : string = (valueDeserializer.readString() as string)
+        const filenameTmpResult : string = (valueDeserializer.readString() as string)
+        const linenoTmpResult : number = (valueDeserializer.readNumber() as number)
+        const colnoTmpResult : number = (valueDeserializer.readNumber() as number)
+        const errorTmpResult : Object = (valueDeserializer.readObject() as object)
+        let value : ErrorEvent = ({type: typeTmpResult, timeStamp: timeStampTmpResult, message: messageTmpResult, filename: filenameTmpResult, lineno: linenoTmpResult, colno: colnoTmpResult, error: errorTmpResult} as ErrorEvent)
+        return value
+    }
+}
+export class Event_serializer {
+    public static write(buffer: SerializerBase, value: Event): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForType  = value.type
+        valueSerializer.writeString(valueHolderForType)
+        const valueHolderForTimeStamp  = value.timeStamp
+        valueSerializer.writeInt64(valueHolderForTimeStamp)
+    }
+    public static read(buffer: DeserializerBase): Event {
+        let valueDeserializer : DeserializerBase = buffer
+        const typeTmpResult : string = (valueDeserializer.readString() as string)
+        const timeStampTmpResult : int64 = valueDeserializer.readInt64()
+        let value : Event = ({type: typeTmpResult, timeStamp: timeStampTmpResult} as Event)
+        return value
+    }
+}
+export class LengthMetricsCustom_serializer {
+    public static write(buffer: SerializerBase, value: LengthMetricsCustom): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForUnit  = value.unit
+        valueSerializer.writeNumber(valueHolderForUnit)
+        const valueHolderForValue  = value.value
+        valueSerializer.writeNumber(valueHolderForValue)
+    }
+    public static read(buffer: DeserializerBase): LengthMetricsCustom {
+        let valueDeserializer : DeserializerBase = buffer
+        const unitTmpResult : number = (valueDeserializer.readNumber() as number)
+        const valueTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : LengthMetricsCustom = ({unit: unitTmpResult, value: valueTmpResult} as LengthMetricsCustom)
+        return value
+    }
+}
+export class MessageEvents_serializer {
+    public static write(buffer: SerializerBase, value: MessageEvents): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForType  = value.type
+        valueSerializer.writeString(valueHolderForType)
+        const valueHolderForTimeStamp  = value.timeStamp
+        valueSerializer.writeInt64(valueHolderForTimeStamp)
+        const valueHolderForData  = value.data
+        valueSerializer.holdAndWriteObject(valueHolderForData)
+    }
+    public static read(buffer: DeserializerBase): MessageEvents {
+        let valueDeserializer : DeserializerBase = buffer
+        const typeTmpResult : string = (valueDeserializer.readString() as string)
+        const timeStampTmpResult : int64 = valueDeserializer.readInt64()
+        const dataTmpResult : object = (valueDeserializer.readObject() as object)
+        let value : MessageEvents = ({type: typeTmpResult, timeStamp: timeStampTmpResult, data: dataTmpResult} as MessageEvents)
+        return value
+    }
+}
+export class PostMessageOptions_serializer {
+    public static write(buffer: SerializerBase, value: PostMessageOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForTransfer  = value.transfer
+        if (valueHolderForTransfer !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTransferTmpValue  = valueHolderForTransfer!
+            valueSerializer.writeInt32((valueHolderForTransferTmpValue.length).toInt())
+            for (let valueHolderForTransferTmpValueCounterI = 0; valueHolderForTransferTmpValueCounterI < valueHolderForTransferTmpValue.length; valueHolderForTransferTmpValueCounterI++) {
+                const valueHolderForTransferTmpValueTmpElement : Object = valueHolderForTransferTmpValue[valueHolderForTransferTmpValueCounterI]
+                valueSerializer.holdAndWriteObject(valueHolderForTransferTmpValueTmpElement)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): PostMessageOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const transferTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let transferTmpBuf : Array<Object> | undefined = undefined
+        if ((transferTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const transferTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let transferTmpBuf_ : Array<Object> = new Array<Object>(transferTmpBuf_Length)
+            for (let transferTmpBuf_BufCounterI = 0; transferTmpBuf_BufCounterI < transferTmpBuf_Length; transferTmpBuf_BufCounterI++) {
+                transferTmpBuf_[transferTmpBuf_BufCounterI] = (valueDeserializer.readObject() as object)
+            }
+            transferTmpBuf = transferTmpBuf_
+        }
+        const transferTmpResult : Array<Object> | undefined = transferTmpBuf
+        let value : PostMessageOptions = ({transfer: transferTmpResult} as PostMessageOptions)
+        return value
+    }
+}
+export class SnapshotOptions_serializer {
+    public static write(buffer: SerializerBase, value: SnapshotOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForScale  = value.scale
+        if (valueHolderForScale !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForScaleTmpValue  = valueHolderForScale!
+            valueSerializer.writeNumber(valueHolderForScaleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForWaitUntilRenderFinished  = value.waitUntilRenderFinished
+        if (valueHolderForWaitUntilRenderFinished !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWaitUntilRenderFinishedTmpValue  = valueHolderForWaitUntilRenderFinished!
+            valueSerializer.writeBoolean(valueHolderForWaitUntilRenderFinishedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SnapshotOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let scaleTmpBuf : number | undefined = undefined
+        if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            scaleTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const scaleTmpResult : number | undefined = scaleTmpBuf
+        const waitUntilRenderFinishedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let waitUntilRenderFinishedTmpBuf : boolean | undefined = undefined
+        if ((waitUntilRenderFinishedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            waitUntilRenderFinishedTmpBuf = valueDeserializer.readBoolean()
+        }
+        const waitUntilRenderFinishedTmpResult : boolean | undefined = waitUntilRenderFinishedTmpBuf
+        let value : SnapshotOptions = ({scale: scaleTmpResult, waitUntilRenderFinished: waitUntilRenderFinishedTmpResult} as SnapshotOptions)
+        return value
+    }
+}
+export class WorkerOptions_serializer {
+    public static write(buffer: SerializerBase, value: WorkerOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForType  = value.type
+        if (valueHolderForType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTypeTmpValue  = valueHolderForType!
+            valueSerializer.writeString(valueHolderForTypeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForName  = value.name
+        if (valueHolderForName !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForNameTmpValue  = valueHolderForName!
+            valueSerializer.writeString(valueHolderForNameTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForShared  = value.shared
+        if (valueHolderForShared !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSharedTmpValue  = valueHolderForShared!
+            valueSerializer.writeBoolean(valueHolderForSharedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): WorkerOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let typeTmpBuf : string | undefined = undefined
+        if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            typeTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const typeTmpResult : string | undefined = typeTmpBuf
+        const nameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let nameTmpBuf : string | undefined = undefined
+        if ((nameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            nameTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const nameTmpResult : string | undefined = nameTmpBuf
+        const sharedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let sharedTmpBuf : boolean | undefined = undefined
+        if ((sharedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            sharedTmpBuf = valueDeserializer.readBoolean()
+        }
+        const sharedTmpResult : boolean | undefined = sharedTmpBuf
+        let value : WorkerOptions = ({type: typeTmpResult, name: nameTmpResult, shared: sharedTmpResult} as WorkerOptions)
+        return value
+    }
+}
+export class ComponentInfo_serializer {
+    public static write(buffer: SerializerBase, value: ComponentInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForSize  = value.size
+        Size_serializer.write(valueSerializer, valueHolderForSize)
+        const valueHolderForLocalOffset  = value.localOffset
+        Offset_componentutils_serializer.write(valueSerializer, valueHolderForLocalOffset)
+        const valueHolderForWindowOffset  = value.windowOffset
+        Offset_componentutils_serializer.write(valueSerializer, valueHolderForWindowOffset)
+        const valueHolderForScreenOffset  = value.screenOffset
+        Offset_componentutils_serializer.write(valueSerializer, valueHolderForScreenOffset)
+        const valueHolderForTranslate  = value.translate
+        TranslateResult_serializer.write(valueSerializer, valueHolderForTranslate)
+        const valueHolderForScale  = value.scale
+        ScaleResult_serializer.write(valueSerializer, valueHolderForScale)
+        const valueHolderForRotate  = value.rotate
+        RotateResult_serializer.write(valueSerializer, valueHolderForRotate)
+        const valueHolderForTransform  = value.transform
+        const valueHolderForTransform_0  = valueHolderForTransform[0]
+        valueSerializer.writeNumber(valueHolderForTransform_0)
+        const valueHolderForTransform_1  = valueHolderForTransform[1]
+        valueSerializer.writeNumber(valueHolderForTransform_1)
+        const valueHolderForTransform_2  = valueHolderForTransform[2]
+        valueSerializer.writeNumber(valueHolderForTransform_2)
+        const valueHolderForTransform_3  = valueHolderForTransform[3]
+        valueSerializer.writeNumber(valueHolderForTransform_3)
+        const valueHolderForTransform_4  = valueHolderForTransform[4]
+        valueSerializer.writeNumber(valueHolderForTransform_4)
+        const valueHolderForTransform_5  = valueHolderForTransform[5]
+        valueSerializer.writeNumber(valueHolderForTransform_5)
+        const valueHolderForTransform_6  = valueHolderForTransform[6]
+        valueSerializer.writeNumber(valueHolderForTransform_6)
+        const valueHolderForTransform_7  = valueHolderForTransform[7]
+        valueSerializer.writeNumber(valueHolderForTransform_7)
+        const valueHolderForTransform_8  = valueHolderForTransform[8]
+        valueSerializer.writeNumber(valueHolderForTransform_8)
+        const valueHolderForTransform_9  = valueHolderForTransform[9]
+        valueSerializer.writeNumber(valueHolderForTransform_9)
+        const valueHolderForTransform_10  = valueHolderForTransform[10]
+        valueSerializer.writeNumber(valueHolderForTransform_10)
+        const valueHolderForTransform_11  = valueHolderForTransform[11]
+        valueSerializer.writeNumber(valueHolderForTransform_11)
+        const valueHolderForTransform_12  = valueHolderForTransform[12]
+        valueSerializer.writeNumber(valueHolderForTransform_12)
+        const valueHolderForTransform_13  = valueHolderForTransform[13]
+        valueSerializer.writeNumber(valueHolderForTransform_13)
+        const valueHolderForTransform_14  = valueHolderForTransform[14]
+        valueSerializer.writeNumber(valueHolderForTransform_14)
+        const valueHolderForTransform_15  = valueHolderForTransform[15]
+        valueSerializer.writeNumber(valueHolderForTransform_15)
+    }
+    public static read(buffer: DeserializerBase): ComponentInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const sizeTmpResult : Size = Size_serializer.read(valueDeserializer)
+        const localOffsetTmpResult : Offset_componentutils = Offset_componentutils_serializer.read(valueDeserializer)
+        const windowOffsetTmpResult : Offset_componentutils = Offset_componentutils_serializer.read(valueDeserializer)
+        const screenOffsetTmpResult : Offset_componentutils = Offset_componentutils_serializer.read(valueDeserializer)
+        const translateTmpResult : TranslateResult = TranslateResult_serializer.read(valueDeserializer)
+        const scaleTmpResult : ScaleResult = ScaleResult_serializer.read(valueDeserializer)
+        const rotateTmpResult : RotateResult = RotateResult_serializer.read(valueDeserializer)
+        const transformTmpBufValue0 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue1 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue2 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue3 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue4 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue5 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue6 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue7 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue8 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue9 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue10 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue11 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue12 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue13 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue14 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue15 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpResult : Matrix4Result = ([transformTmpBufValue0, transformTmpBufValue1, transformTmpBufValue2, transformTmpBufValue3, transformTmpBufValue4, transformTmpBufValue5, transformTmpBufValue6, transformTmpBufValue7, transformTmpBufValue8, transformTmpBufValue9, transformTmpBufValue10, transformTmpBufValue11, transformTmpBufValue12, transformTmpBufValue13, transformTmpBufValue14, transformTmpBufValue15] as Matrix4Result)
+        let value : ComponentInfo = ({size: sizeTmpResult, localOffset: localOffsetTmpResult, windowOffset: windowOffsetTmpResult, screenOffset: screenOffsetTmpResult, translate: translateTmpResult, scale: scaleTmpResult, rotate: rotateTmpResult, transform: transformTmpResult} as ComponentInfo)
+        return value
+    }
+}
+export class RestrictedWorker_serializer {
+    public static write(buffer: SerializerBase, value: RestrictedWorker): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): RestrictedWorker {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return RestrictedWorkerInternal.fromPtr(ptr)
+    }
+}
+export class CustomDialogControllerOptionsExtender_serializer {
+    public static write(buffer: SerializerBase, value: CustomDialogControllerOptionsExtender): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForBuilder  = value.builder
+        valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForBuilder))
+        const valueHolderForCancel  = value.cancel
+        if (valueHolderForCancel !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCancelTmpValue  = valueHolderForCancel!
+            valueSerializer.holdAndWriteCallback(valueHolderForCancelTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAutoCancel  = value.autoCancel
+        if (valueHolderForAutoCancel !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAutoCancelTmpValue  = valueHolderForAutoCancel!
+            valueSerializer.writeBoolean(valueHolderForAutoCancelTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAlignment  = value.alignment
+        if (valueHolderForAlignment !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAlignmentTmpValue  = (valueHolderForAlignment as DialogAlignment)
+            valueSerializer.writeInt32(valueHolderForAlignmentTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOffset  = value.offset
+        if (valueHolderForOffset !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOffsetTmpValue  = valueHolderForOffset!
+            Offset_serializer.write(valueSerializer, valueHolderForOffsetTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForCustomStyle  = value.customStyle
+        if (valueHolderForCustomStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCustomStyleTmpValue  = valueHolderForCustomStyle!
+            valueSerializer.writeBoolean(valueHolderForCustomStyleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForGridCount  = value.gridCount
+        if (valueHolderForGridCount !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGridCountTmpValue  = valueHolderForGridCount!
+            valueSerializer.writeNumber(valueHolderForGridCountTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMaskColor  = value.maskColor
+        if (valueHolderForMaskColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMaskColorTmpValue  = valueHolderForMaskColor!
+            if (valueHolderForMaskColorTmpValue instanceof Color) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForMaskColorTmpValueForIdx0  = valueHolderForMaskColorTmpValue as Color
+                valueSerializer.writeInt32(valueHolderForMaskColorTmpValueForIdx0.valueOf())
+            } else if (valueHolderForMaskColorTmpValue instanceof number) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForMaskColorTmpValueForIdx1  = valueHolderForMaskColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForMaskColorTmpValueForIdx1)
+            } else if (valueHolderForMaskColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toChar())
+                const valueHolderForMaskColorTmpValueForIdx2  = valueHolderForMaskColorTmpValue as string
+                valueSerializer.writeString(valueHolderForMaskColorTmpValueForIdx2)
+            } else if (valueHolderForMaskColorTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((3).toChar())
+                const valueHolderForMaskColorTmpValueForIdx3  = valueHolderForMaskColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForMaskColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMaskRect  = value.maskRect
+        if (valueHolderForMaskRect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMaskRectTmpValue  = valueHolderForMaskRect!
+            Rectangle_serializer.write(valueSerializer, valueHolderForMaskRectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOpenAnimation  = value.openAnimation
+        if (valueHolderForOpenAnimation !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOpenAnimationTmpValue  = valueHolderForOpenAnimation!
+            AnimateParam_serializer.write(valueSerializer, valueHolderForOpenAnimationTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForCloseAnimation  = value.closeAnimation
+        if (valueHolderForCloseAnimation !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCloseAnimationTmpValue  = valueHolderForCloseAnimation!
+            AnimateParam_serializer.write(valueSerializer, valueHolderForCloseAnimationTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForShowInSubWindow  = value.showInSubWindow
+        if (valueHolderForShowInSubWindow !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShowInSubWindowTmpValue  = valueHolderForShowInSubWindow!
+            valueSerializer.writeBoolean(valueHolderForShowInSubWindowTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBackgroundColor  = value.backgroundColor
+        if (valueHolderForBackgroundColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
+            if (valueHolderForBackgroundColorTmpValue instanceof Color) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.valueOf())
+            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+            } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toChar())
+                const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
+                valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
+            } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((3).toChar())
+                const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForCornerRadius  = value.cornerRadius
+        if (valueHolderForCornerRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCornerRadiusTmpValue  = valueHolderForCornerRadius!
+            if (valueHolderForCornerRadiusTmpValue instanceof Dimension) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForCornerRadiusTmpValueForIdx0  = valueHolderForCornerRadiusTmpValue as Dimension
+                if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof string) {
+                    valueSerializer.writeInt8((0).toChar())
+                    const valueHolderForCornerRadiusTmpValueForIdx0ForIdx0  = valueHolderForCornerRadiusTmpValueForIdx0 as string
+                    valueSerializer.writeString(valueHolderForCornerRadiusTmpValueForIdx0ForIdx0)
+                } else if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof number) {
+                    valueSerializer.writeInt8((1).toChar())
+                    const valueHolderForCornerRadiusTmpValueForIdx0ForIdx1  = valueHolderForCornerRadiusTmpValueForIdx0 as number
+                    valueSerializer.writeNumber(valueHolderForCornerRadiusTmpValueForIdx0ForIdx1)
+                } else if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof Resource) {
+                    valueSerializer.writeInt8((2).toChar())
+                    const valueHolderForCornerRadiusTmpValueForIdx0ForIdx2  = valueHolderForCornerRadiusTmpValueForIdx0 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx0ForIdx2)
+                }
+            } else if (valueHolderForCornerRadiusTmpValue instanceof BorderRadiuses) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForCornerRadiusTmpValueForIdx1  = valueHolderForCornerRadiusTmpValue as BorderRadiuses
+                BorderRadiuses_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForIsModal  = value.isModal
+        if (valueHolderForIsModal !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsModalTmpValue  = valueHolderForIsModal!
+            valueSerializer.writeBoolean(valueHolderForIsModalTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnWillDismiss  = value.onWillDismiss
+        if (valueHolderForOnWillDismiss !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnWillDismissTmpValue  = valueHolderForOnWillDismiss!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnWillDismissTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            if (valueHolderForWidthTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
+            } else if (valueHolderForWidthTmpValue instanceof number) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
+                valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
+            } else if (valueHolderForWidthTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toChar())
+                const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForHeight  = value.height
+        if (valueHolderForHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightTmpValue  = valueHolderForHeight!
+            if (valueHolderForHeightTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
+                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
+            } else if (valueHolderForHeightTmpValue instanceof number) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as number
+                valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx1)
+            } else if (valueHolderForHeightTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toChar())
+                const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBorderWidth  = value.borderWidth
+        if (valueHolderForBorderWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBorderWidthTmpValue  = valueHolderForBorderWidth!
+            if (valueHolderForBorderWidthTmpValue instanceof Dimension) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForBorderWidthTmpValueForIdx0  = valueHolderForBorderWidthTmpValue as Dimension
+                if (valueHolderForBorderWidthTmpValueForIdx0 instanceof string) {
+                    valueSerializer.writeInt8((0).toChar())
+                    const valueHolderForBorderWidthTmpValueForIdx0ForIdx0  = valueHolderForBorderWidthTmpValueForIdx0 as string
+                    valueSerializer.writeString(valueHolderForBorderWidthTmpValueForIdx0ForIdx0)
+                } else if (valueHolderForBorderWidthTmpValueForIdx0 instanceof number) {
+                    valueSerializer.writeInt8((1).toChar())
+                    const valueHolderForBorderWidthTmpValueForIdx0ForIdx1  = valueHolderForBorderWidthTmpValueForIdx0 as number
+                    valueSerializer.writeNumber(valueHolderForBorderWidthTmpValueForIdx0ForIdx1)
+                } else if (valueHolderForBorderWidthTmpValueForIdx0 instanceof Resource) {
+                    valueSerializer.writeInt8((2).toChar())
+                    const valueHolderForBorderWidthTmpValueForIdx0ForIdx2  = valueHolderForBorderWidthTmpValueForIdx0 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx0ForIdx2)
+                }
+            } else if (valueHolderForBorderWidthTmpValue instanceof EdgeWidths) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForBorderWidthTmpValueForIdx1  = valueHolderForBorderWidthTmpValue as EdgeWidths
+                EdgeWidths_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBorderColor  = value.borderColor
+        if (valueHolderForBorderColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBorderColorTmpValue  = valueHolderForBorderColor!
+            if (valueHolderForBorderColorTmpValue instanceof ResourceColor) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as ResourceColor
+                if (valueHolderForBorderColorTmpValueForIdx0 instanceof Color) {
+                    valueSerializer.writeInt8((0).toChar())
+                    const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
+                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.valueOf())
+                } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
+                    valueSerializer.writeInt8((1).toChar())
+                    const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
+                    valueSerializer.writeNumber(valueHolderForBorderColorTmpValueForIdx0ForIdx1)
+                } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof string) {
+                    valueSerializer.writeInt8((2).toChar())
+                    const valueHolderForBorderColorTmpValueForIdx0ForIdx2  = valueHolderForBorderColorTmpValueForIdx0 as string
+                    valueSerializer.writeString(valueHolderForBorderColorTmpValueForIdx0ForIdx2)
+                } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof Resource) {
+                    valueSerializer.writeInt8((3).toChar())
+                    const valueHolderForBorderColorTmpValueForIdx0ForIdx3  = valueHolderForBorderColorTmpValueForIdx0 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx0ForIdx3)
+                }
+            } else if (valueHolderForBorderColorTmpValue instanceof EdgeColors) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as EdgeColors
+                EdgeColors_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBorderStyle  = value.borderStyle
+        if (valueHolderForBorderStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBorderStyleTmpValue  = valueHolderForBorderStyle!
+            if (valueHolderForBorderStyleTmpValue instanceof BorderStyle) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForBorderStyleTmpValueForIdx0  = valueHolderForBorderStyleTmpValue as BorderStyle
+                valueSerializer.writeInt32(valueHolderForBorderStyleTmpValueForIdx0.valueOf())
+            } else if (valueHolderForBorderStyleTmpValue instanceof EdgeStyles) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForBorderStyleTmpValueForIdx1  = valueHolderForBorderStyleTmpValue as EdgeStyles
+                EdgeStyles_serializer.write(valueSerializer, valueHolderForBorderStyleTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForShadow  = value.shadow
+        if (valueHolderForShadow !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShadowTmpValue  = valueHolderForShadow!
+            if (valueHolderForShadowTmpValue instanceof ShadowOptions) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForShadowTmpValueForIdx0  = valueHolderForShadowTmpValue as ShadowOptions
+                ShadowOptions_serializer.write(valueSerializer, valueHolderForShadowTmpValueForIdx0)
+            } else if (valueHolderForShadowTmpValue instanceof ShadowStyle) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForShadowTmpValueForIdx1  = valueHolderForShadowTmpValue as ShadowStyle
+                valueSerializer.writeInt32(valueHolderForShadowTmpValueForIdx1.valueOf())
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBackgroundBlurStyle  = value.backgroundBlurStyle
+        if (valueHolderForBackgroundBlurStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundBlurStyleTmpValue  = (valueHolderForBackgroundBlurStyle as BlurStyle)
+            valueSerializer.writeInt32(valueHolderForBackgroundBlurStyleTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBackgroundBlurStyleOptions  = value.backgroundBlurStyleOptions
+        if (valueHolderForBackgroundBlurStyleOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundBlurStyleOptionsTmpValue  = valueHolderForBackgroundBlurStyleOptions!
+            BackgroundBlurStyleOptions_serializer.write(valueSerializer, valueHolderForBackgroundBlurStyleOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBackgroundEffect  = value.backgroundEffect
+        if (valueHolderForBackgroundEffect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundEffectTmpValue  = valueHolderForBackgroundEffect!
+            BackgroundEffectOptions_serializer.write(valueSerializer, valueHolderForBackgroundEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForKeyboardAvoidMode  = value.keyboardAvoidMode
+        if (valueHolderForKeyboardAvoidMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForKeyboardAvoidModeTmpValue  = (valueHolderForKeyboardAvoidMode as KeyboardAvoidMode)
+            valueSerializer.writeInt32(valueHolderForKeyboardAvoidModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEnableHoverMode  = value.enableHoverMode
+        if (valueHolderForEnableHoverMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableHoverModeTmpValue  = valueHolderForEnableHoverMode!
+            valueSerializer.writeBoolean(valueHolderForEnableHoverModeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForHoverModeArea  = value.hoverModeArea
+        if (valueHolderForHoverModeArea !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHoverModeAreaTmpValue  = (valueHolderForHoverModeArea as HoverModeAreaType)
+            valueSerializer.writeInt32(valueHolderForHoverModeAreaTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnDidAppear  = value.onDidAppear
+        if (valueHolderForOnDidAppear !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDidAppearTmpValue  = valueHolderForOnDidAppear!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDidAppearTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnDidDisappear  = value.onDidDisappear
+        if (valueHolderForOnDidDisappear !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDidDisappearTmpValue  = valueHolderForOnDidDisappear!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDidDisappearTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnWillAppear  = value.onWillAppear
+        if (valueHolderForOnWillAppear !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnWillAppearTmpValue  = valueHolderForOnWillAppear!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnWillAppearTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnWillDisappear  = value.onWillDisappear
+        if (valueHolderForOnWillDisappear !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnWillDisappearTmpValue  = valueHolderForOnWillDisappear!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnWillDisappearTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForKeyboardAvoidDistance  = value.keyboardAvoidDistance
+        if (valueHolderForKeyboardAvoidDistance !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForKeyboardAvoidDistanceTmpValue  = valueHolderForKeyboardAvoidDistance!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForKeyboardAvoidDistanceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForLevelMode  = value.levelMode
+        if (valueHolderForLevelMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLevelModeTmpValue  = (valueHolderForLevelMode as LevelMode)
+            valueSerializer.writeInt32(valueHolderForLevelModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForLevelUniqueId  = value.levelUniqueId
+        if (valueHolderForLevelUniqueId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLevelUniqueIdTmpValue  = valueHolderForLevelUniqueId!
+            valueSerializer.writeNumber(valueHolderForLevelUniqueIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForImmersiveMode  = value.immersiveMode
+        if (valueHolderForImmersiveMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForImmersiveModeTmpValue  = (valueHolderForImmersiveMode as ImmersiveMode)
+            valueSerializer.writeInt32(valueHolderForImmersiveModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForLevelOrder  = value.levelOrder
+        if (valueHolderForLevelOrder !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLevelOrderTmpValue  = valueHolderForLevelOrder!
+            LevelOrder_serializer.write(valueSerializer, valueHolderForLevelOrderTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForFocusable  = value.focusable
+        if (valueHolderForFocusable !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFocusableTmpValue  = valueHolderForFocusable!
+            valueSerializer.writeBoolean(valueHolderForFocusableTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): CustomDialogControllerOptionsExtender {
+        let valueDeserializer : DeserializerBase = buffer
+        const builderTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const builderTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const builderTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const builderTmpResult : CustomBuilder = ():void => {
+            const builderTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            builderTmpBufBufArgsSerializer.writeInt32(builderTmpBufBufResource.resourceId);
+            builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCall);
+            builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCallSync);
+            InteropNativeModule._CallCallbackSync(10, 737226752, builderTmpBufBufArgsSerializer.asBuffer(), builderTmpBufBufArgsSerializer.length());
+            builderTmpBufBufArgsSerializer.release();
+            return;
+        }
+        const cancelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let cancelTmpBuf : (() => void) | undefined = undefined
+        if ((cancelTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const cancelTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const cancelTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const cancelTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            cancelTmpBuf = ():void => {
+                const cancelTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                cancelTmpBuf_BufArgsSerializer.writeInt32(cancelTmpBuf_BufResource.resourceId);
+                cancelTmpBuf_BufArgsSerializer.writePointer(cancelTmpBuf_BufCall);
+                cancelTmpBuf_BufArgsSerializer.writePointer(cancelTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, cancelTmpBuf_BufArgsSerializer.asBuffer(), cancelTmpBuf_BufArgsSerializer.length());
+                cancelTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const cancelTmpResult : (() => void) | undefined = cancelTmpBuf
+        const autoCancelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let autoCancelTmpBuf : boolean | undefined = undefined
+        if ((autoCancelTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            autoCancelTmpBuf = valueDeserializer.readBoolean()
+        }
+        const autoCancelTmpResult : boolean | undefined = autoCancelTmpBuf
+        const alignmentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let alignmentTmpBuf : DialogAlignment | undefined = undefined
+        if ((alignmentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            alignmentTmpBuf = DialogAlignment.fromValue(valueDeserializer.readInt32())
+        }
+        const alignmentTmpResult : DialogAlignment | undefined = alignmentTmpBuf
+        const offsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let offsetTmpBuf : Offset | undefined = undefined
+        if ((offsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            offsetTmpBuf = Offset_serializer.read(valueDeserializer)
+        }
+        const offsetTmpResult : Offset | undefined = offsetTmpBuf
+        const customStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let customStyleTmpBuf : boolean | undefined = undefined
+        if ((customStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            customStyleTmpBuf = valueDeserializer.readBoolean()
+        }
+        const customStyleTmpResult : boolean | undefined = customStyleTmpBuf
+        const gridCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let gridCountTmpBuf : number | undefined = undefined
+        if ((gridCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            gridCountTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const gridCountTmpResult : number | undefined = gridCountTmpBuf
+        const maskColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let maskColorTmpBuf : ResourceColor | undefined = undefined
+        if ((maskColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const maskColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let maskColorTmpBuf_ : Color | number | string | Resource | undefined
+            if (maskColorTmpBuf_UnionSelector == (0).toChar()) {
+                maskColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+            } else if (maskColorTmpBuf_UnionSelector == (1).toChar()) {
+                maskColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (maskColorTmpBuf_UnionSelector == (2).toChar()) {
+                maskColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (maskColorTmpBuf_UnionSelector == (3).toChar()) {
+                maskColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for maskColorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            maskColorTmpBuf = (maskColorTmpBuf_ as Color | number | string | Resource)
+        }
+        const maskColorTmpResult : ResourceColor | undefined = maskColorTmpBuf
+        const maskRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let maskRectTmpBuf : Rectangle | undefined = undefined
+        if ((maskRectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            maskRectTmpBuf = Rectangle_serializer.read(valueDeserializer)
+        }
+        const maskRectTmpResult : Rectangle | undefined = maskRectTmpBuf
+        const openAnimationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let openAnimationTmpBuf : AnimateParam | undefined = undefined
+        if ((openAnimationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            openAnimationTmpBuf = AnimateParam_serializer.read(valueDeserializer)
+        }
+        const openAnimationTmpResult : AnimateParam | undefined = openAnimationTmpBuf
+        const closeAnimationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let closeAnimationTmpBuf : AnimateParam | undefined = undefined
+        if ((closeAnimationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            closeAnimationTmpBuf = AnimateParam_serializer.read(valueDeserializer)
+        }
+        const closeAnimationTmpResult : AnimateParam | undefined = closeAnimationTmpBuf
+        const showInSubWindowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let showInSubWindowTmpBuf : boolean | undefined = undefined
+        if ((showInSubWindowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            showInSubWindowTmpBuf = valueDeserializer.readBoolean()
+        }
+        const showInSubWindowTmpResult : boolean | undefined = showInSubWindowTmpBuf
+        const backgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundColorTmpBuf : ResourceColor | undefined = undefined
+        if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
+                backgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+            } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
+                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
+                backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
+                backgroundColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+        }
+        const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
+        const cornerRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let cornerRadiusTmpBuf : Dimension | BorderRadiuses | undefined = undefined
+        if ((cornerRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const cornerRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let cornerRadiusTmpBuf_ : Dimension | BorderRadiuses | undefined
+            if (cornerRadiusTmpBuf_UnionSelector == (0).toChar()) {
+                const cornerRadiusTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let cornerRadiusTmpBuf_BufU : string | number | Resource | undefined
+                if (cornerRadiusTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    cornerRadiusTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (cornerRadiusTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    cornerRadiusTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                } else if (cornerRadiusTmpBuf_BufUUnionSelector == (2).toChar()) {
+                    cornerRadiusTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for cornerRadiusTmpBuf_BufU has to be chosen through deserialisation.")
+                }
+                cornerRadiusTmpBuf_ = (cornerRadiusTmpBuf_BufU as string | number | Resource)
+            } else if (cornerRadiusTmpBuf_UnionSelector == (1).toChar()) {
+                cornerRadiusTmpBuf_ = BorderRadiuses_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for cornerRadiusTmpBuf_ has to be chosen through deserialisation.")
+            }
+            cornerRadiusTmpBuf = (cornerRadiusTmpBuf_ as Dimension | BorderRadiuses)
+        }
+        const cornerRadiusTmpResult : Dimension | BorderRadiuses | undefined = cornerRadiusTmpBuf
+        const isModalTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isModalTmpBuf : boolean | undefined = undefined
+        if ((isModalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isModalTmpBuf = valueDeserializer.readBoolean()
+        }
+        const isModalTmpResult : boolean | undefined = isModalTmpBuf
+        const onWillDismissTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onWillDismissTmpBuf : ((value0: DismissDialogAction) => void) | undefined = undefined
+        if ((onWillDismissTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onWillDismissTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onWillDismissTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onWillDismissTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onWillDismissTmpBuf = (value0: DismissDialogAction):void => {
+                const onWillDismissTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onWillDismissTmpBuf_BufArgsSerializer.writeInt32(onWillDismissTmpBuf_BufResource.resourceId);
+                onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCall);
+                onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCallSync);
+                DismissDialogAction_serializer.write(onWillDismissTmpBuf_BufArgsSerializer, value0);
+                InteropNativeModule._CallCallbackSync(10, -2095828093, onWillDismissTmpBuf_BufArgsSerializer.asBuffer(), onWillDismissTmpBuf_BufArgsSerializer.length());
+                onWillDismissTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onWillDismissTmpResult : ((value0: DismissDialogAction) => void) | undefined = onWillDismissTmpBuf
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : Dimension | undefined = undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBuf_ : string | number | Resource | undefined
+            if (widthTmpBuf_UnionSelector == (0).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (widthTmpBuf_UnionSelector == (2).toChar()) {
+                widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+            }
+            widthTmpBuf = (widthTmpBuf_ as string | number | Resource)
+        }
+        const widthTmpResult : Dimension | undefined = widthTmpBuf
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightTmpBuf : Dimension | undefined = undefined
+        if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBuf_ : string | number | Resource | undefined
+            if (heightTmpBuf_UnionSelector == (0).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (heightTmpBuf_UnionSelector == (2).toChar()) {
+                heightTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+            }
+            heightTmpBuf = (heightTmpBuf_ as string | number | Resource)
+        }
+        const heightTmpResult : Dimension | undefined = heightTmpBuf
+        const borderWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let borderWidthTmpBuf : Dimension | EdgeWidths | undefined = undefined
+        if ((borderWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const borderWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let borderWidthTmpBuf_ : Dimension | EdgeWidths | undefined
+            if (borderWidthTmpBuf_UnionSelector == (0).toChar()) {
+                const borderWidthTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let borderWidthTmpBuf_BufU : string | number | Resource | undefined
+                if (borderWidthTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    borderWidthTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (borderWidthTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    borderWidthTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                } else if (borderWidthTmpBuf_BufUUnionSelector == (2).toChar()) {
+                    borderWidthTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for borderWidthTmpBuf_BufU has to be chosen through deserialisation.")
+                }
+                borderWidthTmpBuf_ = (borderWidthTmpBuf_BufU as string | number | Resource)
+            } else if (borderWidthTmpBuf_UnionSelector == (1).toChar()) {
+                borderWidthTmpBuf_ = EdgeWidths_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for borderWidthTmpBuf_ has to be chosen through deserialisation.")
+            }
+            borderWidthTmpBuf = (borderWidthTmpBuf_ as Dimension | EdgeWidths)
+        }
+        const borderWidthTmpResult : Dimension | EdgeWidths | undefined = borderWidthTmpBuf
+        const borderColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let borderColorTmpBuf : ResourceColor | EdgeColors | undefined = undefined
+        if ((borderColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const borderColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let borderColorTmpBuf_ : ResourceColor | EdgeColors | undefined
+            if (borderColorTmpBuf_UnionSelector == (0).toChar()) {
+                const borderColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let borderColorTmpBuf_BufU : Color | number | string | Resource | undefined
+                if (borderColorTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    borderColorTmpBuf_BufU = Color.fromValue(valueDeserializer.readInt32())
+                } else if (borderColorTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    borderColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                } else if (borderColorTmpBuf_BufUUnionSelector == (2).toChar()) {
+                    borderColorTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (borderColorTmpBuf_BufUUnionSelector == (3).toChar()) {
+                    borderColorTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for borderColorTmpBuf_BufU has to be chosen through deserialisation.")
+                }
+                borderColorTmpBuf_ = (borderColorTmpBuf_BufU as Color | number | string | Resource)
+            } else if (borderColorTmpBuf_UnionSelector == (1).toChar()) {
+                borderColorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for borderColorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            borderColorTmpBuf = (borderColorTmpBuf_ as ResourceColor | EdgeColors)
+        }
+        const borderColorTmpResult : ResourceColor | EdgeColors | undefined = borderColorTmpBuf
+        const borderStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let borderStyleTmpBuf : BorderStyle | EdgeStyles | undefined = undefined
+        if ((borderStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const borderStyleTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let borderStyleTmpBuf_ : BorderStyle | EdgeStyles | undefined
+            if (borderStyleTmpBuf_UnionSelector == (0).toChar()) {
+                borderStyleTmpBuf_ = BorderStyle.fromValue(valueDeserializer.readInt32())
+            } else if (borderStyleTmpBuf_UnionSelector == (1).toChar()) {
+                borderStyleTmpBuf_ = EdgeStyles_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for borderStyleTmpBuf_ has to be chosen through deserialisation.")
+            }
+            borderStyleTmpBuf = (borderStyleTmpBuf_ as BorderStyle | EdgeStyles)
+        }
+        const borderStyleTmpResult : BorderStyle | EdgeStyles | undefined = borderStyleTmpBuf
+        const shadowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let shadowTmpBuf : ShadowOptions | ShadowStyle | undefined = undefined
+        if ((shadowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const shadowTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let shadowTmpBuf_ : ShadowOptions | ShadowStyle | undefined
+            if (shadowTmpBuf_UnionSelector == (0).toChar()) {
+                shadowTmpBuf_ = ShadowOptions_serializer.read(valueDeserializer)
+            } else if (shadowTmpBuf_UnionSelector == (1).toChar()) {
+                shadowTmpBuf_ = ShadowStyle.fromValue(valueDeserializer.readInt32())
+            } else {
+                throw new Error("One of the branches for shadowTmpBuf_ has to be chosen through deserialisation.")
+            }
+            shadowTmpBuf = (shadowTmpBuf_ as ShadowOptions | ShadowStyle)
+        }
+        const shadowTmpResult : ShadowOptions | ShadowStyle | undefined = shadowTmpBuf
+        const backgroundBlurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyleTmpBuf : BlurStyle | undefined = undefined
+        if ((backgroundBlurStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundBlurStyleTmpBuf = BlurStyle.fromValue(valueDeserializer.readInt32())
+        }
+        const backgroundBlurStyleTmpResult : BlurStyle | undefined = backgroundBlurStyleTmpBuf
+        const backgroundBlurStyleOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyleOptionsTmpBuf : BackgroundBlurStyleOptions | undefined = undefined
+        if ((backgroundBlurStyleOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundBlurStyleOptionsTmpBuf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
+        }
+        const backgroundBlurStyleOptionsTmpResult : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptionsTmpBuf
+        const backgroundEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundEffectTmpBuf : BackgroundEffectOptions | undefined = undefined
+        if ((backgroundEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundEffectTmpBuf = BackgroundEffectOptions_serializer.read(valueDeserializer)
+        }
+        const backgroundEffectTmpResult : BackgroundEffectOptions | undefined = backgroundEffectTmpBuf
+        const keyboardAvoidModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let keyboardAvoidModeTmpBuf : KeyboardAvoidMode | undefined = undefined
+        if ((keyboardAvoidModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            keyboardAvoidModeTmpBuf = KeyboardAvoidMode.fromValue(valueDeserializer.readInt32())
+        }
+        const keyboardAvoidModeTmpResult : KeyboardAvoidMode | undefined = keyboardAvoidModeTmpBuf
+        const enableHoverModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableHoverModeTmpBuf : boolean | undefined = undefined
+        if ((enableHoverModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableHoverModeTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableHoverModeTmpResult : boolean | undefined = enableHoverModeTmpBuf
+        const hoverModeAreaTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let hoverModeAreaTmpBuf : HoverModeAreaType | undefined = undefined
+        if ((hoverModeAreaTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            hoverModeAreaTmpBuf = HoverModeAreaType.fromValue(valueDeserializer.readInt32())
+        }
+        const hoverModeAreaTmpResult : HoverModeAreaType | undefined = hoverModeAreaTmpBuf
+        const onDidAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onDidAppearTmpBuf : (() => void) | undefined = undefined
+        if ((onDidAppearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDidAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDidAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onDidAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onDidAppearTmpBuf = ():void => {
+                const onDidAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
+                onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
+                onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onDidAppearTmpBuf_BufArgsSerializer.asBuffer(), onDidAppearTmpBuf_BufArgsSerializer.length());
+                onDidAppearTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onDidAppearTmpResult : (() => void) | undefined = onDidAppearTmpBuf
+        const onDidDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onDidDisappearTmpBuf : (() => void) | undefined = undefined
+        if ((onDidDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDidDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDidDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onDidDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onDidDisappearTmpBuf = ():void => {
+                const onDidDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
+                onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
+                onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onDidDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDidDisappearTmpBuf_BufArgsSerializer.length());
+                onDidDisappearTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onDidDisappearTmpResult : (() => void) | undefined = onDidDisappearTmpBuf
+        const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onWillAppearTmpBuf : (() => void) | undefined = undefined
+        if ((onWillAppearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onWillAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onWillAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onWillAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onWillAppearTmpBuf = ():void => {
+                const onWillAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
+                onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
+                onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onWillAppearTmpBuf_BufArgsSerializer.asBuffer(), onWillAppearTmpBuf_BufArgsSerializer.length());
+                onWillAppearTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onWillAppearTmpResult : (() => void) | undefined = onWillAppearTmpBuf
+        const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onWillDisappearTmpBuf : (() => void) | undefined = undefined
+        if ((onWillDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onWillDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onWillDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onWillDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onWillDisappearTmpBuf = ():void => {
+                const onWillDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
+                onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
+                onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onWillDisappearTmpBuf_BufArgsSerializer.asBuffer(), onWillDisappearTmpBuf_BufArgsSerializer.length());
+                onWillDisappearTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onWillDisappearTmpResult : (() => void) | undefined = onWillDisappearTmpBuf
+        const keyboardAvoidDistanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let keyboardAvoidDistanceTmpBuf : LengthMetrics | undefined = undefined
+        if ((keyboardAvoidDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            keyboardAvoidDistanceTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        }
+        const keyboardAvoidDistanceTmpResult : LengthMetrics | undefined = keyboardAvoidDistanceTmpBuf
+        const levelModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let levelModeTmpBuf : LevelMode | undefined = undefined
+        if ((levelModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            levelModeTmpBuf = LevelMode.fromValue(valueDeserializer.readInt32())
+        }
+        const levelModeTmpResult : LevelMode | undefined = levelModeTmpBuf
+        const levelUniqueIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let levelUniqueIdTmpBuf : number | undefined = undefined
+        if ((levelUniqueIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            levelUniqueIdTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const levelUniqueIdTmpResult : number | undefined = levelUniqueIdTmpBuf
+        const immersiveModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let immersiveModeTmpBuf : ImmersiveMode | undefined = undefined
+        if ((immersiveModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            immersiveModeTmpBuf = ImmersiveMode.fromValue(valueDeserializer.readInt32())
+        }
+        const immersiveModeTmpResult : ImmersiveMode | undefined = immersiveModeTmpBuf
+        const levelOrderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let levelOrderTmpBuf : LevelOrder | undefined = undefined
+        if ((levelOrderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            levelOrderTmpBuf = (LevelOrder_serializer.read(valueDeserializer) as LevelOrder)
+        }
+        const levelOrderTmpResult : LevelOrder | undefined = levelOrderTmpBuf
+        const focusableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let focusableTmpBuf : boolean | undefined = undefined
+        if ((focusableTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            focusableTmpBuf = valueDeserializer.readBoolean()
+        }
+        const focusableTmpResult : boolean | undefined = focusableTmpBuf
+        let value : CustomDialogControllerOptionsExtender = ({builder: builderTmpResult, cancel: cancelTmpResult, autoCancel: autoCancelTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, customStyle: customStyleTmpResult, gridCount: gridCountTmpResult, maskColor: maskColorTmpResult, maskRect: maskRectTmpResult, openAnimation: openAnimationTmpResult, closeAnimation: closeAnimationTmpResult, showInSubWindow: showInSubWindowTmpResult, backgroundColor: backgroundColorTmpResult, cornerRadius: cornerRadiusTmpResult, isModal: isModalTmpResult, onWillDismiss: onWillDismissTmpResult, width: widthTmpResult, height: heightTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, keyboardAvoidDistance: keyboardAvoidDistanceTmpResult, levelMode: levelModeTmpResult, levelUniqueId: levelUniqueIdTmpResult, immersiveMode: immersiveModeTmpResult, levelOrder: levelOrderTmpResult, focusable: focusableTmpResult} as CustomDialogControllerOptionsExtender)
+        return value
+    }
+}

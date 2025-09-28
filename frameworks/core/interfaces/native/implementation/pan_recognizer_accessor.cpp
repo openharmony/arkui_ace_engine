@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_PanRecognizer peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_PanRecognizer CtorImpl()
+Ark_PanRecognizer ConstructImpl()
 {
     return PeerUtils::CreatePeer<PanRecognizerPeer>();
 }
@@ -47,7 +47,7 @@ const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor()
 {
     static const GENERATED_ArkUIPanRecognizerAccessor PanRecognizerAccessorImpl {
         PanRecognizerAccessor::DestroyPeerImpl,
-        PanRecognizerAccessor::CtorImpl,
+        PanRecognizerAccessor::ConstructImpl,
         PanRecognizerAccessor::GetFinalizerImpl,
         PanRecognizerAccessor::GetPanGestureOptionsImpl,
     };

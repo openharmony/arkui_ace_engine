@@ -21,21 +21,19 @@ void ImageCommonMethods::ApplyColorFilterValues(
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     bool isValid = false;
-    if (value) {
-        Converter::VisitUnion(
-            *value,
-            [frameNode, &isValid](const Ark_ColorFilter& filter) {
-                if (filter && filter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
-                    isValid = true;
-                    ImageModelNG::SetColorFilterMatrix(frameNode, filter->GetColorFilterMatrix());
-                    return;
-                }
-            },
-            [frameNode](const Ark_DrawingColorFilter& colorStrategy) {
-                LOGE("Arkoala: Image.ColorFilterImpl - doesn't support DrawinColorFilter");
-            },
-            []() {});
-    }
+    Converter::VisitUnionPtr(
+        value,
+        [frameNode, &isValid](const Ark_ColorFilter& filter) {
+            if (filter && filter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
+                isValid = true;
+                ImageModelNG::SetColorFilterMatrix(frameNode, filter->GetColorFilterMatrix());
+                return;
+            }
+        },
+        [frameNode](const Ark_drawing_ColorFilter& colorStrategy) {
+            LOGE("Arkoala: Image.ColorFilterImpl - doesn't support DrawinColorFilter");
+        },
+        []() {});
     if (isValid)
         return;
     ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLORFILTER_MATRIX);

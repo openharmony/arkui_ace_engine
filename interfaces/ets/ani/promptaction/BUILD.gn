@@ -25,8 +25,8 @@ ohos_shared_library("promptAction_ani") {
     "./src/promptAction.cpp",
     "./src/prompt_action_controller.cpp",
     "./src/prompt_action_params.cpp",
-    "./src/prompt_action_utils.cpp",
     "./src/toast_params.cpp",
+    "./src/prompt_action_utils.cpp",
   ]
   external_deps = [
     #"runtime_core:libarkruntime",

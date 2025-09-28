@@ -33,6 +33,8 @@ public:
     static void SetActiveCircleColor(FrameNode* frameNode, const std::optional<Color>& activeCircleColor);
     static void SetActiveCircleRadius(FrameNode* frameNode, const std::optional<Dimension>& activeCircleRadius);
     static void SetEnableWaveEffect(FrameNode* frameNode, const std::optional<bool>& enableWaveEffect);
+    static void SetSkipUnselectedPoint(FrameNode* frameNode, const std::optional<bool>& skipValue);
+    static void SetEnableForeground(FrameNode* frameNode, const std::optional<bool>& enableForeground);
 };
 
 } // namespace OHOS::Ace::NG

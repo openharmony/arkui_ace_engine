@@ -138,8 +138,16 @@ RefPtr<FrameNode> ButtonModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, nodeId, AceType::MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty();
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
+
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        // undefined use ROUNDED_RECTANGLE type.
+        layoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        // undefined use capsule type.
+        layoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
     return frameNode;
 }
 
@@ -263,7 +271,7 @@ void ButtonModelStatic::SetStateEffect(FrameNode* frameNode, const std::optional
     if (stateEffect) {
         buttonEventHub->SetStateEffect(stateEffect.value());
     } else {
-        buttonEventHub->SetStateEffect(false);
+        buttonEventHub->SetStateEffect(true);
     }
 }
 

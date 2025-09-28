@@ -21,41 +21,38 @@ node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
 action("incremental_install") {
-  script = "../gn/command/npm_util.py"
-  outputs = [ "$target_out_dir/incremental_install" ]
-  args = [
-    "--project-path",
-    rebase_path("."),
-    "--node-path",
-    rebase_path(
-        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-    "--install",
-  ]
+    script = "../gn/command/npm_util.py"
+    outputs = [
+        "$target_out_dir/incremental_install"
+    ]
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--install"
+    ]
 }
 
 action("incremental.abc") {
-  script = "../gn/command/npm_util.py"
-  outputs = [ "$target_out_dir/incremental.abc" ]
-  args = [
-    "--project-path",
-    rebase_path("."),
-    "--node-path",
-    rebase_path(
-        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-    "--arklink-path",
-    rebase_path("${static_linker_build_path}"),
-    "--es2panda-path",
-    rebase_path("${ets2abc_build_path}"),
-    "--stdlib-path",
-    rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
-    "--npm-args",
-    "run",
-    "build:incremental:gn",
-  ]
+    script = "../gn/command/npm_util.py"
+    outputs = [
+        "$target_out_dir/incremental.abc"
+    ]
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--arklink-path", rebase_path("${static_linker_build_path}"),
+        "--es2panda-path", rebase_path("${ets2abc_build_path}"),
+        "--stdlib-path", rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
+        "--npm-args", "run", "build:incremental:gn"
+    ]
 
-  deps = [ "$koala_root/ui2abc:ui2abc" ]
+    deps = [
+      "$koala_root/ui2abc:ui2abc"
+    ]
 }
 
 group("incremental") {
-  deps = [ ":incremental.abc" ]
+    deps = [
+      ":incremental.abc"
+    ]
 }

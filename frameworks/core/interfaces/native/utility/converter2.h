@@ -33,7 +33,6 @@ namespace Converter {
     template<> void AssignCast(std::optional<TextSpanType>& dst, const Ark_RichEditorSpanType& src);
     template<> void AssignCast(std::optional<TextResponseType>& dst, const Ark_ResponseType& src);
     template<> void AssignCast(std::optional<TextResponseType>& dst, const Ark_RichEditorResponseType& src);
-    template<> NG::PreviewMenuOptions Convert(const Ark_PreviewMenuOptions& src);
     template<> SelectMenuParam Convert(const Ark_SelectionMenuOptions& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG

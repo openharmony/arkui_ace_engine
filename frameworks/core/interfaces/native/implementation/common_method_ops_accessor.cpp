@@ -72,12 +72,14 @@ void AdvancedBlendModeObjectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto addr = Converter::Convert<int64_t>(effect);
-    auto convValue = reinterpret_cast<OHOS::Rosen::Blender* >(addr);
+    auto convValue = reinterpret_cast<OHOS::Rosen::BrightnessBlender* >(addr);
     if (!convValue) {
         return;
     }
-    ViewAbstractModelStatic::SetBlender(frameNode, convValue);
+    ViewAbstractModelStatic::SetBrightnessBlender(frameNode, convValue);
+    BlendApplyType blendApplyType = BlendApplyType::FAST;
     std::optional<BlendApplyType> blendApplyTypeOpt = Converter::OptConvertPtr<BlendApplyType>(type);
+    blendApplyType = blendApplyTypeOpt.value_or(blendApplyType);
     ViewAbstractModelStatic::SetBlendApplyType(frameNode, blendApplyTypeOpt);
 }
 void AdvancedBlendModeEnumImpl(Ark_NativePointer node,

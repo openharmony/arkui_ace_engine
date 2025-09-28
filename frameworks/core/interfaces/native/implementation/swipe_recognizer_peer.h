@@ -23,6 +23,8 @@ const double DEFAULT_SPEED = 100.0;
 const OHOS::Ace::SwipeDirection DEFAULT_DIRECT = { .type = OHOS::Ace::SwipeDirection::ALL };
 
 struct SwipeRecognizerPeer : public MultiFingerRecognizerPeer {
+    DECLARE_ACE_TYPE(SwipeRecognizerPeer, MultiFingerRecognizerPeer);
+public:
     void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::SwipeRecognizer>& recognizer)
     {
         MultiFingerRecognizerPeer::Update(recognizer);

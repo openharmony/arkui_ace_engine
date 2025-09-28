@@ -41,8 +41,7 @@ public:
 
     static void InitialSetupSinglePicker(FrameNode* frameNode, uint32_t columnKind);
     static void SetCanLoop(FrameNode* frameNode, const bool value);
-    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
-    static void SetDigitalCrownSensitivity(FrameNode* frameNode, std::optional<int32_t>& crownSensitivity);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<int32_t>& crownSensitivity);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
     static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);
     static void SetHasSelectAttr(FrameNode* frameNode, bool value);
@@ -91,10 +90,8 @@ public:
     static void SetTextPickerRangeType(FrameNode* frameNode, int32_t rangeType);
     static int32_t GetTextPickerRangeType(FrameNode* frameNode);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
-#ifdef ACE_STATIC
     static const std::string GetSelectedObjectStr(FrameNode* frameNode,
         const std::string value, const uint32_t index);
-#endif
     static void SetOnValueChangeEvent(FrameNode* frameNode, TextCascadeValueChangeEvent&& onChange);
     static void SetOnSelectedChangeEvent(FrameNode* frameNode, TextCascadeSelectedChangeEvent&& onChange);
     static void SetColumnWidths(FrameNode* frameNode, const std::vector<Dimension>& widths);

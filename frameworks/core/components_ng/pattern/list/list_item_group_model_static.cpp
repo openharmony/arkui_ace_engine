@@ -42,7 +42,12 @@ void ListItemGroupModelStatic::SetHeader(FrameNode* frameNode, std::function<Ref
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     RefPtr<UINode> unitNode = builder();
-    pattern->AddHeader(unitNode);
+    if (unitNode) {
+        pattern->AddHeader(unitNode);
+    } else {
+        pattern->SetHeaderComponentContentExist(true);
+        pattern->RemoveHeader();
+    }
 }
 
 void ListItemGroupModelStatic::SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
@@ -51,7 +56,12 @@ void ListItemGroupModelStatic::SetFooter(FrameNode* frameNode, std::function<Ref
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     RefPtr<UINode> unitNode = builder();
-    pattern->AddFooter(unitNode);
+    if (unitNode) {
+        pattern->AddFooter(unitNode);
+    } else {
+        pattern->SetFooterComponentContentExist(true);
+        pattern->RemoveFooter();
+    }
 }
 
 RefPtr<ListChildrenMainSize> ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(FrameNode* frameNode)

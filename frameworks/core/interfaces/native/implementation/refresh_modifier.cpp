@@ -24,7 +24,6 @@
 
 namespace OHOS::Ace::NG {
 namespace Converter {
-
 void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src)
 {
     switch (src) {
@@ -48,8 +47,31 @@ void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src)
             LOGE("Unexpected enum value in RefreshStatus: %{public}d", src);
     }
 }
-
 } // namespace Converter
+namespace {
+std::optional<bool> ProcessBindableRefreshing(FrameNode* frameNode, const Ark_Union_Boolean_Bindable& value)
+{
+    std::optional<bool> result;
+    Converter::VisitUnion(value,
+        [&result](const Ark_Boolean& src) {
+            result = Converter::OptConvert<bool>(src);
+        },
+        [&result, frameNode](const Ark_Bindable_Boolean& src) {
+            result = Converter::OptConvert<bool>(src.value);
+            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+            auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](const std::string& param) {
+                if (param != "true" && param != "false") {
+                    return;
+                }
+                PipelineContext::SetCallBackNode(weakNode);
+                arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(Framework::StringToBool(param)));
+            };
+            RefreshModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
+        },
+        [] {});
+    return result;
+}
+} // namespace
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -67,13 +89,14 @@ constexpr float PULLDOWNRATIO_MIN = 0.0f;
 constexpr float PULLDOWNRATIO_MAX = 1.0f;
 } // namespace
 namespace RefreshInterfaceModifier {
-void SetRefreshOptionsImpl(Ark_NativePointer node, const Ark_RefreshOptions* value)
+void SetRefreshOptionsImpl(Ark_NativePointer node,
+                           const Ark_RefreshOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
-    auto refreshing = Converter::OptConvert<bool>(value->refreshing);
+    auto refreshing = ProcessBindableRefreshing(frameNode, value->refreshing);
     RefreshModelStatic::SetRefreshing(frameNode, refreshing);
 
     auto promptText = Converter::OptConvert<std::string>(value->promptText);
@@ -94,7 +117,8 @@ void SetRefreshOptionsImpl(Ark_NativePointer node, const Ark_RefreshOptions* val
 }
 } // namespace RefreshInterfaceModifier
 namespace RefreshAttributeModifier {
-void OnStateChangeImpl(Ark_NativePointer node, const Opt_Callback_RefreshStatus_Void* value)
+void SetOnStateChangeImpl(Ark_NativePointer node,
+                          const Opt_Callback_RefreshStatus_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -109,8 +133,8 @@ void OnStateChangeImpl(Ark_NativePointer node, const Opt_Callback_RefreshStatus_
     };
     RefreshModelStatic::SetOnStateChange(frameNode, std::move(onStateChange));
 }
-
-void OnRefreshingImpl(Ark_NativePointer node, const Opt_Callback_Void* value)
+void SetOnRefreshingImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -121,24 +145,24 @@ void OnRefreshingImpl(Ark_NativePointer node, const Opt_Callback_Void* value)
     auto onRefreshing = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
     RefreshModelStatic::SetOnRefreshing(frameNode, std::move(onRefreshing));
 }
-
-void RefreshOffsetImpl(Ark_NativePointer node, const Opt_Number* value)
+void SetRefreshOffsetImpl(Ark_NativePointer node,
+                          const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Dimension>(*value);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     RefreshModelStatic::SetRefreshOffset(frameNode, convValue);
 }
-
-void PullToRefreshImpl(Ark_NativePointer node, const Opt_Boolean* value)
+void SetPullToRefreshImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     RefreshModelStatic::SetPullToRefresh(frameNode, convValue);
 }
-
-void OnOffsetChangeImpl(Ark_NativePointer node, const Opt_Callback_Number_Void* value)
+void SetOnOffsetChangeImpl(Ark_NativePointer node,
+                           const Opt_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -153,45 +177,28 @@ void OnOffsetChangeImpl(Ark_NativePointer node, const Opt_Callback_Number_Void* 
     };
     RefreshModelStatic::SetOnOffsetChange(frameNode, std::move(onOffsetChange));
 }
-
-void PullDownRatioImpl(Ark_NativePointer node, const Opt_Number* value)
+void SetPullDownRatioImpl(Ark_NativePointer node,
+                          const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<float>(value);
     Validator::ClampByRange(convValue, PULLDOWNRATIO_MIN, PULLDOWNRATIO_MAX);
     RefreshModelStatic::SetPullDownRatio(frameNode, convValue);
 }
-
-void _onChangeEvent_refreshingImpl(Ark_NativePointer node, const Callback_Boolean_Void* callback)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const std::string& param) {
-        if (param != "true" && param != "false") {
-            return;
-        }
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(Framework::StringToBool(param)));
-    };
-    RefreshModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
-}
-} // namespace RefreshAttributeModifier
+} // RefreshAttributeModifier
 const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()
 {
     static const GENERATED_ArkUIRefreshModifier ArkUIRefreshModifierImpl {
         RefreshModifier::ConstructImpl,
         RefreshInterfaceModifier::SetRefreshOptionsImpl,
-        RefreshAttributeModifier::OnStateChangeImpl,
-        RefreshAttributeModifier::OnRefreshingImpl,
-        RefreshAttributeModifier::RefreshOffsetImpl,
-        RefreshAttributeModifier::PullToRefreshImpl,
-        RefreshAttributeModifier::OnOffsetChangeImpl,
-        RefreshAttributeModifier::PullDownRatioImpl,
-        RefreshAttributeModifier::_onChangeEvent_refreshingImpl,
+        RefreshAttributeModifier::SetOnStateChangeImpl,
+        RefreshAttributeModifier::SetOnRefreshingImpl,
+        RefreshAttributeModifier::SetRefreshOffsetImpl,
+        RefreshAttributeModifier::SetPullToRefreshImpl,
+        RefreshAttributeModifier::SetOnOffsetChangeImpl,
+        RefreshAttributeModifier::SetPullDownRatioImpl,
     };
     return &ArkUIRefreshModifierImpl;
 }

@@ -23,6 +23,8 @@
 
 namespace OHOS::Ace::NG {
 
+const auto DEFAULT_CONSTRAINT_SIZE = CalcLength(0.0_vp);
+
 RefPtr<FrameNode> WaterFlowModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::WATERFLOW_ETS_TAG, nodeId, AceType::MakeRefPtr<WaterFlowPattern>());
@@ -98,9 +100,14 @@ void WaterFlowModelStatic::SetCachedCount(FrameNode* frameNode, const std::optio
     }
 }
 
-void WaterFlowModelStatic::SetShowCached(FrameNode* frameNode, bool show)
+void WaterFlowModelStatic::SetShowCached(FrameNode* frameNode, const std::optional<bool>& show)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, show, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (show) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, show.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, frameNode);
+    }
 }
 
 RefPtr<WaterFlowSections> WaterFlowModelStatic::GetOrCreateWaterFlowSections(FrameNode* frameNode)
@@ -163,44 +170,36 @@ void WaterFlowModelStatic::SetRowsGap(FrameNode* frameNode, const std::optional<
     }
 }
 
-void WaterFlowModelStatic::SetItemMinWidth(FrameNode* frameNode, const std::optional<Dimension>& minWidth)
+void WaterFlowModelStatic::SetItemMinWidth(FrameNode* frameNode, const std::optional<CalcLength>& minWidth)
 {
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (minWidth) {
-        layoutProperty->UpdateItemMinSize(CalcSize(CalcLength(minWidth.value()), std::nullopt));
-    }
+    layoutProperty->UpdateItemMinSize(CalcSize(minWidth.value_or(DEFAULT_CONSTRAINT_SIZE), std::nullopt));
 }
 
-void WaterFlowModelStatic::SetItemMinHeight(FrameNode* frameNode, const std::optional<Dimension>& minHeight)
+void WaterFlowModelStatic::SetItemMinHeight(FrameNode* frameNode, const std::optional<CalcLength>& minHeight)
 {
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (minHeight) {
-        layoutProperty->UpdateItemMinSize(CalcSize(CalcLength(minHeight.value()), std::nullopt));
-    }
+    layoutProperty->UpdateItemMinSize(CalcSize(std::nullopt, minHeight.value_or(DEFAULT_CONSTRAINT_SIZE)));
 }
 
-void WaterFlowModelStatic::SetItemMaxWidth(FrameNode* frameNode, const std::optional<Dimension>& maxWidth)
+void WaterFlowModelStatic::SetItemMaxWidth(FrameNode* frameNode, const std::optional<CalcLength>& maxWidth)
 {
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (maxWidth) {
-        layoutProperty->UpdateItemMinSize(CalcSize(CalcLength(maxWidth.value()), std::nullopt));
-    }
+    layoutProperty->UpdateItemMaxSize(CalcSize(maxWidth.value_or(DEFAULT_CONSTRAINT_SIZE), std::nullopt));
 }
 
-void WaterFlowModelStatic::SetItemMaxHeight(FrameNode* frameNode, const std::optional<Dimension>& maxHeight)
+void WaterFlowModelStatic::SetItemMaxHeight(FrameNode* frameNode, const std::optional<CalcLength>& maxHeight)
 {
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (maxHeight) {
-        layoutProperty->UpdateItemMinSize(CalcSize(CalcLength(maxHeight.value()), std::nullopt));
-    }
+    layoutProperty->UpdateItemMaxSize(CalcSize(std::nullopt, maxHeight.value_or(DEFAULT_CONSTRAINT_SIZE)));
 }
 
 void WaterFlowModelStatic::SetLayoutDirection(FrameNode* frameNode, const std::optional<FlexDirection>& value)

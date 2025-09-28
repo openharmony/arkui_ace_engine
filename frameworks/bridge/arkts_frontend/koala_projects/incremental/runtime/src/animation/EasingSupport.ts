@@ -29,14 +29,14 @@ export class EasingSupport {
         this.x[last] = xSupplier(1)
         this.y[last] = ySupplier(1)
         for (let i = 1; i < last; i++) {
-            const value = (i.toDouble()) / last
+            const value = (i as float64) / last
             this.x[i] = xSupplier(value)
             this.y[i] = ySupplier(value)
         }
     }
 
     convert(value: float64): float64 {
-        let last = (this.x.length - 1).toInt()
+        let last = (this.x.length - 1) as uint32
         let left = 0 as uint32
         if (value < this.x[left]) return this.y[left]
         let right = last

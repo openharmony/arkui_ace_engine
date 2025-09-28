@@ -56,11 +56,11 @@ ani_object WrapStsError(ani_env* env, const std::string& msg)
         return nullptr;
     }
 
-    if ((status = env->FindClass("Lescompat/Error;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("escompat.Error", &cls)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "FindClass failed %{public}d", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &method)) !=
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
         ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Class_FindMethod failed %{public}d", status);
         return nullptr;
@@ -77,11 +77,11 @@ static ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg
 {
     ani_class cls;
     ani_status status = ANI_OK;
-    if ((status = env->FindClass("L@ohos/base/BusinessError;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("C{@ohos.base.BusinessError}", &cls)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "FindClass failed %{public}d", status);
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "dC{escompat.Error}:", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "iC{escompat.Error}:", &ctor)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Class_FindMethod failed %{public}d", status);
     }
     ani_object error = WrapStsError(env, msg);
@@ -195,7 +195,7 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback
 bool IsFunctionObjectWith2Param(ani_env* env, ani_ref obj)
 {
     ani_class funcClass;
-    if (ANI_OK != env->FindClass("Lstd/core/Function2;", &funcClass)) {
+    if (ANI_OK != env->FindClass("std.core.Function2", &funcClass)) {
         return false;
     }
     ani_boolean result;
@@ -234,7 +234,7 @@ auto CreateCallbackFunc(ani_env* env, ani_object callback, ani_object& result)
 
 static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
 {
-    ani_boolean isUndefined;
+    ani_boolean isUndefined = true;
     if (ANI_OK != env->Reference_IsUndefined(options, &isUndefined)) {
         return false;
     }
@@ -242,7 +242,7 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
         return false;
     }
     ani_class optionsClass;
-    if (ANI_OK != env->FindClass("L@ohos/arkui/componentSnapshot/componentSnapshot/SnapshotOptions;", &optionsClass)) {
+    if (ANI_OK != env->FindClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions", &optionsClass)) {
         return false;
     }
     ani_boolean isOptions;
@@ -258,12 +258,12 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
         return false;
     }
 
-    ani_boolean isPropertyUndefined;
+    ani_boolean isPropertyUndefined = true;
     env->Reference_IsUndefined(propertyRef, &isPropertyUndefined);
     if (isPropertyUndefined) {
         return false;
     }
-    ani_double aniValue;
+    ani_double aniValue = 0.0;
     if (ANI_OK !=
         env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "unboxed", nullptr, &aniValue)) {
         return false;
@@ -276,7 +276,7 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
 
 static bool GetOptionsWaitUntilRenderFinished(ani_env* env, ani_object options, bool& value)
 {
-    ani_boolean isUndefined;
+    ani_boolean isUndefined = true;
     if (ANI_OK != env->Reference_IsUndefined(options, &isUndefined)) {
         return false;
     }
@@ -285,7 +285,7 @@ static bool GetOptionsWaitUntilRenderFinished(ani_env* env, ani_object options, 
     }
 
     ani_class optionsClass;
-    if (ANI_OK != env->FindClass("L@ohos/arkui/componentSnapshot/componentSnapshot/SnapshotOptions;", &optionsClass)) {
+    if (ANI_OK != env->FindClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions", &optionsClass)) {
         return false;
     }
     ani_boolean isOptions;
@@ -301,7 +301,7 @@ static bool GetOptionsWaitUntilRenderFinished(ani_env* env, ani_object options, 
         return false;
     }
 
-    ani_boolean isPropertyUndefined;
+    ani_boolean isPropertyUndefined = true;
     env->Reference_IsUndefined(propertyRef, &isPropertyUndefined);
     if (isPropertyUndefined) {
         return false;
@@ -326,7 +326,7 @@ static bool ParseRegionProperty(ani_env* env, ani_object regionObject, const cha
 static bool ParseLocalizedRegion(ani_env* env, ani_object regionObject, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
 {
     snapShotOptions.snapshotRegion = OHOS::Ace::NG::LocalizedSnapshotRegion {};
-    ani_boolean isUndefined;
+    ani_boolean isUndefined = true;
     env->Reference_IsUndefined(regionObject, &isUndefined);
     if (isUndefined) {
         return false;
@@ -368,7 +368,7 @@ static bool ParseLocalizedRegion(ani_env* env, ani_object regionObject, OHOS::Ac
 static bool ParseRegion(ani_env* env, ani_object regionObject, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
 {
     snapShotOptions.snapshotRegion = OHOS::Ace::NG::LocalizedSnapshotRegion {};
-    ani_boolean isUndefined;
+    ani_boolean isUndefined = true;
     env->Reference_IsUndefined(regionObject, &isUndefined);
     if (isUndefined) {
         return false;
@@ -409,7 +409,7 @@ static bool ParseRegion(ani_env* env, ani_object regionObject, OHOS::Ace::NG::Sn
 
 static bool GetOptionsRegion(ani_env* env, ani_object options, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
 {
-    ani_boolean isUndefined;
+    ani_boolean isUndefined = true;
     env->Reference_IsUndefined(options, &isUndefined);
     if (isUndefined) {
         return false;
@@ -420,7 +420,7 @@ static bool GetOptionsRegion(ani_env* env, ani_object options, OHOS::Ace::NG::Sn
         return false;
     }
 
-    ani_boolean isPropertyUndefined;
+    ani_boolean isPropertyUndefined = true;
     env->Reference_IsUndefined(regionObject, &isPropertyUndefined);
     if (isPropertyUndefined) {
         snapShotOptions.regionMode = OHOS::Ace::NG::SnapshotRegionMode::NO_REGION;

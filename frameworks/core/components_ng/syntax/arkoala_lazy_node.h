@@ -18,12 +18,16 @@
 #include <cstdint>
 #include <functional>
 
+#include "base/memory/referenced.h"
+#include "base/utils/macros.h"
 #include "base/utils/unique_valued_map.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+
+using RangeType = std::pair<int32_t, int32_t>;
 
 /**
  * @brief Backend node representation to access and manage lazy items in Arkoala frontend
@@ -33,7 +37,8 @@ class ArkoalaLazyNode : public ForEachBaseNode {
     DECLARE_ACE_TYPE(ArkoalaLazyNode, ForEachBaseNode);
 
 public:
-    explicit ArkoalaLazyNode(int32_t id) : ForEachBaseNode(V2::JS_LAZY_FOR_EACH_ETS_TAG, id) {}
+    explicit ArkoalaLazyNode(int32_t id, bool isRepeat = false);
+    ~ArkoalaLazyNode() override = default;
 
     using CreateItemCb = std::function<RefPtr<UINode>(int32_t)>;
     using UpdateRangeCb = std::function<void(int32_t, int32_t)>;
@@ -49,10 +54,7 @@ public:
         updateRange_ = std::move(update);
     }
 
-    void MoveData(int32_t from, int32_t to) final
-    {
-        items_.Swap(from, to);
-    }
+    void MoveData(int32_t from, int32_t to) final;
 
     RefPtr<FrameNode> GetFrameNode(int32_t index) final;
 
@@ -76,6 +78,15 @@ public:
         return totalCount_;
     }
 
+    /**
+     * GetChildren re-assembles children_ and cleanup the L1 cache
+     * active items remain in L1 cache and are added to RepeatVirtualScroll.children_
+     * inactive items are moved from L1 to L2 cache, not added to children_
+     * function returns children_
+     * function runs as part of idle task
+     */
+    const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
+
     void RecycleItems(int32_t from, int32_t to) final
     {
         /* not implemented yet */
@@ -83,11 +94,71 @@ public:
 
     void OnDataChange(int32_t changeIndex, int32_t count, NotificationType type);
 
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override;
+
+    // used for drag move operation.
+    void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
+    void SetOnMoveFromTo(std::function<void(int32_t, int32_t)>&& onMoveFromTo);
+    void SetItemDragEvent(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
+    void FireOnMove(int32_t from, int32_t to) override;
+    void InitDragManager(const RefPtr<FrameNode>& childNode);
+    void InitAllChildrenDragManager(bool init);
+    int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
+
+    void DumpInfo() override;
+
 private:
-    UniqueValuedMap<int32_t, WeakPtr<UINode>, WeakPtr<UINode>::Hash> items_;
+    bool IsNodeInRange(int32_t index, const RangeType range)
+    {
+        return index >= range.first && index <= range.second;
+    }
+    void UpdateIsCache(const RefPtr<UINode>& node, bool isCache, bool shouldTrigger = true);
+
+    void UpdateMoveFromTo(int32_t from, int32_t to);
+    void UpdateItemsForOnMove();
+    void ResetMoveFromTo()
+    {
+        moveFromTo_.reset();
+    }
+
+    // convert index by moveFromTo_.
+    int32_t ConvertFromToIndex(int32_t index) const;
+    // revert converted-index to origin index.
+    int32_t ConvertFromToIndexRevert(int32_t index) const;
+
+    void RequestSyncTree();
+    void PostIdleTask();
+
+    /**
+     * iterate over L1 items and call cbFunc for each
+     * cbFunction is NOT allowed to add to or remove items from L1
+     */
+    void ForEachL1Node(const std::function<void(int32_t index, const RefPtr<UINode>& node)>& cbFunc) const;
+
+    std::string DumpUINode(const RefPtr<UINode>& node) const;
+
+    bool isRepeat_ = false;
+    // ArkoalaLazyNode is not instance of FrameNode, needs to propagate active state to all items inside
+    bool isActive_ = false;
+
+    UniqueValuedMap<int32_t, WeakPtr<UINode>, WeakPtr<UINode>::Hash> node4Index_;
     CreateItemCb createItem_;
     UpdateRangeCb updateRange_;
     int32_t totalCount_ = 0;
+
+    // re-assembled by GetChildren called from idle task
+    mutable std::list<RefPtr<UINode>> children_;
+
+    // for tracking reused/recycled nodes
+    std::unordered_set<int32_t> recycleNodeIds_;
+
+    // true in the time from requesting idle / predict task until exec predict task.
+    bool postUpdateTaskHasBeenScheduled_;
+
+    std::function<void(int32_t, int32_t)> onMoveFromTo_;
+    // record (from, to), only valid during dragging item.
+    std::optional<std::pair<int32_t, int32_t>> moveFromTo_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_SYNTAX_ARKOALA_LAZY_NODE_H

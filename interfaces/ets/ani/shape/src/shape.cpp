@@ -17,6 +17,34 @@
 
 #include "shapeUtil.h"
 
+namespace OHOS::Ace {
+namespace {
+ani_status BindShapeInnerMethods(ani_env* env)
+{
+    static const char* className = "@ohos.arkui.shape.__ShapeInnerMethods__";
+    ani_class cls;
+    ani_status status;
+    if ((status = env->FindClass(className, &cls)) != ANI_OK) {
+        LOGW("find shapeInnerMethods class error, status:%{public}d", status);
+        return ANI_ERROR;
+    }
+    std::array methods = {
+        ani_native_function { "CircleFromPtr", nullptr, reinterpret_cast<void*>(CircleShape::ANICircleShapeFromPtr) },
+        ani_native_function { "RectFromPtr", nullptr, reinterpret_cast<void*>(RectShape::ANIRectShapeFromPtr) },
+        ani_native_function {
+            "EllipseFromPtr", nullptr, reinterpret_cast<void*>(EllipseShape::ANIEllipseShapeFromPtr) },
+        ani_native_function { "PathFromPtr", nullptr, reinterpret_cast<void*>(PathShape::ANIPathShapeFromPtr) },
+    };
+    status = env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size());
+    if (status != ANI_OK) {
+        LOGW("bind shapeInnerMethods error, status:%{public}d", status);
+        return ANI_ERROR;
+    }
+    return ANI_OK;
+}
+} // namespace
+} // namespace OHOS::Ace
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
     ani_env* env;
@@ -43,6 +71,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     if (retRectBind == ANI_OK) {
         *result = ANI_VERSION_1;
     }
+
+    OHOS::Ace::BindShapeInnerMethods(env);
 
     *result = ANI_VERSION_1;
     return ANI_OK;

@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
 
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
@@ -20,83 +20,82 @@ host_arch = "${host_os}-${host_cpu}"
 libarkts_root = "./libarkts"
 
 action("fast_arktsc_build") {
-  script = "../gn/command/npm_util.py"
+    script = "../gn/command/npm_util.py"
 
-  outputs = [ "$target_out_dir/fast_arktsc_build" ]
-  deps = [ "../arkoala-arkts:ui2abc_process" ]
-  args = [
-    "--project-path",
-    rebase_path("./fast-arktsc"),
-    "--node-path",
-    rebase_path(
-        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-    "--npm-args",
-    "run",
-    "compile",
-  ]
+    outputs = [
+        "$target_out_dir/fast_arktsc_build"
+    ]
+    deps = [
+        "../arkoala-arkts:ui2abc_process",
+    ]
+    args = [
+        "--project-path", rebase_path("./fast-arktsc"),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--npm-args", "run", "compile"
+    ]
 }
 
 action("ui2abc_install") {
-  script = "../gn/command/npm_util.py"
-  outputs = [ "$target_out_dir/ui2abc_install" ]
-  args = [
-    "--project-path",
-    rebase_path("."),
-    "--node-path",
-    rebase_path(
-        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-    "--install",
-  ]
+    script = "../gn/command/npm_util.py"
+    outputs = [
+        "$target_out_dir/ui2abc_install"
+    ]
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--install"
+    ]
 }
 
 action("ui2abc_build") {
-  script = "../gn/command/npm_util.py"
+    script = "../gn/command/npm_util.py"
 
-  outputs = [ "$target_out_dir/MemoTransformer.js" ]
+    outputs = [
+        "$target_out_dir/MemoTransformer.js"
+    ]
 
-  deps = [
-    ":fast_arktsc_build",
-    "$libarkts_root:es2panda",
-    "../arkoala-arkts:ui2abc_process",
-  ]
+    deps = [
+        "../arkoala-arkts:ui2abc_process",
+        ":fast_arktsc_build",
+        "$libarkts_root:es2panda"
+    ]
 
-  args = [
-    "--project-path",
-    rebase_path("."),
-    "--node-path",
-    rebase_path(
-        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-    "--npm-args",
-    "run",
-    "build:gn",
-  ]
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--npm-args", "run", "build:gn"
+    ]
 }
 
 group("build_es2panda_lib") {
-  external_deps = [ ets2abc_build_deps ]
-  external_deps += [ static_linker_build_deps ]
-  external_deps += [ "ets_frontend:libes2panda_public(${host_toolchain})" ]
+    external_deps = [ets2abc_build_deps]
+    external_deps += [static_linker_build_deps]
+    external_deps += [ "ets_frontend:libes2panda_public(${host_toolchain})" ]
 }
 
 action("ui2abc_panda_sdk") {
-  script = "gn/command/gen_sdk.py"
+    script = "gn/command/gen_sdk.py"
 
-  outputs = [ "$target_out_dir/panda-sdk" ]
+    outputs = [
+        "$target_out_dir/panda-sdk"
+    ]
 
-  deps = [ ":build_es2panda_lib" ]
+    deps = [
+        ":build_es2panda_lib",
+    ]
 
-  args = [
-    "--config",
-    rebase_path("gn/sdk_config.json"),
-    "--src",
-    rebase_path("//"),
-    "--dist",
-    rebase_path("./build/sdk"),
-    "--out-root",
-    rebase_path(root_out_dir),
-  ]
+    args = [
+        "--config", rebase_path("gn/sdk_config.json"),
+        "--src", rebase_path("//"),
+        "--dist", rebase_path("./build/sdk"),
+        "--out-root", rebase_path(root_out_dir)
+    ]
 }
 
+
+
 group("ui2abc") {
-  deps = [ ":ui2abc_build" ]
+    deps = [
+        ":ui2abc_build"
+    ]
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,11 +25,19 @@ namespace OHOS::Ace::NG::GeneratedViewModel {
 
 void* createColumnSplitNode(ArkUI_Int32 nodeId)
 {
+    // auto frameNode = LinearSplitModelNG::CreateFrameNode(nodeId, NG::SplitType::COLUMN_SPLIT);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
 void* createRowSplitNode(ArkUI_Int32 nodeId)
 {
+    // auto frameNode = LinearSplitModelNG::CreateFrameNode(nodeId, NG::SplitType::ROW_SPLIT);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 

@@ -18,16 +18,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#ifdef ARKUI_CAPI_UNITTEST
-#include "test/unittest/capi/stubs/mock_time_picker_dialog_view.h"
-#else
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
-#endif
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerDialogAccessor {
+#ifdef WRONG_GEN
 PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions& options)
 {
     PickerDialogInfo dialogInfo;
@@ -63,8 +60,10 @@ PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions& op
     if (offset) {
         dialogInfo.offset = offset.value();
     }
-    dialogInfo.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
-        options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+    auto blurStyle = Converter::OptConvert<BlurStyle>(options.backgroundBlurStyle);
+    if (blurStyle.has_value()) {
+        dialogInfo.backgroundBlurStyle = static_cast<int32_t>(blurStyle.value());
+    }
     dialogInfo.blurStyleOption = Converter::OptConvert<BlurStyleOption>(options.backgroundBlurStyleOptions);
     dialogInfo.effectOption =  Converter::OptConvert<EffectOption>(options.backgroundEffect);
     dialogInfo.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
@@ -230,13 +229,27 @@ void ShowImpl(const Opt_TimePickerDialogOptions* options)
         std::move(acceptEvent), std::move(changeEvent), std::move(enterSelectedAreaEvent),
         timePickerDialogEvent, buttonInfos);
 }
+#endif
+void DestroyPeerImpl(Ark_TimePickerDialog peer)
+{
+}
+Ark_TimePickerDialog ConstructImpl()
+{
+    return {};
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
 } // TimePickerDialogAccessor
-
 const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
 {
     static const GENERATED_ArkUITimePickerDialogAccessor TimePickerDialogAccessorImpl {
-        TimePickerDialogAccessor::ShowImpl,
+        TimePickerDialogAccessor::DestroyPeerImpl,
+        TimePickerDialogAccessor::ConstructImpl,
+        TimePickerDialogAccessor::GetFinalizerImpl,
     };
     return &TimePickerDialogAccessorImpl;
 }
+
 }

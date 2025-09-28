@@ -136,12 +136,11 @@ void ExecuteSharedRuntimeAnimation(const RefPtr<Container>& container, const Ref
     StartAnimationForStageMode(pipelineContextBase, option, onEventFinish, count, true);
 }
 
-void AnimateToImmediatelyImpl(const Ark_AnimateParam* param, const Opt_Callback_Void* event_)
+void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param, const Callback_Void* event)
 {
-    auto event = Converter::OptConvert<Callback_Void>(*event_);
     std::function<void()> onEventFinish;
     if (event) {
-        onEventFinish = [arkCallback = CallbackHelper(event.value())]() { 
+        onEventFinish = [arkCallback = CallbackHelper(*event)]() {
             arkCallback.InvokeSync();
         };
     }
@@ -159,7 +158,7 @@ void AnimateToImmediatelyImpl(const Ark_AnimateParam* param, const Opt_Callback_
             AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
         return;
     }
-    
+
     AnimationOption option = Converter::Convert<AnimationOption>(*param);
     auto onFinish = Converter::OptConvert<Callback_Void>(param->onFinish);
     std::optional<int32_t> count;
@@ -345,7 +344,7 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
     AnimationUtils::CloseImplicitAnimation();
 }
 
-void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ark_KeyframeState* keyframes)
+void KeyframeAnimationImplImpl(const Ark_KeyframeAnimateParam* param, const Array_KeyframeState* keyframes)
 {
     auto scopedDelegate = Container::CurrentIdSafelyWithCheck();
     if (!scopedDelegate) {
@@ -380,9 +379,6 @@ void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ar
     if (keyframes && keyframes->array) {
         for (int i = 0; i < keyframes->length; ++i) {
             const auto& arkFrame = keyframes->array[i];
-            if (arkFrame.event.tag == INTEROP_TAG_UNDEFINED) {
-                continue;
-            }
             Keyframe keyframe;
             keyframe.duration = Converter::OptConvert<int32_t>(arkFrame.duration).value_or(DEFAULT_DURATION);
             if (keyframe.duration < 0) {
@@ -390,7 +386,7 @@ void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ar
             }
             totalDuration += keyframe.duration;
             keyframe.curve = Converter::OptConvert<RefPtr<Curve>>(arkFrame.curve).value_or(Curves::EASE_IN_OUT);
-            keyframe.animationClosure = [arkCallback = CallbackHelper(arkFrame.event.value),
+            keyframe.animationClosure = [arkCallback = CallbackHelper(arkFrame.event),
                                             currentId = Container::CurrentIdSafely()]() {
                 ContainerScope scope(currentId);
                 arkCallback.InvokeSync();
@@ -431,12 +427,12 @@ const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
 {
     static const GENERATED_ArkUIAnimationExtenderAccessor AnimationExtenderAccessorImpl {
         AnimationExtenderAccessor::SetClipRectImpl,
-        AnimationExtenderAccessor::KeyFrameAnimationImpl,
         AnimationExtenderAccessor::OpenImplicitAnimationImpl,
-        AnimationExtenderAccessor::AnimateToImmediatelyImpl,
         AnimationExtenderAccessor::CloseImplicitAnimationImpl,
         AnimationExtenderAccessor::StartDoubleAnimationImpl,
         AnimationExtenderAccessor::AnimationTranslateImpl,
+        AnimationExtenderAccessor::AnimateToImmediatelyImplImpl,
+        AnimationExtenderAccessor::KeyframeAnimationImplImpl,
     };
     return &AnimationExtenderAccessorImpl;
 }

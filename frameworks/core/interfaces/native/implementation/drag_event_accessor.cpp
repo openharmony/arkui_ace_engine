@@ -22,15 +22,11 @@
 #include "core/interfaces/native/implementation/unified_data_peer.h"
 #include "unified_data_peer.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-    const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
-}
 namespace OHOS::Ace::NG::Converter {
     template<>
     void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src)
     {
         switch (src) {
-            case ARK_DRAG_RESULT_UNKNOWN: dst = DragRet::DRAG_DEFAULT; break;
             case ARK_DRAG_RESULT_DRAG_SUCCESSFUL: dst = DragRet::DRAG_SUCCESS; break;
             case ARK_DRAG_RESULT_DRAG_FAILED: dst = DragRet::DRAG_FAIL; break;
             case ARK_DRAG_RESULT_DRAG_CANCELED: dst = DragRet::DRAG_CANCEL; break;
@@ -43,7 +39,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_DragResult& dst, const DragRet& src)
     {
         switch (src) {
-            case DragRet::DRAG_DEFAULT: dst = ARK_DRAG_RESULT_UNKNOWN; break;
             case DragRet::DRAG_SUCCESS: dst = ARK_DRAG_RESULT_DRAG_SUCCESSFUL; break;
             case DragRet::DRAG_FAIL: dst = ARK_DRAG_RESULT_DRAG_FAILED; break;
             case DragRet::DRAG_CANCEL: dst = ARK_DRAG_RESULT_DRAG_CANCELED; break;
@@ -55,12 +50,12 @@ namespace OHOS::Ace::NG::Converter {
         }
     }
 
-    void AssignArkValue(Ark_Rectangle& dst, const Rect& src)
+    void AssignArkValue(Ark_Rectangle& dst, const Rect& src, ConvContext *ctx)
     {
-        dst.x = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Left()));
-        dst.y = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Top()));
-        dst.width = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Width()));
-        dst.height = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Height()));
+        dst.x = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Left()), ctx);
+        dst.y = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Top()), ctx);
+        dst.width = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Width()), ctx);
+        dst.height = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Height()), ctx);
     }
 } // namespace Converter
 
@@ -71,7 +66,7 @@ void DestroyPeerImpl(Ark_DragEvent peer)
 {
     delete peer;
 }
-Ark_DragEvent CtorImpl()
+Ark_DragEvent ConstructImpl()
 {
     return new DragEventPeer();
 }
@@ -113,26 +108,17 @@ Ark_Number GetWindowYImpl(Ark_DragEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(peer->dragInfo->GetY());
     return ArkValue<Ark_Number>(value);
 }
-Ark_Number GetXImpl(Ark_DragEvent peer)
-{
-    return GetWindowXImpl(peer);
-}
-Ark_Number GetYImpl(Ark_DragEvent peer)
-{
-    return GetWindowYImpl(peer);
-}
 void SetDataImpl(Ark_DragEvent peer,
-                 Ark_UnifiedData unifiedData)
+                 Ark_unifiedDataChannel_UnifiedData unifiedData)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->dragInfo);
     CHECK_NULL_VOID(unifiedData);
     peer->dragInfo->SetData(unifiedData->unifiedData);
 }
-Ark_UnifiedData GetDataImpl(Ark_VMContext vmContext,
-                            Ark_DragEvent peer)
+Ark_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
 {
-    const auto unifiedPeer = GeneratedModifier::GetUnifiedDataAccessor()->ctor();
+    const auto unifiedPeer = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
     CHECK_NULL_RETURN(peer, unifiedPeer);
     CHECK_NULL_RETURN(peer->dragInfo, unifiedPeer);
     auto data = peer->dragInfo->GetData();
@@ -140,9 +126,10 @@ Ark_UnifiedData GetDataImpl(Ark_VMContext vmContext,
     unifiedPeer->unifiedData = data;
     return unifiedPeer;
 }
-Ark_Summary GetSummaryImpl(Ark_DragEvent peer)
+Ark_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
 {
-    Ark_Summary arkValue = { .summary = {}, .totalSize = 0 };
+    Ark_unifiedDataChannel_Summary arkValue{};
+#ifdef WRONG_GEN1
     CHECK_NULL_RETURN(peer, arkValue);
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, arkValue);
@@ -151,6 +138,7 @@ Ark_Summary GetSummaryImpl(Ark_DragEvent peer)
     for (const auto &item: summary) {
         arkValue.totalSize += ArkValue<Ark_Int64>(item.second);
     }
+#endif
     return arkValue;
 }
 void SetResultImpl(Ark_DragEvent peer,
@@ -175,7 +163,7 @@ Ark_Rectangle GetPreviewRectImpl(Ark_DragEvent peer)
     CHECK_NULL_RETURN(peer, {});
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, {});
-    return ArkValue<Ark_Rectangle>(info->GetPreviewRect());
+    return ArkValue<Ark_Rectangle>(info->GetPreviewRect(), Converter::FC);
 }
 Ark_Number GetVelocityXImpl(Ark_DragEvent peer)
 {
@@ -204,18 +192,6 @@ Ark_Number GetVelocityImpl(Ark_DragEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityValue());
     return Converter::ArkValue<Ark_Number>(value);
 }
-Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
-                                    Ark_DragEvent peer,
-                                    const Array_String* keys)
-{
-    auto defaultValue = ArkValue<Ark_Boolean>(false);
-    CHECK_NULL_RETURN(peer, defaultValue);
-    auto info = peer->dragInfo;
-    CHECK_NULL_RETURN(info, defaultValue);
-    auto eventKeys = info->GetPressedKeyCodes();
-    auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
-    return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
-}
 void ExecuteDropAnimationImpl(Ark_DragEvent peer,
                               const Callback_Void* customDropAnimation)
 {
@@ -228,11 +204,9 @@ void ExecuteDropAnimationImpl(Ark_DragEvent peer,
     };
     info->SetDropAnimation(std::move(customDropAnimationCallback));
 }
-Ark_String StartDataLoadingImpl(Ark_VMContext vmContext,
-                                Ark_DragEvent peer,
-                                const Ark_DataSyncOptions* options)
+void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
+                                     const Ark_String* configuration)
 {
-    return {};
 }
 Ark_DragBehavior GetDragBehaviorImpl(Ark_DragEvent peer)
 {
@@ -268,19 +242,38 @@ void SetUseCustomDropAnimationImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(peer->dragInfo);
     peer->dragInfo->UseCustomAnimation(Convert<bool>(useCustomDropAnimation));
 }
+Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_DragEvent peer)
+{
+    const auto invalid = Converter::ArkValue<Opt_ModifierKeyStateGetter>(Ark_Empty());
+    CHECK_NULL_RETURN(peer, invalid);
+    auto info = peer->dragInfo;
+    CHECK_NULL_RETURN(info, invalid);
+    auto getter = CallbackKeeper::RegisterReverseCallback<ModifierKeyStateGetter,
+            std::function<void(const Array_String, const Callback_Boolean_Void)>>([info]
+            (const Array_String keys, const Callback_Boolean_Void continuation) {
+        auto eventKeys = info->GetPressedKeyCodes();
+        auto keysStr = Converter::Convert<std::vector<std::string>>(keys);
+        Ark_Boolean arkResult = Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
+        CallbackHelper(continuation).InvokeSync(arkResult);
+    });
+    return Converter::ArkValue<Opt_ModifierKeyStateGetter, ModifierKeyStateGetter>(getter);
+}
+void SetGetModifierKeyStateImpl(Ark_DragEvent peer,
+                                const Opt_ModifierKeyStateGetter* getModifierKeyState)
+{
+    LOGE("DragEventAccessor.SetGetModifierKeyStateImpl does nothing");
+}
 } // DragEventAccessor
 const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
 {
     static const GENERATED_ArkUIDragEventAccessor DragEventAccessorImpl {
         DragEventAccessor::DestroyPeerImpl,
-        DragEventAccessor::CtorImpl,
+        DragEventAccessor::ConstructImpl,
         DragEventAccessor::GetFinalizerImpl,
         DragEventAccessor::GetDisplayXImpl,
         DragEventAccessor::GetDisplayYImpl,
         DragEventAccessor::GetWindowXImpl,
         DragEventAccessor::GetWindowYImpl,
-        DragEventAccessor::GetXImpl,
-        DragEventAccessor::GetYImpl,
         DragEventAccessor::SetDataImpl,
         DragEventAccessor::GetDataImpl,
         DragEventAccessor::GetSummaryImpl,
@@ -290,13 +283,14 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::GetVelocityXImpl,
         DragEventAccessor::GetVelocityYImpl,
         DragEventAccessor::GetVelocityImpl,
-        DragEventAccessor::GetModifierKeyStateImpl,
         DragEventAccessor::ExecuteDropAnimationImpl,
-        DragEventAccessor::StartDataLoadingImpl,
+        DragEventAccessor::EnableInternalDropAnimationImpl,
         DragEventAccessor::GetDragBehaviorImpl,
         DragEventAccessor::SetDragBehaviorImpl,
         DragEventAccessor::GetUseCustomDropAnimationImpl,
         DragEventAccessor::SetUseCustomDropAnimationImpl,
+        DragEventAccessor::GetGetModifierKeyStateImpl,
+        DragEventAccessor::SetGetModifierKeyStateImpl,
     };
     return &DragEventAccessorImpl;
 }

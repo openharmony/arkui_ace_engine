@@ -17,6 +17,7 @@ import { IBindingSource, ITrackedDecoratorRef } from '../base/mutableStateMeta';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { RenderIdType, IMutableStateMeta, IComputedDecoratedVariable } from '../decorator';
 import { FactoryInternal } from '../base/iFactoryInternal';
+import { ExtendableComponent } from '../../component/extendableComponent';
 
 export interface IComputedDecoratorRef extends ITrackedDecoratorRef {
     fireChange(): void;
@@ -34,6 +35,7 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
     private readonly computedLambda_: () => T;
     private meta_: IMutableStateMeta = FactoryInternal.mkMutableStateMeta('Computed');
     private initialized: boolean = false;
+    private owningComponent_?: ExtendableComponent;
     constructor(computedLambda: () => T, varName: string) {
         this.id = ++ComputedDecoratedVariable.nextComputedId_;
         this.weakThis = new WeakRef<ITrackedDecoratorRef>(this);
@@ -69,6 +71,10 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
         return this.cachedValue_ as T;
     }
 
+    setOwner(owningView: ExtendableComponent) {
+        this.owningComponent_ = owningView;
+    }
+
     private shouldAddRef(): boolean {
         return ObserveSingleton.instance.renderingComponent >= ObserveSingleton.RenderingComponentV2;
     }
@@ -82,7 +88,7 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
         let newValue: T;
         try {
             newValue = this.computedLambda_();
-        } catch (e: Exception) {
+        } catch (e) {
             StateMgmtConsole.log(`@Computed Exception caught for ${this.varName}: ${e.toString()}.`);
             throw e;
         } finally {

@@ -25,13 +25,13 @@ void DestroyPeerImpl(Ark_BaselineOffsetStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_BaselineOffsetStyle CtorImpl(Ark_LengthMetrics value)
+Ark_BaselineOffsetStyle ConstructImpl(const Ark_LengthMetrics* value)
 {
     auto peer = PeerUtils::CreatePeer<BaselineOffsetStylePeer>();
     std::optional<Dimension> offset;
     Dimension defaultOffset = Dimension(0, DimensionUnit::VP);
     if (value) {
-        offset = Converter::OptConvert<Dimension>(value);
+        offset = Converter::OptConvert<Dimension>(*value);
         Validator::ValidateNonPercent(offset);
     }
     peer->span = AceType::MakeRefPtr<BaselineOffsetSpan>(offset.value_or(defaultOffset));
@@ -41,11 +41,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetBaselineOffsetImpl(Ark_BaselineOffsetStyle peer)
+Ark_Float64 GetBaselineOffsetImpl(Ark_BaselineOffsetStyle peer)
 {
     CHECK_NULL_RETURN(peer, {});
     CHECK_NULL_RETURN(peer->span, {});
-    auto value = Converter::ArkValue<Ark_Number>(peer->span->GetBaselineOffset().ConvertToVp());
+    auto value = Converter::ArkValue<Ark_Float64>(peer->span->GetBaselineOffset().ConvertToVp());
     return value;
 }
 } // BaselineOffsetStyleAccessor
@@ -53,7 +53,7 @@ const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor
 {
     static const GENERATED_ArkUIBaselineOffsetStyleAccessor BaselineOffsetStyleAccessorImpl {
         BaselineOffsetStyleAccessor::DestroyPeerImpl,
-        BaselineOffsetStyleAccessor::CtorImpl,
+        BaselineOffsetStyleAccessor::ConstructImpl,
         BaselineOffsetStyleAccessor::GetFinalizerImpl,
         BaselineOffsetStyleAccessor::GetBaselineOffsetImpl,
     };

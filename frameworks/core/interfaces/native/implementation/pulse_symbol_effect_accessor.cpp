@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_PulseSymbolEffect peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_PulseSymbolEffect CtorImpl()
+Ark_PulseSymbolEffect ConstructImpl()
 {
     return PeerUtils::CreatePeer<PulseSymbolEffectPeer>();
 }
@@ -37,7 +37,7 @@ const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor()
 {
     static const GENERATED_ArkUIPulseSymbolEffectAccessor PulseSymbolEffectAccessorImpl {
         PulseSymbolEffectAccessor::DestroyPeerImpl,
-        PulseSymbolEffectAccessor::CtorImpl,
+        PulseSymbolEffectAccessor::ConstructImpl,
         PulseSymbolEffectAccessor::GetFinalizerImpl,
     };
     return &PulseSymbolEffectAccessorImpl;

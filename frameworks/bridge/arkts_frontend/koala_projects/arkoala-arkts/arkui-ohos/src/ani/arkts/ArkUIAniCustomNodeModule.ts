@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Measurable, Layoutable, Position, ConstraintSizeOptions, MeasureResult, DirectionalEdgesT,  Length, Padding, Margin, EdgeWidths, GeometryInfo, SizeResult } from 'arkui/component'
+import { Measurable, Layoutable, Position, ConstraintSizeOptions, MeasureResult, DirectionalEdgesT,  Length, Padding, Margin, EdgeWidths, GeometryInfo, SizeResult } from '#generated'
 import { int64, int32 } from '@koalaui/common'
 import { KPointer, KInt } from '@koalaui/interop'
 import { ArkCustomComponent } from 'arkui/ArkCustomComponent'
@@ -36,7 +36,7 @@ export class MeasurableLayoutableInner implements Measurable, Layoutable {
     }
     
     uniqueId?: number | undefined;
-    measureResult: MeasureResult = {};
+    measureResult: MeasureResult = {width: 0, height: 0};
 
     public override measure(constraint: ConstraintSizeOptions): MeasureResult {
         return this.measureInner(constraint);

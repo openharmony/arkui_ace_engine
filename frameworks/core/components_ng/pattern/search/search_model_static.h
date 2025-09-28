@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@ public:
     static void SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetTextIndent(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetAutoCapitalizationMode(FrameNode* frameNode, const std::optional<AutoCapitalizationMode>& value);
     static void SetPlaceholderFont(FrameNode* frameNode, const std::optional<Font>& font);
     static void SetSearchImageIcon(FrameNode* frameNode, std::optional<IconOptions>& iconOptions);
     static void SetSearchButtonFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);

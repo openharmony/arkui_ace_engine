@@ -19,40 +19,21 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/promise_helper.h"
 
-namespace OHOS::Ace::NG {
-using SwiperAnimationModeVariantType = std::variant<SwiperAnimationMode, bool>;
-}
-
 namespace OHOS::Ace::NG::Converter {
 template<>
-inline void AssignCast(std::optional<Ark_Function>& dst, const Ark_Function& src)
-{
-    dst = src;
-}
-
-template<>
-SwiperAnimationModeVariantType Convert(const Ark_SwiperAnimationMode& src)
-{
-    auto animationModeOpt = Converter::OptConvert<SwiperAnimationMode>(src);
-    SwiperAnimationMode defualtMode = SwiperAnimationMode::NO_ANIMATION;
-    return animationModeOpt.value_or(defualtMode);
-}
-
-template<>
-SwiperAnimationModeVariantType Convert(const Ark_Boolean& src)
-{
-    return Convert<bool>(src);
-}
-
-template<>
-inline void AssignCast(std::optional<SwiperAnimationMode>& dst, const Ark_SwiperAnimationMode& src)
+void AssignCast(std::optional<SwiperAnimationMode>& dst, const Ark_SwiperAnimationMode& src)
 {
     switch (src) {
-        case SELECTOR_ID_0: dst = SwiperAnimationMode::NO_ANIMATION; break;
-        case SELECTOR_ID_1: dst = SwiperAnimationMode::DEFAULT_ANIMATION; break;
-        case SELECTOR_ID_2: dst = SwiperAnimationMode::FAST_ANIMATION; break;
+        case ARK_SWIPER_ANIMATION_MODE_NO_ANIMATION: dst = SwiperAnimationMode::NO_ANIMATION; break;
+        case ARK_SWIPER_ANIMATION_MODE_DEFAULT_ANIMATION: dst = SwiperAnimationMode::DEFAULT_ANIMATION; break;
+        case ARK_SWIPER_ANIMATION_MODE_FAST_ANIMATION: dst = SwiperAnimationMode::FAST_ANIMATION; break;
         default: LOGE("Unexpected enum value in Ark_SwiperAnimationMode: %{public}d", src);
     }
+}
+template<>
+SwiperAnimationMode Convert(const Ark_Boolean& src)
+{
+    return src ? SwiperAnimationMode::DEFAULT_ANIMATION : SwiperAnimationMode::NO_ANIMATION;
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -65,7 +46,7 @@ void DestroyPeerImpl(Ark_SwiperController peer)
         peerImpl->DecRefCount();
     }
 }
-Ark_SwiperController CtorImpl()
+Ark_SwiperController ConstructImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<SwiperControllerPeerImpl>();
     peerImpl->IncRefCount();
@@ -87,42 +68,23 @@ void ShowPreviousImpl(Ark_SwiperController peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerShowPrevious();
 }
-void ChangeIndex0Impl(Ark_SwiperController peer,
-                      const Ark_Number* index,
-                      const Opt_Boolean* useAnimation)
+void ChangeIndexImpl(Ark_SwiperController peer,
+                     const Opt_Number* index,
+                     const Opt_Union_SwiperAnimationMode_Boolean* animationMode)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(index);
-    auto aceIdx = Converter::Convert<Ark_Int32>(*index);
-    auto aceUseAnim = useAnimation ? Converter::OptConvert<bool>(*useAnimation) : std::nullopt;
-    peerImpl->TriggerChangeIndex(aceIdx, aceUseAnim);
-}
-void ChangeIndex1Impl(Ark_SwiperController peer,
-                      const Ark_Number* index,
-                      const Opt_Union_SwiperAnimationMode_Boolean* animationMode)
-{
-    auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(index);
-    auto aceIdx = Converter::Convert<Ark_Int32>(*index);
-    auto optMode = Converter::OptConvert<SwiperAnimationModeVariantType>(*animationMode);
-    CHECK_NULL_VOID(optMode);
-
-    if (auto modeStylePtr = std::get_if<SwiperAnimationMode>(&(*optMode)); modeStylePtr) {
-        peerImpl->TriggerChangeIndex(aceIdx, *modeStylePtr);
-    } else if (auto modeBoolPtr = std::get_if<bool>(&(*optMode)); modeBoolPtr) {
-        peerImpl->TriggerChangeIndex(aceIdx, modeBoolPtr);
-    } else {
-        peerImpl->TriggerChangeIndex(aceIdx, SwiperAnimationMode::NO_ANIMATION);
-    }
+    auto aceIdx = Converter::OptConvertPtr<int32_t>(index);
+    auto aceUseAnim = Converter::OptConvertPtr<SwiperAnimationMode>(animationMode);
+    peerImpl->TriggerChangeIndex(aceIdx.value_or(0), aceUseAnim.value_or(SwiperAnimationMode::NO_ANIMATION));
 }
 void FinishAnimationImpl(Ark_SwiperController peer,
                          const Opt_VoidCallback* callback_)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto arkCallbackOpt = callback_ ? Converter::OptConvert<VoidCallback>(*callback_) : std::nullopt;
+    auto arkCallbackOpt = Converter::GetOptPtr(callback_);
     if (arkCallbackOpt) {
         auto onFinish = [arkCallback = CallbackHelper(*arkCallbackOpt)]() -> void {
             arkCallback.Invoke();
@@ -140,7 +102,15 @@ void PreloadItemsImpl(Ark_VMContext vmContext,
     CHECK_NULL_VOID(asyncWorker);
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
+    auto finishFunc = [promise](const int32_t errCode, const std::string errStr) {
+        if (errCode == ERROR_CODE_NO_ERROR) {
+            promise->Resolve();
+        } else {
+            promise->Reject({std::to_string(errCode), errStr});
+        }
+    };
+    peerImpl->TriggerSetPreloadFinishCallback(finishFunc);
     auto indexVectOpt = !indices ? std::nullopt : Converter::OptConvert<std::vector<int32_t>>(*indices);
     auto execFunc = [peerImpl, indexVectOpt = std::move(indexVectOpt)]() {
         if (indexVectOpt) {
@@ -150,28 +120,18 @@ void PreloadItemsImpl(Ark_VMContext vmContext,
             peerImpl->TriggerPreloadItems({});
         }
     };
-    PromiseHelper promise(outputArgumentForReturningPromise, vmContext, *asyncWorker, std::move(execFunc));
-
-    auto finishFunc = [promise = std::move(promise)](const int32_t errCode, const std::string errStr) {
-        if (errCode == ERROR_CODE_NO_ERROR) {
-            promise.Resolve();
-        } else {
-            promise.Reject({std::to_string(errCode), errStr});
-        }
-    };
-    peerImpl->TriggerSetPreloadFinishCallback(finishFunc);
+    promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
 } // SwiperControllerAccessor
 const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
 {
     static const GENERATED_ArkUISwiperControllerAccessor SwiperControllerAccessorImpl {
         SwiperControllerAccessor::DestroyPeerImpl,
-        SwiperControllerAccessor::CtorImpl,
+        SwiperControllerAccessor::ConstructImpl,
         SwiperControllerAccessor::GetFinalizerImpl,
         SwiperControllerAccessor::ShowNextImpl,
         SwiperControllerAccessor::ShowPreviousImpl,
-        SwiperControllerAccessor::ChangeIndex0Impl,
-        SwiperControllerAccessor::ChangeIndex1Impl,
+        SwiperControllerAccessor::ChangeIndexImpl,
         SwiperControllerAccessor::FinishAnimationImpl,
         SwiperControllerAccessor::PreloadItemsImpl,
     };

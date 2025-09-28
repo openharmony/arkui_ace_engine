@@ -15,17 +15,17 @@
 
 import { Finalizable, SerializerBase, toPeerPtr, KPointer, MaterializedBase, DeserializerBase } from "@koalaui/interop"
 import { ResourceColor, Offset, Dimension, EdgeStyles, EdgeColors, EdgeWidths,
-    BorderRadiuses } from 'arkui/component/units';
+    BorderRadiuses } from 'arkui/framework'
 import { Callback } from '@ohos.base';
 import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle, TransitionEffect, KeyboardAvoidMode,
-    DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions } from 'arkui/component/common';
-import { AsyncCallback, CustomBuilder } from 'arkui/component';
-import { DialogAlignment } from 'arkui/component/alertDialog';
-import { DismissDialogAction } from 'arkui/component/actionSheet';
-import { BorderStyle, Alignment } from 'arkui/component/enums';
+    DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions } from 'arkui/framework'
+import { CustomBuilder } from 'arkui/framework'
+import { DialogAlignment } from 'arkui/framework'
+import { DismissDialogAction } from 'arkui/framework'
+import { BorderStyle, Alignment } from 'arkui/framework'
 import { Resource } from 'global.resource';
 import { LengthMetrics } from 'arkui/Graphics';
-import { ArkUIGeneratedNativeModule } from "#components"
+import { AsyncCallback } from 'arkui/base';
 
 export enum LevelMode {
     OVERLAY = 0,
@@ -37,44 +37,23 @@ export enum ImmersiveMode {
     EXTEND = 1,
 }
 
-export class LevelOrderInternal {
-    public static fromPtr(ptr: KPointer): LevelOrder {
-        return new LevelOrder(ptr)
-    }
-}
-export class LevelOrder implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr?: KPointer) {
-        if(!peerPtr) {
-            peerPtr = LevelOrder.construct()
-        }
-        this.peer = new Finalizable(peerPtr!, LevelOrder.getFinalizer())
-    }
-    static construct(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._LevelOrder_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._LevelOrder_getFinalizer()
-    }
+export class LevelOrder {
+    private order_: number = 0.0;
+    private static ORDER_MIN: number = -100000.0;
+    private static ORDER_MAX: number = 100000.0;
+    constructor() {}
     public static clamp(order: number): LevelOrder {
-        const order_casted = order as (number)
-        return LevelOrder.clamp_serialize(order_casted)
+        let levelOrderImpl = new LevelOrder();
+        levelOrderImpl.setOrder(order);
+        return levelOrderImpl;
     }
     public getOrder(): number {
-        return this.getOrder_serialize()
+        return this.order_;
     }
-    private static clamp_serialize(order: number): LevelOrder {
-        const retval = ArkUIGeneratedNativeModule._LevelOrder_clamp(order)
-        const obj : LevelOrder = LevelOrderInternal.fromPtr(retval)
-        return obj
-    }
-    private getOrder_serialize(): number {
-        const retval = ArkUIGeneratedNativeModule._LevelOrder_getOrder(this.peer!.ptr)
-        return retval
+
+    private setOrder(order: number): void {
+        this.order_ = order < LevelOrder.ORDER_MIN ?
+            LevelOrder.ORDER_MIN : (order > LevelOrder.ORDER_MAX ? LevelOrder.ORDER_MAX : order);
     }
 }
 
@@ -137,10 +116,10 @@ declare namespace promptAction {
         shadow?: ShadowOptions | ShadowStyle;
         enableHoverMode?: boolean;
         hoverModeArea?: HoverModeAreaType;
-        onDidAppear?: ((data: undefined) => void);
-        onDidDisappear?: ((data: undefined) => void);
-        onWillAppear?: ((data: undefined) => void);
-        onWillDisappear?: ((data: undefined) => void);
+        onDidAppear?: (() => void);
+        onDidDisappear?: (() => void);
+        onWillAppear?: (() => void);
+        onWillDisappear?: (() => void);
         levelMode?: LevelMode;
         levelUniqueId?: number;
         immersiveMode?: ImmersiveMode;

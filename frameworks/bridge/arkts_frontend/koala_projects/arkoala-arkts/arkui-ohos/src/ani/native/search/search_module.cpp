@@ -31,7 +31,7 @@ void SetSearchIconSymbol(ani_env* env, [[maybe_unused]] ani_object obj, ani_long
     }
 
     ani_class cls;
-    static const char *className = "Larkui/SymbolGlyphModifier/SymbolGlyphModifier;";
+    static const char *className = "arkui.SymbolGlyphModifier.SymbolGlyphModifier";
     auto ani_status = env->FindClass(className, &cls);
     if (ani_status != ANI_OK) {
         HILOGE("SearchIcon findClass failed, className: %{public}s", className);

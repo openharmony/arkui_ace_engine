@@ -1,0 +1,164 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { pointer } from '@koalaui/interop'
+import { int32 } from '@koalaui/common'
+import { MutableState } from '@koalaui/runtime'
+import { LazyForEachOps } from '#generated'
+import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation, DataChangeOperation,
+    DataMoveOperation, DataExchangeOperation, DataChangeListener } from '../component/lazyForEach'
+
+export class InternalListener implements DataChangeListener {
+    private startIndex: number // Tracks the minimum item index that has changed
+    private endIndex: number
+    private changeCount: number // Tracks the number of items added or deleted
+    private version: MutableState<int32> // reference to mark LazyForEach dirty
+
+    constructor(version: MutableState<int32>) {
+        this.startIndex = Number.POSITIVE_INFINITY
+        this.endIndex = Number.NEGATIVE_INFINITY
+        this.changeCount = 0
+        this.version = version
+    }
+    /**
+     * Notify the change of data to backend
+     * @return the index of the first changed item
+     */
+    flush(nodePtr: pointer): number {
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            return Number.POSITIVE_INFINITY // none affected
+        }
+        LazyForEachOps.NotifyChange(
+            nodePtr,
+            this.startIndex as int32,
+            this.endIndex as int32,
+            this.changeCount as int32
+        );
+        const firstAffected = this.startIndex
+        // Reset the cache after flushing
+        this.startIndex = Number.POSITIVE_INFINITY;
+        this.endIndex = Number.NEGATIVE_INFINITY;
+        this.changeCount = 0;
+        return firstAffected
+    }
+
+    onDataReloaded(): void {
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            ++this.version.value
+        }
+        this.startIndex = 0
+        this.endIndex = Number.POSITIVE_INFINITY
+    }
+
+    onDataAdd(index: number): void {
+        if (index < 0) {
+            return
+        }
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            ++this.version.value
+        }
+        this.startIndex = Math.min(this.startIndex, index)
+        ++this.changeCount
+    }
+
+    onDataMove(from: number, to: number): void {
+        if (from < 0 || to < 0) {
+            return
+        }
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            ++this.version.value
+        }
+        this.startIndex = Math.min(this.startIndex, Math.min(from, to))
+        this.endIndex = Math.max(this.endIndex, Math.max(from, to))
+    }
+
+    onDataDelete(index: number): void {
+        if (index < 0) {
+            return
+        }
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            ++this.version.value
+        }
+        this.startIndex = Math.min(this.startIndex, index)
+        --this.changeCount
+    }
+
+    onDataChange(index: number): void {
+        if (index < 0) {
+            return
+        }
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            ++this.version.value
+        }
+        this.startIndex = Math.min(this.startIndex, index)
+    }
+
+    onDatasetChange(dataOperations: DataOperation[]): void {
+        let startIndex = Number.NEGATIVE_INFINITY
+        let endIndex = Number.NEGATIVE_INFINITY
+        let changeCount = 0
+        for (const operation of dataOperations) {
+            switch (operation.type) {
+                case DataOperationType.ADD: {
+                    startIndex = Math.min(startIndex, (operation as DataAddOperation).index);
+                    ++changeCount
+                    break;
+                }
+                case DataOperationType.DELETE: {
+                    startIndex = Math.min(startIndex, (operation as DataDeleteOperation).index);
+                    --changeCount
+                    break;
+                }
+                case DataOperationType.CHANGE: {
+                    startIndex = Math.min(startIndex, (operation as DataChangeOperation).index);
+                    break;
+                }
+                case DataOperationType.MOVE: {
+                    const moveOp = operation as DataMoveOperation;
+                    startIndex = Math.min(startIndex, Math.min(moveOp.index.from, moveOp.index.to));
+                    endIndex = Math.max(endIndex, Math.max(moveOp.index.from, moveOp.index.to));
+                    break;
+                }
+                case DataOperationType.EXCHANGE: {
+                    const exchangeOp = operation as DataExchangeOperation;
+                    startIndex = Math.min(startIndex, Math.min(exchangeOp.index.start, exchangeOp.index.end));
+                    endIndex = Math.max(endIndex, Math.max(exchangeOp.index.start, exchangeOp.index.end));
+                    break;
+                }
+                case DataOperationType.RELOAD: {
+                    startIndex = 0;
+                    endIndex = Number.POSITIVE_INFINITY
+                    break;
+                }
+            }
+        }
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            ++this.version.value
+        }
+        this.startIndex = startIndex
+        this.endIndex = endIndex
+        this.changeCount = changeCount
+    }
+
+    /**
+     * @internal
+     * Notify data change without updating MutableState. Safe to call during composition.
+     */
+    update(start: number, end: number, countDiff: number): void {
+        this.startIndex = Math.min(start, this.startIndex)
+        this.endIndex = Math.max(end, this.endIndex)
+        this.changeCount += countDiff
+    }
+}

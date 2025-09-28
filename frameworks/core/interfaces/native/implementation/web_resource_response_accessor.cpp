@@ -34,7 +34,7 @@ void DestroyPeerImpl(Ark_WebResourceResponse peer)
 {
     delete peer;
 }
-Ark_WebResourceResponse CtorImpl()
+Ark_WebResourceResponse ConstructImpl()
 {
     return new WebResourceResponsePeer();
 }
@@ -49,26 +49,26 @@ Ark_String GetResponseDataImpl(Ark_WebResourceResponse peer)
     result  = peer->handler->GetData();
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
-Opt_Union_String_Int32_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
+Opt_Union_String_I32_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
 {
-    Opt_Union_String_Int32_Buffer_Resource result {};
+    Opt_Union_String_I32_Buffer_Resource result {};
     CHECK_NULL_RETURN(peer && peer->handler, result);
     if (peer->responseDataType) {
         switch (peer->responseDataType.value()) {
             case RESPONSE_DATA_TYPE_STRING:
-                return Converter::ArkUnion<Opt_Union_String_Int32_Buffer_Resource, Ark_String>(
+                return Converter::ArkUnion<Opt_Union_String_I32_Buffer_Resource, Ark_String>(
                     peer->handler->GetData(), Converter::FC);
             case RESPONSE_DATA_TYPE_NUMBER:
-                return Converter::ArkUnion<Opt_Union_String_Int32_Buffer_Resource, Ark_Int32>(
+                return Converter::ArkUnion<Opt_Union_String_I32_Buffer_Resource, Ark_Int32>(
                     peer->handler->GetFileHandle());
             case RESPONSE_DATA_TYPE_RESOURCE:
                 if (peer->responseDataResEx) {
-                    return Converter::ArkUnion<Opt_Union_String_Int32_Buffer_Resource, Ark_Resource>(
+                    return Converter::ArkUnion<Opt_Union_String_I32_Buffer_Resource, Ark_Resource>(
                         peer->responseDataResEx.value());
                 }
                 break;
             case RESPONSE_DATA_TYPE_BUFFER:
-                return Converter::ArkUnion<Opt_Union_String_Int32_Buffer_Resource, Ark_Buffer>(
+                return Converter::ArkUnion<Opt_Union_String_I32_Buffer_Resource, Ark_Buffer>(
                     peer->handler->GetData(), Converter::FC);
             default:
                 break;
@@ -117,7 +117,7 @@ Ark_Int32 GetResponseCodeImpl(Ark_WebResourceResponse peer)
     return Converter::ArkValue<Ark_Int32>(peer->handler->GetStatusCode());
 }
 void SetResponseDataImpl(Ark_WebResourceResponse peer,
-                         const Ark_Union_String_Int32_Resource_Buffer* data)
+                         const Ark_Union_String_I32_Resource_Buffer* data)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(data);
@@ -193,12 +193,11 @@ void SetResponseHeaderImpl(Ark_WebResourceResponse peer,
     }
 }
 void SetResponseCodeImpl(Ark_WebResourceResponse peer,
-                         const Ark_Int32* code)
+                         Ark_Int32 code)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(code);
-    int32_t statusCode = Converter::Convert<int32_t>(*code);
-    peer->handler->SetStatusCode(statusCode);
+    peer->handler->SetStatusCode(code);
 }
 void SetResponseIsReadyImpl(Ark_WebResourceResponse peer,
                             Ark_Boolean IsReady)
@@ -217,7 +216,7 @@ const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor
 {
     static const GENERATED_ArkUIWebResourceResponseAccessor WebResourceResponseAccessorImpl {
         WebResourceResponseAccessor::DestroyPeerImpl,
-        WebResourceResponseAccessor::CtorImpl,
+        WebResourceResponseAccessor::ConstructImpl,
         WebResourceResponseAccessor::GetFinalizerImpl,
         WebResourceResponseAccessor::GetResponseDataImpl,
         WebResourceResponseAccessor::GetResponseDataExImpl,

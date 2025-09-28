@@ -70,16 +70,14 @@ export default namespace matrix4 {
     }
 
     class Matrix4TransitInner implements Matrix4Transit {
-        private matrix4Object:long = 0;
+        private matrix4Object: long = 0;
 
         static {
             loadLibrary("matrix4_ani");
         }
 
-        constructor(context:long) {
-            if(this.matrix4Object == 0){
-                this.matrix4Object = context;
-            }
+        constructor(context: long) {
+            this.matrix4Object = context;
         }
 
         static matrixTransferStatic(input: Any): Any {

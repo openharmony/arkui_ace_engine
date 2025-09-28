@@ -135,12 +135,11 @@ public:
 
     WeakPtr<RichEditorPattern> GetPattern()
     {
-        if (auto controller = handler_.Upgrade(); controller) {
-            auto richEditorController = AceType::DynamicCast<RichEditorController>(controller);
-            CHECK_NULL_RETURN(richEditorController, nullptr);
-            // return richEditorController->GetPattern();
-            return nullptr;
-        }
+        // if (auto controller = handler_.Upgrade(); controller) {
+        //     auto richEditorController = AceType::DynamicCast<RichEditorController>(controller);
+        //     CHECK_NULL_RETURN(richEditorController, nullptr);
+        //     return richEditorController->GetPattern();
+        // }
         return nullptr;
     }
 

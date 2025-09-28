@@ -28,6 +28,7 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
     private _next: IncrementalNode | undefined = undefined
     private _parent: IncrementalNode | undefined = undefined
     private _incremental: IncrementalNode | undefined = undefined
+    disabledStateUpdates: boolean = false
 
     /**
      * This callback is called when a child node is added to this parent.
@@ -69,7 +70,7 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @param id - The id of the scope to reuse.
      * @returns A recycled scope, or undefined if none is available.
      */
-    reuse(reuseKey: string | undefined, id: KoalaCallsiteKey): Disposable | undefined {
+    reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
         return undefined
     }
 
@@ -80,7 +81,7 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @param id - The id of the scope to recycle.
      * @return true if child is successfully recycled
      */
-    recycle(reuseKey: string | undefined, child: Disposable, id: KoalaCallsiteKey): boolean {
+    recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
         return false
     }
 
@@ -212,7 +213,11 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
                 this._parent = parent
                 if (next) next._prev = this
                 if (prev) prev._next = this
-                else parent._child = this
+                else parent._child = this;
+
+                // TODO: this is to workaround ast dumper bug #24055
+                if (0) {} else {}
+
                 parent.onChildInserted?.(this)
             }
         }

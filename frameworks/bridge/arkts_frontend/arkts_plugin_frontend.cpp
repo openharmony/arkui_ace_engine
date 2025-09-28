@@ -39,18 +39,18 @@ struct AppInfo {
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
-    "Larkui/ArkUIEntry/Application;",
+    "arkui.ArkUIEntry.Application",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZLstd/core/String;Larkui/UserView/UserView;Larkui/UserView/EntryPoint;"
-    ":Larkui/ArkUIEntry/Application;",
+    "C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}C{arkui.UserView.EntryPoint}"
+    ":C{arkui.ArkUIEntry.Application}",
     "start",
-    "Z:J",
+    ":l",
     "enter",
-    "IIJ:Z",
+    "iil:z",
     "emitEvent",
-    "IIII:V",
+    "iiii:",
     "checkCallbacks",
-    ":V",
+    ":",
 };
 
 void RunArkoalaEventLoop(ani_env* env, ani_ref app)
@@ -120,19 +120,7 @@ UIContentErrorCode ArktsPluginFrontend::RunPage(const std::string& url, const st
     ANI_CALL(env, Class_FindStaticMethod(appClass, KOALA_APP_INFO.createMethodName, KOALA_APP_INFO.createMethodSig,
         &create), return UIContentErrorCode::INVALID_URL);
 
-    auto endsWith = [](const std::string& str, const char* suffix) -> bool {
-        auto len = strlen(suffix);
-        return str.length() >= len && strcmp(&str[str.length() - len], suffix) == 0;
-    };
-
-    std::string appUrl;
-    if (endsWith(url, ".js") || endsWith(url, ".ts")) {
-        appUrl = url.substr(0, url.length() - strlen(".js"));
-    } else if (endsWith(url, ".ets")) {
-        appUrl = url.substr(0, url.length() - strlen(".ets"));
-    } else {
-        appUrl = url;
-    }
+    std::string appUrl = url.substr(0, url.rfind(".js"));
 
     ani_string aniUrl{};
     env->String_NewUTF8(appUrl.c_str(), appUrl.size(), &aniUrl);
@@ -165,7 +153,7 @@ UIContentErrorCode ArktsPluginFrontend::RunPage(const std::string& url, const st
         return UIContentErrorCode::INVALID_URL);
 
     ani_long result;
-    ANI_CALL(env, Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result, true),
+    ANI_CALL(env, Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result),
         return UIContentErrorCode::INVALID_URL);
 
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
