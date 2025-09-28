@@ -50,7 +50,7 @@ ani_long ExtractorsToDrawingCanvasPtr(ani_env* env, [[maybe_unused]]ani_object a
     CHECK_NULL_RETURN(canvasAni, {});
     auto rsCanvas = canvasAni->GetCanvas();
     CHECK_NULL_RETURN(rsCanvas, {});
-    drawing_CanvasPeer* drawingCanvasPeer = new drawing_CanvasPeer(std::shared_ptr<Rosen::Drawing::Canvas>(rsCanvas));
+    drawing_CanvasPeer* drawingCanvasPeer = new drawing_CanvasPeer(rsCanvas);
     return reinterpret_cast<ani_long>(drawingCanvasPeer);
 }
 
@@ -60,7 +60,7 @@ ani_object ExtractorsFromDrawingCanvasPtr(ani_env* env, [[maybe_unused]] ani_obj
     CHECK_NULL_RETURN(drawingCanvasPeer, nullptr);
     auto rsCanvas = drawingCanvasPeer->GetCanvas();
     CHECK_NULL_RETURN(rsCanvas, nullptr);
-    return Rosen::Drawing::AniCanvas::CreateAniCanvas(env, rsCanvas.get());
+    return Rosen::Drawing::AniCanvas::CreateAniCanvas(env, rsCanvas);
 }
 
 } // namespace OHOS::Ace::Ani

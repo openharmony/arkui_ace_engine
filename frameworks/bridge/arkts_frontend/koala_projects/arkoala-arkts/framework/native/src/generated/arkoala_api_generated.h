@@ -782,8 +782,8 @@ typedef struct Ark_Union_String_F64 Ark_Union_String_F64;
 typedef struct Opt_Union_String_F64 Opt_Union_String_F64;
 typedef struct Ark_Union_String_FunctionKey Ark_Union_String_FunctionKey;
 typedef struct Opt_Union_String_FunctionKey Opt_Union_String_FunctionKey;
-typedef struct Ark_Union_String_I32_CanvasGradient_CanvasPattern Ark_Union_String_I32_CanvasGradient_CanvasPattern;
-typedef struct Opt_Union_String_I32_CanvasGradient_CanvasPattern Opt_Union_String_I32_CanvasGradient_CanvasPattern;
+typedef struct Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern;
+typedef struct Opt_Union_String_Color_I32_CanvasGradient_CanvasPattern Opt_Union_String_Color_I32_CanvasGradient_CanvasPattern;
 typedef struct Ark_Union_String_Number Ark_Union_String_Number;
 typedef struct Opt_Union_String_Number Opt_Union_String_Number;
 typedef struct Ark_Union_SwiperAnimationMode_Boolean Ark_Union_SwiperAnimationMode_Boolean;
@@ -8088,20 +8088,21 @@ typedef struct Opt_Union_String_FunctionKey {
     Ark_Tag tag;
     Ark_Union_String_FunctionKey value;
 } Opt_Union_String_FunctionKey;
-typedef struct Ark_Union_String_I32_CanvasGradient_CanvasPattern {
+typedef struct Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern {
     /* kind: UnionType */
     Ark_Int32 selector;
     union {
         Ark_String value0;
-        Ark_Int32 value1;
-        Ark_CanvasGradient value2;
-        Ark_CanvasPattern value3;
+        Ark_Color value1;
+        Ark_Int32 value2;
+        Ark_CanvasGradient value3;
+        Ark_CanvasPattern value4;
     };
-} Ark_Union_String_I32_CanvasGradient_CanvasPattern;
-typedef struct Opt_Union_String_I32_CanvasGradient_CanvasPattern {
+} Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern;
+typedef struct Opt_Union_String_Color_I32_CanvasGradient_CanvasPattern {
     Ark_Tag tag;
-    Ark_Union_String_I32_CanvasGradient_CanvasPattern value;
-} Opt_Union_String_I32_CanvasGradient_CanvasPattern;
+    Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern value;
+} Opt_Union_String_Color_I32_CanvasGradient_CanvasPattern;
 typedef struct Ark_Union_String_Number {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -23857,12 +23858,12 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
     Ark_String (*getGlobalCompositeOperation)(Ark_CanvasRenderer peer);
     void (*setGlobalCompositeOperation)(Ark_CanvasRenderer peer,
                                         const Ark_String* globalCompositeOperation);
-    Ark_Union_String_I32_CanvasGradient_CanvasPattern (*getFillStyle)(Ark_CanvasRenderer peer);
+    Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern (*getFillStyle)(Ark_CanvasRenderer peer);
     void (*setFillStyle)(Ark_CanvasRenderer peer,
-                         const Ark_Union_String_I32_CanvasGradient_CanvasPattern* fillStyle);
-    Ark_Union_String_I32_CanvasGradient_CanvasPattern (*getStrokeStyle)(Ark_CanvasRenderer peer);
+                         const Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern* fillStyle);
+    Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern (*getStrokeStyle)(Ark_CanvasRenderer peer);
     void (*setStrokeStyle)(Ark_CanvasRenderer peer,
-                           const Ark_Union_String_I32_CanvasGradient_CanvasPattern* strokeStyle);
+                           const Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern* strokeStyle);
     Ark_String (*getFilter)(Ark_CanvasRenderer peer);
     void (*setFilter)(Ark_CanvasRenderer peer,
                       const Ark_String* filter);
@@ -24232,6 +24233,9 @@ typedef struct GENERATED_ArkUIDrawingRenderingContextAccessor {
     Ark_Size (*getSize)(Ark_DrawingRenderingContext peer);
     void (*setSize)(Ark_DrawingRenderingContext peer,
                     const Ark_Size* size);
+    Opt_drawing_Canvas (*getCanvas)(Ark_DrawingRenderingContext peer);
+    void (*setCanvas)(Ark_DrawingRenderingContext peer,
+                      const Opt_drawing_Canvas* canvas);
 } GENERATED_ArkUIDrawingRenderingContextAccessor;
 
 typedef struct GENERATED_ArkUIDrawModifierAccessor {
