@@ -1225,7 +1225,7 @@ void ViewAbstractModelStatic::SetBackgroundColor(FrameNode *frameNode, const std
     if (color) {
         ViewAbstract::SetBackgroundColor(frameNode, color.value());
     } else {
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
+        ViewAbstract::SetBackgroundColor(frameNode, Color::TRANSPARENT);
     }
 }
 

@@ -16,6 +16,8 @@
 #include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 
+#include "core/components_ng/pattern/progress/progress_model_static.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 DirtySwapConfig config;
@@ -2308,5 +2310,45 @@ HWTEST_F(ProgressTestNg, ProgressPatternCreateWithResourceObjTest002, TestSize.L
     auto theme = pipeline->GetTheme<ProgressTheme>();
     Color testColor = theme->GetBorderColor();
     EXPECT_EQ(paintProperty->GetBorderColor(), testColor);
+}
+
+/**
+ * @tc.name: SetPrivacySensitive
+ * @tc.desc: Test model static  SetPrivacySensitive
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelStaticSetPrivacySensitive, TestSize.Level0)
+{
+    CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    std::optional<bool> flag = true;
+    ProgressModelStatic::SetPrivacySensitive(AceType::RawPtr(frameNode_), flag);
+    ASSERT_NE(paintProperty_, nullptr);
+    auto ret = paintProperty_->GetIsSensitiveValue(false);
+    EXPECT_TRUE(ret);
+    flag.reset();
+    ProgressModelStatic::SetPrivacySensitive(AceType::RawPtr(frameNode_), flag);
+    EXPECT_FALSE(paintProperty_->GetIsSensitive().has_value());
+}
+
+/**
+ * @tc.name: SetValue
+ * @tc.desc: Test model static  SetValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelStaticSetValue, TestSize.Level0)
+{
+    CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    std::optional<double> value = 1.0;
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetTextFromUser(true);
+    ProgressModelStatic::SetValue(AceType::RawPtr(frameNode_), value);
+    ASSERT_NE(paintProperty_, nullptr);
+    auto ret = paintProperty_->GetValueValue(0.0);
+    EXPECT_EQ(ret, value.value());
+
+    value.reset();
+    pattern_->SetTextFromUser(false);
+    ProgressModelStatic::SetValue(AceType::RawPtr(frameNode_), value);
+    EXPECT_FALSE(paintProperty_->GetValue().has_value());
 }
 } // namespace OHOS::Ace::NG

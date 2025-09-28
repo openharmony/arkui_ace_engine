@@ -187,7 +187,7 @@ std::vector<Dimension> TextPickerModelStatic::GetColumnWidths(FrameNode* frameNo
 void TextPickerModelStatic::SetOnEnterSelectedArea(FrameNode* frameNode, TextCascadeChangeEvent&& onEnterSelectedArea)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
 }
@@ -797,7 +797,7 @@ void TextPickerModelStatic::SetDisableTextStyleAnimation(FrameNode* frameNode, c
 void TextPickerModelStatic::SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -805,7 +805,7 @@ void TextPickerModelStatic::SetOnCascadeChange(FrameNode* frameNode, TextCascade
 void TextPickerModelStatic::SetOnScrollStop(FrameNode* frameNode, TextCascadeChangeEvent&& onScrollStop)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
