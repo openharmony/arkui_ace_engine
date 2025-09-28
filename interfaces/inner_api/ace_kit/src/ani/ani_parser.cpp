@@ -33,16 +33,10 @@ public:
     {
         static WeakPtr<ScrollControllerBase> retPtr = nullptr;
         return retPtr;
-        // return scrollerPeer_->GetController();
     }
-    void AddObserver(const ScrollerObserver& observer, int32_t id) override
-    {
-        // scrollerPeer_->AddObserver(observer, id);
-    }
-    void RemoveObserver(int32_t id) override
-    {
-        // scrollerPeer_->RemoveObserver(id);
-    }
+    void AddObserver(const ScrollerObserver& observer, int32_t id) override {}
+    void RemoveObserver(int32_t id) override {}
+
 private:
     RefPtr<ScrollerPeer> scrollerPeer_;
 };
