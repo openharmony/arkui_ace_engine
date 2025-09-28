@@ -367,6 +367,10 @@ void ScrollLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper, float
     }
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+    CHECK_NULL_VOID(GreatNotEqual(keyboardHeight, 0));
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     // only when textField is onFocus

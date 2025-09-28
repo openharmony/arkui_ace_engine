@@ -1059,4 +1059,71 @@ HWTEST_F(ListScrollerEventTestNg, onWillStopDragging002, TestSize.Level1)
     EXPECT_TRUE(isOnWillStopDraggingCallBack);
     EXPECT_FLOAT_EQ(willStopDraggingVelocity.Value(), info.GetMainVelocity());
 }
+
+/**
+ * @tc.name: onWillStartDragging001
+ * @tc.desc: Test onWillStartDragging001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, onWillStartDragging001, TestSize.Level1)
+{
+    bool isOnWillStartDraggingCallBack = false;
+    auto onWillStartDragging = [&isOnWillStartDraggingCallBack]() {
+        isOnWillStartDraggingCallBack = true;
+    };
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    eventHub_->SetOnWillStartDragging(onWillStartDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStartDraggingCallBack);
+}
+
+/**
+ * @tc.name: onDidStopDragging001
+ * @tc.desc: Test onDidStopDragging001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, onDidStopDragging001, TestSize.Level1)
+{
+    bool isOnDidStopDraggingCallBack = false;
+    bool isFlingAfterDrag = false;
+    auto onWillStopDragging = [&isFlingAfterDrag, &isOnDidStopDraggingCallBack](bool isWillFling) {
+        isFlingAfterDrag = isWillFling;
+        isOnDidStopDraggingCallBack = true;
+    };
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    eventHub_->SetOnDidStopDragging(onWillStopDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnDidStopDraggingCallBack);
+    EXPECT_TRUE(isFlingAfterDrag);
+}
 } // namespace OHOS::Ace::NG
