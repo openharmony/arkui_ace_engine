@@ -125,7 +125,6 @@ HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isCustomKeyboardAttached_ = true;
     auto func1 = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ;
     auto func2 = [] {};
     pattern->customKeyboard_ = AceType::Claim<UINode>(func1);
     pattern->customKeyboardBuilder_ = func2;

@@ -45,13 +45,41 @@ void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_String& src)
         dst = temp;
     }
 }
+template<>
+FontInfo Convert(const Ark_font_FontInfo& src)
+{
+    return {
+        .path = Convert<std::string>(src.path),
+        .postScriptName = Convert<std::string>(src.postScriptName),
+        .fullName = Convert<std::string>(src.fullName),
+        .family = Convert<std::string>(src.family),
+        .subfamily = Convert<std::string>(src.subfamily),
+        .weight = Convert<uint32_t>(src.weight),
+        .width = Convert<uint32_t>(src.width),
+        .italic = Convert<bool>(src.italic),
+        .monoSpace = Convert<bool>(src.monoSpace),
+        .symbolic = Convert<bool>(src.symbolic),
+    };
+}
+void AssignArkValue(Ark_font_FontInfo& dst, const FontInfo& src, ConvContext *ctx)
+{
+    dst.path = ArkValue<Ark_String>(src.path, ctx);
+    dst.postScriptName = ArkValue<Ark_String>(src.postScriptName, ctx);
+    dst.fullName = ArkValue<Ark_String>(src.fullName, ctx);
+    dst.family = ArkValue<Ark_String>(src.family, ctx);
+    dst.subfamily = ArkValue<Ark_String>(src.subfamily, ctx);
+    dst.weight = ArkValue<Ark_Int32>(src.weight);
+    dst.width = ArkValue<Ark_Int32>(src.width);
+    dst.italic = ArkValue<Ark_Boolean>(src.italic);
+    dst.monoSpace = ArkValue<Ark_Boolean>(src.monoSpace);
+    dst.symbolic = ArkValue<Ark_Boolean>(src.symbolic);
+}
 } /* namespace OHOS::Ace::NG::Converter */
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_ohos_fontAccessor {
-void RegisterFontImpl(const Ark_CustomObject* options)
+void RegisterFontImpl(const Ark_font_FontOptions* options)
 {
-#ifdef WRONG_GEN1
     CHECK_NULL_VOID(options);
     std::string familyName;
     std::string familySrc;
@@ -70,7 +98,6 @@ void RegisterFontImpl(const Ark_CustomObject* options)
     if (pipeline) {
         pipeline->RegisterFont(familyName, familySrc, bundleName, moduleName);
     }
-#endif
 }
 Array_String GetSystemFontListImpl()
 {
@@ -81,18 +108,24 @@ Array_String GetSystemFontListImpl()
     }
     return Converter::ArkValue<Array_String>(fontList, Converter::FC);
 }
-Ark_CustomObject GetFontByNameImpl(const Ark_String* fontName)
+Ark_font_FontInfo GetFontByNameImpl(const Ark_String* fontName)
 {
-#ifdef WRONG_GEN1
     FontInfo fontInfo;
     auto fontNameCasted = Converter::Convert<std::string>(*fontName);
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     if (pipeline) {
         pipeline->GetSystemFont(fontNameCasted, fontInfo);
     }
-    return Converter::ArkValue<Ark_FontInfo>(fontInfo, Converter::FC);
-#endif
-    return {};
+    return Converter::ArkValue<Ark_font_FontInfo>(fontInfo, Converter::FC);
+}
+Ark_font_UIFontConfig GetUIFontConfigImpl()
+{
+    FontConfigJsonInfo fontConfigJsonInfo;
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        pipeline->GetUIFontConfig(fontConfigJsonInfo);
+    }
+    return Converter::ArkValue<Ark_font_UIFontConfig>(fontConfigJsonInfo, Converter::FC);
 }
 } // GlobalScope_ohos_fontAccessor
 const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor()
@@ -101,6 +134,7 @@ const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAcce
         GlobalScope_ohos_fontAccessor::RegisterFontImpl,
         GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
         GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
+        GlobalScope_ohos_fontAccessor::GetUIFontConfigImpl,
     };
     return &GlobalScope_ohos_fontAccessorImpl;
 }

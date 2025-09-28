@@ -3287,6 +3287,7 @@ frameworks/core/interfaces/native/implementation/text_input_controller_peer.h @h
 frameworks/core/interfaces/native/implementation/global_scope_ohos_font_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/global_scope_ohos_measure_utils_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/global_scope_uicontext_text_menu_accessor.cpp @huawei_g_five
+frameworks/core/interfaces/native/implementation/global_scope_uicontext_font_scale_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/edit_menu_options_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_menu_item_id_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_menu_item_id_peer.h @huawei_g_five

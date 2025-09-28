@@ -252,6 +252,8 @@ const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* GetGlobal
 const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* GetGlobalScope_ohos_arkui_performanceMonitorAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor* GetGlobalScope_ohos_measure_utilsAccessor();
+const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicontextFontScaleAccessor();
+const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* GetGlobalScopeUicontextTextMenuAccessor();
 const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor();
 const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor();
 const GENERATED_ArkUIHttpAuthHandlerAccessor* GetHttpAuthHandlerAccessor();
@@ -552,6 +554,8 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
         GetGlobalScope_ohos_fontAccessor,
         GetGlobalScope_ohos_measure_utilsAccessor,
+        GetGlobalScopeUicontextFontScaleAccessor,
+        GetGlobalScopeUicontextTextMenuAccessor,
         GetHierarchicalSymbolEffectAccessor,
         GetHoverEventAccessor,
         GetHttpAuthHandlerAccessor,
