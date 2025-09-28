@@ -368,6 +368,7 @@ public:
     static void CompleteResourceObject(JSRef<JSObject>& jsObj);
     static void CompleteResourceObjectWithBundleName(
         JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resId);
+    static void CompleteResourceObjectWithResIdType(JSRef<JSObject>& jsObj, int32_t& resId, int32_t& resType);
     static bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
     static bool ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
         std::string& resName, bool isParseType);
@@ -409,7 +410,7 @@ public:
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
-        RefPtr<ResourceObject>& resObj);
+        RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
         RefPtr<ResourceObject>& resObj);
@@ -742,22 +743,17 @@ public:
         if (!jsValue->IsObject()) {
             return false;
         }
+        int32_t resIdNum = -1;
+        int32_t resType = -1;
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        CompleteResourceObject(jsObj);
-        int32_t resType = jsObj->GetPropertyValue<int32_t>("type", -1);
+        CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
         if (resType == -1) {
-            return false;
-        }
-
-        JSRef<JSVal> resId = jsObj->GetProperty("id");
-        if (!resId->IsNumber()) {
             return false;
         }
 
         resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
             GetResourceObjectByBundleAndModule(jsObj);
         auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
-        auto resIdNum = resId->ToNumber<int32_t>();
         if (resIdNum == -1) {
             if (!IsGetResourceByName(jsObj)) {
                 return false;
@@ -775,7 +771,7 @@ public:
             return false;
         }
         if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
-            result = static_cast<T>(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
+            result = static_cast<T>(resourceWrapper->GetInt(static_cast<uint32_t>(resIdNum)));
             return true;
         }
         return false;
@@ -818,7 +814,7 @@ public:
         RefPtr<ResourceObject>& resourceObject);
     static bool CheckResource(RefPtr<ResourceObject> resourceObject,
         RefPtr<ResourceWrapper> resourceWrapper);
-    static bool CheckCustomSymbolId(RefPtr<ResourceWrapper> resourceWrapper, JSRef<JSVal>& resId,
+    static bool CheckCustomSymbolId(RefPtr<ResourceWrapper> resourceWrapper, int32_t resIdNum,
         std::uint32_t& symbolId);
     static bool ProcessSymbolObject(
         JSRef<JSObject>& jsObj, std::uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject);
@@ -920,8 +916,8 @@ private:
     static JSRef<JSObject> CreateJsTextMenuId(const std::string& id);
     static JSRef<JSArray> CreateJsOnMenuItemClick(const NG::MenuItemParam& menuItemParam);
     static JSRef<JSVal> CreateJsSystemMenuItems(const std::vector<NG::MenuItemParam>& systemMenuItems);
-    static void CompleteResourceObjectInner(
-        JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue);
+    static void CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName,
+        int32_t& resIdValue, int32_t& resTypeValue);
     static NG::LayoutSafeAreaEdge ParseJsLayoutSafeAreaEdgeArray(
         const JSRef<JSArray>& jsSafeAreaEdges, NG::LayoutSafeAreaEdge defaultVal);
     static bool ParseAllBorderRadiusesForOutLine(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius);
@@ -939,6 +935,7 @@ private:
         NG::GradientColor& gradientColor, int32_t& indx);
     static bool ParseBackgroundBuilder(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, std::function<void()>& builderFunc);
+    static int32_t GetStringFormatStartIndex(const JSRef<JSObject>& jsObj);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

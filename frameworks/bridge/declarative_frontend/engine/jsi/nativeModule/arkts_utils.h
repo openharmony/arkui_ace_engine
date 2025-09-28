@@ -381,6 +381,10 @@ public:
         Color& color, bool state, const NodeInfo& nodeInfo);
     static bool ParseContentTransitionEffect(
         const EcmaVM* vm, const Local<JSValueRef>& value, ContentTransitionType& contentTransitionType);
+    static bool GetResourceId(
+        const std::string& resName, const std::string& bundleName, const std::string& moduleName, int32_t& resId);
+    static bool HasGetter(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj, int32_t propertyIndex);
+    static int32_t GetStringFormatStartIndex(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj);
 
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);

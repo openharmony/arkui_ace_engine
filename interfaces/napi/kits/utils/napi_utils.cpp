@@ -16,6 +16,8 @@
 #include "napi_utils.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/pipeline/pipeline_base.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
+#include "jsnapi.h"
 
 namespace OHOS::Ace::Napi {
 using namespace OHOS::Ace;
@@ -25,6 +27,7 @@ const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))",
 const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
 constexpr int32_t NAPI_BUF_LENGTH = 256;
 constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
+constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
 constexpr char BUNDLE_NAME[] = "bundleName";
 std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 } // namespace
@@ -310,7 +313,13 @@ ResourceStruct CheckResourceStruct(napi_env env, napi_value value)
     if (valueType == napi_number) {
         int32_t id = 0;
         napi_get_value_int32(env, idNApi, &id);
-        if (id == UNKNOWN_RESOURCE_ID) {
+
+        napi_value typeNApi = nullptr;
+        napi_get_named_property(env, value, "type", &typeNApi);
+        int32_t type = UNKNOWN_RESOURCE_TYPE;
+        napi_get_value_int32(env, typeNApi, &type);
+
+        if (id == UNKNOWN_RESOURCE_ID || type == UNKNOWN_RESOURCE_TYPE) {
             return ResourceStruct::DYNAMIC_V2;
         }
     }
@@ -711,6 +720,10 @@ bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info)
         info.moduleName = moduleNameStr.get();
     }
 
+    if (HasGetter(env, value, "id")) {
+        info.hasGetter = true;
+    }
+
     return true;
 }
 
@@ -740,11 +753,13 @@ bool ParseString(const ResourceInfo& info, std::string& result)
         if (info.resId == UNKNOWN_RESOURCE_ID) {
             auto count = StringUtils::StringToInt(info.params[1]);
             pluralResults = resourceWrapper->GetPluralStringByName(info.params[0], count);
-            ReplaceHolder(pluralResults, info.params, 2); // plural holder in index 2
+            int32_t startIndex = GetStringFormatStartIndex(info.hasGetter);
+            ReplaceHolder(pluralResults, info.params, startIndex + 2); // plural holder in index 2
         } else {
             auto count = StringUtils::StringToInt(info.params[0]);
             pluralResults = resourceWrapper->GetPluralString(info.resId, count);
-            ReplaceHolder(pluralResults, info.params, 1);
+            int32_t startIndex = GetStringFormatStartIndex(info.hasGetter);
+            ReplaceHolder(pluralResults, info.params, startIndex + 1);
         }
         result = pluralResults;
         return true;
@@ -766,10 +781,12 @@ bool ParseString(const ResourceInfo& info, std::string& result)
         std::string originStr;
         if (info.resId == UNKNOWN_RESOURCE_ID) {
             originStr = resourceWrapper->GetStringByName(info.params[0]);
-            ReplaceHolder(originStr, info.params, 1);
+            int32_t startIndex = GetStringFormatStartIndex(info.hasGetter);
+            ReplaceHolder(originStr, info.params, startIndex + 1);
         } else {
             originStr = resourceWrapper->GetString(info.resId);
-            ReplaceHolder(originStr, info.params, 0);
+            int32_t startIndex = GetStringFormatStartIndex(info.hasGetter);
+            ReplaceHolder(originStr, info.params, startIndex);
         }
         result = originStr;
         return true;
@@ -1006,8 +1023,8 @@ RefPtr<ResourceObject> ParseResourceParamToObj(napi_env env, napi_value value)
             resObjParams.value = indexStr;
             resObjParams.type = ResourceObjectParamType::STRING;
         } else if (valueType == napi_number) {
-            int32_t num;
-            napi_get_value_int32(env, indexValue, &num);
+            double num;
+            napi_get_value_double(env, indexValue, &num);
             resObjParams.value = std::to_string(num);
             resObjParams.type = std::regex_match(std::to_string(num), FLOAT_PATTERN) ? ResourceObjectParamType::FLOAT
                                                                                      : ResourceObjectParamType::INT;
@@ -1113,5 +1130,27 @@ bool ParseShadowColorStrategy(napi_env env, napi_value value, ShadowColorStrateg
         }
     }
     return false;
+}
+
+bool HasGetter(napi_env env, napi_value value, const std::string& key)
+{
+    auto* nativeEngine = reinterpret_cast<NativeEngine*>(env);
+    CHECK_NULL_RETURN(nativeEngine, false);
+    auto vm = nativeEngine->GetEcmaVm();
+    CHECK_NULL_RETURN(vm, false);
+
+    auto localObject = NapiValueToLocalValue(value)->ToObject(vm);
+    if (localObject->IsUndefined()) {
+        return false;
+    }
+    auto stringRef = panda::StringRef::NewFromUtf8(vm, key.c_str());
+    panda::PropertyAttribute propertyAttribute;
+    localObject->GetOwnProperty(vm, stringRef, propertyAttribute);
+    return propertyAttribute.HasGetter();
+}
+
+int32_t GetStringFormatStartIndex(bool hasGetter)
+{
+    return hasGetter ? 1 : 0;
 }
 } // namespace OHOS::Ace::Napi
