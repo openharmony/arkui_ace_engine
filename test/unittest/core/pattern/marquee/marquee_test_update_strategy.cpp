@@ -1021,6 +1021,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy013, TestSize.Lev
     /**
      * @tc.steps: step2. Set up the created frameNode.
      */
+    ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
     ElementRegister::GetInstance()->AddReferenced(nodeId, frameNode);
 
     /**
@@ -1055,6 +1056,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy014, TestSize.Lev
     /**
      * @tc.steps: step2. Set up the created frameNode.
      */
+    ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
     ElementRegister::GetInstance()->AddReferenced(nodeId, frameNode);
 
     /**
@@ -1118,6 +1120,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy015, TestSize.Lev
     /**
      * @tc.steps: step2. Set up the created frameNode.
      */
+    ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
     ElementRegister::GetInstance()->AddReferenced(nodeId, frameNode);
 
     /**
@@ -1664,6 +1667,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy026, TestSize.Lev
     /**
      * @tc.steps: step2. Set up the created frameNode.
      */
+    ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
     ElementRegister::GetInstance()->AddReferenced(nodeId, frameNode);
 
     /**

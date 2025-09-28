@@ -1268,10 +1268,10 @@ void DeclarativeFrontend::NotifyAppStorage(const std::string& key, const std::st
     delegate_->NotifyAppStorage(jsEngine_, key, value);
 }
 
-void DeclarativeFrontend::CallJSCleanUpIdleTaskFunc(int64_t maxTimeInNs)
+void DeclarativeFrontend::CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs)
 {
     if (jsEngine_) {
-        jsEngine_->CallJSCleanUpIdleTaskFunc(maxTimeInNs);
+        jsEngine_->CallStateMgmtCleanUpIdleTaskFunc(maxTimeInNs);
     }
 }
 

@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ELEMENT_REGISTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ELEMENT_REGISTER_H
 
-#include <cinttypes>
 #include <functional>
 #include <inttypes.h>
 #include <list>
@@ -123,7 +122,7 @@ public:
 
     uint32_t GetNodeNum() const;
 
-    ElementIdType GetLastestElementId() const;
+    ElementIdType GetLatestElementId() const;
 
     RefPtr<NG::FrameNode> GetAttachedFrameNodeById(const std::string& key, bool willGetAll = false);
 
@@ -142,11 +141,11 @@ public:
     uint64_t GetSurfaceIdByEmbedNode(NG::FrameNode* node);
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
     // private constructor
     ElementRegister() = default;
 
     bool AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced);
+    ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
 };
 } // namespace OHOS::Ace
 #endif

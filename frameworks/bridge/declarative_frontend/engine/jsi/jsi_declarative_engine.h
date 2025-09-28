@@ -220,7 +220,7 @@ public:
         const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
     void CallRemoveAvailableInstanceIdFunc(
         const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
-    void CallJSCleanUpIdleTaskFunc(int64_t maxTimeInNs);
+    void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs);
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -456,9 +456,9 @@ public:
         return engineInstance_->GetFrameNodeValueByNodeId(nodeId);
     }
 
-    void CallJSCleanUpIdleTaskFunc(int64_t maxTimeInNs) override
+    void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs) override
     {
-        engineInstance_->CallJSCleanUpIdleTaskFunc(maxTimeInNs);
+        engineInstance_->CallStateMgmtCleanUpIdleTaskFunc(maxTimeInNs);
     }
 
     void JsStateProfilerResgiter();

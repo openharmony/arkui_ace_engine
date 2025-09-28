@@ -5438,7 +5438,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     if (currentTime < deadline) {
         auto frontend = GetFrontend();
         if (frontend) {
-            frontend->CallJSCleanUpIdleTaskFunc(deadline - currentTime);
+            frontend->CallStateMgmtCleanUpIdleTaskFunc(deadline - currentTime);
         } else {
             LOGW("Fail to Call JSCleanUpIdleTaskFunc for frontend is null.");
         }
@@ -5447,13 +5447,13 @@ void PipelineContext::OnIdle(int64_t deadline)
         frameCountForNotCallJSCleanUp_++;
     }
 
-    // Check if there is more than 100 frame which does not execute the CallJSCleanUpIdleTaskFunc
-    // Force to invoke CallJSCleanUpIdleTaskFunc to make sure no OOM in JS side
+    // Check if there is more than 100 frame which does not execute the CallStateMgmtCleanUpIdleTaskFunc
+    // Force to invoke CallStateMgmtCleanUpIdleTaskFunc to make sure no OOM in JS side
     if (frameCountForNotCallJSCleanUp_ >= MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION) {
         // The longest execution time is half of vsync period
         auto frontend = GetFrontend();
         if (frontend) {
-            frontend->CallJSCleanUpIdleTaskFunc(window_->GetVSyncPeriod() / RATIO_OF_VSYNC_PERIOD);
+            frontend->CallStateMgmtCleanUpIdleTaskFunc(window_->GetVSyncPeriod() / RATIO_OF_VSYNC_PERIOD);
         } else {
             LOGW("Fail to Call JSCleanUpIdleTaskFunc for frontend is null.");
         }

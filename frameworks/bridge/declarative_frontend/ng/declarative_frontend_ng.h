@@ -182,10 +182,10 @@ public:
         }
     }
 
-    void CallJSCleanUpIdleTaskFunc(int64_t maxTimeInNs) override
+    void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs) override
     {
         if (jsEngine_) {
-            jsEngine_->CallJSCleanUpIdleTaskFunc(maxTimeInNs);
+            jsEngine_->CallStateMgmtCleanUpIdleTaskFunc(maxTimeInNs);
         }
     }
 

@@ -244,7 +244,7 @@ bool ParallelPageRouterManager::JudgePrimaryPage(const RouterPageInfo& target)
         return false;
     }
 
-    int32_t elementNum = ElementRegister::GetInstance()->GetLastestElementId();
+    int32_t elementNum = ElementRegister::GetInstance()->GetLatestElementId();
     TAG_LOGI(AceLogTag::ACE_ROUTER,
         "Judge primary page, url: %{public}s, lastest elementId: %{public}d", target.url.c_str(), elementNum);
     if (elementNum >= PRIMARY_PAGE_NODE_THRESHOLD) {

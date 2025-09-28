@@ -377,6 +377,8 @@ public:
     // flush frontend for HotReload feature in NG
     virtual void HotReload() {}
 
+    virtual void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs) {}
+
     State GetState() const
     {
         return state_;
@@ -428,8 +430,6 @@ public:
     }
 
     virtual void OpenStateMgmtInterop() {}
-
-    virtual void CallJSCleanUpIdleTaskFunc(int64_t maxTimeInNs) {}
 
     // For arkts 1.2
     virtual void NotifyArkoalaConfigurationChange(bool isNeedUpdate) {}
