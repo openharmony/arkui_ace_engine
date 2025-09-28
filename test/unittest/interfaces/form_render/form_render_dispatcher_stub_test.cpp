@@ -38,7 +38,7 @@ public:
  * @tc.name: OnRemoteRequest
  * @tc.desc:
  */
-HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_001, TestSize.Level1)
+HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_001, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> renderDispather = new AppExecFwk::MockFormRendererDispatherStub();
     MessageParcel data;
@@ -88,7 +88,7 @@ HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_001, Tes
  * @tc.name: HandleDispatchPointerEvent
  * @tc.desc:
  */
-HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_002, TestSize.Level1)
+HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_002, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> renderDispather = new AppExecFwk::MockFormRendererDispatherStub();
     MessageParcel data;
@@ -114,7 +114,7 @@ HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_002, Tes
  *           HandleOnAccessibilityDumpChildInfo
  * @tc.desc:
  */
-HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_003, TestSize.Level1)
+HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_003, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> renderDispather = new AppExecFwk::MockFormRendererDispatherStub();
     MessageParcel data;
@@ -133,7 +133,7 @@ HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_003, Tes
  * @tc.name: HandleOnAccessibilityTransferHoverEvent
  * @tc.desc:
  */
-HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_004, TestSize.Level1)
+HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_004, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> renderDispather = new AppExecFwk::MockFormRendererDispatherStub();
     MessageParcel data;

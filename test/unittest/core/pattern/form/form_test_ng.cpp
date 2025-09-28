@@ -127,7 +127,7 @@ HWTEST_F(FormTestNg, FormNodeTest001, TestSize.Level1)
  * @tc.desc: Test OnDirtyLayoutWrapperSwap in Form Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
+HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
@@ -203,7 +203,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
  * @tc.desc: create form node
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, FormModelNGTest001, TestSize.Level1)
+HWTEST_F(FormTestNg, FormModelNGTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init FormModelNG object
@@ -240,7 +240,7 @@ HWTEST_F(FormTestNg, FormModelNGTest001, TestSize.Level1)
  * @tc.desc: create form node
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, FormModelNGTest002, TestSize.Level1)
+HWTEST_F(FormTestNg, FormModelNGTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init FormModelNG object
@@ -294,7 +294,7 @@ HWTEST_F(FormTestNg, FormModelNGTest002, TestSize.Level1)
  * @tc.desc: create form node
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, FormModelNGTest003, TestSize.Level1)
+HWTEST_F(FormTestNg, FormModelNGTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init FormModelNG object
@@ -326,7 +326,7 @@ HWTEST_F(FormTestNg, FormModelNGTest003, TestSize.Level1)
  * @tc.desc: Test OnDirtyLayoutWrapperSwap in Form Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
+HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init FormModelNG object
@@ -396,7 +396,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
  * @tc.desc: Test OnDirtyLayoutWrapperSwap in Form Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
+HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init FormModelNG object
@@ -442,7 +442,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
  * @tc.desc: Verify the InitFormManagerDelegate Interface of FormPattern work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, InitFormManagerDelegate001, TestSize.Level1)
+HWTEST_F(FormTestNg, InitFormManagerDelegate001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a FormPattern and build a subContainer .
@@ -487,7 +487,7 @@ HWTEST_F(FormTestNg, InitFormManagerDelegate001, TestSize.Level1)
  * @tc.desc: Verify the CreateCardContainer Interface of FormPattern work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, CreateCardContainer001, TestSize.Level1)
+HWTEST_F(FormTestNg, CreateCardContainer001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a FormPattern and build a subContainer .
@@ -523,7 +523,7 @@ HWTEST_F(FormTestNg, CreateCardContainer001, TestSize.Level1)
  * @tc.desc: Verify the CreateCardContainer Interface of FormPattern work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, CreateCardContainer002, TestSize.Level1)
+HWTEST_F(FormTestNg, CreateCardContainer002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a FormPattern and build a subContainer .
@@ -594,7 +594,7 @@ HWTEST_F(FormTestNg, CreateCardContainer002, TestSize.Level1)
  * @tc.desc: Verify the OnRebuildFrame Interface of FormPattern work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, OnRebuildFrame, TestSize.Level1)
+HWTEST_F(FormTestNg, OnRebuildFrame, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a FormPattern and build a subContainer .

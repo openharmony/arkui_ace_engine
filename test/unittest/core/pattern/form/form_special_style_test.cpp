@@ -46,7 +46,7 @@ void FormSpecialStyleTest::SetUp()
  * @tc.desc: create form node
  * @tc.type: FUNC
  */
-HWTEST_F(FormSpecialStyleTest, FormSpecialStyleTest001, TestSize.Level1)
+HWTEST_F(FormSpecialStyleTest, FormSpecialStyleTest001, TestSize.Level0)
 {
     FormSpecialStyle style;
     style.SetIsForbiddenByParentControl(true);

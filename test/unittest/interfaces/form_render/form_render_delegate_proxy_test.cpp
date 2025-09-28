@@ -42,7 +42,7 @@ public:
  * @tc.desc: Test OnSurfaceCreate() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_001, TestSize.Level1)
+HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_001, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormIRemoteObject> iremoteObject = new (std::nothrow) AppExecFwk::MockFormIRemoteObject();
     sptr<FormRendererDelegateProxy> renderDelegate =
@@ -73,7 +73,7 @@ HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_001, TestSize.
  * @tc.desc: Test OnSurfaceReuse() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_002, TestSize.Level1)
+HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_002, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormIRemoteObject> iremoteObject = new (std::nothrow) AppExecFwk::MockFormIRemoteObject();
     sptr<FormRendererDelegateProxy> renderDelegate =
@@ -103,7 +103,7 @@ HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_002, TestSize.
  * @tc.desc: Test OnSurfaceDetach() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_003, TestSize.Level1)
+HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_003, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormIRemoteObject> iremoteObject = new (std::nothrow) AppExecFwk::MockFormIRemoteObject();
     sptr<FormRendererDelegateProxy> renderDelegate =
@@ -126,7 +126,7 @@ HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_003, TestSize.
  * @tc.desc: Test OnSurfaceRelease() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_004, TestSize.Level1)
+HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_004, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormIRemoteObject> iremoteObject = new (std::nothrow) AppExecFwk::MockFormIRemoteObject();
     sptr<FormRendererDelegateProxy> renderDelegate =
@@ -149,7 +149,7 @@ HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_004, TestSize.
  * @tc.desc: Test OnActionEvent() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_005, TestSize.Level1)
+HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_005, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormIRemoteObject> iremoteObject = new (std::nothrow) AppExecFwk::MockFormIRemoteObject();
     sptr<FormRendererDelegateProxy> renderDelegate =
