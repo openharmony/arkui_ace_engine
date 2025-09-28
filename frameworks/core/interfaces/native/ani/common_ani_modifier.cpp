@@ -168,7 +168,7 @@ void SetDrawCallback(ani_env* env, ani_long ptr, void* fnDrawCallbackFun)
 
 ArkUI_Int32 GetCurrentInstanceId()
 {
-    return ContainerScope::CurrentId();
+    return Container::CurrentIdSafely();
 }
 
 ArkUI_Int32 GetFocusedInstanceId()
