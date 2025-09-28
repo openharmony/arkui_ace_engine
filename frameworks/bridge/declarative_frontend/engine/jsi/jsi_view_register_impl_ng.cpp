@@ -336,6 +336,7 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     if (cleanUpIdleTask->IsFunction()) {
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
         const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
+            JAVASCRIPT_EXECUTION_SCOPE_STATIC;
             auto params = ConvertToJSValues(maxTimeInNs / 1e6);
             jsFunc->Call(globalObject, params.size(), params.data());
         };
