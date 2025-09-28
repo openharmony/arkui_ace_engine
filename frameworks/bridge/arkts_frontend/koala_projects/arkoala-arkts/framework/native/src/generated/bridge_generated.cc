@@ -4694,102 +4694,6 @@ void impl_CommonMethod_setTransition1(Ark_NativePointer thisPtr, KSerializerBuff
         GetNodeModifiers()->getCommonMethodModifier()->setTransition1(self, static_cast<Opt_TransitionEffect*>(&effectValueTemp), static_cast<Opt_TransitionFinishCallback*>(&onFinishValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setTransition1, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setGesture(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto gestureValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_GestureType gestureValueTempTmpBuf = {};
-        gestureValueTempTmpBuf.tag = gestureValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((gestureValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            const Ark_Int8 gestureValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_GestureType gestureValueTempTmpBuf_ = {};
-            gestureValueTempTmpBuf_.selector = gestureValueTempTmpBuf_UnionSelector;
-            if (gestureValueTempTmpBuf_UnionSelector == 0) {
-                gestureValueTempTmpBuf_.selector = 0;
-                gestureValueTempTmpBuf_.value0 = static_cast<Ark_Gesture>(Gesture_serializer::read(thisDeserializer));
-            } else if (gestureValueTempTmpBuf_UnionSelector == 1) {
-                gestureValueTempTmpBuf_.selector = 1;
-                gestureValueTempTmpBuf_.value1 = static_cast<Ark_GestureGroup>(GestureGroup_serializer::read(thisDeserializer));
-            } else {
-                INTEROP_FATAL("One of the branches for gestureValueTempTmpBuf_ has to be chosen through deserialisation.");
-            }
-            gestureValueTempTmpBuf.value = static_cast<Ark_GestureType>(gestureValueTempTmpBuf_);
-        }
-        Opt_GestureType gestureValueTemp = gestureValueTempTmpBuf;;
-        const auto maskValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_GestureMask maskValueTempTmpBuf = {};
-        maskValueTempTmpBuf.tag = maskValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((maskValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            maskValueTempTmpBuf.value = static_cast<Ark_GestureMask>(thisDeserializer.readInt32());
-        }
-        Opt_GestureMask maskValueTemp = maskValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setGesture(self, static_cast<Opt_GestureType*>(&gestureValueTemp), static_cast<Opt_GestureMask*>(&maskValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setGesture, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setPriorityGesture(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto gestureValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_GestureType gestureValueTempTmpBuf = {};
-        gestureValueTempTmpBuf.tag = gestureValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((gestureValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            const Ark_Int8 gestureValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_GestureType gestureValueTempTmpBuf_ = {};
-            gestureValueTempTmpBuf_.selector = gestureValueTempTmpBuf_UnionSelector;
-            if (gestureValueTempTmpBuf_UnionSelector == 0) {
-                gestureValueTempTmpBuf_.selector = 0;
-                gestureValueTempTmpBuf_.value0 = static_cast<Ark_Gesture>(Gesture_serializer::read(thisDeserializer));
-            } else if (gestureValueTempTmpBuf_UnionSelector == 1) {
-                gestureValueTempTmpBuf_.selector = 1;
-                gestureValueTempTmpBuf_.value1 = static_cast<Ark_GestureGroup>(GestureGroup_serializer::read(thisDeserializer));
-            } else {
-                INTEROP_FATAL("One of the branches for gestureValueTempTmpBuf_ has to be chosen through deserialisation.");
-            }
-            gestureValueTempTmpBuf.value = static_cast<Ark_GestureType>(gestureValueTempTmpBuf_);
-        }
-        Opt_GestureType gestureValueTemp = gestureValueTempTmpBuf;;
-        const auto maskValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_GestureMask maskValueTempTmpBuf = {};
-        maskValueTempTmpBuf.tag = maskValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((maskValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            maskValueTempTmpBuf.value = static_cast<Ark_GestureMask>(thisDeserializer.readInt32());
-        }
-        Opt_GestureMask maskValueTemp = maskValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setPriorityGesture(self, static_cast<Opt_GestureType*>(&gestureValueTemp), static_cast<Opt_GestureMask*>(&maskValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setPriorityGesture, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setParallelGesture(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto gestureValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_GestureType gestureValueTempTmpBuf = {};
-        gestureValueTempTmpBuf.tag = gestureValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((gestureValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            const Ark_Int8 gestureValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_GestureType gestureValueTempTmpBuf_ = {};
-            gestureValueTempTmpBuf_.selector = gestureValueTempTmpBuf_UnionSelector;
-            if (gestureValueTempTmpBuf_UnionSelector == 0) {
-                gestureValueTempTmpBuf_.selector = 0;
-                gestureValueTempTmpBuf_.value0 = static_cast<Ark_Gesture>(Gesture_serializer::read(thisDeserializer));
-            } else if (gestureValueTempTmpBuf_UnionSelector == 1) {
-                gestureValueTempTmpBuf_.selector = 1;
-                gestureValueTempTmpBuf_.value1 = static_cast<Ark_GestureGroup>(GestureGroup_serializer::read(thisDeserializer));
-            } else {
-                INTEROP_FATAL("One of the branches for gestureValueTempTmpBuf_ has to be chosen through deserialisation.");
-            }
-            gestureValueTempTmpBuf.value = static_cast<Ark_GestureType>(gestureValueTempTmpBuf_);
-        }
-        Opt_GestureType gestureValueTemp = gestureValueTempTmpBuf;;
-        const auto maskValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_GestureMask maskValueTempTmpBuf = {};
-        maskValueTempTmpBuf.tag = maskValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((maskValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            maskValueTempTmpBuf.value = static_cast<Ark_GestureMask>(thisDeserializer.readInt32());
-        }
-        Opt_GestureMask maskValueTemp = maskValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setParallelGesture(self, static_cast<Opt_GestureType*>(&gestureValueTemp), static_cast<Opt_GestureMask*>(&maskValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setParallelGesture, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setBlur(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -28970,33 +28874,6 @@ void impl_FullScreenExitHandler_exitFullScreen(Ark_NativePointer thisPtr) {
         GetAccessors()->getFullScreenExitHandlerAccessor()->exitFullScreen(self);
 }
 KOALA_INTEROP_DIRECT_V1(FullScreenExitHandler_exitFullScreen, Ark_NativePointer)
-Ark_NativePointer impl_Gesture_construct() {
-        return GetAccessors()->getGestureAccessor()->construct();
-}
-KOALA_INTEROP_DIRECT_0(Gesture_construct, Ark_NativePointer)
-Ark_NativePointer impl_Gesture_getFinalizer() {
-        return GetAccessors()->getGestureAccessor()->getFinalizer();
-}
-KOALA_INTEROP_DIRECT_0(Gesture_getFinalizer, Ark_NativePointer)
-void impl_Gesture_tag(Ark_NativePointer thisPtr, const KStringPtr& tag) {
-        Ark_Gesture self = reinterpret_cast<Ark_Gesture>(thisPtr);
-        GetAccessors()->getGestureAccessor()->tag(self, (const Ark_String*) (&tag));
-}
-KOALA_INTEROP_V2(Gesture_tag, Ark_NativePointer, KStringPtr)
-void impl_Gesture_allowedTypes(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_Gesture self = reinterpret_cast<Ark_Gesture>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const Ark_Int32 typesValueTempTmpBufLength = thisDeserializer.readInt32();
-        Array_SourceTool typesValueTempTmpBuf = {};
-        thisDeserializer.resizeArray<std::decay<decltype(typesValueTempTmpBuf)>::type,
-        std::decay<decltype(*typesValueTempTmpBuf.array)>::type>(&typesValueTempTmpBuf, typesValueTempTmpBufLength);
-        for (int typesValueTempTmpBufBufCounterI = 0; typesValueTempTmpBufBufCounterI < typesValueTempTmpBufLength; typesValueTempTmpBufBufCounterI++) {
-            typesValueTempTmpBuf.array[typesValueTempTmpBufBufCounterI] = static_cast<Ark_SourceTool>(thisDeserializer.readInt32());
-        }
-        Array_SourceTool typesValueTemp = typesValueTempTmpBuf;;
-        GetAccessors()->getGestureAccessor()->allowedTypes(self, static_cast<Array_SourceTool*>(&typesValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(Gesture_allowedTypes, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_GestureEvent_construct() {
         return GetAccessors()->getGestureEventAccessor()->construct();
 }
@@ -29141,47 +29018,107 @@ void impl_GestureEvent_setVelocity(Ark_NativePointer thisPtr, KInteropNumber vel
         GetAccessors()->getGestureEventAccessor()->setVelocity(self, (const Ark_Number*) (&velocity));
 }
 KOALA_INTEROP_DIRECT_V2(GestureEvent_setVelocity, Ark_NativePointer, KInteropNumber)
-Ark_NativePointer impl_GestureGroup_construct() {
-        return GetAccessors()->getGestureGroupAccessor()->construct();
+Ark_NativePointer impl_GestureOps_createTapGesture(KInteropNumber fingers, KInteropNumber count, KInteropNumber distanceThreshold, Ark_Boolean isFingerCountLimited) {
+        return GetAccessors()->getGestureOpsAccessor()->createTapGesture((const Ark_Number*) (&fingers), (const Ark_Number*) (&count), (const Ark_Number*) (&distanceThreshold), isFingerCountLimited);
 }
-KOALA_INTEROP_DIRECT_0(GestureGroup_construct, Ark_NativePointer)
-Ark_NativePointer impl_GestureGroup_getFinalizer() {
-        return GetAccessors()->getGestureGroupAccessor()->getFinalizer();
+KOALA_INTEROP_DIRECT_4(GestureOps_createTapGesture, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, Ark_Boolean)
+Ark_NativePointer impl_GestureOps_createLongPressGesture(KInteropNumber fingers, Ark_Boolean repeat, KInteropNumber duration, Ark_Boolean isFingerCountLimited) {
+        return GetAccessors()->getGestureOpsAccessor()->createLongPressGesture((const Ark_Number*) (&fingers), repeat, (const Ark_Number*) (&duration), isFingerCountLimited);
 }
-KOALA_INTEROP_DIRECT_0(GestureGroup_getFinalizer, Ark_NativePointer)
-Ark_NativePointer impl_GestureGroup_$_instantiate(KSerializerBuffer thisArray, int32_t thisLength, Ark_Int32 mode) {
+KOALA_INTEROP_DIRECT_4(GestureOps_createLongPressGesture, Ark_NativePointer, KInteropNumber, Ark_Boolean, KInteropNumber, Ark_Boolean)
+Ark_NativePointer impl_GestureOps_createPanGesture(KInteropNumber fingers, Ark_Int32 direction, KInteropNumber distance, Ark_Boolean isFingerCountLimited) {
+        return GetAccessors()->getGestureOpsAccessor()->createPanGesture((const Ark_Number*) (&fingers), static_cast<Ark_PanDirection>(direction), (const Ark_Number*) (&distance), isFingerCountLimited);
+}
+KOALA_INTEROP_DIRECT_4(GestureOps_createPanGesture, Ark_NativePointer, KInteropNumber, Ark_Int32, KInteropNumber, Ark_Boolean)
+Ark_NativePointer impl_GestureOps_createPanGestureWithPanGestureOptions(Ark_NativePointer panGestureOptions) {
+        return GetAccessors()->getGestureOpsAccessor()->createPanGestureWithPanGestureOptions(panGestureOptions);
+}
+KOALA_INTEROP_DIRECT_1(GestureOps_createPanGestureWithPanGestureOptions, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_GestureOps_createPinchGesture(KInteropNumber fingers, KInteropNumber distance, Ark_Boolean isFingerCountLimited) {
+        return GetAccessors()->getGestureOpsAccessor()->createPinchGesture((const Ark_Number*) (&fingers), (const Ark_Number*) (&distance), isFingerCountLimited);
+}
+KOALA_INTEROP_DIRECT_3(GestureOps_createPinchGesture, Ark_NativePointer, KInteropNumber, KInteropNumber, Ark_Boolean)
+Ark_NativePointer impl_GestureOps_createRotationGesture(KInteropNumber fingers, KInteropNumber angle, Ark_Boolean isFingerCountLimited) {
+        return GetAccessors()->getGestureOpsAccessor()->createRotationGesture((const Ark_Number*) (&fingers), (const Ark_Number*) (&angle), isFingerCountLimited);
+}
+KOALA_INTEROP_DIRECT_3(GestureOps_createRotationGesture, Ark_NativePointer, KInteropNumber, KInteropNumber, Ark_Boolean)
+Ark_NativePointer impl_GestureOps_createSwipeGesture(KInteropNumber fingers, Ark_Int32 direction, KInteropNumber speed, Ark_Boolean isFingerCountLimited) {
+        return GetAccessors()->getGestureOpsAccessor()->createSwipeGesture((const Ark_Number*) (&fingers), static_cast<Ark_SwipeDirection>(direction), (const Ark_Number*) (&speed), isFingerCountLimited);
+}
+KOALA_INTEROP_DIRECT_4(GestureOps_createSwipeGesture, Ark_NativePointer, KInteropNumber, Ark_Int32, KInteropNumber, Ark_Boolean)
+Ark_NativePointer impl_GestureOps_createGestureGroup(Ark_Int32 mode) {
+        return GetAccessors()->getGestureOpsAccessor()->createGestureGroup(static_cast<Ark_GestureMode>(mode));
+}
+KOALA_INTEROP_DIRECT_1(GestureOps_createGestureGroup, Ark_NativePointer, Ark_Int32)
+void impl_GestureOps_setOnAction(Ark_NativePointer gesture, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_GestureGroup factoryValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Callback_GestureGroup_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureGroup)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Callback_GestureGroup_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureGroup))))};;
-        const Ark_Int32 gestureValueTempTmpBufLength = thisDeserializer.readInt32();
-        Array_GestureType gestureValueTempTmpBuf = {};
-        thisDeserializer.resizeArray<std::decay<decltype(gestureValueTempTmpBuf)>::type,
-        std::decay<decltype(*gestureValueTempTmpBuf.array)>::type>(&gestureValueTempTmpBuf, gestureValueTempTmpBufLength);
-        for (int gestureValueTempTmpBufBufCounterI = 0; gestureValueTempTmpBufBufCounterI < gestureValueTempTmpBufLength; gestureValueTempTmpBufBufCounterI++) {
-            const Ark_Int8 gestureValueTempTmpBufTempBufUnionSelector = thisDeserializer.readInt8();
-            Ark_GestureType gestureValueTempTmpBufTempBuf = {};
-            gestureValueTempTmpBufTempBuf.selector = gestureValueTempTmpBufTempBufUnionSelector;
-            if (gestureValueTempTmpBufTempBufUnionSelector == 0) {
-                gestureValueTempTmpBufTempBuf.selector = 0;
-                gestureValueTempTmpBufTempBuf.value0 = static_cast<Ark_Gesture>(Gesture_serializer::read(thisDeserializer));
-            } else if (gestureValueTempTmpBufTempBufUnionSelector == 1) {
-                gestureValueTempTmpBufTempBuf.selector = 1;
-                gestureValueTempTmpBufTempBuf.value1 = static_cast<Ark_GestureGroup>(GestureGroup_serializer::read(thisDeserializer));
-            } else {
-                INTEROP_FATAL("One of the branches for gestureValueTempTmpBufTempBuf has to be chosen through deserialisation.");
-            }
-            gestureValueTempTmpBuf.array[gestureValueTempTmpBufBufCounterI] = static_cast<Ark_GestureType>(gestureValueTempTmpBufTempBuf);
+        Callback_GestureEvent_Void onActionValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
+        GetAccessors()->getGestureOpsAccessor()->setOnAction(gesture, static_cast<Callback_GestureEvent_Void*>(&onActionValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(GestureOps_setOnAction, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GestureOps_setOnActionStart(Ark_NativePointer gesture, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Callback_GestureEvent_Void onActionStartValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
+        GetAccessors()->getGestureOpsAccessor()->setOnActionStart(gesture, static_cast<Callback_GestureEvent_Void*>(&onActionStartValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(GestureOps_setOnActionStart, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GestureOps_setOnActionUpdate(Ark_NativePointer gesture, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Callback_GestureEvent_Void onActionUpdateValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
+        GetAccessors()->getGestureOpsAccessor()->setOnActionUpdate(gesture, static_cast<Callback_GestureEvent_Void*>(&onActionUpdateValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(GestureOps_setOnActionUpdate, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GestureOps_setOnActionEnd(Ark_NativePointer gesture, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Callback_GestureEvent_Void onActionEndValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
+        GetAccessors()->getGestureOpsAccessor()->setOnActionEnd(gesture, static_cast<Callback_GestureEvent_Void*>(&onActionEndValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(GestureOps_setOnActionEnd, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GestureOps_setOnActionCancel(Ark_NativePointer gesture, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Callback_GestureEvent_Void onActionCancelValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
+        GetAccessors()->getGestureOpsAccessor()->setOnActionCancel(gesture, static_cast<Callback_GestureEvent_Void*>(&onActionCancelValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(GestureOps_setOnActionCancel, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GestureOps_setOnCancel(Ark_NativePointer gesture, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Callback_Void onCancelValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
+        GetAccessors()->getGestureOpsAccessor()->setOnCancel(gesture, static_cast<Callback_Void*>(&onCancelValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(GestureOps_setOnCancel, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GestureOps_setGestureTag(Ark_NativePointer gesture, const KStringPtr& tag) {
+        GetAccessors()->getGestureOpsAccessor()->setGestureTag(gesture, (const Ark_String*) (&tag));
+}
+KOALA_INTEROP_V2(GestureOps_setGestureTag, Ark_NativePointer, KStringPtr)
+void impl_GestureOps_setAllowedTypes(Ark_NativePointer gesture, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const Ark_Int32 typesValueTempTmpBufLength = thisDeserializer.readInt32();
+        Array_SourceTool typesValueTempTmpBuf = {};
+        thisDeserializer.resizeArray<std::decay<decltype(typesValueTempTmpBuf)>::type,
+        std::decay<decltype(*typesValueTempTmpBuf.array)>::type>(&typesValueTempTmpBuf, typesValueTempTmpBufLength);
+        for (int typesValueTempTmpBufBufCounterI = 0; typesValueTempTmpBufBufCounterI < typesValueTempTmpBufLength; typesValueTempTmpBufBufCounterI++) {
+            typesValueTempTmpBuf.array[typesValueTempTmpBufBufCounterI] = static_cast<Ark_SourceTool>(thisDeserializer.readInt32());
         }
-        Array_GestureType gestureValueTemp = gestureValueTempTmpBuf;;
-        return GetAccessors()->getGestureGroupAccessor()->$_instantiate(static_cast<Callback_GestureGroup*>(&factoryValueTemp), static_cast<Ark_GestureMode>(mode), static_cast<Array_GestureType*>(&gestureValueTemp));
+        Array_SourceTool typesValueTemp = typesValueTempTmpBuf;;
+        GetAccessors()->getGestureOpsAccessor()->setAllowedTypes(gesture, static_cast<Array_SourceTool*>(&typesValueTemp));
 }
-KOALA_INTEROP_DIRECT_3(GestureGroup_$_instantiate, Ark_NativePointer, KSerializerBuffer, int32_t, Ark_Int32)
-Ark_NativePointer impl_GestureGroup_onCancel(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_GestureGroup self = reinterpret_cast<Ark_GestureGroup>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_Void eventValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
-        return GetAccessors()->getGestureGroupAccessor()->onCancel(self, static_cast<Callback_Void*>(&eventValueTemp));
+KOALA_INTEROP_DIRECT_V3(GestureOps_setAllowedTypes, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GestureOps_addGestureToNode(Ark_NativePointer node, KInteropNumber priority, Ark_Int32 mask, Ark_NativePointer gesture, Ark_Boolean isModifier) {
+        GetAccessors()->getGestureOpsAccessor()->addGestureToNode(node, (const Ark_Number*) (&priority), static_cast<Ark_GestureMask>(mask), gesture, isModifier);
 }
-KOALA_INTEROP_DIRECT_3(GestureGroup_onCancel, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V5(GestureOps_addGestureToNode, Ark_NativePointer, KInteropNumber, Ark_Int32, Ark_NativePointer, Ark_Boolean)
+void impl_GestureOps_addGestureToGroup(Ark_NativePointer group, Ark_NativePointer gesture) {
+        GetAccessors()->getGestureOpsAccessor()->addGestureToGroup(group, gesture);
+}
+KOALA_INTEROP_DIRECT_V2(GestureOps_addGestureToGroup, Ark_NativePointer, Ark_NativePointer)
+void impl_GestureOps_removeGestureByTag(Ark_NativePointer node, const KStringPtr& tag) {
+        GetAccessors()->getGestureOpsAccessor()->removeGestureByTag(node, (const Ark_String*) (&tag));
+}
+KOALA_INTEROP_V2(GestureOps_removeGestureByTag, Ark_NativePointer, KStringPtr)
+void impl_GestureOps_clearGestures(Ark_NativePointer node) {
+        GetAccessors()->getGestureOpsAccessor()->clearGestures(node);
+}
+KOALA_INTEROP_DIRECT_V1(GestureOps_clearGestures, Ark_NativePointer)
 Ark_NativePointer impl_GestureRecognizer_construct() {
         return GetAccessors()->getGestureRecognizerAccessor()->construct();
 }
@@ -33106,55 +33043,6 @@ void impl_RichEditorStyledStringController_onContentChanged(Ark_NativePointer th
         GetAccessors()->getRichEditorStyledStringControllerAccessor()->onContentChanged(self, static_cast<Ark_StyledStringChangedListener*>(&listenerValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(RichEditorStyledStringController_onContentChanged, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_RotationGesture_construct() {
-        return GetAccessors()->getRotationGestureAccessor()->construct();
-}
-KOALA_INTEROP_DIRECT_0(RotationGesture_construct, Ark_NativePointer)
-Ark_NativePointer impl_RotationGesture_getFinalizer() {
-        return GetAccessors()->getRotationGestureAccessor()->getFinalizer();
-}
-KOALA_INTEROP_DIRECT_0(RotationGesture_getFinalizer, Ark_NativePointer)
-Ark_NativePointer impl_RotationGesture_$_instantiate(KSerializerBuffer thisArray, int32_t thisLength) {
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_RotationGesture factoryValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Callback_RotationGesture_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_RotationGesture)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Callback_RotationGesture_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_RotationGesture))))};;
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_RotationGestureHandlerOptions valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = RotationGestureHandlerOptions_serializer::read(thisDeserializer);
-        }
-        Opt_RotationGestureHandlerOptions valueValueTemp = valueValueTempTmpBuf;;
-        return GetAccessors()->getRotationGestureAccessor()->$_instantiate(static_cast<Callback_RotationGesture*>(&factoryValueTemp), static_cast<Opt_RotationGestureHandlerOptions*>(&valueValueTemp));
-}
-KOALA_INTEROP_DIRECT_2(RotationGesture_$_instantiate, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_RotationGesture_onActionStart(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_RotationGesture self = reinterpret_cast<Ark_RotationGesture>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_GestureEvent_Void eventValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
-        GetAccessors()->getRotationGestureAccessor()->onActionStart(self, static_cast<Callback_GestureEvent_Void*>(&eventValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(RotationGesture_onActionStart, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_RotationGesture_onActionUpdate(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_RotationGesture self = reinterpret_cast<Ark_RotationGesture>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_GestureEvent_Void eventValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
-        GetAccessors()->getRotationGestureAccessor()->onActionUpdate(self, static_cast<Callback_GestureEvent_Void*>(&eventValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(RotationGesture_onActionUpdate, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_RotationGesture_onActionEnd(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_RotationGesture self = reinterpret_cast<Ark_RotationGesture>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_GestureEvent_Void eventValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
-        GetAccessors()->getRotationGestureAccessor()->onActionEnd(self, static_cast<Callback_GestureEvent_Void*>(&eventValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(RotationGesture_onActionEnd, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_RotationGesture_onActionCancel(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_RotationGesture self = reinterpret_cast<Ark_RotationGesture>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_GestureEvent_Void eventValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
-        GetAccessors()->getRotationGestureAccessor()->onActionCancel(self, static_cast<Callback_GestureEvent_Void*>(&eventValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(RotationGesture_onActionCancel, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_RotationGestureEvent_construct() {
         return GetAccessors()->getRotationGestureEventAccessor()->construct();
 }
@@ -33802,34 +33690,6 @@ void impl_SubmitEvent_setText(Ark_NativePointer thisPtr, const KStringPtr& text)
         GetAccessors()->getSubmitEventAccessor()->setText(self, (const Ark_String*) (&text));
 }
 KOALA_INTEROP_V2(SubmitEvent_setText, Ark_NativePointer, KStringPtr)
-Ark_NativePointer impl_SwipeGesture_construct() {
-        return GetAccessors()->getSwipeGestureAccessor()->construct();
-}
-KOALA_INTEROP_DIRECT_0(SwipeGesture_construct, Ark_NativePointer)
-Ark_NativePointer impl_SwipeGesture_getFinalizer() {
-        return GetAccessors()->getSwipeGestureAccessor()->getFinalizer();
-}
-KOALA_INTEROP_DIRECT_0(SwipeGesture_getFinalizer, Ark_NativePointer)
-Ark_NativePointer impl_SwipeGesture_$_instantiate(KSerializerBuffer thisArray, int32_t thisLength) {
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_SwipeGesture factoryValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Callback_SwipeGesture_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_SwipeGesture)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Callback_SwipeGesture_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_SwipeGesture))))};;
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_SwipeGestureHandlerOptions valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = SwipeGestureHandlerOptions_serializer::read(thisDeserializer);
-        }
-        Opt_SwipeGestureHandlerOptions valueValueTemp = valueValueTempTmpBuf;;
-        return GetAccessors()->getSwipeGestureAccessor()->$_instantiate(static_cast<Callback_SwipeGesture*>(&factoryValueTemp), static_cast<Opt_SwipeGestureHandlerOptions*>(&valueValueTemp));
-}
-KOALA_INTEROP_DIRECT_2(SwipeGesture_$_instantiate, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_SwipeGesture_onAction(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_SwipeGesture self = reinterpret_cast<Ark_SwipeGesture>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_GestureEvent_Void eventValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
-        GetAccessors()->getSwipeGestureAccessor()->onAction(self, static_cast<Callback_GestureEvent_Void*>(&eventValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(SwipeGesture_onAction, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_SwipeGestureEvent_construct() {
         return GetAccessors()->getSwipeGestureEventAccessor()->construct();
 }
