@@ -1156,11 +1156,9 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
 #ifdef ARKUI_WEARABLE
     rootNode =  CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
 #else
-    if (cardInfo_.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_2)) {
-        rootNode = CreateRowNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
-    } else {
-        rootNode = CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
-    }
+    rootNode = (cardInfo_.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_2)) 
+               ? CreateRowNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
+               : CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
 #endif
     CHECK_NULL_VOID(rootNode);
     auto renderContext = rootNode->GetRenderContext();
