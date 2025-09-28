@@ -1208,8 +1208,8 @@ RefPtr<FrameNode> FormPattern::CreateTextNode(bool isRowStyle)
         AddFormChildNode(FormChildNodeType::APP_LOCKED_TEXT_NODE, textNode);
     }
     if (attribution == FormStyleAttribution::DEVELOPER_MODE_TIPS) {
-        imageNode = CreateForbiddenTextNode(DEVELOPER_MODE_TIPS_RESOURCE_NAME, isRowStyle);
-        AddFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE, imageNode);
+        textNode = CreateForbiddenTextNode(DEVELOPER_MODE_TIPS_RESOURCE_NAME, isRowStyle);
+        AddFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE, textNode);
     }
     return textNode;
 }
