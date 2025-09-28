@@ -181,4 +181,30 @@ HWTEST_F(ViewAbstractTestNg, SetPivotTest001, TestSize.Level1)
     ASSERT_TRUE(pivotProperty.has_value());
     EXPECT_TRUE(NearEqual(offset3, pivotProperty.value()));
 }
+
+/**
+ * @tc.name: SetBlendApplyType
+ * @tc.desc: Test the SetBlendApplyType function of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetBlendApplyType, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Check ViewStackProcessor.
+     */
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    stack->ClearVisualState();
+    auto node = stack->GetMainFrameNode();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps: step2. Set a BlendApplyType value and get.
+     * @tc.expected: step2. BlendApplyType value is same with the value set.
+     */
+    BlendApplyType testType = BlendApplyType::OFFSCREEN;
+    ViewAbstract::SetBlendApplyType(testType);
+    auto property = node->GetRenderContext()->GetBackBlendApplyType();
+    ASSERT_TRUE(property.has_value());
+    EXPECT_EQ(testType, property.value());
+}
 } // namespace OHOS::Ace::NG
