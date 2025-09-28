@@ -25,7 +25,6 @@
 #include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
-static const char* ANI_CLASS_WEBVIEW_CONTROLLER = "L@ohos/web/webview/webview/WebviewController;";
 
 static ani_env* GetAniEnv(ani_vm* vm)
 {
