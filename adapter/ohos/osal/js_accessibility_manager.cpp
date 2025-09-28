@@ -939,6 +939,9 @@ RefPtr<NG::FrameNode> GetAccessibilityPrevFocusNode(
     }
     auto it = nextFocusIdMap.find(currentInspectorId);
     if (it != nextFocusIdMap.end()) {
+        if (currentFrameNode->GetAccessibilityId() == it->second) {
+            return nullptr;
+        }
         return NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, it->second);
     }
     return nullptr;
@@ -958,6 +961,9 @@ void SetRootAccessibilityPreFocusId(const RefPtr<NG::UINode>& currentNode, const
     auto it = nextFocusIdMap.find(currentInspectorId);
     if (it != nextFocusIdMap.end()) {
         int64_t preAccessibilityId = it->second;
+        if (currentFrameNode->GetAccessibilityId() == preAccessibilityId) {
+            return;
+        }
         if (nodeInfo.GetBelongTreeId() > 0) {
             AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(nodeInfo.GetBelongTreeId(), preAccessibilityId);
         }

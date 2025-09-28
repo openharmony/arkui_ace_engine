@@ -3698,7 +3698,7 @@ HWTEST_F(JsAccessibilityManagerTest, GetAccessibilityPrevFocusNode001, TestSize.
     auto root = context->GetRootElement();
     ASSERT_NE(root, nullptr);
 
-    auto node1 = FrameNode::CreateFrameNode("framenode",
+    auto node1 = FrameNode::CreateFrameNode("framenode1",
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
 
     auto prevNode = jsAccessibilityManager->GetPrevFocusNodeByManager(node1, root, context);
@@ -3708,6 +3708,22 @@ HWTEST_F(JsAccessibilityManagerTest, GetAccessibilityPrevFocusNode001, TestSize.
     prevNode = jsAccessibilityManager->GetPrevFocusNodeByManager(node1, root, context);
     ASSERT_EQ(prevNode, nullptr);
 
+    auto node2 = FrameNode::CreateFrameNode("framenode2",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    root->AddChild(node1);
+    root->AddChild(node2);
+    
+    /**
+     * @tc.steps: step1. if node2->node1 then pre is node2
+     */
+    jsAccessibilityManager->UpdateAccessibilityNextFocusIdMap(instanceId, testKey, node2->GetAccessibilityId());
+    prevNode = jsAccessibilityManager->GetPrevFocusNodeByManager(node1, root, context);
+    ASSERT_NE(prevNode, nullptr);
+    ASSERT_EQ(prevNode->GetId(), node2->GetId());
+    
+    /**
+     * @tc.steps: step2. if node1->node1 then pre is nullptr
+     */
     jsAccessibilityManager->UpdateAccessibilityNextFocusIdMap(instanceId, testKey, node1->GetAccessibilityId());
     prevNode = jsAccessibilityManager->GetPrevFocusNodeByManager(node1, root, context);
     ASSERT_EQ(prevNode, nullptr);
