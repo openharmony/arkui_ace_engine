@@ -132,8 +132,7 @@ void SetMatchTextDirectionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
-        return;
+        convValue = false;
     }
     ImageModelNG::SetMatchTextDirection(frameNode, *convValue);
 }
@@ -144,8 +143,7 @@ void SetFitOriginalSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
-        return;
+        convValue = false;
     }
     ImageModelNG::SetFitOriginSize(frameNode, *convValue);
 }
@@ -197,6 +195,7 @@ void SetAutoResizeImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // Implement Reset value
+        ImageModelNG::ResetAutoResize(frameNode);
         return;
     }
     ImageModelNG::SetAutoResize(frameNode, *convValue);
@@ -228,7 +227,9 @@ void SetSourceSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto sourceSize = Converter::OptConvert<std::pair<CalcDimension, CalcDimension>>(*value);
-    ImageModelStatic::SetImageSourceSize(frameNode, sourceSize);
+    std::pair<CalcDimension, CalcDimension> defaultSize =
+        std::make_pair(CalcDimension(0.0, DimensionUnit::VP), CalcDimension(0.0, DimensionUnit::VP));
+    ImageModelStatic::SetImageSourceSize(frameNode, sourceSize.value_or(defaultSize));
 }
 void SetSyncLoadImpl(Ark_NativePointer node,
                      const Opt_Boolean* value)
@@ -238,6 +239,7 @@ void SetSyncLoadImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // Implement Reset value
+        ImageModelNG::SetSyncMode(frameNode, false);
         return;
     }
     ImageModelNG::SetSyncMode(frameNode, *convValue);
@@ -262,6 +264,7 @@ void SetDraggableImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // Implement Reset value
+        ImageModelNG::SetDraggable(frameNode, false);
         return;
     }
     ImageModelNG::SetDraggable(frameNode, *convValue);
@@ -318,7 +321,7 @@ void SetOnCompleteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ImageModelNG::SetOnComplete(frameNode, nullptr);
         return;
     }
     auto onEvent = [callback = CallbackHelper(*optValue)](const LoadImageSuccessEvent& info) {
@@ -345,6 +348,7 @@ void SetOnErrorImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         // Implement Reset value
+        ImageModelNG::SetOnError(frameNode, nullptr);
         return;
     }
     auto onError = [arkCallback = CallbackHelper(*optValue)](const LoadImageFailEvent& info) {
@@ -361,6 +365,7 @@ void SetOnFinishImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         // Implement Reset value
+        ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
         return;
     }
     auto onFinish = [arkCallback = CallbackHelper(*optValue)]() {
@@ -376,6 +381,7 @@ void SetEnableAnalyzerImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // Implement Reset value
+        ImageModelNG::EnableAnalyzer(frameNode, false);
         return;
     }
     ImageModelNG::EnableAnalyzer(frameNode, *convValue);

@@ -43,6 +43,7 @@ public:
     static void SetItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);
     static void SetStrokeRadius(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
+    static void SetValue(FrameNode* frameNode, const std::optional<double>& valueOpt);
 };
 
 } // namespace OHOS::Ace::NG

@@ -72,4 +72,58 @@ void TimePickerModelStatic::SetSelectedTime(FrameNode* frameNode, const int64_t&
     PickerTime pickerTime(local_tm.tm_hour, local_tm.tm_min, local_tm.tm_sec);
     timePickerRowPattern->SetSelectedTime(pickerTime);
 }
+
+void TimePickerModelStatic::SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
+
+void TimePickerModelStatic::SetOnEnterSelectedArea(FrameNode* frameNode, TimeChangeEvent&& onEnterSelectedArea)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
+}
+
+void TimePickerModelStatic::SetEnableCascade(FrameNode* frameNode, const std::optional<bool>& isEnableCascade)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (isEnableCascade) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, IsEnableCascade, isEnableCascade.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, IsEnableCascade, frameNode);
+    }
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetEnableCascade(isEnableCascade.value_or(false));
+}
+
+void TimePickerModelStatic::SetLoop(FrameNode* frameNode, const std::optional<bool>& loop)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (loop) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Loop, loop.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Loop, frameNode);
+    }
+}
+
+void TimePickerModelStatic::SetUseMilitaryTime(FrameNode* frameNode, const std::optional<bool>& isUseMilitaryTime)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (isUseMilitaryTime) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TimePickerLayoutProperty, IsUseMilitaryTime, isUseMilitaryTime.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, IsUseMilitaryTime, frameNode);
+    }
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->ClearOptionsHour();
+    timePickerRowPattern->SetHour24(isUseMilitaryTime.value_or(false));
+}
 } // namespace OHOS::Ace::NG

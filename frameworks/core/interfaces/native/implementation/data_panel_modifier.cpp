@@ -173,6 +173,7 @@ void SetCloseEffectImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // Implement Reset value
+        DataPanelModelNG::SetCloseEffect(frameNode, false);
         return;
     }
     DataPanelModelNG::SetCloseEffect(frameNode, *convValue);
@@ -207,7 +208,7 @@ void SetStrokeWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto width = value ? Converter::OptConvertFromArkLength(value->value, DimensionUnit::VP) : std::nullopt;
+    auto width = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(width);
     Validator::ValidateNonPercent(width);
     DataPanelModelStatic::SetStrokeWidth(frameNode, width);
@@ -220,6 +221,7 @@ void SetTrackShadowImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<DataPanelShadow>(value);
     if (!convValue) {
         // Implement Reset value
+        ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ShadowOption, frameNode);
         return;
     }
     DataPanelModelNG::SetShadowOption(frameNode, *convValue);

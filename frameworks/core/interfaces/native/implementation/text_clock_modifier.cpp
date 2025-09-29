@@ -25,10 +25,14 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
-    struct TextClockOptions {
-        std::optional<float> timeZoneOffset = std::nullopt;
-        TextClockControllerPeer* peerController = nullptr;
-    };
+constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
+const std::vector<std::string> DEFAULT_FONT_FAMILY = { "HarmonyOS Sans" };
+constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
+constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
+struct TextClockOptions {
+    std::optional<float> timeZoneOffset = std::nullopt;
+    TextClockControllerPeer* peerController = nullptr;
+};
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
@@ -91,7 +95,7 @@ void SetOnDateChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextClockModelNG::SetOnDateChange(frameNode, nullptr);
         return;
     }
     auto onDateChange = [arkCallback = CallbackHelper(*optValue)](const std::string& data) {
@@ -115,7 +119,7 @@ void SetFontSizeImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
-    TextClockModelStatic::SetFontSize(frameNode, convValue);
+    TextClockModelStatic::SetFontSize(frameNode, convValue.value_or(DEFAULT_FONT_SIZE));
 }
 void SetFontStyleImpl(Ark_NativePointer node,
                       const Opt_FontStyle* value)
@@ -123,7 +127,7 @@ void SetFontStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Ace::FontStyle>(value);
-    TextClockModelStatic::SetFontStyle(frameNode, convValue);
+    TextClockModelStatic::SetFontStyle(frameNode, convValue.value_or(DEFAULT_FONT_STYLE));
 }
 void SetFontWeightImpl(Ark_NativePointer node,
                        const Opt_Union_Number_FontWeight_String* value)
@@ -131,15 +135,20 @@ void SetFontWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Ace::FontWeight>(value);
-    TextClockModelStatic::SetFontWeight(frameNode, convValue);
+    TextClockModelStatic::SetFontWeight(frameNode, convValue.value_or(DEFAULT_FONT_WEIGHT));
 }
 void SetFontFamilyImpl(Ark_NativePointer node,
                        const Opt_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Converter::FontFamilies>(value);
+    if (!convValue) {
+        TextClockModelNG::SetFontFamily(frameNode, DEFAULT_FONT_FAMILY);
+        return;
+    }
     StringArray families;
-    if (auto fontfamiliesOpt = Converter::OptConvertPtr<Converter::FontFamilies>(value); fontfamiliesOpt) {
+    if (auto fontfamiliesOpt = convValue; fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
     TextClockModelNG::SetFontFamily(frameNode, families);
@@ -163,10 +172,11 @@ void SetFontFeatureImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
-        // Implement Reset value
+        std::string strValue = "normal";
+        TextClockModelStatic::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
         return;
     }
-    TextClockModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(*convValue));
+    TextClockModelStatic::SetFontFeature(frameNode, ParseFontFeatureSettings(*convValue));
 }
 void SetDateTimeOptionsImpl(Ark_NativePointer node,
                             const Opt_intl_DateTimeOptions* value)
