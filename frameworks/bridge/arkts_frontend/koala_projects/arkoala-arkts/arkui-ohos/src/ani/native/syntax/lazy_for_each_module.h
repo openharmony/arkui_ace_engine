@@ -23,14 +23,14 @@
 namespace OHOS::Ace::Ani {
  
 ani_long ConstructLazyForEachNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
-                             ani_int id, ani_object obj)
+    ani_int id, ani_boolean isRepeat, ani_object obj)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return 0;
     }
 
-    ani_long node = modifier->getLazyForEachNodeAniModifier()->constructLazyForEachNode(id);
+    ani_long node = modifier->getLazyForEachNodeAniModifier()->constructLazyForEachNode(id, isRepeat);
     return node;
 }
  

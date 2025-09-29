@@ -21,7 +21,7 @@ export function isFunction(object?: Object): boolean {
     return Type.of(object) instanceof FunctionType
 }
 
-// TODO: This is an very ad hoc function,
+// Improve: This is an very ad hoc function,
 // but I could not find in ArkTS stdlib enough functionality
 // for a more generic way.
 export function functionOverValue<Value>(value: Value|(()=>Value)): boolean {

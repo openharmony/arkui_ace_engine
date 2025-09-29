@@ -25,13 +25,15 @@ void DestroyPeerImpl(Ark_CustomDialogController peer)
     CHECK_NULL_VOID(peer);
     peer->DecRefCount();
 }
-Ark_CustomDialogController CtorImpl(const Ark_CustomDialogControllerOptions* value)
+Ark_CustomDialogController ConstructImpl(const Ark_CustomDialogControllerOptions* value)
 {
     auto peer = AceType::MakeRefPtr<CustomDialogControllerPeer>();
     peer->IncRefCount();
     CHECK_NULL_RETURN(value, AceType::RawPtr(peer));
 
+#ifdef WRONG_GEN
     peer->SetBuilder(value->builder, peer);
+#endif
     peer->SetOnCancel(value->cancel, peer);
     peer->SetAutoCancel(value->autoCancel);
     peer->SetDialogAlignment(value->alignment);
@@ -47,8 +49,8 @@ Ark_CustomDialogController CtorImpl(const Ark_CustomDialogControllerOptions* val
     peer->SetCornerRadius(value->cornerRadius);
     peer->SetIsModal(value->isModal);
     peer->SetDismiss(value->onWillDismiss);
-    peer->SetWidth(value->width);
-    peer->SetHeight(value->height);
+    peer->SetWidth(Converter::OptConvert<Dimension>(value->width));
+    peer->SetHeight(Converter::OptConvert<Dimension>(value->height));
     peer->SetBorderWidth(value->borderWidth);
     peer->SetBorderColor(value->borderColor);
     peer->SetBorderStyle(value->borderStyle);
@@ -64,7 +66,7 @@ Ark_CustomDialogController CtorImpl(const Ark_CustomDialogControllerOptions* val
     peer->SetOnWillAppear(value->onWillAppear, peer);
     peer->SetOnWillDisappear(value->onWillDisappear, peer);
     peer->SetKeyboardAvoidDistance(value->keyboardAvoidDistance);
-    peer->SetLevelMode(value->levelMode);
+    peer->SetLevelMode(value->showInSubWindow, value->levelMode);
     peer->SetLevelUniqueId(value->levelUniqueId);
     peer->SetImersiveMode(value->immersiveMode);
     peer->SetLevelOrder(value->levelOrder);
@@ -86,6 +88,15 @@ void CloseImpl(Ark_CustomDialogController peer)
     CHECK_NULL_VOID(peer);
     peer->CloseDialog();
 }
+Ark_CustomDialogControllerExternalOptions GetExternalOptionsImpl(Ark_CustomDialogController peer)
+{
+    Ark_CustomDialogControllerExternalOptions result = {
+        .customStyle = Converter::ArkValue<Opt_Boolean>(false),
+    };
+    CHECK_NULL_RETURN(peer, result);
+    result.customStyle = peer->GetCustomStyle();
+    return result;
+}
 void SetOwnerViewImpl(Ark_CustomDialogController peer, Ark_NodeHandle node)
 {
     CHECK_NULL_VOID(peer);
@@ -97,11 +108,11 @@ const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAc
 {
     static const GENERATED_ArkUICustomDialogControllerAccessor CustomDialogControllerAccessorImpl {
         CustomDialogControllerAccessor::DestroyPeerImpl,
-        CustomDialogControllerAccessor::CtorImpl,
+        CustomDialogControllerAccessor::ConstructImpl,
         CustomDialogControllerAccessor::GetFinalizerImpl,
         CustomDialogControllerAccessor::OpenImpl,
         CustomDialogControllerAccessor::CloseImpl,
-        CustomDialogControllerAccessor::SetOwnerViewImpl,
+        CustomDialogControllerAccessor::GetExternalOptionsImpl,
     };
     return &CustomDialogControllerAccessorImpl;
 }

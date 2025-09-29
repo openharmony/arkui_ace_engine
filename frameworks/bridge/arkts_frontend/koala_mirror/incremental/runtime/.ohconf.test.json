@@ -1,6 +1,0 @@
-{
-    "test_root": "test",
-    "build": [
-        "npm run compile:test"
-    ]
-}

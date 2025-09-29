@@ -17,8 +17,8 @@ ace_unittest("blank_test_ng") {
   type = "new"
   module_name = "Component-Layout"
   module_output = ""
-  sources = [ 
-    "blank_test_ng.cpp",
+  sources = [
     "blank_new_test_ng.cpp",
+    "blank_test_ng.cpp",
   ]
 }

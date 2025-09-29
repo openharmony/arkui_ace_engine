@@ -544,10 +544,8 @@ void ParseColorOption(const Ark_ParticleColorPropertyOptionsInner& src, Particle
 {
     std::pair<Color, Color> colorRange = ParseParticleColor(src.range);
     result.SetRange(colorRange);
-#if defined(ACE_STATIC)
     std::optional<DistributionType> colorDist = Converter::OptConvert<DistributionType>(src.distributionType);
     result.SetDistribution(colorDist.value_or(DistributionType::UNIFORM));
-#endif
     ParticleColorPropertyUpdater updater;
     if (src.updater.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         if (ParseColorUpdater(src.updater.value, updater)) {

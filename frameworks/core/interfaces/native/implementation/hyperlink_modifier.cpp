@@ -39,19 +39,19 @@ void SetHyperlinkOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(address);
     auto convAddress = Converter::OptConvert<std::string>(*address);
-    auto convContent = Converter::OptConvert<std::string>(*content);
+    auto convContent = Converter::OptConvertPtr<std::string>(content);
     if (convAddress.has_value()) {
         HyperlinkModelStatic::SetTextStyle(frameNode, convAddress.value(), convContent);
     }
 }
 } // HyperlinkInterfaceModifier
 namespace HyperlinkAttributeModifier {
-void ColorImpl(Ark_NativePointer node,
-               const Opt_Union_Color_Number_String_Resource* value)
+void SetColorImpl(Ark_NativePointer node,
+                  const Opt_Union_Color_I32_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     HyperlinkModelStatic::SetColor(frameNode, convValue);
 }
 } // HyperlinkAttributeModifier
@@ -60,7 +60,7 @@ const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()
     static const GENERATED_ArkUIHyperlinkModifier ArkUIHyperlinkModifierImpl {
         HyperlinkModifier::ConstructImpl,
         HyperlinkInterfaceModifier::SetHyperlinkOptionsImpl,
-        HyperlinkAttributeModifier::ColorImpl,
+        HyperlinkAttributeModifier::SetColorImpl,
     };
     return &ArkUIHyperlinkModifierImpl;
 }

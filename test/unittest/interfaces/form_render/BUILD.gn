@@ -65,13 +65,13 @@ ohos_unittest("form_render_test") {
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
+    "hicollie:libhicollie",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",
     "window_manager:libwm",
-    "hisysevent:libhisysevent",
-    "hicollie:libhicollie",
   ]
 }
 
@@ -146,13 +146,13 @@ ohos_unittest("form_render_group_test") {
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
+    "hicollie:libhicollie",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",
     "window_manager:libwm",
-    "hisysevent:libhisysevent",
-    "hicollie:libhicollie",
   ]
 }
 
@@ -282,13 +282,13 @@ ohos_unittest("form_render_dispatcher_stub_test") {
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
+    "hicollie:libhicollie",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",
     "window_manager:libwm",
-    "hisysevent:libhisysevent",
-    "hicollie:libhicollie",
   ]
 }
 
@@ -354,13 +354,13 @@ ohos_unittest("form_render_dispatcher_impl_test") {
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
+    "hicollie:libhicollie",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",
     "window_manager:libwm",
-    "hisysevent:libhisysevent",
-    "hicollie:libhicollie",
   ]
 }
 
@@ -373,6 +373,6 @@ group("ace_form_render_test") {
     ":form_render_dispatcher_impl_test",
     ":form_render_dispatcher_stub_test",
     ":form_render_group_test",
-    ":form_render_test"
+    ":form_render_test",
   ]
 }

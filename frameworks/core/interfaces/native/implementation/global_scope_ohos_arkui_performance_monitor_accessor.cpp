@@ -57,7 +57,7 @@ void BeginImpl(const Ark_String* scene,
     CHECK_NULL_VOID(scene);
     auto sceneId = Converter::Convert<std::string>(*scene);
     auto action = Converter::OptConvert<PerfActionType>(startInputType).value_or(PerfActionType::UNKNOWN_ACTION);
-    auto notes = (note ? Converter::OptConvert<std::string>(*note) : std::nullopt).value_or(EMPTY_STRING);
+    auto notes = Converter::OptConvertPtr<std::string>(note).value_or(EMPTY_STRING);
     auto pMonitor = PerfMonitor::GetPerfMonitor();
     CHECK_NULL_VOID(pMonitor);
     pMonitor->Start(sceneId, action, notes);

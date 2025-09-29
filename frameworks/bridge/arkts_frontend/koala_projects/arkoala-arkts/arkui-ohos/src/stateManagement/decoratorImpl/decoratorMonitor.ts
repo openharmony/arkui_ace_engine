@@ -17,6 +17,7 @@ import { IBindingSource } from '../base/mutableStateMeta';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { ITrackedDecoratorRef } from '../base/mutableStateMeta';
 import { RenderIdType, IMonitorValue, IMonitorDecoratedVariable, IMonitor, IMonitorPathInfo } from '../decorator';
+import { ExtendableComponent } from '../../component/extendableComponent';
 
 export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMonitor {
     public static readonly MIN_MONITOR_ID: RenderIdType = 0x20000000;
@@ -24,9 +25,11 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
     public readonly decorator: string;
     private readonly monitorFunction_: (m: IMonitor) => void;
     private readonly values_: MonitorValueInternal[] = new Array<MonitorValueInternal>();
+    private readonly owningComponent_?: ExtendableComponent;
 
-    constructor(pathLambda: IMonitorPathInfo[], monitorFunction: (m: IMonitor) => void) {
+    constructor(pathLambda: IMonitorPathInfo[], monitorFunction: (m: IMonitor) => void, owningView?: ExtendableComponent) {
         this.monitorFunction_ = monitorFunction;
+        this.owningComponent_ = owningView;
         pathLambda.forEach((info: IMonitorPathInfo) => {
             this.values_.push(new MonitorValueInternal(info.path, info.valueCallback, this));
         });
@@ -61,7 +64,7 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         }
         try {
             this.monitorFunction_(this);
-        } catch (e: Exception) {
+        } catch (e) {
             StateMgmtConsole.log(`Error caught while executing @Monitor function: '${e}'`);
         } finally {
             this.values_.forEach((monitorValue: MonitorValueInternal) => {

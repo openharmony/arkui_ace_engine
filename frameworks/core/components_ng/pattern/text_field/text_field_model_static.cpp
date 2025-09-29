@@ -31,9 +31,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const auto DEFAULT_KEYBOARD_APPERANCE = KeyboardAppearance::NONE_IMMERSIVE;
 constexpr uint32_t MAX_LINES = 3;
 constexpr double DEFAULT_OPACITY = 0.2;
+constexpr float MAX_FONT_SCALE = 2.0;
 constexpr int32_t DEFAULT_ALPHA = 255;
 }
 
@@ -115,6 +115,18 @@ void TextFieldModelStatic::SetAdaptMaxFontSize(FrameNode* frameNode, const std::
         TextFieldModelNG::SetAdaptMaxFontSize(frameNode, valueOpt.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMaxFontSize, frameNode);
+    }
+}
+
+void TextFieldModelStatic::SetAutoCapitalizationMode(
+    FrameNode* frameNode, const std::optional<AutoCapitalizationMode>& value)
+{
+    auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    if (value) {
+        pattern->UpdateAutoCapitalizationMode(*value);
+    } else {
+        pattern->ResetAutoCapitalizationMode();
     }
 }
 
@@ -661,7 +673,7 @@ void TextFieldModelStatic::SetStopBackPress(FrameNode* frameNode, const std::opt
 void TextFieldModelStatic::SetKeyboardAppearance(FrameNode* frameNode,
     const std::optional<KeyboardAppearance>& valueOpt)
 {
-    TextFieldModelNG::SetKeyboardAppearance(frameNode, valueOpt.value_or(DEFAULT_KEYBOARD_APPERANCE));
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, valueOpt.value_or(KeyboardAppearance::NONE_IMMERSIVE));
 }
 
 void TextFieldModelStatic::RequestKeyboardOnFocus(FrameNode* frameNode, const std::optional<bool>& needToRequest)
@@ -700,20 +712,20 @@ void TextFieldModelStatic::SetEllipsisMode(FrameNode* frameNode, const std::opti
 
 void TextFieldModelStatic::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    if (optValue) {
-        TextFieldModelNG::SetMinFontScale(frameNode, optValue.value());
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinFontScale, frameNode);
+    float minFontScale = 0.0f;
+    if (optValue.has_value()) {
+        minFontScale = std::clamp(optValue.value(), 0.0f, 1.0f);
     }
+    TextFieldModelNG::SetMinFontScale(frameNode, minFontScale);
 }
 
 void TextFieldModelStatic::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    if (optValue) {
-        TextFieldModelNG::SetMaxFontScale(frameNode, optValue.value());
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, frameNode);
+    float maxFontScale = MAX_FONT_SCALE;
+    if (optValue.has_value()) {
+        maxFontScale = std::max(optValue.value(), 1.0f);
     }
+    TextFieldModelNG::SetMaxFontScale(frameNode, maxFontScale);
 }
 
 void TextFieldModelStatic::SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& valueOpt)

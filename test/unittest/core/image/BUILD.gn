@@ -37,12 +37,12 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/mock/base/mock_foldable_window.cpp",
     "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
-    "$ace_root/test/mock/base/mock_measure_util.cpp",
     "$ace_root/test/mock/base/mock_image_perf.cpp",
     "$ace_root/test/mock/base/mock_image_source.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
     "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/base/mock_localization.cpp",
+    "$ace_root/test/mock/base/mock_measure_util.cpp",
     "$ace_root/test/mock/base/mock_ressched_report.cpp",
     "$ace_root/test/mock/base/mock_ressched_touch_optimizer.cpp",
     "$ace_root/test/mock/base/mock_socperf_client_impl.cpp",
@@ -60,12 +60,12 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
     "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
     "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
-    "$ace_root/test/mock/core/common/mock_reporter.cpp",    
+    "$ace_root/test/mock/core/common/mock_reporter.cpp",
     "$ace_root/test/mock/core/common/mock_resource_adapter_v2.cpp",
     "$ace_root/test/mock/core/common/mock_text_share_adapter.cpp",
     "$ace_root/test/mock/core/common/mock_text_translation_adapter.cpp",
-    "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
     "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
+    "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
     "$ace_root/test/mock/core/event/mock_statusbar_event_proxy.cpp",
     "$ace_root/test/mock/core/event/mock_touch_event.cpp",
@@ -341,7 +341,7 @@ ohos_unittest("image_loader_test") {
   if (ace_engine_feature_enable_upgrade_skia) {
     defines += [ "USE_NEW_SKIA" ]
   }
-  
+
   deps = [
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
@@ -350,7 +350,7 @@ ohos_unittest("image_loader_test") {
     "$ace_root/test/unittest:ace_core_extra",
     "$ace_root/test/unittest:ace_unittest_log",
   ]
-  
+
   external_deps = [
     "ability_base:zuri",
     "app_file_service:fileuri_native",

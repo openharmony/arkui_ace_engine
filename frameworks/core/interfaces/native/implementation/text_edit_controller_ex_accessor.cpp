@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_TextEditControllerEx peer)
 {
     delete peer;
 }
-Ark_TextEditControllerEx CtorImpl()
+Ark_TextEditControllerEx ConstructImpl()
 {
     LOGE("TextEditControllerExPeer is an abstract class.");
     return nullptr;
@@ -66,7 +66,7 @@ const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccess
 {
     static const GENERATED_ArkUITextEditControllerExAccessor TextEditControllerExAccessorImpl {
         TextEditControllerExAccessor::DestroyPeerImpl,
-        TextEditControllerExAccessor::CtorImpl,
+        TextEditControllerExAccessor::ConstructImpl,
         TextEditControllerExAccessor::GetFinalizerImpl,
         TextEditControllerExAccessor::IsEditingImpl,
         TextEditControllerExAccessor::StopEditingImpl,

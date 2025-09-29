@@ -29,10 +29,6 @@ rebased_generated_sources = []
 foreach(src, generated_sources) {
   rebased_generated_sources += [ native_root + "/" + src ]
 }
-rebased_wearable_sources = []
-foreach(src, wearable_sources) {
-  rebased_wearable_sources += [ native_root + "/" + src ]
-}
 rebased_common_sources = []
 foreach(src, common_sources) {
   rebased_common_sources += [ native_root + "/" + src ]
@@ -53,6 +49,7 @@ template("ace_core_interfaces_native") {
     if (ace_engine_feature_enable_point_light) {
       defines += [ "POINT_LIGHT_ENABLE" ]
     }
+
     # add common source file needed by all product platform here
     sources = []
     sources += rebased_common_sources
@@ -61,22 +58,14 @@ template("ace_core_interfaces_native") {
       defines += [ "WEB_SUPPORTED" ]
       external_deps += [
         "ability_runtime:app_context",
-        "bundle_framework:appexecfwk_core_headers",
-        "common_event_service:cesfwk_innerkits",
         "webview:libnweb",
-        "image_framework:image_ani",
-        "image_framework:image_native",
-        "runtime_core:ani",
       ]
     }
     if (include_generated_sources) {
       sources += rebased_generated_sources
       defines += [ "INCLUDE_GENERATED_SOURCES" ]
     }
-    if (!ace_engine_feature_wearable) {
-      sources += rebased_wearable_sources
-    }
-    deps = []
+    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {
@@ -86,10 +75,7 @@ template("ace_core_interfaces_native") {
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
-    
-    if (ace_engine_feature_enable_upgrade_skia) {
-      defines += [ "USE_NEW_SKIA" ]
-    }
+
     external_deps += [
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",

@@ -16,17 +16,7 @@
 # ../../tools/gen_gni.py --json arktsconfig.json --output common.gni --gn-tool ../../../../../../../../../prebuilts/build-tools/linux-x86/bin/gn
 
 koalaui_common_files = [
-  "src/Errors.ts",
   "src/Finalization.ts",
-  "src/KoalaProfiler.ts",
-  "src/LifecycleEvent.ts",
-  "src/MarkableQueue.ts",
-  "src/Matrix33.ts",
-  "src/Matrix44.ts",
-  "src/PerfProbe.ts",
-  "src/Point.ts",
-  "src/Point3.ts",
-  "src/Utils.ts",
   "src/index.ts",
   "src/koalaKey.ts",
   "src/math.ts",

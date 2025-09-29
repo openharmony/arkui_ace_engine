@@ -19,6 +19,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/ace_events.h"
 #include "core/interfaces/native/utility/accessor_utils.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
@@ -32,18 +33,6 @@ const Ark_Boolean DefaultValueBoolean = Converter::ArkValue<Ark_Boolean>(false);
 const Ark_Number DefaultValueArkNumber = Converter::ArkValue<Ark_Number>(0);
 }  // namespace
 
-void DestroyPeerImpl(Ark_BaseEvent peer)
-{
-    PeerUtils::DestroyPeer(peer);
-}
-Ark_BaseEvent CtorImpl()
-{
-    return PeerUtils::CreatePeer<BaseEventPeerImpl>();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
                                     Ark_BaseEvent peer,
                                     const Array_String* keys)
@@ -52,12 +41,24 @@ Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
     CHECK_NULL_RETURN(keys, DefaultValueBoolean);
     auto eventKeys = peer->GetBaseInfo()->GetPressedKeyCodes();
     auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
-    return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
+    return Converter::ArkValue<Ark_Boolean>(OHOS::Ace::NG::AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
+}
+void DestroyPeerImpl(Ark_BaseEvent peer)
+{
+    PeerUtils::DestroyPeer(peer);
+}
+Ark_BaseEvent ConstructImpl()
+{
+    return PeerUtils::CreatePeer<BaseEventPeerImpl>();
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_EventTarget GetTargetImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), {});
-    return Converter::ArkValue<Ark_EventTarget>(peer->GetBaseInfo()->GetTarget());
+    return Converter::ArkValue<Ark_EventTarget>(peer->GetBaseInfo()->GetTarget(), Converter::FC);
 }
 void SetTargetImpl(Ark_BaseEvent peer,
                    const Ark_EventTarget* target)
@@ -66,19 +67,20 @@ void SetTargetImpl(Ark_BaseEvent peer,
     CHECK_NULL_VOID(target);
     peer->GetBaseInfo()->SetTarget(Converter::Convert<EventTarget>(*target));
 }
-Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
+Ark_Number GetTimestampImpl(Ark_BaseEvent peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), -1);
+    auto errValue = Converter::ArkValue<Ark_Number>(-1);
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), errValue);
     auto tstamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
-    return Converter::ArkValue<Ark_Int64>(tstamp);
+    return Converter::ArkValue<Ark_Number>(tstamp);
 }
 void SetTimestampImpl(Ark_BaseEvent peer,
-                      Ark_Int64 timestamp)
+                      const Ark_Number* timestamp)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(timestamp);
-    int64_t value = Converter::Convert<int64_t>(timestamp);
+    int64_t value = Converter::Convert<int64_t>(*timestamp);
     std::chrono::high_resolution_clock::duration duration = std::chrono::nanoseconds(value);
     std::chrono::time_point<std::chrono::high_resolution_clock> time_point(duration);
     peer->GetBaseInfo()->SetTimeStamp(time_point);
@@ -106,11 +108,11 @@ Opt_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetAxisHorizontalImpl(Ark_BaseEvent peer,
-                           const Ark_Number* axisHorizontal)
+                           const Opt_Number* axisHorizontal)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    CHECK_NULL_VOID(axisHorizontal);
-    peer->GetBaseInfo()->SetHorizontalAxis(Converter::Convert<float>(*axisHorizontal));
+    auto value = Converter::OptConvertPtr<float>(axisHorizontal).value_or(0.f);
+    peer->GetBaseInfo()->SetHorizontalAxis(value);
 }
 Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
 {
@@ -120,25 +122,12 @@ Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetAxisVerticalImpl(Ark_BaseEvent peer,
-                         const Ark_Number* axisVertical)
+                         const Opt_Number* axisVertical)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(axisVertical);
-    peer->GetBaseInfo()->SetVerticalAxis(Converter::Convert<float>(*axisVertical));
-}
-Opt_Number GetAxisPinchImpl(Ark_BaseEvent peer)
-{
-    auto invalid = Converter::ArkValue<Opt_Number>();
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    float value = peer->GetBaseInfo()->GetPinchAxisScale();
-    return Converter::ArkValue<Opt_Number>(value);
-}
-void SetAxisPinchImpl(Ark_BaseEvent peer,
-                         const Ark_Number* axisPinch)
-{
-    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    CHECK_NULL_VOID(axisPinch);
-    peer->GetBaseInfo()->SetPinchAxisScale(Converter::Convert<float>(*axisPinch));
+    auto value = Converter::OptConvertPtr<float>(axisVertical).value_or(0.f);
+    peer->GetBaseInfo()->SetVerticalAxis(value);
 }
 Ark_Number GetPressureImpl(Ark_BaseEvent peer)
 {
@@ -185,11 +174,11 @@ Opt_Number GetRollAngleImpl(Ark_BaseEvent peer)
     return Converter::ArkValue<Opt_Number>(peer->GetBaseInfo()->GetRollAngle());
 }
 void SetRollAngleImpl(Ark_BaseEvent peer,
-                      const Ark_Number* rollAngle)
+                      const Opt_Number* rollAngle)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(rollAngle);
-    peer->GetBaseInfo()->SetRollAngle(Converter::Convert<float>(*rollAngle));
+    peer->GetBaseInfo()->SetRollAngle(Converter::OptConvertPtr<float>(rollAngle).value_or(0));
 }
 Ark_SourceTool GetSourceToolImpl(Ark_BaseEvent peer)
 {
@@ -206,6 +195,27 @@ void SetSourceToolImpl(Ark_BaseEvent peer,
         peer->GetBaseInfo()->SetSourceTool(*value);
     }
 }
+Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_BaseEvent peer)
+{
+    const auto invalid = Converter::ArkValue<Opt_ModifierKeyStateGetter>(Ark_Empty());
+    CHECK_NULL_RETURN(peer, invalid);
+    auto info = peer->GetBaseInfo();
+    CHECK_NULL_RETURN(info, invalid);
+    auto getter = CallbackKeeper::RegisterReverseCallback<ModifierKeyStateGetter,
+            std::function<void(const Array_String, const Callback_Boolean_Void)>>([info]
+            (const Array_String keys, const Callback_Boolean_Void continuation) {
+        auto eventKeys = info->GetPressedKeyCodes();
+        auto keysStr = Converter::Convert<std::vector<std::string>>(keys);
+        Ark_Boolean arkResult = Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
+        CallbackHelper(continuation).InvokeSync(arkResult);
+    });
+    return Converter::ArkValue<Opt_ModifierKeyStateGetter, ModifierKeyStateGetter>(getter);
+}
+void SetGetModifierKeyStateImpl(Ark_BaseEvent peer,
+                                const Opt_ModifierKeyStateGetter* getModifierKeyState)
+{
+    LOGE("BaseEventAccessor.SetGetModifierKeyStateImpl does nothing");
+}
 Opt_Number GetDeviceIdImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
@@ -216,11 +226,11 @@ Opt_Number GetDeviceIdImpl(Ark_BaseEvent peer)
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetDeviceIdImpl(Ark_BaseEvent peer,
-                     const Ark_Number* deviceId)
+                     const Opt_Number* deviceId)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(deviceId);
-    peer->GetBaseInfo()->SetDeviceId(Converter::Convert<int>(*deviceId));
+    peer->GetBaseInfo()->SetDeviceId(Converter::OptConvertPtr<int>(deviceId).value_or(0));
 }
 Opt_Number GetTargetDisplayIdImpl(Ark_BaseEvent peer)
 {
@@ -230,11 +240,14 @@ Opt_Number GetTargetDisplayIdImpl(Ark_BaseEvent peer)
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetTargetDisplayIdImpl(Ark_BaseEvent peer,
-                            const Ark_Number* targetDisplayId)
+                            const Opt_Number* targetDisplayId)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(targetDisplayId);
-    peer->GetBaseInfo()->SetTargetDisplayId(Converter::Convert<int32_t>(*targetDisplayId));
+    auto id = Converter::OptConvertPtr<int32_t>(targetDisplayId);
+    if (id) {
+        peer->GetBaseInfo()->SetTargetDisplayId(id.value());
+    }
 }
 } // BaseEventAccessor
 
@@ -242,9 +255,8 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
 {
     static const GENERATED_ArkUIBaseEventAccessor BaseEventAccessorImpl {
         BaseEventAccessor::DestroyPeerImpl,
-        BaseEventAccessor::CtorImpl,
+        BaseEventAccessor::ConstructImpl,
         BaseEventAccessor::GetFinalizerImpl,
-        BaseEventAccessor::GetModifierKeyStateImpl,
         BaseEventAccessor::GetTargetImpl,
         BaseEventAccessor::SetTargetImpl,
         BaseEventAccessor::GetTimestampImpl,
@@ -255,8 +267,6 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
         BaseEventAccessor::SetAxisHorizontalImpl,
         BaseEventAccessor::GetAxisVerticalImpl,
         BaseEventAccessor::SetAxisVerticalImpl,
-        BaseEventAccessor::GetAxisPinchImpl,
-        BaseEventAccessor::SetAxisPinchImpl,
         BaseEventAccessor::GetPressureImpl,
         BaseEventAccessor::SetPressureImpl,
         BaseEventAccessor::GetTiltXImpl,
@@ -267,6 +277,8 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
         BaseEventAccessor::SetRollAngleImpl,
         BaseEventAccessor::GetSourceToolImpl,
         BaseEventAccessor::SetSourceToolImpl,
+        BaseEventAccessor::GetGetModifierKeyStateImpl,
+        BaseEventAccessor::SetGetModifierKeyStateImpl,
         BaseEventAccessor::GetDeviceIdImpl,
         BaseEventAccessor::SetDeviceIdImpl,
         BaseEventAccessor::GetTargetDisplayIdImpl,

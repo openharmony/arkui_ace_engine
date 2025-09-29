@@ -35,7 +35,7 @@ void DestroyPeerImpl(Ark_ClickEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_ClickEvent CtorImpl()
+Ark_ClickEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<ClickEventPeer>();
 }
@@ -139,24 +139,6 @@ void SetWindowYImpl(Ark_ClickEvent peer,
     offset.SetY(y, animation);
     info->SetGlobalLocation(offset);
 }
-Ark_Number GetScreenXImpl(Ark_ClickEvent peer)
-{
-    return GetWindowXImpl(peer);
-}
-void SetScreenXImpl(Ark_ClickEvent peer,
-                    const Ark_Number* screenX)
-{
-    SetWindowXImpl(peer, screenX);
-}
-Ark_Number GetScreenYImpl(Ark_ClickEvent peer)
-{
-    return GetWindowYImpl(peer);
-}
-void SetScreenYImpl(Ark_ClickEvent peer,
-                    const Ark_Number* screenY)
-{
-    SetWindowYImpl(peer, screenY);
-}
 Ark_Number GetXImpl(Ark_ClickEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
@@ -230,7 +212,7 @@ Opt_InteractionHand GetHandImpl(Ark_ClickEvent peer)
     return Converter::ArkValue<Opt_InteractionHand>(retVal);
 }
 void SetHandImpl(Ark_ClickEvent peer,
-                 Ark_InteractionHand hand)
+                 const Opt_InteractionHand* hand)
 {
     LOGE("ClickEventAccessor::SetHandImpl we can only GET hand");
 }
@@ -259,7 +241,7 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
 {
     static const GENERATED_ArkUIClickEventAccessor ClickEventAccessorImpl {
         ClickEventAccessor::DestroyPeerImpl,
-        ClickEventAccessor::CtorImpl,
+        ClickEventAccessor::ConstructImpl,
         ClickEventAccessor::GetFinalizerImpl,
         ClickEventAccessor::GetDisplayXImpl,
         ClickEventAccessor::SetDisplayXImpl,
@@ -269,10 +251,6 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::SetWindowXImpl,
         ClickEventAccessor::GetWindowYImpl,
         ClickEventAccessor::SetWindowYImpl,
-        ClickEventAccessor::GetScreenXImpl,
-        ClickEventAccessor::SetScreenXImpl,
-        ClickEventAccessor::GetScreenYImpl,
-        ClickEventAccessor::SetScreenYImpl,
         ClickEventAccessor::GetXImpl,
         ClickEventAccessor::SetXImpl,
         ClickEventAccessor::GetYImpl,

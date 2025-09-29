@@ -27,8 +27,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RouterExtenderAccessor {
-Ark_NativePointer PushImpl(const Ark_String* url, const Opt_Boolean* recover, Ark_NativePointer jsView,
-    const Opt_Callback_Pointer_Void* finishCallback)
+Ark_NativePointer PushImpl(Ark_NativePointer jsView,
+                           const Ark_String* url,
+                           const Opt_Boolean* recover,
+                           const Opt_RouterFinishCallback* finishCallback)
 {
     CHECK_NULL_RETURN(url, nullptr);
     CHECK_NULL_RETURN(recover, nullptr);
@@ -48,16 +50,21 @@ Ark_NativePointer PushImpl(const Ark_String* url, const Opt_Boolean* recover, Ar
     CHECK_NULL_RETURN(delegate, nullptr);
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
-            finish.Invoke(jsNode);
+        // callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
+        //     finish.Invoke(jsNode);
+        // };
+        callback = []() {
+
         };
     }
     auto pageNode = delegate->PushExtender(pushUrl, "", recoverValue, std::move(callback), jsView);
     return pageNode;
 }
 
-Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Boolean* recover, Ark_NativePointer jsView,
-    const Opt_Callback_Pointer_Void* enterFinishCallback)
+Ark_NativePointer ReplaceImpl(Ark_NativePointer jsView,
+                              const Ark_String* url,
+                              const Opt_Boolean* recover,
+                              const Opt_RouterFinishCallback* enterFinishCallback)
 {
     CHECK_NULL_RETURN(url, nullptr);
     CHECK_NULL_RETURN(recover, nullptr);
@@ -85,7 +92,8 @@ Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Boolean* recover,
     return pageNode;
 }
 
-void MoveCommonUnderPageNode(Ark_NativePointer commonNode, Ark_NativePointer pageNode)
+void MoveCommonUnderPageNodeImpl(Ark_NativePointer commonNode,
+                                 Ark_NativePointer pageNode)
 {
     auto common = reinterpret_cast<FrameNode*>(commonNode);
     CHECK_NULL_VOID(common);
@@ -115,7 +123,8 @@ void BackImpl()
     delegate->BackExtender("", "");
 }
 
-void BackWithOptionsImpl(const Ark_String* url, const Opt_Object* params)
+void BackWithOptionsImpl(const Ark_String* url,
+                         const Opt_Object* params)
 {
     CHECK_NULL_VOID(url);
     CHECK_NULL_VOID(params);
@@ -130,8 +139,10 @@ void BackWithOptionsImpl(const Ark_String* url, const Opt_Object* params)
     delegate->BackExtender(pushUrl, param);
 }
 
-Ark_NativePointer RunPageImpl(const Ark_String* url, const Opt_Boolean* recover, Ark_NativePointer jsView,
-    const Opt_Callback_Pointer_Void* finishCallback)
+Ark_NativePointer RunPageImpl(Ark_NativePointer jsView,
+                              const Ark_String* url,
+                              const Opt_Boolean* recover,
+                              const Opt_RouterFinishCallback* finishCallback)
 {
     CHECK_NULL_RETURN(url, nullptr);
     CHECK_NULL_RETURN(recover, nullptr);
@@ -194,7 +205,7 @@ const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor()
     static const GENERATED_ArkUIRouterExtenderAccessor RouterExtenderAccessorImpl {
         RouterExtenderAccessor::PushImpl,
         RouterExtenderAccessor::ReplaceImpl,
-        RouterExtenderAccessor::MoveCommonUnderPageNode,
+        RouterExtenderAccessor::MoveCommonUnderPageNodeImpl,
         RouterExtenderAccessor::BackImpl,
         RouterExtenderAccessor::BackWithOptionsImpl,
         RouterExtenderAccessor::RunPageImpl,

@@ -17,8 +17,8 @@
 
 #include "base/log/log.h"
 #include "core/common/ace_engine.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "frameworks/core/components_ng/render/adapter/component_snapshot.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 

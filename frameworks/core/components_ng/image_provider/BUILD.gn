@@ -16,9 +16,9 @@ import(
 
 build_component_ng("image_provider_ng") {
   sources = [
-    "image_decoder.cpp",
     "animated_image_object.cpp",
     "image_data.cpp",
+    "image_decoder.cpp",
     "image_loading_context.cpp",
     "image_object.cpp",
     "image_provider.cpp",

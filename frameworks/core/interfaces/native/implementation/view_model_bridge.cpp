@@ -157,14 +157,12 @@ namespace GeneratedBridge {
 
         switch (type) {
             case GENERATED_ARKUI_CUSTOM_NODE: return GeneratedViewModel::createCustomNodeNode(id);
-            case GENERATED_ARKUI_ABILITY_COMPONENT: return GeneratedViewModel::createAbilityComponentNode(id);
             case GENERATED_ARKUI_ALPHABET_INDEXER: return GeneratedViewModel::createAlphabetIndexerNode(id);
             case GENERATED_ARKUI_ANIMATOR: return GeneratedViewModel::createAnimatorNode(id);
             case GENERATED_ARKUI_BADGE: return GeneratedViewModel::createBadgeNode(id);
             case GENERATED_ARKUI_BASE_SPAN: return GeneratedViewModel::createBaseSpanNode(id);
             case GENERATED_ARKUI_BLANK: return GeneratedViewModel::createBlankNode(id);
             case GENERATED_ARKUI_BUTTON: return GeneratedViewModel::createButtonNode(id);
-            case GENERATED_ARKUI_CALENDAR: return GeneratedViewModel::createCalendarNode(id);
             case GENERATED_ARKUI_CALENDAR_PICKER: return GeneratedViewModel::createCalendarPickerNode(id);
             case GENERATED_ARKUI_CANVAS: return GeneratedViewModel::createCanvasNode(id);
             case GENERATED_ARKUI_CHECKBOX: return GeneratedViewModel::createCheckboxNode(id);
@@ -172,9 +170,6 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_CIRCLE: return GeneratedViewModel::createCircleNode(id);
             case GENERATED_ARKUI_COLUMN: return GeneratedViewModel::createColumnNode(id);
             case GENERATED_ARKUI_COLUMN_SPLIT: return GeneratedViewModel::createColumnSplitNode(id);
-            case GENERATED_ARKUI_COMMON: return GeneratedViewModel::createCommonNode(id);
-            case GENERATED_ARKUI_COMMON_METHOD: return GeneratedViewModel::createCommonMethodNode(id);
-            case GENERATED_ARKUI_COMMON_SHAPE_METHOD: return GeneratedViewModel::createCommonShapeMethodNode(id);
             case GENERATED_ARKUI_COMPONENT_3D: return GeneratedViewModel::createComponent3DNode(id);
             case GENERATED_ARKUI_COMPONENT_ROOT: return GeneratedViewModel::createComponentRootNode(id);
             case GENERATED_ARKUI_CONTAINER_SPAN: return GeneratedViewModel::createContainerSpanNode(id);
@@ -193,7 +188,6 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_GAUGE: return GeneratedViewModel::createGaugeNode(id);
             case GENERATED_ARKUI_GRID: return GeneratedViewModel::createGridNode(id);
             case GENERATED_ARKUI_GRID_COL: return GeneratedViewModel::createGridColNode(id);
-            case GENERATED_ARKUI_GRID_CONTAINER: return GeneratedViewModel::createGridContainerNode(id);
             case GENERATED_ARKUI_GRID_ITEM: return GeneratedViewModel::createGridItemNode(id);
             case GENERATED_ARKUI_GRID_ROW: return GeneratedViewModel::createGridRowNode(id);
             case GENERATED_ARKUI_HYPERLINK: return GeneratedViewModel::createHyperlinkNode(id);
@@ -201,26 +195,20 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_IMAGE_ANIMATOR: return GeneratedViewModel::createImageAnimatorNode(id);
             case GENERATED_ARKUI_IMAGE_SPAN: return GeneratedViewModel::createImageSpanNode(id);
             case GENERATED_ARKUI_INDICATOR_COMPONENT: return GeneratedViewModel::createIndicatorComponentNode(id);
-            case GENERATED_ARKUI_LAZY_GRID_LAYOUT: return GeneratedViewModel::createLazyGridLayoutNode(id);
-            case GENERATED_ARKUI_LAZY_VGRID_LAYOUT: return GeneratedViewModel::createLazyVGridLayoutNode(id);
             case GENERATED_ARKUI_LINE: return GeneratedViewModel::createLineNode(id);
             case GENERATED_ARKUI_LINEAR_INDICATOR: return GeneratedViewModel::createLinearIndicatorNode(id);
             case GENERATED_ARKUI_LIST: return GeneratedViewModel::createListNode(id);
             case GENERATED_ARKUI_LIST_ITEM: return GeneratedViewModel::createListItemNode(id);
             case GENERATED_ARKUI_LIST_ITEM_GROUP: return GeneratedViewModel::createListItemGroupNode(id);
             case GENERATED_ARKUI_LOADING_PROGRESS: return GeneratedViewModel::createLoadingProgressNode(id);
-            case GENERATED_ARKUI_LOCATION_BUTTON: return GeneratedViewModel::createLocationButtonNode(id);
             case GENERATED_ARKUI_MARQUEE: return GeneratedViewModel::createMarqueeNode(id);
             case GENERATED_ARKUI_MEDIA_CACHED_IMAGE: return GeneratedViewModel::createMediaCachedImageNode(id);
             case GENERATED_ARKUI_MENU: return GeneratedViewModel::createMenuNode(id);
             case GENERATED_ARKUI_MENU_ITEM: return GeneratedViewModel::createMenuItemNode(id);
             case GENERATED_ARKUI_MENU_ITEM_GROUP: return GeneratedViewModel::createMenuItemGroupNode(id);
             case GENERATED_ARKUI_NAV_DESTINATION: return GeneratedViewModel::createNavDestinationNode(id);
-            case GENERATED_ARKUI_NAV_ROUTER: return GeneratedViewModel::createNavRouterNode(id);
             case GENERATED_ARKUI_NAVIGATION: return GeneratedViewModel::createNavigationNode(id);
-            case GENERATED_ARKUI_NAVIGATOR: return GeneratedViewModel::createNavigatorNode(id);
             case GENERATED_ARKUI_NODE_CONTAINER: return GeneratedViewModel::createNodeContainerNode(id);
-            case GENERATED_ARKUI_PANEL: return GeneratedViewModel::createPanelNode(id);
             case GENERATED_ARKUI_PASTE_BUTTON: return GeneratedViewModel::createPasteButtonNode(id);
             case GENERATED_ARKUI_PATH: return GeneratedViewModel::createPathNode(id);
             case GENERATED_ARKUI_PATTERN_LOCK: return GeneratedViewModel::createPatternLockNode(id);
@@ -245,9 +233,11 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_SCREEN: return GeneratedViewModel::createScreenNode(id);
             case GENERATED_ARKUI_SCROLL: return GeneratedViewModel::createScrollNode(id);
             case GENERATED_ARKUI_SCROLL_BAR: return GeneratedViewModel::createScrollBarNode(id);
-            case GENERATED_ARKUI_SCROLLABLE_COMMON_METHOD: return GeneratedViewModel::createScrollableCommonMethodNode(id);
+            case GENERATED_ARKUI_SCROLLABLE_COMMON_METHOD:
+                return GeneratedViewModel::createScrollableCommonMethodNode(id);
             case GENERATED_ARKUI_SEARCH: return GeneratedViewModel::createSearchNode(id);
-            case GENERATED_ARKUI_SECURITY_COMPONENT_METHOD: return GeneratedViewModel::createSecurityComponentMethodNode(id);
+            case GENERATED_ARKUI_SECURITY_COMPONENT_METHOD:
+                return GeneratedViewModel::createSecurityComponentMethodNode(id);
             case GENERATED_ARKUI_SELECT: return GeneratedViewModel::createSelectNode(id);
             case GENERATED_ARKUI_SHAPE: return GeneratedViewModel::createShapeNode(id);
             case GENERATED_ARKUI_SIDE_BAR_CONTAINER: return GeneratedViewModel::createSideBarContainerNode(id);

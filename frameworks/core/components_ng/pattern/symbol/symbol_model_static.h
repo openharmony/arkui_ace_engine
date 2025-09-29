@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,9 @@ public:
     static void SetSymbolEffect(FrameNode* frameNode, const std::optional<uint32_t>& effectStrategy);
     static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetSymbolType(FrameNode* frameNode, const std::optional<SymbolType>& optValue);
+    static void SetFontFamilies(FrameNode* frameNode, const std::optional<std::vector<std::string>>& optValue);
+    static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode);
 };
 } // namespace OHOS::Ace::NG
 

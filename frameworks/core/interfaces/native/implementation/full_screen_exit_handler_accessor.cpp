@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_FullScreenExitHandler peer)
 {
     delete peer;
 }
-Ark_FullScreenExitHandler CtorImpl()
+Ark_FullScreenExitHandler ConstructImpl()
 {
     return new FullScreenExitHandlerPeer();
 }
@@ -42,7 +42,7 @@ const GENERATED_ArkUIFullScreenExitHandlerAccessor* GetFullScreenExitHandlerAcce
 {
     static const GENERATED_ArkUIFullScreenExitHandlerAccessor FullScreenExitHandlerAccessorImpl {
         FullScreenExitHandlerAccessor::DestroyPeerImpl,
-        FullScreenExitHandlerAccessor::CtorImpl,
+        FullScreenExitHandlerAccessor::ConstructImpl,
         FullScreenExitHandlerAccessor::GetFinalizerImpl,
         FullScreenExitHandlerAccessor::ExitFullScreenImpl,
     };

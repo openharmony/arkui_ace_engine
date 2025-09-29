@@ -15,6 +15,11 @@
 
 import { Finalizable } from "./Finalizable"
 
+export class MaterializedBaseTag {
+    static NOP = new MaterializedBaseTag()
+    private constructor() { }
+}
+
 export interface MaterializedBase {
     getPeer(): Finalizable | undefined
 }

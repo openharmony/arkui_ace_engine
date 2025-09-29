@@ -44,7 +44,7 @@ std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
 static ani_object getSize([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/SizeInner;";
+    static const char* className = "@ohos.arkui.componentUtils.componentUtils.SizeInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -68,7 +68,7 @@ static ani_object getSize([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangl
 static ani_object getLocalOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/OffsetInner;";
+    static const char* className = "@ohos.arkui.componentUtils.componentUtils.OffsetInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -92,7 +92,7 @@ static ani_object getLocalOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::R
 static ani_object getWindowOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/OffsetInner;";
+    static const char* className = "@ohos.arkui.componentUtils.componentUtils.OffsetInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -116,7 +116,7 @@ static ani_object getWindowOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::
 static ani_object getScreenOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/OffsetInner;";
+    static const char* className = "@ohos.arkui.componentUtils.componentUtils.OffsetInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -142,7 +142,7 @@ static ani_object getScreenOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::
 static ani_object getTranslateResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/TranslateResultInner;";
+    static const char* className = "@ohos.arkui.componentUtils.componentUtils.TranslateResultInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -169,7 +169,7 @@ static ani_object getTranslateResult([[maybe_unused]] ani_env* env, OHOS::Ace::N
 static ani_object getScaleResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/ScaleResultInner;";
+    static const char* className = "@ohos.arkui.componentUtils.componentUtils.ScaleResultInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -202,7 +202,7 @@ static ani_object getScaleResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::R
 static ani_object getRotateResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     ani_object obj = {};
-    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/RotateResultInner;";
+    static const char* className = "@ohos.arkui.componentUtils.componentUtils.RotateResultInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -242,9 +242,9 @@ static ani_object getTransform([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rec
     env->Array_New(size, nullptr, &array);
 
     ani_class doubleClass = nullptr;
-    env->FindClass("Lstd/core/Double;", &doubleClass);
+    env->FindClass("std.core.Double", &doubleClass);
     ani_method doubleCtor = nullptr;
-    env->Class_FindMethod(doubleClass, "<ctor>", "D:V", &doubleCtor);
+    env->Class_FindMethod(doubleClass, "<ctor>", "d:", &doubleCtor);
 
     for (int32_t i = 0; i < size; i++) {
         ani_object boxedDouble {};
@@ -260,7 +260,7 @@ static ani_object getRectangleById([[maybe_unused]] ani_env* env, ani_string id)
     auto key = ANIUtils_ANIStringToStdString(env, id);
     OHOS::Ace::NG::Inspector::GetRectangleById(key, rectangle);
     ani_object rectangleObj = {};
-    static const char* className = "L@ohos/arkui/componentUtils/componentUtils/ComponentInfoInner;";
+    static const char* className = "@ohos.arkui.componentUtils.componentUtils.ComponentInfoInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -339,7 +339,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/arkui/componentUtils/componentUtils;", &ns)) {
+    if (ANI_OK != env->FindNamespace("@ohos.arkui.componentUtils.componentUtils", &ns)) {
         std::cout << "Failed componentUtils to create namespace" << std::endl;
         return ANI_ERROR;
     }

@@ -14,6 +14,8 @@
  */
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 
+#include "core/components_ng/pattern/overlay/sheet_theme.h"
+
 namespace OHOS::Ace::NG {
 constexpr int32_t EFFECT_EDGE_ZERO = 0;
 constexpr int32_t EFFECT_EDGE_ONE = 1;
@@ -74,7 +76,7 @@ void BindSheetUtil::ParseLifecycleCallbacks(SheetCallbacks& callbacks, const Ark
         };
     }
 }
-void BindSheetUtil::ParseFuntionalCallbacks(SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions)
+void BindSheetUtil::ParseFunctionalCallbacks(SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions)
 {
     auto onWillDismiss = Converter::OptConvert<Callback_DismissSheetAction_Void>(sheetOptions.onWillDismiss);
     if (onWillDismiss) {
@@ -122,46 +124,22 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
 {
     sheetStyle.showInPage = OptConvert<SheetLevel>(sheetOptions.mode).value_or(SheetLevel::OVERLAY);
     std::vector<SheetHeight> detents;
-    auto detentsOpt =
-        OptConvert<Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents>(sheetOptions.detents);
-    std::optional<SheetHeight> value0;
-    std::optional<SheetHeight> value1;
-    std::optional<SheetHeight> value2;
-    if (detentsOpt.has_value()) {
-        switch (detentsOpt.value().selector) {
-            case DETENTS_SELECT_ZERO:
-                value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value0.value0);
-                if (value0) {
-                    detents.emplace_back(value0.value());
-                }
-                break;
-            case DETENTS_SELECT_ONE:
-                value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1.value0);
-                if (value0) {
-                    detents.emplace_back(value0.value());
-                }
-                value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1.value1);
-                if (value1) {
-                    detents.emplace_back(value1.value());
-                }
-                break;
-            case DETENTS_SELECT_TWO:
-                value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2.value0);
-                if (value0) {
-                    detents.emplace_back(value0.value());
-                }
-                value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2.value1);
-                if (value1) {
-                    detents.emplace_back(value1.value());
-                }
-                value2 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2.value2);
-                if (value2) {
-                    detents.emplace_back(value2.value());
-                }
-                break;
+    auto detentsOpt = GetOpt(sheetOptions.detents);
+    if (detentsOpt) {
+        auto value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value0);
+        if (value0) {
+            detents.emplace_back(value0.value());
         }
+        auto value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1);
+        if (value1) {
+            detents.emplace_back(value1.value());
+        }
+        auto value2 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2);
+        if (value2) {
+            detents.emplace_back(value2.value());
+        }
+        sheetStyle.detents = detents;
     }
-    sheetStyle.detents = detents;
     sheetStyle.backgroundBlurStyle = OptConvert<BlurStyleOption>(sheetOptions.blurStyle);
     sheetStyle.showCloseIcon = OptConvert<bool>(sheetOptions.showClose);
     sheetStyle.interactive = OptConvert<bool>(sheetOptions.enableOutsideInteractive);
@@ -178,6 +156,7 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
     sheetStyle.enableHoverMode = OptConvert<bool>(sheetOptions.enableHoverMode);
     sheetStyle.hoverModeArea = OptConvert<HoverModeAreaType>(sheetOptions.hoverModeArea);
     sheetStyle.width = OptConvert<Dimension>(sheetOptions.width);
+    sheetStyle.instanceId = OptConvert<int32_t>(sheetOptions.uiContext);
     auto effectEdge = OptConvert<int>(sheetOptions.effectEdge.value).value_or(3);
     switch (effectEdge) {
         case EFFECT_EDGE_ZERO:
@@ -194,11 +173,7 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
             break;
     }
     sheetStyle.radius = OptConvert<NG::BorderRadiusProperty>(sheetOptions.radius);
-    if (LessNotEqual(sheetOptions.detentSelection.value.value1.value, DETENT_SELECTION_EDGE)) {
-        sheetStyle.detentSelection.reset();
-    } else {
-        sheetStyle.detentSelection = OptConvert<SheetHeight>(sheetOptions.detentSelection);
-    }
+    sheetStyle.detentSelection = OptConvert<SheetHeight>(sheetOptions.detentSelection);
     sheetStyle.showInSubWindow = OptConvert<bool>(sheetOptions.showInSubWindow).value_or(false);
     sheetStyle.placement = OptConvert<Placement>(sheetOptions.placement);
     sheetStyle.placementOnTarget = OptConvert<bool>(sheetOptions.placementOnTarget).value_or(true);
@@ -213,6 +188,37 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
     sheetOffset.SetY(offsetVal.second.value().ConvertToPx());
     sheetStyle.bottomOffset = sheetOffset;
 }
+
+void BindSheetUtil::ModifySheetStyle(
+    const RefPtr<NG::FrameNode>& sheetContentRefptr, SheetStyle& sheetStyle, bool isPartialUpdate)
+{
+    // When isPartialUpdate is false, set some unassigned fields in the sheetStyle to the default value
+    if (isPartialUpdate) {
+        return;
+    }
+    CHECK_NULL_VOID(sheetContentRefptr);
+    auto pipelineContext = sheetContentRefptr->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto sheetTheme = themeManager->GetTheme<OHOS::Ace::NG::SheetTheme>(sheetContentRefptr->GetThemeScopeId());
+
+    if (!sheetStyle.showCloseIcon.has_value()) {
+        sheetStyle.showCloseIcon = (sheetTheme != nullptr) ? sheetTheme->GetShowCloseIcon() : true;
+    }
+    if (!sheetStyle.showDragBar.has_value()) {
+        sheetStyle.showDragBar = true;
+    }
+    if (!sheetStyle.enableFloatingDragBar.has_value()) {
+        sheetStyle.enableFloatingDragBar = false;
+    }
+    if (!sheetStyle.sheetHeight.sheetMode.has_value()) {
+        sheetStyle.sheetHeight.sheetMode = sheetTheme != nullptr ?
+                                   static_cast<NG::SheetMode>(sheetTheme->GetSheetHeightDefaultMode()) :
+                                   NG::SheetMode::LARGE;
+    }
+}
+
 void BindSheetUtil::ParseContentCoverCallbacks(WeakPtr<FrameNode> weakNode, const Ark_ContentCoverOptions& options,
     std::function<void()>& onShowCallback, std::function<void()>& onDismissCallback,
     std::function<void()>& onWillShowCallback, std::function<void()>& onWillDismissCallback,

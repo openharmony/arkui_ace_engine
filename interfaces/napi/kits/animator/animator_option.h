@@ -149,25 +149,59 @@ private:
     std::optional<AnimationDirection> direction_;
 };
 
-class AnimatorResult final {
+class AnimatorResultBase {
 public:
-    AnimatorResult() = default;
-    AnimatorResult(RefPtr<Animator>& animator, std::shared_ptr<AnimatorOption>& option)
+    AnimatorResultBase() = default;
+    AnimatorResultBase(RefPtr<Animator>& animator, std::shared_ptr<AnimatorOption>& option)
         : animator_(animator), option_(option)
-    {
-        ApplyOption();
-    }
-    ~AnimatorResult() = default;
+    {}
+    virtual ~AnimatorResultBase() = default;
 
     RefPtr<Animator> GetAnimator() const
     {
         return animator_;
     }
 
+    void SetAnimator(RefPtr<Animator>& animator)
+    {
+        animator_ = animator;
+    }
+
     std::shared_ptr<AnimatorOption> GetAnimatorOption() const
     {
         return option_;
     }
+
+    void SetAnimatorOption(std::shared_ptr<AnimatorOption> option)
+    {
+        option_ = option;
+    }
+
+    const RefPtr<Motion>& GetMotion() const
+    {
+        return motion_;
+    }
+
+    void SetMotion(const RefPtr<Motion>& motion)
+    {
+        motion_ = motion;
+    }
+
+protected:
+    RefPtr<Animator> animator_;
+    RefPtr<Motion> motion_;
+    std::shared_ptr<AnimatorOption> option_;
+};
+
+class AnimatorResult final: public AnimatorResultBase {
+public:
+    AnimatorResult() = default;
+    AnimatorResult(RefPtr<Animator>& animator, std::shared_ptr<AnimatorOption>& option)
+        : AnimatorResultBase(animator, option)
+    {
+        ApplyOption();
+    }
+    ~AnimatorResult() override = default;
 
     napi_ref GetOnframeRef() const
     {
@@ -209,24 +243,11 @@ public:
         onrepeat_ = onrepeat;
     }
 
-    const RefPtr<Motion>& GetMotion() const
-    {
-        return motion_;
-    }
-
-    void SetMotion(const RefPtr<Motion>& motion)
-    {
-        motion_ = motion;
-    }
-
     void ApplyOption();
 
     void Destroy(napi_env env);
 
 private:
-    RefPtr<Animator> animator_;
-    RefPtr<Motion> motion_;
-    std::shared_ptr<AnimatorOption> option_;
     napi_ref onframe_ = nullptr;
     napi_ref onfinish_ = nullptr;
     napi_ref oncancel_ = nullptr;

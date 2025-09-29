@@ -135,15 +135,15 @@ void RichEditorModelStatic::SetEnterKeyType(FrameNode* frameNode, const std::opt
 
 void RichEditorModelStatic::SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& selectedColor)
 {
-    // auto pattern = frameNode->GetPattern<RichEditorPattern>();
-    // CHECK_NULL_VOID(pattern);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
     // pattern->SetSelectedBackgroundColor(selectedColor);
 }
 
 void RichEditorModelStatic::SetCaretColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    // auto pattern = frameNode->GetPattern<RichEditorPattern>();
-    // CHECK_NULL_VOID(pattern);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
     // pattern->SetCaretColor(color);
 }
 
@@ -185,21 +185,21 @@ void RichEditorModelStatic::BindSelectionMenu(FrameNode* frameNode, TextSpanType
     }
 }
 
+void RichEditorModelStatic::SetSelectionMenuOptions(FrameNode* frameNode,
+    const OnCreateMenuCallback&& onCreateMenuCallback, const OnMenuItemClickCallback&& onMenuItemClick)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
+        nullptr);
+}
+
 void RichEditorModelStatic::SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMaxLength(value);
-}
-
-void RichEditorModelStatic::SetMaxLines(FrameNode* frameNode, uint32_t value)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<RichEditorPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetMaxLinesHeight(FLT_MAX);
-    pattern->SetMaxLines(value);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

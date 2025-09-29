@@ -126,4 +126,37 @@ void SetRadiusValue(const OHOS::Ace::RefPtr<OHOS::Ace::ShapeRect>& shapeRect,
     const OHOS::Ace::CalcDimension& radius, int32_t index);
 bool ParseStringNumberUndefinedObject(ani_env* env, ani_ref property_ref, OHOS::Ace::DimensionUnit defaultUnit,
     std::optional<OHOS::Ace::CalcDimension>& result);
+template <typename T>
+ani_object ANIShapeFromPtr(ani_env* env, ani_long ptr, const char* className, const char* propertyName)
+{
+    ani_status status;
+    ani_method ctor = nullptr;
+    ani_class myClass;
+    if ((status = env->FindClass(className, &myClass)) != ANI_OK) {
+        LOGW("ANIShapeFromPtr find class error, status:%{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(myClass, "<ctor>", ":", &ctor)) != ANI_OK) {
+        LOGW("ANIShapeFromPtr find constructor error, status:%{public}d", status);
+        return nullptr;
+    }
+    ani_object result;
+    if ((status = env->Object_New(myClass, ctor, &result)) != ANI_OK) {
+        LOGW("ANIShapeFromPtr Object_New error, status:%{public}d", status);
+        return nullptr;
+    }
+    ani_long addr = 0L;
+    if ((status = env->Object_GetPropertyByName_Long(result, propertyName, &addr)) != ANI_OK) {
+        LOGW("ANIShapeFromPtr getProperty error, status:%{public}d", status);
+        return nullptr;
+    }
+    auto peer = reinterpret_cast<T*>(addr);
+    delete peer;
+    if ((status = env->Object_SetPropertyByName_Long(result, propertyName, reinterpret_cast<ani_long>(ptr))) !=
+        ANI_OK) {
+        LOGW("ANIShapeFromPtr setProperty error, status:%{public}d", status);
+        return nullptr;
+    }
+    return result;
+}
 #endif

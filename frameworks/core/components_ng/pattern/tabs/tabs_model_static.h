@@ -69,6 +69,7 @@ public:
     static void SetCachedMaxCount(FrameNode* frameNode, std::optional<int32_t> cachedMaxCount,
         std::optional<TabsCacheMode> cacheMode);
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChangeEvent);
+    static void ApplyAttributesFinish(FrameNode* frameNode);
 
 private:
     static RefPtr<TabsNode> GetOrCreateTabsNode(

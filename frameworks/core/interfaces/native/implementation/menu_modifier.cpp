@@ -20,7 +20,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace OHOS::Ace::NG {
 using BorderRadiusesType = std::variant<std::optional<Dimension>, BorderRadiusProperty>;
@@ -28,7 +27,19 @@ using BorderRadiusesType = std::variant<std::optional<Dimension>, BorderRadiusPr
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-BorderRadiusesType Convert(const Ark_Length& src)
+BorderRadiusesType Convert(const Ark_Number& src)
+{
+    return Converter::OptConvert<Dimension>(src);
+}
+
+template<>
+BorderRadiusesType Convert(const Ark_String& src)
+{
+    return Converter::OptConvert<Dimension>(src);
+}
+
+template<>
+BorderRadiusesType Convert(const Ark_Resource& src)
 {
     return Converter::OptConvert<Dimension>(src);
 }
@@ -68,7 +79,7 @@ V2::ItemDivider Convert(const Ark_DividerStyleOptions& src)
 template<>
 DividerMode Convert(const Ark_DividerStyleOptions& src)
 {
-    DividerMode mode = OptConvert<DividerMode>(src.mode).value_or(mode);
+    DividerMode mode = OptConvert<DividerMode>(src.mode).value_or(DividerMode::FLOATING_ABOVE_MENU);
     return mode;
 }
 }
@@ -91,42 +102,35 @@ void SetMenuOptionsImpl(Ark_NativePointer node)
 }
 } // MenuInterfaceModifier
 namespace MenuAttributeModifier {
-void FontSizeImpl(Ark_NativePointer node,
-                  const Opt_Length* value)
+void SetFontImpl(Ark_NativePointer node,
+                 const Opt_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuModelStatic::SetFontSize(frameNode, Converter::OptConvert<Dimension>(*value));
-}
-void FontImpl(Ark_NativePointer node,
-              const Opt_Font* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto fontOpt = Converter::OptConvert<Font>(*value);
+    auto fontOpt = Converter::OptConvertPtr<Font>(value);
     if (fontOpt.has_value()) {
-        // TODO: Reset value
+        // Implement Reset value
         MenuModelStatic::SetFontSize(frameNode, fontOpt.value().fontSize);
         MenuModelStatic::SetFontWeight(frameNode, fontOpt.value().fontWeight);
         MenuModelStatic::SetFontStyle(frameNode, fontOpt.value().fontStyle);
         MenuModelStatic::SetFontFamily(frameNode, fontOpt.value().fontFamilies);
     }
 }
-void FontColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
+void SetFontColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuModelStatic::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
+    MenuModelStatic::SetFontColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
-void RadiusImpl(Ark_NativePointer node,
-                const Opt_Union_Dimension_BorderRadiuses* value)
+void SetRadiusImpl(Ark_NativePointer node,
+                   const Opt_Union_Dimension_BorderRadiuses* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto radiusesOpt = Converter::OptConvert<BorderRadiusesType>(*value);
+    auto radiusesOpt = Converter::OptConvertPtr<BorderRadiusesType>(value);
     if (radiusesOpt) {
-        // TODO: Reset value
+        // Implement Reset value
         if (auto radiusPtr = std::get_if<std::optional<Dimension>>(&(*radiusesOpt)); radiusPtr) {
             Validator::ValidateNonNegative(*radiusPtr);
             MenuModelStatic::SetBorderRadius(frameNode, *radiusPtr);
@@ -142,8 +146,8 @@ void RadiusImpl(Ark_NativePointer node,
         }
     }
 }
-void MenuItemDividerImpl(Ark_NativePointer node,
-                         const Opt_DividerStyleOptions* value)
+void SetMenuItemDividerImpl(Ark_NativePointer node,
+                            const Opt_DividerStyleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -152,8 +156,8 @@ void MenuItemDividerImpl(Ark_NativePointer node,
     auto mode = Converter::OptConvert<DividerMode>(*value);
     MenuModelStatic::SetItemDivider(frameNode, divider, mode);
 }
-void MenuItemGroupDividerImpl(Ark_NativePointer node,
-                              const Opt_DividerStyleOptions* value)
+void SetMenuItemGroupDividerImpl(Ark_NativePointer node,
+                                 const Opt_DividerStyleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -162,12 +166,12 @@ void MenuItemGroupDividerImpl(Ark_NativePointer node,
     auto mode = Converter::OptConvert<DividerMode>(*value);
     MenuModelStatic::SetItemGroupDivider(frameNode, divider, mode);
 }
-void SubMenuExpandingModeImpl(Ark_NativePointer node,
-                              const Opt_SubMenuExpandingMode* value)
+void SetSubMenuExpandingModeImpl(Ark_NativePointer node,
+                                 const Opt_SubMenuExpandingMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuModelStatic::SetExpandingMode(frameNode, Converter::OptConvert<SubMenuExpandingMode>(*value));
+    MenuModelStatic::SetExpandingMode(frameNode, Converter::OptConvertPtr<SubMenuExpandingMode>(value));
 }
 } // MenuAttributeModifier
 const GENERATED_ArkUIMenuModifier* GetMenuModifier()
@@ -175,13 +179,12 @@ const GENERATED_ArkUIMenuModifier* GetMenuModifier()
     static const GENERATED_ArkUIMenuModifier ArkUIMenuModifierImpl {
         MenuModifier::ConstructImpl,
         MenuInterfaceModifier::SetMenuOptionsImpl,
-        MenuAttributeModifier::FontSizeImpl,
-        MenuAttributeModifier::FontImpl,
-        MenuAttributeModifier::FontColorImpl,
-        MenuAttributeModifier::RadiusImpl,
-        MenuAttributeModifier::MenuItemDividerImpl,
-        MenuAttributeModifier::MenuItemGroupDividerImpl,
-        MenuAttributeModifier::SubMenuExpandingModeImpl,
+        MenuAttributeModifier::SetFontImpl,
+        MenuAttributeModifier::SetFontColorImpl,
+        MenuAttributeModifier::SetRadiusImpl,
+        MenuAttributeModifier::SetMenuItemDividerImpl,
+        MenuAttributeModifier::SetMenuItemGroupDividerImpl,
+        MenuAttributeModifier::SetSubMenuExpandingModeImpl,
     };
     return &ArkUIMenuModifierImpl;
 }

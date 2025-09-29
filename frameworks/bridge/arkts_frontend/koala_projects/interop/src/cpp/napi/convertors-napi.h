@@ -31,7 +31,7 @@
 #include "koala-types.h"
 #include "interop-types.h"
 
-// TODO: switch to more generic convertors eventually.
+// Improve: switch to more generic convertors eventually.
 template<class T>
 struct InteropTypeConverter {
     using InteropType = T;
@@ -64,11 +64,21 @@ napi_value makeUInt32(napi_env env, uint32_t value);
 napi_value makeInt64(napi_env env, int64_t value);
 napi_value makeUInt64(napi_env env, uint64_t value);
 napi_value makeFloat32(napi_env env, float value);
+napi_value makeFloat64(napi_env env, double value);
 napi_value makePointer(napi_env env, void* value);
 napi_value makeVoid(napi_env env);
-// napi_value makeObject(napi_env env, napi_value object);
 
-void* getPointer(napi_env env, napi_value value);
+void* getPointerSlow(napi_env env, napi_value value);
+
+inline void* getPointer(napi_env env, napi_value value) {
+  bool isWithinRange = true;
+  uint64_t ptrU64 = 0;
+  napi_status status = napi_get_value_bigint_uint64(env, value, &ptrU64, &isWithinRange);
+  if (status != 0 || !isWithinRange)
+    return getPointerSlow(env, value);
+  else
+    return reinterpret_cast<void*>(ptrU64);
+}
 void* getSerializerBufferPointer(napi_env env, napi_value value);
 
 template<>
@@ -79,12 +89,12 @@ struct InteropTypeConverter<KInteropBuffer> {
       bool isArrayBuffer = false;
       napi_is_arraybuffer(env, value, &isArrayBuffer);
       if (isArrayBuffer) {
-        napi_get_arraybuffer_info(env, value, &result.data, (size_t*)&result.length);
+        napi_get_arraybuffer_info(env, value, &result.data, reinterpret_cast<size_t*>(&result.length));
       } else {
         bool isDataView = false;
         napi_is_dataview(env, value, &isDataView);
         if (isDataView) {
-          napi_get_dataview_info(env, value, (size_t*)&result.length, &result.data, nullptr, nullptr);
+          napi_get_dataview_info(env, value, reinterpret_cast<size_t*>(&result.length), &result.data, nullptr, nullptr);
         }
       }
       return result;
@@ -153,7 +163,7 @@ template<>
 struct InteropTypeConverter<KSerializerBuffer> {
     using InteropType = napi_value;
     static KSerializerBuffer convertFrom(napi_env env, InteropType value) {
-        return (KSerializerBuffer)getSerializerBufferPointer(env, value); // TODO we are receiving Uint8Array from the native side
+        return (KSerializerBuffer)getSerializerBufferPointer(env, value); // Improve: we are receiving Uint8Array from the native side
     }
     static InteropType convertTo(napi_env env, KSerializerBuffer value) {
       return makePointer(env, value);
@@ -195,20 +205,25 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
     static inline void release(napi_env env, InteropType value, const KInteropReturnBuffer& converted) = delete;
 };
 
-#define KOALA_INTEROP_THROW(vmcontext, object, ...) \
+
+#define KOALA_INTEROP_THROW(vmContext, object, ...) \
    do { \
-     napi_env env = (napi_env)vmcontext; \
+     napi_env env = (napi_env)vmContext; \
      napi_handle_scope scope = nullptr; \
-     napi_throw((napi_env)vmcontext, object); \
+     napi_open_handle_scope(env, &scope); \
+     napi_throw(env, object); \
      napi_close_handle_scope(env, scope); \
      return __VA_ARGS__;  \
    } while (0)
 
 #define KOALA_INTEROP_THROW_STRING(vmContext, message, ...) \
   do { \
-    napi_value value; \
-    napi_create_string_utf8((napi_env)vmContext, message, strlen(message), &value); \
-    KOALA_INTEROP_THROW(vmContext, value, __VA_ARGS__); \
+    napi_env env = (napi_env)vmContext; \
+    napi_handle_scope scope = nullptr; \
+    napi_open_handle_scope(env, &scope); \
+    napi_throw_error(env, nullptr, message); \
+    napi_close_handle_scope(env, scope); \
+    return __VA_ARGS__;  \
   } while (0)
 
 #define NAPI_ASSERT_INDEX(info, index, result)              \
@@ -243,7 +258,7 @@ public:
     status = napi_get_cb_info(env, info, &size, nullptr, nullptr, nullptr);
     KOALA_NAPI_THROW_IF_FAILED_VOID(env, status);
     if (size > 0) {
-      args.resize(size);  // TODO statically allocate small array for common case with few arguments passed
+      args.resize(size);  // Improve: statically allocate small array for common case with few arguments passed
       status = napi_get_cb_info(env, info, &size, args.data(), nullptr, nullptr);
       KOALA_NAPI_THROW_IF_FAILED_VOID(env, status);
     }
@@ -277,6 +292,11 @@ inline napi_typedarray_type getNapiType() = delete;
 template <>
 inline napi_typedarray_type getNapiType<float>() {
   return napi_float32_array;
+}
+
+template <>
+inline napi_typedarray_type getNapiType<double>() {
+  return napi_float64_array;
 }
 
 template <>
@@ -386,6 +406,10 @@ inline float* getFloat32Elements(const CallbackInfo& info, int index) {
   return getTypedElements<float>(info, index);
 }
 
+inline double* getFloat64Elements(const CallbackInfo& info, int index) {
+  return getTypedElements<double>(info, index);
+}
+
 inline KNativePointer* getPointerElements(const CallbackInfo& info, int index) {
   return getTypedElements<KNativePointer>(info, index);
 }
@@ -438,13 +462,6 @@ inline KBoolean getBoolean(const CallbackInfo& info, int index) {
   NAPI_ASSERT_INDEX(info, index, false);
   return getBoolean(info.Env(), info[index]);
 }
-// TODO should we keep supporting conversion to and from raw JS object values?
-// napi_value getObject(napi_env env, napi_value value);
-// inline napi_value getObject(const CallbackInfo& info, int index) {
-//   NAPI_ASSERT_INDEX(info, index, info.Env().Global());
-//   return getObject(info.Env(), info[index]);
-// }
-
 template <typename Type>
 inline Type getArgument(const CallbackInfo& info, int index) = delete;
 
@@ -474,49 +491,6 @@ inline KSerializerBuffer getArgument<KSerializerBuffer>(const CallbackInfo& info
   NAPI_ASSERT_INDEX(info, index, nullptr);
   return getArgument<KSerializerBuffer>(info.Env(), info[index]);
 }
-
-template <>
-inline KLength getArgument<KLength>(const CallbackInfo& info, int index) {
-  KLength result { 0 };
-  NAPI_ASSERT_INDEX(info, index, result);
-  auto value = info[index];
-  napi_valuetype type;
-  auto status = napi_typeof(info.Env(), value, &type);
-  if (status != 0) return result;
-  switch (type) {
-    case napi_number: {
-      result.value = getFloat32(info.Env(), value);
-      result.unit = 1;
-      result.type = 0;
-      break;
-    }
-    case napi_string: {
-      KStringPtr string = getString(info.Env(), value);
-      parseKLength(string, &result);
-      result.type = 1;
-      result.resource = 0;
-      break;
-    }
-    case napi_object: {
-      result.value = 0;
-      result.unit = 1;
-      result.type = 2;
-      napi_value field;
-      napi_status status = napi_get_named_property(info.Env(), value, "id", &field);
-      if (status == 0) {
-        status = napi_get_value_int32(info.Env(), field, &result.resource);
-        if (status != 0) result.resource = 0;
-      } else {
-        result.resource = 0;
-      }
-      break;
-    }
-    default:
-      INTEROP_FATAL("Error, unexpected KLength type");
-  }
-  return result;
-}
-
 
 template <>
 inline KInteropBuffer getArgument<KInteropBuffer>(const CallbackInfo& info, int index) {
@@ -553,11 +527,6 @@ template <>
 inline KNativePointerArray getArgument<KNativePointerArray>(const CallbackInfo& info, int index) {
   return getPointerElements(info, index);
 }
-
-// template <>
-// inline napi_value getArgument<napi_value>(const CallbackInfo& info, int index) {
-//   return getObject(info, index);
-// }
 
 template <>
 inline uint8_t* getArgument<uint8_t*>(const CallbackInfo& info, int index) {
@@ -639,6 +608,11 @@ inline napi_value makeResult<KULong>(const CallbackInfo& info, uint64_t value) {
 template <>
 inline napi_value makeResult<float>(const CallbackInfo& info, float value) {
   return makeFloat32(info.Env(), value);
+}
+
+template <>
+inline napi_value makeResult<double>(const CallbackInfo& info, double value) {
+  return makeFloat64(info.Env(), value);
 }
 
 template <>
@@ -1411,7 +1385,7 @@ public:
     KOALA_INTEROP_V11(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10)
 
 napi_value getKoalaNapiCallbackDispatcher(napi_env env);
-// TODO: can/shall we cache bridge reference?
+// Improve: can/shall we cache bridge reference?
 
 #define KOALA_INTEROP_CALL_VOID(venv, id, length, args)                            \
 {                                                                                  \

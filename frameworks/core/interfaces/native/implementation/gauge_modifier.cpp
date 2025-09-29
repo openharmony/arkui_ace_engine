@@ -25,6 +25,7 @@ namespace {
 constexpr double DEFAULT_GAUGE_VALUE = 0;
 constexpr double DEFAULT_GAUGE_MIN = 0;
 constexpr double DEFAULT_GAUGE_MAX = 100;
+constexpr Color ERROR_COLOR = Color(0xFFE84026);
 void SortColorStopOffset(std::vector<ColorStopArray>& colors)
 {
     for (auto& colorStopArray : colors) {
@@ -51,6 +52,8 @@ ColorStopArray Convert(const Ark_ResourceColor& src)
     const auto color = OptConvert<Color>(src);
     if (color) {
         colorStop.emplace_back(std::make_pair(*color, Dimension(0.0)));
+    } else {
+        colorStop.emplace_back(std::make_pair(ERROR_COLOR, Dimension(0.0)));
     }
     return colorStop;
 }
@@ -128,80 +131,80 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     // CHECK_NULL_RETURN(frameNode, nullptr);
     // frameNode->IncRefCount();
     // return AceType::RawPtr(frameNode);
-    return {};
+    return nullptr;
 }
 } // GaugeModifier
 namespace GaugeInterfaceModifier {
 void SetGaugeOptionsImpl(Ark_NativePointer node,
                          const Ark_GaugeOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto min = Converter::OptConvert<float>(options->min);
-    auto max = Converter::OptConvert<float>(options->max);
-    if (!min) {
-        min = DEFAULT_GAUGE_MIN;
-    }
-    if (!max) {
-        max = DEFAULT_GAUGE_MAX;
-    }
-    if (LessNotEqual(*max, *min)) {
-        min = DEFAULT_GAUGE_MIN;
-        max = DEFAULT_GAUGE_MAX;
-    }
-    auto value = Converter::OptConvert<float>(options->value);
-    if (!value) {
-        value = DEFAULT_GAUGE_VALUE;
-    }
-    if (LessNotEqual(*value, *min) || GreatNotEqual(*value, *max)) {
-        value = min;
-    }
-    GaugeModelStatic::SetValue(frameNode, value);
-    GaugeModelStatic::SetMin(frameNode, min);
-    GaugeModelStatic::SetMax(frameNode, max);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // CHECK_NULL_VOID(options);
+    // auto min = Converter::OptConvert<float>(options->min);
+    // auto max = Converter::OptConvert<float>(options->max);
+    // if (!min) {
+    //     min = DEFAULT_GAUGE_MIN;
+    // }
+    // if (!max) {
+    //     max = DEFAULT_GAUGE_MAX;
+    // }
+    // if (LessNotEqual(*max, *min)) {
+    //     min = DEFAULT_GAUGE_MIN;
+    //     max = DEFAULT_GAUGE_MAX;
+    // }
+    // auto value = Converter::OptConvert<float>(options->value);
+    // if (!value) {
+    //     value = DEFAULT_GAUGE_VALUE;
+    // }
+    // if (LessNotEqual(*value, *min) || GreatNotEqual(*value, *max)) {
+    //     value = min;
+    // }
+    // GaugeModelStatic::SetValue(frameNode, value);
+    // GaugeModelStatic::SetMin(frameNode, min);
+    // GaugeModelStatic::SetMax(frameNode, max);
     // GaugeModelNG::SetIsShowLimitValue(frameNode, min || max);
 }
 } // GaugeInterfaceModifier
 namespace GaugeAttributeModifier {
-void ValueImpl(Ark_NativePointer node,
-               const Opt_Number* value)
+void SetValueImpl(Ark_NativePointer node,
+                  const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
         GaugeModelNG::SetValue(frameNode, DEFAULT_GAUGE_VALUE);
         return;
     }
     GaugeModelStatic::SetValue(frameNode, convValue);
 }
-void StartAngleImpl(Ark_NativePointer node,
-                    const Opt_Number* value)
+void SetStartAngleImpl(Ark_NativePointer node,
+                       const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     GaugeModelNG::SetStartAngle(frameNode, *convValue);
 }
-void EndAngleImpl(Ark_NativePointer node,
-                  const Opt_Number* value)
+void SetEndAngleImpl(Ark_NativePointer node,
+                     const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     GaugeModelNG::SetEndAngle(frameNode, *convValue);
 }
-void ColorsImpl(Ark_NativePointer node,
-                const Opt_Type_GaugeAttribute_colors_colors* value)
+void SetColorsImpl(Ark_NativePointer node,
+                   const Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -239,7 +242,7 @@ void ColorsImpl(Ark_NativePointer node,
             }
         },
         []() {
-            // TODO: Reset value
+            // Implement Reset value
         });
     if (gaugeColors.has_value()) {
         SortColorStopOffset(gaugeColors->gradient);
@@ -248,47 +251,47 @@ void ColorsImpl(Ark_NativePointer node,
         GaugeModelNG::ResetGradientColors(frameNode);
     }
 }
-void StrokeWidthImpl(Ark_NativePointer node,
-                     const Opt_Length* value)
+void SetStrokeWidthImpl(Ark_NativePointer node,
+                        const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto strokeWidth = Converter::OptConvert<Dimension>(*value);
+    auto strokeWidth = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     GaugeModelStatic::SetGaugeStrokeWidth(frameNode, strokeWidth);
 }
-void DescriptionImpl(Ark_NativePointer node,
-                     const Opt_CustomNodeBuilder* value)
+void SetDescriptionImpl(Ark_NativePointer node,
+                        const Opt_CustomNodeBuilder* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     CallbackHelper(*optValue).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
         GaugeModelStatic::SetDescription(frameNode, uiNode);
         }, node);
 }
-void TrackShadowImpl(Ark_NativePointer node,
-                     const Opt_GaugeShadowOptions* value)
+void SetTrackShadowImpl(Ark_NativePointer node,
+                        const Opt_GaugeShadowOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<GaugeShadowOptions>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<GaugeShadowOptions>(value);
     GaugeShadowOptions defaultOptions;
     defaultOptions.isShadowVisible = false;
     auto shadow = convValue.value_or(defaultOptions);
     GaugeModelNG::SetShadowOptions(frameNode, shadow);
 }
-void IndicatorImpl(Ark_NativePointer node,
-                   const Opt_GaugeIndicatorOptions* value)
+void SetIndicatorImpl(Ark_NativePointer node,
+                      const Opt_GaugeIndicatorOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto indicator = Converter::OptConvert<Converter::GaugeIndicatorOptions>(*value);
+    auto indicator = Converter::OptConvertPtr<Converter::GaugeIndicatorOptions>(value);
     if (indicator) {
         GaugeModelNG::SetIsShowIndicator(frameNode, true);
         if (indicator->icon) {
@@ -304,21 +307,13 @@ void IndicatorImpl(Ark_NativePointer node,
         GaugeModelNG::SetIsShowIndicator(frameNode, false);
     }
 }
-void PrivacySensitiveImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+void SetPrivacySensitiveImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    const auto sensitive = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    const auto sensitive = Converter::OptConvertPtr<bool>(value);
     GaugeModelStatic::SetPrivacySensitive(frameNode, sensitive);
-}
-void ContentModifierImpl(Ark_NativePointer node,
-                         const Opt_ContentModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GaugeModelNG::SetContentModifier(frameNode, convValue);
 }
 } // GaugeAttributeModifier
 const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()
@@ -326,16 +321,15 @@ const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()
     static const GENERATED_ArkUIGaugeModifier ArkUIGaugeModifierImpl {
         GaugeModifier::ConstructImpl,
         GaugeInterfaceModifier::SetGaugeOptionsImpl,
-        GaugeAttributeModifier::ValueImpl,
-        GaugeAttributeModifier::StartAngleImpl,
-        GaugeAttributeModifier::EndAngleImpl,
-        GaugeAttributeModifier::ColorsImpl,
-        GaugeAttributeModifier::StrokeWidthImpl,
-        GaugeAttributeModifier::DescriptionImpl,
-        GaugeAttributeModifier::TrackShadowImpl,
-        GaugeAttributeModifier::IndicatorImpl,
-        GaugeAttributeModifier::PrivacySensitiveImpl,
-        GaugeAttributeModifier::ContentModifierImpl,
+        GaugeAttributeModifier::SetValueImpl,
+        GaugeAttributeModifier::SetStartAngleImpl,
+        GaugeAttributeModifier::SetEndAngleImpl,
+        GaugeAttributeModifier::SetColorsImpl,
+        GaugeAttributeModifier::SetStrokeWidthImpl,
+        GaugeAttributeModifier::SetDescriptionImpl,
+        GaugeAttributeModifier::SetTrackShadowImpl,
+        GaugeAttributeModifier::SetIndicatorImpl,
+        GaugeAttributeModifier::SetPrivacySensitiveImpl,
     };
     return &ArkUIGaugeModifierImpl;
 }

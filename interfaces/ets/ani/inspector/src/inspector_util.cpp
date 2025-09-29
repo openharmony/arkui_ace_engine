@@ -36,10 +36,9 @@ void AniThrow(ani_env *env, const std::string &errMsg, int32_t errorCode)
     }
     ani_ref undefinedRef {};
     if (ANI_OK != env->GetUndefined(&undefinedRef)) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetUndefined failed.");
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Get undefined failed.");
         return;
     }
- 
     ani_object errObj {};
     if (ANI_OK != env->Object_New(errCls, errCtor, &errObj, resultString, undefinedRef)) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Create ani error object failed.");
@@ -83,15 +82,15 @@ ani_status ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str, std::
     return status;
 }
  
-NG::InspectorFilter GetInspectorFilter(ani_env *env, const ani_array_ref& filters, bool& isLayoutInspector)
+NG::InspectorFilter GetInspectorFilter(ani_env *env, const ani_array& filters, bool& isLayoutInspector)
 {
     NG::InspectorFilter inspectorFilter;
     ani_size size;
     if (filters != nullptr && !IsUndefinedRef(env, filters) && ANI_OK == env->Array_GetLength(filters, &size)) {
         for (ani_size i = 0; i < size; i++) {
             ani_ref string_ref;
-            if (ANI_OK != env->Array_Get_Ref(filters, i, &string_ref)) {
-                TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Array_Get_Ref FAILED index:%{public}zu", i);
+            if (ANI_OK != env->Array_Get(filters, i, &string_ref)) {
+                TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Array_Get FAILED index:%{public}zu", i);
                 continue;
             }
             std::string filterItem;
@@ -115,6 +114,6 @@ bool IsUndefinedRef(ani_env *env, ani_ref object_ref)
     if (ANI_OK != env->Reference_IsUndefined(object_ref, &isUndefined)) {
         return false;
     }
-    return (bool)isUndefined;
+    return isUndefined == ANI_TRUE;
 }
 } // namespace OHOS::Ace

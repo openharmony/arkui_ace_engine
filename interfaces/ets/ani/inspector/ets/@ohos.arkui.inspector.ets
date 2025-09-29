@@ -39,17 +39,17 @@
  
         off(type: string, callback?: Callback<void>): void;
         
-        onLayout(type: 'layout', callback: Callback<void>): void;
+        onLayout(callback: Callback<void>): void;
         
-        offLayout(type: 'layout', callback?: Callback<void>): void;
+        offLayout(callback?: Callback<void>): void;
         
-        onDraw(type: 'draw', callback: Callback<void>): void;
+        onDraw(callback: Callback<void>): void;
         
-        offDraw(type: 'draw', callback?: Callback<void>): void;
+        offDraw(callback?: Callback<void>): void;
 
-        onDrawChildren(type: 'drawChildren', callback: Callback<void>): void;
+        onDrawChildren(callback: Callback<void>): void;
         
-        offDrawChildren(type: 'drawChildren', callback?: Callback<void>): void;
+        offDrawChildren(callback?: Callback<void>): void;
     }
     
     class ComponentObserverImpl implements ComponentObserver
@@ -62,27 +62,27 @@
             }
         }
         
-        public onLayout(type: 'layout', callback: Callback<void>): void {
+        public onLayout(callback: Callback<void>): void {
             this.on('layout', callback);
         }
         
-        public offLayout(type: 'layout', callback?: Callback<void>): void {
+        public offLayout(callback?: Callback<void>): void {
             this.off('layout', callback);
         }
         
-        public onDraw(type: 'draw', callback: Callback<void>): void {
+        public onDraw(callback: Callback<void>): void {
             this.on('draw', callback);
         }
         
-        public offDraw(type: 'draw', callback?: Callback<void>): void {
+        public offDraw(callback?: Callback<void>): void {
             this.off('draw', callback);
         }
 
-        public onDrawChildren(type: 'drawChildren', callback: Callback<void>): void {
+        public onDrawChildren(callback: Callback<void>): void {
             this.on('drawChildren', callback);
         }
         
-        public offDrawChildren(type: 'drawChildren', callback?: Callback<void>): void {
+        public offDrawChildren(callback?: Callback<void>): void {
             this.off('drawChildren', callback);
         }
         

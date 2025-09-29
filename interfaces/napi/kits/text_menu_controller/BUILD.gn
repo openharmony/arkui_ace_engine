@@ -21,7 +21,6 @@ template("napi_textmenu_controller_static") {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
-    
 
     sources = [ "js_text_menu_controller.cpp" ]
     deps = []

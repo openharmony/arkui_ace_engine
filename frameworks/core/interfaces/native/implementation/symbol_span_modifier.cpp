@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text/symbol_span_model_static.h"
@@ -27,9 +26,6 @@ namespace SymbolSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    if (MultiThreadBuildManager::IsParallelScope()) {
-        LOGF_ABORT("Unsupported UI components SymbolSpan used in ParallelizeUI");
-    }
     auto frameNode = SymbolSpanModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
@@ -45,32 +41,31 @@ void SetSymbolSpanOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Converter::SymbolData>(*value);
     if (convValue.has_value() && convValue->symbol.has_value()) {
-        SymbolSpanModelNG::InitialSymbol(frameNode, convValue->symbol.value());
+        SymbolSpanModelStatic::InitialSymbol(frameNode, convValue->symbol.value());
+        SymbolSpanModelStatic::SetFontFamilies(frameNode, convValue->symbolFamilyName);
+        SymbolSpanModelStatic::SetSymbolType(frameNode, convValue->symbolType);
     }
 }
 } // SymbolSpanInterfaceModifier
 namespace SymbolSpanAttributeModifier {
-void FontSizeImpl(Ark_NativePointer node,
-                  const Opt_Union_Number_String_Resource* value)
+void SetFontSizeImpl(Ark_NativePointer node,
+                     const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<Dimension> optValue = std::nullopt;
-    if (value->tag != INTEROP_TAG_UNDEFINED) {
-        optValue = Converter::OptConvertFromArkNumStrRes(value->value);
-    }
+    auto optValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(optValue);
     Validator::ValidateNonPercent(optValue);
     SymbolSpanModelStatic::SetFontSize(frameNode, optValue);
 }
-void FontColorImpl(Ark_NativePointer node,
-                   const Opt_Array_ResourceColor* value)
+void SetFontColorImpl(Ark_NativePointer node,
+                      const Opt_Array_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optColorVec = Converter::OptConvert<std::vector<std::optional<Color>>>(*value);
     if (!optColorVec) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     std::vector<Color> colorVec;
@@ -81,28 +76,28 @@ void FontColorImpl(Ark_NativePointer node,
     }
     SymbolSpanModelNG::SetFontColor(frameNode, colorVec);
 }
-void FontWeightImpl(Ark_NativePointer node,
-                    const Opt_Union_Number_FontWeight_String* value)
+void SetFontWeightImpl(Ark_NativePointer node,
+                       const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Ace::FontWeight>(*value);
+    auto convValue = Converter::OptConvertPtr<Ace::FontWeight>(value);
     SymbolSpanModelStatic::SetFontWeight(frameNode, convValue);
 }
-void EffectStrategyImpl(Ark_NativePointer node,
-                        const Opt_SymbolEffectStrategy* value)
+void SetEffectStrategyImpl(Ark_NativePointer node,
+                           const Opt_SymbolEffectStrategy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<SymbolEffectType>(*value);
+    auto convValue = Converter::OptConvertPtr<SymbolEffectType>(value);
     SymbolSpanModelStatic::SetSymbolEffect(frameNode, EnumToInt(convValue));
 }
-void RenderingStrategyImpl(Ark_NativePointer node,
-                           const Opt_SymbolRenderingStrategy* value)
+void SetRenderingStrategyImpl(Ark_NativePointer node,
+                              const Opt_SymbolRenderingStrategy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Converter::RenderingStrategy>(*value);
+    auto convValue = Converter::OptConvertPtr<Converter::RenderingStrategy>(value);
     SymbolSpanModelStatic::SetSymbolRenderingStrategy(frameNode, EnumToInt(convValue));
 }
 } // SymbolSpanAttributeModifier
@@ -111,11 +106,11 @@ const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier()
     static const GENERATED_ArkUISymbolSpanModifier ArkUISymbolSpanModifierImpl {
         SymbolSpanModifier::ConstructImpl,
         SymbolSpanInterfaceModifier::SetSymbolSpanOptionsImpl,
-        SymbolSpanAttributeModifier::FontSizeImpl,
-        SymbolSpanAttributeModifier::FontColorImpl,
-        SymbolSpanAttributeModifier::FontWeightImpl,
-        SymbolSpanAttributeModifier::EffectStrategyImpl,
-        SymbolSpanAttributeModifier::RenderingStrategyImpl,
+        SymbolSpanAttributeModifier::SetFontSizeImpl,
+        SymbolSpanAttributeModifier::SetFontColorImpl,
+        SymbolSpanAttributeModifier::SetFontWeightImpl,
+        SymbolSpanAttributeModifier::SetEffectStrategyImpl,
+        SymbolSpanAttributeModifier::SetRenderingStrategyImpl,
     };
     return &ArkUISymbolSpanModifierImpl;
 }

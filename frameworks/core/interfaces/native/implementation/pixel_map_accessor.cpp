@@ -19,48 +19,48 @@
 #include "pixel_map_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace PixelMapAccessor {
-void DestroyPeerImpl(Ark_PixelMap peer)
+namespace image_PixelMapAccessor {
+void DestroyPeerImpl(Ark_image_PixelMap peer)
 {
-    PixelMapPeer::Destroy(peer);
+    image_PixelMapPeer::Destroy(peer);
 }
-Ark_PixelMap CtorImpl()
+Ark_image_PixelMap ConstructImpl()
 {
-    return PixelMapPeer::Create({});
+    return image_PixelMapPeer::Create({});
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ReadPixelsToBufferSyncImpl(Ark_PixelMap peer,
+void ReadPixelsToBufferSyncImpl(Ark_image_PixelMap peer,
                                 const Ark_Buffer* dst)
 {
 }
-void WriteBufferToPixelsImpl(Ark_PixelMap peer,
+void WriteBufferToPixelsImpl(Ark_image_PixelMap peer,
                              const Ark_Buffer* src)
 {
 }
-Ark_Boolean GetIsEditableImpl(Ark_PixelMap peer)
+Ark_Boolean GetIsEditableImpl(Ark_image_PixelMap peer)
 {
     return {};
 }
-Ark_Boolean GetIsStrideAlignmentImpl(Ark_PixelMap peer)
+Ark_Boolean GetIsStrideAlignmentImpl(Ark_image_PixelMap peer)
 {
     return {};
 }
-} // PixelMapAccessor
-const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor()
+} // image_PixelMapAccessor
+const GENERATED_ArkUIImage_PixelMapAccessor* GetImage_PixelMapAccessor()
 {
-    static const GENERATED_ArkUIPixelMapAccessor PixelMapAccessorImpl {
-        PixelMapAccessor::DestroyPeerImpl,
-        PixelMapAccessor::CtorImpl,
-        PixelMapAccessor::GetFinalizerImpl,
-        PixelMapAccessor::ReadPixelsToBufferSyncImpl,
-        PixelMapAccessor::WriteBufferToPixelsImpl,
-        PixelMapAccessor::GetIsEditableImpl,
-        PixelMapAccessor::GetIsStrideAlignmentImpl,
+    static const GENERATED_ArkUIImage_PixelMapAccessor Image_PixelMapAccessorImpl {
+        image_PixelMapAccessor::DestroyPeerImpl,
+        image_PixelMapAccessor::ConstructImpl,
+        image_PixelMapAccessor::GetFinalizerImpl,
+        image_PixelMapAccessor::ReadPixelsToBufferSyncImpl,
+        image_PixelMapAccessor::WriteBufferToPixelsImpl,
+        image_PixelMapAccessor::GetIsEditableImpl,
+        image_PixelMapAccessor::GetIsStrideAlignmentImpl,
     };
-    return &PixelMapAccessorImpl;
+    return &Image_PixelMapAccessorImpl;
 }
 
 }

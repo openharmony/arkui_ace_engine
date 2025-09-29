@@ -16,46 +16,62 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CONTROLLER_HANDLER_PEER_IMPL_H
 
 #include "core/components/web/web_event.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/webview_controller_peer_impl.h"
-#include "core/interfaces/ani/ani_api.h"
 #include "core/components_ng/pattern/web/ani/web_model_static.h"
 
 struct ControllerHandlerPeer {
     struct ChildWindowInfo {
         int32_t parentWebId = -1;
-        OHOS::Ace::RefPtr<WebviewControllerPeer> controller = nullptr;
-        WebviewControllerInfo controllerInfo = {};
+        Ark_webview_WebviewController controller = nullptr;
     };
 
     OHOS::Ace::RefPtr<OHOS::Ace::WebWindowNewHandler> handler;
     inline static std::unordered_map<int32_t, ChildWindowInfo> controllerMap {};
 
-    inline static void ReleaseRef(const std::function<void()>& releaseRefFunc)
+    inline static void ReleaseRef(const Ark_webview_WebviewController controller)
     {
-        if (releaseRefFunc) {
-            releaseRefFunc();
+        if (controller->releaseRefFunc) {
+            controller->releaseRefFunc();
+        }
+        delete controller;
+    }
+
+    static void DestroyController()
+    {
+        for (auto iter = controllerMap.begin(); iter != controllerMap.end(); iter++) {
+            if (!iter->second.controller) {
+                continue;
+            }
+            ReleaseRef(iter->second.controller);
+            iter->second.controller = nullptr;
         }
     }
 
-    static WebviewControllerInfo PopController(int32_t id, int32_t* parentId = nullptr)
+    static Ark_webview_WebviewController PopController(int32_t id, int32_t* parentId = nullptr)
     {
         auto iter = controllerMap.find(id);
         if (iter == controllerMap.end()) {
             return {};
         }
-        auto controllerInfo = iter->second.controllerInfo;
+        if (!iter->second.controller) {
+            return {};
+        }
         if (parentId) {
             *parentId = iter->second.parentWebId;
         }
         controllerMap.erase(iter);
-        return controllerInfo;
+        return iter->second.controller;
     }
 
     static bool ExistController(int64_t nativeController, int32_t& parentWebId)
     {
         for (auto iter = controllerMap.begin(); iter != controllerMap.end(); iter++) {
-            if ((iter->second.controllerInfo.getNativePtrFunc) &&
-                (nativeController == iter->second.controllerInfo.getNativePtrFunc())) {
+            if (!iter->second.controller) {
+                continue;
+            }
+            auto controller = iter->second.controller;
+            if ((controller->getNativePtrFunc) && (nativeController == controller->getNativePtrFunc())) {
                 parentWebId = iter->second.parentWebId;
                 return true;
             }
@@ -64,35 +80,38 @@ struct ControllerHandlerPeer {
         return false;
     }
 
-    void SetWebController(const WebviewControllerInfo& controllerInfo)
+    void SetWebController(const Ark_webview_WebviewController controller)
     {
+        if (!controller) {
+            return;
+        }
         if (!handler) {
-            ReleaseRef(controllerInfo.releaseRefFunc);
+            ReleaseRef(controller);
             return;
         }
         int32_t parentNWebId = handler->GetParentNWebId();
         if (parentNWebId == -1) {
-            ReleaseRef(controllerInfo.releaseRefFunc);
+            ReleaseRef(controller);
             return;
         }
-        if ((!controllerInfo.getWebIdFunc) || (!controllerInfo.completeWindowNewFunc) ||
-            (!controllerInfo.getNativePtrFunc)) {
-            ReleaseRef(controllerInfo.releaseRefFunc);
+        if ((!controller->getWebIdFunc) || (!controller->completeWindowNewFunc) ||
+            (!controller->getNativePtrFunc)) {
+            ReleaseRef(controller);
             OHOS::Ace::NG::WebModelStatic::NotifyPopupWindowResultStatic(parentNWebId, false);
             return;
         }
-        int32_t childWebId = controllerInfo.getWebIdFunc();
+        int32_t childWebId = controller->getWebIdFunc();
         if ((childWebId == parentNWebId) || (childWebId != -1)) {
-            ReleaseRef(controllerInfo.releaseRefFunc);
+            ReleaseRef(controller);
             OHOS::Ace::NG::WebModelStatic::NotifyPopupWindowResultStatic(parentNWebId, false);
             return;
         }
         controllerMap.insert(std::pair<int32_t, ChildWindowInfo>(handler->GetId(),
         {
             .parentWebId = parentNWebId,
-            .controller = nullptr,
-            .controllerInfo = controllerInfo,
+            .controller = controller,
         }));
+        LOGI("SetWebController set controller success. parentNWebId: %{public}d", parentNWebId);
     }
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CONTROLLER_HANDLER_PEER_IMPL_H

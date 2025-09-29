@@ -74,7 +74,6 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     makeLocal<T>(owningView: ExtendableComponent, varName: string, initValue: T): ILocalDecoratedVariable<T> {
         return new LocalDecoratedVariable<T>(owningView, varName, uiUtils.makeObserved(initValue, true) as T);
     }
-
     makeStaticLocal<T>(varName: string, initValue: T): ILocalDecoratedVariable<T> {
         return new LocalDecoratedVariable<T>(null, varName, uiUtils.makeObserved(initValue, true) as T);
     }
@@ -568,8 +567,9 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
 
     makeMonitor(
         pathLambda: Array<IMonitorPathInfo>,
-        monitorFunction: (m: IMonitor) => void
+        monitorFunction: (m: IMonitor) => void,
+        owningView?: ExtendableComponent
     ): IMonitorDecoratedVariable {
-        return new MonitorFunctionDecorator(pathLambda, monitorFunction);
+        return new MonitorFunctionDecorator(pathLambda, monitorFunction, owningView);
     }
 }

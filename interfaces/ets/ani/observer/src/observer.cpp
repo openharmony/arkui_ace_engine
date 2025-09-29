@@ -24,17 +24,17 @@
 
 namespace {
 // constexpr const char DENSITY_CHNAGE[] = "densityUpdate";
-const char ANI_OBSERVER_NS[] = "L@ohos/arkui/observer/uiObserver;";
-const char ANI_OBSERVER_CLS[] = "L@ohos/arkui/observer/uiObserver/UIObserverImpl;";
-constexpr char ANI_NAVDESTINATION_INFO_CLS[] = "L@ohos/arkui/observer/uiObserver/NavDestinationInfoImpl;";
-constexpr char ANI_NAVDESTINATION_STATE_TYPE[] = "L@ohos/arkui/observer/uiObserver/NavDestinationState;";
-constexpr char ANI_NAVDESTINATION_MODE_TYPE[] = "Larkui/component/navDestination/NavDestinationMode;";
+const char ANI_OBSERVER_NS[] = "@ohos.arkui.observer.uiObserver";
+const char ANI_OBSERVER_CLS[] = "@ohos.arkui.observer.uiObserver.UIObserverImpl";
+constexpr char ANI_NAVDESTINATION_INFO_CLS[] = "@ohos.arkui.observer.uiObserver.NavDestinationInfoImpl";
+constexpr char ANI_NAVDESTINATION_STATE_TYPE[] = "@ohos.arkui.observer.uiObserver.NavDestinationState";
+constexpr char ANI_NAVDESTINATION_MODE_TYPE[] = "arkui.component.navDestination.NavDestinationMode";
 constexpr char NAVDESTINATION_UPDATE[] = "navDestinationUpdate";
 constexpr char ROUTER_UPDATE[] = "routerPageUpdate";
-constexpr char ANI_ROUTER_INFO_CLS[] = "L@ohos/arkui/observer/uiObserver/RouterPageInfo;";
-constexpr char ANI_ROUTER_STATE_TYPE[] = "L@ohos/arkui/observer/uiObserver/RouterPageState;";
+constexpr char ANI_ROUTER_INFO_CLS[] = "@ohos.arkui.observer.uiObserver.RouterPageInfo";
+constexpr char ANI_ROUTER_STATE_TYPE[] = "@ohos.arkui.observer.uiObserver.RouterPageState";
 constexpr char NAVDESTINATION_PARAM_WITHID[] =
-    "Lstd/core/String;L@ohos/arkui/observer/uiObserver/NavDestinationSwitchObserverOptions;Lstd/core/Object;:V";
+    "C{std.core.String}C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Object}:";
 } // namespace
 namespace OHOS::Ace {
 class UiObserver {
@@ -563,11 +563,11 @@ public:
 
     void CreateDensityInfo(ani_env* env, double density, ani_object& obj)
     {
-        static const char* className = "L@ohos/arkui/observer/uiObserver/DensityInfo;";
+        static const char* className = "@ohos.arkui.observer.uiObserver.DensityInfo";
         ani_class cls;
         env->FindClass(className, &cls);
         ani_method ctor;
-        env->Class_FindMethod(cls, "<ctor>", ":V", &ctor);
+        env->Class_FindMethod(cls, "<ctor>", ":", &ctor);
         env->Object_New(cls, ctor, &obj);
         env->Object_SetPropertyByName_Double(obj, "density", ani_double(density));
     }
@@ -637,10 +637,10 @@ public:
         env->Object_SetPropertyByName_Ref(res, "state", routerStateItem);
 
         ani_class uiContextUtil;
-        env->FindClass("Larkui/handwritten/UIContextUtil;", &uiContextUtil);
+        env->FindClass("arkui.handwritten.UIContextUtil.UIContextUtil", &uiContextUtil);
         ani_static_method getUiContext;
         env->Class_FindStaticMethod(
-            uiContextUtil, "getOrCreateUIContextById", "I:L@ohos/arkui/UIContext/UIContext;", &getUiContext);
+            uiContextUtil, "getOrCreateUIContextById", "i:C{@ohos.arkui.UIContext.UIContext}", &getUiContext);
         ani_int instanceId = Container::CurrentIdSafelyWithCheck();
         ani_ref uiContext;
         env->Class_CallStaticMethod_Ref(uiContextUtil, getUiContext, &uiContext, instanceId);
@@ -894,8 +894,8 @@ bool ANI_ConstructorForAni(ani_env* env)
     }
 
     std::array methodsObserver = {
-        ani_native_function { "on", "Lstd/core/String;Lstd/core/Object;:V", reinterpret_cast<void*>(OHOS::Ace::On) },
-        ani_native_function { "off", "Lstd/core/String;Lstd/core/Object;:V", reinterpret_cast<void*>(OHOS::Ace::Off) },
+        ani_native_function { "on", "C{std.core.String}C{Lstd.core.Object}:", reinterpret_cast<void*>(OHOS::Ace::On) },
+        ani_native_function { "off", "C{std.core.String}C{std.core.Object}:", reinterpret_cast<void*>(OHOS::Ace::Off) },
         ani_native_function {
             "on", NAVDESTINATION_PARAM_WITHID, reinterpret_cast<void*>(OHOS::Ace::OnNavDestinationUpdateWithId) },
         ani_native_function {

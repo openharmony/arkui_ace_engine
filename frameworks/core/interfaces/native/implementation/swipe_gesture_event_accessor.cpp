@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_SwipeGestureEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_SwipeGestureEvent CtorImpl()
+Ark_SwipeGestureEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<SwipeGestureEventPeer>();
 }
@@ -74,7 +74,7 @@ const GENERATED_ArkUISwipeGestureEventAccessor* GetSwipeGestureEventAccessor()
 {
     static const GENERATED_ArkUISwipeGestureEventAccessor SwipeGestureEventAccessorImpl {
         SwipeGestureEventAccessor::DestroyPeerImpl,
-        SwipeGestureEventAccessor::CtorImpl,
+        SwipeGestureEventAccessor::ConstructImpl,
         SwipeGestureEventAccessor::GetFinalizerImpl,
         SwipeGestureEventAccessor::GetAngleImpl,
         SwipeGestureEventAccessor::SetAngleImpl,

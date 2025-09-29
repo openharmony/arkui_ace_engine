@@ -31,7 +31,7 @@ void DestroyPeerImpl(Ark_XComponentController peer)
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
     peerImpl->DecRefCount();
 }
-Ark_XComponentController CtorImpl()
+Ark_XComponentController ConstructImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<XComponentControllerPeerImpl>();
     peerImpl->IncRefCount();
@@ -56,32 +56,6 @@ Ark_String GetXComponentSurfaceIdImpl(Ark_XComponentController peer)
     arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId, Converter::FC);
 #endif //XCOMPONENT_SUPPORTED
     return arkSurfaceId;
-}
-Ark_Object GetXComponentContextImpl(Ark_XComponentController peer)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    CHECK_NULL_RETURN(peerImpl->controller, {});
-    LOGE("XComponentControllerAccessor::GetXComponentContextImpl - return context object need to be supported");
-#endif //XCOMPONENT_SUPPORTED
-    return {};
-}
-void SetXComponentSurfaceSizeImpl(Ark_XComponentController peer,
-                                  const Ark_Literal_Number_surfaceHeight_surfaceWidth* value)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    //This API is deprecated since API version 12. Should be used SetXComponentSurfaceRectImpl instead.
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(peerImpl->controller);
-    CHECK_NULL_VOID(value);
-    uint32_t surfaceWidth = static_cast<uint32_t>(Converter::Convert<int32_t>(value->surfaceWidth));
-    uint32_t surfaceHeight = static_cast<uint32_t>(Converter::Convert<int32_t>(value->surfaceHeight));
-    peerImpl->controller->ConfigSurface(surfaceWidth, surfaceHeight);
-#endif //XCOMPONENT_SUPPORTED
 }
 void SetXComponentSurfaceRectImpl(Ark_XComponentController peer,
                                   const Ark_SurfaceRect* rect)
@@ -128,10 +102,10 @@ Ark_SurfaceRect GetXComponentSurfaceRectImpl(Ark_XComponentController peer)
     float height = 0.0f;
     peerImpl->controller->GetSurfaceOffset(offsetX, offsetY);
     peerImpl->controller->GetSurfaceSize(width, height);
-    rect.offsetX = Converter::ArkValue<Opt_Number>(offsetX);
-    rect.offsetY = Converter::ArkValue<Opt_Number>(offsetY);
-    rect.surfaceWidth = Converter::ArkValue<Ark_Number>(width);
-    rect.surfaceHeight = Converter::ArkValue<Ark_Number>(height);
+    rect.offsetX = Converter::ArkValue<Opt_Float64>(offsetX);
+    rect.offsetY = Converter::ArkValue<Opt_Float64>(offsetY);
+    rect.surfaceWidth = Converter::ArkValue<Ark_Float64>(width);
+    rect.surfaceHeight = Converter::ArkValue<Ark_Float64>(height);
 #endif //XCOMPONENT_SUPPORTED
     return rect;
 }
@@ -161,28 +135,6 @@ Ark_SurfaceRotationOptions GetXComponentSurfaceRotationImpl(Ark_XComponentContro
 #endif //XCOMPONENT_SUPPORTED
     return rotationOptions;
 }
-void OnSurfaceCreatedImpl(Ark_XComponentController peer,
-                          const Ark_String* surfaceId)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    LOGE("XComponentControllerAccessor::OnSurfaceCreatedImpl - callback need to be supported");
-#endif //XCOMPONENT_SUPPORTED
-}
-void OnSurfaceChangedImpl(Ark_XComponentController peer,
-                          const Ark_String* surfaceId,
-                          const Ark_SurfaceRect* rect)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    LOGE("XComponentControllerAccessor::OnSurfaceChangedImpl - callback need to be supported");
-#endif //XCOMPONENT_SUPPORTED
-}
-void OnSurfaceDestroyedImpl(Ark_XComponentController peer,
-                            const Ark_String* surfaceId)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    LOGE("XComponentControllerAccessor::OnSurfaceDestroyedImpl - callback need to be supported");
-#endif //XCOMPONENT_SUPPORTED
-}
 void StartImageAnalyzerImpl(Ark_VMContext vmContext,
                             Ark_AsyncWorkerPtr asyncWorker,
                             Ark_XComponentController peer,
@@ -204,40 +156,73 @@ void StopImageAnalyzerImpl(Ark_XComponentController peer)
     peerImpl->controller->StopImageAnalyzer();
 #endif //XCOMPONENT_SUPPORTED
 }
-void SetOnSurfaceCreatedCallbackImpl(Ark_XComponentController peer,
-    const Callback_String_Void* onSurfaceCreatedCallback)
+Callback_String_Void GetOnSurfaceCreatedImpl(Ark_XComponentController peer)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_VOID(peer);
+    CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(peerImpl->controller);
-    CHECK_NULL_VOID(onSurfaceCreatedCallback);
-    peerImpl->SetOnSurfaceCreatedEvent(*onSurfaceCreatedCallback);
+    CHECK_NULL_RETURN(peerImpl, {});
+    return peerImpl->arkOnSurfaceCreated;
+#else
+    return {};
 #endif //XCOMPONENT_SUPPORTED
 }
-void SetOnSurfaceChangedCallbackImpl(Ark_XComponentController peer,
-    const Callback_String_SurfaceRect_Void* onSurfaceChangedCallback)
+void SetOnSurfaceCreatedImpl(Ark_XComponentController peer,
+                             const Callback_String_Void* onSurfaceCreated)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
-    CHECK_NULL_VOID(onSurfaceChangedCallback);
-    peerImpl->SetOnSurfaceChangedEvent(*onSurfaceChangedCallback);
+    CHECK_NULL_VOID(onSurfaceCreated);
+    peerImpl->SetOnSurfaceCreatedEvent(*onSurfaceCreated);
 #endif //XCOMPONENT_SUPPORTED
 }
-void SetOnSurfaceDestroyedCallbackImpl(Ark_XComponentController peer,
-    const Callback_String_Void* onSurfaceDestroyedCallback)
+Callback_String_SurfaceRect_Void GetOnSurfaceChangedImpl(Ark_XComponentController peer)
+{
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_RETURN(peer, {});
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, {});
+    return peerImpl->arkOnSurfaceChanged;
+#else
+    return {};
+#endif //XCOMPONENT_SUPPORTED
+}
+void SetOnSurfaceChangedImpl(Ark_XComponentController peer,
+                             const Callback_String_SurfaceRect_Void* onSurfaceChanged)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
-    CHECK_NULL_VOID(onSurfaceDestroyedCallback);
-    peerImpl->SetOnSurfaceDestroyedEvent(*onSurfaceDestroyedCallback);
+    CHECK_NULL_VOID(onSurfaceChanged);
+    peerImpl->SetOnSurfaceChangedEvent(*onSurfaceChanged);
+#endif //XCOMPONENT_SUPPORTED
+}
+Callback_String_Void GetOnSurfaceDestroyedImpl(Ark_XComponentController peer)
+{
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_RETURN(peer, {});
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, {});
+    return peerImpl->arkOnSurfaceDestroyed;
+#else
+    return {};
+#endif //XCOMPONENT_SUPPORTED
+}
+void SetOnSurfaceDestroyedImpl(Ark_XComponentController peer,
+                               const Callback_String_Void* onSurfaceDestroyed)
+{
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(peerImpl->controller);
+    CHECK_NULL_VOID(onSurfaceDestroyed);
+    peerImpl->SetOnSurfaceDestroyedEvent(*onSurfaceDestroyed);
 #endif //XCOMPONENT_SUPPORTED
 }
 } // XComponentControllerAccessor
@@ -245,23 +230,21 @@ const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccess
 {
     static const GENERATED_ArkUIXComponentControllerAccessor XComponentControllerAccessorImpl {
         XComponentControllerAccessor::DestroyPeerImpl,
-        XComponentControllerAccessor::CtorImpl,
+        XComponentControllerAccessor::ConstructImpl,
         XComponentControllerAccessor::GetFinalizerImpl,
         XComponentControllerAccessor::GetXComponentSurfaceIdImpl,
-        XComponentControllerAccessor::GetXComponentContextImpl,
-        XComponentControllerAccessor::SetXComponentSurfaceSizeImpl,
         XComponentControllerAccessor::SetXComponentSurfaceRectImpl,
         XComponentControllerAccessor::GetXComponentSurfaceRectImpl,
         XComponentControllerAccessor::SetXComponentSurfaceRotationImpl,
         XComponentControllerAccessor::GetXComponentSurfaceRotationImpl,
-        XComponentControllerAccessor::OnSurfaceCreatedImpl,
-        XComponentControllerAccessor::OnSurfaceChangedImpl,
-        XComponentControllerAccessor::OnSurfaceDestroyedImpl,
         XComponentControllerAccessor::StartImageAnalyzerImpl,
         XComponentControllerAccessor::StopImageAnalyzerImpl,
-        XComponentControllerAccessor::SetOnSurfaceCreatedCallbackImpl,
-        XComponentControllerAccessor::SetOnSurfaceChangedCallbackImpl,
-        XComponentControllerAccessor::SetOnSurfaceDestroyedCallbackImpl,
+        XComponentControllerAccessor::GetOnSurfaceCreatedImpl,
+        XComponentControllerAccessor::SetOnSurfaceCreatedImpl,
+        XComponentControllerAccessor::GetOnSurfaceChangedImpl,
+        XComponentControllerAccessor::SetOnSurfaceChangedImpl,
+        XComponentControllerAccessor::GetOnSurfaceDestroyedImpl,
+        XComponentControllerAccessor::SetOnSurfaceDestroyedImpl,
     };
     return &XComponentControllerAccessorImpl;
 }

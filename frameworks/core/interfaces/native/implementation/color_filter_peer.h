@@ -15,20 +15,37 @@
 
 #pragma once
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "base/image/image_color_filter.h"
+#include "base/memory/referenced.h"
 
 struct ColorFilterPeer final {
     void SetColorFilterMatrix(const std::vector<float>&& matrix)
     {
-        colorfiltermatrix_ = std::move(matrix);
+        if (!colorFilter_) {
+            colorFilter_ = OHOS::Ace::Referenced::MakeRefPtr<OHOS::Ace::ImageColorFilter>();
+        }
+        colorFilter_->SetColorFilterMatrix(std::move(matrix));
     }
 
     const std::vector<float>& GetColorFilterMatrix() const
     {
-        return colorfiltermatrix_;
+        if (!colorFilter_) {
+            static const std::vector<float> emptyMatrix;
+            return emptyMatrix;
+        }
+        return colorFilter_->GetColorFilterMatrix();
     }
+
+    OHOS::Ace::RefPtr<OHOS::Ace::ImageColorFilter>& GetColorFilter()
+    {
+        return colorFilter_;
+    }
+
+    void SetColorFilter(const OHOS::Ace::RefPtr<OHOS::Ace::ImageColorFilter>& colorFilter)
+    {
+        colorFilter_ = colorFilter;
+    }
+
 private:
-    std::vector<float> colorfiltermatrix_;
+    OHOS::Ace::RefPtr<OHOS::Ace::ImageColorFilter> colorFilter_;
 };

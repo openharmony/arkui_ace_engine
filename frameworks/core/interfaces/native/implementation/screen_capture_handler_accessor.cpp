@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_ScreenCaptureHandler peer)
 {
     delete peer;
 }
-Ark_ScreenCaptureHandler CtorImpl()
+Ark_ScreenCaptureHandler ConstructImpl()
 {
     return new ScreenCaptureHandlerPeer();
 }
@@ -57,7 +57,7 @@ const GENERATED_ArkUIScreenCaptureHandlerAccessor* GetScreenCaptureHandlerAccess
 {
     static const GENERATED_ArkUIScreenCaptureHandlerAccessor ScreenCaptureHandlerAccessorImpl {
         ScreenCaptureHandlerAccessor::DestroyPeerImpl,
-        ScreenCaptureHandlerAccessor::CtorImpl,
+        ScreenCaptureHandlerAccessor::ConstructImpl,
         ScreenCaptureHandlerAccessor::GetFinalizerImpl,
         ScreenCaptureHandlerAccessor::GetOriginImpl,
         ScreenCaptureHandlerAccessor::GrantImpl,

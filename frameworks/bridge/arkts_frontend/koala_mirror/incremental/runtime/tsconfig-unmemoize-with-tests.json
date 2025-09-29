@@ -1,9 +1,0 @@
-{
-    "extends": "./tsconfig-unmemoize.json",
-    "include": [ "src/**/*.ts", "test/**/*.ts", "test-arkts/**/*.ts" ],
-    "references": [
-        { "path": "../compiler-plugin" },
-        { "path": "../common" },
-        { "path": "../harness" }
-    ]
-}

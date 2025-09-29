@@ -27,20 +27,20 @@ std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str)
 {
     ani_size strSize;
     env->String_GetUTF8Size(ani_str, &strSize);
-   
+
     std::vector<char> buffer(strSize + 1);
     char* utf8Buffer = buffer.data();
 
     ani_size bytesWritten = 0;
     env->String_GetUTF8(ani_str, utf8Buffer, strSize + 1, &bytesWritten);
-    
+
     utf8Buffer[bytesWritten] = '\0';
     std::string content = std::string(utf8Buffer);
     return content;
 }
 bool GetToastMessage(ani_env *env, ani_object options, std::string& messageString)
 {
-    static const char *className = "L@system/prompt/ShowToastOptions;";
+    static const char *className = "@system.prompt.ShowToastOptions";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return false;
@@ -57,7 +57,7 @@ bool GetToastMessage(ani_env *env, ani_object options, std::string& messageStrin
 }
 bool GetToastDuration(ani_env *env, ani_object options, int32_t& durationInt)
 {
-    static const char *className = "L@system/prompt/ShowToastOptions;";
+    static const char *className = "@system.prompt.ShowToastOptions";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         std::cerr << "Not found '" << className << "'" << std::endl;
@@ -84,7 +84,7 @@ bool GetToastDuration(ani_env *env, ani_object options, int32_t& durationInt)
 }
 bool GetToastBottom(ani_env *env, ani_object options, std::string& bottomString)
 {
-    static const char *className = "L@system/prompt/ShowToastOptions;";
+    static const char *className = "@system.prompt.ShowToastOptions";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return false;
@@ -101,10 +101,10 @@ bool GetToastBottom(ani_env *env, ani_object options, std::string& bottomString)
         return false;
     }
     ani_class stringClass;
-    env->FindClass("Lstd/core/String;", &stringClass);
+    env->FindClass("std.core.String", &stringClass);
 
     ani_class numberClass;
-    env->FindClass("Lstd/core/Numeric;", &numberClass);
+    env->FindClass("std.core.Numeric", &numberClass);
 
     ani_boolean isString;
     env->Object_InstanceOf(static_cast<ani_object>(bottom_ref), stringClass, &isString);
@@ -159,15 +159,15 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         return ANI_ERROR;
     }
-    static const char *className = "L@system/prompt/Prompt;";
+    static const char *className = "@system.prompt.Prompt";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return ANI_ERROR;
     }
-    std::array methods = {
+    std::array staticMethods = {
         ani_native_function {"showToast", nullptr, reinterpret_cast<void *>(showToast)},
     };
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
         return ANI_ERROR;
     };
     *result = ANI_VERSION_1;

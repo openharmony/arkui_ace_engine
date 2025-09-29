@@ -26,36 +26,30 @@
 namespace OHOS::Ace::NG {
 void AniThemeModule::UpdateColorMode(int32_t colorMode)
 {
-    ColorMode colorModeValue = MapAniColorModeToColorMode(colorMode);
-    if (colorModeValue != ColorMode::COLOR_MODE_UNDEFINED) {
-#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-        UpdateColorModeForThemeConstants(colorModeValue);
-#else
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    ResourceManager::GetInstance().UpdateColorMode(
-        container->GetBundleName(), container->GetModuleName(), container->GetInstanceId(), colorModeValue);
-#endif
-        auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
-        pipelineContext->SetLocalColorMode(colorModeValue);
-    }
+//     ColorMode colorModeValue = MapAniColorModeToColorMode(colorMode);
+//     if (colorModeValue != ColorMode::COLOR_MODE_UNDEFINED) {
+// #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+//         UpdateColorModeForThemeConstants(colorModeValue);
+// #else
+//         ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
+// #endif
+//         auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
+//         pipelineContext->SetLocalColorMode(colorModeValue);
+//     }
 }
 
 void AniThemeModule::RestoreColorMode()
 {
-    auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+//     auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
+//     CHECK_NULL_VOID(pipelineContext);
+//     pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
 
-    auto colorModeValue = pipelineContext->GetColorMode();
-#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-    UpdateColorModeForThemeConstants(colorModeValue);
-#else
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    ResourceManager::GetInstance().UpdateColorMode(
-        container->GetBundleName(), container->GetModuleName(), container->GetInstanceId(), colorModeValue);
-#endif
+//     auto colorModeValue = pipelineContext->GetColorMode();
+// #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+//     UpdateColorModeForThemeConstants(colorModeValue);
+// #else
+//     ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
+// #endif
 }
 
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)

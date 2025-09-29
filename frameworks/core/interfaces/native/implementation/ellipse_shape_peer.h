@@ -16,7 +16,7 @@
 #pragma once
 
 #include "arkoala_api_generated.h"
-#include "base/geometry/shape.h"
-struct EllipseShapePeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::Ellipse> shape;
+#include "interfaces/ets/ani/shape/src/shape_peer.h"
+
+struct EllipseShapePeer : public OHOS::Ace::EllipsePeer {
 };

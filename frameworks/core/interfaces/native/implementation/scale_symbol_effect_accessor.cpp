@@ -25,17 +25,11 @@ void DestroyPeerImpl(Ark_ScaleSymbolEffect peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_ScaleSymbolEffect CtorImpl(const Opt_EffectScope* scope,
-                               const Opt_EffectDirection* direction)
+Ark_ScaleSymbolEffect ConstructImpl(const Opt_EffectScope* scope,
+                                    const Opt_EffectDirection* direction)
 {
-    std::optional<OHOS::Ace::ScopeType> optScope;
-    std::optional<OHOS::Ace::CommonSubType> optDirection;
-    if (scope) {
-        optScope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
-    }
-    if (direction) {
-        optDirection = Converter::OptConvert<OHOS::Ace::CommonSubType>(*direction);
-    }
+    auto optScope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
+    auto optDirection = Converter::OptConvertPtr<OHOS::Ace::CommonSubType>(direction);
     return PeerUtils::CreatePeer<ScaleSymbolEffectPeer>(optScope, optDirection);
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -49,10 +43,10 @@ Opt_EffectScope GetScopeImpl(Ark_ScaleSymbolEffect peer)
     return Converter::ArkValue<Opt_EffectScope>(peer->scope);
 }
 void SetScopeImpl(Ark_ScaleSymbolEffect peer,
-                  Ark_EffectScope scope)
+                  const Opt_EffectScope* scope)
 {
     CHECK_NULL_VOID(peer);
-    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
+    peer->scope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
 }
 Opt_EffectDirection GetDirectionImpl(Ark_ScaleSymbolEffect peer)
 {
@@ -61,17 +55,17 @@ Opt_EffectDirection GetDirectionImpl(Ark_ScaleSymbolEffect peer)
     return Converter::ArkValue<Opt_EffectDirection>(peer->direction);
 }
 void SetDirectionImpl(Ark_ScaleSymbolEffect peer,
-                      Ark_EffectDirection direction)
+                      const Opt_EffectDirection* direction)
 {
     CHECK_NULL_VOID(peer);
-    peer->direction = Converter::OptConvert<OHOS::Ace::CommonSubType>(direction);
+    peer->direction = Converter::OptConvertPtr<OHOS::Ace::CommonSubType>(direction);
 }
 } // ScaleSymbolEffectAccessor
 const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor()
 {
     static const GENERATED_ArkUIScaleSymbolEffectAccessor ScaleSymbolEffectAccessorImpl {
         ScaleSymbolEffectAccessor::DestroyPeerImpl,
-        ScaleSymbolEffectAccessor::CtorImpl,
+        ScaleSymbolEffectAccessor::ConstructImpl,
         ScaleSymbolEffectAccessor::GetFinalizerImpl,
         ScaleSymbolEffectAccessor::GetScopeImpl,
         ScaleSymbolEffectAccessor::SetScopeImpl,

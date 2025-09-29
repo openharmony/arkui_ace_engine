@@ -240,7 +240,22 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
         })
         return proxyObject(value, handler)
     }
-    // TODO: support set/map
+    if (value instanceof Map) {
+        const handler = new ObservableHandler(parent)
+        const data = proxyMapValues(value, handler, observed)
+        setObservable(data)
+        deleteObservable(data)
+        clearObservable(data)
+        return proxyMapOrSet(data, handler)
+    }
+    if (value instanceof Set) {
+        const handler = new ObservableHandler(parent)
+        const data = proxySetValues(value, handler, observed)
+        addObservable(data)
+        deleteObservable(data)
+        clearObservable(data)
+        return proxyMapOrSet(data, handler)
+    }
     const handler = new ObservableHandler(parent, isObserved(value))
     if (handler.observed || observed) proxyFields(value, true, handler)
     return proxyObject(value, handler)
@@ -401,4 +416,128 @@ function unshiftObservable(array: any) {
             return this.unshiftOriginal(...items)
         }
     }
+}
+
+function proxyMapValues<T, V>(data: Map<T, V>, parent: ObservableHandler, observed?: boolean): Map<T, V> {
+    if (observed === undefined) observed = ObservableHandler.contains(parent)
+    const result = new Map()
+    for (const [key, value] of data.entries()) {
+        result.set(key, observableProxy(value, parent, observed))
+    }
+    return result
+}
+
+function proxySetValues<T>(data: Set<T>, parent: ObservableHandler, observed?: boolean): Set<T> {
+    // Improve: check if necessary to replace items of the set with observed objects as
+    // for complex objects add() function won't find original object inside the set of proxies
+    /*
+    if (observed === undefined) observed = ObservableHandler.contains(parent)
+    const result = new Set<T>()
+    for (const value of data.values()) {
+        result.add(observableProxy(value, parent, observed))
+    }
+    return result
+    */
+    return data
+}
+
+function proxyMapOrSet(value: any, observable: ObservableHandler) {
+    ObservableHandler.installOn(value, observable)
+    return new Proxy(value, {
+        get(target, property, receiver) {
+            if (property == OBSERVABLE_TARGET) return target
+            if (property == 'size') {
+                ObservableHandler.find(target)?.onAccess()
+                return target.size
+            }
+            const value: any = Reflect.get(target, property, receiver)
+            ObservableHandler.find(target)?.onAccess()
+            return typeof value == "function"
+                ? value.bind(target)
+                : value
+        },
+    })
+}
+
+function addObservable(data: any) {
+    if (data.addOriginal === undefined) {
+        data.addOriginal = data.add
+        data.add = function (this, value: any) {
+            const observable = ObservableHandler.find(this)
+            if (observable && !this.has(value)) {
+                observable.onModify()
+                // Improve: check if necessary to replace items of the set with observed objects as
+                // for complex objects add() function won't find original object inside the set of proxies
+                // value = observableProxy(value, observable)
+            }
+            return this.addOriginal(value)
+        }
+    }
+}
+
+function setObservable(data: any) {
+    if (data.setOriginal === undefined) {
+        data.setOriginal = data.set
+        data.set = function (this, key: any, value: any) {
+            const observable = ObservableHandler.find(this)
+            if (observable) {
+                observable.onModify()
+                observable.removeChild(this.get(key))
+                value = observableProxy(value, observable)
+            }
+            return this.setOriginal(key, value)
+        }
+    }
+}
+
+function deleteObservable(data: any) {
+    if (data.deleteOriginal === undefined) {
+        data.deleteOriginal = data.delete
+        data.delete = function (this, key: any) {
+            const observable = ObservableHandler.find(this)
+            if (observable) {
+                observable.onModify()
+                if (this instanceof Map) {
+                    observable.removeChild(this.get(key))
+                } else if (this instanceof Set) {
+                    observable.removeChild(key)
+                }
+            }
+            return this.deleteOriginal(key)
+        }
+    }
+}
+
+function clearObservable(data: any) {
+    if (data.clearOriginal === undefined) {
+        data.clearOriginal = data.clear
+        data.clear = function (this) {
+            const observable = ObservableHandler.find(this)
+            if (observable) {
+                observable.onModify()
+                Array.from(this.values()).forEach(it => observable.removeChild(it))
+            }
+            return this.clearOriginal()
+        }
+    }
+}
+
+/**
+ * Interface for getting the observed properties of a class
+ */
+export interface TrackableProps {
+    /**
+     * Retrieves the set of property names that are being tracked for changes using `@Track` decorator
+     */
+    trackedProperties(): ReadonlySet<string>
+}
+
+/**
+ * Interface for getting the observability status of a class
+ */
+export interface ObservableClass {
+    /**
+     * Indicates whether the class is decorated with `@Observed`.
+     */
+    isObserved(): boolean
 }
