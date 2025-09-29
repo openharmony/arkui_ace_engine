@@ -3510,7 +3510,7 @@ export class RichEditorTextStyleResult_serializer {
         const fontColorTmpResult : ResourceColor = (fontColorTmpBuf as Color | number | string | Resource)
         const fontSizeTmpResult : double = (valueDeserializer.readFloat64() as double)
         const fontStyleTmpResult : FontStyle = FontStyle.fromValue(valueDeserializer.readInt32())
-        const fontWeightTmpResult : int32 = (valueDeserializer.readFloat64() as int32)
+        const fontWeightTmpResult : int32 = (valueDeserializer.readInt32() as int32)
         const fontFamilyTmpResult : string = (valueDeserializer.readString() as string)
         const decorationTmpResult : DecorationStyleResult = DecorationStyleResult_serializer.read(valueDeserializer)
         const textShadowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

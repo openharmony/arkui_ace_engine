@@ -173,8 +173,8 @@ void AssignArkValue(Ark_RichEditorDeleteValue& dst, const RichEditorDeleteValue&
 void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue& src, Converter::ConvContext *ctx)
 {
     auto rangeBefore = src.GetRangeBefore();
-    dst.rangeBefore.start = Converter::ArkValue<Opt_Number>(rangeBefore.start);
-    dst.rangeBefore.end = Converter::ArkValue<Opt_Number>(rangeBefore.end);
+    dst.rangeBefore.start = Converter::ArkValue<Opt_Int32>(rangeBefore.start);
+    dst.rangeBefore.end = Converter::ArkValue<Opt_Int32>(rangeBefore.end);
     dst.replacedSpans = Converter::ArkValue<Array_RichEditorTextSpanResult>(src.GetRichEditorReplacedSpans(), ctx);
     dst.replacedImageSpans = Converter::ArkValue<Array_RichEditorImageSpanResult>(
         src.GetRichEditorReplacedImageSpans(), ctx);
