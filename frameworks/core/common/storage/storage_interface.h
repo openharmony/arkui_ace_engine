@@ -22,11 +22,13 @@
 
 namespace OHOS::Ace {
 
+constexpr int AREA_MODE_FOR_MODULE_PATH = -1;
+
 class StorageInterface {
 public:
     virtual ~StorageInterface() = default;
 
-    virtual RefPtr<Storage> GetStorage(int areaMode = -1) const
+    virtual RefPtr<Storage> GetStorage(int areaMode = AREA_MODE_FOR_MODULE_PATH, bool useStatic = false) const
     {
         return nullptr;
     }
