@@ -867,7 +867,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest012, TestSize.Level1)
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     ASSERT_NE(frameNode, nullptr);
     sliderPattern->AttachToFrameNode(frameNode);
-    auto hub = frameNode->GetEventHub<EventHub>();
+    auto hub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
 
     /**
@@ -1216,7 +1216,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest021, TestSize.Level1)
     ASSERT_NE(sliderPaintProperty, nullptr);
     auto host = sliderPattern->GetHost();
     ASSERT_NE(host, nullptr);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);

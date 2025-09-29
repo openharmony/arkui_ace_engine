@@ -68,7 +68,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
         StringUtils::StringToDimensionWithThemeValue(toastInfo.bottom, true, toastTheme->GetBottom()));
     toastProperty->UpdateShowMode(toastInfo.showMode);
     toastProperty->UpdateHoverModeArea(toastInfo.hoverModeArea);
-    toastNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()
+    toastNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()
         ->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     toastNode->MarkModifyDone();
     return toastNode;

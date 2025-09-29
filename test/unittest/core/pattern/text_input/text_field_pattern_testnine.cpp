@@ -138,7 +138,7 @@ HWTEST_F(TextFieldPatternTestNine, SetPreviewTextOperation001, TestSize.Level0)
 
     auto host = pattern_->GetHost();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -176,7 +176,7 @@ HWTEST_F(TextFieldPatternTestNine, FinishTextPreviewOperation001, TestSize.Level
     GetFocus();
 
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -381,7 +381,7 @@ HWTEST_F(TextFieldPatternTestNine, ExecuteInputCommand001, TestSize.Level0)
     auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
     layoutProperty->UpdateMaxLength(123);
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -662,7 +662,7 @@ HWTEST_F(TextFieldPatternTestNine, HandleOnCopy001, TestSize.Level0)
     pattern->contentController_->content_ = u"";
     ASSERT_NE(pattern->selectController_, nullptr);
     pattern->selectController_->UpdateHandleIndex(0, 4);
-    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool calledOnCopy = false;
     eventHub->SetOnCopy([&calledOnCopy](const std::u16string& value) {
@@ -761,7 +761,7 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack001, TestSize.Level0)
     GetFocus();
 
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     pattern_->InitDragDropCallBack();
     RefPtr<OHOS::Ace::DragEvent> event  = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     const std::string extraParams("test");

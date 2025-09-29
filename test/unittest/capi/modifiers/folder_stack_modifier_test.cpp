@@ -171,7 +171,7 @@ HWTEST_F(FolderStackModifierTest, setOnFolderStateChangeTest, TestSize.Level1)
 
     auto folderStackNode = AceType::DynamicCast<FolderStackGroupNode>(frameNode);
     ASSERT_NE(folderStackNode, nullptr);
-    auto eventHub = folderStackNode->GetEventHub<FolderStackEventHub>();
+    auto eventHub = folderStackNode->GetOrCreateEventHub<FolderStackEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     FolderEventInfo info(FoldStatus::FOLDED);
@@ -203,7 +203,7 @@ HWTEST_F(FolderStackModifierTest, setOnHoverStatusChangeTest, TestSize.Level1)
 
     auto folderStackNode = AceType::DynamicCast<FolderStackGroupNode>(frameNode);
     ASSERT_NE(folderStackNode, nullptr);
-    auto eventHub = folderStackNode->GetEventHub<FolderStackEventHub>();
+    auto eventHub = folderStackNode->GetOrCreateEventHub<FolderStackEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     FolderEventInfo info(FoldStatus::FOLDED);

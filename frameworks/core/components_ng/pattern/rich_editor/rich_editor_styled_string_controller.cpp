@@ -61,7 +61,7 @@ void RichEditorStyledStringController::SetOnWillChange(std::function<bool(const 
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStyledStringWillChange(std::move(func));
 }
@@ -70,7 +70,7 @@ void RichEditorStyledStringController::SetOnDidChange(std::function<void(const S
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStyledStringDidChange(std::move(func));
 }

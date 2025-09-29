@@ -279,7 +279,7 @@ HWTEST_F(ArcListCommonTestNg, EventHub002, TestSize.Level1)
     CreateList();
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetEventHub<ListItemEventHub>();
+    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetOrCreateEventHub<ListItemEventHub>();
     auto jsonStr = itemEventHub->GetDragExtraParams("", Point(0, 250.f), DragEventType::START);
     EXPECT_EQ(jsonStr, "{\"selectedIndex\":0}");
     jsonStr = itemEventHub->GetDragExtraParams("info", Point(0, 250.f), DragEventType::MOVE);
@@ -299,7 +299,7 @@ HWTEST_F(ArcListCommonTestNg, GetScrollUpdateFriction001, TestSize.Level1)
 
     pattern_->contentMainSize_ = 50.0;
     pattern_->GetScrollUpdateFriction(1.0);
-    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetEventHub<ListItemEventHub>();
+    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetOrCreateEventHub<ListItemEventHub>();
     auto jsonStr = itemEventHub->GetDragExtraParams("", Point(0, 250.f), DragEventType::START);
     EXPECT_EQ(jsonStr, "{\"selectedIndex\":0}");
     jsonStr = itemEventHub->GetDragExtraParams("info", Point(0, 250.f), DragEventType::MOVE);
@@ -321,7 +321,7 @@ HWTEST_F(ArcListCommonTestNg, GetScrollUpdateFriction002, TestSize.Level1)
     pattern_->contentMainSize_ = 50.0;
     pattern_->GetScrollUpdateFriction(-1.0);
     pattern_->OnMidIndexChanged();
-    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetEventHub<ListItemEventHub>();
+    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetOrCreateEventHub<ListItemEventHub>();
     auto jsonStr = itemEventHub->GetDragExtraParams("", Point(0, 250.f), DragEventType::START);
     EXPECT_EQ(jsonStr, "{\"selectedIndex\":0}");
     jsonStr = itemEventHub->GetDragExtraParams("info", Point(0, 250.f), DragEventType::MOVE);

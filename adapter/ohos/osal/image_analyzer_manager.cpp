@@ -222,7 +222,7 @@ bool ImageAnalyzerManager::IsSupportImageAnalyzerFeature()
 {
     auto node = frameNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
-    auto eventHub = node->GetEventHub<NG::EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     if (!eventHub->IsEnabled()) {
         return false;

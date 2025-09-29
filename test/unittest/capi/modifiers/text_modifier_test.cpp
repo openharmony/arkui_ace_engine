@@ -675,7 +675,7 @@ HWTEST_F(TextModifierTest, setSelectableMode, TestSize.Level1)
 HWTEST_F(TextModifierTest, setOnCopyTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
 
     struct CopyEvent {
         int32_t nodeId;
@@ -705,7 +705,7 @@ HWTEST_F(TextModifierTest, setOnCopyTest, TestSize.Level1)
 HWTEST_F(TextModifierTest, setOnSelectionChange, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
 
     struct SelectionChangeEvent {
         int32_t nodeId;
@@ -1359,7 +1359,7 @@ HWTEST_F(TextModifierTest, setSelectionTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetOnSelectionChange([](int32_t start, int32_t end) {
         range.push_back({ .start = start, .end = end });
@@ -1576,7 +1576,7 @@ HWTEST_F(TextModifierTest, setOnMarqueeStateChangeTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     const int32_t start = 0;

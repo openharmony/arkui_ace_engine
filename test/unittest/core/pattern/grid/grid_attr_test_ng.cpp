@@ -160,7 +160,7 @@ HWTEST_F(GridAttrTestNg, Property003, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetCrossEnd(Axis::HORIZONTAL), 2);
     auto pattern = frameNode->GetPattern<GridItemPattern>();
     EXPECT_TRUE(pattern->forceRebuild_);
-    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
     ASSERT_NE(eventHub->onSelect_, nullptr);
 
     /**
@@ -1015,7 +1015,7 @@ HWTEST_F(GridAttrTestNg, GridItemHoverEventTest001, TestSize.Level1)
     CreateDone();
     auto gridItemNode = GetChildFrameNode(frameNode_, 0);
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
-    auto gridItemeventHub = gridItemNode->GetEventHub<GridItemEventHub>();
+    auto gridItemeventHub = gridItemNode->GetOrCreateEventHub<GridItemEventHub>();
     auto gridItemInputHub = gridItemeventHub->GetOrCreateInputEventHub();
     auto HandleHoverEvent = gridItemInputHub->hoverEventActuator_->inputEvents_.back()->GetOnHoverEventFunc();
 
@@ -1047,7 +1047,7 @@ HWTEST_F(GridAttrTestNg, GridItemPressEventTest001, TestSize.Level1)
     CreateDone();
     auto gridItemNode = GetChildFrameNode(frameNode_, 0);
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
-    auto gridItemeventHub = gridItemNode->GetEventHub<GridItemEventHub>();
+    auto gridItemeventHub = gridItemNode->GetOrCreateEventHub<GridItemEventHub>();
     auto gridItemGesture = gridItemeventHub->GetOrCreateGestureEventHub();
     auto HandlePressEvent = gridItemGesture->touchEventActuator_->touchEvents_.back()->GetTouchEventCallback();
 

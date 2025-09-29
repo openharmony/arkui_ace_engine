@@ -156,7 +156,7 @@ public:
     template<typename T>
     RefPtr<T> GetChildEventHub(const RefPtr<FrameNode>& frameNode, int32_t index)
     {
-        return GetChildFrameNode(frameNode, index)->GetEventHub<T>();
+        return GetChildFrameNode(frameNode, index)->GetOrCreateEventHub<T>();
     }
 
     RectF GetChildRect(const RefPtr<FrameNode>& frameNode, int32_t index)

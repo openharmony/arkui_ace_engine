@@ -228,7 +228,7 @@ public:
         if (!frameNode) {
             return nullptr;
         }
-        return frameNode->GetEventHub<EventHubType>();
+        return frameNode->GetOrCreateEventHub<EventHubType>();
     }
 
     RefPtr<GestureEventHub> GetMainFrameNodeGestureEventHub() const

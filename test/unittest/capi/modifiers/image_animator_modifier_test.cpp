@@ -312,7 +312,7 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnStartTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnStart, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static constexpr int32_t contextId = 123;
@@ -341,7 +341,7 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnPauseTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnPause, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static constexpr int32_t contextId = 123;
@@ -370,7 +370,7 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnRepeatTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnRepeat, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static constexpr int32_t contextId = 123;
@@ -399,7 +399,7 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnCancelTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnCancel, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static constexpr int32_t contextId = 123;
@@ -428,7 +428,7 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnFinishTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnFinish, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static constexpr int32_t contextId = 123;

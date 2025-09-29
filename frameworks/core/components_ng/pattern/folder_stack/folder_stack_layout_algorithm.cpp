@@ -138,7 +138,7 @@ void FolderStackLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto displayInfo = pattern->GetDisplayInfo();
         if (displayInfo) {
             FolderEventInfo event(displayInfo->GetFoldStatus());
-            auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();
+            auto eventHub = layoutWrapper->GetHostNode()->GetOrCreateEventHub<FolderStackEventHub>();
             if (eventHub) {
                 eventHub->OnFolderStateChange(event);
             }
@@ -304,7 +304,7 @@ void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrappe
     if (isIntoFolderStack_ == pattern->IsInHoverMode() || !OHOS::Ace::SystemProperties::IsBigFoldProduct()) {
         return;
     }
-    auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();
+    auto eventHub = layoutWrapper->GetHostNode()->GetOrCreateEventHub<FolderStackEventHub>();
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();

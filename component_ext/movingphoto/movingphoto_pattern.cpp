@@ -511,7 +511,7 @@ void MovingPhotoPattern::RegisterImageEvent()
     CHECK_NULL_VOID(movingPhoto);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_VOID(image);
-    auto imageHub = image->GetEventHub<ImageEventHub>();
+    auto imageHub = image->GetOrCreateEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageHub);
     auto imageCompleteEventCallback = [weak = WeakClaim(this)](const LoadImageSuccessEvent& info) {
         auto pattern = weak.Upgrade();
@@ -755,14 +755,14 @@ void MovingPhotoPattern::MediaResetToPlay()
 
 void MovingPhotoPattern::FireMediaPlayerImageComplete()
 {
-    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireCompleteEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerStart()
 {
-    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireStartEvent();
     if (isFastKeyUp_) {
@@ -773,35 +773,35 @@ void MovingPhotoPattern::FireMediaPlayerStart()
 
 void MovingPhotoPattern::FireMediaPlayerStop()
 {
-    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireStopEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerPause()
 {
-    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FirePauseEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerFinish()
 {
-    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireFinishEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerError()
 {
-    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireErrorEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerPrepared()
 {
-    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FirePreparedEvent();
 }

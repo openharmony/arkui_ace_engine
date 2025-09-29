@@ -101,7 +101,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkDrag001, TestSize.Level1)
     ASSERT_NE(hyperlinkPattern, nullptr);
     hyperlinkPattern->EnableDrag();
     // emulate drag event
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub->GetDefaultOnDragStart(), nullptr);
     auto extraParams =
         eventHub->GetDragExtraParams(std::string(), Point(RADIUS_DEFAULT, RADIUS_DEFAULT), DragEventType::START);
@@ -128,7 +128,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
     textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     auto inputHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
 
     hyperlinkPattern->InitInputEvent(inputHub);
@@ -211,7 +211,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest003, TestSize.Level1)
     textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
     auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     auto inputHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_FALSE(hyperlinkPattern->onTouchEvent_);
     hyperlinkPattern->InitTouchEvent(inputHub);
@@ -273,7 +273,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest005, TestSize.Level1)
      * @tc.steps: step2. Call OnModifyDone while gestureHub is able or enable.
      * @tc.expected: TextColor of hyperlink is set different.
      */
-    auto hub = hyperlinkNode->GetEventHub<EventHub>();
+    auto hub = hyperlinkNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
     auto hyperlinkLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
     ASSERT_NE(hyperlinkLayoutProperty, nullptr);

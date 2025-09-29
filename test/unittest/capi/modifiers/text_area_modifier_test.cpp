@@ -577,7 +577,7 @@ HWTEST_F(TextAreaModifierTest, setOnEditChangeTest, TestSize.Level1)
         };
     auto func = Converter::ArkValue<Callback_Boolean_Void>(onEditChange, CONTEXT_ID);
     modifier_->setOnEditChange(node_, &func);
-    auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     EXPECT_EQ(g_isEditChangeTest, true);
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnEditChanged(false);
@@ -600,7 +600,7 @@ HWTEST_F(TextAreaModifierTest, setOnSubmit0Test, TestSize.Level1)
         };
     auto func = Converter::ArkValue<Callback_EnterKeyType_Void>(onSubmit0, CONTEXT_ID);
     modifier_->setOnSubmit0(node_, &func);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     ASSERT_NE(eventHub, nullptr);
     TextFieldCommonEvent event;
@@ -634,7 +634,7 @@ HWTEST_F(TextAreaModifierTest, setOnSubmit1Test, TestSize.Level1)
     static const int expectedResId = 123;
     static const std::u16string testValue(u"string text");
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto onSubmitFunc = [](
@@ -686,7 +686,7 @@ HWTEST_F(TextAreaModifierTest, setOnChangeTest, TestSize.Level1)
     g_EventTestString = u"";
     g_EventTestOffset = 0;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     EXPECT_EQ(g_EventTestOffset, 0);
@@ -1065,7 +1065,7 @@ HWTEST_F(TextAreaModifierTest, setOnWillInsertTest, TestSize.Level1)
     modifier_->setOnWillInsert(node_, &arkFunc);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
 
     {
@@ -1091,7 +1091,7 @@ HWTEST_F(TextAreaModifierTest, setOnDidInsertTest, TestSize.Level1)
     g_EventTestString = u"";
     g_EventTestOffset = 0;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     InsertValueInfo checkValueDefault;
     textFieldEventHub->FireOnDidInsertValueEvent(checkValueDefault);
@@ -1136,7 +1136,7 @@ HWTEST_F(TextAreaModifierTest, setOnWillDeleteTest, TestSize.Level1)
     modifier_->setOnWillDelete(node_, &arkFunc);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     DeleteValueInfo checkValueDefault;
 
@@ -1167,7 +1167,7 @@ HWTEST_F(TextAreaModifierTest, setOnDidDeleteTest, TestSize.Level1)
     g_EventTestOffset = 0;
     g_deleteDirection = TextDeleteDirection::FORWARD;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     DeleteValueInfo checkValueDefault;
     textFieldEventHub->FireOnDidDeleteValueEvent(checkValueDefault);
@@ -1214,7 +1214,7 @@ HWTEST_F(TextAreaModifierTest, setOnTextSelectionChangeTest, TestSize.Level1)
             g_endValue = Converter::Convert<int32_t>(selectionEnd);
         };
     auto func = Converter::ArkValue<Callback_Number_Number_Void>(onTextSelectionChange, CONTEXT_ID);
-    auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
 
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
         modifier_->setOnTextSelectionChange(node_, &func);
@@ -1234,7 +1234,7 @@ HWTEST_F(TextAreaModifierTest, setOnCopyTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnCopy, nullptr);
     g_EventTestString = EMPTY_TEXT;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnCopy(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
@@ -1259,7 +1259,7 @@ HWTEST_F(TextAreaModifierTest, setOnCutTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnCut, nullptr);
     g_EventTestString = EMPTY_TEXT;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnCut(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
@@ -1289,7 +1289,7 @@ HWTEST_F(TextAreaModifierTest, setOnContentScrollTest, TestSize.Level1)
             g_scrollY = Converter::Convert<float>(totalOffsetY);
         };
     auto func = Converter::ArkValue<Callback_Number_Number_Void>(onContentScroll, CONTEXT_ID);
-    auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
 
     typedef std::pair<float, float> ArkNumberFloatTestStep;
     const std::vector<ArkNumberFloatTestStep> floatNumberTestPlan = {
@@ -1354,7 +1354,7 @@ HWTEST_F(TextAreaModifierTest, setInputFilterTestValidValues, TestSize.Level1)
     };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     Callback_String_Void callBackValue = {
         .resource = Ark_CallbackResource {
             .resourceId = frameNode->GetId(),
@@ -1399,7 +1399,7 @@ HWTEST_F(TextAreaModifierTest, setInputFilterTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setInputFilter, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     auto optCallbackValue = Converter::ArkValue<Opt_Callback_String_Void>();
     Converter::ConvContext ctx;
     auto sendString = Converter::ArkValue<Ark_String>(STR_TEST_TEXT, &ctx);
@@ -1791,7 +1791,7 @@ HWTEST_F(TextAreaModifierTest, setOnPasteTestCallEvent, TestSize.Level1)
     };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     auto arkCallback = Converter::ArkValue<Callback_String_PasteEvent_Void>(testCallback, frameNode->GetId());
     ASSERT_NE(eventHub, nullptr);
     modifier_->setOnPaste(node_, &arkCallback);
@@ -1827,7 +1827,7 @@ HWTEST_F(TextAreaModifierTest, setOnPasteTest, TestSize.Level1)
     };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     auto arkCallback = Converter::ArkValue<Callback_String_PasteEvent_Void>(testCallback, frameNode->GetId());
     ASSERT_NE(eventHub, nullptr);
     modifier_->setOnPaste(node_, &arkCallback);
@@ -1927,7 +1927,7 @@ HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
 HWTEST_F(TextAreaModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

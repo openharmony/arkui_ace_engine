@@ -359,7 +359,7 @@ RefPtr<FormNode> FormNode::GetOrCreateFormNode(
 
 void FormNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
-    auto eventHub = GetEventHub<FormEventHub>();
+    auto eventHub = GetOrCreateEventHub<FormEventHub>();
     eventHub->FireOnCache();
     FrameNode::OnDetachFromMainTree(recursive, context);
 }

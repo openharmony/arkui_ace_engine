@@ -1045,7 +1045,7 @@ HWTEST_F(DatePickerTestThree, DatePickerColumnPatternTest003, TestSize.Level1)
     /**
      * @tc.step: step2. call InitPanEvent method.
      */
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     columnPattern->InitPanEvent(gestureHub);
     auto panEvent = columnPattern->panEvent_;
@@ -1120,7 +1120,7 @@ HWTEST_F(DatePickerTestThree, DatePickerColumnPatternTest004, TestSize.Level1)
     /**
      * @tc.step: step2. call InitPanEvent method.
      */
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     columnPattern->InitPanEvent(gestureHub);
     auto panEvent = columnPattern->panEvent_;

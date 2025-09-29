@@ -664,7 +664,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest021, TestSize.Level1)
     pattern->StartCustomNodeAnimation(true);
     auto layoutProperty = pattern->builderNode_->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->IsEnabled(), true);
 }
@@ -695,7 +695,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest022, TestSize.Level1)
     auto layoutProperty = pattern->builderNode_->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->IsEnabled(), true);
 }
@@ -726,7 +726,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest023, TestSize.Level1)
     auto layoutProperty = pattern->builderNode_->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_NE(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->IsEnabled(), true);
 }
@@ -783,7 +783,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest025, TestSize.Level1)
     pattern->StartCustomNodeAnimation(false);
     auto layoutProperty = pattern->builderNode_->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->IsEnabled(), true);
 }
@@ -813,7 +813,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest026, TestSize.Level1)
     auto layoutProperty = pattern->builderNode_->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_NE(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->IsEnabled(), true);
 }
@@ -844,7 +844,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest027, TestSize.Level1)
     auto layoutProperty = pattern->builderNode_->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_NE(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->IsEnabled(), true);
 }
@@ -901,7 +901,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest029, TestSize.Level1)
     pattern->StartEnterAnimation();
     auto layoutProperty = pattern->builderNode_->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->IsEnabled(), true);
 }
@@ -932,7 +932,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest030, TestSize.Level1)
     auto layoutProperty = pattern->builderNode_->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->IsEnabled(), true);
 }
@@ -963,7 +963,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest031, TestSize.Level1)
     auto layoutProperty = pattern->builderNode_->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->IsEnabled(), true);
 }
@@ -1020,7 +1020,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest033, TestSize.Level1)
     pattern->StartExitAnimation();
     auto layoutProperty = pattern->builderNode_->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->IsEnabled(), true);
 }
@@ -1050,7 +1050,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest034, TestSize.Level1)
     auto layoutProperty = pattern->builderNode_->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_NE(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->IsEnabled(), true);
 }
@@ -1081,7 +1081,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest035, TestSize.Level1)
     auto layoutProperty = pattern->builderNode_->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_NE(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->IsEnabled(), true);
 }

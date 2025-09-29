@@ -186,7 +186,7 @@ RefPtr<FrameNode> LoadingProgressPattern::BuildContentModifierNode()
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     auto paintProperty = host->GetPaintProperty<LoadingProgressPaintProperty>();

@@ -73,7 +73,7 @@ void SwitchPattern::OnModifyDone()
     InitClickEvent();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -177,7 +177,7 @@ void SwitchPattern::HandleEnabled()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -315,7 +315,7 @@ void SwitchPattern::MarkIsSelected(bool isSelected)
         return;
     }
     isOn_ = isSelected;
-    auto eventHub = GetEventHub<SwitchEventHub>();
+    auto eventHub = GetOrCreateEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateChangeEvent(isSelected);
     auto host = GetHost();
@@ -384,7 +384,7 @@ float SwitchPattern::GetSwitchContentOffsetX() const
 
 void SwitchPattern::UpdateChangeEvent() const
 {
-    auto switchEventHub = GetEventHub<SwitchEventHub>();
+    auto switchEventHub = GetOrCreateEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(switchEventHub);
     switchEventHub->UpdateChangeEvent(isOn_.value());
 }
@@ -567,7 +567,7 @@ void SwitchPattern::InitMouseEvent()
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto eventHub = GetHost()->GetEventHub<SwitchEventHub>();
+    auto eventHub = GetHost()->GetOrCreateEventHub<SwitchEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
@@ -828,7 +828,7 @@ void SwitchPattern::SetSwitchIsOn(bool ison)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -879,7 +879,7 @@ RefPtr<FrameNode> SwitchPattern::BuildContentModifierNode()
     CHECK_NULL_RETURN(host, nullptr);
     auto paintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, nullptr);
-    auto eventHub = host->GetEventHub<SwitchEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<SwitchEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     bool isOn = false;

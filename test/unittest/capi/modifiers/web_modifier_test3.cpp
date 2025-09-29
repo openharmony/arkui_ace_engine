@@ -266,7 +266,7 @@ HWTEST_F(WebModifierTest3, setEditMenuOptionsTest, TestSize.Level1)
 HWTEST_F(WebModifierTest3, onFaviconReceivedTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     auto webFaviconReceived = Referenced::MakeRefPtr<MockWebFaviconReceived>();
 
     struct CheckEvent {

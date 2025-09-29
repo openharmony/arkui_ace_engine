@@ -178,7 +178,7 @@ HWTEST_F(CheckboxGroupModifierTest, DISABLED_SetOnChangeTest, TestSize.Level1)
     auto arkCallback = Converter::ArkValue<OnCheckboxGroupChangeCallback>(testCallback, frameNode->GetId());
     auto optCallback = Converter::ArkValue<Opt_OnCheckboxGroupChangeCallback>(arkCallback);
     modifier_->setOnChange(node_, &optCallback);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     CheckboxGroupResult info({"test1", "test2"}, 2);
     eventHub->UpdateChangeEvent(&info);
@@ -197,7 +197,7 @@ HWTEST_F(CheckboxGroupModifierTest, DISABLED_SetOnChangeTest, TestSize.Level1)
 HWTEST_F(CheckboxGroupModifierTest, setOnChangeEventSelectAllImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

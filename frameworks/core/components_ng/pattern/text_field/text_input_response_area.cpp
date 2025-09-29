@@ -556,7 +556,7 @@ void PasswordResponseArea::LoadImageSourceInfo()
 void PasswordResponseArea::AddImageEventOnError()
 {
     auto imageNode = passwordNode_.Upgrade();
-    auto eventHub = imageNode->GetEventHub<ImageEventHub>();
+    auto eventHub = imageNode->GetOrCreateEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError([ weakNode = WeakClaim(AceType::RawPtr(imageNode)), weakArea = WeakClaim(this) ]
         (const LoadImageFailEvent& info) {

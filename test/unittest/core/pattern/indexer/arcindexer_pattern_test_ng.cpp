@@ -118,7 +118,7 @@ void ArcindexerPatternTestNg::GetInstance()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ArcIndexerPattern>();
-    eventHub_ = frameNode_->GetEventHub<IndexerEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<IndexerEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<IndexerLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<IndexerPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();

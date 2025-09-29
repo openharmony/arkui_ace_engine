@@ -821,7 +821,7 @@ bool DragDropFuncWrapper::IsSelectedItemNode(const RefPtr<UINode>& uiNode)
     CHECK_NULL_RETURN(frameNode, false);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto dragPreview = frameNode->GetDragPreviewOption();
     if (!dragPreview.isMultiSelectionEnabled) {
@@ -876,7 +876,7 @@ bool DragDropFuncWrapper::IsSelfAndParentDragForbidden(const RefPtr<FrameNode>& 
 {
     auto parent = frameNode;
     while (parent) {
-        auto eventHub = parent->GetEventHub<EventHub>();
+        auto eventHub = parent->GetOrCreateEventHub<EventHub>();
         parent = parent->GetAncestorNodeOfFrame(true);
         if (!eventHub) {
             continue;
