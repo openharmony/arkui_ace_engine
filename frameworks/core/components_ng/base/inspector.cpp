@@ -347,6 +347,11 @@ std::unique_ptr<OHOS::Ace::JsonValue> GetNavCustomNodeInfo(const RefPtr<UINode>&
     return jsonNode;
 }
 
+bool isBreakProceeNav(InspectorChildrenParameters inspectorParameters, const RefPtr<NG::UINode>& uiNode)
+{
+    return ((!inspectorParameters.isLayoutInspector) || (uiNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG));
+}
+
 void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
     InspectorChildrenParameters inspectorParameters, const InspectorFilter& filter = InspectorFilter(),
     uint32_t depth = UINT32_MAX)
@@ -402,13 +407,13 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     }
 
     auto jsonChildrenArray = JsonUtil::CreateArray(true);
-    for (auto uiNode : children) {
+    for (const auto& uiNode : children) {
         if (IsInternalNode(uiNode)) {
             continue;
         }
         bool wantGetInspectorChildren = true;
         do {
-            if ((!inspectorParameters.isLayoutInspector) || (uiNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG)) {
+            if (isBreakProceeNav(inspectorParameters, uiNode)) {
                 break;
             }
             auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(uiNode);
