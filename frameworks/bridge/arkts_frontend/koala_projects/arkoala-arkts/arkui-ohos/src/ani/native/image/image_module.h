@@ -19,6 +19,8 @@
 #include "ani.h"
 
 namespace OHOS::Ace::Ani {
+ani_long ExtractorsToDrawingColorFilterPtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object colorFilterObj);
+ani_long ExtractorsToDrawingLatticePtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object latticeObj);
 ani_object ExtractorsFromImagePixelMapPtr(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_long pointer);
 ani_long ExtractorsToImagePixelMapPtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object pixelMapObj);
 void ImageResizableOptions(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object latticeAni);

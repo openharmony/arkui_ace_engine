@@ -2073,4 +2073,25 @@ HWTEST_F(ImageTestOneNg, ParseImageModelStaticFillColor001, TestSize.Level1)
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ImageRenderProperty, SvgFillColor, color, frameNode, Color::RED);
     ASSERT_EQ(Color::BLACK, color);
 }
+
+/**
+ * @tc.name: SetImageModelStaticSrc001
+ * @tc.desc: parse fill color
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticSrc001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ImageSourceInfo defaultInfo;
+    ImageSourceInfo info("pages/image.png");
+    ImageModelStatic::SetSrc(frameNode, info);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, ImageSourceInfo, defaultInfo, frameNode, ImageSourceInfo());
+    ASSERT_EQ(defaultInfo.GetSrc(), "pages/image.png");
+    ImageModelStatic::SetSrc(frameNode, std::nullopt);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, ImageSourceInfo, defaultInfo, frameNode, ImageSourceInfo());
+    ASSERT_EQ(defaultInfo.GetSrc(), "");
+}
 } // namespace OHOS::Ace::NG

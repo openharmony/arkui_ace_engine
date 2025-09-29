@@ -43,6 +43,8 @@ export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
     }
+    native static _Extractors_ToDrawingColorFilterPtr(drawingColorFilter: drawing.ColorFilter): KPointer;
+    native static _Extractors_ToDrawingLatticePtr(drawingLattice: drawing.Lattice): KPointer;
     native static _Extractors_ToImagePixelMapPtr(pixelmap: image.PixelMap): KPointer;
     native static _Extractors_FromImagePixelMapPtr(ptr: KPointer): image.PixelMap;
     native static _Extractors_ToRectShapePtr(value: RectShape): KPointer;
