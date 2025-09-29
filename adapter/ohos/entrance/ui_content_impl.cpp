@@ -5565,12 +5565,20 @@ void UIContentImpl::PreLayout()
 
 void UIContentImpl::SetStatusBarItemColor(uint32_t color)
 {
-    ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto appBar = container->GetAppBar();
-    CHECK_NULL_VOID(appBar);
-    appBar->SetStatusBarItemColor(IsDarkColor(color));
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [instanceId = instanceId_, color] {
+            auto container = Platform::AceContainer::GetContainer(instanceId);
+            CHECK_NULL_VOID(container);
+            auto appBar = container->GetAppBar();
+            CHECK_NULL_VOID(appBar);
+            appBar->SetStatusBarItemColor(IsDarkColor(color));
+        },
+        TaskExecutor::TaskType::UI, "ArkUIStatusBarItemColor");
 }
 
 void UIContentImpl::SetForceSplitEnable(
