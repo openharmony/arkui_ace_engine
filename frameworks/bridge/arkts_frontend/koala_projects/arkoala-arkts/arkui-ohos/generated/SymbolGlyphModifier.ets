@@ -31,6 +31,14 @@ import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
 export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolGlyphAttribute,AttributeModifier<SymbolGlyphAttribute> {
+    constructor(src?: Resource) {
+        super()
+        let src_type: int32 = RuntimeType.UNDEFINED
+        src_type = runtimeType(src)
+        if (RuntimeType.UNDEFINED != src_type) {
+            this.setSymbolGlyphOptions(src)
+        }
+    }
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
@@ -41,6 +49,9 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     applyFocusedAttribute(instance: SymbolGlyphAttribute): void { }
     applyDisabledAttribute(instance: SymbolGlyphAttribute): void { }
     applySelectedAttribute(instance: SymbolGlyphAttribute): void { }
+
+    _setSymbolGlyphOptions_flag:  AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _setSymbolGlyphOptions0_value?: Resource | undefined
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontSize_0_0value?: double | string | Resource | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -61,6 +72,23 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkSymbolGlyphPeer;
+        if (this._setSymbolGlyphOptions_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (this._setSymbolGlyphOptions_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSymbolGlyphOptionsAttribute((this._setSymbolGlyphOptions0_value as Resource | undefined))
+                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                default: {
+                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.INITIAL
+                    peer.setSymbolGlyphOptionsAttribute(undefined)
+                }
+            }
+        }
         if (this._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._fontSize_0_flag) {
@@ -206,8 +234,21 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
             }
         }
     }
-    mergeModifier(modifier: SymbolGlyphModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        const modifier = value as SymbolGlyphModifier;
+        if (modifier._setSymbolGlyphOptions_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (modifier._setSymbolGlyphOptions_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.setSymbolGlyphOptions(modifier._setSymbolGlyphOptions0_value)
+                    break
+                }
+                default: {
+                    this.setSymbolGlyphOptions(undefined)
+                }
+            }
+        }
         if (modifier._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._fontSize_0_flag) {
@@ -312,6 +353,16 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
+    }
+    setSymbolGlyphOptions(value: Resource | undefined): this {
+        if (this._setSymbolGlyphOptions_flag === AttributeUpdaterFlag.INITIAL ||
+            this._setSymbolGlyphOptions0_value !== value || !Type.of(value).isPrimitive()) {
+            this._setSymbolGlyphOptions0_value = value
+            this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.UPDATE
+        } else {
+            this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
     }
     fontSize(value: double | string | Resource | undefined): this {
         if (((this._fontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
