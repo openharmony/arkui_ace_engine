@@ -700,6 +700,7 @@ typedef struct TransitionEffectPeer* Ark_TransitionEffect;
 typedef struct Opt_TransitionEffect Opt_TransitionEffect;
 typedef struct Ark_TranslateResult Ark_TranslateResult;
 typedef struct Opt_TranslateResult Opt_TranslateResult;
+typedef struct Ark_Tuple_I32_I32 Ark_Tuple_I32_I32;
 typedef struct Ark_Tuple_Number_Number Ark_Tuple_Number_Number;
 typedef struct Opt_Tuple_Number_Number Opt_Tuple_Number_Number;
 typedef struct Ark_Tuple_Number_Number_Number_Number Ark_Tuple_Number_Number_Number_Number;
@@ -2364,6 +2365,8 @@ typedef struct Ark_Union_String_I32_I64_F64_Resource Ark_Union_String_I32_I64_F6
 typedef struct Opt_Union_String_I32_I64_F64_Resource Opt_Union_String_I32_I64_F64_Resource;
 typedef struct Ark_Union_String_I32_Resource_Buffer Ark_Union_String_I32_Resource_Buffer;
 typedef struct Opt_Union_String_I32_Resource_Buffer Opt_Union_String_I32_Resource_Buffer;
+typedef struct Ark_Union_String_F64_Resource Ark_Union_String_F64_Resource;
+typedef struct Opt_Union_String_F64_Resource Opt_Union_String_F64_Resource;
 typedef struct Ark_Union_String_Number_Resource Ark_Union_String_Number_Resource;
 typedef struct Opt_Union_String_Number_Resource Opt_Union_String_Number_Resource;
 typedef struct Ark_Union_String_PixelMap_Resource Ark_Union_String_PixelMap_Resource;
@@ -7682,6 +7685,11 @@ typedef struct Opt_TranslateResult {
     Ark_Tag tag;
     Ark_TranslateResult value;
 } Opt_TranslateResult;
+typedef struct Ark_Tuple_I32_I32 {
+    /* kind: Interface */
+    Ark_Int32 value0;
+    Ark_Int32 value1;
+} Ark_Tuple_I32_I32;
 typedef struct Ark_Tuple_Number_Number {
     /* kind: Interface */
     Ark_Number value0;
@@ -11093,8 +11101,8 @@ typedef struct Opt_Map_String_String {
 typedef struct MenuCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
 } MenuCallback;
 typedef struct Opt_MenuCallback {
     Ark_Tag tag;
@@ -11113,8 +11121,8 @@ typedef struct Opt_MenuItemModifierBuilder {
 typedef struct MenuOnAppearCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
 } MenuOnAppearCallback;
 typedef struct Opt_MenuOnAppearCallback {
     Ark_Tag tag;
@@ -14088,9 +14096,9 @@ typedef struct Opt_ResourceStr {
 } Opt_ResourceStr;
 typedef struct Ark_RichEditorDeleteValue {
     /* kind: Interface */
-    Ark_Number offset;
+    Ark_Int32 offset;
     Ark_RichEditorDeleteDirection direction;
-    Ark_Number length;
+    Ark_Int32 length;
     Array_Union_RichEditorTextSpanResult_RichEditorImageSpanResult richEditorDeleteSpans;
 } Ark_RichEditorDeleteValue;
 typedef struct Opt_RichEditorDeleteValue {
@@ -14109,7 +14117,7 @@ typedef struct Opt_RichEditorGesture {
 } Opt_RichEditorGesture;
 typedef struct Ark_RichEditorInsertValue {
     /* kind: Interface */
-    Ark_Number insertOffset;
+    Ark_Int32 insertOffset;
     Ark_String insertValue;
     Opt_String previewText;
 } Ark_RichEditorInsertValue;
@@ -14119,8 +14127,8 @@ typedef struct Opt_RichEditorInsertValue {
 } Opt_RichEditorInsertValue;
 typedef struct Ark_RichEditorRange {
     /* kind: Interface */
-    Opt_Number start;
-    Opt_Number end;
+    Opt_Int32 start;
+    Opt_Int32 end;
 } Ark_RichEditorRange;
 typedef struct Opt_RichEditorRange {
     Ark_Tag tag;
@@ -14128,7 +14136,7 @@ typedef struct Opt_RichEditorRange {
 } Opt_RichEditorRange;
 typedef struct Ark_RichEditorSelection {
     /* kind: Interface */
-    Ark_Tuple_Number_Number selection;
+    Ark_Tuple_I32_I32 selection;
     Array_Union_RichEditorTextSpanResult_RichEditorImageSpanResult spans;
 } Ark_RichEditorSelection;
 typedef struct Opt_RichEditorSelection {
@@ -14137,8 +14145,8 @@ typedef struct Opt_RichEditorSelection {
 } Opt_RichEditorSelection;
 typedef struct Ark_RichEditorSpanPosition {
     /* kind: Interface */
-    Ark_Number spanIndex;
-    Ark_Tuple_Number_Number spanRange;
+    Ark_Int32 spanIndex;
+    Ark_Tuple_I32_I32 spanRange;
 } Ark_RichEditorSpanPosition;
 typedef struct Opt_RichEditorSpanPosition {
     Ark_Tag tag;
@@ -15493,6 +15501,19 @@ typedef struct Opt_Union_String_Number_Resource {
     Ark_Tag tag;
     Ark_Union_String_Number_Resource value;
 } Opt_Union_String_Number_Resource;
+typedef struct Ark_Union_String_F64_Resource {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_String value0;
+        Ark_Float64 value1;
+        Ark_Resource value2;
+    };
+} Ark_Union_String_F64_Resource;
+typedef struct Opt_Union_String_F64_Resource {
+    Ark_Tag tag;
+    Ark_Union_String_F64_Resource value;
+} Opt_Union_String_F64_Resource;
 typedef struct Ark_Union_String_PixelMap_Resource {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -16492,7 +16513,7 @@ typedef struct Opt_ReuseOptions {
 } Opt_ReuseOptions;
 typedef struct Ark_RichEditorBuilderSpanOptions {
     /* kind: Interface */
-    Opt_Number offset;
+    Opt_Int32 offset;
     Opt_ColorMetrics dragBackgroundColor;
     Opt_Boolean isDragShadowNeeded;
 } Ark_RichEditorBuilderSpanOptions;
@@ -16513,9 +16534,9 @@ typedef struct Opt_RichEditorChangeValue {
 } Opt_RichEditorChangeValue;
 typedef struct Ark_RichEditorSymbolSpanStyle {
     /* kind: Interface */
-    Opt_Union_Number_String_Resource fontSize;
+    Opt_Union_F64_String_Resource fontSize;
     Opt_Array_ResourceColor fontColor;
-    Opt_Union_Number_FontWeight_String fontWeight;
+    Opt_Union_I32_FontWeight_String fontWeight;
     Opt_SymbolEffectStrategy effectStrategy;
     Opt_SymbolRenderingStrategy renderingStrategy;
 } Ark_RichEditorSymbolSpanStyle;
@@ -16525,8 +16546,8 @@ typedef struct Opt_RichEditorSymbolSpanStyle {
 } Opt_RichEditorSymbolSpanStyle;
 typedef struct Ark_RichEditorUpdateSymbolSpanStyleOptions {
     /* kind: Interface */
-    Opt_Number start;
-    Opt_Number end;
+    Opt_Int32 start;
+    Opt_Int32 end;
     Ark_RichEditorSymbolSpanStyle symbolStyle;
 } Ark_RichEditorUpdateSymbolSpanStyleOptions;
 typedef struct Opt_RichEditorUpdateSymbolSpanStyleOptions {
@@ -17760,7 +17781,7 @@ typedef struct Opt_RectOptions {
 } Opt_RectOptions;
 typedef struct Ark_RichEditorSymbolSpanOptions {
     /* kind: Interface */
-    Opt_Number offset;
+    Opt_Int32 offset;
     Opt_RichEditorSymbolSpanStyle style;
 } Ark_RichEditorSymbolSpanOptions;
 typedef struct Opt_RichEditorSymbolSpanOptions {
@@ -19206,7 +19227,7 @@ typedef struct Ark_RichEditorParagraphStyle {
     Opt_Union_Dimension_LeadingMarginPlaceholder leadingMargin;
     Opt_WordBreak wordBreak;
     Opt_LineBreakStrategy lineBreakStrategy;
-    Opt_Number paragraphSpacing;
+    Opt_Float64 paragraphSpacing;
 } Ark_RichEditorParagraphStyle;
 typedef struct Opt_RichEditorParagraphStyle {
     Ark_Tag tag;
@@ -19214,8 +19235,8 @@ typedef struct Opt_RichEditorParagraphStyle {
 } Opt_RichEditorParagraphStyle;
 typedef struct Ark_RichEditorParagraphStyleOptions {
     /* kind: Interface */
-    Opt_Number start;
-    Opt_Number end;
+    Opt_Int32 start;
+    Opt_Int32 end;
     Ark_RichEditorParagraphStyle style;
 } Ark_RichEditorParagraphStyleOptions;
 typedef struct Opt_RichEditorParagraphStyleOptions {
@@ -19615,7 +19636,7 @@ typedef struct Opt_RichEditorImageSpanStyle {
 } Opt_RichEditorImageSpanStyle;
 typedef struct Ark_RichEditorImageSpanStyleResult {
     /* kind: Interface */
-    Ark_Tuple_Number_Number size;
+    Ark_Tuple_I32_I32 size;
     Ark_ImageSpanAlignment verticalAlign;
     Ark_ImageFit objectFit;
     Opt_RichEditorLayoutStyle layoutStyle;
@@ -19627,7 +19648,7 @@ typedef struct Opt_RichEditorImageSpanStyleResult {
 typedef struct Ark_RichEditorParagraphResult {
     /* kind: Interface */
     Ark_RichEditorParagraphStyle style;
-    Ark_Tuple_Number_Number range;
+    Ark_Tuple_I32_I32 range;
 } Ark_RichEditorParagraphResult;
 typedef struct Opt_RichEditorParagraphResult {
     Ark_Tag tag;
@@ -19636,14 +19657,14 @@ typedef struct Opt_RichEditorParagraphResult {
 typedef struct Ark_RichEditorTextStyle {
     /* kind: Interface */
     Opt_ResourceColor fontColor;
-    Opt_Union_String_Number_Resource fontSize;
+    Opt_Union_String_F64_Resource fontSize;
     Opt_FontStyle fontStyle;
-    Opt_Union_Number_FontWeight_String fontWeight;
+    Opt_Union_I32_FontWeight_String fontWeight;
     Opt_ResourceStr fontFamily;
     Opt_DecorationStyleInterface decoration;
     Opt_Union_ShadowOptions_Array_ShadowOptions textShadow;
-    Opt_Union_Number_String letterSpacing;
-    Opt_Union_Number_String_Resource lineHeight;
+    Opt_Union_F64_String letterSpacing;
+    Opt_Union_F64_String_Resource lineHeight;
     Opt_Boolean halfLeading;
     Opt_String fontFeature;
     Opt_TextBackgroundStyle textBackgroundStyle;
@@ -19655,14 +19676,14 @@ typedef struct Opt_RichEditorTextStyle {
 typedef struct Ark_RichEditorTextStyleResult {
     /* kind: Interface */
     Ark_ResourceColor fontColor;
-    Ark_Number fontSize;
+    Ark_Float64 fontSize;
     Ark_FontStyle fontStyle;
-    Ark_Number fontWeight;
+    Ark_Int32 fontWeight;
     Ark_String fontFamily;
     Ark_DecorationStyleResult decoration;
     Opt_Array_ShadowOptions textShadow;
-    Opt_Number letterSpacing;
-    Opt_Number lineHeight;
+    Opt_Float64 letterSpacing;
+    Opt_Float64 lineHeight;
     Opt_Boolean halfLeading;
     Opt_String fontFeature;
     Opt_TextBackgroundStyle textBackgroundStyle;
@@ -19673,8 +19694,8 @@ typedef struct Opt_RichEditorTextStyleResult {
 } Opt_RichEditorTextStyleResult;
 typedef struct Ark_RichEditorUpdateImageSpanStyleOptions {
     /* kind: Interface */
-    Opt_Number start;
-    Opt_Number end;
+    Opt_Int32 start;
+    Opt_Int32 end;
     Ark_RichEditorImageSpanStyle imageStyle;
 } Ark_RichEditorUpdateImageSpanStyleOptions;
 typedef struct Opt_RichEditorUpdateImageSpanStyleOptions {
@@ -19683,8 +19704,8 @@ typedef struct Opt_RichEditorUpdateImageSpanStyleOptions {
 } Opt_RichEditorUpdateImageSpanStyleOptions;
 typedef struct Ark_RichEditorUpdateTextSpanStyleOptions {
     /* kind: Interface */
-    Opt_Number start;
-    Opt_Number end;
+    Opt_Int32 start;
+    Opt_Int32 end;
     Ark_RichEditorTextStyle textStyle;
     Opt_RichEditorUrlStyle urlStyle;
 } Ark_RichEditorUpdateTextSpanStyleOptions;
@@ -19809,7 +19830,7 @@ typedef struct Opt_AttachmentType {
 } Opt_AttachmentType;
 typedef struct Ark_RichEditorImageSpanOptions {
     /* kind: Interface */
-    Opt_Number offset;
+    Opt_Int32 offset;
     Opt_RichEditorImageSpanStyle imageStyle;
     Opt_RichEditorGesture gesture;
     Opt_OnHoverCallback onHover;
@@ -19824,7 +19845,7 @@ typedef struct Ark_RichEditorImageSpanResult {
     Opt_image_PixelMap valuePixelMap;
     Opt_ResourceStr valueResourceStr;
     Ark_RichEditorImageSpanStyleResult imageStyle;
-    Ark_Tuple_Number_Number offsetInSpan;
+    Ark_Tuple_I32_I32 offsetInSpan;
 } Ark_RichEditorImageSpanResult;
 typedef struct Opt_RichEditorImageSpanResult {
     Ark_Tag tag;
@@ -19832,7 +19853,7 @@ typedef struct Opt_RichEditorImageSpanResult {
 } Opt_RichEditorImageSpanResult;
 typedef struct Ark_RichEditorTextSpanOptions {
     /* kind: Interface */
-    Opt_Number offset;
+    Opt_Int32 offset;
     Opt_RichEditorTextStyle style;
     Opt_RichEditorParagraphStyle paragraphStyle;
     Opt_RichEditorGesture gesture;
@@ -19847,7 +19868,7 @@ typedef struct Ark_RichEditorTextSpanResult {
     Ark_RichEditorSpanPosition spanPosition;
     Ark_String value;
     Ark_RichEditorTextStyleResult textStyle;
-    Ark_Tuple_Number_Number offsetInSpan;
+    Ark_Tuple_I32_I32 offsetInSpan;
     Opt_RichEditorSymbolSpanStyle symbolSpanStyle;
     Opt_Resource valueResource;
     Opt_RichEditorParagraphStyle paragraphStyle;
@@ -21724,9 +21745,9 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
     void (*setBarState)(Ark_NativePointer node,
                         const Opt_BarState* value);
     void (*setMaxLength)(Ark_NativePointer node,
-                         const Opt_Number* value);
+                         const Opt_Int32* value);
     void (*setMaxLines)(Ark_NativePointer node,
-                        const Opt_Number* value);
+                        const Opt_Int32* value);
     void (*setKeyboardAppearance)(Ark_NativePointer node,
                                   const Opt_KeyboardAppearance* value);
     void (*setStopBackPress)(Ark_NativePointer node,
@@ -25505,16 +25526,16 @@ typedef struct GENERATED_ArkUIRichEditorBaseControllerAccessor {
     void (*destroyPeer)(Ark_RichEditorBaseController peer);
     Ark_RichEditorBaseController (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getCaretOffset)(Ark_RichEditorBaseController peer);
+    Ark_Int32 (*getCaretOffset)(Ark_RichEditorBaseController peer);
     Ark_Boolean (*setCaretOffset)(Ark_RichEditorBaseController peer,
-                                  const Ark_Number* offset);
+                                  const Ark_Int32* offset);
     void (*closeSelectionMenu)(Ark_RichEditorBaseController peer);
     Ark_RichEditorTextStyle (*getTypingStyle)(Ark_RichEditorBaseController peer);
     void (*setTypingStyle)(Ark_RichEditorBaseController peer,
                            const Ark_RichEditorTextStyle* value);
     void (*setSelection)(Ark_RichEditorBaseController peer,
-                         const Ark_Number* selectionStart,
-                         const Ark_Number* selectionEnd,
+                         const Ark_Int32* selectionStart,
+                         const Ark_Int32* selectionEnd,
                          const Opt_SelectionOptions* options);
     Ark_Boolean (*isEditing)(Ark_RichEditorBaseController peer);
     void (*stopEditing)(Ark_RichEditorBaseController peer);
@@ -25527,16 +25548,16 @@ typedef struct GENERATED_ArkUIRichEditorControllerAccessor {
     void (*destroyPeer)(Ark_RichEditorController peer);
     Ark_RichEditorController (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*addTextSpan)(Ark_RichEditorController peer,
+    Ark_Int32 (*addTextSpan)(Ark_RichEditorController peer,
                               const Ark_ResourceStr* content,
                               const Opt_RichEditorTextSpanOptions* options);
-    Ark_Number (*addImageSpan)(Ark_RichEditorController peer,
+    Ark_Int32 (*addImageSpan)(Ark_RichEditorController peer,
                                const Ark_Union_PixelMap_ResourceStr* value,
                                const Opt_RichEditorImageSpanOptions* options);
-    Ark_Number (*addBuilderSpan)(Ark_RichEditorController peer,
+    Ark_Int32 (*addBuilderSpan)(Ark_RichEditorController peer,
                                  const CustomNodeBuilder* value,
                                  const Opt_RichEditorBuilderSpanOptions* options);
-    Ark_Number (*addSymbolSpan)(Ark_RichEditorController peer,
+    Ark_Int32 (*addSymbolSpan)(Ark_RichEditorController peer,
                                 const Ark_Resource* value,
                                 const Opt_RichEditorSymbolSpanOptions* options);
     void (*updateSpanStyle)(Ark_RichEditorController peer,
