@@ -63,7 +63,7 @@ HWTEST_F(CanvasModifierTest, setOnReadyTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnReady, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<CanvasEventHub>();
+    auto eventHub = frameNode->GetEventHub<CanvasEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

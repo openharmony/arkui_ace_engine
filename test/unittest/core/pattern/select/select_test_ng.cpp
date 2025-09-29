@@ -366,7 +366,7 @@ HWTEST_F(SelectTestNg, OnModifyDone001, TestSize.Level1)
      */
     selectPattern->OnModifyDone();
     auto host = selectPattern->GetHost();
-    EXPECT_NE(host->GetOrCreateEventHub<SelectEventHub>(), nullptr);
+    EXPECT_NE(host->GetEventHub<SelectEventHub>(), nullptr);
 }
 /**
  * @tc.name: UpdateSelectedProps001
@@ -1941,7 +1941,7 @@ HWTEST_F(SelectTestNg, OnAfterModifyDone001, TestSize.Level1)
      */
     selectPattern->OnAfterModifyDone();
     auto host = selectPattern->GetHost();
-    EXPECT_NE(host->GetOrCreateEventHub<SelectEventHub>(), nullptr);
+    EXPECT_NE(host->GetEventHub<SelectEventHub>(), nullptr);
 }
 
 /**

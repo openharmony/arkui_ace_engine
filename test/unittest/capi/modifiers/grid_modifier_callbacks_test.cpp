@@ -60,7 +60,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollBarUpdateTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number index,
@@ -90,7 +90,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
     // test is disabled because onScrollBarUpdate callback should return value
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent { int32_t nodeId; int32_t index; Dimension offset; };
@@ -154,7 +154,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
 HWTEST_F(GridModifierCallbacksTest, setOnScrollIndexTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -253,7 +253,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnItemDragStartTest, TestSize.Le
     modifier_->setOnItemDragStart(node_, &optCallback);
 
     // imitate the test case
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ItemDragInfo dragInfo;
     dragInfo.SetX(expectedX);
@@ -315,7 +315,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartInvalidTest, TestSize.Leve
     modifier_->setOnItemDragStart(node_, &optCallback);
 
     // imitate the test case
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ItemDragInfo dragInfo;
     dragInfo.SetX(expectedX);
@@ -334,7 +334,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartInvalidTest, TestSize.Leve
 HWTEST_F(GridModifierCallbacksTest, setOnItemDragEnterTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
     ASSERT_NE(eventHub, nullptr);
 
@@ -375,7 +375,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragEnterTest, TestSize.Level1)
 HWTEST_F(GridModifierCallbacksTest, setOnItemDragMoveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
     ASSERT_NE(eventHub, nullptr);
 
@@ -424,7 +424,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragMoveTest, TestSize.Level1)
 HWTEST_F(GridModifierCallbacksTest, setOnItemDragLeaveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
     ASSERT_NE(eventHub, nullptr);
 
@@ -470,7 +470,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragLeaveTest, TestSize.Level1)
 HWTEST_F(GridModifierCallbacksTest, setOnItemDropTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
     ASSERT_NE(eventHub, nullptr);
 
@@ -523,7 +523,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollFrameBeginTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     ASSERT_NE(modifier_->setOnScrollFrameBegin, nullptr);

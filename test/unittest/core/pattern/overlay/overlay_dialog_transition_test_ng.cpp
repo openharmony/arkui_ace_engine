@@ -754,7 +754,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest010, TestSize.Level1
      * @tc.steps: step6. Test focusHub is not empty.
      * @tc.expected: return true
      */
-    auto eventHub = dialog->GetOrCreateEventHub<DialogEventHub>();
+    auto eventHub = dialog->GetEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
 }
 
@@ -813,7 +813,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest011, TestSize.Level1
      * @tc.steps: step6. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
      * @tc.expected: return true
      */
-    auto eventHub = dialog->GetOrCreateEventHub<DialogEventHub>();
+    auto eventHub = dialog->GetEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -1006,7 +1006,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest014, TestSize.Level1
      * @tc.steps: step7. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
      * @tc.expected: return true
      */
-    auto eventHub = dialogNode->GetOrCreateEventHub<DialogEventHub>();
+    auto eventHub = dialogNode->GetEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);

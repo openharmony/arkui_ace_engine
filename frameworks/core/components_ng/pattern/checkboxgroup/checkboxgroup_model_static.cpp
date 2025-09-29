@@ -108,7 +108,7 @@ void CheckBoxGroupModelStatic::SetCheckboxGroupStyle(
 void CheckBoxGroupModelStatic::SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }

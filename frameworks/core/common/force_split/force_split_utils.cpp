@@ -86,7 +86,7 @@ RefPtr<NavDestinationGroupNode> ForceSplitUtils::CreatePlaceHolderNavDestination
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     CHECK_NULL_RETURN(placeHolder, nullptr);
 
-    auto eventHub = placeHolder->GetOrCreateEventHub<EventHub>();
+    auto eventHub = placeHolder->GetEventHub<EventHub>();
     eventHub->SetEnabled(false);
     auto pattern = placeHolder->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);

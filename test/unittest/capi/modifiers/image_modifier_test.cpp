@@ -208,7 +208,7 @@ HWTEST_F(ImageModifierTest, setAutoResizeTestValidValues, TestSize.Level1)
 HWTEST_F(ImageModifierTest, setOnFinishTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -245,7 +245,7 @@ HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnError, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     const auto width = 0.5f;
     const auto height = 0.6f;
@@ -597,7 +597,7 @@ MATCHER_P2(CompareLoadImageSuccessEvent, event1, event2, "LoadImageSuccessEvent 
 HWTEST_F(ImageModifierTest, setOnCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     auto widthHeight = 100.0f;
     static constexpr int32_t contextId = 123;
     const LoadImageSuccessEvent info (widthHeight, widthHeight, widthHeight, widthHeight, 0,

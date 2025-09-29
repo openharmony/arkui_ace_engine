@@ -807,7 +807,7 @@ HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest01, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(10));
         ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, breakpoints);
     });
-    auto eventHub = gridRow->GetOrCreateEventHub<GridRowEventHub>();
+    auto eventHub = gridRow->GetEventHub<GridRowEventHub>();
     bool eventTriggerFlag = false;
     auto layoutProperty = gridRow->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -862,7 +862,7 @@ HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest02, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(300));
         ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, breakpoints);
     });
-    auto eventHub = gridRow->GetOrCreateEventHub<GridRowEventHub>();
+    auto eventHub = gridRow->GetEventHub<GridRowEventHub>();
     bool eventTriggerFlag = false;
     auto layoutProperty = gridRow->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);

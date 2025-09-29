@@ -1083,7 +1083,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setOnSizeChangeTest, TestSize.Level
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     struct CheckEvent {
         int32_t nodeId;

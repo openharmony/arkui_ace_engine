@@ -882,7 +882,7 @@ HWTEST_F(MenuItemTestNg, MenuItemEventTest001, TestSize.Level1)
     menuitem.Create(itemOption);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
     ASSERT_NE(eventHub, nullptr);
     menuitem.SetOnChange(frameNode, [](bool onChange) {});
     EXPECT_NE(eventHub->onChange_, nullptr);

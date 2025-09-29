@@ -505,7 +505,7 @@ bool RichEditorPattern::BeforeStyledStringChange(const UndoRedoRecord& record, b
 
 bool RichEditorPattern::BeforeStyledStringChange(int32_t start, int32_t length, const std::u16string& string)
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
     CHECK_NULL_RETURN(eventHub->HasOnStyledStringWillChange(), true);
     auto changeStart = std::clamp(start, 0, GetTextContentLength());
@@ -515,7 +515,7 @@ bool RichEditorPattern::BeforeStyledStringChange(int32_t start, int32_t length, 
 
 bool RichEditorPattern::BeforeStyledStringChange(int32_t start, int32_t length, const RefPtr<SpanString>& styledString)
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
     CHECK_NULL_RETURN(eventHub->HasOnStyledStringWillChange(), true);
     auto replaceMentString = AceType::MakeRefPtr<MutableSpanString>(u"");
@@ -534,7 +534,7 @@ bool RichEditorPattern::BeforeStyledStringChange(int32_t start, int32_t length, 
 
 void RichEditorPattern::AfterStyledStringChange(int32_t start, int32_t length, const std::u16string& string)
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (eventHub->HasOnStyledStringDidChange()) {
         StyledStringChangeValue changeValue;
@@ -719,7 +719,7 @@ void RichEditorPattern::OnModifyDone()
     Register2DragDropManager();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     bool enabledCache = eventHub->IsEnabled();
     if (textDetectEnable_ && enabledCache != enabled_) {
@@ -895,7 +895,7 @@ void RichEditorPattern::HandleSelectOverlayOnLayoutSwap()
 
 void RichEditorPattern::FireOnReady()
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnReady();
     ClearOperationRecords();
@@ -1002,7 +1002,7 @@ void RichEditorPattern::AddSpanHoverEvent(
     CHECK_NULL_VOID(spanItem && frameNode && onHoverFunc);
     auto tag = frameNode->GetTag();
     spanItem->SetHoverEvent(std::move(onHoverFunc));
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -1580,7 +1580,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
 
 bool RichEditorPattern::BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options)
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     CHECK_NULL_RETURN(eventHub->HasOnWillChange(), true);
 
@@ -1613,7 +1613,7 @@ bool RichEditorPattern::BeforeAddSymbol(RichEditorChangeValue& changeValue, cons
 
 void RichEditorPattern::AfterContentChange(RichEditorChangeValue& changeValue)
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     if (eventHub && eventHub->HasOnDidChange()) {
         eventHub->FireOnDidChange(changeValue);
     }
@@ -1684,7 +1684,7 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options, TextChangeReaso
     RichEditorChangeValue changeValue(reason);
     changeValue.SetRangeBefore({ start, end });
     changeValue.SetRangeAfter({ start, start });
-    if (auto eventHub = GetOrCreateEventHub<RichEditorEventHub>(); eventHub) {
+    if (auto eventHub = GetEventHub<RichEditorEventHub>(); eventHub) {
         CHECK_NULL_VOID(eventHub->FireOnWillChange(changeValue));
     }
     ClearRedoOperationRecords();
@@ -2207,7 +2207,7 @@ void RichEditorPattern::FireOnSelectionChange(const TextSelector& selector)
 
 void RichEditorPattern::FireOnSelectionChange(int32_t start, int32_t end, bool isForced)
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     CHECK_NULL_VOID(isForced || HasFocus() || dataDetectorAdapter_->hasClickedMenuOption_);
     bool isSingleHandle = selectOverlay_->IsSingleHandle();
@@ -4313,7 +4313,7 @@ void RichEditorPattern::InitDragDropEvent()
     CHECK_NULL_VOID(gestureHub);
     gestureHub->InitDragDropEvent();
     gestureHub->SetThumbnailCallback(GetThumbnailCallback());
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragMove = [weakPtr = WeakClaim(this)](
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
@@ -4331,7 +4331,7 @@ void RichEditorPattern::OnDragStartAndEnd()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragStart = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
                            const std::string& extraParams) -> NG::DragDropInfo {
@@ -4365,7 +4365,7 @@ NG::DragDropInfo RichEditorPattern::HandleDragStart(const RefPtr<Ace::DragEvent>
     }
     sourceTool_ = event ? event->GetSourceTool() : SourceTool::UNKNOWN;
     timestamp_ = std::chrono::system_clock::now().time_since_epoch().count();
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, {});
     eventHub->SetTimestamp(timestamp_);
     showSelect_ = false;
@@ -4379,7 +4379,7 @@ void RichEditorPattern::onDragDropAndLeave()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragDrop = [weakPtr = WeakClaim(this), scopeId = Container::CurrentId()](
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& value) {
@@ -4388,7 +4388,7 @@ void RichEditorPattern::onDragDropAndLeave()
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto eventHub = host->GetOrCreateEventHub<EventHub>();
+        auto eventHub = host->GetEventHub<EventHub>();
         pattern->sourceTool_ = event ? event->GetSourceTool() : SourceTool::UNKNOWN;
         CHECK_NULL_VOID(eventHub && eventHub->IsEnabled());
         bool isCopy = false;
@@ -4419,7 +4419,7 @@ void RichEditorPattern::ClearDragDropEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     SetIsTextDraggable(false);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDragStart(nullptr);
     eventHub->SetOnDragEnter(nullptr);
@@ -5111,7 +5111,7 @@ void RichEditorPattern::InitMouseEvent()
     CHECK_NULL_VOID(!mouseEventInitialized_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -6212,7 +6212,7 @@ void RichEditorPattern::SetDefaultColor(RefPtr<SpanNode>& spanNode)
 
 bool RichEditorPattern::BeforeIMEInsertValue(const std::u16string& insertValue)
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
     RichEditorInsertValue insertValueInfo;
     insertValueInfo.SetInsertOffset(caretPosition_);
@@ -6244,7 +6244,7 @@ bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     ACE_SCOPED_TRACE("RichEditorAfterIMEInsertValue");
     auto host = GetContentHost();
     CHECK_NULL_RETURN(host, false);
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
 
     RichEditorAbstractSpanResult retInfo;
@@ -6288,7 +6288,7 @@ bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
 bool RichEditorPattern::DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info,
     bool isIME)
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto allowDelete = eventHub->FireAboutToDelete(info);
     info.ResetRichEditorDeleteSpans();
@@ -8235,7 +8235,7 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
 
 void RichEditorPattern::FireOnSelect(int32_t selectStart, int32_t selectEnd)
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     if (!textSelectInfo.GetSelection().resultObjects.empty()) {
@@ -8598,7 +8598,7 @@ void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
     if (copyOption_ == CopyOptions::None) {
         return;
     }
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     TextCommonEvent event;
     eventHub->FireOnCopy(event);
@@ -8639,7 +8639,7 @@ void RichEditorPattern::HandleOnPaste()
         suppressAccessibilityEvent_ = true;
         return;
     }
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     TextCommonEvent event;
     eventHub->FireOnPaste(event);
@@ -8729,7 +8729,7 @@ void RichEditorPattern::HandleOnCut()
         suppressAccessibilityEvent_ = true;
         return;
     }
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     TextCommonEvent event;
     eventHub->FireOnCut(event);
@@ -8749,7 +8749,7 @@ void RichEditorPattern::HandleOnCut()
 
 void RichEditorPattern::HandleOnShare()
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     TextCommonEvent event;
     eventHub->FireOnShare(event);
@@ -9104,7 +9104,7 @@ void RichEditorPattern::ResetSelection()
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "ResetSelection");
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto eventHub = host->GetOrCreateEventHub<RichEditorEventHub>();
+        auto eventHub = host->GetEventHub<RichEditorEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto textSelectInfo = GetSpansInfo(-1, -1, GetSpansMethod::ONSELECT);
         eventHub->FireOnSelect(&textSelectInfo);
@@ -9132,7 +9132,7 @@ bool RichEditorPattern::InRangeRect(const Offset& globalOffset, const std::pair<
     if (selectOverlay_->HasRenderTransform()) {
         localOffset = ConvertGlobalToLocalOffset(globalOffset);
     }
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     if (GreatNotEqual(range.second, range.first)) {
         // Determine if the pan location is in the selected area
         auto rangeRects = paragraphs_.GetRects(range.first, range.second);
@@ -9259,7 +9259,7 @@ void RichEditorPattern::UpdateTextFieldManager(const Offset& offset, float heigh
 
 bool RichEditorPattern::IsDisabled() const
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
     return !eventHub->IsEnabled();
 }
@@ -10800,7 +10800,7 @@ void RichEditorPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& eve
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     TextCommonEvent textCommonEvent;
     if (textCommonEvent.IsPreventDefault()) {
@@ -10937,7 +10937,7 @@ void RichEditorPattern::HandleOnEditChanged(bool isEditing)
     CHECK_NULL_VOID(isEditing_ != isEditing);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "editState->%{public}d", isEditing);
@@ -11006,7 +11006,7 @@ void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKey
     }
     // Enter key type callback
     TextFieldCommonEvent event;
-    auto eventHub = host->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
     eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
     // If the developer wants to keep editing, editing will not stop
     if (event.IsKeepEditable() || action == TextInputAction::NEW_LINE) {
@@ -11395,7 +11395,7 @@ RefPtr<SpanItem> RichEditorPattern::GetDelPartiallySpanItem(
 
 bool RichEditorPattern::BeforeChangeText(RichEditorChangeValue& changeValue, const TextSpanOptions& options)
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     if (!eventHub->HasOnWillChange() && !eventHub->HasOnDidChange()) {
         return true;
@@ -11431,7 +11431,7 @@ bool RichEditorPattern::BeforeChangeText(RichEditorChangeValue& changeValue, con
 bool RichEditorPattern::BeforeAddImage(RichEditorChangeValue& changeValue,
     const ImageSpanOptions& options, int32_t insertIndex)
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     if (!eventHub->HasOnWillChange() && !eventHub->HasOnDidChange()) {
         return true;
@@ -11486,7 +11486,7 @@ void RichEditorPattern::UpdateImageSpanResultByOptions(RichEditorAbstractSpanRes
 
 bool RichEditorPattern::BeforeSpansChange(const UndoRedoRecord& record, bool isUndo)
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     CHECK_NULL_RETURN(eventHub->HasOnWillChange(), true);
     RichEditorChangeValue changeValue(isUndo ? TextChangeReason::UNDO : TextChangeReason::REDO);
@@ -11589,7 +11589,7 @@ void RichEditorPattern::UpdateSymbolSpanResultByOptions(RichEditorAbstractSpanRe
 
 void RichEditorPattern::AfterSpansChange(const UndoRedoRecord& record, bool isUndo)
 {
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     CHECK_NULL_VOID(eventHub->HasOnDidChange());
     RichEditorChangeValue changeValue(isUndo ? TextChangeReason::UNDO : TextChangeReason::REDO);
@@ -11702,7 +11702,7 @@ bool RichEditorPattern::BeforeChangeText(
     RichEditorChangeValue& changeValue, const OperationRecord& record, RecordType type, int32_t delLength)
 {
     int32_t innerPosition = caretPosition_;
-    auto eventHub = GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     if (!eventHub->HasOnWillChange() && !eventHub->HasOnDidChange()) {
         return true;

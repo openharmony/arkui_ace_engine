@@ -1867,7 +1867,7 @@ HWTEST_F(SheetPresentationTestThreeNg, OnAttachToFrameNode001, TestSize.Level1)
      * @tc.steps: step3. test OnAttachToFrameNode
      */
     sheetPattern->OnAttachToFrameNode();
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto innerOnAreaChangeCallback = eventHub->onAreaChangedInnerCallbacks_[sheetNode->GetId()];
     EXPECT_NE(innerOnAreaChangeCallback, nullptr);

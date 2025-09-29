@@ -369,7 +369,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest007, TestSi
     /**
      * @tc.steps: step2. Set TextClockConfiguration
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
 
@@ -410,7 +410,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest008, TestSi
     /**
      * @tc.steps: step2. Set TextClockConfiguration
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     auto controller = pattern->GetTextClockController();
@@ -454,7 +454,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest009, TestSi
     /**
      * @tc.steps: step2. Set TextClockConfiguration
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     auto controller = pattern->GetTextClockController();
@@ -500,7 +500,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest010, TestSi
     /**
      * @tc.steps: step2. Set TextClockConfiguration
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
 
@@ -542,7 +542,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest011, TestSi
     /**
      * @tc.steps: step2. Set TextClockConfiguration
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     auto controller = pattern->GetTextClockController();
@@ -587,7 +587,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest012, TestSi
     /**
      * @tc.steps: step2. Set TextClockConfiguration
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     auto controller = pattern->GetTextClockController();
@@ -633,7 +633,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest013, TestSi
      * @tc.steps: step2. Set TextClockConfiguration
      */
     model.SetHoursWest(HOURS_WEST);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
 
@@ -675,7 +675,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest014, TestSi
      * @tc.steps: step2. Set TextClockConfiguration
      */
     model.SetHoursWest(HOURS_WEST);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     auto controller = pattern->GetTextClockController();
@@ -720,7 +720,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest015, TestSi
      * @tc.steps: step2. Set TextClockConfiguration
      */
     model.SetHoursWest(HOURS_WEST);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     auto controller = pattern->GetTextClockController();
@@ -767,7 +767,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest016, TestSi
      */
     float hoursWest = 8;
     model.SetHoursWest(hoursWest);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
 
@@ -810,7 +810,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest017, TestSi
      */
     float hoursWest = 8;
     model.SetHoursWest(hoursWest);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     auto controller = pattern->GetTextClockController();
@@ -856,7 +856,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest018, TestSi
      */
     float hoursWest = 8;
     model.SetHoursWest(hoursWest);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     auto controller = pattern->GetTextClockController();
@@ -902,7 +902,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest019, TestSi
      * @tc.steps: step2. Set TextClockConfiguration
      */
     model.SetHoursWest(HOURS_WEST);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
 
@@ -944,7 +944,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest020, TestSi
      * @tc.steps: step2. Set TextClockConfiguration
      */
     model.SetHoursWest(HOURS_WEST);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     auto controller = pattern->GetTextClockController();
@@ -989,7 +989,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest021, TestSi
      * @tc.steps: step2. Set TextClockConfiguration
      */
     model.SetHoursWest(HOURS_WEST);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     auto controller = pattern->GetTextClockController();
@@ -1036,7 +1036,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest022, TestSi
      */
     float hoursWest = 8;
     model.SetHoursWest(hoursWest);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
 
@@ -1079,7 +1079,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest023, TestSi
      */
     float hoursWest = 8;
     model.SetHoursWest(hoursWest);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     auto controller = pattern->GetTextClockController();
@@ -1125,7 +1125,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest024, TestSi
      */
     float hoursWest = 8;
     model.SetHoursWest(hoursWest);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     auto controller = pattern->GetTextClockController();
@@ -1171,7 +1171,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest025, TestSi
      * @tc.steps: step2. Set TextClockConfiguration
      */
     model.SetHoursWest(HOURS_WEST);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(BIG_INT);
 
@@ -1213,7 +1213,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest026, TestSi
      * @tc.steps: step2. Set TextClockConfiguration
      */
     model.SetHoursWest(HOURS_WEST);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(BIG_INT);
     auto controller = pattern->GetTextClockController();
@@ -1258,7 +1258,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest027, TestSi
      * @tc.steps: step2. Set TextClockConfiguration
      */
     model.SetHoursWest(HOURS_WEST);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(BIG_INT);
     auto controller = pattern->GetTextClockController();
@@ -1305,7 +1305,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest028, TestSi
      */
     float hoursWest = 8;
     model.SetHoursWest(hoursWest);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(BIG_INT);
 
@@ -1348,7 +1348,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest029, TestSi
      */
     float hoursWest = 8;
     model.SetHoursWest(hoursWest);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(BIG_INT);
     auto controller = pattern->GetTextClockController();
@@ -1394,7 +1394,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest030, TestSi
      */
     float hoursWest = 8;
     model.SetHoursWest(hoursWest);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(BIG_INT);
     auto controller = pattern->GetTextClockController();
@@ -1440,7 +1440,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest031, TestSi
      * @tc.steps: step2. Set TextClockConfiguration
      */
     model.SetHoursWest(HOURS_WEST);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
 
@@ -1482,7 +1482,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest032, TestSi
      * @tc.steps: step2. Set TextClockConfiguration
      */
     model.SetHoursWest(HOURS_WEST);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
     auto controller = pattern->GetTextClockController();
@@ -1527,7 +1527,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest033, TestSi
      * @tc.steps: step2. Set TextClockConfiguration
      */
     model.SetHoursWest(HOURS_WEST);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
     auto controller = pattern->GetTextClockController();
@@ -1574,7 +1574,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest034, TestSi
      */
     float hoursWest = 8;
     model.SetHoursWest(hoursWest);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
 
@@ -1617,7 +1617,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest035, TestSi
      */
     float hoursWest = 8;
     model.SetHoursWest(hoursWest);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
     auto controller = pattern->GetTextClockController();
@@ -1663,7 +1663,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest036, TestSi
      */
     float hoursWest = 8;
     model.SetHoursWest(hoursWest);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
     auto controller = pattern->GetTextClockController();
@@ -1708,7 +1708,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest037, TestSi
     /**
      * @tc.steps: step2. Set TextClockConfiguration
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
 
@@ -1749,7 +1749,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest038, TestSi
     /**
      * @tc.steps: step2. Set TextClockConfiguration
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     auto controller = pattern->GetTextClockController();
@@ -1793,7 +1793,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest039, TestSi
     /**
      * @tc.steps: step2. Set TextClockConfiguration
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     auto controller = pattern->GetTextClockController();
@@ -1839,7 +1839,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest040, TestSi
     /**
      * @tc.steps: step2. Set TextClockConfiguration
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
 
@@ -1881,7 +1881,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest041, TestSi
     /**
      * @tc.steps: step2. Set TextClockConfiguration
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     auto controller = pattern->GetTextClockController();
@@ -1926,7 +1926,7 @@ HWTEST_F(TextClockContentModifierTestNG, TextClockContentModifierTest042, TestSi
     /**
      * @tc.steps: step2. Set TextClockConfiguration
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     auto controller = pattern->GetTextClockController();

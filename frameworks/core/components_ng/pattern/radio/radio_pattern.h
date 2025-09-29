@@ -152,7 +152,7 @@ public:
         }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto radioEventHub = host->GetOrCreateEventHub<NG::RadioEventHub>();
+        auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
         auto value = radioEventHub ? radioEventHub->GetValue() : "";
         auto group = radioEventHub ? radioEventHub->GetGroup() : "";
         json->PutExtAttr("value", value.c_str(), filter);

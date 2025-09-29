@@ -91,7 +91,7 @@ HWTEST_F(CheckboxModifierTest, setCheckboxOnChangeTest, TestSize.Level1)
     auto arkCallback = Converter::ArkValue<OnCheckboxChangeCallback>(testCallback, frameNode->GetId());
     auto optCallback = Converter::ArkValue<Opt_OnCheckboxChangeCallback>(arkCallback);
     modifier_->setOnChange(node_, &optCallback);
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
     EXPECT_FALSE(checkEvent);
     eventHub->UpdateChangeEvent(false);
     ASSERT_TRUE(checkEvent);
@@ -590,7 +590,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setMarkTestInvalidValues, TestSize.Level
 HWTEST_F(CheckboxModifierTest, setOnChangeEventSelectImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

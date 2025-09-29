@@ -206,7 +206,7 @@ HWTEST_F(SwiperModifierTest2, setOnSelectedTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnSelected, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -249,7 +249,7 @@ HWTEST_F(SwiperModifierTest2, setOnUnselectedTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnUnselected, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

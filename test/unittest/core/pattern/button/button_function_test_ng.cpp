@@ -1213,7 +1213,7 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest016, TestSize.Level1)
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->SetEnabled(true);
     buttonPattern->HandlePressedStyle();
 
@@ -1282,7 +1282,7 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest018, TestSize.Level1)
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->SetEnabled(true);
     buttonPattern->HandlePressedStyle();
 
@@ -1324,7 +1324,7 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest019, TestSize.Level1)
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->SetEnabled(true);
     buttonPattern->HandlePressedStyle();
 
