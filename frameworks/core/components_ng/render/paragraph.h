@@ -114,6 +114,11 @@ struct DrawableLeadingMargin {
     {
         return size == other.size;
     }
+
+    bool IsValid()
+    {
+        return size.Width().IsValid() || size.Height().IsValid();
+    }
 };
 
 struct LeadingMargin {
@@ -319,6 +324,7 @@ public:
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity, bool needLineHighest = true) = 0;
     virtual bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric,
         const OffsetF& lastTouchOffset, TextAffinity& textAffinity) = 0;
+    virtual bool HandleCaretWhenEmpty(CaretMetricsF& result, bool needLineHighest) = 0;
     virtual void SetIndents(const std::vector<float>& indents) = 0;
     virtual bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) = 0;
     virtual std::u16string GetParagraphText() = 0;

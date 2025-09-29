@@ -28,18 +28,21 @@ public:
     {
         paragraphs_.emplace_back(std::move(info));
         hasPosyRange = false;
+        hasLineIndex = false;
     }
 
     void SetParagraphs(const std::vector<ParagraphInfo>& paragraphs)
     {
         paragraphs_ = paragraphs;
         hasPosyRange = false;
+        hasLineIndex = false;
     }
 
     void Reset()
     {
         paragraphs_.clear();
         hasPosyRange = false;
+        hasLineIndex = false;
     }
 
     float GetHeight()
@@ -65,6 +68,19 @@ public:
             paragraphInfo.bottomPos = cumHeight;
         }
         hasPosyRange = true;
+    }
+
+    void CalLineIndex()
+    {
+        CHECK_NULL_VOID(!hasLineIndex);
+        ACE_SCOPED_TRACE("RichEditorParagraphManager::CalLineIndex");
+        size_t lineIndex = 0;
+        for (auto& paragraphInfo : paragraphs_) {
+            paragraphInfo.topLineIndex = lineIndex;
+            lineIndex += paragraphInfo.paragraph->GetLineCount();
+            paragraphInfo.bottomLineIndex = lineIndex - 1;
+        }
+        hasLineIndex = true;
     }
 
     std::vector<RectF> GetRects(int32_t start, int32_t end,
@@ -111,6 +127,7 @@ public:
 
 private:
     bool hasPosyRange = false;
+    bool hasLineIndex = false;
 };
 } // namespace OHOS::Ace::NG
 #endif

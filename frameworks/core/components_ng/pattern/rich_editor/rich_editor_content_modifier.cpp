@@ -50,6 +50,7 @@ void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     auto&& paragraphs = pManager_->GetParagraphs();
     pManager_->CalPosyRange();
+    pManager_->CalLineIndex();
     auto offset = contentPattern->GetTextRect().GetOffset(); // relative to component
 
     auto clipOffset = clipOffset_->Get();
@@ -69,13 +70,12 @@ void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
         --ub;
     }
 
-    size_t lineCount = 0;
     for (auto iter = lb; iter <= ub && iter != paragraphs.end(); ++iter) {
         const auto& info = *iter;
         float x = AdjustParagraphX(info, contentRect);
         float y = info.topPos + offset.GetY();
         info.paragraph->Paint(drawingContext.canvas, x, y);
-        PaintLeadingMarginSpan(info, offset, lineCount, drawingContext);
+        pManager_->PaintLeadingMarginSpan(info, offset, drawingContext);
     }
 
     PaintCustomSpan(drawingContext);
@@ -90,36 +90,6 @@ float RichEditorContentModifier::AdjustParagraphX(const ParagraphManager::Paragr
     CHECK_NULL_RETURN(paraStyle.direction == TextDirection::RTL, x);
     float leadingMarginWidth = static_cast<float>(paraStyle.leadingMargin->size.Width().ConvertToPx());
     return contentRect.GetX() + contentRect.Width() - leadingMarginWidth;
-}
-
-void RichEditorContentModifier::PaintLeadingMarginSpan(const ParagraphManager::ParagraphInfo& paragraphInfo,
-    const OffsetT<float>& offset, size_t& lineCount, DrawingContext& drawingContext)
-{
-    auto drawableLeadingMargin = paragraphInfo.paragraphStyle.drawableLeadingMargin;
-    auto currentParagraphLineCount = paragraphInfo.paragraph->GetLineCount();
-    if (!drawableLeadingMargin.has_value() || currentParagraphLineCount <= 0) {
-        lineCount += currentParagraphLineCount;
-        return;
-    }
-    auto leadingMarginOnDraw = drawableLeadingMargin.value().onDraw_;
-    CHECK_NULL_VOID(leadingMarginOnDraw);
-    for (size_t i = 0; i < currentParagraphLineCount; i++) {
-        auto lineMetrics = pManager_->GetLineMetrics(lineCount + i);
-        LeadingMarginSpanOptions options;
-        options.x = paragraphInfo.paragraphStyle.direction != TextDirection::RTL ?
-            lineMetrics.x + offset.GetX() : lineMetrics.x + offset.GetX() + lineMetrics.width;
-        options.direction = paragraphInfo.paragraphStyle.direction;
-        options.top = lineMetrics.y + offset.GetY();
-        options.baseline = lineMetrics.baseline + offset.GetY();
-        options.bottom = options.top + lineMetrics.height;
-        options.start = lineMetrics.startIndex;
-        options.end = lineMetrics.endIndex;
-        if (i == 0) {
-            options.first = true;
-        }
-        leadingMarginOnDraw(drawingContext, options);
-    }
-    lineCount += currentParagraphLineCount;
 }
 
 void RichEditorContentModifier::PaintCustomSpan(DrawingContext& drawingContext)

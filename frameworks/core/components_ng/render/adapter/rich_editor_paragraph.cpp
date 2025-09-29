@@ -37,6 +37,7 @@ void RichEditorParagraph::Layout(float width)
     CHECK_NULL_VOID(paragraph_);
     layoutWidth_ = width;
     height_ = paragraph_->GetHeight();
+    lineCount_ = paragraph_->GetLineCount();
 }
 
 void RichEditorParagraph::ReLayout(float width, const ParagraphStyle& paraStyle,
@@ -47,11 +48,17 @@ void RichEditorParagraph::ReLayout(float width, const ParagraphStyle& paraStyle,
     CHECK_NULL_VOID(paragraph_);
     layoutWidth_ = width;
     height_ = paragraph_->GetHeight();
+    lineCount_ = paragraph_->GetLineCount();
 }
 
 float RichEditorParagraph::GetHeight()
 {
     return height_;
+}
+
+size_t RichEditorParagraph::GetLineCount()
+{
+    return lineCount_;
 }
 
 bool RichEditorParagraph::HandleCaretWhenEmpty(CaretMetricsF& result, bool needLineHighest)

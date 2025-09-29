@@ -1008,11 +1008,6 @@ bool ParagraphStyleSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     return paragraphStyle_.Equal(paragraphStyle);
 }
 
-SpanParagraphStyle ParagraphStyleSpan::GetParagraphStyle() const
-{
-    return paragraphStyle_;
-}
-
 void ParagraphStyleSpan::SetParagraphStyle(const SpanParagraphStyle& paragraphStyle)
 {
     paragraphStyle_ = paragraphStyle;
