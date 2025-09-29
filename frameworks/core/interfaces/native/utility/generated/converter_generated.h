@@ -334,6 +334,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_ImageAnalyzerController_Object& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Number_FontWeight_String& src)
 {
     switch (src.selector) {
@@ -3669,6 +3684,7 @@ ASSIGN_OPT(Opt_Union_I32_TextAlign)
 ASSIGN_OPT(Opt_Union_I32_TextCase)
 ASSIGN_OPT(Opt_Union_I32_TextOverflow)
 ASSIGN_OPT(Opt_Union_I64_String)
+ASSIGN_OPT(Opt_Union_ImageAnalyzerController_Object)
 ASSIGN_OPT(Opt_Union_Number_FontWeight_String)
 ASSIGN_OPT(Opt_Union_Number_String)
 ASSIGN_OPT(Opt_Union_PixelMap_String)

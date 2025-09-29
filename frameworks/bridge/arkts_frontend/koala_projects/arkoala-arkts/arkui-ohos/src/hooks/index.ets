@@ -56,6 +56,8 @@ import { NavPathStack, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationCom
 import { PathStackUtils } from "../base/ArkNavPathStack"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
+import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions } from "#generated";
+import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
 import { XComponentOpsHandWritten } from "./XComponentOpsHandWritten";
 
 export function hookId(component: object, value?: string) {}
@@ -142,6 +144,10 @@ export function hookCustomPropertyImpl(component: ArkCommonMethodComponent, name
 
 export * from "./modifiers";
 export * from "./content_modifiers/ContentModifierHooks";
+
+export function hookImageSetImageOptions(component: ArkImageComponent, src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
+    ImageOpsHandWritten.hookImageSetImageOptionsImpl(component, src, imageAIOptions);
+}
 
 export function hookPushPathMethod(pathStack: NavPathStack, info: NavPathInfo, animated?: boolean | NavigationOptions | undefined): void {
   PathStackUtils.pushPath(pathStack, info, animated);

@@ -767,6 +767,8 @@ typedef struct Ark_Union_I32_TextOverflow Ark_Union_I32_TextOverflow;
 typedef struct Opt_Union_I32_TextOverflow Opt_Union_I32_TextOverflow;
 typedef struct Ark_Union_I64_String Ark_Union_I64_String;
 typedef struct Opt_Union_I64_String Opt_Union_I64_String;
+typedef struct Ark_Union_ImageAnalyzerController_Object Ark_Union_ImageAnalyzerController_Object;
+typedef struct Opt_Union_ImageAnalyzerController_Object Opt_Union_ImageAnalyzerController_Object;
 typedef struct Ark_Union_Number_FontWeight_String Ark_Union_Number_FontWeight_String;
 typedef struct Opt_Union_Number_FontWeight_String Opt_Union_Number_FontWeight_String;
 typedef struct Ark_Union_Number_String Ark_Union_Number_String;
@@ -8012,6 +8014,18 @@ typedef struct Opt_Union_I64_String {
     Ark_Tag tag;
     Ark_Union_I64_String value;
 } Opt_Union_I64_String;
+typedef struct Ark_Union_ImageAnalyzerController_Object {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_ImageAnalyzerController value0;
+        Ark_Object value1;
+    };
+} Ark_Union_ImageAnalyzerController_Object;
+typedef struct Opt_Union_ImageAnalyzerController_Object {
+    Ark_Tag tag;
+    Ark_Union_ImageAnalyzerController_Object value;
+} Opt_Union_ImageAnalyzerController_Object;
 typedef struct Ark_Union_Number_FontWeight_String {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -13195,7 +13209,7 @@ typedef struct Opt_HoverEventParam {
 typedef struct Ark_ImageAIOptions {
     /* kind: Interface */
     Opt_Array_ImageAnalyzerType types;
-    Opt_ImageAnalyzerController aiController;
+    Opt_Union_ImageAnalyzerController_Object aiController;
 } Ark_ImageAIOptions;
 typedef struct Opt_ImageAIOptions {
     Ark_Tag tag;
