@@ -478,6 +478,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/theme/system/ArkSystemTheme.ets",
   "arkui-preprocessed/arkui/theme/system/ArkSystemTypography.ets",
   "arkui-preprocessed/arkui/transfer/ColorFilterTransfer.ets",
+  "arkui-preprocessed/arkui/transfer/FrameNodeTransfer.ets",
   "arkui-preprocessed/arkui/typedNode/ArkBadgeNode.ets",
   "arkui-preprocessed/arkui/typedNode/ArkBaseNode.ets",
   "arkui-preprocessed/arkui/typedNode/ArkBlankNode.ets",
