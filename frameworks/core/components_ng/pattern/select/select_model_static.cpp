@@ -409,4 +409,14 @@ void SelectModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::opti
     ViewAbstract::SetBackgroundColor(frameNode, color.value_or(Color::TRANSPARENT));
     ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, BackgroundColorSetByUser, true, frameNode);
 }
+
+void SelectModelStatic::SetOptionTextModifier(
+    FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionTextModifier(optionApply);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, OptionTextModifierSetByUser, true, frameNode);
+}
 } // namespace OHOS::Ace::NG

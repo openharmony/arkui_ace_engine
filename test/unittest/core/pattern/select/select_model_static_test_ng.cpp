@@ -831,4 +831,24 @@ HWTEST_F(SelectModelStaticTestNg, SetControlSize, TestSize.Level1)
     EXPECT_EQ(pattern->controlSize_, ControlSize::SMALL);
     ViewStackProcessor::GetInstance()->ClearStack();
 }
+
+/**
+ * @tc.name: SetOptionTextModifier
+ * @tc.desc: Test SelectModelStatic SetOptionTextModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModelStaticTestNg, SetOptionTextModifier, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    SelectModelStatic::SetOptionTextModifier(select, nullptr);
+}
 } // namespace OHOS::Ace::NG

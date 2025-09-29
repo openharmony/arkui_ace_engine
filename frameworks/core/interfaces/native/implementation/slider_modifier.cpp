@@ -252,7 +252,6 @@ void SetTrackBorderRadiusImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
-    Validator::ValidateNonPercent(convValue);
     SliderModelStatic::SetTrackBorderRadius(frameNode, convValue);
 }
 void SetSelectedBorderRadiusImpl(Ark_NativePointer node,
