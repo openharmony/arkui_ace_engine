@@ -1978,4 +1978,23 @@ HWTEST_F(ImageTestTwoNg, HandleBorderRadiusResource001, TestSize.Level1)
     pattern->OnColorModeChange(colorMode);
     EXPECT_TRUE(pattern->needBorderRadius_);
 }
+
+/**
+ * @tc.name: ParseImageModelStaticSmoothEdge001
+ * @tc.desc: parse smooth edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ParseImageModelStaticSmoothEdge001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    float smooth = 1.0f;
+    ImageModelStatic::SetSmoothEdge(frameNode, smooth);
+    float val = 0.0f;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ImageRenderProperty, SmoothEdge, val, frameNode, 2.0f);
+    EXPECT_EQ(val, smooth);
+    ImageModelStatic::SetSmoothEdge(frameNode, std::nullopt);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ImageRenderProperty, SmoothEdge, val, frameNode, 2.0f);
+    EXPECT_EQ(val, 2.0f);
+}
 } // namespace OHOS::Ace::NG

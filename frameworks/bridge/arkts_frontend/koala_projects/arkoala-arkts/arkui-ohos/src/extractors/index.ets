@@ -29,7 +29,12 @@ import {
 import { ExtensionAbilityInfo } from "bundleManager.ExtensionAbilityInfo";
 import { Metadata } from "bundleManager.Metadata";
 import { Skill, SkillUri } from "bundleManager.Skill";
-import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor";
+import {
+  DrawableDescriptor,
+  PixelMapDrawableDescriptor,
+  LayeredDrawableDescriptor,
+  AnimatedDrawableDescriptor
+} from "@ohos.arkui.drawableDescriptor";
 import {
   RectShape,
   CircleShape,
@@ -277,9 +282,22 @@ export namespace extractors {
   ): webview.WebviewController {
     return ArkUIAniModule._Extractors_FromWebviewWebviewControllerPtr(ptr);
   }
-
+  enum DrawableType {
+    BASE = 0,
+    LAYERED = 1,
+    ANIMATED = 2,
+    PIXELMAP = 3
+  };
   export function toDrawableDescriptorPtr(value: DrawableDescriptor): KPointer {
-    return 123;
+    let type: DrawableType = DrawableType.BASE;
+    if (value instanceof PixelMapDrawableDescriptor) {
+      type = DrawableType.PIXELMAP;
+    } else if (value instanceof LayeredDrawableDescriptor) {
+      type = DrawableType.LAYERED;
+    } else if (value instanceof AnimatedDrawableDescriptor) {
+      type = DrawableType.ANIMATED;
+    }
+    return ArkUIAniModule._Extractors_ToDrawableDescriptorPtr(value, type);
   }
   export function fromDrawableDescriptorPtr(ptr: KPointer): DrawableDescriptor {
     const x: Object = {};

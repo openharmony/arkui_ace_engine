@@ -24,6 +24,25 @@
 
 namespace OHOS::Ace::Ani {
 
+ani_long ExtractorsToDrawableDescriptorPtr(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_object drawableAni, ani_int drawableType)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return 0;
+    }
+    ani_long nativeObj = 0;
+    env->Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj);
+    auto* drawable = reinterpret_cast<void*>(nativeObj);
+    if (drawable == nullptr) {
+        HILOGE("image construct with drawable descriptor failed, nativeObj is nullptr");
+        return 0;
+    }
+    auto drawableDescriptorPeer =
+        modifier->getImageAniModifier()->getDrawableDescriptorPeer(drawable, static_cast<int>(drawableType));
+    return reinterpret_cast<ani_long>(drawableDescriptorPeer);
+}
+
 ani_long ExtractorsToDrawingColorFilterPtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object colorFilterAni)
 {
     const auto* modifier = GetNodeAniModifier();
