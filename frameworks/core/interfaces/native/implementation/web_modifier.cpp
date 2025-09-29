@@ -424,8 +424,8 @@ void BlurOnKeyboardHideModeImpl(Ark_NativePointer node,
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = Converter::OptConvert<BlurOnKeyboardHideMode>(*value);
-    // WebModelStatic::SetBlurOnKeyboardHideMode(frameNode, convValue);
+    auto convValue = Converter::OptConvert<BlurOnKeyboardHideMode>(*value);
+    WebModelStatic::SetBlurOnKeyboardHideMode(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void TextZoomAtioImpl(Ark_NativePointer node,
