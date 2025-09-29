@@ -795,6 +795,10 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg003, TestSize.Level1)
      */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    EXPECT_NE(pattern, nullptr);
+    NG::FrameNode* contentNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(contentNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
     PasswordIcon passwordIcon;
@@ -804,6 +808,14 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg003, TestSize.Level1)
     textFieldModelNG.SetPasswordIcon(passwordIcon);
     std::function<void()> buildFunc;
     textFieldModelNG.SetCustomKeyboard(std::move(buildFunc), true);
+
+    textFieldModelNG.SetCustomKeyboard(frameNode, []() {}, true);
+    EXPECT_NE(pattern->customKeyboardBuilder_, nullptr);
+    textFieldModelNG.SetCustomKeyboardWithNode(contentNode, true);
+    EXPECT_NE(pattern->customKeyboard_, nullptr);
+    contentNode = nullptr;
+    textFieldModelNG.SetCustomKeyboardWithNode(frameNode, contentNode, true);
+    EXPECT_EQ(pattern->customKeyboard_, nullptr);
 }
 
 /**

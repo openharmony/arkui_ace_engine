@@ -987,6 +987,8 @@ HWTEST_F(SearchTestTwoNg, SetProperty001, TestSize.Level1)
     SearchModelNG searchModelInstance;
     searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto fNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto contentNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(contentNode, nullptr);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(fNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -1022,6 +1024,12 @@ HWTEST_F(SearchTestTwoNg, SetProperty001, TestSize.Level1)
     //test SetCustomKeyboard
     searchModelInstance.SetCustomKeyboard([]() {});
     EXPECT_NE(pattern->customKeyboardBuilder_, nullptr);
+    searchModelInstance.SetCustomKeyboard(fNode, nullptr);
+    EXPECT_EQ(pattern->customKeyboardBuilder_, nullptr);
+    searchModelInstance.SetCustomKeyboardWithNode(contentNode);
+    EXPECT_NE(pattern->customKeyboard_, nullptr);
+    searchModelInstance.SetCustomKeyboardWithNode(fNode, nullptr);
+    EXPECT_EQ(pattern->customKeyboard_, nullptr);
 
     //test SetType
     searchModelInstance.SetType(TextInputType::BEGIN);

@@ -538,6 +538,20 @@ class SearchTypeModifier extends ModifierWithKey<number> {
   }
 }
 
+class SearchCustomKeyboardModifier extends ModifierWithKey<ArkCustomKeyboard> {
+  constructor(value: ArkCustomKeyboard) {
+    super(value);
+  }
+  static identity = Symbol('searchCustomKeyboard');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetCustomKeyboard(node);
+    } else {
+      getUINativeModule().search.setCustomKeyboard(node, this.value.value, this.value.supportAvoidance);
+    }
+  }
+}
+
 class SearchOnEditChangeModifier extends ModifierWithKey<(isEditing: boolean) => void> {
   constructor(value: (isEditing: boolean) => void) {
     super(value);
@@ -898,8 +912,13 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
       SearchOnEditChangeModifier, callback);
     return this;
   }
-  customKeyboard(event: () => void): SearchAttribute {
-    throw new Error('Method not implemented.');
+  customKeyboard(value: ComponentContent, options?: { supportAvoidance?: boolean }): SearchAttribute {
+    let arkValue: ArkCustomKeyboard = new ArkCustomKeyboard();
+    arkValue.value = value;
+    arkValue.supportAvoidance = options?.supportAvoidance;
+    modifierWithKey(this._modifiersWithKeys, SearchCustomKeyboardModifier.identity,
+      SearchCustomKeyboardModifier, arkValue);
+    return this;
   }
   showUnit(event: () => void): SearchAttribute {
     throw new Error('Method not implemented.');

@@ -2485,6 +2485,37 @@ void ResetTextAreaScrollBarColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetTextAreaScrollBarColor(frameNode);
 }
+
+void SetTextAreaCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCustomKeyboardWithNode(frameNode, reinterpret_cast<FrameNode*>(contentNode), supportAvoidance);
+}
+
+ArkUINodeHandle GetTextAreaCustomKeyboard(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto customKeyboard = TextFieldModelNG::GetCustomKeyboard(frameNode);
+    CHECK_NULL_RETURN(customKeyboard, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(customKeyboard));
+}
+
+ArkUI_Int32 GetTextAreaCustomKeyboardOption(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetCustomKeyboardOption(frameNode));
+}
+
+void ResetTextAreaCustomKeyboard(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCustomKeyboardWithNode(frameNode, nullptr);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -2676,6 +2707,10 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setTextAreaScrollBarColor = SetTextAreaScrollBarColor,
         .getTextAreaScrollBarColor = GetTextAreaScrollBarColor,
         .resetTextAreaScrollBarColor = ResetTextAreaScrollBarColor,
+        .setTextAreaCustomKeyboard = SetTextAreaCustomKeyboard,
+        .getTextAreaCustomKeyboard = GetTextAreaCustomKeyboard,
+        .getTextAreaCustomKeyboardOption = GetTextAreaCustomKeyboardOption,
+        .resetTextAreaCustomKeyboard = ResetTextAreaCustomKeyboard,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

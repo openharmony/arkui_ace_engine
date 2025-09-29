@@ -1794,6 +1794,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetType));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetType"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetType));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCustomKeyboard"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetCustomKeyboard));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCustomKeyboard"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetCustomKeyboard));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnEditChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetOnEditChange));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnEditChange"),
@@ -2414,6 +2418,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetType));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetType"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetType));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCustomKeyboard"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetCustomKeyboard));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCustomKeyboard"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetCustomKeyboard));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPadding"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetPadding));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPadding"),
@@ -2645,6 +2653,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetType));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetType"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetType));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCustomKeyboard"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetCustomKeyboard));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCustomKeyboard"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetCustomKeyboard));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLines"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetMaxLines));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLines"),

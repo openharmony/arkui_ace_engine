@@ -118,8 +118,8 @@ public:
     static void SetUnderlineColor(const JSCallbackInfo& info);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
     static void SetSelectionMenuHidden(const JSCallbackInfo& info);
-    static bool ParseJsCustomKeyboardBuilder(
-        const JSCallbackInfo& info, int32_t index, std::function<void()>& buildFunc);
+    static bool ParseJsCustomKeyboardBuilder(const JSCallbackInfo& info, int32_t index,
+        std::function<void()>& buildFunc, NG::FrameNode*& contentNode, bool& isBuilder);
     static void SetCustomKeyboard(const JSCallbackInfo& info);
 
     static void SetPasswordRules(const JSCallbackInfo& info);

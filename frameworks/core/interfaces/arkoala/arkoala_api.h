@@ -4849,6 +4849,10 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaScrollBarColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     ArkUI_Uint32 (*getTextAreaScrollBarColor)(ArkUINodeHandle node);
     void (*resetTextAreaScrollBarColor)(ArkUINodeHandle node);
+    void (*setTextAreaCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance);
+    ArkUINodeHandle (*getTextAreaCustomKeyboard)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextAreaCustomKeyboardOption)(ArkUINodeHandle node);
+    void (*resetTextAreaCustomKeyboard)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -6133,6 +6137,8 @@ struct ArkUISearchModifier {
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
     void (*setSearchMargin)(ArkUINodeHandle node);
     void (*resetSearchMargin)(ArkUINodeHandle node);
+    void (*setSearchCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance);
+    void (*resetSearchCustomKeyboard)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

@@ -772,8 +772,8 @@ class TextAreaEnterKeyTypeModifier extends ModifierWithKey<number> {
   }
 }
 
-class TextAreaInputFilterModifier extends ModifierWithKey<ArkTextInputFilter> {
-  constructor(value: ArkTextInputFilter) {
+class TextAreaInputFilterModifier extends ModifierWithKey<ArkTextAreaFilter> {
+  constructor(value: ArkTextAreaFilter) {
     super(value);
   }
   static identity = Symbol('textAreaInputFilter');
@@ -890,6 +890,20 @@ class TextAreaTypeModifier extends ModifierWithKey<TextAreaType> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaCustomKeyboardModifier extends ModifierWithKey<ArkCustomKeyboard> {
+  constructor(value: ArkCustomKeyboard) {
+    super(value);
+  }
+  static identity = Symbol('textAreaCustomKeyboard');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetCustomKeyboard(node);
+    } else {
+      getUINativeModule().textArea.setCustomKeyboard(node, this.value.value, this.value.supportAvoidance);
+    }
   }
 }
 
@@ -1594,8 +1608,13 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaFontFeatureModifier.identity, TextAreaFontFeatureModifier, value);
     return this;
   }
-  customKeyboard(value: CustomBuilder): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+  customKeyboard(value: ComponentContent, options?: { supportAvoidance?: boolean }): TextAreaAttribute {
+    let arkValue: ArkCustomKeyboard = new ArkCustomKeyboard();
+    arkValue.value = value;
+    arkValue.supportAvoidance = options?.supportAvoidance;
+    modifierWithKey(this._modifiersWithKeys, TextAreaCustomKeyboardModifier.identity,
+      TextAreaCustomKeyboardModifier, arkValue);
+    return this;
   }
   decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaDecorationModifier.identity, TextAreaDecorationModifier, value);

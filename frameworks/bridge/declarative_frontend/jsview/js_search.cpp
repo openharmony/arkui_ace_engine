@@ -1319,6 +1319,7 @@ void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && (info[0]->IsUndefined() || info[0]->IsNull())) {
         SearchModel::GetInstance()->SetCustomKeyboard(nullptr);
+        SearchModel::GetInstance()->SetCustomKeyboardWithNode(nullptr);
         return;
     }
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -1333,8 +1334,16 @@ void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
         }
     }
     std::function<void()> buildFunc;
-    if (JSTextField::ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
-        SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
+    NG::FrameNode* contentNode = nullptr;
+    bool isBuilder = true;
+    if (JSTextField::ParseJsCustomKeyboardBuilder(info, 0, buildFunc, contentNode, isBuilder)) {
+        if (isBuilder) {
+            SearchModel::GetInstance()->SetCustomKeyboardWithNode(nullptr, supportAvoidance);
+            SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
+        } else {
+            SearchModel::GetInstance()->SetCustomKeyboard(nullptr, supportAvoidance);
+            SearchModel::GetInstance()->SetCustomKeyboardWithNode(contentNode, supportAvoidance);
+        }
     }
 }
 

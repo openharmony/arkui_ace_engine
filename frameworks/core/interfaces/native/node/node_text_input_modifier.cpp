@@ -2201,7 +2201,7 @@ void SetTextInputCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle customKeyb
     CHECK_NULL_VOID(frameNode);
     auto *customKeyboardNode = reinterpret_cast<FrameNode*>(customKeyboard);
     CHECK_NULL_VOID(customKeyboardNode);
-    TextFieldModelNG::SetCustomKeyboard(frameNode, customKeyboardNode, supportAvoidance);
+    TextFieldModelNG::SetCustomKeyboardWithNode(frameNode, customKeyboardNode, supportAvoidance);
 }
 
 ArkUINodeHandle GetTextInputCustomKeyboard(ArkUINodeHandle node)
@@ -2224,7 +2224,7 @@ void ResetTextInputCustomKeyboard(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetCustomKeyboard(frameNode, nullptr, false);
+    TextFieldModelNG::SetCustomKeyboardWithNode(frameNode, nullptr, false);
 }
 
 void SetTextInputShowKeyBoardOnFocus(ArkUINodeHandle node, ArkUI_Bool value)

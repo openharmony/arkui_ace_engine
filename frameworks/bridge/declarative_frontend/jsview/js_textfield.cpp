@@ -1755,26 +1755,47 @@ void JSTextField::SetSelectionMenuHidden(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetSelectionMenuHidden(jsValue->ToBoolean());
 }
 
-bool JSTextField::ParseJsCustomKeyboardBuilder(
-    const JSCallbackInfo& info, int32_t index, std::function<void()>& buildFunc)
+bool JSTextField::ParseJsCustomKeyboardBuilder(const JSCallbackInfo& info, int32_t index,
+    std::function<void()>& buildFunc, NG::FrameNode*& contentNode, bool& isBuilder)
 {
     if (info.Length() <= static_cast<uint32_t>(index) || !info[index]->IsObject()) {
         return false;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[index]);
     auto builder = obj->GetProperty("builder");
-    if (!builder->IsFunction()) {
+    if (builder->IsFunction()) {
+        isBuilder = true;
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        CHECK_NULL_RETURN(builderFunc, false);
+        WeakPtr<NG::FrameNode> targetNode =
+            AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("CustomKeyboard");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        return true;
+    }
+    JSRef<JSVal> builderNode = obj->GetProperty("builderNode_");
+    if (!builderNode->IsObject()) {
         return false;
     }
-    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-    CHECK_NULL_RETURN(builderFunc, false);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = targetNode]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("CustomKeyboard");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute();
-    };
+    isBuilder = false;
+    auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
+    JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
+    if (nodePtr.IsEmpty()) {
+        return false;
+    }
+    const auto* vm = nodePtr->GetEcmaVM();
+    auto localHandle = nodePtr->GetLocalHandle();
+    if (!localHandle->IsNativePointer(vm)) {
+        return false;
+    }
+    auto* node = localHandle->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    contentNode = frameNode;
     return true;
 }
 
@@ -1786,6 +1807,7 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
     auto jsValue = info[0];
     if (jsValue->IsUndefined() || jsValue->IsNull() || !jsValue->IsObject()) {
         TextFieldModel::GetInstance()->SetCustomKeyboard(nullptr);
+        TextFieldModel::GetInstance()->SetCustomKeyboardWithNode(nullptr);
         return;
     }
     bool supportAvoidance = false;
@@ -1797,8 +1819,16 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
         }
     }
     std::function<void()> buildFunc;
-    if (ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
-        TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
+    NG::FrameNode* contentNode = nullptr;
+    bool isBuilder = true;
+    if (ParseJsCustomKeyboardBuilder(info, 0, buildFunc, contentNode, isBuilder)) {
+        if (isBuilder) {
+            TextFieldModel::GetInstance()->SetCustomKeyboardWithNode(nullptr, supportAvoidance);
+            TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
+        } else {
+            TextFieldModel::GetInstance()->SetCustomKeyboard(nullptr, supportAvoidance);
+            TextFieldModel::GetInstance()->SetCustomKeyboardWithNode(contentNode, supportAvoidance);
+        }
     }
 }
 
