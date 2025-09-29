@@ -17,6 +17,7 @@ import { uiUtils } from '../base/uiUtilsImpl';
 import { StorageHelper } from './persistenceV2'
 import { StorageDefaultCreator } from './persistenceV2'
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
+import { InteropAppStorageV2 } from '../interop/interopStorageV2';
 
 export class AppStorageV2 {
     public static connect<T extends object>(
@@ -24,19 +25,19 @@ export class AppStorageV2 {
         key: string,
         defaultCreator?: StorageDefaultCreator<T>
     ): T | undefined {
-        return AppStorageV2Impl.instance().connect(ttype, key, defaultCreator);
+        return InteropAppStorageV2.instance().connect(ttype, key, defaultCreator);
     }
 
     public static connect<T extends object>(ttype: Type, defaultCreator?: StorageDefaultCreator<T>): T | undefined {
-        return AppStorageV2Impl.instance().connect(ttype, defaultCreator);
+        return InteropAppStorageV2.instance().connect(ttype, defaultCreator);
     }
 
     public static remove(keyOrType: string | Type): void {
-        AppStorageV2Impl.instance().remove(keyOrType);
+        InteropAppStorageV2.instance().remove(keyOrType);
     }
 
     public static keys(): Array<string> {
-        return AppStorageV2Impl.instance().keys();
+        return InteropAppStorageV2.instance().keys();
     }
 }
 
@@ -107,5 +108,32 @@ export class AppStorageV2Impl {
         if (!isDeleted) {
             StateMgmtConsole.log(StorageHelper.DELETE_NOT_EXIST_KEY);
         }
+    }
+
+    public hasKey(key: string): boolean {
+        return this.memorizedValues_.has(key);
+    }
+
+    public getValue(key: string): object | undefined {
+        const obj = this.memorizedValues_.get(key);
+        if (obj == undefined) {
+            return undefined;
+        }
+        return obj!;
+    }
+
+    public removeByInterop(keyOrType: string | Type): boolean {
+        const key = StorageHelper.getKeyOrTypeNameWithChecks(keyOrType);
+        if (!key) {
+            StateMgmtConsole.log(StorageHelper.DELETE_NOT_EXIST_KEY);
+            return false;
+        }
+
+        const isDeleted: boolean = this.memorizedValues_.delete(key);
+        if (!isDeleted) {
+            StateMgmtConsole.log(StorageHelper.DELETE_NOT_EXIST_KEY);
+            return false;
+        }
+        return true;
     }
 }
