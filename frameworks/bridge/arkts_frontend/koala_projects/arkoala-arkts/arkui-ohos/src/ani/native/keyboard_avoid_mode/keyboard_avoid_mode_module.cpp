@@ -52,14 +52,14 @@ ani_ref GetKeyboardAvoidMode(ani_env* env, [[maybe_unused]] ani_object obj)
  
 bool GetKeyboardAvoidModeImpl(ani_env* env, ani_enum_item* enumItem)
 {
+    const auto* modifier = GetNodeAniModifier();
+    if (!env || !modifier) {
+        return false;
+    }
     ani_enum enumType;
     ani_status status = ANI_OK;
     if ((status = env->FindEnum("L@ohos/arkui/UIContext/KeyboardAvoidMode;", &enumType)) != ANI_OK) {
         HILOGE("GetKeyboardAvoidMode FindEnum failed, status:%{public}d", status);
-        return false;
-    }
-    const auto* modifier = GetNodeAniModifier();
-    if (!env || !modifier) {
         return false;
     }
     auto keyboardAvoidModeAniModifier = modifier->getKeyboardAvoidModeAniModifier();
