@@ -21,6 +21,7 @@ ace_unittest("menu_test_ng") {
     "menu_animation_test_ng.cpp",
     "menu_divider_test_ng.cpp",
     "menu_expand_test_ng.cpp",
+    "menu_layout_avoidFst_test_ng.cpp",
     "menu_layoutFst_test_ng.cpp",
     "menu_layoutScd_test_ng.cpp",
     "menu_layoutThi_test_ng.cpp",
