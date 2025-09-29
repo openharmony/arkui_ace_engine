@@ -799,10 +799,10 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack001, TestSize.Level0)
     auto pipeline = pattern_->GetContext();
     auto dragManager = pipeline->GetDragDropManager();
     host->isDisallowDropForcedly_ = false;
-    eventHub->onDragEnter_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragEnter_(event, extraParams);
     EXPECT_TRUE(pattern_->IsNormalInlineState());
 
-    eventHub->onDragMove_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragMove_(event, extraParams);
     EXPECT_TRUE(pattern_->IsNormalInlineState());
 
     paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
@@ -810,10 +810,10 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack001, TestSize.Level0)
     auto dragPreviewOption = host->GetDragPreviewOption();
     dragPreviewOption.enableEdgeAutoScroll = false;
     host->SetDragPreviewOptions(dragPreviewOption);
-    eventHub->onDragMove_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragMove_(event, extraParams);
     EXPECT_FALSE(pattern_->contentScroller_.isScrolling);
 
-    eventHub->onDragLeave_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragLeave_(event, extraParams);
     EXPECT_FALSE(pattern_->isCaretTwinkling_);
 }
 
@@ -852,14 +852,14 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack002, TestSize.Level0)
     host->isDisallowDropForcedly_ = false;
     RefPtr<OHOS::Ace::DragEvent> event  = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     const std::string extraParams("test");
-    eventHub->onDragEnter_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragEnter_(event, extraParams);
     EXPECT_EQ(pattern_->dragRecipientStatus_, DragStatus::NONE);
 
-    eventHub->onDragMove_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragLeave_(event, extraParams);
     EXPECT_EQ(pattern_->dragRecipientStatus_, DragStatus::NONE);
     EXPECT_FALSE(pattern_->HasFocus());
 
-    eventHub->onDragLeave_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragLeave_(event, extraParams);
     EXPECT_FALSE(pattern_->isCaretTwinkling_);
 }
 
@@ -897,14 +897,14 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack003, TestSize.Level0)
     host->isDisallowDropForcedly_ = false;
     RefPtr<OHOS::Ace::DragEvent> event  = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     const std::string extraParams("test");
-    eventHub->onDragEnter_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragEnter_(event, extraParams);
     EXPECT_EQ(pattern_->dragRecipientStatus_, DragStatus::NONE);
 
-    eventHub->onDragMove_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragMove_(event, extraParams);
     EXPECT_EQ(pattern_->dragRecipientStatus_, DragStatus::NONE);
     EXPECT_FALSE(pattern_->HasFocus());
 
-    eventHub->onDragLeave_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragLeave_(event, extraParams);
     EXPECT_FALSE(pattern_->isCaretTwinkling_);
 }
 
@@ -943,14 +943,14 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack004, TestSize.Level0)
     host->isDisallowDropForcedly_ = true;
     RefPtr<OHOS::Ace::DragEvent> event  = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     const std::string extraParams("test");
-    eventHub->onDragEnter_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragEnter_(event, extraParams);
     EXPECT_EQ(pattern_->dragRecipientStatus_, DragStatus::NONE);
 
-    eventHub->onDragMove_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragMove_(event, extraParams);
     EXPECT_EQ(pattern_->dragRecipientStatus_, DragStatus::NONE);
     EXPECT_FALSE(pattern_->HasFocus());
 
-    eventHub->onDragLeave_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragLeave_(event, extraParams);
     EXPECT_FALSE(pattern_->isCaretTwinkling_);
 
     // Close the keyboard when dragging enter the textinput/textarea/search from outside it.
@@ -960,7 +960,7 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack004, TestSize.Level0)
     pattern_->keyboardOverlay_ = AceType::MakeRefPtr<OverlayManager>(keyboard);
     pattern_->dragStatus_ = DragStatus::NONE;
     host->isDisallowDropForcedly_ = false;
-    eventHub->onDragEnter_(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragEnter_(event, extraParams);
     EXPECT_FALSE(pattern_->isCustomKeyboardAttached_);
 }
 

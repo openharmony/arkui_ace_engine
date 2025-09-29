@@ -140,7 +140,7 @@ void SetFrameNodeAllowDrag(RefPtr<FrameNode>& frameNode)
     auto eventHub = gestureHub->eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
-    eventHub->onDragStart_ = func;
+    eventHub->SetOnDragStart(std::move(func));
 }
 /**
  * @tc.name: DragDropFuncWrapperTestNgCoverage001

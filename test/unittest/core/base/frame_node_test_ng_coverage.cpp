@@ -1807,17 +1807,17 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback01, TestSize.
     const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
-    frameNode->GetEventHub<EventHub>()->visibleAreaUserCallback_ = callbackInfo;
+    frameNode->GetEventHub<EventHub>()->GetVisibleAreaCallback(true) = callbackInfo;
     frameNode->TriggerVisibleAreaChangeCallback(0, false);
-    frameNode->GetEventHub<EventHub>()->visibleAreaUserCallback_.callback = nullptr;
-    frameNode->GetEventHub<EventHub>()->visibleAreaInnerCallback_ = callbackInfo;
+    frameNode->GetEventHub<EventHub>()->GetVisibleAreaCallback(true).callback = nullptr;
+    frameNode->GetEventHub<EventHub>()->GetVisibleAreaCallback(false) = callbackInfo;
     frameNode->TriggerVisibleAreaChangeCallback(0, false);
     EXPECT_NE(frameNode->GetEventHub<EventHub>(), nullptr);
     frameNode->isCalculateInnerVisibleRectClip_ = true;
     frameNode->lastInnerVisibleRatio_ = 10.0;
     frameNode->lastVisibleRatio_ = 10.0;
     frameNode->TriggerVisibleAreaChangeCallback(0, true);
-    frameNode->GetEventHub<EventHub>()->visibleAreaUserCallback_ = callbackInfo;
+    frameNode->GetEventHub<EventHub>()->GetVisibleAreaCallback(true) = callbackInfo;
     /**
      * @tc.steps: step2. create layoutProperty.
      */
@@ -1855,7 +1855,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask01, TestSize.Level1)
     const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
-    frameNode->GetEventHub<EventHub>()->throttledVisibleAreaCallback_ = callbackInfo;
+    frameNode->GetEventHub<EventHub>()->GetThrottledVisibleAreaCallback() = callbackInfo;
 
     /**
      * @tc.steps: step2. create layoutProperty.
@@ -1893,7 +1893,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask02, TestSize.Level1)
     const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
-    frameNode->GetEventHub<EventHub>()->throttledVisibleAreaCallback_ = callbackInfo;
+    frameNode->GetEventHub<EventHub>()->GetThrottledVisibleAreaCallback() = callbackInfo;
 
     /**
      * @tc.steps: step2. create layoutProperty.
@@ -1909,7 +1909,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask02, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     EXPECT_FALSE(frameNode->throttledCallbackOnTheWay_);
     EXPECT_TRUE(frameNode->isActive_);
-    EXPECT_EQ(frameNode->GetEventHub<EventHub>()->throttledVisibleAreaCallback_.period, 1);
+    EXPECT_EQ(frameNode->GetEventHub<EventHub>()->GetThrottledVisibleAreaCallback().period, 1);
 }
 
 /**
@@ -1929,14 +1929,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask03, TestSize.Level1)
     const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
-    frameNode->GetEventHub<EventHub>()->throttledVisibleAreaCallback_ = callbackInfo;
+    frameNode->GetEventHub<EventHub>()->GetThrottledVisibleAreaCallback() = callbackInfo;
 
     /**
      * @tc.steps: step2. call the function ThrottledVisibleTask.
      */
     frameNode->ThrottledVisibleTask();
     EXPECT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetEventHub<EventHub>()->throttledVisibleAreaCallback_.period, 1);
+    EXPECT_EQ(frameNode->GetEventHub<EventHub>()->GetThrottledVisibleAreaCallback().period, 1);
 }
 
 /**

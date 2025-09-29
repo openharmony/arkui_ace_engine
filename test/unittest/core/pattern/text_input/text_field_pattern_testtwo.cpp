@@ -142,43 +142,45 @@ HWTEST_F(TextFieldPatternTestTwo, InitDragDropCallBack001, TestSize.Level0)
     auto eventHub = textFieldNode->GetEventHub<EventHub>();
     pattern->dragStatus_ = DragStatus::ON_DROP;
     pattern->isDetachFromMainTree_ = false;
-    eventHub->onDragEnd_.operator()(event);
+    eventHub->GetOnDragEnd().operator()(event);
     pattern->dragStatus_ = DragStatus::ON_DROP;
     pattern->isDetachFromMainTree_ = true;
-    eventHub->onDragEnd_.operator()(event);
+    eventHub->GetOnDragEnd().operator()(event);
     pattern->dragStatus_ = DragStatus::DRAGGING;
     pattern->isDetachFromMainTree_ = true;
-    eventHub->onDragEnd_.operator()(event);
+    eventHub->GetOnDragEnd().operator()(event);
     pattern->dragStatus_ = DragStatus::DRAGGING;
     pattern->isDetachFromMainTree_ = false;
-    eventHub->onDragEnd_.operator()(event);
+    eventHub->GetOnDragEnd().operator()(event);
     auto focusHub = pattern->GetFocusHub();
     focusHub->currentFocus_ = true;
     pattern->dragStatus_ = DragStatus::DRAGGING;
-    eventHub->onDragEnd_.operator()(nullptr);
+    eventHub->GetOnDragEnd().operator()(nullptr);
     event->SetResult(DragRet::DRAG_SUCCESS);
     pattern->dragStatus_ = DragStatus::DRAGGING;
-    eventHub->onDragEnd_.operator()(event);
+    eventHub->GetOnDragEnd().operator()(event);
     event->SetResult(DragRet::DRAG_DEFAULT);
     pattern->dragValue_ = u"Test";
     pattern->dragStatus_ = DragStatus::DRAGGING;
-    eventHub->onDragEnd_.operator()(event);
+    eventHub->GetOnDragEnd().operator()(event);
     pattern->dragValue_= pattern->contentController_->GetSelectedValue(pattern->dragTextStart_, pattern->dragTextEnd_);
     pattern->dragStatus_ = DragStatus::DRAGGING;
-    eventHub->onDragEnd_.operator()(event);
+    eventHub->GetOnDragEnd().operator()(event);
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
     pattern->dragStatus_ = DragStatus::DRAGGING;
-    eventHub->onDragEnd_.operator()(event);
+    eventHub->GetOnDragEnd().operator()(event);
     paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
     pattern->dragStatus_ = DragStatus::DRAGGING;
-    eventHub->onDragEnd_.operator()(event);
+    eventHub->GetOnDragEnd().operator()(event);
     focusHub->currentFocus_ = false;
     pattern->dragStatus_ = DragStatus::DRAGGING;
-    eventHub->onDragEnd_.operator()(event);
-    eventHub->onDragEnter_.operator()(event, extraParams);
+    eventHub->GetOnDragEnd().operator()(event);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->
+        onDragEnter_.operator()(event, extraParams);
     pattern->dragStatus_ = DragStatus::ON_DROP;
-    eventHub->onDragEnter_.operator()(event, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->
+        onDragEnter_.operator()(event, extraParams);
     EXPECT_EQ(pattern->dragStatus_, DragStatus::ON_DROP);
 }
 

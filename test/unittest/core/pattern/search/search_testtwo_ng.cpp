@@ -479,7 +479,7 @@ HWTEST_F(SearchTestTwoNg, Pattern021, TestSize.Level1)
     eventHub->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
     pattern->InitTextFieldDragEvent();
-    ASSERT_NE(textFieldEventHub->onDragStart_, nullptr);
+    ASSERT_NE(textFieldEventHub->GetOnDragStart(), nullptr);
 
     /**
      * @tc.cases: case2.
@@ -487,7 +487,7 @@ HWTEST_F(SearchTestTwoNg, Pattern021, TestSize.Level1)
     eventHub->SetCustomerOnDragFunc(
         DragFuncType::DRAG_ENTER, [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&){});
     pattern->InitTextFieldDragEvent();
-    ASSERT_NE(textFieldEventHub->customerOnDragEnter_, nullptr);
+    ASSERT_NE(textFieldEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_ENTER), nullptr);
 
     /**
      * @tc.cases: case3.
@@ -495,7 +495,7 @@ HWTEST_F(SearchTestTwoNg, Pattern021, TestSize.Level1)
     eventHub->SetCustomerOnDragFunc(
         DragFuncType::DRAG_LEAVE, [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&){});
     pattern->InitTextFieldDragEvent();
-    ASSERT_NE(textFieldEventHub->customerOnDragLeave_, nullptr);
+    ASSERT_NE(textFieldEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE), nullptr);
 
     /**
      * @tc.cases: case4.
@@ -503,7 +503,7 @@ HWTEST_F(SearchTestTwoNg, Pattern021, TestSize.Level1)
     eventHub->SetCustomerOnDragFunc(
         DragFuncType::DRAG_MOVE, [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&){});
     pattern->InitTextFieldDragEvent();
-    ASSERT_NE(textFieldEventHub->customerOnDragMove_, nullptr);
+    ASSERT_NE(textFieldEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_MOVE), nullptr);
 
     /**
      * @tc.cases: case5.
@@ -511,7 +511,7 @@ HWTEST_F(SearchTestTwoNg, Pattern021, TestSize.Level1)
     eventHub->SetCustomerOnDragFunc(
         DragFuncType::DRAG_DROP, [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&){});
     pattern->InitTextFieldDragEvent();
-    ASSERT_NE(textFieldEventHub->customerOnDrop_, nullptr);
+    ASSERT_NE(textFieldEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_DROP), nullptr);
 
     /**
      * @tc.cases: case6.
@@ -519,7 +519,7 @@ HWTEST_F(SearchTestTwoNg, Pattern021, TestSize.Level1)
     eventHub->SetCustomerOnDragFunc(
         DragFuncType::DRAG_END, [](const RefPtr<OHOS::Ace::DragEvent>&){});
     pattern->InitTextFieldDragEvent();
-    ASSERT_NE(textFieldEventHub->customerOnDragEnd_, nullptr);
+    ASSERT_NE(textFieldEventHub->GetCustomerOnDragEndFunc(), nullptr);
 }
 
 /**
