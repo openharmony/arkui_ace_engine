@@ -22,6 +22,7 @@ ace_unittest("xcomponent_test_ng") {
     "xcomponent_testtwo_ng.cpp",
     "xcomponent_utils_test_ng.cpp",
     "xcomponent_v2_test_ng.cpp",
+    "xcomponent_static_test_ng.cpp",
   ]
 
   external_deps = [ 

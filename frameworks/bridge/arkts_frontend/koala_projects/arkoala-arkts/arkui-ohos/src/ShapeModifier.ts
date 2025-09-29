@@ -20,17 +20,18 @@ import { Length, ResourceColor } from 'arkui/component/units';
 import { Resource } from 'global.resource';
 import { int32 } from "@koalaui/common"
 import { LineCapStyle, LineJoinStyle } from 'arkui/component/enums';
+import { PeerNode } from './PeerNode';
 
 export class ShapeModifier extends CommonMethodModifier implements ShapeAttribute, AttributeModifier<ShapeAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyNormalAttribute(instance: CommonShapeMethod): void { }
-    applyPressedAttribute(instance: CommonShapeMethod): void { }
-    applyFocusedAttribute(instance: CommonShapeMethod): void { }
-    applyDisabledAttribute(instance: CommonShapeMethod): void { }
-    applySelectedAttribute(instance: CommonShapeMethod): void { }
+    applyNormalAttribute(instance: ShapeAttribute): void { }
+    applyPressedAttribute(instance: ShapeAttribute): void { }
+    applyFocusedAttribute(instance: ShapeAttribute): void { }
+    applyDisabledAttribute(instance: ShapeAttribute): void { }
+    applySelectedAttribute(instance: ShapeAttribute): void { }
     _viewPort_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _viewPort_0_0value?: ViewportRect | undefined
     _stroke_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -59,8 +60,9 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
     _mesh_0_0value?: Array<number> | undefined
     _mesh_0_1value?: int32 | undefined
     _mesh_0_2value?: int32 | undefined
-    applyModifierPatch(peer: ArkShapePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(peerNode: PeerNode): void {
+        super.applyModifierPatch(peerNode)
+        const peer = peerNode as ArkShapePeer
         if (this._viewPort_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._viewPort_0_flag) {
@@ -299,8 +301,12 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
             }
         }
     }
-    mergeModifier(modifier: ShapeModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof ShapeModifier)) {
+            return;
+        }
+        const modifier = value as ShapeModifier
         if (modifier._viewPort_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._viewPort_0_flag) {

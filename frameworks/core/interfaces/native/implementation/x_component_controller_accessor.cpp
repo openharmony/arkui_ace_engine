@@ -96,6 +96,9 @@ void SetXComponentSurfaceRectImpl(Ark_XComponentController peer,
     auto offsetY = Converter::OptConvert<float>(rect->offsetY);
     auto surfaceWidth = Converter::Convert<float>(rect->surfaceWidth);
     auto surfaceHeight = Converter::Convert<float>(rect->surfaceHeight);
+    if (surfaceWidth <= 0 || surfaceHeight <= 0) {
+        return;
+    }
     peerImpl->controller->SetIdealSurfaceWidth(surfaceWidth);
     peerImpl->controller->SetIdealSurfaceHeight(surfaceHeight);
     if (offsetX) {
@@ -106,7 +109,7 @@ void SetXComponentSurfaceRectImpl(Ark_XComponentController peer,
     if (offsetY) {
         peerImpl->controller->SetIdealSurfaceOffsetY(offsetY.value());
     } else {
-        peerImpl->controller->ClearIdealSurfaceOffset(true);
+        peerImpl->controller->ClearIdealSurfaceOffset(false);
     }
     peerImpl->controller->UpdateSurfaceBounds();
 #endif //XCOMPONENT_SUPPORTED

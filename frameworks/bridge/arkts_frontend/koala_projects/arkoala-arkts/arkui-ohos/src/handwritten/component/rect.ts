@@ -44,6 +44,16 @@ function hookRectAttributeModifier(component: ArkRectComponent, modifier: Attrib
         }
     }
     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: RectOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as RectOptions
+        }
+        let peer: ArkRectPeer = component.getPeer() as Object as ArkRectPeer;
+        peer?.setRectOptionsAttribute(options_casted)
     };
     let updaterReceiver = (): ArkRectComponent => {
         let componentNew: ArkRectComponent = new ArkRectComponent();

@@ -17,23 +17,25 @@ import { AttributeModifier, CommonMethod, CommonShapeMethod, ArkCommonShapeMetho
 import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
 import { ShapePoint, LineAttribute, ArkLinePeer } from 'arkui/component/line';
 import { CommonShapeMethodModifier } from './CommonShapeMethodModifier'
+import { PeerNode } from './PeerNode';
 
 export class LineModifier extends CommonShapeMethodModifier implements LineAttribute, AttributeModifier<LineAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyNormalAttribute(instance: CommonShapeMethod): void { }
-    applyPressedAttribute(instance: CommonShapeMethod): void { }
-    applyFocusedAttribute(instance: CommonShapeMethod): void { }
-    applyDisabledAttribute(instance: CommonShapeMethod): void { }
-    applySelectedAttribute(instance: CommonShapeMethod): void { }
+    applyNormalAttribute(instance: LineAttribute): void { }
+    applyPressedAttribute(instance: LineAttribute): void { }
+    applyFocusedAttribute(instance: LineAttribute): void { }
+    applyDisabledAttribute(instance: LineAttribute): void { }
+    applySelectedAttribute(instance: LineAttribute): void { }
     _startPoint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _startPoint_0_0value?: ShapePoint | undefined
     _endPoint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _endPoint_0_0value?: ShapePoint | undefined
-    applyModifierPatch(peer: ArkLinePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(peerNode: PeerNode): void {
+        super.applyModifierPatch(peerNode)
+        const peer = peerNode as ArkLinePeer
         if (this._startPoint_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._startPoint_0_flag) {
@@ -71,8 +73,12 @@ export class LineModifier extends CommonShapeMethodModifier implements LineAttri
             }
         }
     }
-    mergeModifier(modifier: LineModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof LineModifier)) {
+            return;
+        }
+        const modifier = value as LineModifier
         if (modifier._startPoint_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._startPoint_0_flag) {

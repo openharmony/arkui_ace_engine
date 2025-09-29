@@ -61,6 +61,17 @@ function hookShapeAttributeModifier(component: ArkShapeComponent, modifier: Attr
         }
     }
     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let peer: ArkShapePeer = component.getPeer() as Object as ArkShapePeer;
+        const param1_type = runtimeType(params[0])
+        if ((RuntimeType.UNDEFINED) !== param1_type) {
+            const pixelMap = params[0] as PixelMap;
+            ArkUIAniModule._Shape_Transfer_PixelMap(peer.getPeerPtr() as KPointer, pixelMap);
+        } else {
+            peer?.setShapeOptions1Attribute();
+        }
     };
     let updaterReceiver = (): ArkShapeComponent => {
         let componentNew: ArkShapeComponent = new ArkShapeComponent();

@@ -19,6 +19,8 @@ import { applyAttributeModifierBase, applyCommonModifier } from "../handwritten/
 import { CommonShapeMethodModifier } from '../CommonShapeMethodModifier';
 import { CommonModifier } from '../CommonModifier';
 import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { PeerNode } from '../PeerNode';
+import { CommonMethodModifier } from '../CommonMethodModifier';
 
 
 export class EllipseModifier extends CommonShapeMethodModifier implements EllipseAttribute, AttributeModifier<EllipseAttribute> {
@@ -31,10 +33,10 @@ export class EllipseModifier extends CommonShapeMethodModifier implements Ellips
     applyFocusedAttribute(instance: EllipseAttribute): void { }
     applyDisabledAttribute(instance: EllipseAttribute): void { }
     applySelectedAttribute(instance: EllipseAttribute): void { }
-    applyModifierPatch(peer: ArkEllipsePeer): void {
+    applyModifierPatch(peer: PeerNode): void {
         super.applyModifierPatch(peer)
     }
-    mergeModifier(modifier: EllipseModifier): void {
+    mergeModifier(modifier: CommonMethodModifier): void {
         super.mergeModifier(modifier)
     }
 }
@@ -62,6 +64,16 @@ function hookEllipseAttributeModifier(component: ArkEllipseComponent, modifier: 
         }
     }
     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: EllipseOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as EllipseOptions
+        }
+        let peer: ArkEllipsePeer = component.getPeer() as Object as ArkEllipsePeer;
+        peer?.setEllipseOptionsAttribute(options_casted)
     };
     let updaterReceiver = (): ArkEllipseComponent => {
         let componentNew: ArkEllipseComponent = new ArkEllipseComponent();
