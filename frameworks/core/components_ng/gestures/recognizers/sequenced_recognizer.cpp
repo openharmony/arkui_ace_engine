@@ -380,6 +380,14 @@ void SequencedRecognizer::SendTouchEventToNextRecognizer(
     }
 }
 
+void SequencedRecognizer::ResetStatusOnFinish(bool isBlocked)
+{
+    if (currentIndex_ != -1 && refereeState_ == RefereeState::PENDING) {
+        SendCallbackMsg(onActionCancel_);
+    }
+    NGGestureRecognizer::ResetStatusOnFinish(isBlocked);
+}
+
 void SequencedRecognizer::OnResetStatus()
 {
     RecognizerGroup::OnResetStatus();
