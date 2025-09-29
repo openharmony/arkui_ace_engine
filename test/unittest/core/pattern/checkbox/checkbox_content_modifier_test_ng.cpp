@@ -107,7 +107,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest001, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(SELECTED);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -149,7 +149,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest002, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(SELECTED);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(UNSELECTED);
@@ -191,7 +191,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest003, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(SELECTED);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(0);
@@ -233,7 +233,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest004, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(SELECTED);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(1);
@@ -275,7 +275,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest005, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(SELECTED);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(-1);
@@ -317,7 +317,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest006, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(1);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -359,7 +359,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest007, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(0);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -401,7 +401,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest008, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(-1);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -444,7 +444,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest009, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(SELECTED);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(BIG_INT);
@@ -487,7 +487,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest010, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(SELECTED);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
@@ -529,7 +529,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest011, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -571,7 +571,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest012, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -788,7 +788,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest018, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -835,7 +835,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest019, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -882,7 +882,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest020, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -932,7 +932,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest021, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -982,7 +982,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest022, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1032,7 +1032,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest023, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1082,7 +1082,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest024, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1132,7 +1132,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest025, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1182,7 +1182,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest026, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1232,7 +1232,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest027, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1283,7 +1283,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest028, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1333,7 +1333,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest029, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1403,7 +1403,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest031, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1466,7 +1466,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest032, TestSize
      * @tc.steps: step2. Set checkBoxConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1528,7 +1528,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest033, TestSize
     /**
      * @tc.steps: step2. Set checkBoxConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1595,7 +1595,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest034, TestSize
     /**
      * @tc.steps: step2. Set checkBoxConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1662,7 +1662,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest035, TestSize
     /**
      * @tc.steps: step2. Set checkBoxConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1729,7 +1729,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest036, TestSize
     /**
      * @tc.steps: step2. Set checkBoxConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1796,7 +1796,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest037, TestSize
     /**
      * @tc.steps: step2. Set checkBoxConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1863,7 +1863,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest038, TestSize
     /**
      * @tc.steps: step2. Set checkBoxConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -1930,7 +1930,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest039, TestSize
     /**
      * @tc.steps: step2. Set checkBoxConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -2172,7 +2172,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest045, TestSize
     /**
      * @tc.steps: step2. Set checkBoxConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -2239,7 +2239,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest046, TestSize
     /**
      * @tc.steps: step2. Set checkBoxConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -2306,7 +2306,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest047, TestSize
     /**
      * @tc.steps: step2. Set checkBoxConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -2373,7 +2373,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest048, TestSize
     /**
      * @tc.steps: step2. Set checkBoxConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -2440,7 +2440,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest049, TestSize
     /**
      * @tc.steps: step2. Set checkBoxConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);
@@ -2507,7 +2507,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest050, TestSize
     /**
      * @tc.steps: step2. Set checkBoxConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     eventHub->SetEnabled(SELECTED);

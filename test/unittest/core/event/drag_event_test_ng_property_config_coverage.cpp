@@ -219,7 +219,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest036, TestSize.Le
     dragPreviewInfo.pixelMap = pixelMap;
     frameNode->SetDragPreview(dragPreviewInfo);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     EXPECT_NE(eventHub, nullptr);
     eventHub->AttachHost(frameNode);
     auto onDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {

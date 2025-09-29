@@ -972,7 +972,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest003, TestSize.Level1)
      * @tc.steps: step3. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
      * @tc.expected: return true
      */
-    auto eventHub = dialogNode->GetEventHub<DialogEventHub>();
+    auto eventHub = dialogNode->GetOrCreateEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -1281,7 +1281,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest009, TestSize.Level1)
      * @tc.steps: step3. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
      * @tc.expected: return true
      */
-    auto eventHub = dialogNode->GetEventHub<DialogEventHub>();
+    auto eventHub = dialogNode->GetOrCreateEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);

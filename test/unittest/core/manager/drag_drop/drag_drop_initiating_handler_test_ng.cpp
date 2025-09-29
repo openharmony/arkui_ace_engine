@@ -148,7 +148,7 @@ HWTEST_F(DragDropInitiatingHandlerTestNg, FireCustomerOnDragEndNG001, TestSize.L
     EXPECT_EQ(DragDropGlobalController::GetInstance().currentDragNode_, frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     std::string customerDragEventType;
     std::string dragEventType;
     auto customerOnDragEnd = [&customerDragEventType](const RefPtr<OHOS::Ace::DragEvent>& info) {

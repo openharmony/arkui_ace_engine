@@ -80,7 +80,7 @@ public:
     }
     bool IsNeedHandleScroll() const override
     {
-        auto eventHub = GetEventHub<NavBarEventHub>();
+        auto eventHub = GetOrCreateEventHub<NavBarEventHub>();
         if (eventHub && eventHub->HasOnCoordScrollStartAction()) {
             return true;
         }

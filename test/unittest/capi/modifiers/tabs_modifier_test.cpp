@@ -558,7 +558,7 @@ HWTEST_F(TabsModifierTest, setOnChangeTest, TestSize.Level1)
     ASSERT_NE(tabsNode, nullptr);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     ASSERT_NE(swiperNode, nullptr);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(g_indexValue, 0);
     eventHub->FireChangeEvent(INDEX - 1, INDEX, false);
@@ -590,7 +590,7 @@ HWTEST_F(TabsModifierTest, setOnAnimationStartTest, TestSize.Level1)
     ASSERT_NE(tabsNode, nullptr);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     ASSERT_NE(swiperNode, nullptr);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(g_indexValue, 0);
     EXPECT_EQ(g_targetIndexValue, 0);
@@ -637,7 +637,7 @@ HWTEST_F(TabsModifierTest, setOnAnimationEndTest, TestSize.Level1)
     ASSERT_NE(tabsNode, nullptr);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     ASSERT_NE(swiperNode, nullptr);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(g_indexValue, 0);
     EXPECT_EQ(g_currentOffsetValue, 0.0f);
@@ -683,7 +683,7 @@ HWTEST_F(TabsModifierTest, setOnGestureSwipeTest, TestSize.Level1)
     ASSERT_NE(tabsNode, nullptr);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     ASSERT_NE(swiperNode, nullptr);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(g_indexValue, 0);
     EXPECT_EQ(g_currentOffsetValue, 0.0f);
@@ -1689,7 +1689,7 @@ HWTEST_F(TabsModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1817,7 +1817,7 @@ HWTEST_F(TabsModifierTest, setOnSelectedTest, TestSize.Level1)
     ASSERT_NE(tabsNode, nullptr);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     ASSERT_NE(swiperNode, nullptr);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->FireSelectedEvent(INDEX);
     EXPECT_EQ(g_indexValue, INDEX);
@@ -1845,7 +1845,7 @@ HWTEST_F(TabsModifierTest, setOnUnselectedTest, TestSize.Level1)
     ASSERT_NE(tabsNode, nullptr);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     ASSERT_NE(swiperNode, nullptr);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->FireUnselectedEvent(INDEX);
     EXPECT_EQ(g_indexValue, INDEX);

@@ -1150,7 +1150,7 @@ HWTEST_F(SwiperAttrTestNg, SwiperModelNg002, TestSize.Level1)
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
     auto paintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
-    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SwiperEventHub>();
 
     /**
      * @tc.steps: step3.1. Test SetLoop function.

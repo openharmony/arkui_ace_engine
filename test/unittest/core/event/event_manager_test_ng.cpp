@@ -79,10 +79,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest003, TestSize.Level1)
     auto frameNodeCtrlShift = FrameNode::GetOrCreateFrameNode(CTRLSHIFT, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE), nullptr);
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrlShift));
 
-    auto eventHubCtrl = frameNodeCtrl->GetEventHub<NG::EventHub>();
-    auto eventHubShift = frameNodeShift->GetEventHub<NG::EventHub>();
-    auto eventHubAlt = frameNodeAlt->GetEventHub<NG::EventHub>();
-    auto eventHubCtrlShift = frameNodeCtrlShift->GetEventHub<NG::EventHub>();
+    auto eventHubCtrl = frameNodeCtrl->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubShift = frameNodeShift->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubAlt = frameNodeAlt->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubCtrlShift = frameNodeCtrlShift->GetOrCreateEventHub<NG::EventHub>();
 
     eventHubCtrl->SetKeyboardShortcut(CHARACTER_C, NUM_CTRL_VALUE, []() {});
     eventHubShift->SetKeyboardShortcut(CHARACTER_A, NUM_SHIFT_VALUE, []() {});
@@ -226,7 +226,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest009, TestSize.Level1)
      * @tc.expected: keyboardShortcutNode_.size() > 0.
      */
     auto frameNodeShift = FrameNode::GetOrCreateFrameNode(SHIFT, NUM_SHIFT_VALUE, nullptr);
-    frameNodeShift->GetEventHub<EventHub>()->SetKeyboardShortcut(
+    frameNodeShift->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(
         SHORT_CUT_VALUE_A, static_cast<int>(CtrlKeysBit::SHIFT), []() {});
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeShift));
     EXPECT_GT(eventManager->keyboardShortcutNode_.size(), 0);
@@ -506,7 +506,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest016, TestSize.Level1)
      */
     const int focusNodeId = 10007;
     auto focusNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, focusNodeId, nullptr);
-    focusNode->GetEventHub<ButtonEventHub>();
+    focusNode->GetOrCreateEventHub<ButtonEventHub>();
     focusNode->eventHub_->GetOrCreateFocusHub(FocusType::NODE);
     ASSERT_NE(focusNode->GetFocusHub(), nullptr);
 
@@ -745,25 +745,25 @@ HWTEST_F(EventManagerTestNg, EventManagerTest021, TestSize.Level1)
     const int nodeIdCtrlShift = 10010;
     auto frameNodeCtrlShift = FrameNode::GetOrCreateFrameNode(CTRL, nodeIdCtrlShift, nullptr);
     frameNodeCtrlShift->SetActive(true);
-    frameNodeCtrlShift->GetEventHub<EventHub>()->SetEnabled(true);
+    frameNodeCtrlShift->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     const uint8_t ctrlShift = static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT);
-    frameNodeCtrlShift->GetEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, ctrlShift, []() {});
+    frameNodeCtrlShift->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, ctrlShift, []() {});
     eventManager->AddKeyboardShortcutNode(frameNodeCtrlShift);
 
     const int nodeIdCtrlAlt = 10011;
     auto frameNodeCtrlAlt = FrameNode::GetOrCreateFrameNode(CTRL, nodeIdCtrlAlt, nullptr);
     frameNodeCtrlAlt->SetActive(true);
-    frameNodeCtrlAlt->GetEventHub<EventHub>()->SetEnabled(true);
+    frameNodeCtrlAlt->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     const uint8_t ctrlAlt = static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::ALT);
-    frameNodeCtrlAlt->GetEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, ctrlAlt, []() {});
+    frameNodeCtrlAlt->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, ctrlAlt, []() {});
     eventManager->AddKeyboardShortcutNode(frameNodeCtrlAlt);
 
     const int nodeIdAltShift = 10012;
     auto frameNodeAltShift = FrameNode::GetOrCreateFrameNode(ALT, nodeIdAltShift, nullptr);
     frameNodeAltShift->SetActive(true);
-    frameNodeAltShift->GetEventHub<EventHub>()->SetEnabled(true);
+    frameNodeAltShift->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     const uint8_t altShift = static_cast<uint8_t>(CtrlKeysBit::SHIFT) + static_cast<uint8_t>(CtrlKeysBit::ALT);
-    frameNodeAltShift->GetEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, altShift, []() {});
+    frameNodeAltShift->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, altShift, []() {});
     eventManager->AddKeyboardShortcutNode(frameNodeAltShift);
 
     /**
@@ -773,9 +773,9 @@ HWTEST_F(EventManagerTestNg, EventManagerTest021, TestSize.Level1)
     KeyEvent event;
     event.action = KeyAction::DOWN;
     eventManager->DispatchKeyboardShortcut(event);
-    EXPECT_EQ(frameNodeCtrlShift->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrlShift);
-    EXPECT_EQ(frameNodeCtrlAlt->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrlAlt);
-    EXPECT_EQ(frameNodeAltShift->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, altShift);
+    EXPECT_EQ(frameNodeCtrlShift->GetOrCreateEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrlShift);
+    EXPECT_EQ(frameNodeCtrlAlt->GetOrCreateEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrlAlt);
+    EXPECT_EQ(frameNodeAltShift->GetOrCreateEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, altShift);
 }
 
 /**
@@ -798,25 +798,25 @@ HWTEST_F(EventManagerTestNg, EventManagerTest022, TestSize.Level1)
     const int nodeIdCtrl = 10013;
     auto frameNodeCtrl = FrameNode::GetOrCreateFrameNode(CTRL, nodeIdCtrl, nullptr);
     frameNodeCtrl->SetActive(true);
-    frameNodeCtrl->GetEventHub<EventHub>()->SetEnabled(true);
+    frameNodeCtrl->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     const uint8_t ctrl = static_cast<uint8_t>(CtrlKeysBit::CTRL);
-    frameNodeCtrl->GetEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, ctrl, []() {});
+    frameNodeCtrl->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, ctrl, []() {});
     eventManager->AddKeyboardShortcutNode(frameNodeCtrl);
 
     const int nodeIdAlt = 10014;
     auto frameNodeAlt = FrameNode::GetOrCreateFrameNode(ALT, nodeIdAlt, nullptr);
     frameNodeAlt->SetActive(true);
-    frameNodeAlt->GetEventHub<EventHub>()->SetEnabled(true);
+    frameNodeAlt->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     const uint8_t alt = static_cast<uint8_t>(CtrlKeysBit::ALT);
-    frameNodeAlt->GetEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, alt, []() {});
+    frameNodeAlt->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, alt, []() {});
     eventManager->AddKeyboardShortcutNode(frameNodeAlt);
 
     const int nodeIdShift = 10015;
     auto frameNodeShift = FrameNode::GetOrCreateFrameNode(SHIFT, nodeIdShift, nullptr);
     frameNodeShift->SetActive(true);
-    frameNodeShift->GetEventHub<EventHub>()->SetEnabled(true);
+    frameNodeShift->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     const uint8_t shift = static_cast<uint8_t>(CtrlKeysBit::SHIFT);
-    frameNodeShift->GetEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, shift, []() {});
+    frameNodeShift->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, shift, []() {});
     eventManager->AddKeyboardShortcutNode(frameNodeShift);
 
     /**
@@ -826,9 +826,9 @@ HWTEST_F(EventManagerTestNg, EventManagerTest022, TestSize.Level1)
     KeyEvent event;
     event.action = KeyAction::DOWN;
     eventManager->DispatchKeyboardShortcut(event);
-    EXPECT_EQ(frameNodeCtrl->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrl);
-    EXPECT_EQ(frameNodeAlt->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, alt);
-    EXPECT_EQ(frameNodeShift->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, shift);
+    EXPECT_EQ(frameNodeCtrl->GetOrCreateEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrl);
+    EXPECT_EQ(frameNodeAlt->GetOrCreateEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, alt);
+    EXPECT_EQ(frameNodeShift->GetOrCreateEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, shift);
 }
 
 /**

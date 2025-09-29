@@ -759,7 +759,7 @@ void MenuWrapperPattern::CheckAndShowAnimation()
 void MenuWrapperPattern::MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);

@@ -38,7 +38,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(page);
     auto pagePattern = page->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    auto eventHub = page->GetEventHub<EventHub>();
+    auto eventHub = page->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (transitionType == PageTransitionType::EXIT_POP) {

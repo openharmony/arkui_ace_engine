@@ -632,7 +632,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest014, TestSize.Lev
     EXPECT_EQ(result, true);
 
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     bool isEnableBak = eventHub->IsEnabled();
     eventHub->SetEnabledInternal(false);
     result = accessibilityProperty->IsAccessibilityFocusable(frameNode);
@@ -996,7 +996,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest030, TestSize.Lev
     auto accessibilityProperty2 = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     EXPECT_EQ(accessibilityProperty2, nullptr);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(false);
     EXPECT_FALSE(eventHub->IsEnabled());
     result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
@@ -1109,7 +1109,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest034, TestSize.Lev
     DimensionRect responseRect(Dimension(-1), Dimension(-1), DimensionOffset(OFFSETF));
     std::vector<DimensionRect> responseRegion;
     responseRegion.push_back(responseRect);
-    auto gestureEventHub = host->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto gestureEventHub = host->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetResponseRegion(responseRegion);
     auto paintRect = host->renderContext_->GetPaintRectWithoutTransform();
     auto responseRegionList = host->GetResponseRegionList(paintRect, 2);
@@ -1141,7 +1141,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest035, TestSize.Lev
     DimensionRect responseRect(Dimension(-1), Dimension(-1), DimensionOffset(OFFSETF));
     std::vector<DimensionRect> responseRegion;
     responseRegion.push_back(responseRect);
-    auto gestureEventHub = host->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto gestureEventHub = host->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetResponseRegion(responseRegion);
 
     auto responseRegionList = host->GetResponseRegionList(paintRect, 2);

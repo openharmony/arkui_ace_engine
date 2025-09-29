@@ -173,7 +173,7 @@ HWTEST_F(SearchModifierCallbackTest, setInputFilterTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_TRUE(textFieldChild);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_TRUE(textFieldEventHub);
     struct CheckEvent {
         int32_t nodeId;
@@ -224,7 +224,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnTextSelectionChangeTest, TestSize.Leve
     };
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
 
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
         modifier_->setOnTextSelectionChange(node_, &onTextSelectionChangeCallback);
@@ -253,7 +253,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnCopyTest, TestSize.Level1)
     g_EventTestString.clear();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnCopy(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
@@ -281,7 +281,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnCutTest, TestSize.Level1)
     g_EventTestString = EMPTY_TEXT;
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnCut(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
@@ -321,7 +321,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnPasteTestCallEvent, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     modifier_->setOnPaste(node_, &arkCallback);
     EXPECT_FALSE(checkEvent);
@@ -359,7 +359,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnPasteTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     modifier_->setOnPaste(node_, &arkCallback);
     EXPECT_FALSE(checkEvent);
@@ -390,7 +390,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnContentScrollTest, TestSize.Level1)
     };
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
 
     for (const auto& [value, expectVal] : FLOAT_NUMBER_TEST_PLAN) {
         modifier_->setOnContentScroll(node_, &onContentScroll);
@@ -417,7 +417,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnEditChangeTest, TestSize.Level1)
     modifier_->setOnEditChange(node_, &onEditChange);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
     EXPECT_EQ(g_isEditChangeTest, true);
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnEditChanged(false);
@@ -447,7 +447,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnSubmit0Test, TestSize.Level1)
 
     testString.clear();
     modifier_->setOnSubmit0(node_, &onSubmit0Callback);
-    auto searchEventHub = frameNode->GetEventHub<SearchEventHub>();
+    auto searchEventHub = frameNode->GetOrCreateEventHub<SearchEventHub>();
     EXPECT_EQ(testString, EMPTY_TEXT);
     ASSERT_NE(searchEventHub, nullptr);
     NG::TextFieldCommonEvent event;
@@ -466,7 +466,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnSubmit1Test, TestSize.Level1)
 {
     static const int expectedResId = 123;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SearchEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::u16string testString;
@@ -522,7 +522,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnChangeTest, TestSize.Level1)
 
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     EXPECT_EQ(eventTestString, EMPTY_TEXT);
     EXPECT_EQ(eventTestOffset, 0);
@@ -555,7 +555,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnWillInsertTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
 
     {
@@ -582,7 +582,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnDidInsertTest, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
     EXPECT_NE(textFieldEventHub, nullptr);
     static std::u16string eventTestString = u"";
     static int32_t eventTestOffset = 0;
@@ -633,7 +633,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnWillDeleteTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     DeleteValueInfo checkValueDefault;
 
@@ -680,7 +680,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnDidDeleteTest, TestSize.Level1)
     g_deleteDirection = TextDeleteDirection::FORWARD;
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     DeleteValueInfo checkValueDefault;
     textFieldEventHub->FireOnDidDeleteValueEvent(checkValueDefault);

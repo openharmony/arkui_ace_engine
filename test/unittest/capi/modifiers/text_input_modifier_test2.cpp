@@ -85,7 +85,7 @@ HWTEST_F(TextInputModifierTest2, setOnChangeTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
 
     std::u16string expectedText = u"test_text";
@@ -122,7 +122,7 @@ HWTEST_F(TextInputModifierTest2, setOnPasteTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnPaste, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
 
     std::u16string expectedText = u"test_text";
@@ -195,7 +195,7 @@ HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
     static const int expectedResId = 123;
     static const std::u16string TEST_VALUE(u"string text");
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto onSubmitFunc = [](

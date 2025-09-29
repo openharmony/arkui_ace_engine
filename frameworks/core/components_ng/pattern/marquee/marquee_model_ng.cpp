@@ -151,7 +151,7 @@ void MarqueeModelNG::SetOnStart(std::function<void()>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStart(std::move(onChange));
 }
@@ -160,7 +160,7 @@ void MarqueeModelNG::SetOnBounce(std::function<void()>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnBounce(std::move(onChange));
 }
@@ -169,7 +169,7 @@ void MarqueeModelNG::SetOnFinish(std::function<void()>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFinish(std::move(onChange));
 }
@@ -266,7 +266,7 @@ void MarqueeModelNG::SetMarqueeUpdateStrategy(
 void MarqueeModelNG::SetOnStart(FrameNode* frameNode, std::function<void()>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStart(std::move(onChange));
 }
@@ -274,7 +274,7 @@ void MarqueeModelNG::SetOnStart(FrameNode* frameNode, std::function<void()>&& on
 void MarqueeModelNG::SetOnBounce(FrameNode* frameNode, std::function<void()>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnBounce(std::move(onChange));
 }
@@ -282,7 +282,7 @@ void MarqueeModelNG::SetOnBounce(FrameNode* frameNode, std::function<void()>&& o
 void MarqueeModelNG::SetOnFinish(FrameNode* frameNode, std::function<void()>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFinish(std::move(onChange));
 }

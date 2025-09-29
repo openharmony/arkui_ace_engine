@@ -1612,7 +1612,7 @@ HWTEST_F(SearchModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(searchTextField);
-    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    auto eventHub = searchTextField->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

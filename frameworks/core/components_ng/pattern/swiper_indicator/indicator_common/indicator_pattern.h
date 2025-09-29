@@ -85,7 +85,7 @@ public:
     {
         if (!changeEvent_) {
             changeEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetEventHub<IndicatorEventHub>();
+            auto eventHub = GetOrCreateEventHub<IndicatorEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnChangeEvent(changeEvent_);
         } else {

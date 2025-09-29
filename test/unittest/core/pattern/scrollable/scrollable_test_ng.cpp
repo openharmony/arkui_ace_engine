@@ -1390,7 +1390,7 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
     MouseInfo info;
     info.SetAction(MouseAction::PRESS);
     info.SetButton(MouseButton::LEFT_BUTTON);
-    auto& inputEvents = scrollPn->GetEventHub<EventHub>()
+    auto& inputEvents = scrollPn->GetOrCreateEventHub<EventHub>()
         ->GetOrCreateInputEventHub()->mouseEventActuator_->inputEvents_;
     EXPECT_EQ(inputEvents.size(), 1);
     for (const auto& callback : inputEvents) {
