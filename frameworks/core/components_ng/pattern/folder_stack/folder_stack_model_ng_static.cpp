@@ -63,7 +63,7 @@ void FolderStackModelNGStatic::SetOnFolderStateChange(
     FrameNode* frameNode, std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FolderStackEventHub>();
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFolderStateChange(std::move(onChange));
 }
@@ -72,7 +72,7 @@ void FolderStackModelNGStatic::SetOnHoverStatusChange(
     FrameNode* frameNode, std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FolderStackEventHub>();
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnHoverStatusChange(std::move(onChange));
 }

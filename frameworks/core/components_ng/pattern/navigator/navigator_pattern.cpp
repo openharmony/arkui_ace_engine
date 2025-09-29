@@ -33,7 +33,7 @@ void NavigatorPattern::OnModifyDone()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         // pass to eventHub to perform navigation
-        auto eventHub = pattern->GetOrCreateEventHub<NavigatorEventHub>();
+        auto eventHub = pattern->GetEventHub<NavigatorEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->NavigatePage();
     };

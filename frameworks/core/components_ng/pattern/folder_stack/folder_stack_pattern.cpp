@@ -66,7 +66,7 @@ void FolderStackPattern::InitFolderStackPatternAppearCallback()
     if (isAppearCallback_) {
         return;
     }
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDisappear = [weak = WeakClaim(this)]() {
         auto folderStackPattern = weak.Upgrade();
@@ -168,7 +168,7 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
 void FolderStackPattern::OnFolderStateChangeSend(FoldStatus foldStatus)
 {
     FolderEventInfo event(foldStatus);
-    auto eventHub = GetOrCreateEventHub<FolderStackEventHub>();
+    auto eventHub = GetEventHub<FolderStackEventHub>();
     if (eventHub) {
         needCallBack_ = true;
         eventHub->OnFolderStateChange(event);

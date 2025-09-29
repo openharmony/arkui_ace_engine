@@ -227,7 +227,7 @@ bool CalendarPickerPattern::OnDirtyLayoutWrapperSwap(
         return true;
     }
 
-    auto eventHub = GetOrCreateEventHub<CalendarPickerEventHub>();
+    auto eventHub = GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
     eventHub->FireLayoutChangeEvent();
     return true;
@@ -458,7 +458,7 @@ bool CalendarPickerPattern::ReportChangeEvent(const std::string& compName,
 void CalendarPickerPattern::FireChangeEvents(const std::string& info)
 {
     ReportChangeEvent("CalendarPicker", "onChange", info);
-    auto eventHub = GetOrCreateEventHub<CalendarPickerEventHub>();
+    auto eventHub = GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateInputChangeEvent(info);
     eventHub->UpdateOnChangeEvent(info);
@@ -1171,7 +1171,7 @@ void CalendarPickerPattern::HandleEnable()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();

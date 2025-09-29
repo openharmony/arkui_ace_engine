@@ -85,7 +85,7 @@ void ScrollTestNg::GetScroll()
 {
     frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     pattern_ = frameNode_->GetPattern<ScrollPattern>();
-    eventHub_ = frameNode_->GetOrCreateEventHub<ScrollEventHub>();
+    eventHub_ = frameNode_->GetEventHub<ScrollEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ScrollLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ScrollAccessibilityProperty>();

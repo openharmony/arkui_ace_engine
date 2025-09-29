@@ -453,11 +453,11 @@ public:
     }
 
     template<typename T>
-    RefPtr<T> GetOrCreateEventHub() const
+    RefPtr<T> GetEventHub() const
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
-        return DynamicCast<T>(host->GetOrCreateEventHub<T>());
+        return DynamicCast<T>(host->GetEventHub<T>());
     }
 
     // Called after frameNode RebuildRenderContextTree.

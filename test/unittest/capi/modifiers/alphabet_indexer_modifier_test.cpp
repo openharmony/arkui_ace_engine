@@ -1278,7 +1278,7 @@ HWTEST_F(IndexerModifierTest, setAlignStyleOffset, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setOnSelect, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
@@ -1317,7 +1317,7 @@ HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static bool wasInvoke = false;
@@ -1349,7 +1349,7 @@ HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setOnPopupSelect, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
@@ -1617,7 +1617,7 @@ HWTEST_F(IndexerModifierTest, setEnableHapticFeedback, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

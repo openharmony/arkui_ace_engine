@@ -1778,7 +1778,7 @@ void ImagePatternMethods01()
     EXPECT_EQ(imagePattern->IsSupportImageAnalyzerFeature(), false);
     auto frameNodePtr = AceType::Claim(frameNode);
     imagePattern->AddImageLoadSuccessEvent(frameNodePtr);
-    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     EXPECT_NE(eventHub->completeEvent_, nullptr);
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT);
     eventHub->FireCompleteEvent(loadImageSuccessEvent);

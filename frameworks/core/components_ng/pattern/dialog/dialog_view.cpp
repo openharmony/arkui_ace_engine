@@ -115,7 +115,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     }
     SetDialogAccessibilityHoverConsume(dialog);
     // set onCancel callback
-    auto hub = dialog->GetOrCreateEventHub<DialogEventHub>();
+    auto hub = dialog->GetEventHub<DialogEventHub>();
     CHECK_NULL_RETURN(hub, dialog);
     hub->SetOnCancel(param.onCancel);
     hub->SetOnSuccess(param.onSuccess);

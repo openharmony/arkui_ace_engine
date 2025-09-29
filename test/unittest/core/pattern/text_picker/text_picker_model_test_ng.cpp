@@ -234,7 +234,7 @@ HWTEST_F(TextPickerModelTestNg, SetOnCascadeChange001, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto textPickerEventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
     
     EXPECT_NE(textPickerEventHub->TextChangeEvent_, nullptr);
@@ -263,7 +263,7 @@ HWTEST_F(TextPickerModelTestNg, SetOnScrollStop001, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto textPickerEventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
 
     EXPECT_NE(textPickerEventHub->onScrollStopEvent_, nullptr);
@@ -690,7 +690,7 @@ HWTEST_F(TextPickerModelTestNg, StaticSetOnCascadeChange001, TestSize.Level1)
 {
     auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     ASSERT_NE(frameNode, nullptr);
-    auto textPickerEventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
     int32_t callbackInfo = 0;
     auto onChangeFunc = [&callbackInfo](const std::vector<std::string>& value, const std::vector<double>& index) {
@@ -714,7 +714,7 @@ HWTEST_F(TextPickerModelTestNg, StaticSetOnScrollStop001, TestSize.Level1)
 {
     auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     ASSERT_NE(frameNode, nullptr);
-    auto textPickerEventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
     int32_t callbackInfo = 0;
     auto onScrollStopFunc = [&callbackInfo](const std::vector<std::string>& value, const std::vector<double>& index) {

@@ -829,9 +829,9 @@ HWTEST_F(CalendarTestNg, CalendarPatternTest002, TestSize.Level1)
 
     auto swiperFrameNode = AceType::DynamicCast<FrameNode>(swiperNode);
     ASSERT_NE(swiperFrameNode, nullptr);
-    auto swiperEventHub = swiperFrameNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto swiperEventHub = swiperFrameNode->GetEventHub<SwiperEventHub>();
     ASSERT_NE(swiperEventHub, nullptr);
-    auto calendarEventHub = frameNode->GetOrCreateEventHub<CalendarEventHub>();
+    auto calendarEventHub = frameNode->GetEventHub<CalendarEventHub>();
     ASSERT_NE(calendarEventHub, nullptr);
 
     calendarPattern->initialize_ = true;
@@ -1107,7 +1107,7 @@ HWTEST_F(CalendarTestNg, CalendarMonthPatternTest002, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
-    auto calendarMonthEventHub = frameNode->GetOrCreateEventHub<CalendarEventHub>();
+    auto calendarMonthEventHub = frameNode->GetEventHub<CalendarEventHub>();
     ASSERT_NE(calendarMonthEventHub, nullptr);
     auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
     ASSERT_NE(calendarMonthPattern, nullptr);
@@ -1308,7 +1308,7 @@ HWTEST_F(CalendarTestNg, CalendarMonthPatternTest005, TestSize.Level1)
      */
     std::string infoDetail;
     auto initRequestDataEvent = [&](std::string info) { infoDetail = std::move(info); };
-    auto calendarMonthEventHub = frameNode->GetOrCreateEventHub<CalendarEventHub>();
+    auto calendarMonthEventHub = frameNode->GetEventHub<CalendarEventHub>();
     ASSERT_NE(calendarMonthEventHub, nullptr);
     calendarMonthEventHub->SetSelectedChangeEvent(initRequestDataEvent);
     calendarMonthPattern->OnModifyDone();

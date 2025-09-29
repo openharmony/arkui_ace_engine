@@ -150,7 +150,7 @@ void SliderPattern::OnModifyDone()
     FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -349,7 +349,7 @@ void SliderPattern::HandleEnabled()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -1903,7 +1903,7 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
 void SliderPattern::FireChangeEvent(int32_t mode)
 {
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider fire change %{public}d %{public}f", mode, value_);
-    auto sliderEventHub = GetOrCreateEventHub<SliderEventHub>();
+    auto sliderEventHub = GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
     if ((mode == SliderChangeMode::Click || mode == SliderChangeMode::Moving) &&
         NearEqual(value_, sliderEventHub->GetValue())) {
@@ -2494,7 +2494,7 @@ void SliderPattern::SetSliderValue(double value, int32_t mode)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -2704,7 +2704,7 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
     auto value = sliderPaintProperty->GetValue().value_or(min);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     SliderConfiguration sliderConfiguration(value, min, max, step, enabled);

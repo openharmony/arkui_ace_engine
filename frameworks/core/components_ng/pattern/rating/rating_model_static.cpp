@@ -59,7 +59,7 @@ void RatingModelStatic::SetRatingOptions(
 void RatingModelStatic::SetOnChange(FrameNode* frameNode, RatingChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RatingEventHub>();
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -67,7 +67,7 @@ void RatingModelStatic::SetOnChange(FrameNode* frameNode, RatingChangeEvent&& on
 void RatingModelStatic::SetOnChangeEvent(FrameNode* frameNode, RatingChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RatingEventHub>();
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChange));
 }

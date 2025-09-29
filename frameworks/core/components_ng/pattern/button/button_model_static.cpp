@@ -266,7 +266,7 @@ void ButtonModelStatic::SetType(FrameNode* frameNode, const std::optional<int> v
 void ButtonModelStatic::SetStateEffect(FrameNode* frameNode, const std::optional<bool> stateEffect)
 {
     CHECK_NULL_VOID(frameNode);
-    auto buttonEventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     if (stateEffect) {
         buttonEventHub->SetStateEffect(stateEffect.value());

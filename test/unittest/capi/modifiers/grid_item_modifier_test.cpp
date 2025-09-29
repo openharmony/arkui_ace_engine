@@ -438,7 +438,7 @@ HWTEST_F(GridItemModifierTest, setSelectedTestValidValues, TestSize.Level1)
 HWTEST_F(GridItemModifierTest, setOnSelectTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -481,7 +481,7 @@ HWTEST_F(GridItemModifierTest, setOnSelectTest, TestSize.Level1)
 HWTEST_F(GridItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

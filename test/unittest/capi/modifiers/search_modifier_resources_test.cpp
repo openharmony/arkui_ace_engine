@@ -407,7 +407,7 @@ HWTEST_F(SearchModifierResourcesTest, setInputFilterTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_TRUE(textFieldChild);
-    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
     ASSERT_TRUE(textFieldEventHub);
     struct CheckEvent {
         int32_t nodeId;

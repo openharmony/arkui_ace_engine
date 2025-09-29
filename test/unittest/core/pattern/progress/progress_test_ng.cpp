@@ -100,7 +100,7 @@ void ProgressTestNg::GetProgress()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ProgressPattern>();
-    eventHub_ = frameNode_->GetOrCreateEventHub<EventHub>();
+    eventHub_ = frameNode_->GetEventHub<EventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ProgressLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<ProgressPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ProgressAccessibilityProperty>();

@@ -1187,7 +1187,7 @@ void MenuItemPattern::RegisterOnPress()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!onPressEventSet_) {
         eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, onPressEvent_, true);
@@ -1274,7 +1274,7 @@ bool MenuItemPattern::OnClick()
         menuWrapperPattern->HideSubMenu();
         return true;
     }
-    auto hub = host->GetOrCreateEventHub<MenuItemEventHub>();
+    auto hub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_RETURN(hub, false);
     auto onChange = hub->GetOnChange();
     auto selectedChangeEvent = hub->GetSelectedChangeEvent();
@@ -1401,7 +1401,7 @@ void CustomMenuItemPattern::HandleOnChange()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<MenuItemEventHub>();
+    auto hub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(hub);
     auto onChange = hub->GetOnChange();
     auto selectedChangeEvent = hub->GetSelectedChangeEvent();
@@ -2420,7 +2420,7 @@ void MenuItemPattern::UpdateTextNodes()
 
 bool MenuItemPattern::IsDisabled()
 {
-    auto eventHub = GetHost()->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = GetHost()->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
     return !eventHub->IsEnabled();
 }
@@ -2429,7 +2429,7 @@ void MenuItemPattern::UpdateDisabledStyle()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
@@ -2481,7 +2481,7 @@ void MenuItemPattern::SetAccessibilityAction()
         } else {
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            auto hub = host->GetOrCreateEventHub<MenuItemEventHub>();
+            auto hub = host->GetEventHub<MenuItemEventHub>();
             CHECK_NULL_VOID(hub);
             auto onChange = hub->GetOnChange();
             auto selectedChangeEvent = hub->GetSelectedChangeEvent();
@@ -2513,7 +2513,7 @@ void MenuItemPattern::MarkIsSelected(bool isSelected)
         return;
     }
     isSelected_ = isSelected;
-    auto eventHub = GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onChange = eventHub->GetOnChange();
     auto selectedChangeEvent = eventHub->GetSelectedChangeEvent();
@@ -3017,7 +3017,7 @@ bool MenuItemPattern::OnSelectProcess()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto hub = host->GetOrCreateEventHub<MenuItemEventHub>();
+    auto hub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_RETURN(hub, false);
     auto JsAction = hub->GetJsCallback();
     if (JsAction) {
@@ -3080,7 +3080,7 @@ void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
     selectTheme_ = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme_);
 
-    auto eventHub = host->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     UpdateIconSrc();
     if (!eventHub->IsEnabled()) {

@@ -326,7 +326,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest001, TestSize.Level1
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetGroupName(GROUP_NAME);
     EXPECT_EQ(eventHub->GetGroupName(), GROUP_NAME);
@@ -372,7 +372,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest002, TestSize.Level1
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetGroupName(GROUP_NAME);
     EXPECT_EQ(eventHub->GetGroupName(), GROUP_NAME);
@@ -418,7 +418,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupEventTest002, TestSize.Level1)
     checkBoxGroup.SetOnChange(onChange);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->UpdateChangeEvent(&groupResult);
     EXPECT_FALSE(vec.empty());
@@ -587,7 +587,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest007, TestSize.Level1)
      */
     auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     ASSERT_NE(checkBoxPaintProperty, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto group = eventHub->GetGroupName();
     pattern->SetPreGroup(group);
@@ -884,7 +884,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest017, TestSize.Level1)
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetGroupName(GROUP_NAME);
     EXPECT_EQ(eventHub->GetGroupName(), GROUP_NAME);
@@ -1344,7 +1344,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupAccessibilityPropertyTestNg001, TestS
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetGroupName(GROUP_NAME);
 
@@ -1389,7 +1389,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupAccessibilityPropertyTestNg003, TestS
     auto groupFrameNode = FrameNode::GetOrCreateFrameNode(
         V2::CHECKBOXGROUP_ETS_TAG, 1, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
     EXPECT_NE(groupFrameNode, nullptr);
-    auto eventHub = groupFrameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+    auto eventHub = groupFrameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     eventHub->SetGroupName(GROUP_NAME);
     groupFrameNode->MarkModifyDone();
 
@@ -1420,7 +1420,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxUpdateChangeEventTest001, TestSize.Level1)
     checkBoxGroup.SetChangeEvent(changeEvent);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->UpdateChangeEvent(&groupResult);
     EXPECT_FALSE(vec.empty());
@@ -1680,7 +1680,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest023, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto paintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto checkBoxGroupPattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     ASSERT_NE(checkBoxGroupPattern, nullptr);
@@ -2056,7 +2056,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupNGTest031, TestSize.Level1)
     /**
      * @tc.steps: step3. assert GroupName
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->GetGroupName(), "testGroupName");
 }
@@ -2196,7 +2196,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupEventTest003, TestSize.Level1)
     auto onChange = [&isSelected](bool select) { isSelected = select; };
     CheckBoxGroupModelNG::SetOnChange(node, onChange);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     CheckboxGroupResult groupResult(
         std::vector<std::string> {}, int(CheckBoxGroupPaintProperty::SelectStatus::ALL));

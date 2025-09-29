@@ -2281,7 +2281,7 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SliderEventHub>();
+    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -2325,7 +2325,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setOnChangeEventValueImpl, TestSize.Level1
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SliderEventHub>();
+    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

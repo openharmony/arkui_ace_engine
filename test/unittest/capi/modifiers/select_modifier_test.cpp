@@ -671,7 +671,7 @@ HWTEST_F(SelectModifierTest, setOnSelectTest, TestSize.Level1)
     };
     auto optCallback = Converter::ArkValue<Opt_OnSelectCallback>(arkCallback);
     modifier_->setOnSelect(node_, &optCallback);
-    auto selectEventHub = frameNode->GetOrCreateEventHub<SelectEventHub>();
+    auto selectEventHub = frameNode->GetEventHub<SelectEventHub>();
     EXPECT_FALSE(checkEvent.has_value());
 
     SelectEvent selectEvent = selectEventHub->GetSelectEvent();
@@ -1287,7 +1287,7 @@ HWTEST_F(SelectModifierTest, setDividerColorStringTest, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<SelectEventHub>();
+    auto eventHub = frameNode->GetEventHub<SelectEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1329,7 +1329,7 @@ HWTEST_F(SelectModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<SelectEventHub>();
+    auto eventHub = frameNode->GetEventHub<SelectEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

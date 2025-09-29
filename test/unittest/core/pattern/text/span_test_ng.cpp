@@ -1163,7 +1163,7 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
     eventHub->FireCompleteEvent(loadImageSuccessEvent);
@@ -1191,7 +1191,7 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest002, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!", {});
     eventHub->FireErrorEvent(loadImageFailEvent);
@@ -1668,7 +1668,7 @@ HWTEST_F(SpanTestNg, ImageSpanImageErrorInfo001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT,
@@ -1698,7 +1698,7 @@ HWTEST_F(SpanTestNg, ImageSpanImageErrorInfo002, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     ImageErrorInfo imageErrorInfo;
@@ -1730,7 +1730,7 @@ HWTEST_F(SpanTestNg, ImageSpanImageErrorInfo003, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     ImageErrorInfo imageErrorInfo;

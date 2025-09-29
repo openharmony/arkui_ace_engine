@@ -61,7 +61,7 @@ bool PlatformEventProxyTestNg::CheckClickEvent(
     const RefPtr<FrameNode> &host)
 {
     CHECK_NULL_RETURN(host, true);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(hub, true);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, true);
@@ -80,7 +80,7 @@ bool PlatformEventProxyTestNg::CheckLongPressEvent(
     const RefPtr<FrameNode> &host)
 {
     CHECK_NULL_RETURN(host, true);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(hub, true);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, true);
@@ -99,7 +99,7 @@ bool PlatformEventProxyTestNg::CheckPanGestureEvent(
     const RefPtr<FrameNode> &host)
 {
     CHECK_NULL_RETURN(host, true);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(hub, true);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, true);
@@ -167,7 +167,7 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy001, TestSize.Level1)
     RefPtr<PlatformEventProxy> eventProxy = AceType::MakeRefPtr<PlatformEventProxy>();
     CHECK_NULL_VOID(eventProxy);
     eventProxy->SetHostNode(isolatedNode);
-    auto hub = isolatedNode->GetOrCreateEventHub<EventHub>();
+    auto hub = isolatedNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -232,7 +232,7 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy002, TestSize.Level1)
     RefPtr<PlatformEventProxy> eventProxy = AceType::MakeRefPtr<PlatformEventProxy>();
     CHECK_NULL_VOID(eventProxy);
     eventProxy->SetHostNode(isolatedNode);
-    auto hub = isolatedNode->GetOrCreateEventHub<EventHub>();
+    auto hub = isolatedNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -295,7 +295,7 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy003, TestSize.Level1)
     RefPtr<PlatformEventProxy> eventProxy = AceType::MakeRefPtr<PlatformEventProxy>();
     CHECK_NULL_VOID(eventProxy);
     eventProxy->SetHostNode(isolatedNode);
-    auto hub = isolatedNode->GetOrCreateEventHub<EventHub>();
+    auto hub = isolatedNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -339,7 +339,7 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy004, TestSize.Level1)
     RefPtr<PlatformEventProxy> eventProxy = AceType::MakeRefPtr<PlatformEventProxy>();
     CHECK_NULL_VOID(eventProxy);
     eventProxy->SetHostNode(isolatedNode);
-    auto hub = isolatedNode->GetOrCreateEventHub<EventHub>();
+    auto hub = isolatedNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -401,7 +401,7 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy006, TestSize.Level1)
     RefPtr<PlatformEventProxy> eventProxy = AceType::MakeRefPtr<PlatformEventProxy>();
     CHECK_NULL_VOID(eventProxy);
     eventProxy->SetHostNode(isolatedNode);
-    auto hub = isolatedNode->GetOrCreateEventHub<EventHub>();
+    auto hub = isolatedNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -454,7 +454,7 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy007, TestSize.Level1)
     RefPtr<PlatformEventProxy> eventProxy = AceType::MakeRefPtr<PlatformEventProxy>();
     CHECK_NULL_VOID(eventProxy);
     eventProxy->SetHostNode(isolatedNode);
-    auto hub = isolatedNode->GetOrCreateEventHub<EventHub>();
+    auto hub = isolatedNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -506,7 +506,7 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy008, TestSize.Level1)
     RefPtr<PlatformEventProxy> eventProxy = AceType::MakeRefPtr<PlatformEventProxy>();
     CHECK_NULL_VOID(eventProxy);
     eventProxy->SetHostNode(isolatedNode);
-    auto hub = isolatedNode->GetOrCreateEventHub<EventHub>();
+    auto hub = isolatedNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -550,7 +550,7 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy009, TestSize.Level1)
     RefPtr<PlatformEventProxy> eventProxy = AceType::MakeRefPtr<PlatformEventProxy>();
     CHECK_NULL_VOID(eventProxy);
     eventProxy->SetHostNode(isolatedNode);
-    auto hub = isolatedNode->GetOrCreateEventHub<EventHub>();
+    auto hub = isolatedNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -587,7 +587,7 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy010, TestSize.Level1)
     RefPtr<PlatformEventProxy> eventProxy = AceType::MakeRefPtr<PlatformEventProxy>();
     CHECK_NULL_VOID(eventProxy);
     eventProxy->SetHostNode(isolatedNode);
-    auto hub = isolatedNode->GetOrCreateEventHub<EventHub>();
+    auto hub = isolatedNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

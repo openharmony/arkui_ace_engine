@@ -369,7 +369,7 @@ void XComponentPattern::RequestFocus()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -487,7 +487,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         }
         if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
             OnSurfaceDestroyed();
-            auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+            auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->FireDestroyEvent(GetId());
             if (id_.has_value()) {
@@ -734,7 +734,7 @@ void XComponentPattern::XComponentSizeInit()
         xcomponentController_->SetSurfaceId(surfaceId_);
     }
 #endif
-    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] triggers onLoad and OnSurfaceCreated callback",
         GetId().c_str());
@@ -963,7 +963,7 @@ void XComponentPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (id_.has_value()) {
         eventHub->SetOnSurfaceInitEvent(CreateExternalEvent());
@@ -1639,7 +1639,7 @@ void XComponentPattern::LoadNative()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireSurfaceInitEvent(id_.value_or(""), host->GetId());
     OnNativeLoad(reinterpret_cast<FrameNode*>(AceType::RawPtr(host)));
@@ -1649,7 +1649,7 @@ void XComponentPattern::OnNativeLoad(FrameNode* frameNode)
 {
     hasLoadNativeDone_ = true;
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireLoadEvent(GetId());
 }
@@ -1658,7 +1658,7 @@ void XComponentPattern::OnNativeUnload(FrameNode* frameNode)
 {
     hasLoadNativeDone_ = false;
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireDestroyEvent(GetId());
 }
@@ -1683,7 +1683,7 @@ void XComponentPattern::OnSurfaceCreated()
     } else {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
+        auto eventHub = host->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireControllerCreatedEvent(surfaceId_, GetId());
     }
@@ -1713,7 +1713,7 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
             callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
         }
     } else {
-        auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
+        auto eventHub = host->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireControllerChangedEvent(surfaceId_, surfaceRect, GetId());
     }
@@ -1740,7 +1740,7 @@ void XComponentPattern::OnSurfaceDestroyed(FrameNode* frameNode)
             CHECK_NULL_VOID(host);
             frameNode = Referenced::RawPtr(host);
         }
-        auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+        auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
     }

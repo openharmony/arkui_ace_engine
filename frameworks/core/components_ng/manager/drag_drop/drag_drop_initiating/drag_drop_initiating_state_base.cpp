@@ -82,7 +82,7 @@ void DragDropInitiatingStateBase::FireCustomerOnDragEnd()
     CHECK_NULL_VOID(frameNode);
     auto pipelineContext = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
-    auto eventHub = frameNode ->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode ->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -131,7 +131,7 @@ bool DragDropInitiatingStateBase::IsAllowedDrag()
     CHECK_NULL_RETURN(frameNode, false);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     return isAllowedDrag;
@@ -301,7 +301,7 @@ void DragDropInitiatingStateBase::HideTextAnimation(bool startDrag, double globa
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     if (!gestureHub->GetTextDraggable() || !isAllowedDrag) {

@@ -75,7 +75,7 @@ void SetCheckboxOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     Converter::WithOptional(*options, [frameNode, node](const Ark_CheckboxOptions& options) {
-        auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+        auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
 
         auto name = Converter::OptConvert<std::string>(options.name);

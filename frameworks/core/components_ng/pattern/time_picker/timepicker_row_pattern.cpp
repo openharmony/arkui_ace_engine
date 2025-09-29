@@ -380,7 +380,7 @@ void TimePickerRowPattern::InitDisabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     enabled_ = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -578,7 +578,7 @@ void TimePickerRowPattern::SetEventCallback(EventCallback&& value)
 void TimePickerRowPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
-        auto timePickerEventHub = GetOrCreateEventHub<TimePickerEventHub>();
+        auto timePickerEventHub = GetEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
         auto str = GetSelectedObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
@@ -609,7 +609,7 @@ void TimePickerRowPattern::SetEnterSelectedAreaEventCallback(EventCallback&& val
 void TimePickerRowPattern::FireEnterSelectedAreaEvent(bool refresh)
 {
     if (refresh) {
-        auto timePickerEventHub = GetOrCreateEventHub<TimePickerEventHub>();
+        auto timePickerEventHub = GetEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
         auto str = GetEnterObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);

@@ -208,7 +208,7 @@ void NavDestinationGroupNode::ProcessShallowBuilder()
     CHECK_NULL_VOID(navDestinationPattern);
     auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
     if (shallowBuilder && !shallowBuilder->IsExecuteDeepRenderDone()) {
-        auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
+        auto eventHub = GetEventHub<NavDestinationEventHub>();
         if (eventHub) {
             auto ctx = navDestinationPattern->GetNavDestinationContext();
             eventHub->FireOnReady(ctx);
@@ -300,7 +300,7 @@ void NavDestinationGroupNode::SystemTransitionPushStart(bool transitionIn)
         renderContext->UpdateTranslateInXY(translate);
     }
     if (NeedRemoveInPush()) {
-        GetOrCreateEventHub<EventHub>()->SetEnabledInternal(false);
+        GetEventHub<EventHub>()->SetEnabledInternal(false);
     }
     if (titleBarNode && needTitleAnimation) {
         titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
@@ -499,7 +499,7 @@ void NavDestinationGroupNode::SystemTransitionPopStart(bool transitionIn)
     }
     SetIsOnAnimation(true);
     SetTransitionType(PageTransitionType::EXIT_POP);
-    GetOrCreateEventHub<EventHub>()->SetEnabledInternal(false);
+    GetEventHub<EventHub>()->SetEnabledInternal(false);
     if (needContentAnimation) {
         RectF rect = CalcFullClipRectForTransition(frameSizeWithSafeArea);
         renderContext->ClipWithRRect(rect, RadiusF(EdgeF(0.0f, 0.0f)));
@@ -581,7 +581,7 @@ bool NavDestinationGroupNode::SystemTransitionPopFinish(int32_t animationId, boo
     if (isNeedCleanContent) {
         CleanContent();
     }
-    GetOrCreateEventHub<EventHub>()->SetEnabledInternal(true);
+    GetEventHub<EventHub>()->SetEnabledInternal(true);
     GetRenderContext()->RemoveClipWithRRect();
     if (IsNeedContentTransition()) {
         GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
@@ -882,7 +882,7 @@ int32_t NavDestinationGroupNode::DoSystemFadeTransition(bool isEnter)
 {
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, INVALID_ANIMATION_ID);
-    auto eventHub = GetOrCreateEventHub<EventHub>();
+    auto eventHub = GetEventHub<EventHub>();
     if (!inCurrentStack_ && eventHub) {
         eventHub->SetEnabledInternal(false);
     }
@@ -898,7 +898,7 @@ int32_t NavDestinationGroupNode::DoSystemFadeTransition(bool isEnter)
 
 int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation operation, bool isEnter)
 {
-    auto eventHub = GetOrCreateEventHub<EventHub>();
+    auto eventHub = GetEventHub<EventHub>();
     if (!inCurrentStack_ && eventHub) {
         eventHub->SetEnabledInternal(false);
     }
@@ -943,7 +943,7 @@ int32_t NavDestinationGroupNode::DoSystemEnterExplodeTransition(NavigationOperat
 {
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, INVALID_ANIMATION_ID);
-    auto eventHub = GetOrCreateEventHub<EventHub>();
+    auto eventHub = GetEventHub<EventHub>();
     if (!inCurrentStack_ && eventHub) {
         eventHub->SetEnabledInternal(false);
     }
@@ -979,7 +979,7 @@ int32_t NavDestinationGroupNode::DoSystemExitExplodeTransition(NavigationOperati
 {
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, INVALID_ANIMATION_ID);
-    auto eventHub = GetOrCreateEventHub<EventHub>();
+    auto eventHub = GetEventHub<EventHub>();
     if (!inCurrentStack_ && eventHub) {
         eventHub->SetEnabledInternal(false);
     }
@@ -1033,7 +1033,7 @@ int32_t NavDestinationGroupNode::DoCustomTransition(NavigationOperation operatio
     if (!delegate) {
         return INVALID_ANIMATION_ID;
     }
-    auto eventHub = GetOrCreateEventHub<EventHub>();
+    auto eventHub = GetEventHub<EventHub>();
     if (!inCurrentStack_ && eventHub) {
         eventHub->SetEnabledInternal(false);
     }

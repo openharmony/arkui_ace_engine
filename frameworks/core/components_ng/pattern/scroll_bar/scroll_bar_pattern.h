@@ -225,7 +225,7 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
-        auto hub = host->GetOrCreateEventHub<EventHub>();
+        auto hub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(hub, nullptr);
         return hub->GetOrCreateGestureEventHub();
     }
@@ -234,7 +234,7 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
-        auto hub = host->GetOrCreateEventHub<EventHub>();
+        auto hub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(hub, nullptr);
         return hub->GetOrCreateInputEventHub();
     }

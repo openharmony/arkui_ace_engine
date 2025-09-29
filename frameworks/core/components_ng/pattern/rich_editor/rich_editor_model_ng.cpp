@@ -92,7 +92,7 @@ void RichEditorModelNG::SetOnReady(std::function<void()>&& func)
 void RichEditorModelNG::SetOnReady(FrameNode* frameNode, std::function<void()>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReady(std::move(callback));
 }
@@ -108,7 +108,7 @@ void RichEditorModelNG::SetOnSelect(std::function<void(const BaseEventInfo*)>&& 
 void RichEditorModelNG::SetOnSelect(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(callback));
 }
@@ -132,7 +132,7 @@ void RichEditorModelNG::SetAboutToIMEInput(FrameNode* frameNode,
     std::function<bool(const RichEditorInsertValue&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetAboutToIMEInput(std::move(callback));
 }
@@ -157,7 +157,7 @@ void RichEditorModelNG::SetOnIMEInputComplete(FrameNode* frameNode,
     std::function<void(const RichEditorAbstractSpanResult&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnIMEInputComplete(std::move(callback));
 }
@@ -165,7 +165,7 @@ void RichEditorModelNG::SetOnIMEInputComplete(FrameNode* frameNode,
 void RichEditorModelNG::SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidIMEInput(std::move(callback));
 }
@@ -197,7 +197,7 @@ void RichEditorModelNG::SetOnDeleteComplete(std::function<void()>&& func)
 void RichEditorModelNG::SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDeleteComplete(std::move(callback));
 }
@@ -331,7 +331,7 @@ void RichEditorModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDete
 void RichEditorModelNG::SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelectionChange(std::move(callback));
 }
@@ -385,7 +385,7 @@ void RichEditorModelNG::SetOnEditingChange(std::function<void(const bool&)>&& fu
 void RichEditorModelNG::SetOnEditingChange(FrameNode* frameNode, std::function<void(const bool&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnEditingChange(std::move(callback));
 }
@@ -427,7 +427,7 @@ void RichEditorModelNG::SetOnSubmit(FrameNode* frameNode,
     std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSubmit(std::move(callback));
 }
@@ -443,7 +443,7 @@ void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChang
 void RichEditorModelNG::SetOnWillChange(FrameNode* frameNode, std::function<bool(const RichEditorChangeValue&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillChange(std::move(func));
 }
@@ -459,7 +459,7 @@ void RichEditorModelNG::SetOnDidChange(std::function<void(const RichEditorChange
 void RichEditorModelNG::SetOnDidChange(FrameNode* frameNode, std::function<void(const RichEditorChangeValue&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidChange(std::move(func));
 }

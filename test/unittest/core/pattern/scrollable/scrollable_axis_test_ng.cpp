@@ -161,7 +161,7 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest001, TestSize.Level1)
     scrollable->context_ = PipelineContext::GetCurrentContext();
     auto context = scrollable->context_.Upgrade();
     ASSERT_NE(context, nullptr);
-    auto eventHub = listNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = listNode->GetEventHub<ListEventHub>();
     auto startEventTrigger = false;
     eventHub->SetOnScrollStart([&startEventTrigger]() { startEventTrigger = true; });
     AxisDragStart(scrollable);

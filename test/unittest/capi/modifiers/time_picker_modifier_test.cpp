@@ -926,7 +926,7 @@ HWTEST_F(TimePickerModifierTest, setOnChange, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1007,7 +1007,7 @@ HWTEST_F(TimePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<PickerTime> selectedTime = std::nullopt;
@@ -1089,7 +1089,7 @@ HWTEST_F(TimePickerModifierTest, setOnEnterSelectedArea, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnEnterSelectedArea, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

@@ -410,7 +410,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg012, TestSize.Level1)
     auto imgNode = FrameNode::GetOrCreateFrameNode(
         OHOS::Ace::V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     EXPECT_FALSE(imgNode == nullptr);
-    auto imgHub = imgNode->GetOrCreateEventHub<EventHub>();
+    auto imgHub = imgNode->GetEventHub<EventHub>();
     EXPECT_FALSE(imgHub == nullptr);
     auto gestureHub = imgHub->GetOrCreateGestureEventHub();
     EXPECT_FALSE(gestureHub == nullptr);
@@ -626,7 +626,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarSetOnChangeEvent001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
-    auto sideBarContainerEventHub = frameNode->GetOrCreateEventHub<NG::SideBarContainerEventHub>();
+    auto sideBarContainerEventHub = frameNode->GetEventHub<NG::SideBarContainerEventHub>();
     ASSERT_NE(sideBarContainerEventHub, nullptr);
     sideBarContainerEventHub->SetOnChangeEvent(std::move(eventOnChange));
     sideBarContainerEventHub->FireChangeEvent(true);
@@ -795,7 +795,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg027, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     pattern->frameNode_ = frameNode;
-    auto sideBarContainerEventHub = pattern->GetOrCreateEventHub<SideBarContainerEventHub>();
+    auto sideBarContainerEventHub = pattern->GetEventHub<SideBarContainerEventHub>();
     pattern->FireChangeEvent(false);
     EXPECT_NE(sideBarContainerEventHub, nullptr);
 }
@@ -1179,7 +1179,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg037, TestSize.Level1)
     auto imgNode = FrameNode::GetOrCreateFrameNode(
         OHOS::Ace::V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     ASSERT_NE(imgNode, nullptr);
-    auto imgHub = imgNode->GetOrCreateEventHub<EventHub>();
+    auto imgHub = imgNode->GetEventHub<EventHub>();
     ASSERT_NE(imgHub, nullptr);
     auto gestureHub = imgHub->GetOrCreateInputEventHub();
     ASSERT_NE(gestureHub, nullptr);
@@ -1380,7 +1380,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg043, TestSize.Level1)
     auto imgNode = FrameNode::GetOrCreateFrameNode(
         OHOS::Ace::V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     ASSERT_NE(imgNode, nullptr);
-    auto imgHub = imgNode->GetOrCreateEventHub<EventHub>();
+    auto imgHub = imgNode->GetEventHub<EventHub>();
     ASSERT_NE(imgHub, nullptr);
     auto gestureHub = imgHub->GetOrCreateInputEventHub();
     ASSERT_NE(gestureHub, nullptr);

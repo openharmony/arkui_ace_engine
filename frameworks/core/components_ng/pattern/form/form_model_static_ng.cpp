@@ -135,7 +135,7 @@ void FormModelStatic::SetOnRouter(FrameNode* frameNode, std::function<void(const
 void FormModelStatic::SetOnUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onUpdate)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnUpdate(std::move(onUpdate));
 }
