@@ -24,6 +24,9 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/unittest/core/pattern/scroll/mock_task_executor.h"
+#ifdef ENHANCED_ANIMATION
+#include "test/mock/core/animation/mock_animation_manager.h"
+#endif
 using namespace testing;
 using namespace testing::ext;
 
@@ -3825,6 +3828,38 @@ HWTEST_F(PipelineContextTestNg, FlushPendingDeleteCustomNode001, TestSize.Level1
     context_->FlushPendingDeleteCustomNode();
     auto size = context_->pendingDeleteCustomNode_.size();
     EXPECT_EQ(size, 0);
+}
+
+/**
+ * @tc.name: CloseFrontendAnimation001
+ * @tc.desc: Test the function CloseFrontendAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, CloseFrontendAnimation001, TestSize.Level1)
+{
+#ifdef ENHANCED_ANIMATION
+    /**
+     * @tc.steps1: Call OpenAnimation directly.
+     * @tc.expected: AnimationFlag is true.
+     */
+    context_->pendingFrontendAnimation_ = {};
+    constexpr int32_t DURATION = 100;
+    AnimationOption option(Curves::LINEAR, DURATION);
+    AnimationUtils::OpenImplicitAnimation(option, Curves::LINEAR, nullptr, context_);
+    EXPECT_EQ(MockAnimationManager::GetInstance().Enabled(), true);
+    /**
+     * @tc.steps2: Call PipelineContext::CloseFrontAnimation directly.
+     * @tc.expected: Not call AnimationUtils::CloseAnimation, so enabled is false.
+     */
+    context_->CloseFrontendAnimation();
+    EXPECT_EQ(MockAnimationManager::GetInstance().Enabled(), true);
+    /**
+     * @tc.steps3: Call PipelineContext::CloseFrontAnimation(true).
+     * @tc.expected: Call AnimationUtils::CloseAnimation successfully.
+     */
+    context_->CloseFrontendAnimation(true);
+    EXPECT_EQ(MockAnimationManager::GetInstance().Enabled(), false);
+#endif
 }
 } // namespace NG
 } // namespace OHOS::Ace

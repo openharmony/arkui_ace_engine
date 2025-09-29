@@ -40,6 +40,7 @@ export class ComponentBase implements UICommonBase {
         return true
     }
     public applyAttributesFinish(): void {
+        this.isFirstBuild = false;
         ArkUINativeModule._ApplyModifierFinish(this.peer!.peer.ptr)
     }
     public applyAttributes(attrs: Object): void {
