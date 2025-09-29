@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_PICKER_TOSS_ANIMATION_CONTROLLER_H
 
 #include "core/components/picker/picker_animation.h"
+#include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/memory/ace_type.h"
@@ -67,6 +68,13 @@ public:
 
     bool GetTossPlaying() const;
     void SetTossPlaying(bool playing);
+
+    RefPtr<PickerTheme> GetPickerTheme();
+
+    double GetPickerSpringMass();
+
+    int32_t GetPickerMaxSlidingDistance();
+
 private:
     double GetCurrentTime() const;
     void CreatePropertyCallback();

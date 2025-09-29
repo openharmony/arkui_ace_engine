@@ -26,10 +26,8 @@ constexpr int32_t DISMIN = 0;
 constexpr double VMIN = 0;
 constexpr double PICKER_SPEED_TH = 0.25;
 constexpr int32_t VELOCTY_TRANS = 1000;
-constexpr float PICKER_SPRING_MASS = 1.f;
 constexpr float PICKER_SPRING_STIFFNESS = 20.f;
 constexpr float PICKER_SPRING_DAMPING = 10.f;
-constexpr int32_t DISMAX = 30;
 constexpr double VMAX = 5.0;
 } // namespace
 
@@ -153,12 +151,34 @@ void TossAnimationController::StopTossAnimation()
         ref->property_->Set(0.0);
     }, nullptr, nullptr, context);
 }
+
+RefPtr<PickerTheme> TossAnimationController::GetPickerTheme()
+{
+    auto column = column_.Upgrade();
+    CHECK_NULL_RETURN(column, {});
+    auto context = column->GetContext();
+    CHECK_NULL_RETURN(context, {});
+    return context->GetTheme<PickerTheme>();
+}
+
+double TossAnimationController::GetPickerSpringMass()
+{
+    auto theme = GetPickerTheme();
+    return theme ? theme->GetPickerSpringMass() : PICKER_SPRING_MASS;
+}
+
+int32_t TossAnimationController::GetPickerMaxSlidingDistance()
+{
+    auto theme = GetPickerTheme();
+    return theme ? theme->GetPickerMaxSlidingDistance() : PICKER_MAX_SLIDING_DISTANCE;
+}
+
 RefPtr<Curve> TossAnimationController::UpdatePlayAnimationValue()
 {
-    double mass = PICKER_SPRING_MASS;
+    double mass = GetPickerSpringMass();
     double stiffness = PICKER_SPRING_STIFFNESS;
     double damping = PICKER_SPRING_DAMPING;
-    double showCountMax = DISMAX;
+    double showCountMax = GetPickerMaxSlidingDistance();
     double velocityMax = VMAX;
     speed_ = std::abs(speed_) >= std::abs(velocityMax) ? std::abs(velocityMax) : std::abs(speed_);
     showCount_ = static_cast<int>(DISMIN + (showCountMax - DISMIN) * (std::abs(speed_) - VMIN) / (velocityMax - VMIN));
