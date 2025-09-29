@@ -789,13 +789,15 @@ class TextInputShowCounterModifier extends ModifierWithKey<ArkTextFieldShowCount
       getUINativeModule().textInput.resetShowCounter(node);
     }
     else {
-      getUINativeModule().textInput.setShowCounter(node, this.value.value!, this.value.highlightBorder, this.value.thresholdPercentage);
+      getUINativeModule().textInput.setShowCounter(node, this.value.value!, this.value.highlightBorder, this.value.thresholdPercentage, this.value.counterTextColor, this.value.counterTextOverflowColor);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
       !isBaseOrResourceEqual(this.stageValue.highlightBorder, this.value.highlightBorder) ||
-      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage);
+      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage) ||
+      !isBaseOrResourceEqual(this.stageValue.counterTextColor, this.value.counterTextColor) ||
+      !isBaseOrResourceEqual(this.stageValue.counterTextOverflowColor, this.value.counterTextOverflowColor);
   }
 }
 
@@ -1540,6 +1542,8 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     arkValue.value = value;
     arkValue.highlightBorder = options?.highlightBorder;
     arkValue.thresholdPercentage = options?.thresholdPercentage;
+    arkValue.counterTextcolor = options?.counterTextcolor;
+    arkValue.counterTextOverflow = options?.counterTextOverflow;
     modifierWithKey(this._modifiersWithKeys, TextInputShowCounterModifier.identity,
       TextInputShowCounterModifier, arkValue);
     return this;

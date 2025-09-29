@@ -307,6 +307,13 @@ typedef struct ArkUI_PositionEdges ArkUI_PositionEdges;
 typedef struct ArkUI_PixelRoundPolicy ArkUI_PixelRoundPolicy;
 
 /**
+ * @brief Defines the textField's counter configuration.
+ *
+ * @since 22
+ */
+typedef struct ArkUI_ShowCounterConfig ArkUI_ShowCounterConfig;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -5716,6 +5723,63 @@ void OH_ArkUI_PixelRoundPolicy_SetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_Pixe
  * @since 21
  */
 int32_t OH_ArkUI_PixelRoundPolicy_GetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value);
+
+/**
+ * @brief Creates a configuration object for textField's counter.
+ *
+ * @return A pointer to the configuration object.
+ * @since 22
+ */
+ArkUI_ShowCounterConfig* OH_ArkUI_ShowCounterConfig_Create();
+
+/**
+ * @brief Disposes a configuration object for textField's counter.
+ *
+ * @param config Pointer to the configuration object to be disposed.
+ * @since 22
+ */
+void OH_ArkUI_ShowCounterConfig_Dispose(ArkUI_ShowCounterConfig* config);
+
+/**
+ * @brief Sets the color of counter when textField hasn't wanted to exceed the maximum character count.
+ *
+ * @param config Pointer to the configuration object to be modified.
+ * @param color The color of the counter when textField hasn't wanted to exceed
+ * the maximum character count, in 0xARGB format.
+ * @since 22
+ */
+void OH_ArkUI_ShowCounterConfig_SetCounterTextColor(ArkUI_ShowCounterConfig* config, uint32_t color);
+
+/**
+ * @brief Sets the color of counter when textField wants to exceed the maximum character count.
+ *
+ * @param config Pointer to the configuration object to be modified.
+ * @param color The color of the counter when textField wants to exceed
+ * the maximum character count, in 0xARGB format.
+ * @since 22
+ */
+void OH_ArkUI_ShowCounterConfig_SetCounterTextOverflowColor(ArkUI_ShowCounterConfig* config, uint32_t color);
+
+/**
+ * @brief Gets the color of counter when textField hasn't wanted to exceed the maximum character count.
+ *
+ * @param config Pointer to the configuration object.
+ * @return Returns the color of the counter when textField hasn't wanted to exceed
+ * the maximum character count, in 0xARGB format.
+ * @since 22
+ */
+uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextColor(ArkUI_ShowCounterConfig* config);
+
+/**
+ * @brief Gets the color of counter when textField wants to exceed the maximum character count.
+ *
+ * @param config Pointer to the configuration object.
+ * @return Returns the color of the counter when textField wants to exceed
+ * the maximum character count, in 0xARGB format.
+ * @since 22
+ */
+uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(ArkUI_ShowCounterConfig* config);
+
 #ifdef __cplusplus
 };
 #endif

@@ -7690,30 +7690,83 @@ int32_t SetTextAreaShowCounter(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    ArkUI_Bool open = false;
-    ArkUI_Int32 thresholdPercentage = -1;
-    ArkUI_Bool highlightBorder = true;
+    ArkUIShowCountOptions showCountOptions;
+    showCountOptions.open = false;
+    showCountOptions.thresholdPercentage = -1;
+    showCountOptions.highlightBorder = true;
+    showCountOptions.counterTextColor = -1;
+    showCountOptions.counterTextOverflowColor = -1;
     if (item->size > NUM_0) {
         if (!InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        open = item->value[NUM_0].i32;
+        showCountOptions.open = item->value[NUM_0].i32;
     }
     if (item->size > NUM_1) {
         if (!InRegion(NUM_1, NUM_100, static_cast<ArkUI_Int32>(item->value[NUM_1].f32))) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        thresholdPercentage = static_cast<ArkUI_Int32>(item->value[NUM_1].f32);
+        showCountOptions.thresholdPercentage = static_cast<ArkUI_Int32>(item->value[NUM_1].f32);
     }
     if (item->size > NUM_2) {
         if (!InRegion(NUM_0, NUM_1, item->value[NUM_2].i32)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        highlightBorder = item->value[NUM_2].i32;
+        showCountOptions.highlightBorder = item->value[NUM_2].i32;
     }
-
+    auto* config = reinterpret_cast<ArkUI_ShowCounterConfig*>(item->object);
+    if (config && config->counterTextColor.isSet) {
+        showCountOptions.counterTextColor = config->counterTextColor.value;
+    }
+    if (config && config->counterTextOverflowColor.isSet) {
+        showCountOptions.counterTextOverflowColor = config->counterTextOverflowColor.value;
+    }
+    ArkUIShowCountOptions* options = &showCountOptions;
     fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaShowCounterOptions(
-        node->uiNodeHandle, open, thresholdPercentage, highlightBorder);
+        node->uiNodeHandle, options, nullptr, nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetTextInputShowCounter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    ArkUIShowCountOptions showCountOptions;
+    showCountOptions.open = false;
+    showCountOptions.thresholdPercentage = -1;
+    showCountOptions.highlightBorder = true;
+    showCountOptions.counterTextColor = -1;
+    showCountOptions.counterTextOverflowColor = -1;
+    if (item->size > NUM_0) {
+        if (!InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        showCountOptions.open = item->value[NUM_0].i32;
+    }
+    if (item->size > NUM_1) {
+        if (!InRegion(NUM_1, NUM_100, static_cast<ArkUI_Int32>(item->value[NUM_1].f32))) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        showCountOptions.thresholdPercentage = static_cast<ArkUI_Int32>(item->value[NUM_1].f32);
+    }
+    if (item->size > NUM_2) {
+        if (!InRegion(NUM_0, NUM_1, item->value[NUM_2].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        showCountOptions.highlightBorder = item->value[NUM_2].i32;
+    }
+    auto* config = reinterpret_cast<ArkUI_ShowCounterConfig*>(item->object);
+    if (config && config->counterTextColor.isSet) {
+        showCountOptions.counterTextColor = config->counterTextColor.value;
+    }
+    if (config && config->counterTextOverflowColor.isSet) {
+        showCountOptions.counterTextOverflowColor = config->counterTextOverflowColor.value;
+    }
+    ArkUIShowCountOptions* options = &showCountOptions;
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputShowCounter(
+        node->uiNodeHandle, options, nullptr, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -7721,6 +7774,12 @@ void ResetTextAreaShowCounter(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaShowCounterOptions(node->uiNodeHandle);
+}
+
+void ResetTextInputShowCounter(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputShowCounter(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetTextAreaShowCounter(ArkUI_NodeHandle node)
@@ -7734,6 +7793,40 @@ const ArkUI_AttributeItem* GetTextAreaShowCounter(ArkUI_NodeHandle node)
     g_numberValues[NUM_1].f32 = options.thresholdPercentage;
     // highlightBorder
     g_numberValues[NUM_2].i32 = options.highlightBorder;
+    ArkUI_ShowCounterConfig* config = new ArkUI_ShowCounterConfig;
+    if (options.counterTextColor != -1) {
+        config->counterTextColor.value = options.counterTextColor;
+        config->counterTextColor.isSet = 1;
+    }
+    if (options.counterTextOverflowColor != -1) {
+        config->counterTextOverflowColor.value = options.counterTextOverflowColor;
+        config->counterTextOverflowColor.isSet = 1;
+    }
+    g_attributeItem.object = config;
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetTextInputShowCounter(ArkUI_NodeHandle node)
+{
+    ArkUIShowCountOptions options;
+    auto modifier = GetFullImpl()->getNodeModifiers()->getTextInputModifier();
+    modifier->getTextInputShowCounterOptions(node->uiNodeHandle, &options);
+    // open
+    g_numberValues[NUM_0].i32 = options.open;
+    // thresholdPercentage
+    g_numberValues[NUM_1].f32 = options.thresholdPercentage;
+    // highlightBorder
+    g_numberValues[NUM_2].i32 = options.highlightBorder;
+    ArkUI_ShowCounterConfig* config = new ArkUI_ShowCounterConfig;
+    if (options.counterTextColor != -1) {
+        config->counterTextColor.value = options.counterTextColor;
+        config->counterTextColor.isSet = 1;
+    }
+    if (options.counterTextOverflowColor != -1) {
+        config->counterTextOverflowColor.value = options.counterTextOverflowColor;
+        config->counterTextOverflowColor.isSet = 1;
+    }
+    g_attributeItem.object = config;
     return &g_attributeItem;
 }
 
@@ -17574,7 +17667,7 @@ int32_t SetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
         SetTextInputSelectionMenuHidden, SetBlurOnSubmit, SetInputCustomKeyboard, SetTextInputWordBreak,
         SetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, SetLetterSpacing, SetEnablePreviewText,
         SetTextInputHalfLeading, SetTextInputKeyboardAppearance, SetTextInputEnableAutoFillAnimation,
-        SetTextInputLineHeight };
+        SetTextInputLineHeight, SetTextInputShowCounter };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -17592,7 +17685,8 @@ const ArkUI_AttributeItem* GetTextInputAttribute(ArkUI_NodeHandle node, int32_t 
         GetTextInputStyle, GetTextInputCaretOffset, GetTextInputContentRect, GetTextInputContentLineCount,
         GetTextInputSelectionMenuHidden, GetBlurOnSubmit, GetInputCustomKeyboard, GetTextInputWordBreak,
         GetTextInputShowKeyBoardOnFocus, GetTextInputNumberOfLines, GetLetterSpacing, GetEnablePreviewText,
-        GetTextInputHalfLeading, GetTextInputKeyboardAppearance, GetTextInputEnableAutoFillAnimation, GetTextInputLineHeight };
+        GetTextInputHalfLeading, GetTextInputKeyboardAppearance, GetTextInputEnableAutoFillAnimation, GetTextInputLineHeight,
+        GetTextInputShowCounter };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -17611,7 +17705,7 @@ void ResetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextInputSelectionMenuHidden, ResetBlurOnSubmit, ResetInputCustomKeyboard, ResetTextInputWordBreak,
         ResetTextInputShowKeyBoardOnFocus, ResetTextInputNumberOfLines, ResetLetterSpacing, ResetEnablePreviewText,
         ResetTextInputHalfLeading, ResetTextInputKeyboardAppearance, ResetTextInputEnableAutoFillAnimation,
-        ResetTextInputLineHeight };
+        ResetTextInputLineHeight, ResetTextInputShowCounter };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

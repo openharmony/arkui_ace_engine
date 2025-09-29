@@ -586,26 +586,45 @@ ArkUINativeModuleValue TextAreaBridge::SetShowCounter(ArkUIRuntimeCallInfo *runt
     Local<JSValueRef> showCounterArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> highlightBorderArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> thresholdArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> counterTextColorArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> counterTextOverflowColorArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto showCounter = false;
+    ArkUIShowCountOptions showCountOptions;
+    showCountOptions.open = false;
     if (showCounterArg->IsBoolean()) {
-        showCounter = showCounterArg->BooleaValue(vm);
+        showCountOptions.open = showCounterArg->BooleaValue(vm);
     }
-    auto highlightBorder = true;
+    showCountOptions.highlightBorder = true;
     if (highlightBorderArg->IsBoolean()) {
-        highlightBorder = highlightBorderArg->BooleaValue(vm);
+        showCountOptions.highlightBorder = highlightBorderArg->BooleaValue(vm);
     }
-    auto thresholdValue = static_cast<int32_t>(DEFAULT_MODE);
+    showCountOptions.thresholdPercentage = static_cast<int32_t>(DEFAULT_MODE);
     if (thresholdArg->IsNumber()) {
-        thresholdValue = thresholdArg->Int32Value(vm);
-        if (thresholdValue < MINI_VALID_VALUE || thresholdValue > MAX_VALID_VALUE) {
-            thresholdValue = static_cast<int32_t>(ILLEGAL_VALUE);
-            showCounter = false;
+        showCountOptions.thresholdPercentage = thresholdArg->Int32Value(vm);
+        if (showCountOptions.thresholdPercentage < MINI_VALID_VALUE ||
+            showCountOptions.thresholdPercentage > MAX_VALID_VALUE) {
+            showCountOptions.thresholdPercentage = static_cast<int32_t>(ILLEGAL_VALUE);
+            showCountOptions.open = false;
         }
     }
-    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaShowCounterOptions(
-        nativeNode, showCounter, thresholdValue, highlightBorder);
+    Color counterTextColor;
+    Color counterTextOverflowColor;
+    RefPtr<ResourceObject> resourceObjectTextColor;
+    RefPtr<ResourceObject> resourceObjectTextOverflowColor;
+    auto textFieldTheme = ArkTSUtils::GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, panda::JSValueRef::Undefined(vm));
+    if (!ArkTSUtils::ParseColorMetricsToColor(vm, counterTextColorArg, counterTextColor, resourceObjectTextColor)) {
+        counterTextColor = textFieldTheme->GetCountTextStyle().GetTextColor();
+    }
+    if (!ArkTSUtils::ParseColorMetricsToColor(
+        vm, counterTextOverflowColorArg, counterTextOverflowColor, resourceObjectTextOverflowColor)) {
+        counterTextOverflowColor = textFieldTheme->GetOverCountTextStyle().GetTextColor();
+    }
+    showCountOptions.counterTextColor = counterTextColor.GetValue();
+    showCountOptions.counterTextOverflowColor = counterTextOverflowColor.GetValue();
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaShowCounterOptions(nativeNode, &showCountOptions,
+        AceType::RawPtr(resourceObjectTextColor), AceType::RawPtr(resourceObjectTextOverflowColor));
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -1695,6 +1695,8 @@ struct ArkUIShowCountOptions {
     ArkUI_Bool open;
     ArkUI_Int32 thresholdPercentage;
     ArkUI_Bool highlightBorder;
+    ArkUI_Uint32 counterTextColor;
+    ArkUI_Uint32 counterTextOverflowColor;
 };
 
 struct ArkUICustomNodeEvent {
@@ -4698,8 +4700,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaType)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextAreaType)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextAreaTextAlign)(ArkUINodeHandle node);
-    void (*setTextAreaShowCounterOptions)(
-        ArkUINodeHandle node, ArkUI_Int32 open, ArkUI_Int32 thresholdPercentage, ArkUI_Int32 highlightBorder);
+    void (*setTextAreaShowCounterOptions)(ArkUINodeHandle node, ArkUIShowCountOptions* showCountOptions,
+        void* resourceObject, void* resourceObjectTextOverflowColor);
     void (*resetTextAreaShowCounterOptions)(ArkUINodeHandle node);
     void (*getTextAreaShowCounterOptions)(ArkUINodeHandle node, ArkUIShowCountOptions* options);
     void (*setTextAreaDecoration)(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
@@ -4968,9 +4970,10 @@ struct ArkUITextInputModifier {
     void (*resetTextInputTextIndent)(ArkUINodeHandle node);
     void (*setTextInputSelectAll)(ArkUINodeHandle node, ArkUI_Uint32 enableSelectAll);
     void (*resetTextInputSelectAll)(ArkUINodeHandle node);
-    void (*setTextInputShowCounter)(
-        ArkUINodeHandle node, ArkUI_Uint32 open, ArkUI_Int32 thresholdPercentage, ArkUI_Uint32 highlightBorder);
+    void (*setTextInputShowCounter)(ArkUINodeHandle node, ArkUIShowCountOptions* showCountOptions, void* resourceObject,
+        void* resourceObjectTextOverflowColor);
     void (*resetTextInputShowCounter)(ArkUINodeHandle node);
+    void (*getTextInputShowCounterOptions)(ArkUINodeHandle node, ArkUIShowCountOptions* options);
     void (*setTextInputOnEditChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextInputOnEditChange)(ArkUINodeHandle node);
     void (*setTextInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback);

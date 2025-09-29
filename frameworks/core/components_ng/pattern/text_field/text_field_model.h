@@ -341,6 +341,10 @@ public:
     virtual void ResetMaxLength() = 0;
     virtual void SetForegroundColor(const Color& value) = 0;
     virtual void SetBackgroundColor(const Color& color, bool tmp) = 0;
+    virtual void SetCounterTextColor(const Color& value) {};
+    virtual void SetCounterTextOverflowColor(const Color& value) {};
+    virtual void ResetCounterTextColor() {};
+    virtual void ResetCounterTextOverflowColor() {};
     virtual void ResetBackgroundColor() = 0;
     virtual void SetHeight(const Dimension& value) = 0;
     virtual void SetPadding(

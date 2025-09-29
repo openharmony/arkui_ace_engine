@@ -1085,6 +1085,63 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg011, TestSize.Level1)
     TextFieldModelNG::SetShowCounter(frameNode, true);
     TextFieldModelNG::SetShowCounter(frameNode, false);
 }
+HWTEST_F(TextInputAreaTest, testSetCounterTextColor02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text field model and create a frame node.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(u"Default Text", u"");
+
+    /**
+     * @tc.steps: step2. Get the main frame node and layout property.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Set the counter text color and verify it.
+     */
+    TextFieldModelNG::SetCounterTextColor(frameNode, Color::RED);
+    EXPECT_EQ(layoutProperty->GetCounterTextColor(), Color::RED);
+    TextFieldModelNG::SetCounterTextOverflowColor(frameNode, Color::BLACK);
+    EXPECT_EQ(layoutProperty->GetCounterTextOverflowColor(), Color::BLACK);
+}
+HWTEST_F(TextInputAreaTest, testResetCounterTextColor02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text field model and create a frame node.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(u"Default Text", u"");
+
+    /**
+     * @tc.steps: step2. Get the main frame node and layout property.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Set the counter text color and verify it.
+     */
+    TextFieldModelNG::SetCounterTextColor(frameNode, Color::RED);
+    EXPECT_EQ(layoutProperty->GetCounterTextColor(), Color::RED);
+    TextFieldModelNG::SetCounterTextOverflowColor(frameNode, Color::BLACK);
+    EXPECT_EQ(layoutProperty->GetCounterTextOverflowColor(), Color::BLACK);
+    /**
+     * @tc.steps: step4. Reset the counter text color and verify it.
+     */
+    TextFieldModelNG::ResetCounterTextColor(frameNode);
+    TextFieldModelNG::ResetCounterTextOverflowColor(frameNode);
+    EXPECT_NE(layoutProperty->GetCounterTextColor(), Color::RED);
+    EXPECT_NE(layoutProperty->GetCounterTextOverflowColor(), Color::BLACK);
+}
 
 /**
  * @tc.name: testFieldModelNg012
