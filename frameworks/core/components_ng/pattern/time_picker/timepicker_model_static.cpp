@@ -76,7 +76,7 @@ void TimePickerModelStatic::SetSelectedTime(FrameNode* frameNode, const int64_t&
 void TimePickerModelStatic::SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -84,7 +84,7 @@ void TimePickerModelStatic::SetOnChange(FrameNode* frameNode, TimeChangeEvent&& 
 void TimePickerModelStatic::SetOnEnterSelectedArea(FrameNode* frameNode, TimeChangeEvent&& onEnterSelectedArea)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
 }
