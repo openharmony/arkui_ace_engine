@@ -76,7 +76,8 @@ public:
 
     void InheritAttr(const SvgBaseAttribute& parent)
     {
-        attributes_.Inherit(parent);
+        auto featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, GetUsrConfigVersion());
+        attributes_.Inherit(parent, !featureEnable);
     }
 
     void InheritUseAttr(const SvgBaseAttribute& parent)
