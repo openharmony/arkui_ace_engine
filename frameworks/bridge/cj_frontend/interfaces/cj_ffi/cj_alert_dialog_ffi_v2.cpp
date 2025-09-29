@@ -522,7 +522,7 @@ void FfiOHOSShowAlertDialogParamWithOptionsShadowStyle(NativeAlertDialogParamV2 
     ParseButtonArrayV2(properties, buttons, "buttons");
 
     // Parse buttons direction.
-    if (buttonDirection >= 0 && buttonDirection <= static_cast<int32_t>(DIALOG_BUTTONS_DIRECTION.size())) {
+    if (buttonDirection >= 0 && buttonDirection < static_cast<int32_t>(DIALOG_BUTTONS_DIRECTION.size())) {
         properties.buttonDirection = DIALOG_BUTTONS_DIRECTION[buttonDirection];
     }
 
@@ -555,7 +555,7 @@ void FfiOHOSShowAlertDialogParamWithOptionsShadowOptions(NativeAlertDialogParamV
     ParseButtonArrayV2(properties, buttons, "buttons");
 
     // Parse buttons direction.
-    if (buttonDirection >= 0 && buttonDirection <= static_cast<int32_t>(DIALOG_BUTTONS_DIRECTION.size())) {
+    if (buttonDirection >= 0 && buttonDirection < static_cast<int32_t>(DIALOG_BUTTONS_DIRECTION.size())) {
         properties.buttonDirection = DIALOG_BUTTONS_DIRECTION[buttonDirection];
     }
 
