@@ -22,6 +22,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -402,7 +403,31 @@ void ContainerPickerLayoutAlgorithm::LayoutItem(
 
     offset += OffsetF(0.0f, pos.second.startPos);
     CHECK_NULL_VOID(wrapper->GetGeometryNode());
+    TranslateAndRotate(wrapper->GetHostNode(), offset);
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
     wrapper->Layout();
 }
+
+void ContainerPickerLayoutAlgorithm::TranslateAndRotate(RefPtr<FrameNode> node, OffsetF& offset)
+{
+    float offsetY = offset.GetY() - middleItemStartPos_ - topPadding_;
+    float pi = 3.14159;
+    float radius = 130 * 10 / (2 * pi);
+    float yScale = (pi * radius) / PICKER_DEFAULT_HEIGHT;
+    float radian = (offsetY * yScale) / radius;
+    float angle = radian * (180 / pi);
+    float correctFactor = angle > 0 ? 1.0 : -1.0;
+    double translateY = correctFactor * radius * std::sin(std::abs(radian)) - offsetY * yScale;
+
+    if (GreatNotEqual(angle, 90.0)) {
+        angle = 90.0;
+    } else if (LessNotEqual(angle, -90.0)) {
+        angle = -90.0;
+    } else {
+        translateY = translateY / yScale;
+        offset.AddY(translateY);
+    }
+    NG::ViewAbstract::SetRotate(node.GetRawPtr(), NG::Vector5F(1.0f, 0.0f, 0.0f, -angle, 0.0f));
+}
+
 } // namespace OHOS::Ace::NG

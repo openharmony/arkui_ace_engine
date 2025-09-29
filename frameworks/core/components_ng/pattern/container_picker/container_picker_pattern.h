@@ -149,6 +149,7 @@ private:
     void FireEvent();
     void UpdateClipEdge();
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
+    void CreateChildrenClickEvent(RefPtr<UINode>& host);
 
     int32_t containerPickerId_ = -1;
     int32_t displayCount_ = 9;
