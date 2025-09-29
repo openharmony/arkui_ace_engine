@@ -108,7 +108,7 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
                     if (valueTmpValueTmpElementForIdx0 instanceof Color) {
                         thisSerializer.writeInt8((0).toChar())
                         const valueTmpValueTmpElementForIdx0ForIdx0  = valueTmpValueTmpElementForIdx0 as Color
-                        thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0ForIdx0.valueOf())
+                        thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0ForIdx0.getOrdinal())
                     } else if (valueTmpValueTmpElementForIdx0 instanceof number) {
                         thisSerializer.writeInt8((1).toChar())
                         const valueTmpValueTmpElementForIdx0ForIdx1  = valueTmpValueTmpElementForIdx0 as number
@@ -142,7 +142,7 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -526,7 +526,7 @@ export class DataPanelShadowOptions_serializer {
                     if (valueHolderForColorsTmpValueTmpElementForIdx0 instanceof Color) {
                         valueSerializer.writeInt8((0).toChar())
                         const valueHolderForColorsTmpValueTmpElementForIdx0ForIdx0  = valueHolderForColorsTmpValueTmpElementForIdx0 as Color
-                        valueSerializer.writeInt32(valueHolderForColorsTmpValueTmpElementForIdx0ForIdx0.valueOf())
+                        valueSerializer.writeInt32(valueHolderForColorsTmpValueTmpElementForIdx0ForIdx0.getOrdinal())
                     } else if (valueHolderForColorsTmpValueTmpElementForIdx0 instanceof number) {
                         valueSerializer.writeInt8((1).toChar())
                         const valueHolderForColorsTmpValueTmpElementForIdx0ForIdx1  = valueHolderForColorsTmpValueTmpElementForIdx0 as number
@@ -609,7 +609,7 @@ export class DataPanelShadowOptions_serializer {
                     const colorsTmpBuf_TempBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
                     let colorsTmpBuf_TempBufBufU : Color | number | string | Resource | undefined
                     if (colorsTmpBuf_TempBufBufUUnionSelector == (0).toChar()) {
-                        colorsTmpBuf_TempBufBufU = Color.fromValue(valueDeserializer.readInt32())
+                        colorsTmpBuf_TempBufBufU = Color.values()[valueDeserializer.readInt32()]
                     } else if (colorsTmpBuf_TempBufBufUUnionSelector == (1).toChar()) {
                         colorsTmpBuf_TempBufBufU = (valueDeserializer.readNumber() as number)
                     } else if (colorsTmpBuf_TempBufBufUUnionSelector == (2).toChar()) {
@@ -641,7 +641,7 @@ export class ColorStop_serializer {
         if (valueHolderForColor instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
             const valueHolderForColorForIdx0  = valueHolderForColor as Color
-            valueSerializer.writeInt32(valueHolderForColorForIdx0.valueOf())
+            valueSerializer.writeInt32(valueHolderForColorForIdx0.getOrdinal())
         } else if (valueHolderForColor instanceof number) {
             valueSerializer.writeInt8((1).toChar())
             const valueHolderForColorForIdx1  = valueHolderForColor as number
@@ -675,7 +675,7 @@ export class ColorStop_serializer {
         const colorTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
         let colorTmpBuf : Color | number | string | Resource | undefined
         if (colorTmpBufUnionSelector == (0).toChar()) {
-            colorTmpBuf = Color.fromValue(valueDeserializer.readInt32())
+            colorTmpBuf = Color.values()[valueDeserializer.readInt32()]
         } else if (colorTmpBufUnionSelector == (1).toChar()) {
             colorTmpBuf = (valueDeserializer.readNumber() as number)
         } else if (colorTmpBufUnionSelector == (2).toChar()) {

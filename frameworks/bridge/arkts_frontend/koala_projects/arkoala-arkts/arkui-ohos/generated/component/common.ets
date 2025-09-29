@@ -1649,7 +1649,7 @@ export class ProgressMask implements MaterializedBase {
         if (color instanceof Color) {
             thisSerializer.writeInt8((0).toChar())
             const colorForIdx0  = color as Color
-            thisSerializer.writeInt32(colorForIdx0.valueOf())
+            thisSerializer.writeInt32(colorForIdx0.getOrdinal())
         } else if (color instanceof number) {
             thisSerializer.writeInt8((1).toChar())
             const colorForIdx1  = color as number
@@ -1693,7 +1693,7 @@ export class ProgressMask implements MaterializedBase {
         if (value instanceof Color) {
             thisSerializer.writeInt8((0).toChar())
             const valueForIdx0  = value as Color
-            thisSerializer.writeInt32(valueForIdx0.valueOf())
+            thisSerializer.writeInt32(valueForIdx0.getOrdinal())
         } else if (value instanceof number) {
             thisSerializer.writeInt8((1).toChar())
             const valueForIdx1  = value as number
@@ -2671,7 +2671,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -2926,7 +2926,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 if (valueTmpValueForIdx0 instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
-                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.valueOf())
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
@@ -3078,7 +3078,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 if (valueTmpValueForIdx0 instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
-                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.valueOf())
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
@@ -3150,7 +3150,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 if (valueTmpValueForIdx0 instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
-                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.valueOf())
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
@@ -3531,7 +3531,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -5703,7 +5703,7 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -5731,7 +5731,7 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -5960,7 +5960,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -12265,7 +12265,7 @@ export class LinearGradientOptions_serializer {
             if (valueHolderForColorsTmpElement_0 instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorsTmpElement_0ForIdx0  = valueHolderForColorsTmpElement_0 as Color
-                valueSerializer.writeInt32(valueHolderForColorsTmpElement_0ForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorsTmpElement_0ForIdx0.getOrdinal())
             } else if (valueHolderForColorsTmpElement_0 instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorsTmpElement_0ForIdx1  = valueHolderForColorsTmpElement_0 as number
@@ -12320,7 +12320,7 @@ export class LinearGradientOptions_serializer {
             const colorsTmpBufTempBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
             let colorsTmpBufTempBufValue0TempBuf : Color | number | string | Resource | undefined
             if (colorsTmpBufTempBufValue0TempBufUnionSelector == (0).toChar()) {
-                colorsTmpBufTempBufValue0TempBuf = Color.fromValue(valueDeserializer.readInt32())
+                colorsTmpBufTempBufValue0TempBuf = Color.values()[valueDeserializer.readInt32()]
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (1).toChar()) {
                 colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readNumber() as number)
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (2).toChar()) {
@@ -13654,7 +13654,7 @@ export class BackgroundBlurStyleOptions_serializer {
             if (valueHolderForInactiveColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForInactiveColorTmpValueForIdx0  = valueHolderForInactiveColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForInactiveColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForInactiveColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForInactiveColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForInactiveColorTmpValueForIdx1  = valueHolderForInactiveColorTmpValue as number
@@ -13710,7 +13710,7 @@ export class BackgroundBlurStyleOptions_serializer {
             const inactiveColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let inactiveColorTmpBuf_ : Color | number | string | Resource | undefined
             if (inactiveColorTmpBuf_UnionSelector == (0).toChar()) {
-                inactiveColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                inactiveColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (inactiveColorTmpBuf_UnionSelector == (1).toChar()) {
                 inactiveColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (inactiveColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -13755,7 +13755,7 @@ export class BackgroundEffectOptions_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -13803,7 +13803,7 @@ export class BackgroundEffectOptions_serializer {
             if (valueHolderForInactiveColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForInactiveColorTmpValueForIdx0  = valueHolderForInactiveColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForInactiveColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForInactiveColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForInactiveColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForInactiveColorTmpValueForIdx1  = valueHolderForInactiveColorTmpValue as number
@@ -13842,7 +13842,7 @@ export class BackgroundEffectOptions_serializer {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let colorTmpBuf_ : Color | number | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
@@ -13879,7 +13879,7 @@ export class BackgroundEffectOptions_serializer {
             const inactiveColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let inactiveColorTmpBuf_ : Color | number | string | Resource | undefined
             if (inactiveColorTmpBuf_UnionSelector == (0).toChar()) {
-                inactiveColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                inactiveColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (inactiveColorTmpBuf_UnionSelector == (1).toChar()) {
                 inactiveColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (inactiveColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -13987,7 +13987,7 @@ export class ContentCoverOptions_serializer {
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
@@ -14069,7 +14069,7 @@ export class ContentCoverOptions_serializer {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -14581,7 +14581,7 @@ export class LightSource_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -14632,7 +14632,7 @@ export class LightSource_serializer {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let colorTmpBuf_ : Color | number | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
@@ -14905,7 +14905,7 @@ export class PopupMaskType_serializer {
         if (valueHolderForColor instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
             const valueHolderForColorForIdx0  = valueHolderForColor as Color
-            valueSerializer.writeInt32(valueHolderForColorForIdx0.valueOf())
+            valueSerializer.writeInt32(valueHolderForColorForIdx0.getOrdinal())
         } else if (valueHolderForColor instanceof number) {
             valueSerializer.writeInt8((1).toChar())
             const valueHolderForColorForIdx1  = valueHolderForColor as number
@@ -14925,7 +14925,7 @@ export class PopupMaskType_serializer {
         const colorTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
         let colorTmpBuf : Color | number | string | Resource | undefined
         if (colorTmpBufUnionSelector == (0).toChar()) {
-            colorTmpBuf = Color.fromValue(valueDeserializer.readInt32())
+            colorTmpBuf = Color.values()[valueDeserializer.readInt32()]
         } else if (colorTmpBufUnionSelector == (1).toChar()) {
             colorTmpBuf = (valueDeserializer.readNumber() as number)
         } else if (colorTmpBufUnionSelector == (2).toChar()) {
@@ -15008,7 +15008,7 @@ export class ShadowOptions_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as string
@@ -15090,7 +15090,7 @@ export class ShadowOptions_serializer {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let colorTmpBuf_ : Color | string | Resource | ColoringStrategy | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
@@ -15360,7 +15360,7 @@ export class TextDecorationOptions_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -15395,7 +15395,7 @@ export class TextDecorationOptions_serializer {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let colorTmpBuf_ : Color | number | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
@@ -15511,7 +15511,7 @@ export class DividerStyle_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -15594,7 +15594,7 @@ export class DividerStyle_serializer {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let colorTmpBuf_ : Color | number | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
@@ -15909,7 +15909,7 @@ export class RadialGradientOptions_serializer {
             if (valueHolderForColorsTmpElement_0 instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorsTmpElement_0ForIdx0  = valueHolderForColorsTmpElement_0 as Color
-                valueSerializer.writeInt32(valueHolderForColorsTmpElement_0ForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorsTmpElement_0ForIdx0.getOrdinal())
             } else if (valueHolderForColorsTmpElement_0 instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorsTmpElement_0ForIdx1  = valueHolderForColorsTmpElement_0 as number
@@ -15980,7 +15980,7 @@ export class RadialGradientOptions_serializer {
             const colorsTmpBufTempBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
             let colorsTmpBufTempBufValue0TempBuf : Color | number | string | Resource | undefined
             if (colorsTmpBufTempBufValue0TempBufUnionSelector == (0).toChar()) {
-                colorsTmpBufTempBufValue0TempBuf = Color.fromValue(valueDeserializer.readInt32())
+                colorsTmpBufTempBufValue0TempBuf = Color.values()[valueDeserializer.readInt32()]
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (1).toChar()) {
                 colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readNumber() as number)
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (2).toChar()) {
@@ -16251,7 +16251,7 @@ export class SweepGradientOptions_serializer {
             if (valueHolderForColorsTmpElement_0 instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorsTmpElement_0ForIdx0  = valueHolderForColorsTmpElement_0 as Color
-                valueSerializer.writeInt32(valueHolderForColorsTmpElement_0ForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorsTmpElement_0ForIdx0.getOrdinal())
             } else if (valueHolderForColorsTmpElement_0 instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorsTmpElement_0ForIdx1  = valueHolderForColorsTmpElement_0 as number
@@ -16355,7 +16355,7 @@ export class SweepGradientOptions_serializer {
             const colorsTmpBufTempBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
             let colorsTmpBufTempBufValue0TempBuf : Color | number | string | Resource | undefined
             if (colorsTmpBufTempBufValue0TempBufUnionSelector == (0).toChar()) {
-                colorsTmpBufTempBufValue0TempBuf = Color.fromValue(valueDeserializer.readInt32())
+                colorsTmpBufTempBufValue0TempBuf = Color.values()[valueDeserializer.readInt32()]
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (1).toChar()) {
                 colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readNumber() as number)
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (2).toChar()) {
@@ -16985,7 +16985,7 @@ export class ContextMenuOptions_serializer {
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
@@ -17052,7 +17052,7 @@ export class ContextMenuOptions_serializer {
                 if (valueHolderForOutlineColorTmpValueForIdx0 instanceof Color) {
                     valueSerializer.writeInt8((0).toChar())
                     const valueHolderForOutlineColorTmpValueForIdx0ForIdx0  = valueHolderForOutlineColorTmpValueForIdx0 as Color
-                    valueSerializer.writeInt32(valueHolderForOutlineColorTmpValueForIdx0ForIdx0.valueOf())
+                    valueSerializer.writeInt32(valueHolderForOutlineColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForOutlineColorTmpValueForIdx0 instanceof number) {
                     valueSerializer.writeInt8((1).toChar())
                     const valueHolderForOutlineColorTmpValueForIdx0ForIdx1  = valueHolderForOutlineColorTmpValueForIdx0 as number
@@ -17316,7 +17316,7 @@ export class ContextMenuOptions_serializer {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -17368,7 +17368,7 @@ export class ContextMenuOptions_serializer {
                 const outlineColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let outlineColorTmpBuf_BufU : Color | number | string | Resource | undefined
                 if (outlineColorTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    outlineColorTmpBuf_BufU = Color.fromValue(valueDeserializer.readInt32())
+                    outlineColorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (outlineColorTmpBuf_BufUUnionSelector == (1).toChar()) {
                     outlineColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
                 } else if (outlineColorTmpBuf_BufUUnionSelector == (2).toChar()) {
@@ -17443,7 +17443,7 @@ export class CustomPopupOptions_serializer {
             if (valueHolderForPopupColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForPopupColorTmpValueForIdx0  = valueHolderForPopupColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForPopupColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForPopupColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForPopupColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForPopupColorTmpValueForIdx1  = valueHolderForPopupColorTmpValue as string
@@ -17751,7 +17751,7 @@ export class CustomPopupOptions_serializer {
             const popupColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let popupColorTmpBuf_ : Color | string | Resource | number | undefined
             if (popupColorTmpBuf_UnionSelector == (0).toChar()) {
-                popupColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                popupColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (popupColorTmpBuf_UnionSelector == (1).toChar()) {
                 popupColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (popupColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -18267,7 +18267,7 @@ export class MenuOptions_serializer {
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
@@ -18334,7 +18334,7 @@ export class MenuOptions_serializer {
                 if (valueHolderForOutlineColorTmpValueForIdx0 instanceof Color) {
                     valueSerializer.writeInt8((0).toChar())
                     const valueHolderForOutlineColorTmpValueForIdx0ForIdx0  = valueHolderForOutlineColorTmpValueForIdx0 as Color
-                    valueSerializer.writeInt32(valueHolderForOutlineColorTmpValueForIdx0ForIdx0.valueOf())
+                    valueSerializer.writeInt32(valueHolderForOutlineColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForOutlineColorTmpValueForIdx0 instanceof number) {
                     valueSerializer.writeInt8((1).toChar())
                     const valueHolderForOutlineColorTmpValueForIdx0ForIdx1  = valueHolderForOutlineColorTmpValueForIdx0 as number
@@ -18622,7 +18622,7 @@ export class MenuOptions_serializer {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -18674,7 +18674,7 @@ export class MenuOptions_serializer {
                 const outlineColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let outlineColorTmpBuf_BufU : Color | number | string | Resource | undefined
                 if (outlineColorTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    outlineColorTmpBuf_BufU = Color.fromValue(valueDeserializer.readInt32())
+                    outlineColorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (outlineColorTmpBuf_BufUUnionSelector == (1).toChar()) {
                     outlineColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
                 } else if (outlineColorTmpBuf_BufUUnionSelector == (2).toChar()) {
@@ -18815,7 +18815,7 @@ export class PickerDialogButtonStyle_serializer {
             if (valueHolderForFontColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
@@ -18883,7 +18883,7 @@ export class PickerDialogButtonStyle_serializer {
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
@@ -18980,7 +18980,7 @@ export class PickerDialogButtonStyle_serializer {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let fontColorTmpBuf_ : Color | number | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
-                fontColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -19037,7 +19037,7 @@ export class PickerDialogButtonStyle_serializer {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -19096,7 +19096,7 @@ export class PickerTextStyle_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -19130,7 +19130,7 @@ export class PickerTextStyle_serializer {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let colorTmpBuf_ : Color | number | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
@@ -19171,7 +19171,7 @@ export class PopupCommonOptions_serializer {
             if (valueHolderForPopupColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForPopupColorTmpValueForIdx0  = valueHolderForPopupColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForPopupColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForPopupColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForPopupColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForPopupColorTmpValueForIdx1  = valueHolderForPopupColorTmpValue as number
@@ -19459,7 +19459,7 @@ export class PopupCommonOptions_serializer {
             const popupColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let popupColorTmpBuf_ : Color | number | string | Resource | undefined
             if (popupColorTmpBuf_UnionSelector == (0).toChar()) {
-                popupColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                popupColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (popupColorTmpBuf_UnionSelector == (1).toChar()) {
                 popupColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (popupColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -19723,7 +19723,7 @@ export class PopupMessageOptions_serializer {
             if (valueHolderForTextColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForTextColorTmpValueForIdx0  = valueHolderForTextColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForTextColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForTextColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForTextColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForTextColorTmpValueForIdx1  = valueHolderForTextColorTmpValue as number
@@ -19757,7 +19757,7 @@ export class PopupMessageOptions_serializer {
             const textColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let textColorTmpBuf_ : Color | number | string | Resource | undefined
             if (textColorTmpBuf_UnionSelector == (0).toChar()) {
-                textColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                textColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (textColorTmpBuf_UnionSelector == (1).toChar()) {
                 textColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (textColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -19790,7 +19790,7 @@ export class SheetOptions_serializer {
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
@@ -19882,7 +19882,7 @@ export class SheetOptions_serializer {
             if (valueHolderForMaskColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForMaskColorTmpValueForIdx0  = valueHolderForMaskColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForMaskColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForMaskColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForMaskColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForMaskColorTmpValueForIdx1  = valueHolderForMaskColorTmpValue as number
@@ -20126,7 +20126,7 @@ export class SheetOptions_serializer {
                 if (valueHolderForBorderColorTmpValueForIdx0 instanceof Color) {
                     valueSerializer.writeInt8((0).toChar())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
-                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.valueOf())
+                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
                     valueSerializer.writeInt8((1).toChar())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
@@ -20361,7 +20361,7 @@ export class SheetOptions_serializer {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -20480,7 +20480,7 @@ export class SheetOptions_serializer {
             const maskColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let maskColorTmpBuf_ : Color | number | string | Resource | undefined
             if (maskColorTmpBuf_UnionSelector == (0).toChar()) {
-                maskColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                maskColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (maskColorTmpBuf_UnionSelector == (1).toChar()) {
                 maskColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (maskColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -20739,7 +20739,7 @@ export class SheetOptions_serializer {
                 const borderColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let borderColorTmpBuf_BufU : Color | number | string | Resource | undefined
                 if (borderColorTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    borderColorTmpBuf_BufU = Color.fromValue(valueDeserializer.readInt32())
+                    borderColorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (borderColorTmpBuf_BufUUnionSelector == (1).toChar()) {
                     borderColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
                 } else if (borderColorTmpBuf_BufUUnionSelector == (2).toChar()) {
@@ -21162,7 +21162,7 @@ export class PopupOptions_serializer {
             if (valueHolderForPopupColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForPopupColorTmpValueForIdx0  = valueHolderForPopupColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForPopupColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForPopupColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForPopupColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForPopupColorTmpValueForIdx1  = valueHolderForPopupColorTmpValue as string
@@ -21466,7 +21466,7 @@ export class PopupOptions_serializer {
             const popupColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let popupColorTmpBuf_ : Color | string | Resource | number | undefined
             if (popupColorTmpBuf_UnionSelector == (0).toChar()) {
-                popupColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                popupColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (popupColorTmpBuf_UnionSelector == (1).toChar()) {
                 popupColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (popupColorTmpBuf_UnionSelector == (2).toChar()) {

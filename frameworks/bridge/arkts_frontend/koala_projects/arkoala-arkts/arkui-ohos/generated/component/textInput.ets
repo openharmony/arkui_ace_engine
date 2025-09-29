@@ -147,7 +147,7 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -235,7 +235,7 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -335,7 +335,7 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -547,7 +547,7 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -658,7 +658,7 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                 if (valueTmpValueForIdx0 instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
-                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.valueOf())
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
@@ -2539,7 +2539,7 @@ export class UnderlineColor_serializer {
             if (valueHolderForTypingTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForTypingTmpValueForIdx0  = valueHolderForTypingTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForTypingTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForTypingTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForTypingTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForTypingTmpValueForIdx1  = valueHolderForTypingTmpValue as number
@@ -2563,7 +2563,7 @@ export class UnderlineColor_serializer {
             if (valueHolderForNormalTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForNormalTmpValueForIdx0  = valueHolderForNormalTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForNormalTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForNormalTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForNormalTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForNormalTmpValueForIdx1  = valueHolderForNormalTmpValue as number
@@ -2587,7 +2587,7 @@ export class UnderlineColor_serializer {
             if (valueHolderForErrorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForErrorTmpValueForIdx0  = valueHolderForErrorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForErrorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForErrorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForErrorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForErrorTmpValueForIdx1  = valueHolderForErrorTmpValue as number
@@ -2611,7 +2611,7 @@ export class UnderlineColor_serializer {
             if (valueHolderForDisableTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForDisableTmpValueForIdx0  = valueHolderForDisableTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForDisableTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForDisableTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForDisableTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForDisableTmpValueForIdx1  = valueHolderForDisableTmpValue as number
@@ -2637,7 +2637,7 @@ export class UnderlineColor_serializer {
             const typingTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let typingTmpBuf_ : Color | number | string | Resource | undefined
             if (typingTmpBuf_UnionSelector == (0).toChar()) {
-                typingTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                typingTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (typingTmpBuf_UnionSelector == (1).toChar()) {
                 typingTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (typingTmpBuf_UnionSelector == (2).toChar()) {
@@ -2656,7 +2656,7 @@ export class UnderlineColor_serializer {
             const normalTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let normalTmpBuf_ : Color | number | string | Resource | undefined
             if (normalTmpBuf_UnionSelector == (0).toChar()) {
-                normalTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                normalTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (normalTmpBuf_UnionSelector == (1).toChar()) {
                 normalTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (normalTmpBuf_UnionSelector == (2).toChar()) {
@@ -2675,7 +2675,7 @@ export class UnderlineColor_serializer {
             const errorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let errorTmpBuf_ : Color | number | string | Resource | undefined
             if (errorTmpBuf_UnionSelector == (0).toChar()) {
-                errorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                errorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (errorTmpBuf_UnionSelector == (1).toChar()) {
                 errorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (errorTmpBuf_UnionSelector == (2).toChar()) {
@@ -2694,7 +2694,7 @@ export class UnderlineColor_serializer {
             const disableTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let disableTmpBuf_ : Color | number | string | Resource | undefined
             if (disableTmpBuf_UnionSelector == (0).toChar()) {
-                disableTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                disableTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (disableTmpBuf_UnionSelector == (1).toChar()) {
                 disableTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (disableTmpBuf_UnionSelector == (2).toChar()) {
