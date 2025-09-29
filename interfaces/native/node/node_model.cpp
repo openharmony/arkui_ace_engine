@@ -1016,8 +1016,19 @@ int32_t SetFrameDurations(void* object, uint32_t* durations, size_t size)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
         return ERROR_CODE_PARAM_INVALID;
     }
+    uint32_t (*getFunc)(void* object) = nullptr;
+    getFunc = reinterpret_cast<uint32_t (*)(void*)>(
+        FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_GetFrameCount"));
+    if (!getFunc) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_GetFrameCount");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto count = static_cast<size_t>(getFunc(object));
+    if (count != size || size == 0 || count == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     std::vector<int32_t> frameVec;
-    for (int i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         frameVec.emplace_back(durations[i]);
     }
     void (*setFunc)(void* object, std::vector<int32_t> durations) = nullptr;
@@ -1056,6 +1067,7 @@ int32_t SetAutoPlay(void* object, uint32_t autoPlay)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
         return ERROR_CODE_PARAM_INVALID;
     }
+    bool isAutoPlay = (autoPlay != 0);
     void (*setFunc)(void* object, bool autoPlay) = nullptr;
     setFunc = reinterpret_cast<void (*)(void*, bool)>(
         FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_SetAutoPlay"));
@@ -1063,7 +1075,7 @@ int32_t SetAutoPlay(void* object, uint32_t autoPlay)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_SetAutoPlay");
         return ERROR_CODE_PARAM_INVALID;
     }
-    setFunc(object, autoPlay);
+    setFunc(object, isAutoPlay);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1109,6 +1121,10 @@ int32_t CreateAnimationController(
     }
     (*controller)->drawableDescriptor = object;
     (*controller)->controller = getFunc(object, nodeId);
+    if (!(*controller)->controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get real animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     void (*increase)(void* object) = nullptr;
     increase = reinterpret_cast<void (*)(void*)>(FindFunction(module, "OHOS_ACE_IncreaseRefDrawableDescriptor"));
     if (!increase) {
@@ -1157,6 +1173,10 @@ int32_t StartAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
         return ERROR_CODE_PARAM_INVALID;
     }
+    if (!controller->controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get real animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     func(controller->controller);
     return ERROR_CODE_NO_ERROR;
 }
@@ -1175,6 +1195,10 @@ int32_t StopAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
     }
     if (!controller) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!controller->controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get real animated controller");
         return ERROR_CODE_PARAM_INVALID;
     }
     func(controller->controller);
@@ -1197,6 +1221,10 @@ int32_t ResumeAnimation(ArkUI_DrawableDescriptor_AnimationController* controller
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
         return ERROR_CODE_PARAM_INVALID;
     }
+    if (!controller->controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get real animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     func(controller->controller);
     return ERROR_CODE_NO_ERROR;
 }
@@ -1215,6 +1243,10 @@ int32_t PauseAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
     }
     if (!controller) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!controller->controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get real animated controller");
         return ERROR_CODE_PARAM_INVALID;
     }
     func(controller->controller);
@@ -1237,6 +1269,10 @@ int32_t GetAnimationStatus(
     }
     if (!controller) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!controller->controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get real animated controller");
         return ERROR_CODE_PARAM_INVALID;
     }
     *status = static_cast<DrawableDescriptor_AnimationStatus>(getFunc(controller->controller));
