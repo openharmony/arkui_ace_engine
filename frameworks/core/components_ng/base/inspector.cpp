@@ -408,10 +408,7 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
         }
         bool wantGetInspectorChildren = true;
         do {
-            if (!inspectorParameters.isLayoutInspector) {
-                break;
-            }
-            if (uiNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            if ((!inspectorParameters.isLayoutInspector) || (uiNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG)) {
                 break;
             }
             auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(uiNode);
