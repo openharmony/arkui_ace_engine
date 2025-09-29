@@ -1113,6 +1113,9 @@ HWTEST_F(ScrollLayoutTestNg, OnSurfaceChanged002, TestSize.Level1)
     frameNode->GetOrCreateFocusHub()->SetCurrentFocus(true);
     RefPtr<LayoutWrapperNode> layoutWrapper = frameNode->CreateLayoutWrapper(false, false);
     layoutWrapper->hostNode_ = hostNode;
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    safeAreaManager->UpdateKeyboardSafeArea(HEIGHT);
 
     /**
      * @tc.steps: step2. Set currentOffset_ to 4
@@ -1158,6 +1161,9 @@ HWTEST_F(ScrollLayoutTestNg, OnSurfaceChanged003, TestSize.Level1)
     frameNode->GetOrCreateFocusHub()->SetCurrentFocus(true);
     RefPtr<LayoutWrapperNode> layoutWrapper = frameNode->CreateLayoutWrapper(false, false);
     layoutWrapper->hostNode_ = hostNode;
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    safeAreaManager->UpdateKeyboardSafeArea(HEIGHT);
 
     /**
      * @tc.steps: step2. Set currentOffset_ to 4
