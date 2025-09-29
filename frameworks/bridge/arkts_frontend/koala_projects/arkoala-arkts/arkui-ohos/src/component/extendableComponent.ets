@@ -142,10 +142,18 @@ export abstract class ExtendableComponent implements LifeCycle {
         this.providedVars_.set(providedPropName, store as object as IProvideDecoratedVariable<object>);
     }
 
+    findProvidedVarV2<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
+        const result = this.providedVarsV2_.get(providedPropName);
+        if (result == undefined) {
+            return undefined;
+        }
+        return result as IProviderDecoratedVariable<T>;
+    }
+
     findProvideV2<T>(providedPropName: string): IProviderDecoratedVariable<T> | null {
         let parentCom = this.parent_;
         while (parentCom !== undefined) {
-            let provideVar = parentCom.providedVarsV2_.get(providedPropName);
+            let provideVar = parentCom.findProvidedVarV2(providedPropName);
             if (provideVar !== undefined) {
                 return provideVar as object as IProviderDecoratedVariable<T>;
             }

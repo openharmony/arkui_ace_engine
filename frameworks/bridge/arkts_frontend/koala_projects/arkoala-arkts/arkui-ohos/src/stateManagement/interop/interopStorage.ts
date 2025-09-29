@@ -22,6 +22,7 @@ import { ExtendableComponent } from '../../component/extendableComponent';
 import { WatchFuncType } from '../decorator';
 import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageLink';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
+import { uiUtils } from '../base/uiUtilsImpl';
 
 /**
  * Interop Storage with ArkTS1.1
@@ -49,18 +50,19 @@ export class InteropStorageBase extends StorageBase {
     private proxy?: ESValue;
 
     public getProxy(): ESValue | undefined {
-        if (this.proxy === undefined) {
-            this.BindDynamicStorage();
-        }
         return this.proxy;
     }
 
-    public setProxy(proxy: ESValue): void {
+    public setProxy(proxy?: ESValue): void {
+        if (proxy === undefined) {
+            proxy = ESValue.getGlobal().getProperty('createLocalStorage').invoke(ESValue.wrap(this));
+        }
         this.proxy = proxy;
+        this.BindDynamicStorage(proxy);
     }
 
     // get value from Storage in ArkTS1.1
-    protected getDynamicValue_: (value: string) => ESValue = (value: string) => {
+    protected getDynamicValue_: (value: string) => Object | undefined = (value: string) => {
         throw new Error('not implement');
     };
     protected removeDynamicValue_: (value: string) => boolean = (value: string) => {
@@ -89,7 +91,7 @@ export class InteropStorageBase extends StorageBase {
         super();
     }
 
-    public BindDynamicStorage(): void {
+    public BindDynamicStorage(dynamicLocalStorage: ESValue): void {
         // call ArkTS1.1 Storage to bind static Storage.
         const global = ESValue.getGlobal();
         const bindFunc = global.getProperty('bindStaticLocalStorage');
@@ -128,7 +130,7 @@ export class InteropStorageBase extends StorageBase {
             return this.getStaticKeys();
         };
         // used by ArkTS1.2 to interop with dynamic storage map.
-        const setGetValueFunc = (event: (value: string) => ESValue): void => {
+        const setGetValueFunc = (event: (value: string) => Object | undefined): void => {
             this.getDynamicValue_ = event;
         };
         const setRemoveValueFunc = (event: (value: string) => boolean): void => {
@@ -140,7 +142,8 @@ export class InteropStorageBase extends StorageBase {
         const setCheckClearValueFunc = (event: () => boolean): void => {
             this.checkClearDynamicValue_ = event;
         };
-        let proxyStorage = bindFunc.invoke(
+        bindFunc.invoke(
+            ESValue.wrap(dynamicLocalStorage),
             ESValue.wrap(getValue),
             ESValue.wrap(removeValue),
             ESValue.wrap(getSize),
@@ -154,7 +157,6 @@ export class InteropStorageBase extends StorageBase {
             ESValue.wrap(setClearValueFunc),
             ESValue.wrap(setCheckClearValueFunc)
         );
-        this.setProxy(proxyStorage);
     }
 
     // return ArkTS1.1 ObservedPropertyPU object.
@@ -173,7 +175,7 @@ export class InteropStorageBase extends StorageBase {
             const setSource = (value: Any): void => {
                 state.set(value);
             };
-            const proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource));
+            const proxy = createState.invoke(ESValue.wrap(state), ESValue.wrap(state!.get()), ESValue.wrap(setSource));
             state.setProxy(proxy);
             const setProxyValue = (value: Any): void => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
@@ -183,10 +185,36 @@ export class InteropStorageBase extends StorageBase {
         return state.getProxy()!.unwrap();
     }
 
-    // TODO: ArkTS1.1 -> ArkTS1.2
-    public getStoragePropertyFromDynamic<T>(value: string): StorageProperty<T> | undefined {
-        throw new Error('not implement!');
+
+    public getStoragePropertyFromDynamic<T>(key: string): StorageProperty<T> | undefined {
+        const result = this.getDynamicValue_(key);
+        if (result === undefined) {
+            console.log('undefined');
+            return undefined;
+        }
+        let dynamicState: ESValue = ESValue.wrap(result);
+        let originValue: T = dynamicState.invokeMethod('getUnmonitored').unwrap() as T;
+        let storageProperty = new StorageProperty<T>(key, uiUtils.makeObserved(originValue));
+
+        const setSource = ((value: T): void => {
+            storageProperty.set(value);
+        });
+        const fireChange = (): void => {
+            storageProperty.fireChange();
+        }
+        dynamicState.setProperty('_setInteropValueForStaticState', ESValue.wrap(setSource));
+        dynamicState.setProperty('_notifyInteropFireChange', ESValue.wrap(fireChange));
+        const setProxyValue = ((value: T): void => {
+            dynamicState.invokeMethod('set', ESValue.wrap(value));
+        });
+        storageProperty.setProxyValue = setProxyValue;
+        const notifyProxy = (): void => {
+            dynamicState.invokeMethod('syncPeerHasChanged');
+        };
+        storageProperty.addWatch(notifyProxy);
+        return storageProperty;
     }
+
 
     public has(key: string): boolean {
         if (super.has(key)) {
@@ -561,7 +589,7 @@ export class InteropAppStorageBase extends InteropStorageBase {
             return this.getStaticKeys();
         };
         // used by ArkTS1.2 to interop with dynamic storage map.
-        const setGetValueFunc = (event: (value: string) => ESValue): void => {
+        const setGetValueFunc = (event: (value: string) => Object | undefined): void => {
             this.getDynamicValue_ = event;
         };
         const setRemoveValueFunc = (event: (value: string) => boolean): void => {

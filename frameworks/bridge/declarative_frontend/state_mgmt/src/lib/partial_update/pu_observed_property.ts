@@ -103,7 +103,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     this.unsubscribeWrappedObject();
 
     // for interop
-    if (InteropConfigureStateMgmt.instance.needsInterop() && newValue && typeof newValue === 'object' && isStaticProxy(newValue)) {
+    if (InteropConfigureStateMgmt.needsInterop() && newValue && typeof newValue === 'object' && isStaticProxy(newValue)) {
       this.wrappedValue_ = InteropExtractorModule.getInteropObservedObject(newValue, this);
       stateMgmtProfiler.end();
       return true;
@@ -163,7 +163,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
         this.notifyPropertyHasChangedPU,
         this.notifyTrackedObjectPropertyHasChanged, this);
       // for interop
-      if (InteropConfigureStateMgmt.instance.needsInterop()) {
+      if (InteropConfigureStateMgmt.needsInterop()) {
         InteropExtractorModule.setStaticValueForInterop(this, newValue);
       }
     }

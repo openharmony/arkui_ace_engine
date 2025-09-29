@@ -106,6 +106,7 @@ state_mgmt_release_files_to_watch = [
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop_storage.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop_builder.ts",
+  "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop_view.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/v2_builder.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/index.ts",
 ]

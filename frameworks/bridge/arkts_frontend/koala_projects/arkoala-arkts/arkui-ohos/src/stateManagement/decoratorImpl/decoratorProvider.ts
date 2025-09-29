@@ -22,6 +22,7 @@ import { uiUtils } from '../base/uiUtilsImpl';
 export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implements IProviderDecoratedVariable<T> {
     private readonly provideAlias_: string;
     private readonly backing_: IBackingValue<T>;
+    public viewV2?: Object;
     constructor(owningView: ExtendableComponent, varName: string, provideAlias: string, initValue: T) {
         super('@Provider', owningView, varName);
         this.provideAlias_ = provideAlias;
@@ -39,7 +40,11 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implem
         if (value === newValue) {
             return;
         }
-        if (this.backing_.set(uiUtils.makeObserved(newValue, true) as T)) {
+        const makeObserved = uiUtils.makeObserved(newValue, true) as T;
+        if (this.backing_.set(makeObserved)) {
+            if (this.viewV2) {
+                ESValue.wrap(this.viewV2).setProperty(this.provideAlias_, ESValue.wrap(makeObserved));
+            }
         }
     }
 }
