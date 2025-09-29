@@ -590,7 +590,7 @@ export struct MultiNavigation {
     that = this;
     console.log('MultiNavigation aboutToAppear');
     try {
-      display.on('foldStatusChange', this.foldStatusCallback);
+      display.onFoldStatusChange(this.foldStatusCallback);
     } catch (exception) {
       console.error('Failed to register callback. Code: ' + JSON.stringify(exception));
     }
@@ -620,7 +620,7 @@ export struct MultiNavigation {
 
   aboutToDisappear(): void {
     try {
-      display.off('foldStatusChange');
+      display.offFoldStatusChange();
     } catch (exception) {
       console.error('Failed to unregister callback. Code: ' + JSON.stringify(exception));
     }
