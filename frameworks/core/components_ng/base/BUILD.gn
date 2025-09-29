@@ -73,7 +73,4 @@ build_component_ng("base_ng") {
   } else {
     sources += [ "navigation_register.cpp" ]
   }
-  if (ace_engine_feature_enable_static_instructive_code) {
-    source += [ "interop/view_stack_processor_interop.cpp" ]
-  }
 }

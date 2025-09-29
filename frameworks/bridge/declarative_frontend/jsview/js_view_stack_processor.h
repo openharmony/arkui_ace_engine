@@ -112,11 +112,9 @@ public:
      */
     static void JsSendStateInfo(const std::string& stateInfo);
 
-#ifdef ACE_STATIC
     static void JsPush(const JSCallbackInfo& info);
     
     static void JsPop();
-#endif
 
 private:
     static void JSVisualState(const JSCallbackInfo& info);
