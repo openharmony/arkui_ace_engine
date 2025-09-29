@@ -28925,14 +28925,14 @@ Ark_NativePointer impl_FrameNodeExtender_createTypedFrameNode(const KStringPtr& 
         return GetAccessors()->getFrameNodeExtenderAccessor()->createTypedFrameNode((const Ark_String*) (&type));
 }
 KOALA_INTEROP_1(FrameNodeExtender_createTypedFrameNode, Ark_NativePointer, KStringPtr)
-Ark_NativePointer impl_FrameNodeExtender_createByRawPtr(Ark_NativePointer peer, Ark_NativePointer pointer) {
-        return GetAccessors()->getFrameNodeExtenderAccessor()->createByRawPtr(static_cast<Ark_FrameNode>(peer), static_cast<Ark_FrameNode>(pointer));
+Ark_NativePointer impl_FrameNodeExtender_createByRawPtr(Ark_NativePointer ptr) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->createByRawPtr(ptr);
 }
-KOALA_INTEROP_DIRECT_2(FrameNodeExtender_createByRawPtr, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_FrameNodeExtender_unWrapRawPtr(Ark_NativePointer peer, Ark_NativePointer pointer) {
-        return GetAccessors()->getFrameNodeExtenderAccessor()->unWrapRawPtr(static_cast<Ark_FrameNode>(peer), pointer);
+KOALA_INTEROP_DIRECT_1(FrameNodeExtender_createByRawPtr, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_FrameNodeExtender_unWrapRawPtr(Ark_NativePointer ptr) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->unWrapRawPtr(ptr);
 }
-KOALA_INTEROP_DIRECT_2(FrameNodeExtender_unWrapRawPtr, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(FrameNodeExtender_unWrapRawPtr, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_FrameNodeExtender_getCommonEvent(Ark_NativePointer peer) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getCommonEvent(static_cast<Ark_FrameNode>(peer));
 }

@@ -4037,9 +4037,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _FrameNodeExtender_createTypedFrameNode(type: KStringPtr): KPointer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_createByRawPtr(peer: KPointer, pointer: KPointer): KPointer
+    native static _FrameNodeExtender_createByRawPtr(ptr: KPointer): KPointer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_unWrapRawPtr(peer: KPointer, pointer: KPointer): KPointer
+    native static _FrameNodeExtender_unWrapRawPtr(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getCommonEvent(peer: KPointer): KPointer
     @ani.unsafe.Direct
