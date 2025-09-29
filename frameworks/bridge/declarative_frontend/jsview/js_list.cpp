@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/js_list_children_main_size.h"
 #include "bridge/declarative_frontend/jsview/models/list_model_impl.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -75,37 +76,6 @@ static constexpr int ARGS_LENGTH = 2;
 }
 
 namespace {
-bool ParseChange(const JSRef<JSObject>& changeObject, const float defaultSize, int32_t& start,
-    int32_t& deleteCount, std::vector<float>& newChildrenSize)
-{
-    if (!JSViewAbstract::ParseJsInteger<int32_t>(changeObject->GetProperty("start"), start) || start < 0) {
-        return false;
-    }
-    if (!(changeObject->HasProperty("deleteCount"))) {
-        // If only input one parameter, set -1 to deleteCount for deleting elements after index 'start' in the array.
-        deleteCount = -1;
-    } else if (!JSViewAbstract::ParseJsInteger<int32_t>(changeObject->GetProperty("deleteCount"), deleteCount) ||
-        deleteCount < 0) {
-        deleteCount = 0;
-    }
-    auto childrenSizeValue = changeObject->GetProperty("childrenSize");
-    if (childrenSizeValue->IsArray()) {
-        auto childrenSize = JSRef<JSArray>::Cast(childrenSizeValue);
-        auto childrenSizeCount = childrenSize->Length();
-        for (size_t j = 0; j < childrenSizeCount; ++j) {
-            // -1.0: represent default size.
-            double childSize = -1.0;
-            if (!JSViewAbstract::ParseJsDouble(childrenSize->GetValueAt(j), childSize) || Negative(childSize)) {
-                // -1.0f: represent default size.
-                newChildrenSize.emplace_back(-1.0f);
-            } else {
-                newChildrenSize.emplace_back(Dimension(childSize, DimensionUnit::VP).ConvertToPx());
-            }
-        }
-    }
-    return true;
-}
-
 void SyncChildrenSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChildrenMainSize> childrenSize)
 {
     auto sizeArray = childrenSizeObj->GetProperty("sizeArray");
@@ -126,6 +96,59 @@ void SyncChildrenSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChi
         }
     }
     childrenSize->SyncChildrenSizeOver();
+}
+
+void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChildrenMainSize> listChildrenMainSize)
+{
+    auto nativeMainSize = JSClass<JSListChildrenMainSize>::NewInstance();
+    auto nativeMainSizeObj = JSRef<JSObject>::Cast(nativeMainSize);
+    JSListChildrenMainSize* jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    jsChildrenMainSize->SetHost(frameNode);
+
+    auto id = Container::CurrentId();
+    auto onStateCallback = [id, weak = AceType::WeakClaim(AceType::RawPtr(listChildrenMainSize)),
+                               nativeMainSize = AceType::WeakClaim(jsChildrenMainSize)](
+                               size_t start, size_t deleteCount, std::vector<float>&& newChildrenSize) {
+        ContainerScope scope(id);
+        auto jsChildrenMainSize = nativeMainSize.Upgrade();
+        CHECK_NULL_VOID(jsChildrenMainSize);
+        auto frameNode =  jsChildrenMainSize->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto context = frameNode->GetContext();
+        context->AddBuildFinishCallBack([start, deleteCount, change = std::move(newChildrenSize), weak]() {
+            auto listChildrenMainSize = weak.Upgrade();
+            CHECK_NULL_VOID(listChildrenMainSize);
+            listChildrenMainSize->ChangeData(start, deleteCount, change);
+        });
+        context->RequestFrame();
+    };
+    jsChildrenMainSize->SetOnStateChangedCallback(onStateCallback);
+
+    auto updateSizeCallback = [id, weak = AceType::WeakClaim(AceType::RawPtr(listChildrenMainSize)),
+                                  nativeMainSize = AceType::WeakClaim(jsChildrenMainSize)](double defaultSize) {
+        ContainerScope scope(id);
+        auto jsChildrenMainSize = nativeMainSize.Upgrade();
+        CHECK_NULL_VOID(jsChildrenMainSize);
+        auto frameNode =  jsChildrenMainSize->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto context = frameNode->GetContext();
+        context->AddBuildFinishCallBack([defaultSize, weak]() {
+            auto listChildrenMainSize = weak.Upgrade();
+            CHECK_NULL_VOID(listChildrenMainSize);
+            listChildrenMainSize->UpdateDefaultSize(Dimension(defaultSize, DimensionUnit::VP).ConvertToPx());
+        });
+        context->RequestFrame();
+    };
+    jsChildrenMainSize->SetOnDefaultSizeUpdate(updateSizeCallback);
+
+    auto property = childrenSizeObj->GetProperty("setNativeMainSize");
+    if (property->IsFunction()) {
+        auto setnativeMainSizeFunc = JSRef<JSFunc>::Cast(property);
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>::Cast(nativeMainSize);
+        setnativeMainSizeFunc->Call(childrenSizeObj, 1, params);
+    }
 }
 } // namespace
 
@@ -281,39 +304,18 @@ void JSList::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj)
     }
     auto listChildrenMainSize = ListModel::GetInstance()->GetOrCreateListChildrenMainSize();
     CHECK_NULL_VOID(listChildrenMainSize);
-    listChildrenMainSize->UpdateDefaultSize(Dimension(defaultSize, DimensionUnit::VP).ConvertToPx());
 
-    if (listChildrenMainSize->NeedSync()) {
+    auto property = childrenSizeObj->GetProperty("getNativeMainSize");
+    auto getNativeMainSizeFunc = JSRef<JSFunc>::Cast(property);
+    auto nativeMainSize = getNativeMainSizeFunc->Call(childrenSizeObj);
+    auto nativeMainSizeObj = JSRef<JSObject>::Cast(nativeMainSize);
+    JSListChildrenMainSize* jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (nativeMainSize->IsEmpty() || !nativeMainSize->IsObject() || !jsChildrenMainSize->IsHostEqual(frameNode)) {
+        InitNativeMainSize(childrenSizeObj, listChildrenMainSize);
+        listChildrenMainSize->UpdateDefaultSize(Dimension(defaultSize, DimensionUnit::VP).ConvertToPx());
         SyncChildrenSize(childrenSizeObj, listChildrenMainSize);
-    } else {
-        auto changes = childrenSizeObj->GetProperty("changeArray");
-        if (!changes->IsArray()) {
-            return;
-        }
-        auto changeArray = JSRef<JSArray>::Cast(changes);
-        auto length = changeArray->Length();
-        for (size_t i = 0; i < length; ++i) {
-            auto change = changeArray->GetValueAt(i);
-            if (!change->IsObject()) {
-                continue;
-            }
-            auto changeObject = JSRef<JSObject>::Cast(change);
-            int32_t start = 0;
-            int32_t deleteCount = 0;
-            std::vector<float> newChildrenSize;
-            if (!ParseChange(changeObject, defaultSize, start, deleteCount, newChildrenSize)) {
-                SyncChildrenSize(childrenSizeObj, listChildrenMainSize);
-                break;
-            }
-            listChildrenMainSize->ChangeData(start, deleteCount, newChildrenSize);
-        }
     }
-    auto clearFunc = childrenSizeObj->GetProperty("clearChanges");
-    if (!clearFunc->IsFunction()) {
-        return;
-    }
-    auto func = JSRef<JSFunc>::Cast(clearFunc);
-    JSRef<JSVal>::Cast(func->Call(childrenSizeObj));
 }
 
 void JSList::SetChainAnimation(const JSCallbackInfo& args)
