@@ -570,7 +570,6 @@ export class PersistenceV2Impl {
         }
         const areaMode = (keyType === MapType.GLOBAL_MAP) ? this.globalMapAreaMode_.get(key!) : undefined;
         // Write to backend
-        StateMgmtConsole.log("### propertyWriter  set to backend " + jsonString);
         this.storageBackend_!.set(key!, jsonString, areaMode);
         PersistenceV2Impl.backendUpdateCountForTesting++;
     }
@@ -842,7 +841,6 @@ export class PersistenceV2Impl {
     }
 
     private removeFromPersistenceV2(key: string, areaMode?: AreaMode): void {
-        StateMgmtConsole.log("### removeFromPersistenceV2 start");
         try {
             // check for global path
             if (areaMode !== undefined) {
@@ -863,7 +861,7 @@ export class PersistenceV2Impl {
                 }
             }
         } catch (err) {
-            StateMgmtConsole.log("### removeFromPersistenceV2 fails to remove " + err);
+            StateMgmtConsole.log("removeFromPersistenceV2 fails to remove " + err);
             this.errorHelper(key, PersistError.Unknown, `fail to remove the key '${key}'`);
         }
     }

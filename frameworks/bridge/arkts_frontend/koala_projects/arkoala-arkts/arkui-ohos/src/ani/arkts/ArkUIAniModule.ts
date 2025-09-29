@@ -255,11 +255,11 @@ export class ArkUIAniModule {
     native static _RichEditor_Transfer_PixelMap(pixelmap: image.PixelMap): KPointer;
 
     // for  stateMgmt
-    native static _PersistentStorage_Get(key: string, areaMode?: KInt): string
-    native static _PersistentStorage_Set(key: string, value: string, areaMode?: KInt): void
-    native static _PersistentStorage_Has(key: string, areaMode?: KInt): boolean
+    native static _PersistentStorage_Get(key: string, areaMode: KInt): string
+    native static _PersistentStorage_Set(key: string, value: string, areaMode: KInt): void
+    native static _PersistentStorage_Has(key: string, areaMode: KInt): boolean
     native static _PersistentStorage_Clear(): void
-    native static _PersistentStorage_Delete(key: string, areaMode?: KInt): void
+    native static _PersistentStorage_Delete(key: string, areaMode: KInt): void
     native static _Env_GetColorMode(): KInt
     native static _Env_GetFontScale(): KFloat
     native static _Env_GetFontWeightScale(): KFloat
