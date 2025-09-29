@@ -79,6 +79,7 @@ const int ALLOW_SIZE_12(12);
 constexpr int DEFAULT_SIZE_18 = 18;
 constexpr int DEFAULT_SIZE_24 = 24;
 constexpr int DEFAULT_SIZE_50 = 50;
+constexpr int DEFAULT_LINE_HEIGHT = 28;
 constexpr int COLOR_STRATEGY_STYLE = 1;
 constexpr int COLOR_STYLE = 2;
 constexpr int DISPLAY_ARROW_FALSE = 0;
@@ -12359,6 +12360,104 @@ void ResetTextMinLines(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTextModifier()->resetTextMinLines(node->uiNodeHandle);
 }
 
+int32_t SetLineHeightMultiple(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->value[0].f32 < 0) {
+        fullImpl->getNodeModifiers()->getTextModifier()->resetTextLineHeightMultiply(node->uiNodeHandle);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    int32_t px = GetDefaultUnit(node, UNIT_PX);
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextLineHeight(
+            node->uiNodeHandle, DEFAULT_LINE_HEIGHT, px, nullptr);
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextLineHeightMultiply(
+        node->uiNodeHandle, item->value[0].f32, nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetMaxLineHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    int32_t unit = GetDefaultUnit(node, UNIT_FP);
+    if (item->value[0].f32 < 0) {
+        fullImpl->getNodeModifiers()->getTextModifier()->setTextMaximumLineHeight(
+            node->uiNodeHandle, 0, unit, nullptr);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextMaximumLineHeight(
+        node->uiNodeHandle, item->value[0].f32, unit, nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetMinLineHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    int32_t unit = GetDefaultUnit(node, UNIT_FP);
+    if (item->value[0].f32 < 0) {
+        fullImpl->getNodeModifiers()->getTextModifier()->setTextMinimumLineHeight(
+            node->uiNodeHandle, 0, unit, nullptr);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextMinimumLineHeight(
+        node->uiNodeHandle, item->value[0].f32, unit, nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetLineHeightMultiple(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getTextModifier()->getTextLineHeightMultiply(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetMaxLineHeight(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getTextModifier()->getTextMaximumLineHeight(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetMinLineHeight(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getTextModifier()->getTextMinimumLineHeight(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetLineHeightMultiple(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextLineHeightMultiply(node->uiNodeHandle);
+}
+
+void ResetMinLineHeight(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextMinimumLineHeight(node->uiNodeHandle);
+}
+
+void ResetMaxLineHeight(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextMaximumLineHeight(node->uiNodeHandle);
+}
+
 const ArkUI_AttributeItem* GetTextEllipsisMode(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
@@ -17444,7 +17543,8 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetTextHeightAdaptivePolicy, SetTextIndent, SetTextWordBreak, SetTextEllipsisMode, SetLineSpacing,
         SetFontFeature, SetTextEnableDateDetector, SetTextDataDetectorConfig, SetTextSelectedBackgroundColor,
         SetTextContentWithStyledString, SetHalfLeading, SetImmutableFontWeight, SetLineCount, SetOptimizeTrailingSpace,
-        SetTextLinearGradient, SetTextRadialGradient, SetTextVerticalAlign, SetTextContentAlign, SetTextMinLines};
+        SetTextLinearGradient, SetTextRadialGradient, SetTextVerticalAlign, SetTextContentAlign, SetTextMinLines,
+        nullptr, nullptr, SetMinLineHeight, SetMaxLineHeight, SetLineHeightMultiple };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -17460,7 +17560,8 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         GetTextHeightAdaptivePolicy, GetTextIndent, GetTextWordBreak, GetTextEllipsisMode, GetLineSpacing,
         GetFontFeature, GetTextEnableDateDetector, GetTextDataDetectorConfig, GetTextSelectedBackgroundColor, nullptr,
         GetHalfLeading, GetFontWeight, GetLineCount, GetOptimizeTrailingSpace, GetTextLinearGradient,
-        GetTextRadialGradient, GetTextVerticalAlign, GetTextContentAlign, GetTextMinLines};
+        GetTextRadialGradient, GetTextVerticalAlign, GetTextContentAlign, GetTextMinLines, nullptr, nullptr,
+        GetMinLineHeight, GetMaxLineHeight, GetLineHeightMultiple };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*) || !getters[subTypeId]) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -17478,7 +17579,8 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextWordBreak, ResetTextEllipsisMode, ResetLineSpacing, ResetFontFeature, ResetTextEnableDateDetector,
         ResetTextDataDetectorConfig, ResetTextSelectedBackgroundColor, ResetTextContentWithStyledString,
         ResetHalfLeading, ResetFontWeight, ResetLineCount, ResetOptimizeTrailingSpace, ResetTextLinearGradient,
-        ResetTextRadialGradient, ResetTextVerticalAlign, ResetTextContentAlign, ResetTextMinLines};
+        ResetTextRadialGradient, ResetTextVerticalAlign, ResetTextContentAlign, ResetTextMinLines, nullptr, nullptr,
+        ResetMinLineHeight, ResetMaxLineHeight, ResetLineHeightMultiple };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

@@ -13827,6 +13827,54 @@ class TextLineHeightModifier extends ModifierWithKey {
   }
 }
 TextLineHeightModifier.identity = Symbol('textLineHeight');
+class TextMaxLineHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetMaxLineHeight(node);
+    } else {
+      getUINativeModule().text.setMaxLineHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextMaxLineHeightModifier.identity = Symbol('textMaxLineHeight');
+class TextMinLineHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetMinLineHeight(node);
+    } else {
+      getUINativeModule().text.setMinLineHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextMinLineHeightModifier.identity = Symbol('textMinLineHeight');
+class TextLineHeightMultipleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetLineHeightMultiple(node);
+    } else {
+      getUINativeModule().text.setLineHeightMultiple(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextLineHeightMultipleModifier.identity = Symbol('textLineHeightMultiple');
 class TextCopyOptionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14592,6 +14640,18 @@ class ArkTextComponent extends ArkComponent {
   }
   lineHeight(value) {
     modifierWithKey(this._modifiersWithKeys, TextLineHeightModifier.identity, TextLineHeightModifier, value);
+    return this;
+  }
+  maxLineHeight(value) {
+    modifierWithKey(this._modifiersWithKeys, TextMaxLineHeightModifier.identity, TextMaxLineHeightModifier, value);
+    return this;
+  }
+  minLineHeight(value) {
+    modifierWithKey(this._modifiersWithKeys, TextMinLineHeightModifier.identity, TextMinLineHeightModifier, value);
+    return this;
+  }
+  lineHeightMultiple(value) {
+    modifierWithKey(this._modifiersWithKeys, TextLineHeightMultipleModifier.identity, TextLineHeightMultipleModifier, value);
     return this;
   }
   textOverflow(value) {

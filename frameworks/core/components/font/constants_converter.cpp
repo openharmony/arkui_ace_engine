@@ -43,6 +43,9 @@ struct LineSpaceAndHeightInfo {
     double lineSpacingScale = 0.0;
     bool lineHeightOnly = false;
     bool lineSpacingOnly = false;
+    double minimumLineHeight = 0.0;
+    double maximumLineHeight = std::numeric_limits<float>::max();
+    double lineHeightMultiply = 0.0;
 };
 } // namespace
 
@@ -469,6 +472,38 @@ void ConvertSpacingAndHeigh(
     }
 }
 
+void CheckMinMaxLineHeight(const TextStyle& textStyle, Rosen::TextStyle& txtStyle, LineSpaceAndHeightInfo& info)
+{
+    if (textStyle.GetMinimumLineHeight().has_value()) {
+        double minimumLineHeight = textStyle.GetMinimumLineHeight()->ConvertToPxDistribute(textStyle.GetMinFontScale(),
+            textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        if (GreatNotEqual(minimumLineHeight, 0.0)) {
+            info.minimumLineHeight = minimumLineHeight;
+        }
+        txtStyle.minLineHeight = info.minimumLineHeight;
+    }
+    if (textStyle.GetMaximumLineHeight().has_value()) {
+        double maximumLineHeight = textStyle.GetMaximumLineHeight()->ConvertToPxDistribute(textStyle.GetMinFontScale(),
+        textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        if (GreatNotEqual(maximumLineHeight, 0.0)) {
+            if (GreatNotEqual(info.minimumLineHeight, 0.0)) {
+                info.maximumLineHeight = std::max(maximumLineHeight, info.minimumLineHeight);
+            } else {
+                info.maximumLineHeight = maximumLineHeight;
+            }
+        }
+        txtStyle.maxLineHeight = info.maximumLineHeight;
+    }
+    if (textStyle.GetLineHeightMultiply().has_value()) {
+        double lineHeightMultiply = textStyle.GetLineHeightMultiply().value();
+        if (GreatNotEqual(lineHeightMultiply, 0.0)) {
+            info.lineHeightMultiply = lineHeightMultiply;
+        }
+        txtStyle.lineHeightStyle = Rosen::LineHeightStyle::kFontHeight;
+        txtStyle.heightScale = info.lineHeightMultiply;
+    }
+}
+
 void ConvertGradiantColor(
     const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, Rosen::TextStyle& txtStyle,
     OHOS::Ace::FontForegroudGradiantColor & gradiantColor)
@@ -597,7 +632,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     } else {
         txtStyle.heightScale = 1;
     }
-
+    CheckMinMaxLineHeight(textStyle, txtStyle, info);
     // set font variant
     auto fontFeatures = textStyle.GetFontFeatures();
     if (!fontFeatures.empty()) {

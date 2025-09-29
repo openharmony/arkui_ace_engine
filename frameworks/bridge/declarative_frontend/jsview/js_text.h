@@ -50,6 +50,9 @@ public:
     static void SetTextContentAlign(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetLineHeightMultiply(const JSCallbackInfo& info);
+    static void SetMinimumLineHeight(const JSCallbackInfo& info);
+    static void SetMaximumLineHeight(const JSCallbackInfo& info);
     static void SetLineSpacing(const JSCallbackInfo& info);
     static void SetOptimizeTrailingSpace(const JSCallbackInfo& info);
     static void SetShaderStyle(const JSCallbackInfo& info);

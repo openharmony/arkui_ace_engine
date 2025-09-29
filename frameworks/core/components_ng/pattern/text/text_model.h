@@ -220,6 +220,12 @@ public:
     virtual void SetColorShaderStyle(const Color& value) = 0;
     virtual void ResetGradientShaderStyle() = 0;
     virtual void SetTextVerticalAlign(TextVerticalAlign verticalAlign) = 0;
+    virtual void ResetLineHeightMultiply() {};
+    virtual void ResetMinimumLineHeight() {};
+    virtual void ResetMaximumLineHeight() {};
+    virtual void SetLineHeightMultiply(double value) {};
+    virtual void SetMinimumLineHeight(const Dimension& value) {};
+    virtual void SetMaximumLineHeight(const Dimension& value) {};
 
 private:
     static std::unique_ptr<TextModel> instance_;

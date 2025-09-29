@@ -395,6 +395,93 @@ void ResetTextLineHeight(ArkUINodeHandle node)
     }
 }
 
+void SetTextLineHeightMultiply(
+    ArkUINodeHandle node, ArkUI_Float32 number, void* lineHeightMultiplyRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetLineHeightMultiply(frameNode, number);
+    NodeModifier::ProcessResourceObj<double>(
+        frameNode, "LineHeightMultiply", number, lineHeightMultiplyRawPtr);
+}
+
+double GetTextLineHeightMultiply(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetTextLineHeightMultiply(frameNode);
+}
+
+void ResetTextLineHeightMultiply(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetLineHeightMultiply(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("LineHeightMultiply");
+    }
+}
+
+void SetTextMinimumLineHeight(
+    ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* minimumlineHeightRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMinimumLineHeight(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+    NodeModifier::ProcessResourceObj<CalcDimension>(
+        frameNode, "MinimumLineHeight", Dimension(number, static_cast<DimensionUnit>(unit)), minimumlineHeightRawPtr);
+}
+
+float GetTextMinimumLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetTextMinimumLineHeight(frameNode);
+}
+
+void ResetTextMinimumLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetMinimumLineHeight(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("MinimumLineHeight");
+    }
+}
+
+void SetTextMaximumLineHeight(
+    ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* maximumlineHeightRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMaximumLineHeight(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+    NodeModifier::ProcessResourceObj<CalcDimension>(
+        frameNode, "MaximumLineHeight", Dimension(number, static_cast<DimensionUnit>(unit)), maximumlineHeightRawPtr);
+}
+
+float GetTextMaximumLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetTextMaximumLineHeight(frameNode);
+}
+
+void ResetTextMaximumLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetMaximumLineHeight(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("MaximumLineHeight");
+    }
+}
+
 void SetTextTextOverflow(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2104,6 +2191,15 @@ const ArkUITextModifier* GetTextModifier()
         .resetFontSize = ResetFontSize,
         .setTextLineHeight = SetTextLineHeight,
         .resetTextLineHeight = ResetTextLineHeight,
+        .setTextLineHeightMultiply = SetTextLineHeightMultiply,
+        .getTextLineHeightMultiply = GetTextLineHeightMultiply,
+        .resetTextLineHeightMultiply = ResetTextLineHeightMultiply,
+        .setTextMinimumLineHeight = SetTextMinimumLineHeight,
+        .getTextMinimumLineHeight = GetTextMinimumLineHeight,
+        .resetTextMinimumLineHeight = ResetTextMinimumLineHeight,
+        .setTextMaximumLineHeight = SetTextMaximumLineHeight,
+        .getTextMaximumLineHeight = GetTextMaximumLineHeight,
+        .resetTextMaximumLineHeight = ResetTextMaximumLineHeight,
         .setTextOverflow = SetTextTextOverflow,
         .resetTextOverflow = ResetTextTextOverflow,
         .setTextDecoration = SetTextDecoration,
@@ -2265,6 +2361,15 @@ const CJUITextModifier* GetCJUITextModifier()
         .resetFontSize = ResetFontSize,
         .setTextLineHeight = SetTextLineHeight,
         .resetTextLineHeight = ResetTextLineHeight,
+        .setTextLineHeightMultiply = SetTextLineHeightMultiply,
+        .getTextLineHeightMultiply = GetTextLineHeightMultiply,
+        .resetTextLineHeightMultiply = ResetTextLineHeightMultiply,
+        .setTextMinimumLineHeight = SetTextMinimumLineHeight,
+        .getTextMinimumLineHeight = GetTextMinimumLineHeight,
+        .resetTextMinimumLineHeight = ResetTextMinimumLineHeight,
+        .setTextMaximumLineHeight = SetTextMaximumLineHeight,
+        .getTextMaximumLineHeight = GetTextMaximumLineHeight,
+        .resetTextMaximumLineHeight = ResetTextMaximumLineHeight,
         .setTextOverflow = SetTextTextOverflow,
         .resetTextOverflow = ResetTextTextOverflow,
         .setTextDecoration = SetTextDecoration,
