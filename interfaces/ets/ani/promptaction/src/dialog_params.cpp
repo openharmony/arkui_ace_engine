@@ -1150,7 +1150,7 @@ bool GetCustomBuilderWithId(ani_vm *vm, ani_object object,
 
         ani_object builderObj = static_cast<ani_object>(fnReturnVal);
         ani_long builder;
-        status = env->Object_CallMethodByName_Long(builderObj, "unboxed", nullptr, &builder);
+        status = env->Object_CallMethodByName_Long(builderObj, "toLong", nullptr, &builder);
         if (status != ANI_OK) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CallMethodByName_Long fail. status: %{public}d", status);
             return;

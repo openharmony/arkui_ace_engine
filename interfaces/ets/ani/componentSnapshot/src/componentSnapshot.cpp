@@ -265,7 +265,7 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
     }
     ani_double aniValue = 0.0;
     if (ANI_OK !=
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "unboxed", nullptr, &aniValue)) {
+        env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "toDouble", nullptr, &aniValue)) {
         return false;
     }
     if (OHOS::Ace::GreatNotEqual(aniValue, 0.0)) {
@@ -308,7 +308,7 @@ static bool GetOptionsWaitUntilRenderFinished(ani_env* env, ani_object options, 
     }
     ani_boolean aniValue;
     if (ANI_OK !=
-        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(propertyRef), "unboxed", nullptr, &aniValue)) {
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(propertyRef), "toBoolean", nullptr, &aniValue)) {
         return false;
     }
     value = static_cast<bool>(aniValue);

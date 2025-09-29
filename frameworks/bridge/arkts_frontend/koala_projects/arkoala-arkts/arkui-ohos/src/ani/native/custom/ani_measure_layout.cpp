@@ -39,7 +39,7 @@ bool ParseAniDimension(ani_env* env, ani_object obj, CalcDimension& result, Dime
     }
     if (AniUtils::IsNumber(env, obj)) {
         ani_double param_value;
-        env->Object_CallMethodByName_Double(obj, "unboxed", ":d", &param_value);
+        env->Object_CallMethodByName_Double(obj, "toDouble", ":d", &param_value);
 
         result = CalcDimension(param_value, defaultUnit);
         return true;

@@ -116,7 +116,7 @@ Matrix4 ConvertToMatrixArray([[maybe_unused]] ani_env* env, [[maybe_unused]] ani
             }
             ani_double unboxedDouble {};
             if (env->Object_CallMethodByName_Double(
-                reinterpret_cast<ani_object>(value), "unboxed", ":d", &unboxedDouble) != ANI_OK) {
+                reinterpret_cast<ani_object>(value), "toDouble", ":d", &unboxedDouble) != ANI_OK) {
                 return result;
             }
             auto ret = static_cast<double>(unboxedDouble);
@@ -197,7 +197,7 @@ bool ParseOption(ani_env* env, ani_object options, double& input, const char* pr
     }
     ani_double propertyValue;
     if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(property_ref),
-        "unboxed", nullptr, &propertyValue)) {
+        "toDouble", nullptr, &propertyValue)) {
         return false;
     }
     input = static_cast<double>(propertyValue);

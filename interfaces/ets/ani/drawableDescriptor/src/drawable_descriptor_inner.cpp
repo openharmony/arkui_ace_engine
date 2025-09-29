@@ -235,12 +235,12 @@ void CreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, a
     env->Reference_IsUndefined(iterationsAni, &isIterationsUndefined);
     if (!isDurationUndefined) {
         ani_double duration;
-        env->Object_CallMethodByName_Double(durationAni, "unboxed", ":d", &duration);
+        env->Object_CallMethodByName_Double(durationAni, "toDouble", ":d", &duration);
         drawable->SetTotalDuration(static_cast<int32_t>(duration));
     }
     if (!isIterationsUndefined) {
         ani_double iterations;
-        env->Object_CallMethodByName_Double(iterationsAni, "unboxed", ":d", &iterations);
+        env->Object_CallMethodByName_Double(iterationsAni, "toDouble", ":d", &iterations);
         drawable->SetIterations(static_cast<int32_t>(iterations));
     }
 }

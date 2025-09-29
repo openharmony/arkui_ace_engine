@@ -322,7 +322,7 @@ void ParseNumberString(ani_env* env, ani_ref value, ArkUIAniNumberString& result
     }
     if (AniUtils::IsNumber(env, valueObj)) {
         ani_double doubleValue;
-        if (env->Object_CallMethodByName_Double(valueObj, "unboxed", ":d", &doubleValue) == ANI_OK) {
+        if (env->Object_CallMethodByName_Double(valueObj, "toDouble", ":d", &doubleValue) == ANI_OK) {
             result.selector = 0;
             result.value0 = doubleValue;
             return;
@@ -342,7 +342,7 @@ void HandleAnimatablePropertyFloat(
     ArkUINodeHandle frameNode, const std::string& name, ani_env* env, ani_object property, ani_fn_object callback)
 {
     ani_double valueAniDouble = 0.0;
-    if (env->Object_CallMethodByName_Double(property, "unboxed", ":d", &valueAniDouble) != ANI_OK) {
+    if (env->Object_CallMethodByName_Double(property, "toDouble", ":d", &valueAniDouble) != ANI_OK) {
         HILOGW("unbox double failed when %{public}s", __func__);
         return;
     }
