@@ -1120,7 +1120,7 @@ public:
         isNeedReloadDensity_ = isNeedReloadDensity;
     }
 
-    void GetInspectorTree(bool onlyNeedVisible);
+    void GetInspectorTree(bool onlyNeedVisible, ParamConfig config = ParamConfig());
     void NotifyAllWebPattern(bool isRegister);
     void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(int32_t nodeId);

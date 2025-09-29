@@ -5864,18 +5864,17 @@ void sendCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
 void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     // set get inspector tree function for ui session manager
-    auto callback = [weakTaskExecutor = taskExecutor](bool onlyNeedVisible) {
+    auto callback = [weakTaskExecutor = taskExecutor](bool onlyNeedVisible, ParamConfig config) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [onlyNeedVisible]() {
+            [onlyNeedVisible, config]() {
                 auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 if (onlyNeedVisible) {
-                    pipeline->GetInspectorTree(true);
+                    pipeline->GetInspectorTree(true, config);
                 } else {
-                    pipeline->GetInspectorTree(false);
-                    UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
+                    pipeline->GetInspectorTree(false, config);
                 }
             },
             TaskExecutor::TaskType::UI, "UiSessionGetInspectorTree",
