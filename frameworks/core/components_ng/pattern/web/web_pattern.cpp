@@ -86,12 +86,15 @@
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/event/event_info_convertor.h"
+#include "core/event/statusbar/statusbar_event_proxy.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "common_event_manager.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
 #include "oh_window_pip.h"
 #include "oh_window_comm.h"
 #include "web_accessibility_session_adapter.h"
+#include "web_statusbar_click.h"
 #include "web_pattern.h"
 #include "nweb_handler.h"
 
@@ -2122,6 +2125,9 @@ int32_t WebPattern::HandleMouseClickEvent(const MouseInfo& info)
         mouseClickQueue_.push(clickInfo);
         return SINGLE_CLICK_NUM;
     }
+    if (isBackToTopRunning_) {
+        isBackToTopRunning_ = false;
+    }
     std::chrono::duration<float> timeout_ = clickInfo.start - mouseClickQueue_.back().start;
     double offsetX = clickInfo.x - mouseClickQueue_.back().x;
     double offsetY = clickInfo.y - mouseClickQueue_.back().y;
@@ -4093,6 +4099,7 @@ void WebPattern::OnModifyDone()
             delegate_->UpdateEnableFollowSystemFontWeight(GetEnableFollowSystemFontWeight().value());
         }
         UpdateScrollBarWithBorderRadius();
+        OnBackToTopUpdate(backToTop_);
     }
 
     // Set the default background color when the component did not set backgroundColor()
@@ -4589,6 +4596,9 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         }
         if (overlayCreating_) {
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
+        }
+        if (isBackToTopRunning_) {
+            isBackToTopRunning_ = false;
         }
     }
     if (IsDefaultGestureFocusMode() && !touchInfos.empty() && !GetNativeEmbedModeEnabledValue(false)) {
@@ -9301,5 +9311,32 @@ void WebPattern::SetImeShow(bool visible)
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipelineContext->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->SetImeShow(visible);
+}
+
+void WebPattern::OnBackToTopUpdate(bool isBackToTop)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnBackToTopUpdate = %{public}d", isBackToTop);
+    backToTop_ = isBackToTop;
+    if (backToTop_) {
+        WebStatusBarEventProxy::GetWebInstance()->Register(WeakClaim(this));
+    } else {
+        WebStatusBarEventProxy::GetWebInstance()->UnRegister(WeakClaim(this));
+    }
+}
+
+void WebPattern::OnStatusBarClick()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnStatusBarClick");
+    if (!backToTop_ || isBackToTopRunning_) {
+        isBackToTopRunning_ = false;
+        return;
+    }
+
+    CHECK_NULL_VOID(delegate_);
+    if (IsFocus()) {
+        isBackToTopRunning_ = true;
+        delegate_->WebScrollStopFling();
+        delegate_->OnStatusBarClick();
+    }
 }
 } // namespace OHOS::Ace::NG

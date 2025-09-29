@@ -31838,6 +31838,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebRotateRenderEffectModifier.identity, WebRotateRenderEffectModifier, effect);
     return this;
   }
+  backToTop(backToTop) {
+    modifierWithKey(this._modifiersWithKeys, WebBackToTopModifier.identity, WebBackToTopModifier, backToTop);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -33363,6 +33367,20 @@ class WebForceEnableZoomModifier extends ModifierWithKey {
   }
 }
 WebForceEnableZoomModifier.identity = Symbol('webForceEnableZoomModifier');
+
+class WebBackToTopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetBackToTop(node);
+    } else {
+      getUINativeModule().web.setBackToTop(node, this.value);
+    }
+  }
+}
+WebBackToTopModifier.identity = Symbol('webBackToTopModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

@@ -240,6 +240,7 @@ public:
     virtual void SetForceEnableZoom(bool isEnabled) {}
     virtual void SetSafeBrowsingCheckFinishId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId) {};
+    virtual void SetBackToTop(bool isBackToTop) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

@@ -2632,4 +2632,19 @@ void WebModelNG::SetOnSafeBrowsingCheckFinish(
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnSafeBrowsingCheckFinishEvent(std::move(safeBrowsingCheckFinish));
 }
+
+void WebModelNG::SetBackToTop(bool isBackToTop)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateBackToTop(isBackToTop);
+}
+
+void WebModelNG::SetBackToTop(FrameNode* frameNode, bool isBackToTop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateBackToTop(isBackToTop);
+}
 } // namespace OHOS::Ace::NG
