@@ -154,7 +154,7 @@ private:
     std::unordered_set<int32_t> recycleNodeIds_;
 
     // true in the time from requesting idle / predict task until exec predict task.
-    bool postUpdateTaskHasBeenScheduled_;
+    bool postUpdateTaskHasBeenScheduled_ = false;
 
     std::function<void(int32_t, int32_t)> onMoveFromTo_;
     // record (from, to), only valid during dragging item.
