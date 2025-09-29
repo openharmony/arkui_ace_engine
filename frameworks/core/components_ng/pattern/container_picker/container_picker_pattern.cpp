@@ -242,6 +242,35 @@ RefPtr<ClickEvent> ContainerPickerPattern::CreateItemClickEventListener(RefPtr<C
     return listener;
 }
 
+void ContainerPickerPattern::CreateChildrenClickEvent(RefPtr<UINode>& host)
+{
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
+    for (auto child : children) {
+        auto tag = child->GetTag();
+        if (tag == V2::JS_FOR_EACH_ETS_TAG || tag == V2::JS_SYNTAX_ITEM_ETS_TAG) {
+            CreateChildrenClickEvent(child);
+        } else if (tag == V2::ROW_ETS_TAG || tag == V2::IMAGE_ETS_TAG ||
+                   tag == V2::TEXT_ETS_TAG || tag == V2::SYMBOL_ETS_TAG) {
+            RefPtr<ContainerPickerEventParam> param = MakeRefPtr<ContainerPickerEventParam>();
+            param->itemNodeId = child->GetId();
+            RefPtr<FrameNode> childNode = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(childNode);
+            auto eventHub = childNode->GetEventHub<EventHub>();
+            CHECK_NULL_VOID(eventHub);
+            RefPtr<ClickEvent> clickListener = CreateItemClickEventListener(param);
+            CHECK_NULL_VOID(clickListener);
+            auto gesture = eventHub->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gesture);
+            gesture->AddClickEvent(clickListener);
+        } else {
+            TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER,
+                "CreateChildrenClickEvent does not support this type of the node. id: %{public}d, tag: %{public}s",
+                host->GetId(), tag.c_str());
+        }
+    }
+}
+
 void ContainerPickerPattern::InitMouseAndPressEvent()
 {
     if (isItemClickEventCreated_) {
@@ -251,22 +280,8 @@ void ContainerPickerPattern::InitMouseAndPressEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    int32_t i = 0;
-    for (const auto& child : host->GetChildren()) {
-        RefPtr<FrameNode> childNode = DynamicCast<FrameNode>(child);
-        CHECK_NULL_VOID(childNode);
-        RefPtr<ContainerPickerEventParam> param = MakeRefPtr<ContainerPickerEventParam>();
-        param->itemIndex = i;
-        param->itemNodeId = child->GetId();
-        auto eventHub = childNode->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(eventHub);
-        RefPtr<ClickEvent> clickListener = CreateItemClickEventListener(param);
-        CHECK_NULL_VOID(clickListener);
-        auto gesture = eventHub->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gesture);
-        gesture->AddClickEvent(clickListener);
-        i++;
-    }
+    auto uiNode = AceType::DynamicCast<UINode>(host);
+    CreateChildrenClickEvent(uiNode);
     isItemClickEventCreated_ = true;
 }
 
