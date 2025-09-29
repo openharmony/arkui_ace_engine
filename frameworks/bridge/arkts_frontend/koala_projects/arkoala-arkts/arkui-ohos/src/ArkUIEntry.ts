@@ -191,7 +191,7 @@ export class Application {
     private startUrl: string
     private startParam: string
     private instanceId: int32 = -1
-
+    private plugin = false
     private withLog = false
     private useNativeLog = true
     private rootState: ComputableState<PeerNode> | undefined = undefined
@@ -217,7 +217,9 @@ export class Application {
         router.runPage(routerOption, builder)
     }
 
-    start(): pointer {
+    start(plugin: boolean): pointer {
+        InteropNativeModule._NativeLog("ArkTS Application.start plugin: " + plugin)
+        this.plugin = plugin
         if (this.withLog) UserView.startNativeLog(1)
         let root: PeerNode | undefined = undefined
         try {
@@ -241,10 +243,18 @@ export class Application {
             } else {
                 throw new Error("Invalid EntryPoint")
             }
-            Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
+            if (plugin) {
+                this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {
+                    const frozen = this.manager!.frozen
+                    this.manager!.frozen = true
+                    memoEntry<void>(context, 0, builder)
+                    this.manager!.frozen = frozen
+                })
+            } else {
+                Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
+                this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {})
+            }
             InteropNativeModule._NativeLog(`[${this.instanceId}] ArkTS Application.start before computeRoot`)
-            const manager = GlobalStateManager.instance
-            this.rootState = manager.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {})
             root = this.rootState!.value
             InteropNativeModule._NativeLog(`[${this.instanceId}] ArkTS Application.start after computeRoot`)
         } catch (e) {
@@ -300,7 +310,71 @@ export class Application {
         }
     }
 
+    updatePluginStates(manager: StateManager, root: ComputableState<PeerNode>) {
+        if (this.instanceId < 0) {
+            InteropNativeModule._NativeLog(
+                `ArkTS updateStates failed due to instanceId: ${this.instanceId} is illegal`)
+            return;
+        }
+        // Ensure all current state updates took effect.
+        manager.syncChanges()
+        manager.updateSnapshot()
+        let detachedRoots = getDetachedRootsByInstanceId(this.instanceId);
+        for (const detachedRoot of detachedRoots.values()) {
+            detachedRoot.compute()
+        }
+        updateLazyItems()
+        flushBuilderRootNode()
+        if (partialUpdates.length > 0) {
+            // If there are pending partial updates - we apply them one by one and provide update context.
+            for (let update of partialUpdates) {
+                // Set the context available via currentPartialUpdateContext() to @memo code.
+                _currentPartialUpdateContext = update.context
+                // Update states.
+                update.update()
+                // Propagate changes.
+                manager.syncChanges()
+                manager.updateSnapshot()
+                // Notify subscriber.
+                update.callback(true)
+                // Compute new tree state
+                try {
+                    root.value
+                    for (const detachedRoot of detachedRoots.values()) {
+                        detachedRoot.compute()
+                    }
+                } catch (error) {
+                    InteropNativeModule._NativeLog('has error in partialUpdates')
+                }
+                // Notify subscriber.
+                update.callback(false)
+                // Clear context.
+                _currentPartialUpdateContext = undefined
+            }
+            // Clear partial updates list.
+            partialUpdates.splice(0, partialUpdates.length)
+        }
+    }
+
+    private updatePluginState() {
+        // NativeModule._NativeLog("ARKTS: updateState")
+        this.updatePluginStates(this.manager!, this.rootState!)
+        while (StateUpdateLoop.len) {
+            StateUpdateLoop.consume();
+            this.updatePluginStates(this.manager!, this.rootState!)
+        }
+        // Here we request to draw a frame and call custom components callbacks.
+        let root = this.rootState!.value
+        ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr);
+        // Call callbacks and sync
+        callScheduledCallbacks();
+    }
+
     private updateState() {
+        if (this.plugin) {
+            this.updatePluginState()
+            return
+        }
         // NativeModule._NativeLog("ARKTS: updateState")
         let uiContextRouter = this.uiContext!.getRouter();
         let rootState = uiContextRouter.getStateRoot();
@@ -474,6 +548,12 @@ export class Application {
     notifyConfigurationChange() {
         if (!this.uiContext || !this.manager) {
             console.warn("Arkoala haven't been initialized !");
+            return;
+        }
+        if (this.plugin) {
+            this.rootState!.forceCompleteRerender();
+            this.manager!.syncChanges();
+            this.manager!.updateSnapshot();
             return;
         }
         let uiContextRouter = this.uiContext!.getRouter();

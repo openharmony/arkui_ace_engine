@@ -79,7 +79,7 @@ export interface PluginComponentOptions {
     data: Object | undefined | null;
 }
 export interface PluginErrorData {
-    errcode: number;
+    errcode: int;
     msg: string;
 }
 export type PluginErrorCallback = (info: PluginErrorData) => void;

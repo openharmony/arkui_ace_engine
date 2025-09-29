@@ -44,7 +44,7 @@ const AppInfo KOALA_APP_INFO = {
     "Lstd/core/String;Lstd/core/String;ZLstd/core/String;Larkui/UserView/UserView;Larkui/UserView/EntryPoint;"
     ":Larkui/ArkUIEntry/Application;",
     "start",
-    ":J",
+    "Z:J",
     "enter",
     "IIJ:Z",
     "emitEvent",
@@ -120,7 +120,19 @@ UIContentErrorCode ArktsPluginFrontend::RunPage(const std::string& url, const st
     ANI_CALL(env, Class_FindStaticMethod(appClass, KOALA_APP_INFO.createMethodName, KOALA_APP_INFO.createMethodSig,
         &create), return UIContentErrorCode::INVALID_URL);
 
-    std::string appUrl = url.substr(0, url.rfind(".js"));
+    auto endsWith = [](const std::string& str, const char* suffix) -> bool {
+        auto len = strlen(suffix);
+        return str.length() >= len && strcmp(&str[str.length() - len], suffix) == 0;
+    };
+
+    std::string appUrl;
+    if (endsWith(url, ".js") || endsWith(url, ".ts")) {
+        appUrl = url.substr(0, url.length() - strlen(".js"));
+    } else if (endsWith(url, ".ets")) {
+        appUrl = url.substr(0, url.length() - strlen(".ets"));
+    } else {
+        appUrl = url;
+    }
 
     ani_string aniUrl{};
     env->String_NewUTF8(appUrl.c_str(), appUrl.size(), &aniUrl);
@@ -153,7 +165,7 @@ UIContentErrorCode ArktsPluginFrontend::RunPage(const std::string& url, const st
         return UIContentErrorCode::INVALID_URL);
 
     ani_long result;
-    ANI_CALL(env, Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result),
+    ANI_CALL(env, Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result, true),
         return UIContentErrorCode::INVALID_URL);
 
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
