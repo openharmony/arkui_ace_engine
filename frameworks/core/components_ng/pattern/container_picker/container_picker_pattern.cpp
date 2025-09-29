@@ -18,9 +18,6 @@
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/syntax/for_each_node.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

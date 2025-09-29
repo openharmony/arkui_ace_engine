@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/container_picker/container_picker_layout_algorithm.h"
-
 #include <cstdint>
 #include <iterator>
 
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/container_picker/container_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -55,19 +54,6 @@ void ContainerPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         itemPosition_.clear();
     }
 
-    if (itemPosition_.empty()) {
-        layoutWrapper->SetActiveChildRange(-1, -1);
-    } else {
-        // startIndex maybe target to invalid blank items in group mode, need to be adjusted.
-        int32_t startIndex = ContainerPickerUtils::GetLoopIndex(GetStartIndex(), totalItemCount_);
-        int32_t endIndex = ContainerPickerUtils::GetLoopIndex(GetEndIndex(), totalItemCount_);
-        if (!isLoop_) {
-            layoutWrapper->SetActiveChildRange(
-                startIndex, endIndex, std::min(1, startIndex), std::min(1, totalItemCount_ - 1 - endIndex));
-        } else {
-            layoutWrapper->SetActiveChildRange(startIndex, endIndex, 1, 1);
-        }
-    }
     const auto& padding = pickerLayoutProperty->CreatePaddingAndBorder();
     topPadding_ = padding.top.value_or(0.0);
     AddPaddingToSize(padding, contentIdealSize);
