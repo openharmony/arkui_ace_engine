@@ -67,7 +67,10 @@ export enum LengthUnit {
 export class LengthMetrics {
     public unit: LengthUnit;
     public value: number;
-
+    constructor(){
+        this.value = 0;
+        this.unit = LengthUnit.VP;
+    }
     constructor(value: number, unit?: LengthUnit) {
         this.value = value;
         if (unit === undefined || unit === null || unit < LengthUnit.PX || unit > LengthUnit.LPX) {
