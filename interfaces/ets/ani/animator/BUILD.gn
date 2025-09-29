@@ -29,9 +29,9 @@ ohos_shared_library("animator_ani") {
   sources = [ "./src/animator.cpp" ]
   deps = [ "$ace_root/build:libace_compatible" ]
   external_deps = [
+    "napi:ace_napi",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
-    "napi:ace_napi",
   ]
   part_name = "ace_engine"
   subsystem_name = "arkui"

@@ -22,40 +22,43 @@ node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
 action("interop_install") {
-    script = "../gn/command/npm_util.py"
-    outputs = [
-        "$target_out_dir/interop_install"
-    ]
-    args = [
-        "--project-path", rebase_path("."),
-        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-        "--install"
-    ]
+  script = "../gn/command/npm_util.py"
+  outputs = [ "$target_out_dir/interop_install" ]
+  args = [
+    "--project-path",
+    rebase_path("."),
+    "--node-path",
+    rebase_path(
+        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+    "--install",
+  ]
 }
 
 action("interop.abc") {
-    script = "../gn/command/npm_util.py"
-    outputs = [
-        "$target_out_dir/interop.abc"
-    ]
-    args = [
-        "--project-path", rebase_path("."),
-        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-        "--arklink-path", rebase_path("${static_linker_build_path}"),
-        "--es2panda-path", rebase_path("${ets2abc_build_path}"),
-        "--stdlib-path", rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
-        "--npm-args", "run", "build:interop:gn"
-    ]
+  script = "../gn/command/npm_util.py"
+  outputs = [ "$target_out_dir/interop.abc" ]
+  args = [
+    "--project-path",
+    rebase_path("."),
+    "--node-path",
+    rebase_path(
+        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+    "--arklink-path",
+    rebase_path("${static_linker_build_path}"),
+    "--es2panda-path",
+    rebase_path("${ets2abc_build_path}"),
+    "--stdlib-path",
+    rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
+    "--npm-args",
+    "run",
+    "build:interop:gn",
+  ]
 
-    deps = [
-        "../ui2abc:ui2abc"
-    ]
+  deps = [ "../ui2abc:ui2abc" ]
 }
 
 group("interop") {
-    deps = [
-      "$interop_root:interop.abc"
-    ]
+  deps = [ "$interop_root:interop.abc" ]
 }
 
 generate_static_abc("interop-arkts_abc") {

@@ -208,8 +208,8 @@ ace_unittest("accessibility_adapter_test_web_ng") {
   if (defined(global_parts_info.web_webview)) {
     external_deps += [
       "webview:cj_webview_ffi",
-      "webview:libnweb",
       "webview:libarkweb_utils",
+      "webview:libnweb",
     ]
     sources += [
       "$ace_root/frameworks/core/components/web/resource/web_delegate.cpp",

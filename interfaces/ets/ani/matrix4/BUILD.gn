@@ -31,10 +31,10 @@ ohos_shared_library("matrix4_ani") {
   sources = [ "./src/matrix4.cpp" ]
   external_deps = [
     #"runtime_core:libarkruntime",
-    "napi:ace_napi",
-    "runtime_core:ani_helpers",
-    "runtime_core:ani",
     "graphic_2d:2d_graphics",
+    "napi:ace_napi",
+    "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
   configs = [ "$ace_root:ace_config" ]
   part_name = "ace_engine"

@@ -17,10 +17,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 config("perf_monitor_config") {
   visibility = [ "*:*" ]
 
-  include_dirs = [
-    "$ace_root/frameworks/base/perfmonitor",
-  ]
-
+  include_dirs = [ "$ace_root/frameworks/base/perfmonitor" ]
 }
 
 ohos_unittest("perf_monitor_test") {
@@ -28,17 +25,16 @@ ohos_unittest("perf_monitor_test") {
 
   public_configs = [ ":perf_monitor_config" ]
   sources = [
-    "$ace_root/adapter/preview/osal/system_properties.cpp",
     "$ace_root/adapter/preview/osal/perf_interfaces.cpp",
+    "$ace_root/adapter/preview/osal/system_properties.cpp",
     "$ace_root/frameworks/base/perfmonitor/perf_monitor.cpp",
     "perf_monitor_test.cpp",
   ]
 
-    external_deps = [
-      "hicollie:libhicollie",
-      "hiview:libperfmonitor",
-    ]
-
+  external_deps = [
+    "hicollie:libhicollie",
+    "hiview:libperfmonitor",
+  ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

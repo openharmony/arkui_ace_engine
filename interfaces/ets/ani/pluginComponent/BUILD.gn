@@ -49,7 +49,7 @@ ohos_shared_library("pluginComponent_ani") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
-    "runtime_core:ani"
+    "runtime_core:ani",
   ]
   configs = [ "$ace_root:ace_config" ]
   part_name = "ace_engine"

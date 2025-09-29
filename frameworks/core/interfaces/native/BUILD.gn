@@ -140,10 +140,9 @@ template("ace_core_interfaces_native_node") {
       "node/view_model.cpp",
       "node/view_model_multi_thread.cpp",
       "node/water_flow_modifier.cpp",
-      "runtime/runtime_init.cpp"
+      "runtime/runtime_init.cpp",
     ]
 
-    
     sources += [
       "ani/ani_animatable_arithmetic.cpp",
       "ani/ani_theme.cpp",
@@ -154,28 +153,28 @@ template("ace_core_interfaces_native_node") {
       "ani/component3d_ani_modifier.cpp",
       "ani/component_content_ani_modifier.cpp",
       "ani/component_snapshot_ani_modifier.cpp",
+      "ani/condition_scope_ani_modifier.cpp",
       "ani/content_slot_ani_modifier.cpp",
       "ani/custom_node_ani_modifier.cpp",
       "ani/drag_ani_modifier.cpp",
-      "ani/node_adapter_ani_modifier.cpp",
-      "ani/interop_ani_modifier.cpp",
       "ani/image_ani_modifier.cpp",
       "ani/image_span_ani_modifier.cpp",
+      "ani/interop_ani_modifier.cpp",
+      "ani/list_ani_modifier.cpp",
+      "ani/node_adapter_ani_modifier.cpp",
       "ani/node_ani_modifier.cpp",
-      "ani/search_ani_modifier.cpp",
-      "ani/styled_string_ani_modifier.cpp",
-      "ani/trace_ani_modifier.cpp",
-      "ani/web_ani_modifier.cpp",
-      "ani/waterflow_ani_modifier.cpp",
-      "ani/video_ani_modifier.cpp",
       "ani/rich_editor_ani_modifier.cpp",
+      "ani/search_ani_modifier.cpp",
       "ani/shape_ani_modifier.cpp",
       "ani/stateMgmt_ani_modifier.cpp",
+      "ani/styled_string_ani_modifier.cpp",
+      "ani/trace_ani_modifier.cpp",
+      "ani/uinode_ani_modifier.cpp",
+      "ani/video_ani_modifier.cpp",
+      "ani/waterflow_ani_modifier.cpp",
+      "ani/web_ani_modifier.cpp",
       "ani/xbar_ani_modifier.cpp",
       "ani/xcomponent_ani_modifier.cpp",
-      "ani/list_ani_modifier.cpp",
-      "ani/condition_scope_ani_modifier.cpp",
-      "ani/uinode_ani_modifier.cpp",
     ]
     if (build_ohos_sdk) {
       sources -= [
@@ -184,12 +183,12 @@ template("ace_core_interfaces_native_node") {
         "ani/common_ani_modifier.cpp",
         "ani/component3d_ani_modifier.cpp",
         "ani/custom_node_ani_modifier.cpp",
-        "ani/node_ani_modifier.cpp",
-        "ani/waterflow_ani_modifier.cpp",
-        "ani/node_adapter_ani_modifier.cpp",
         "ani/interop_ani_modifier.cpp",
         "ani/list_ani_modifier.cpp",
+        "ani/node_adapter_ani_modifier.cpp",
+        "ani/node_ani_modifier.cpp",
         "ani/uinode_ani_modifier.cpp",
+        "ani/waterflow_ani_modifier.cpp",
       ]
     }
 
@@ -203,10 +202,9 @@ template("ace_core_interfaces_native_node") {
       ]
     }
 
-    if (defined(config.enable_drag_framework) && config.enable_drag_framework && !build_ohos_sdk) {
-      sources += [
-        "ani/drag_controller_ani_modifier.cpp",
-      ]
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
+        !build_ohos_sdk) {
+      sources += [ "ani/drag_controller_ani_modifier.cpp" ]
     }
 
     deps = [
@@ -262,15 +260,12 @@ template("ace_core_interfaces_native_node") {
       ]
     }
 
-    if (defined(config.window_scene_support) &&
-        config.window_scene_support) {
+    if (defined(config.window_scene_support) && config.window_scene_support) {
       sources += [ "node/embeddedComponent_modifier.cpp" ]
     }
 
     if (is_arkui_x) {
-      deps += [
-        "//foundation/arkui/napi:ace_napi",
-      ]
+      deps += [ "//foundation/arkui/napi:ace_napi" ]
     }
 
     external_deps = [
@@ -283,14 +278,12 @@ template("ace_core_interfaces_native_node") {
     if (current_os == "ohos") {
       external_deps += [ "graphic_2d:drawing_ani" ]
     }
-    
+
     if (defined(config.pixel_map_support)) {
-      external_deps += [
-        "image_framework:image",
-      ]
+      external_deps += [ "image_framework:image" ]
     }
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
-        external_deps += [ "device_status:devicestatus_client" ]
+      external_deps += [ "device_status:devicestatus_client" ]
       if (defined(global_parts_info.distributeddatamgr_udmf)) {
         external_deps += [ "udmf:udmf_client" ]
         external_deps += [ "udmf:libudmf" ]
@@ -307,8 +300,7 @@ template("ace_core_interfaces_native_node") {
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
-    if (defined(config.window_scene_support) &&
-        config.window_scene_support) {
+    if (defined(config.window_scene_support) && config.window_scene_support) {
       external_deps += [
         "ability_base:ability_base_want",
         "ability_base:want",

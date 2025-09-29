@@ -17,14 +17,12 @@ import("//foundation/arkui/ace_engine/adapter/ohos/build/common.gni")
 
 group("ace_ani_native_package") {
   deps = [
-    "ui_extension:arkuiuiextension_group",
     "custom:arkuicustomnode_group",
-    ]
+    "ui_extension:arkuiuiextension_group",
+  ]
 }
 config("ani_utils_common_config") {
-  include_dirs = [
-    "./"
-  ]
+  include_dirs = [ "./" ]
 }
 ohos_source_set("ani_utils_common") {
   subsystem_name = ace_engine_subsystem
@@ -32,13 +30,9 @@ ohos_source_set("ani_utils_common") {
 
   configs = [ "$ace_root:ace_config" ]
   public_configs = [ ":ani_utils_common_config" ]
-  sources = [
-    "utils/ani_utils.cpp",
-  ]
+  sources = [ "utils/ani_utils.cpp" ]
 
-  external_deps = [
-    "runtime_core:ani",
-  ]
+  external_deps = [ "runtime_core:ani" ]
 }
 ohos_shared_library("arkoala_native_ani") {
   shlib_type = "ani"
@@ -47,20 +41,22 @@ ohos_shared_library("arkoala_native_ani") {
 
   include_dirs = [
     "./",
-    "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/"
+    "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/",
   ]
 
   deps = [ ":ani_utils_common" ]
   if (!build_ohos_sdk) {
-    deps += ["$ace_root/frameworks/bridge/arkts_frontend:ArkoalaNative_ark"]
+    deps += [ "$ace_root/frameworks/bridge/arkts_frontend:ArkoalaNative_ark" ]
   }
 
   sources = [
+    "UINode/uinode_module_methods.cpp",
     "animation/animation_ani_impl.cpp",
     "canvas/canvas_module.cpp",
     "common/common_module.cpp",
     "component3d/component3d_module_methods.cpp",
     "componentSnapshot/componentSnapshot_module.cpp",
+    "condition_scope/condition_scope.cpp",
     "content_slot/content_slot_module.cpp",
     "custom_node/custom_node_module.cpp",
     "dragController/drag_controller_module.cpp",
@@ -68,25 +64,23 @@ ohos_shared_library("arkoala_native_ani") {
     "image/image_module.cpp",
     "image_span/image_span_module.cpp",
     "interop/interop_module.cpp",
+    "list/list_children_main_size_module.cpp",
     "load.cpp",
     "module.cpp",
+    "node_adapter/node_adapter_module.cpp",
+    "rich_editor/rich_editor_module.cpp",
     "search/search_module.cpp",
     "shape/shape_module_methods.cpp",
+    "stateMgmt/stateMgmt_module.cpp",
     "styled_string/styled_string_module.cpp",
     "utils/ani_trace.cpp",
     "utils/convert_utils.cpp",
     "video/video_module_methods.cpp",
     "visual_effect/visual_effect_module.cpp",
-    "rich_editor/rich_editor_module.cpp",
-    "stateMgmt/stateMgmt_module.cpp",
     "water_flow/water_flow_module.cpp",
-    "list/list_children_main_size_module.cpp",
     "web/web_module_methods.cpp",
     "xbar/xbar_module_methods.cpp",
     "xcomponent/xcomponent_module_methods.cpp",
-    "condition_scope/condition_scope.cpp",
-    "UINode/uinode_module_methods.cpp",
-    "node_adapter/node_adapter_module.cpp",
   ]
   if (ace_engine_feature_wearable) {
     sources -= [
@@ -132,12 +126,12 @@ if (use_linux) {
   ohos_shared_library("arkoala_native_ani_linux") {
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
-  
+
     include_dirs = [
       "./",
       "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/",
     ]
-  
+
     sources = [
       "animation/animation_ani_impl.cpp",
       "common/common_module.cpp",
@@ -153,7 +147,7 @@ if (use_linux) {
       "water_flow/water_flow_module.cpp",
       "xcomponent/xcomponent_module_methods.cpp",
     ]
-  
+
     external_deps = [
       "hilog:libhilog",
       "napi:ace_napi",

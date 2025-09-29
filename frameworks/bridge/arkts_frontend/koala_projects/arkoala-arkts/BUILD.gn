@@ -22,7 +22,6 @@ koala_path = ""
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
-
 action("ui2abc_annotate") {
   outputs = [ "$target_out_dir/arkui-ui2abc-processed" ]
 
@@ -30,7 +29,7 @@ action("ui2abc_annotate") {
 
   args = [
     rebase_path("."),
-    rebase_path("annotate-ui2abc-config.json")
+    rebase_path("annotate-ui2abc-config.json"),
   ]
 }
 action("ui2abc_process") {
@@ -40,83 +39,101 @@ action("ui2abc_process") {
 
   args = [
     rebase_path("."),
+
     # Paths: 6 ohos_ets_api_path
     rebase_path("${ohos_ets_api_path}"),
+
     # Paths: 7 ohos_ets_arkts_path
     rebase_path("${ohos_ets_arkts_path}"),
   ]
 
   deps = [
+    ":install_all",
     ":ui2abc_annotate",
-    ":install_all"
   ]
   external_deps = [
     "sdk:ohos_ets_api",
     "sdk:ohos_ets_arkts",
-  ]  
+  ]
 }
 
 action("arkoala_install") {
-    script = "../gn/command/npm_util.py"
-    outputs = [
-        "$target_out_dir/arkoala_install"
-    ]
-    args = [
-        "--project-path", rebase_path("."),
-        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-        "--install"
-    ]
+  script = "../gn/command/npm_util.py"
+  outputs = [ "$target_out_dir/arkoala_install" ]
+  args = [
+    "--project-path",
+    rebase_path("."),
+    "--node-path",
+    rebase_path(
+        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+    "--install",
+  ]
 }
 action("arkoala.abc") {
-    script = "../gn/command/npm_util.py"
-    outputs = [
-        "$target_out_dir/arkoala.abc"
-    ]
-    args = [
-        "--project-path", rebase_path("."),
-        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-        "--arklink-path", rebase_path("${static_linker_build_path}"),
-        "--es2panda-path", rebase_path("${ets2abc_build_path}"),
-        "--stdlib-path", rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
-        "--target-out-path", rebase_path("$target_out_dir"),
-        "--built-file-path", rebase_path("build/arkoala.abc"),
-        "--npm-args", "run", "link:arkoala:m3:gn"
-    ]
-    deps = [
-      ":arkui.abc",
-      "$koala_root/interop:interop"
-    ]
-
+  script = "../gn/command/npm_util.py"
+  outputs = [ "$target_out_dir/arkoala.abc" ]
+  args = [
+    "--project-path",
+    rebase_path("."),
+    "--node-path",
+    rebase_path(
+        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+    "--arklink-path",
+    rebase_path("${static_linker_build_path}"),
+    "--es2panda-path",
+    rebase_path("${ets2abc_build_path}"),
+    "--stdlib-path",
+    rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
+    "--target-out-path",
+    rebase_path("$target_out_dir"),
+    "--built-file-path",
+    rebase_path("build/arkoala.abc"),
+    "--npm-args",
+    "run",
+    "link:arkoala:m3:gn",
+  ]
+  deps = [
+    ":arkui.abc",
+    "$koala_root/interop:interop",
+  ]
 }
 
 action("arkui.abc") {
-    script = "../gn/command/npm_util.py"
-    outputs = [
-        "$target_out_dir/arkui.abc"
-    ]
-    args = [
-        "--project-path", rebase_path("."),
-        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-        "--arklink-path", rebase_path("${static_linker_build_path}"),
-        "--es2panda-path", rebase_path("${ets2abc_build_path}"),
-        "--stdlib-path", rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
-        "--target-out-path", rebase_path("$target_out_dir"),
-        "--built-file-path", rebase_path("build/arkui.abc"),
-        "--npm-args", "run", "build:arkoala:m3:gn"
-    ]
+  script = "../gn/command/npm_util.py"
+  outputs = [ "$target_out_dir/arkui.abc" ]
+  args = [
+    "--project-path",
+    rebase_path("."),
+    "--node-path",
+    rebase_path(
+        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+    "--arklink-path",
+    rebase_path("${static_linker_build_path}"),
+    "--es2panda-path",
+    rebase_path("${ets2abc_build_path}"),
+    "--stdlib-path",
+    rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
+    "--target-out-path",
+    rebase_path("$target_out_dir"),
+    "--built-file-path",
+    rebase_path("build/arkui.abc"),
+    "--npm-args",
+    "run",
+    "build:arkoala:m3:gn",
+  ]
 
-    deps = [
-      "$koala_root/ui2abc:ui2abc",
-      "$koala_root/incremental:incremental"
-    ]
+  deps = [
+    "$koala_root/incremental:incremental",
+    "$koala_root/ui2abc:ui2abc",
+  ]
 }
 
 group("install_all") {
   deps = [
     ":arkoala_install",
-    "$koala_root/ui2abc:ui2abc_install",
     "$koala_root/incremental:incremental_install",
-    "$koala_root/interop:interop_install"
+    "$koala_root/interop:interop_install",
+    "$koala_root/ui2abc:ui2abc_install",
   ]
 }
 ohos_prebuilt_etc("arkoala_build") {
@@ -128,9 +145,7 @@ ohos_prebuilt_etc("arkoala_build") {
 }
 
 group("arkoala") {
-    deps = [
-      "$koala_path:arkoala_build"
-    ]
+  deps = [ "$koala_path:arkoala_build" ]
 }
 
 # Use build system to build arkoala
@@ -141,7 +156,7 @@ action("arkoala_annotate") {
 
   args = [
     rebase_path("."),
-    rebase_path("annotate-config.json")
+    rebase_path("annotate-config.json"),
   ]
 }
 
@@ -150,13 +165,11 @@ action("arkoala_process") {
 
   script = "../../arkoala/process_arkoala.py"
 
-  args = [
-    rebase_path("."),
-  ]
+  args = [ rebase_path(".") ]
 
   deps = [
     ":arkoala_annotate",
-    "../incremental/runtime:runtime_annotate"
+    "../incremental/runtime:runtime_annotate",
   ]
 }
 
@@ -173,11 +186,7 @@ generate_static_abc("components_compile_abc") {
 }
 
 ohos_copy("components_abc") {
-  sources = [
-    target_out_dir + "/components_compile_abc/modules_static.abc"
-  ]
-  outputs = [
-    target_out_dir + "/components.abc"
-  ]
+  sources = [ target_out_dir + "/components_compile_abc/modules_static.abc" ]
+  outputs = [ target_out_dir + "/components.abc" ]
   deps = [ ":components_compile_abc" ]
 }

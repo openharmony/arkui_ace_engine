@@ -27,12 +27,14 @@ ohos_shared_library("shape_ani") {
   shlib_type = "ani"
   deps = [ "$ace_root/build:libace_compatible" ]
   public_configs = [ ":ani_config" ]
-  sources = [ "./src/shape.cpp",
-              "./src/circleShape.cpp",
-              "./src/ellipseShape.cpp",
-              "./src/pathShape.cpp",
-              "./src/rectShape.cpp",
-              "./src/shapeUtil.cpp" ]
+  sources = [
+    "./src/circleShape.cpp",
+    "./src/ellipseShape.cpp",
+    "./src/pathShape.cpp",
+    "./src/rectShape.cpp",
+    "./src/shape.cpp",
+    "./src/shapeUtil.cpp",
+  ]
   external_deps = [ "runtime_core:ani" ]
   part_name = "ace_engine"
   subsystem_name = "arkui"
@@ -41,12 +43,19 @@ ohos_shared_library("shape_ani") {
 
 generate_static_abc("shape_ani_abc") {
   base_url = "./ets"
-  files = [ "./ets/@ohos.arkui.shape.ets",
-            "./ets/arkui.component.units.ets",
-            "./ets/arkui.component.enums.ets"
-            ]
-  paths_keys = [ "@ohos.arkui.shape", "@ohos.arkui.component.Units" ]
-  paths_values = [ "./ets/@ohos.arkui.shape.ets", "./ets/@ohos.arkui.component.Units.ets" ]
+  files = [
+    "./ets/@ohos.arkui.shape.ets",
+    "./ets/arkui.component.units.ets",
+    "./ets/arkui.component.enums.ets",
+  ]
+  paths_keys = [
+    "@ohos.arkui.shape",
+    "@ohos.arkui.component.Units",
+  ]
+  paths_values = [
+    "./ets/@ohos.arkui.shape.ets",
+    "./ets/@ohos.arkui.component.Units.ets",
+  ]
   dst_file = target_out_dir + "/shape_ani.abc"
   out_puts = [ target_out_dir + "/shape_ani.abc" ]
   is_boot_abc = "True"

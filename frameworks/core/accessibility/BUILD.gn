@@ -34,8 +34,10 @@ template("ace_core_accessibility_ng_source_set") {
     sources = [
       # hidumper
       "hidumper/accessibility_hidumper.cpp",
+
       # for frameNode property handle
       "node_utils/accessibility_frame_node_utils.cpp",
+
       # utils
       "utils/accessibility_property_utils.cpp",
     ]
@@ -43,8 +45,7 @@ template("ace_core_accessibility_ng_source_set") {
     configs = [ "$ace_root:ace_config" ]
 
     deps = []
-    external_deps = [
-    ]
+    external_deps = []
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
@@ -54,8 +55,8 @@ template("ace_core_accessibility_ng_source_set") {
 }
 
 foreach(item, ace_platforms) {
-  ace_core_accessibility_ng_source_set("ace_core_accessibility_ng_" + item.name) {
-
+  ace_core_accessibility_ng_source_set(
+      "ace_core_accessibility_ng_" + item.name) {
     if (defined(item.config)) {
       config = item.config
     } else {

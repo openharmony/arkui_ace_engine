@@ -22,11 +22,11 @@ ace_unittest("event_manager_test_ng") {
     "$ace_root/test/mock/core/common/mock_window.cpp",
     "event_dump_test_ng.cpp",
     "event_manager_dispatch_mouse_hover_event_ng.cpp",
+    "event_manager_pen_test_ng.cpp",
     "event_manager_test_ng.cpp",
     "event_manager_test_ng_issuse.cpp",
     "event_manager_test_ng_new.cpp",
     "event_manager_test_ng_two.cpp",
-    "event_manager_pen_test_ng.cpp",
   ]
 }
 
@@ -191,6 +191,7 @@ group("core_event_unittest") {
     ":event_hub_test_ng",
     ":event_manager_test_ng",
     ":focus_box_test_ng",
+    ":focus_event_handler_test_ng",
     ":focus_hub_test_ng",
     ":gesture_event_hub_test_ng",
     ":input_event_hub_test_ng",
@@ -202,6 +203,5 @@ group("core_event_unittest") {
     ":scrollable_event_test_ng",
     ":state_style_test_ng",
     ":touch_event_test_ng",
-    ":focus_event_handler_test_ng",
   ]
 }

@@ -255,7 +255,7 @@ if (defined(global_parts_info)) {
 }
 
 if (defined(global_parts_info) &&
-  defined(global_parts_info.resourceschedule_ffrt) && current_os == "ohos") {
+    defined(global_parts_info.resourceschedule_ffrt) && current_os == "ohos") {
   ffrt_support = true
 } else {
   ffrt_support = false

@@ -18,111 +18,103 @@ libarkts_path = "."
 ui2abc_path = ".."
 interop_root = "$koala_root/interop"
 
-
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
 os_define = "KOALA_LINUX"
 
 shared_library("es2panda_lib") {
-    sources = [
-        "$libarkts_path/native/src/common.cc",
-        "$libarkts_path/native/src/bridges.cc",
-        "$libarkts_path/native/src/generated/bridges.cc",
+  sources = [
+    "$interop_root/src/cpp/callback-resource.cc",
+    "$interop_root/src/cpp/common-interop.cc",
+    "$interop_root/src/cpp/interop-logging.cc",
+    "$interop_root/src/cpp/napi/convertors-napi.cc",
+    "$libarkts_path/native/src/bridges.cc",
+    "$libarkts_path/native/src/common.cc",
+    "$libarkts_path/native/src/generated/bridges.cc",
+  ]
 
-        "$interop_root/src/cpp/napi/convertors-napi.cc",
-        "$interop_root/src/cpp/callback-resource.cc",
-        "$interop_root/src/cpp/interop-logging.cc",
-        "$interop_root/src/cpp/common-interop.cc"
-    ]
+  include_dirs = [
+    #"//third_party/node/src",
+    "$ui2abc_path/build/sdk/linux_host_tools/include/tools/es2panda/public",
+    "$ui2abc_path/build/sdk/linux_host_tools/include/tools/es2panda",
 
-    include_dirs = [
-        #"//third_party/node/src",
-        "$ui2abc_path/build/sdk/linux_host_tools/include/tools/es2panda/public",
-        "$ui2abc_path/build/sdk/linux_host_tools/include/tools/es2panda",
+    "$libarkts_path/native/src",
 
-        "$libarkts_path/native/src",
+    "$koala_root/interop/src/cpp",
+    "$koala_root/interop/src/cpp/napi",
+    "$koala_root/interop/src/cpp/types",
+  ]
 
-        "$koala_root/interop/src/cpp",
-        "$koala_root/interop/src/cpp/napi",
-        "$koala_root/interop/src/cpp/types",
-        
-    ]
+  defines = [
+    "$os_define",
+    "KOALA_INTEROP_MODULE=NativeModule",
+    "INTEROP_LIBRARY_NAME=es2panda",
+    "KOALA_USE_NODE_VM",
+    "KOALA_NAPI",
+  ]
 
-    defines = [
-        "$os_define",
-        "KOALA_INTEROP_MODULE=NativeModule",
-        "INTEROP_LIBRARY_NAME=es2panda",
-        "KOALA_USE_NODE_VM",
-        "KOALA_NAPI"
-    ]
+  configs -= [ "//build/config/compiler:compiler" ]
 
+  cflags_cc = [
+    "-std=c++17",
+    "-fPIC",
+  ]
 
-    configs -= [ "//build/config/compiler:compiler" ]
+  ldflags = [ "-Wl,--allow-shlib-undefined" ]
+  deps = [ "$ui2abc_path:ui2abc_panda_sdk" ]
 
-    cflags_cc = [
-        "-std=c++17",
-        "-fPIC",
-    ]
-
-    ldflags = [
-        "-Wl,--allow-shlib-undefined",
-
-    ]
-    deps = [
-        "$ui2abc_path:ui2abc_panda_sdk"
-    ]
-
-    output_extension = "node"
+  output_extension = "node"
 }
 
 action("es2panda_copy_lib") {
-    script = "gn/command/copy.py"
-    outputs = [
-        "$target_out_dir/es2panda.node"
-    ]
-    deps = [
-        ":es2panda_lib(${host_toolchain})"
-    ]
-    args = [
-        "--from-path", rebase_path(root_out_dir),
-        "--to-path", rebase_path(".")
-    ]
+  script = "gn/command/copy.py"
+  outputs = [ "$target_out_dir/es2panda.node" ]
+  deps = [ ":es2panda_lib(${host_toolchain})" ]
+  args = [
+    "--from-path",
+    rebase_path(root_out_dir),
+    "--to-path",
+    rebase_path("."),
+  ]
 }
 
 action("libarkts_install") {
-    script = "../../gn/command/npm_util.py"
-    outputs = [
-        "$target_out_dir/libarkts_install"
-    ]
-    args = [
-        "--project-path", rebase_path("."),
-        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-        "--install",
-        "--install-path", rebase_path("..")
-    ]
+  script = "../../gn/command/npm_util.py"
+  outputs = [ "$target_out_dir/libarkts_install" ]
+  args = [
+    "--project-path",
+    rebase_path("."),
+    "--node-path",
+    rebase_path(
+        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+    "--install",
+    "--install-path",
+    rebase_path(".."),
+  ]
 
-    deps = [ "../../arkoala-arkts:install_all" ]
+  deps = [ "../../arkoala-arkts:install_all" ]
 }
 
 action("es2panda.js") {
-    script = "../../gn/command/npm_util.py"
-    outputs = [
-        "$target_out_dir/es2panda.js"
-    ]
-    deps = [
-        ":es2panda_copy_lib",
-        ":libarkts_install"
-    ]
-    args = [
-        "--project-path", rebase_path("."),
-        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-        "--npm-args", "run", "compile:gn"
-    ]
+  script = "../../gn/command/npm_util.py"
+  outputs = [ "$target_out_dir/es2panda.js" ]
+  deps = [
+    ":es2panda_copy_lib",
+    ":libarkts_install",
+  ]
+  args = [
+    "--project-path",
+    rebase_path("."),
+    "--node-path",
+    rebase_path(
+        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+    "--npm-args",
+    "run",
+    "compile:gn",
+  ]
 }
 
 group("es2panda") {
-    deps = [
-      ":es2panda.js"
-    ]
+  deps = [ ":es2panda.js" ]
 }

@@ -46,8 +46,8 @@ ace_unittest("drag_drop_manager_test_ng") {
   sources = [
     "drag_drop_manager_test_ng.cpp",
     "drag_drop_manager_test_ng_coverage.cpp",
-    "drag_drop_manager_test_ng_property_config.cpp",
     "drag_drop_manager_test_ng_plus.cpp",
+    "drag_drop_manager_test_ng_property_config.cpp",
   ]
 }
 
@@ -216,10 +216,10 @@ group("core_manager_unittest") {
     ":navigation_manager_test_ng",
     ":post_event_manager_test_ng",
     ":safe_area_manager_test_ng",
+    ":scroll_adjust_manager_test_ng",
     ":select_overlay_manager_test_ng",
     ":select_overlay_proxy_test_ng",
     ":shared_overlay_manager_test_ng",
     ":theme_manager_test_ng",
-    ":scroll_adjust_manager_test_ng",
   ]
 }

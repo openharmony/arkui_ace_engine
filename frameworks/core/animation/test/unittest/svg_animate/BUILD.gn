@@ -178,7 +178,6 @@ ohos_unittest("SvgAnimateTest") {
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
     "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
 
-
     # mock
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/adapter/ohos/osal/thread_priority.cpp",

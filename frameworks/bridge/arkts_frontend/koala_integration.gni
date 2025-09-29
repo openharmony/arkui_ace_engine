@@ -12,19 +12,20 @@
 # limitations under the License.
 
 koala_mr = {
-    root_path = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mirror"
-    scripts_path = "$root_path/gn/script"
-    imports_prefix = "$root_path/gn/import"
-    ui2abc_path = "$root_path/ui2abc"
-    libarkts_path = "$ui2abc_path/libarkts"
-    incremental_path = "$root_path/incremental"
-    panda_sdk_path = "$ui2abc_path/build/sdk"
-    es2panda_path = "$panda_sdk_path/ohos_arm64/include/tools/es2panda"
-    interop_path = "$root_path/interop"
-    arkoala_arkts_path = "$root_path/arkoala-arkts"
-    is_rri = false
+  root_path = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mirror"
+  scripts_path = "$root_path/gn/script"
+  imports_prefix = "$root_path/gn/import"
+  ui2abc_path = "$root_path/ui2abc"
+  libarkts_path = "$ui2abc_path/libarkts"
+  incremental_path = "$root_path/incremental"
+  panda_sdk_path = "$ui2abc_path/build/sdk"
+  es2panda_path = "$panda_sdk_path/ohos_arm64/include/tools/es2panda"
+  interop_path = "$root_path/interop"
+  arkoala_arkts_path = "$root_path/arkoala-arkts"
+  is_rri = false
 }
 
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
-koala_node_path = rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin")
+koala_node_path = rebase_path(
+        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin")
