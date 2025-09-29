@@ -1622,7 +1622,7 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
 
     if (isOnShow) {
         if (overlayManager && overlayManager->HasModalPage() &&
-            navigationPattern->GetEnableShowHideWithContentCover()) {
+            navigationPattern->GetEnableVisibilityLifecycleWithContentCover()) {
             return;
         }
         if (needHideOrShowPrimaryNodes) {
@@ -1727,7 +1727,7 @@ void NavigationPattern::FireNavigationLifecycleChange(
             auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
             CHECK_NULL_VOID(navigationPattern);
             if (reason == NavDestVisibilityChangeReason::CONTENT_COVER &&
-                !navigationPattern->GetEnableShowHideWithContentCover()) {
+                !navigationPattern->GetEnableVisibilityLifecycleWithContentCover()) {
                 continue;
             }
             navigationPattern->FireNavDestinationStateChange(lifecycle, reason);

@@ -438,12 +438,12 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("enableDragBar", &JSNavigation::SetEnableDragBar);
     JSClass<JSNavigation>::StaticMethod("enableModeChangeAnimation", &JSNavigation::SetEnableModeChangeAnimation);
     JSClass<JSNavigation>::StaticMethod("splitPlaceholder", &JSNavigation::SetSplitPlaceholder);
-    JSClass<JSNavigation>::StaticMethod("enableShowHideWithContentCover",
-        &JSNavigation::SetEnableShowHideWithContentCover);
+    JSClass<JSNavigation>::StaticMethod("enableVisibilityLifecycleWithContentCover",
+        &JSNavigation::SetEnableVisibilityLifecycleWithContentCover);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
-void JSNavigation::SetEnableShowHideWithContentCover(const JSCallbackInfo& info)
+void JSNavigation::SetEnableVisibilityLifecycleWithContentCover(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
         return;
@@ -452,7 +452,7 @@ void JSNavigation::SetEnableShowHideWithContentCover(const JSCallbackInfo& info)
     if (info[0]->IsBoolean()) {
         isEnable = info[0]->ToBoolean();
     }
-    NavigationModel::GetInstance()->SetEnableShowHideWithContentCover(isEnable);
+    NavigationModel::GetInstance()->SetEnableVisibilityLifecycleWithContentCover(isEnable);
 }
 
 void JSNavigation::SetTitle(const JSCallbackInfo& info)
