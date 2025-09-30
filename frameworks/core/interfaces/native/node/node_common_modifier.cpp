@@ -5091,7 +5091,7 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::RemoveResObj(frameNode, "backgroundEffect");
     CalcDimension radius;
-    radius = CalcDimension(radiusArg, DimensionUnit::VP);
+    radius.SetValue(radiusArg);
     Color color(colorArg);
     BlurOption blurOption;
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
