@@ -377,6 +377,7 @@ struct ArkUIAniImageModifier {
     ani_long (*getColorFilter)(ani_long colorFilterPeer);
     void* (*getDrawingColorFilterPeer)(void* colorFilter);
     void* (*getDrawingLatticePeer)(void* latticePeer);
+    void* (*getDrawableDescriptorPeer)(void* drawableDescriptorPeer, int32_t type);
 };
 
 struct ArkUIWaterFlowSectionGap {

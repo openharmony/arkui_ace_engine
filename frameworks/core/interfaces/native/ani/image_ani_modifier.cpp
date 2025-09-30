@@ -24,6 +24,7 @@
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
 #include "core/interfaces/native/implementation/drawing_lattice_peer.h"
+#include "core/interfaces/native/implementation/drawable_descriptor_peer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -99,6 +100,11 @@ void* GetDrawingLatticePeer(void* drawingLatticePeerPtr)
     return reinterpret_cast<void*>(drawing_LatticePeer::Create(drawingLatticePeerPtr));
 }
 
+void* GetDrawableDescriptorPeer(void* drawableDescriptorPeer, int32_t type)
+{
+    return reinterpret_cast<void*>(DrawableDescriptorPeer::Create(drawableDescriptorPeer, type));
+}
+
 const ArkUIAniImageModifier* GetImageAniModifier()
 {
     static const ArkUIAniImageModifier impl = {
@@ -111,6 +117,7 @@ const ArkUIAniImageModifier* GetImageAniModifier()
         .getColorFilter = OHOS::Ace::NG::GetColorFilter,
         .getDrawingColorFilterPeer = OHOS::Ace::NG::GetDrawingColorFilterPeer,
         .getDrawingLatticePeer = OHOS::Ace::NG::GetDrawingLatticePeer,
+        .getDrawableDescriptorPeer = OHOS::Ace::NG::GetDrawableDescriptorPeer,
     };
     return &impl;
 }
