@@ -188,7 +188,6 @@ void SetStartAngleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
-        // Implement Reset value
         GaugeModelNG::SetStartAngle(frameNode, DEFAULT_GAUGE_STARTANGLE);
         return;
     }
@@ -201,7 +200,6 @@ void SetEndAngleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
-        // Implement Reset value
         GaugeModelNG::SetEndAngle(frameNode, DEFAULT_GAUGE_ENDANGLE);
         return;
     }
@@ -246,7 +244,6 @@ void SetColorsImpl(Ark_NativePointer node,
             }
         },
         []() {
-            // Implement Reset value
         });
     if (gaugeColors.has_value()) {
         SortColorStopOffset(gaugeColors->gradient);
@@ -272,7 +269,6 @@ void SetDescriptionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowDescription, false, frameNode);
         frameNode->MarkModifyDone();
         return;

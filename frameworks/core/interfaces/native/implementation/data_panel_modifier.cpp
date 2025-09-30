@@ -172,7 +172,6 @@ void SetCloseEffectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
         DataPanelModelNG::SetCloseEffect(frameNode, false);
         return;
     }
@@ -220,7 +219,6 @@ void SetTrackShadowImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<DataPanelShadow>(value);
     if (!convValue) {
-        // Implement Reset value
         ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ShadowOption, frameNode);
         return;
     }

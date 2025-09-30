@@ -467,7 +467,8 @@ void SetCanLoopImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        convValue = true;
+        TextPickerModelStatic::SetCanLoop(frameNode, true);
+        return;
     }
     TextPickerModelStatic::SetCanLoop(frameNode, *convValue);
 }
@@ -514,7 +515,8 @@ void SetDisableTextStyleAnimationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        convValue = false;
+        TextPickerModelStatic::SetDisableTextStyleAnimation(frameNode, false);
+        return;
     }
     TextPickerModelStatic::SetDisableTextStyleAnimation(frameNode, *convValue);
 }
@@ -533,7 +535,6 @@ void SetOnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
         TextPickerModelStatic::SetOnCascadeChange(frameNode, nullptr);
         return;
     }
@@ -562,7 +563,6 @@ void SetOnScrollStopImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
         TextPickerModelStatic::SetOnScrollStop(frameNode, nullptr);
         return;
     }
@@ -587,7 +587,6 @@ void SetOnEnterSelectedAreaImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
         TextPickerModelStatic::SetOnEnterSelectedArea(frameNode, nullptr);
         return;
     }
