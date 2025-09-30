@@ -516,7 +516,6 @@ protected:
     int32_t instanceId_ = -1;
     int32_t lastRotation = -1;
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;
-    OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IWaterfallModeChangeListener> waterfallModeChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IWindowRectChangeListener> windowRectChangeListener_ = nullptr;
