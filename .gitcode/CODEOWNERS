@@ -3186,7 +3186,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/utils/ani_utils.h @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/ @arkui-idlize
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/interop/ @arkui-idlize
-frameworks/bridge/arkts_frontend/koala_projects/arkoala/arkui-ohos/src/component @arkui-idlize
+frameworks/bridge/arkts_frontend/koala_projects/arkoala/arkui-ohos/src/component/ @arkui-idlize
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.cc @arkui_framework_resource
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.h @arkui_framework_resource
 
