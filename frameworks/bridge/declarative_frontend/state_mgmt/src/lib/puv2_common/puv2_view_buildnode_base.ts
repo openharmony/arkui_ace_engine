@@ -132,9 +132,13 @@ abstract class ViewBuildNodeBase {
             this.reconnectToConsume()
         }
 
+        if (this instanceof ViewV2) {
+            this.reconnectToConsumerV2(this.defaultConsumer, this.defaultVal);
+        }
+
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild?.deref();
-            if (child instanceof ViewPU) {
+            if (child instanceof ViewPU || child instanceof ViewV2) {
                 child.propagateToChildrenToConnected();
             }
         })
@@ -181,9 +185,13 @@ abstract class ViewBuildNodeBase {
         if (this instanceof ViewPU && this.reconnectConsume_.size > 0) {
             this.disconnectedConsume();
         }
+
+        if (this instanceof ViewV2) {
+            this.reconnectToConsumerV2(this.defaultConsumer, this.defaultVal);
+        }
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild?.deref();
-            if (child instanceof ViewPU) {
+            if (child instanceof ViewPU || child instanceof ViewV2) {
                 child.propagateToChildrenToDisconnected();
             }
         })

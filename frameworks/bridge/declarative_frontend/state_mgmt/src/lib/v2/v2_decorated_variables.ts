@@ -128,6 +128,12 @@ class VariableUtilV2 {
       let checkView : IView | undefined = view?.getParent();
       const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, '@Provider');
       stateMgmtConsole.debug(`findProvider: Try to connect ${view.debugInfo__()} '@Consumer ${aliasName}' to @Provider counterpart....`);
+      if ((!checkView) &&('__parentViewBuildNode__' in (view as any)) && (view as any).__parentViewBuildNode__) {
+        const buildNodeProvider = ProviderConsumerUtilV2.findProviderInBuildNode((view as any).__parentViewBuildNode__, aliasName);
+        if (buildNodeProvider) {
+          return buildNodeProvider;
+        }
+      }
 
       while (checkView) {
         const meta = checkView.constructor?.prototype[ObserveV2.V2_DECO_META];
@@ -140,12 +146,59 @@ class VariableUtilV2 {
             return [checkView, providedVarName];
           }
         }
+
+        if ('__parentViewBuildNode__' in (checkView as any) && (checkView as any).__parentViewBuildNode__) {
+          const buildNodeProvider = ProviderConsumerUtilV2.findProviderInBuildNode((checkView as any ).__parentViewBuildNode__, aliasName);
+          if (buildNodeProvider) {
+            return buildNodeProvider;
+          }
+        }
+
         checkView = checkView.getParent();
       }; // while
       stateMgmtConsole.warn(`findProvider: ${view.debugInfo__()} @Consumer('${aliasName}'), no matching @Provider found amongst ancestor @ComponentV2's!`);
       return undefined;
     }
 
+  private static findProviderInBuildNode(buildNode: any, aliasName: string): [ViewV2, string] | undefined {
+    let currentNode: any = buildNode;
+    const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, '@Provider');
+  
+    while (currentNode) {
+      if (currentNode instanceof ViewV2) {
+        const meta = (currentNode as any).constructor?.prototype[ObserveV2.V2_DECO_META];
+  
+        if (meta && meta[searchingPrefixedAliasName]) {
+          const aliasMeta = meta[searchingPrefixedAliasName];
+          const providedVarName: string | undefined = (aliasMeta && aliasMeta.deco === '@Provider') ? aliasMeta.varName : undefined;
+          if (providedVarName) {
+            stateMgmtConsole.debug(`success findProviderInBuildNode: Found @Provider('${aliasName}') in ViewV2: ${currentNode.debugInfo__()}, varName = ${providedVarName}`);
+            return [currentNode, providedVarName];
+          }
+        } else if (!(currentNode as any).__parentViewBuildNode__) {
+          currentNode = currentNode.getParent();
+          continue;
+        }
+      }
+
+      const parentRef = (currentNode as any).__parentViewOfBuildNode;
+      if (parentRef && typeof parentRef.deref === 'function') {
+        currentNode = parentRef.deref();
+        continue;
+      }
+
+      if ('__parentViewBuildNode__' in (currentNode as any) && (currentNode as any).__parentViewBuildNode__) {
+        currentNode = (currentNode as any).__parentViewBuildNode__;
+      } else {
+        currentNode = undefined;
+      }
+      if (!currentNode) {
+        break;
+      }
+    }
+
+    return undefined;
+  }
    /**
    * Connects a consumer property of a view (`consumeView`) to a provider property of another view (`provideView`).
    * This function establishes a link between the consumer and provider, allowing the consumer to access and update
@@ -161,7 +214,7 @@ class VariableUtilV2 {
     public static connectConsumer2Provider<T>(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): T {
       const weakView = new WeakRef<ViewV2>(provideView);
       const provideViewName = provideView.constructor?.name;
-
+      consumeView[consumeVarName] = provideView[provideVarName];
       Reflect.defineProperty(consumeView, consumeVarName, {
         get() {
           let view = weakView.deref();
@@ -193,7 +246,8 @@ class VariableUtilV2 {
             ObserveV2.getObserve().fireChange(this, consumeVarName);
           }
         },
-        enumerable: true
+        enumerable: true,
+        configurable: true
       });
       return provideView[provideVarName];
     }
@@ -216,7 +270,8 @@ class VariableUtilV2 {
             ObserveV2.getObserve().fireChange(this, consumeVarName);
           }
         },
-        enumerable: true
+        enumerable: true,
+        configurable: true
       });
       return consumeView[storeProp];
     }

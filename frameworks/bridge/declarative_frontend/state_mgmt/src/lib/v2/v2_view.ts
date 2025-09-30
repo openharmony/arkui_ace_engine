@@ -51,6 +51,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     private monitorIdsDelayedUpdateForAddMonitor_: Set<number> = new Set();
     private computedIdsDelayedUpdate: Set<number> = new Set();
 
+    public defaultConsumer: any = undefined;
+    public defaultVal: any = undefined;
+
     private recyclePoolV2_: RecyclePoolV2 | undefined = undefined;
 
     public hasBeenRecycled_: boolean = false;
@@ -388,6 +391,18 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         const refs = this[ObserveV2.COMPUTED_REFS];
         refs[name].resetComputed(name);
      }
+
+    public reconnectToConsumerV2<T>(varName: string, consumerVal: T): void {
+        let providerInfo = ProviderConsumerUtilV2.findProvider(this, varName);
+        if (providerInfo && providerInfo[0] && providerInfo[1]) {
+            ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+        }
+        if (!providerInfo) {
+          ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, consumerVal);
+          ObserveV2.getObserve().fireChange(this, varName);
+        }
+        stateMgmtConsole.debug(`resetConsumer value: ${consumerVal} for ${varName}`);
+    }
 
     // Resets the consumer value when the component is reinitialized on reuse
      public resetConsumer<T>(varName: string, consumerVal: T): void {
