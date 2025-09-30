@@ -1590,7 +1590,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_040, TestSize.Level1)
 
     std::shared_ptr<Rosen::RSSurfaceNode> node;
     std::string surfaceNodeName = "ArkTSCardNode";
-    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName};
     node = std::make_shared<OHOS::Rosen::RSSurfaceNode>(surfaceNodeConfig, true);
     AAFwk::Want want;
 
