@@ -6627,6 +6627,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetZoomAccessEnabled));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetZoomAccess"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetZoomAccessEnabled));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setZoomControlAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetZoomControlAccess));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetZoomControlAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetZoomControlAccess));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCacheMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetCacheMode));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCacheMode"),

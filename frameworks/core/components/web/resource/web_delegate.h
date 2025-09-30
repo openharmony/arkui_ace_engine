@@ -996,6 +996,7 @@ public:
     void UpdateLoadsImagesAutomatically(const bool& isImageAccessEnabled);
     void UpdateMixedContentMode(const MixedModeContent& mixedMode);
     void UpdateSupportZoom(const bool& isZoomAccessEnabled);
+    void UpdateZoomControlAccess(bool zoomControlAccess);
     void UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled);
     void UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled);
     void UpdateCacheMode(const WebCacheMode& mode);

@@ -3793,6 +3793,26 @@ void WebDelegate::UpdateSupportZoom(const bool& isZoomAccessEnabled)
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateSupportZoom");
 }
+
+void WebDelegate::UpdateZoomControlAccess(bool zoomControlAccess)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), zoomControlAccess]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutZoomControlAccess(zoomControlAccess);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebPutZoomControlAccess");
+}
+
 void WebDelegate::UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled)
 {
     auto context = context_.Upgrade();
