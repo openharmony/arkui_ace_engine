@@ -3268,6 +3268,7 @@ frameworks/core/interfaces/native/ani/waterflow_ani_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/water_flow_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/implementation/water_flow_modifier.cpp @arkuiscroll
 
+frameworks/core/interfaces/native/implementation/select_modifier.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/text_input_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/search_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_area_modifier.cpp @huawei_g_five
