@@ -220,7 +220,7 @@ public:
         const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
     void CallRemoveAvailableInstanceIdFunc(
         const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
-
+    void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs);
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -271,6 +271,7 @@ private:
     static bool isModuleInitialized_;
     static shared_ptr<JsRuntime> globalRuntime_;
     shared_ptr<JsValue> uiContext_;
+    shared_ptr<JsValue> uiNodeCleanUpIdleFunc_;
     static std::shared_mutex globalRuntimeMutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngineInstance);
@@ -453,6 +454,11 @@ public:
     napi_value GetFrameNodeValueByNodeId(int32_t nodeId) override
     {
         return engineInstance_->GetFrameNodeValueByNodeId(nodeId);
+    }
+
+    void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs) override
+    {
+        engineInstance_->CallStateMgmtCleanUpIdleTaskFunc(maxTimeInNs);
     }
 
     void JsStateProfilerResgiter();

@@ -1023,24 +1023,6 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     (*func).second(globalObj);
 }
 
-void JsUINodeRegisterCleanUp(BindingTarget globalObj)
-{
-    // globalObj is panda::Local<panda::ObjectRef>
-    const auto globalObject = JSRef<JSObject>::Make(globalObj);
-
-    const JSRef<JSVal> cleanUpIdleTask = globalObject->GetProperty("uiNodeCleanUpIdleTask");
-    if (cleanUpIdleTask->IsFunction()) {
-        LOGI("CleanUpIdleTask is a valid function");
-        const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
-        const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
-            JAVASCRIPT_EXECUTION_SCOPE_STATIC;
-            auto params = ConvertToJSValues(maxTimeInNs / 1e6);
-            jsFunc->Call(globalObject, params.size(), params.data());
-        };
-        ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
-    }
-}
-
 void JsRegisterModules(BindingTarget globalObj, std::string modules, void* nativeEngine)
 {
     std::stringstream input(modules);
@@ -1048,7 +1030,6 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules, void* nativ
     while (std::getline(input, moduleName, ',')) {
         RegisterModuleByName(globalObj, moduleName);
     }
-    JsUINodeRegisterCleanUp(globalObj);
 
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);

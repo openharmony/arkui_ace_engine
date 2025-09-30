@@ -296,7 +296,7 @@ HWTEST_F(BubbleTestTwoNg, InitWrapperRect001, TestSize.Level1)
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
     ASSERT_NE(layoutWrapper, nullptr);
     WeakPtr<AceType> bubble = Referenced::WeakClaim(Referenced::RawPtr(frameNode));
-    ElementRegister::GetInstance()->itemMap_.insert({ 1, bubble });
+    ElementRegister::GetInstance()->AddReferenced(1, bubble);
     BubbleLayoutAlgorithm bubbleLayoutAlgorithm;
     bubbleLayoutAlgorithm.targetTag_ = "test1";
     bubbleLayoutAlgorithm.targetNodeId_ = 1;

@@ -40,7 +40,7 @@ Flow B:
      it may make the first viewpu aboutToBeDeleted execution time longer than before, but for rest viewpu may be faster.
      It's function equals with purgeDeletedElmtIdsRecursively, so it is not necessary to execute purgeDeletedElmtIds for all its child recursively.
 
-2. some time later or when idle: PipelineContext::OnIdle will CallJSCleanUpIdleTaskFunc to do the clean up for the removed elements which have not unregisted
+2. some time later or when idle: PipelineContext::OnIdle will CallStateMgmtCleanUpIdleTaskFunc to do the clean up for the removed elements which have not unregisted
    from the stateMgmt side.
 */
 

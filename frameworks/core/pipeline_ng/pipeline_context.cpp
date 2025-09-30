@@ -5436,17 +5436,27 @@ void PipelineContext::OnIdle(int64_t deadline)
     canUseLongPredictTask_ = false;
     currentTime = GetSysTimestamp();
     if (currentTime < deadline) {
-        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(deadline - currentTime);
+        auto frontend = GetFrontend();
+        if (frontend) {
+            frontend->CallStateMgmtCleanUpIdleTaskFunc(deadline - currentTime);
+        } else {
+            LOGW("Fail to Call JSCleanUpIdleTaskFunc for frontend is null.");
+        }
         frameCountForNotCallJSCleanUp_ = 0;
     } else {
         frameCountForNotCallJSCleanUp_++;
     }
 
-    // Check if there is more than 100 frame which does not execute the CallJSCleanUpIdleTaskFunc
-    // Force to invoke CallJSCleanUpIdleTaskFunc to make sure no OOM in JS side
+    // Check if there is more than 100 frame which does not execute the CallStateMgmtCleanUpIdleTaskFunc
+    // Force to invoke CallStateMgmtCleanUpIdleTaskFunc to make sure no OOM in JS side
     if (frameCountForNotCallJSCleanUp_ >= MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION) {
         // The longest execution time is half of vsync period
-        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(window_->GetVSyncPeriod() / RATIO_OF_VSYNC_PERIOD);
+        auto frontend = GetFrontend();
+        if (frontend) {
+            frontend->CallStateMgmtCleanUpIdleTaskFunc(window_->GetVSyncPeriod() / RATIO_OF_VSYNC_PERIOD);
+        } else {
+            LOGW("Fail to Call JSCleanUpIdleTaskFunc for frontend is null.");
+        }
         frameCountForNotCallJSCleanUp_ = 0;
     }
 
