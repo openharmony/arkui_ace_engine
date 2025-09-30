@@ -25474,6 +25474,16 @@ class ArkNavDestinationComponent extends ArkComponent {
       NavDestinationOnWillDisappearModifier, callback);
     return this;
   }
+  onActive(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnActiveModifier.identity,
+      NavDestinationOnActiveModifier, callback);
+    return this;
+  }
+  onInactive(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnInactiveModifier.identity,
+      NavDestinationOnInactiveModifier, callback);
+    return this;
+  }
   onBackPressed(callback) {
     modifierWithKey(this._modifiersWithKeys, NavDestinationOnBackPressedModifier.identity,
       NavDestinationOnBackPressedModifier, callback);
@@ -25553,6 +25563,16 @@ class ArkNavDestinationComponent extends ArkComponent {
   }
   systemBarStyle(style) {
     modifierWithKey(this._modifiersWithKeys, NavDestinationSystemBarStyleModifier.identity, NavDestinationSystemBarStyleModifier, style);
+    return this;
+  }
+  onResult(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnResultModifier.identity,
+      NavDestinationOnResultModifier, callback);
+    return this;
+  }
+  onNewParam(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnNewParamModifier.identity,
+      NavDestinationOnNewParamModifier, callback);
     return this;
   }
 }
@@ -25872,6 +25892,34 @@ class NavDestinationOnWillDisappearModifier extends ModifierWithKey {
 }
 NavDestinationOnWillDisappearModifier.identity = Symbol('onWillDisappear');
 
+class NavDestinationOnActiveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnActive(node);
+    } else {
+      getUINativeModule().navDestination.setOnActive(node, this.value);
+    }
+  }
+}
+NavDestinationOnActiveModifier.identity = Symbol('onActive');
+
+class NavDestinationOnInactiveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnInactive(node);
+    } else {
+      getUINativeModule().navDestination.setOnInactive(node, this.value);
+    }
+  }
+}
+NavDestinationOnInactiveModifier.identity = Symbol('onInactive');
+
 class NavDestinationOnBackPressedModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -25899,6 +25947,34 @@ class NavDestinationOnReadyModifier extends ModifierWithKey {
   }
 }
 NavDestinationOnReadyModifier.identity = Symbol('onReady');
+
+class NavDestinationOnResultModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnResult(node);
+    } else {
+      getUINativeModule().navDestination.setOnResult(node, this.value);
+    }
+  }
+}
+NavDestinationOnResultModifier.identity = Symbol('onResult');
+
+class NavDestinationOnNewParamModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnNewParam(node);
+    } else {
+      getUINativeModule().navDestination.setOnNewParam(node, this.value);
+    }
+  }
+}
+NavDestinationOnNewParamModifier.identity = Symbol('onNewParam');
 
 //@ts-ignore
 if (globalThis.NavDestination !== undefined) {

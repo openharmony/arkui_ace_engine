@@ -1741,6 +1741,22 @@ void NavDestinationModelNG::SetOnPop(std::function<void(const RefPtr<NavPathInfo
     onPop(navPathInfo);
 }
 
+void NavDestinationModelNG::SetOnPop(FrameNode* frameNode, std::function<void(const RefPtr<NavPathInfo>&)>&& onPop)
+{
+    if (!onPop) {
+        return;
+    }
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
+    auto navPathInfo = context->GetNavPathInfo();
+    CHECK_NULL_VOID(navPathInfo);
+    onPop(navPathInfo);
+}
+
 void NavDestinationModelNG::SetCustomTitle(FrameNode* frameNode, const RefPtr<AceType>& customNode)
 {
     auto customTitle = AceType::DynamicCast<NG::UINode>(customNode);
@@ -1852,9 +1868,25 @@ void NavDestinationModelNG::SetOnActive(std::function<void(int32_t)>&& onActive)
     eventHub->SetOnActive(onActive);
 }
 
+void NavDestinationModelNG::SetOnActive(FrameNode* frameNode, std::function<void(int32_t)>&& onActive)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnActive(onActive);
+}
+
 void NavDestinationModelNG::SetOnInactive(std::function<void(int32_t)>&& onInactive)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnInactive(onInactive);
+}
+
+void NavDestinationModelNG::SetOnInactive(FrameNode* frameNode, std::function<void(int32_t)>&& onInactive)
+{
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1869,6 +1901,15 @@ void NavDestinationModelNG::SetCustomTransition(NG::NavDestinationTransitionDele
     auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
     CHECK_NULL_VOID(node);
     node->SetNavDestinationTransitionDelegate(std::move(transitionDelegate));
+}
+
+void NavDestinationModelNG::SetOnNewParam(
+    FrameNode* frameNode, NG::NavDestinationOnNewParamCallback&& onNewParamCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnNewParam(std::move(onNewParamCallback));
 }
 
 void NavDestinationModelNG::SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback)
