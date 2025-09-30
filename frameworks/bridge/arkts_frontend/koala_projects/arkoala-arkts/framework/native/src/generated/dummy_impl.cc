@@ -2476,18 +2476,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetDrawModifierImpl(Ark_NativePointer node,
-                             const Opt_DrawModifier* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setDrawModifier(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void SetResponseRegionImpl(Ark_NativePointer node,
                                const Opt_Union_Array_Rectangle_Rectangle* value)
     {
@@ -21131,7 +21119,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::ConstructImpl,
             CommonMethodModifier::SetWidthImpl,
             CommonMethodModifier::SetHeightImpl,
-            CommonMethodModifier::SetDrawModifierImpl,
             CommonMethodModifier::SetResponseRegionImpl,
             CommonMethodModifier::SetMouseResponseRegionImpl,
             CommonMethodModifier::SetSizeImpl,
@@ -28693,66 +28680,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // DrawingRenderingContextAccessor
-    namespace DrawModifierAccessor {
-    void DestroyPeerImpl(Ark_DrawModifier peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("destroyPeer(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_DrawModifier ConstructImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_DrawModifier>(100);
-        }
-        string out("new DrawModifier(");
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_DrawModifier>(100)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_DrawModifier>(100);
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        }
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
-    Callback_DrawContext_Void GetDrawBehind_callbackImpl(Ark_DrawModifier peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getDrawBehind_callback(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    Callback_DrawContext_Void GetDrawContent_callbackImpl(Ark_DrawModifier peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getDrawContent_callback(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    } // DrawModifierAccessor
     namespace EnvironmentBackendAccessor {
     } // EnvironmentBackendAccessor
     namespace EventEmulatorAccessor {
@@ -35250,6 +35177,64 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // NodeContainerOpsAccessor
+    namespace NodeContentExtenderAccessor {
+    Ark_NativePointer ConstructorNodeContentImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("constructorNodeContent(");
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer GetDestroyImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("getDestroy(");
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_Boolean AddFrameNodeImpl(Ark_NativePointer content,
+                                 Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("addFrameNode(");
+        WriteToString(&out, content);
+        out.append(", ");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Boolean RemoveFrameNodeImpl(Ark_NativePointer content,
+                                    Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("removeFrameNode(");
+        WriteToString(&out, content);
+        out.append(", ");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    } // NodeContentExtenderAccessor
     namespace OffscreenCanvasAccessor {
     void DestroyPeerImpl(Ark_OffscreenCanvas peer)
     {
@@ -44225,24 +44210,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DrawingRenderingContextPeer {
         virtual ~DrawingRenderingContextPeer() = default;
     };
-    const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
-    {
-        static const GENERATED_ArkUIDrawModifierAccessor DrawModifierAccessorImpl {
-            DrawModifierAccessor::DestroyPeerImpl,
-            DrawModifierAccessor::ConstructImpl,
-            DrawModifierAccessor::GetFinalizerImpl,
-            DrawModifierAccessor::InvalidateImpl,
-            DrawModifierAccessor::GetDrawBehind_callbackImpl,
-            DrawModifierAccessor::SetDrawBehind_callbackImpl,
-            DrawModifierAccessor::GetDrawContent_callbackImpl,
-            DrawModifierAccessor::SetDrawContent_callbackImpl,
-        };
-        return &DrawModifierAccessorImpl;
-    }
-
-    struct DrawModifierPeer {
-        virtual ~DrawModifierPeer() = default;
-    };
     const GENERATED_ArkUIEnvironmentBackendAccessor* GetEnvironmentBackendAccessor()
     {
         static const GENERATED_ArkUIEnvironmentBackendAccessor EnvironmentBackendAccessorImpl {
@@ -45286,6 +45253,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NodeContainerOpsAccessor::SetOnTouchEventImpl,
         };
         return &NodeContainerOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUINodeContentExtenderAccessor* GetNodeContentExtenderAccessor()
+    {
+        static const GENERATED_ArkUINodeContentExtenderAccessor NodeContentExtenderAccessorImpl {
+            NodeContentExtenderAccessor::ConstructorNodeContentImpl,
+            NodeContentExtenderAccessor::GetDestroyImpl,
+            NodeContentExtenderAccessor::AddFrameNodeImpl,
+            NodeContentExtenderAccessor::RemoveFrameNodeImpl,
+        };
+        return &NodeContentExtenderAccessorImpl;
     }
 
     const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor()
@@ -46809,7 +46787,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetDismissPopupActionAccessor,
             GetDragEventAccessor,
             GetDrawingRenderingContextAccessor,
-            GetDrawModifierAccessor,
             GetEnvironmentBackendAccessor,
             GetEventEmulatorAccessor,
             GetEventResultAccessor,
@@ -46868,6 +46845,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetNavPathInfoAccessor,
             GetNavPathStackAccessor,
             GetNodeContainerOpsAccessor,
+            GetNodeContentExtenderAccessor,
             GetOffscreenCanvasAccessor,
             GetOffscreenCanvasRenderingContext2DAccessor,
             GetPanGestureEventAccessor,
