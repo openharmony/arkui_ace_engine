@@ -95,6 +95,11 @@ public:
         return *this;
     }
 
+    bool operator!=(const LinearColor& color) const
+    {
+        return !operator==(color);
+    }
+
     int16_t GetRed() const
     {
         return red_;

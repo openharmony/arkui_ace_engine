@@ -77,7 +77,7 @@ void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSi
 Gradient GradientStyleModifier::GetGradient() const
 {
     Gradient gradient;
-    std::vector<Color> colors = colors_->Get().GetColors();
+    std::vector<LinearColor> colors = colors_->Get().GetColors();
     std::vector<Dimension> stops = colorStops_->Get().GetColorStops();
     if (gradient_) {
         gradient = gradient_->Get();
@@ -89,8 +89,9 @@ Gradient GradientStyleModifier::GetGradient() const
     }
     GradientColor color;
     for (size_t index = 0; index < size; index++) {
-        colors[index].SetColorSpace(colorSpace_);
-        color.SetColor(colors[index]);
+        auto curColor = colors[index].ToColor();
+        curColor.SetColorSpace(colorSpace_);
+        color.SetColor(curColor);
         auto colorStop =
             stops[index].Value() > MAX_COLOR_STOP ? Dimension(MAX_COLOR_STOP, DimensionUnit::PERCENT) : stops[index];
         color.SetDimension(colorStop);
@@ -141,7 +142,7 @@ void GradientStyleModifier::PaddingColors(ColorAnimatableArithmetic& colors, boo
         return;
     }
     size_t paddingSize = colors_->Get().GetColors().size() - colors.GetColors().size();
-    colors.PaddingColors(paddingSize, Color::TRANSPARENT);
+    colors.PaddingColors(paddingSize, LinearColor::TRANSPARENT);
 }
 
 void GradientStyleModifier::PaddingColorStops(ColorStopAnimatableArithmetic& colorStops, bool repeat)
@@ -170,7 +171,7 @@ void GradientStyleModifier::SetSizeF(const SizeF& size)
 ColorAnimatableArithmetic::ColorAnimatableArithmetic(const Gradient& gradient)
 {
     for (const auto& color : gradient.GetColors()) {
-        colors_.push_back(color.GetColor());
+        colors_.push_back(LinearColor(color.GetColor()));
     }
 }
 
@@ -183,10 +184,7 @@ ColorAnimatableArithmetic ColorAnimatableArithmetic::Add(const ColorAnimatableAr
     ColorAnimatableArithmetic result;
     size_t index = 0;
     for (; index < idealSize; index++) {
-        Color color = Color::FromARGB(colors_[index].GetAlpha() + value.colors_[index].GetAlpha(),
-            colors_[index].GetRed() + value.colors_[index].GetRed(),
-            colors_[index].GetGreen() + value.colors_[index].GetGreen(),
-            colors_[index].GetBlue() + value.colors_[index].GetBlue());
+        LinearColor color = colors_[index] + value.colors_[index];
         result.colors_.push_back(color);
     }
     if (srcColorSize > dstColorSize) {
@@ -210,10 +208,7 @@ ColorAnimatableArithmetic ColorAnimatableArithmetic::Minus(const ColorAnimatable
     ColorAnimatableArithmetic result;
     size_t index = 0;
     for (; index < idealSize; index++) {
-        Color color = Color::FromARGB(colors_[index].GetAlpha() - value.colors_[index].GetAlpha(),
-            colors_[index].GetRed() - value.colors_[index].GetRed(),
-            colors_[index].GetGreen() - value.colors_[index].GetGreen(),
-            colors_[index].GetBlue() - value.colors_[index].GetBlue());
+        LinearColor color = colors_[index] - value.colors_[index];
         result.colors_.push_back(color);
     }
     if (srcColorSize > dstColorSize) {
@@ -234,8 +229,7 @@ ColorAnimatableArithmetic ColorAnimatableArithmetic::Multiply(const float scale)
     ColorAnimatableArithmetic result;
     size_t index = 0;
     for (; index < srcColorSize; index++) {
-        Color color = Color::FromARGB(colors_[index].GetAlpha() * scale, colors_[index].GetRed() * scale,
-            colors_[index].GetGreen() * scale, colors_[index].GetBlue() * scale);
+        LinearColor color = colors_[index] * scale;
         result.colors_.push_back(color);
     }
     return result;
