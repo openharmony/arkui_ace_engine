@@ -97,14 +97,14 @@ Ark_RichEditorTextStyle CreateEmptyArkTextStyle()
 {
     Ark_RichEditorTextStyle dst;
     dst.fontColor = Converter::ArkUnion<Opt_ResourceColor>(Ark_Empty());
-    dst.fontSize = Converter::ArkUnion<Opt_Union_String_Number_Resource>(Ark_Empty());
+    dst.fontSize = Converter::ArkUnion<Opt_Union_String_F64_Resource>(Ark_Empty());
     dst.fontStyle = Converter::ArkValue<Opt_FontStyle>(Ark_Empty());
-    dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String>(Ark_Empty());
+    dst.fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String>(Ark_Empty());
     dst.fontFamily = Converter::ArkUnion<Opt_ResourceStr>(Ark_Empty());
     dst.decoration = Converter::ArkValue<Opt_DecorationStyleInterface>(Ark_Empty());
     dst.textShadow = Converter::ArkUnion<Opt_Union_ShadowOptions_Array_ShadowOptions>(Ark_Empty());
-    dst.letterSpacing = Converter::ArkUnion<Opt_Union_Number_String>(Ark_Empty());
-    dst.lineHeight = Converter::ArkUnion<Opt_Union_Number_String_Resource>(Ark_Empty());
+    dst.letterSpacing = Converter::ArkUnion<Opt_Union_F64_String>(Ark_Empty());
+    dst.lineHeight = Converter::ArkUnion<Opt_Union_F64_String_Resource>(Ark_Empty());
     dst.fontFeature = Converter::ArkValue<Opt_String>(Ark_Empty());
     dst.halfLeading = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(Ark_Empty());
@@ -115,9 +115,9 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Co
 {
     dst = CreateEmptyArkTextStyle();
     dst.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(src.updateTextColor, ctx);
-    dst.fontSize = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_String>(src.updateFontSize, ctx);
+    dst.fontSize = Converter::ArkUnion<Opt_Union_String_F64_Resource, Ark_String>(src.updateFontSize, ctx);
     dst.fontStyle = Converter::ArkValue<Opt_FontStyle>(src.updateItalicFontStyle);
-    dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(src.updateFontWeight);
+    dst.fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_FontWeight>(src.updateFontWeight);
     if (src.updateFontFamily.has_value() && !src.updateFontFamily->empty()) {
         std::string family = V2::ConvertFontFamily(src.updateFontFamily.value());
         dst.fontFamily = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(family, ctx);
@@ -127,8 +127,8 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Co
     }
     dst.textShadow = Converter::ArkUnion<Opt_Union_ShadowOptions_Array_ShadowOptions, Array_ShadowOptions>(
         src.updateTextShadows, ctx);
-    dst.letterSpacing = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(src.updateLetterSpacing, ctx);
-    dst.lineHeight = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(src.updateLineHeight, ctx);
+    dst.letterSpacing = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(src.updateLetterSpacing, ctx);
+    dst.lineHeight = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>(src.updateLineHeight, ctx);
     if (src.updateFontFeature.has_value()) {
         dst.fontFeature =
             Converter::ArkValue<Opt_String>(UnParseFontFeatureSetting(src.updateFontFeature.value()), ctx);
@@ -161,14 +161,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
+Ark_Int32 GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Int32>(0));
     auto result = peer->GetCaretOffset();
-    return Converter::ArkValue<Ark_Number>(result);
+    return Converter::ArkValue<Ark_Int32>(result);
 }
 Ark_Boolean SetCaretOffsetImpl(Ark_RichEditorBaseController peer,
-                               const Ark_Number* offset)
+                               const Ark_Int32* offset)
 {
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(offset, false);
@@ -200,8 +200,8 @@ void SetTypingStyleImpl(Ark_RichEditorBaseController peer,
     peer->SetTypingStyle(typingStyle, textStyle);
 }
 void SetSelectionImpl(Ark_RichEditorBaseController peer,
-                      const Ark_Number* selectionStart,
-                      const Ark_Number* selectionEnd,
+                      const Ark_Int32* selectionStart,
+                      const Ark_Int32* selectionEnd,
                       const Opt_SelectionOptions* options)
 {
     CHECK_NULL_VOID(peer);
