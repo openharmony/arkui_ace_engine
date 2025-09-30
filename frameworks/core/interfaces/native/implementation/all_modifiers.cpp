@@ -235,7 +235,6 @@ const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor
 const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor();
 const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor();
-const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor();
 const GENERATED_ArkUIEnvironmentBackendAccessor* GetEnvironmentBackendAccessor();
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor();
 const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor();
@@ -293,6 +292,7 @@ const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionP
 const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor();
 const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor();
 const GENERATED_ArkUINodeContainerOpsAccessor* GetNodeContainerOpsAccessor();
+const GENERATED_ArkUINodeContentExtenderAccessor* GetNodeContentExtenderAccessor();
 const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor();
 const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* GetOffscreenCanvasRenderingContext2DAccessor();
 const GENERATED_ArkUIPanGestureEventAccessor* GetPanGestureEventAccessor();
@@ -544,7 +544,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetDismissPopupActionAccessor,
         GetDragEventAccessor,
         GetDrawingRenderingContextAccessor,
-        GetDrawModifierAccessor,
         GetEnvironmentBackendAccessor,
         GetEventEmulatorAccessor,
         GetEventResultAccessor,
@@ -602,6 +601,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetNavPathInfoAccessor,
         GetNavPathStackAccessor,
         GetNodeContainerOpsAccessor,
+        GetNodeContentExtenderAccessor,
         GetOffscreenCanvasAccessor,
         GetOffscreenCanvasRenderingContext2DAccessor,
         GetPanGestureEventAccessor,

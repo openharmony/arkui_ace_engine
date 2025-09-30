@@ -562,8 +562,8 @@ struct ArkUIAniKeyboardAvoidModeModifier {
     void (*setKeyboardAvoidMode)(int32_t index);
 };
 struct ArkUIAniDrawModifier {
-    void (*setDrawModifier)(ani_long ptr, uint32_t flag,
-        void* fnDrawBehindFun, void* fnDrawContentFun, void* fnDrawFrontFun);
+    void (*setDrawModifier)(ani_long ptr, uint32_t flag, void* fnDrawBehindFun, void* fnDrawContentFun,
+        void* fnDrawFrontFun, void* fnDrawForegroundFun);
     void (*invalidate)(ani_env* env, ani_long ptr);
 };
 struct ArkUIAniContentSlotModifier {
