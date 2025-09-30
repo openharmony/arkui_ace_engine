@@ -3462,7 +3462,23 @@ frameworks/core/interfaces/native/implementation/nav_destination_modifier.cpp @a
 frameworks/core/interfaces/native/implementation/navigation_modifier.cpp @arkui_navigation
 frameworks/core/interfaces/native/implementation/side_bar_container_modifier.cpp @arkui_navigation
 frameworks/core/interfaces/native/implementation/swiper_modifier.cpp @arkui_navigation
+frameworks/core/interfaces/native/implementation/button_modifier.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/checkbox_group_modifier.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/checkbox_group_ops_accessor.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/checkbox_modifier.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/checkbox_ops_accessor.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/context_menu_accessor.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/dialog_common.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/dialog_common.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/select_modifier.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/slider_modifier.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/slider_ops_accessor.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/radio_modifier.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/radio_ops_accessor.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/rating_modifier.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/rating_ops_accessor.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/toggle_modifier.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/toggle_ops_accessor.cpp @arkuipopupwindow_all
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.inspector.ts @arkui-idlize
 
 interfaces/ets/ani/observer @arkui_framework_resource
