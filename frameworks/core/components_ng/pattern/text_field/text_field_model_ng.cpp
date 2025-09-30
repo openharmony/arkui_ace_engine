@@ -2322,7 +2322,8 @@ void TextFieldModelNG::SetTextAreaScrollBarColor(const Color& value)
 
 void TextFieldModelNG::ResetTextAreaScrollBarColor()
 {
-    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, ScrollBarColor, PROPERTY_UPDATE_MEASURE);
+    Color colorValue = Color(0x66182431);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ScrollBarColor, colorValue);
 }
 
 Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
@@ -2700,7 +2701,8 @@ Color TextFieldModelNG::GetTextAreaScrollBarColor(FrameNode* frameNode)
 
 void TextFieldModelNG::ResetTextAreaScrollBarColor(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ScrollBarColor, frameNode);
+    Color colorValue = Color(0x66182431);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ScrollBarColor, colorValue, frameNode);
 }
 
 } // namespace OHOS::Ace::NG
