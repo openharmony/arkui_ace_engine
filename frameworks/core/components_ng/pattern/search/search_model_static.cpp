@@ -341,8 +341,12 @@ void SearchModelStatic::SetCancelDefaultIcon(FrameNode* frameNode)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->InitCancelIconColorSize();
-    pattern->CreateCancelIcon();
+    auto theme = SearchModelStatic::GetTheme(frameNode);
+    CHECK_NULL_VOID(theme);
+    IconOptions iconOptions = IconOptions(theme->GetSearchIconColor(), theme->GetIconHeight(), "", "", "");
+    pattern->SetCancelImageIcon(iconOptions);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonStyle, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize, frameNode);
 }
 
 void SearchModelStatic::SetCancelButtonStyle(FrameNode* frameNode, const std::optional<CancelButtonStyle>& style)
