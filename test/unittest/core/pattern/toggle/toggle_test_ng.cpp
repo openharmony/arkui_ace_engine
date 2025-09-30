@@ -2571,4 +2571,30 @@ HWTEST_F(ToggleTestNg, CreateWithDimensionVpResourceObj, TestSize.Level1)
     count = resMgr->resMap_.count(key);
     EXPECT_EQ(count, 1);
 }
+
+/**
+ * @tc.name: GetOrCreateHolderNode
+ * @tc.desc: Test GetOrCreateHolderNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, GetOrCreateHolderNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a toggleBase.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto toggleBase = AceType::MakeRefPtr<ToggleBasePattern>();
+    ASSERT_NE(toggleBase, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetOrCreateHolderNode.
+     */
+    auto holder = toggleBase->GetOrCreateHolderNode();
+    ASSERT_NE(holder, nullptr);
+    RefPtr<FrameNode> child = FrameNode::GetOrCreateFrameNode(V2::TOGGLE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwitchPattern>(); });
+    toggleBase->MountToHolder(child);
+    ASSERT_NE(child, nullptr);
+}
 } // namespace OHOS::Ace::NG
