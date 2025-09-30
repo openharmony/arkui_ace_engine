@@ -1019,13 +1019,20 @@ void SetBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPt
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!SystemProperties::ConfigChangePerform() || !bgColorRawPtr) {
-        ViewAbstract::SetBackgroundColor(frameNode, Color(color));
-    } else {
-        auto* bgColor = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
-        auto backgroundColorResObj = AceType::Claim(bgColor);
-        ViewAbstract::SetBackgroundColor(frameNode, Color(color), backgroundColorResObj);
+    Color result = Color(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!bgColorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(bgColorRawPtr));
+        }
+        if (resObj) {
+            ViewAbstract::SetBackgroundColor(frameNode, result, resObj);
+            return;
+        }
     }
+    ViewAbstract::SetBackgroundColor(frameNode, result);
 }
 
 void SetBackgroundColorWithColorSpace(
