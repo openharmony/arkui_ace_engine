@@ -63,7 +63,7 @@ void XComponentControllerPeerImpl::TriggerStartImageAnalyzer(Ark_VMContext vmCon
 void XComponentControllerPeerImpl::SetOnSurfaceCreatedEvent(const Callback_String_Void& callback)
 {
     arkOnSurfaceCreated = callback;
-    onSurfaceCreatedEvent_ = [arkCallback = CallbackHelper(callback)]
+    onSurfaceCreatedEvent = [arkCallback = CallbackHelper(callback)]
         (const std::string& surfaceId, const std::string& xcomponentId) {
         auto arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId);
         arkCallback.InvokeSync(arkSurfaceId);
@@ -72,7 +72,7 @@ void XComponentControllerPeerImpl::SetOnSurfaceCreatedEvent(const Callback_Strin
 void XComponentControllerPeerImpl::SetOnSurfaceChangedEvent(const Callback_String_SurfaceRect_Void& callback)
 {
     arkOnSurfaceChanged = callback;
-    onSurfaceChangedEvent_ = [arkCallback = CallbackHelper(callback)]
+    onSurfaceChangedEvent = [arkCallback = CallbackHelper(callback)]
         (const std::string& surfaceId, const RectF& rect) {
         auto arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId);
         Ark_SurfaceRect arkSurfaceRect;
@@ -86,23 +86,11 @@ void XComponentControllerPeerImpl::SetOnSurfaceChangedEvent(const Callback_Strin
 void XComponentControllerPeerImpl::SetOnSurfaceDestroyedEvent(const Callback_String_Void& callback)
 {
     arkOnSurfaceDestroyed = callback;
-    onSurfaceDestroyedEvent_ = [arkCallback = CallbackHelper(callback)]
+    onSurfaceDestroyedEvent = [arkCallback = CallbackHelper(callback)]
         (const std::string& surfaceId, const std::string& xcomponentId) {
         auto arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId);
         arkCallback.InvokeSync(arkSurfaceId);
     };
-}
-SurfaceCreatedEvent XComponentControllerPeerImpl::GetOnSurfaceCreatedEvent()
-{
-    return onSurfaceCreatedEvent_;
-}
-SurfaceChangedEvent XComponentControllerPeerImpl::GetOnSurfaceChangedEvent()
-{
-    return onSurfaceChangedEvent_;
-}
-SurfaceDestroyedEvent XComponentControllerPeerImpl::GetOnSurfaceDestroyedEvent()
-{
-    return onSurfaceDestroyedEvent_;
 }
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

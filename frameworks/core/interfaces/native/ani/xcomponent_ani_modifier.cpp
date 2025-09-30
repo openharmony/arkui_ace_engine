@@ -25,50 +25,30 @@
 
 namespace OHOS::Ace::NG {
 
-void SetXComponentInitParameters(ArkUINodeHandle node, const ArkUIXComponentParams& params)
+void SetXComponentControllerCallback(void* peer, const ArkUIXComponentParams& params)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    if (params.type == static_cast<ArkUI_Int32>(XComponentType::SURFACE) ||
-        params.type == static_cast<ArkUI_Int32>(XComponentType::TEXTURE)) {
-        XComponentModelStatic::SetXComponentType(frameNode, static_cast<XComponentType>(params.type));
-    }
-    auto controllerPeerImpl = reinterpret_cast<GeneratedModifier::XComponentControllerPeerImpl*>(params.controller);
-    bool shouldUpdateController = false;
-    if (controllerPeerImpl) {
-        auto controller = controllerPeerImpl->controller;
-        shouldUpdateController = XComponentModelStatic::SetXComponentController(frameNode, controller);
-    }
-    if (params.nativeHandler) {
-        XComponentModelStatic::SetXComponentId(frameNode, params.id);
-        XComponentModelStatic::SetNativeXComponentHandler(frameNode, params.nativeHandler);
-        return XComponentModelStatic::InitParams(frameNode);
-    }
-    if (shouldUpdateController) {
-        auto onSurfaceCreatedEvent = [onSurfaceCreated = params.onSurfaceCreated]
-            (const std::string& surfaceId, const std::string xcomponentId) {
-            CHECK_NULL_VOID(onSurfaceCreated);
-            onSurfaceCreated(surfaceId);
-            TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] ControllerOnCreated surfaceId:%{public}s",
-                xcomponentId.c_str(), surfaceId.c_str());
-        };
-        auto onSurfaceChangedEvent = [onSurfaceChanged = params.onSurfaceChanged]
-            (const std::string& surfaceId, const RectF& rect) {
-            CHECK_NULL_VOID(onSurfaceChanged);
-            onSurfaceChanged(surfaceId, rect.Width(), rect.Height(), rect.Left(), rect.Top());
-        };
-        auto onSurfaceDestroyedEvent = [onSurfaceDestroyed = params.onSurfaceDestroyed]
-            (const std::string& surfaceId, const std::string xcomponentId) {
-            CHECK_NULL_VOID(onSurfaceDestroyed);
-            onSurfaceDestroyed(surfaceId);
-            TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] ControllerOnDestroyed surfaceId:%{public}s",
-                xcomponentId.c_str(), surfaceId.c_str());
-        };
-        XComponentModelNG::SetControllerOnCreated(frameNode, std::move(onSurfaceCreatedEvent));
-        XComponentModelNG::SetControllerOnChanged(frameNode, std::move(onSurfaceChangedEvent));
-        XComponentModelNG::SetControllerOnDestroyed(frameNode, std::move(onSurfaceDestroyedEvent));
-    }
-    XComponentModelStatic::InitParams(frameNode);
+    auto controllerPeerImpl = reinterpret_cast<GeneratedModifier::XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(controllerPeerImpl);
+    controllerPeerImpl->onSurfaceCreatedEvent = [onSurfaceCreated = params.onSurfaceCreated]
+        (const std::string& surfaceId, const std::string xcomponentId) {
+        CHECK_NULL_VOID(onSurfaceCreated);
+        onSurfaceCreated(surfaceId);
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] ControllerOnCreated surfaceId:%{public}s",
+            xcomponentId.c_str(), surfaceId.c_str());
+    };
+    controllerPeerImpl->onSurfaceChangedEvent = [onSurfaceChanged = params.onSurfaceChanged]
+        (const std::string& surfaceId, const RectF& rect) {
+        CHECK_NULL_VOID(onSurfaceChanged);
+        onSurfaceChanged(surfaceId, rect.Width(), rect.Height(), rect.Left(), rect.Top());
+    };
+    controllerPeerImpl->onSurfaceDestroyedEvent = [onSurfaceDestroyed = params.onSurfaceDestroyed]
+        (const std::string& surfaceId, const std::string xcomponentId) {
+        CHECK_NULL_VOID(onSurfaceDestroyed);
+        onSurfaceDestroyed(surfaceId);
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] ControllerOnDestroyed surfaceId:%{public}s",
+            xcomponentId.c_str(), surfaceId.c_str());
+    };
 #endif
 }
 
@@ -91,7 +71,7 @@ void MarkBindNative(ArkUINodeHandle node)
 const ArkUIAniXComponentModifier* GetXComponentAniModifier()
 {
     static const ArkUIAniXComponentModifier impl = {
-        .setXComponentInitParameters = OHOS::Ace::NG::SetXComponentInitParameters,
+        .setXComponentControllerCallback = OHOS::Ace::NG::SetXComponentControllerCallback,
         .setScreenId = OHOS::Ace::NG::SetScreenId,
         .markBindNative = OHOS::Ace::NG::MarkBindNative,
     };

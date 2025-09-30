@@ -44,6 +44,7 @@ import { TextModifier } from "../TextModifier";
 import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
 import { CommonMethod, StateStyles, ArkCommonMethodComponent, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent } from "#generated";
+import { ArkXComponentComponent, XComponentOptions, XComponentParameters, NativeXComponentParameters } from "#generated";
 
 import { AnimateParam } from "#generated";
 import { GestureModifier } from "#generated";
@@ -55,6 +56,7 @@ import { NavPathStack, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationCom
 import { PathStackUtils } from "../base/ArkNavPathStack"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
+import { XComponentOpsHandWritten } from "./XComponentOpsHandWritten";
 
 export function hookId(component: object, value?: string) {}
 
@@ -175,6 +177,10 @@ export function hookSetNavigationOptions(component: ArkNavigationComponent, path
 
 export function hookSetNavDestination(component: ArkNavigationComponent, value: PageMapBuilder | undefined): void {
   NavigationOpsHandWritten.hookSetNavDestinationImpl(component, value);
+}
+
+export function hookSetXComponentOptions(component: ArkXComponentComponent, params: XComponentParameters | XComponentOptions | NativeXComponentParameters): void {
+  XComponentOpsHandWritten.hookSetXComponentOptionsImpl(component, params);
 }
 
 const DIFF: number = 1e-10
