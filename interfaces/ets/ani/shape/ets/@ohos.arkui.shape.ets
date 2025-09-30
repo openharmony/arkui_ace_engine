@@ -134,3 +134,11 @@ export class PathShape extends CommonShapeMethod<PathShape> {
 
     public native position(position: Position): PathShape;
 }
+
+export class __ShapeInnerMethods__ {
+    static { loadLibrary("shape_ani") }
+    public static native CircleFromPtr(ptr: long): CircleShape;
+    public static native RectFromPtr(ptr: long): RectShape;
+    public static native EllipseFromPtr(ptr: long): EllipseShape;
+    public static native PathFromPtr(ptr: long): PathShape;
+}

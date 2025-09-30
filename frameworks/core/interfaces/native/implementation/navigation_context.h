@@ -35,7 +35,6 @@ public:
 };
 using ExternalData = RefPtr<ExternalDataKeeper>;
 using OnPopCallback = CallbackHelper<Callback_PopInfo_Void>;
-using NavDestBuildCallback = CallbackHelper<Callback_String_Opt_Object_Void>;
 
 struct Interception {
     std::function<void(NG::NavigationMode)> modeChange;
@@ -136,7 +135,7 @@ public:
     void MoveIndexToTop(size_t index, const std::optional<bool>& animated);
     void MoveToTopInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated);
     void Clear(const std::optional<bool>& animated);
-    int RemoveInfoByIndexes(const std::vector<int>& indexes);
+    int RemoveByIndexes(const std::vector<int>& indexes);
     int RemoveByName(const std::string& name);
     bool RemoveByNavDestinationId(const std::string& navDestinationId);
     void RemoveIndex(size_t index);
@@ -194,8 +193,6 @@ public:
     void SetDataSourceObj(const RefPtr<PathStack>& dataSourceObj);
     const RefPtr<PathStack>& GetDataSourceObj();
 
-    void SetNavDestBuilderFunc(const NavDestBuildCallback& navDestBuilderFunc);
-
     bool IsEmpty() override;
     void Pop() override;
     void Push(const std::string& name, const RefPtr<NG::RouteInfo>& routeInfo = nullptr) override;
@@ -216,8 +213,6 @@ public:
     void InitNavPathIndex(const std::vector<std::string>& pathNames) override;
     void SetDestinationIdToJsStack(int32_t index, const std::string& navDestinationId) override;
     bool CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
-    RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
-        const WeakPtr<NG::UINode>& node) override;
     std::string GetRouteParam() const override;
     void OnAttachToParent(RefPtr<NG::NavigationStack> parent) override;
     void OnDetachFromParent() override;
@@ -247,15 +242,9 @@ public:
     {
         nodes_.clear();
     }
-
-    bool IsStaticStack() override
-    {
-        return true;
-    }
 protected:
     std::map<int32_t, RefPtr<NG::UINode>> nodes_;
     RefPtr<PathStack> dataSourceObj_;
-    NavDestBuildCallback navDestBuilderFunc_;
     std::function<void()> onStateChangedCallback_;
 
 private:
@@ -269,10 +258,6 @@ private:
     OnPopCallback GetOnPopByIndex(int32_t index) const;
     bool GetIsEntryByIndex(int32_t index);
     std::string ConvertParamToString(const ParamType& param, bool needLimit = false) const;
-    int LoadDestination(const std::string& name, const ParamType& param, const WeakPtr<NG::UINode>& customNode,
-        RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);
-    bool LoadDestinationByBuilder(const std::string& name, const ParamType& param, RefPtr<NG::UINode>& node,
-        RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool GetNeedUpdatePathInfo(int32_t index);
     void SetNeedUpdatePathInfo(int32_t index, bool need);

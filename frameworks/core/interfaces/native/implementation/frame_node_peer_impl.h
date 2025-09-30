@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
 
+#include <mutex>
 #include <vector>
 
 #include "ui/base/referenced.h"
@@ -24,59 +25,48 @@
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
 
-
 struct FrameNodePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> node;
 
     OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> weakNode;
     int32_t nodeId_ = -1;
-    static std::map<int32_t, FrameNodePeer> peerMap_;
+    static std::map<int32_t, std::shared_ptr<FrameNodePeer>> peerMap_;
+    static std::mutex peerMapMutex_;
 
-    static FrameNodePeer *Create(Ark_UIContext uiContext)
+    static FrameNodePeer* Create(Ark_UIContext uiContext)
     {
         return new FrameNodePeer;
     }
 
     static FrameNodePeer* Create(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src)
     {
+        std::lock_guard<std::mutex> lock(peerMapMutex_);
         auto it = peerMap_.find(src->GetId());
         if (it != peerMap_.end()) {
-            return &(it->second);
+            return (it->second).get();
         }
-        auto frameNode = new FrameNodePeer;
+        auto frameNode = std::make_shared<FrameNodePeer>();
         if (src->IsArkTsFrameNode()) {
             frameNode->node = src;
         } else {
             frameNode->weakNode = OHOS::Ace::WeakPtr(src);
         }
-        peerMap_.emplace(src->GetId(), *frameNode);
-        return frameNode;
+        peerMap_.emplace(src->GetId(), frameNode);
+        frameNode->nodeId_ = src->GetId();
+        return frameNode.get();
     }
 
     static FrameNodePeer* Create(OHOS::Ace::NG::FrameNode* src)
     {
-        auto it = peerMap_.find(src->GetId());
-        if (it != peerMap_.end()) {
-            return &(it->second);
-        }
-        auto frameNode = new FrameNodePeer;
-        if (src->IsArkTsFrameNode()) {
-            frameNode->node = src;
-        } else {
-            frameNode->weakNode = OHOS::Ace::AceType::WeakClaim(src);
-        }
-        peerMap_.emplace(src->GetId(), *frameNode);
-        return frameNode;
+        return Create(OHOS::Ace::AceType::Claim<OHOS::Ace::NG::FrameNode>(src));
     }
 
     static void Destroy(FrameNodePeer* peer)
     {
-        auto currentNode = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::NG::FrameNode>(peer->node);
-        if (currentNode) {
-            auto nodeId = currentNode->GetId();
-            peerMap_.erase(nodeId);
+        if (peer) {
+            std::lock_guard<std::mutex> lock(peerMapMutex_);
+            peerMap_.erase(peer->nodeId_);
         }
-        delete peer;
     }
 
     static OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> GetFrameNodeByPeer(FrameNodePeer* peer)
@@ -95,7 +85,7 @@ struct FrameNodePeer {
 
     RenderNodePeer* GetRenderNodePeer()
     {
-        return RenderNodePeer::Create(node);
+        return OHOS::Ace::NG::PeerUtils::CreatePeer<RenderNodePeer>(GetFrameNodeByPeer(this));
     }
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H

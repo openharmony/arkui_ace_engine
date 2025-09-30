@@ -14,6 +14,8 @@
  */
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_component.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/image/image_model_static.h"
 #include "core/interfaces/native/implementation/image_common_methods.h"
 #include "core/interfaces/native/implementation/matrix4_transit_peer.h"
@@ -21,11 +23,10 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_abstract_model_static.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t UNION_ONE = 1;
 // similar as in the js_image.cpp
 constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
 constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
@@ -65,25 +66,15 @@ void AssignCast(std::optional<ImageRotateOrientation>& dst, const Ark_ImageRotat
         default: LOGE("Unexpected enum value in Ark_ImageRotateOrientation: %{public}d", src);
     }
 }
+
 template<>
-void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_Union_String_Resource_PixelMap& src)
+void AssignCast(std::optional<Color>& dst, const Ark_ColorContent& src)
 {
-    Converter::VisitUnion(src,
-        [&dst](const Ark_String& val) {
-            dst = Converter::OptConvert<ImageSourceInfo>(val);
-        },
-        [&dst](const Ark_Resource& val) {
-            dst = Converter::OptConvert<ImageSourceInfo>(val);
-        },
-        [&dst](const Ark_PixelMap& val) {
-            dst = std::nullopt;
-            auto pixMapRefPtr = Converter::OptConvert<RefPtr<PixelMap>>(val).value_or(nullptr);
-            if (pixMapRefPtr) {
-                dst = ImageSourceInfo(pixMapRefPtr);
-            }
-        },
-        []() {}
-    );
+    // Currently ColorContent have only one value: ORIGIN
+    // which corresponds to default value. We reset to default value when optional is empty.
+    // So, all we need to do is reset optional.
+    // Need to check that ColorContent is indeed ORIGIN. There can be other types in future.
+    dst.reset();
 }
 } // Converter
 } // OHOS::Ace::NG
@@ -101,215 +92,185 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // ImageModifier
 namespace ImageInterfaceModifier {
-void SetImageOptions0Impl(Ark_NativePointer node,
-                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src)
-{
-    CHECK_NULL_VOID(src);
-    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
-    if (info) {
-        auto frameNode = reinterpret_cast<FrameNode*>(node);
-        CHECK_NULL_VOID(frameNode);
-        std::string source = info->GetSrc();
-        ImageModelNG::InitImage(frameNode, source);
-    }
-}
-void SetImageOptions1Impl(Ark_NativePointer node,
-                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src)
+void SetImageOptionsImpl(Ark_NativePointer node,
+                         const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
+                         const Opt_ImageAIOptions* imageAIOptions)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
-    if (src->selector == SELECTOR_INDEX) {
-        ImageModelNG::ResetImageSrc(frameNode);
-        return;
-    }
+    CHECK_NULL_VOID(imageAIOptions);
     auto info = Converter::OptConvert<ImageSourceInfo>(*src);
     // Note.
     // This function should skip InitImage invocation if info's optional is empty.
     if (info) {
-        auto frameNode = reinterpret_cast<FrameNode*>(node);
-        CHECK_NULL_VOID(frameNode);
-        std::string source = info->GetSrc();
-        ImageModelNG::InitImage(frameNode, source);
+        ImageModelStatic::SetSrc(frameNode, info);
+    } else {
+        ImageModelNG::ResetImageSrc(frameNode);
     }
-}
-void SetImageOptions2Impl(Ark_NativePointer node,
-                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src,
-                          const Ark_ImageAIOptions* imageAIOptions)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(src);
-    //auto convValue = Converter::OptConvert<type>(src); // for enums
-    //ImageModelNG::SetSetImageOptions2(frameNode, convValue);
-    LOGE("Arkoala: Image.SetImageOptions2Impl - method not implemented");
 }
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
-void AltImpl(Ark_NativePointer node,
-             const Opt_Union_String_Resource_PixelMap* value)
+void SetAltImpl(Ark_NativePointer node,
+                const Opt_Union_String_Resource_PixelMap* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto info = Converter::OptConvert<ImageSourceInfo>(*value);
+    auto info = Converter::OptConvertPtr<ImageSourceInfo>(value);
     if (!info.has_value() || ImageSourceInfo::ResolveURIType(info->GetSrc()) == SrcType::NETWORK) {
         ImageModelStatic::SetAlt(frameNode, std::nullopt);
         return;
     }
     ImageModelStatic::SetAlt(frameNode, info);
 }
-void MatchTextDirectionImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
+void SetMatchTextDirectionImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     ImageModelNG::SetMatchTextDirection(frameNode, *convValue);
 }
-void FitOriginalSizeImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
+void SetFitOriginalSizeImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     ImageModelNG::SetFitOriginSize(frameNode, *convValue);
 }
-void FillColor0Impl(Ark_NativePointer node,
-                    const Opt_ResourceColor* value)
+void SetFillColorImpl(Ark_NativePointer node,
+                      const Opt_Union_ResourceColor_ColorContent_ColorMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetImageFill(frameNode, Converter::OptConvert<Color>(*value));
+    if (value->value.selector == UNION_ONE) {
+        ImageModelNG::ResetImageFill(frameNode);
+        return;
+    }
+    ImageModelStatic::SetImageFill(frameNode, Converter::OptConvertPtr<Color>(value));
 }
-void FillColor1Impl(Ark_NativePointer node,
-                    const Opt_Union_ResourceColor_ColorContent* value)
+void SetObjectFitImpl(Ark_NativePointer node,
+                      const Opt_ImageFit* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::ResetImageFill(frameNode);
-}
-void ObjectFitImpl(Ark_NativePointer node,
-                   const Opt_ImageFit* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto fit = Converter::OptConvert<ImageFit>(*value);
+    auto fit = Converter::OptConvertPtr<ImageFit>(value);
     ImageModelStatic::SetImageFit(frameNode, fit);
 }
-void ImageMatrixImpl(Ark_NativePointer node,
-                     const Opt_Matrix4Transit* value)
+void SetImageMatrixImpl(Ark_NativePointer node,
+                        const Opt_matrix4_Matrix4Transit* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto peerOpt = value ? Converter::OptConvert<Ark_Matrix4Transit>(*value) : std::nullopt;
+    auto peerOpt = Converter::GetOptPtr(value);
     std::optional<Matrix4> matrix;
     if (peerOpt.has_value()) {
-        Matrix4TransitPeer* peer = peerOpt.value();
+        auto* peer = peerOpt.value();
         CHECK_NULL_VOID(peer);
         matrix = peer->matrix;
     }
     ImageModelStatic::SetImageMatrix(frameNode, matrix);
 }
-void ObjectRepeatImpl(Ark_NativePointer node,
-                      const Opt_ImageRepeat* value)
+void SetObjectRepeatImpl(Ark_NativePointer node,
+                         const Opt_ImageRepeat* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetImageRepeat(frameNode, Converter::OptConvert<ImageRepeat>(*value));
+    ImageModelStatic::SetImageRepeat(frameNode, Converter::OptConvertPtr<ImageRepeat>(value));
 }
-void AutoResizeImpl(Ark_NativePointer node,
-                    const Opt_Boolean* value)
+void SetAutoResizeImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     ImageModelNG::SetAutoResize(frameNode, *convValue);
 }
-void RenderModeImpl(Ark_NativePointer node,
-                    const Opt_ImageRenderMode* value)
+void SetRenderModeImpl(Ark_NativePointer node,
+                       const Opt_ImageRenderMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetImageRenderMode(frameNode, Converter::OptConvert<ImageRenderMode>(*value));
+    ImageModelStatic::SetImageRenderMode(frameNode, Converter::OptConvertPtr<ImageRenderMode>(value));
 }
-void DynamicRangeModeImpl(Ark_NativePointer node,
-                          const Opt_DynamicRangeMode* value)
+void SetDynamicRangeModeImpl(Ark_NativePointer node,
+                             const Opt_DynamicRangeMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetDynamicRangeMode(frameNode, Converter::OptConvert<DynamicRangeMode>(*value));
+    ImageModelStatic::SetDynamicRangeMode(frameNode, Converter::OptConvertPtr<DynamicRangeMode>(value));
 }
-void InterpolationImpl(Ark_NativePointer node,
-                       const Opt_ImageInterpolation* value)
+void SetInterpolationImpl(Ark_NativePointer node,
+                          const Opt_ImageInterpolation* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetImageInterpolation(frameNode, Converter::OptConvert<ImageInterpolation>(*value));
+    ImageModelStatic::SetImageInterpolation(frameNode, Converter::OptConvertPtr<ImageInterpolation>(value));
 }
-void SourceSizeImpl(Ark_NativePointer node,
-                    const Opt_ImageSourceSize* value)
+void SetSourceSizeImpl(Ark_NativePointer node,
+                       const Opt_ImageSourceSize* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto sourceSize = Converter::OptConvert<std::pair<CalcDimension, CalcDimension>>(*value);
     ImageModelStatic::SetImageSourceSize(frameNode, sourceSize);
 }
-void SyncLoadImpl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
+void SetSyncLoadImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     ImageModelNG::SetSyncMode(frameNode, *convValue);
 }
-void ColorFilterImpl(Ark_NativePointer node,
-                     const Opt_Union_ColorFilter_DrawingColorFilter* value)
+void SetColorFilterImpl(Ark_NativePointer node,
+                        const Opt_Union_ColorFilter_DrawingColorFilter* value)
 {
     ImageCommonMethods::ApplyColorFilterValues(node, value);
 }
-void CopyOptionImpl(Ark_NativePointer node,
-                    const Opt_CopyOptions* value)
+void SetCopyOptionImpl(Ark_NativePointer node,
+                       const Opt_CopyOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetCopyOption(frameNode, Converter::OptConvert<CopyOptions>(*value));
+    ImageModelStatic::SetCopyOption(frameNode, Converter::OptConvertPtr<CopyOptions>(value));
 }
-void DraggableImpl(Ark_NativePointer node,
-                   const Opt_Boolean* value)
+void SetDraggableImpl(Ark_NativePointer node,
+                      const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     ImageModelNG::SetDraggable(frameNode, *convValue);
 }
-void PointLightImpl(Ark_NativePointer node,
-                    const Opt_PointLightStyle* value)
+void SetPointLightImpl(Ark_NativePointer node,
+                       const Opt_PointLightStyle* value)
 {
 #ifdef POINT_LIGHT_ENABLE
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    auto pointLightStyle = Converter::OptConvertPtr<Converter::PointLightStyle>(value);
     auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
     auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
     CHECK_NULL_VOID(themeConstants);
@@ -339,27 +300,27 @@ void PointLightImpl(Ark_NativePointer node,
     }
 #endif
 }
-void EdgeAntialiasingImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+void SetEdgeAntialiasingImpl(Ark_NativePointer node,
+                             const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     Validator::ValidateByRange(convValue, FLOOR_SMOOTHEDGE_VALUE, CEIL_SMOOTHEDGE_VALUE);
     ImageModelStatic::SetSmoothEdge(frameNode, convValue);
 }
-void OnCompleteImpl(Ark_NativePointer node,
-                    const Opt_Callback_Type_ImageAttribute_onComplete_callback_event_Void* value)
+void SetOnCompleteImpl(Ark_NativePointer node,
+                       const Opt_ImageOnCompleteCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onEvent = [callback = CallbackHelper(*optValue)](const LoadImageSuccessEvent& info) {
-        Ark_Type_ImageAttribute_onComplete_callback_event event;
+        Ark_ImageCompleteEvent event;
         event.width = Converter::ArkValue<Ark_Number>(info.GetWidth());
         event.height = Converter::ArkValue<Ark_Number>(info.GetHeight());
         event.componentWidth = Converter::ArkValue<Ark_Number>(info.GetComponentWidth());
@@ -369,19 +330,19 @@ void OnCompleteImpl(Ark_NativePointer node,
         event.contentOffsetY = Converter::ArkValue<Ark_Number>(info.GetContentOffsetY());
         event.contentWidth = Converter::ArkValue<Ark_Number>(info.GetContentWidth());
         event.contentHeight = Converter::ArkValue<Ark_Number>(info.GetContentHeight());
-        auto optEvent = Converter::ArkValue<Opt_Type_ImageAttribute_onComplete_callback_event>(event);
+        auto optEvent = Converter::ArkValue<Opt_ImageCompleteEvent>(event);
         callback.Invoke(optEvent);
     };
     ImageModelNG::SetOnComplete(frameNode, std::move(onEvent));
 }
-void OnErrorImpl(Ark_NativePointer node,
-                 const Opt_ImageErrorCallback* value)
+void SetOnErrorImpl(Ark_NativePointer node,
+                    const Opt_ImageErrorCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onError = [arkCallback = CallbackHelper(*optValue)](const LoadImageFailEvent& info) {
@@ -390,14 +351,14 @@ void OnErrorImpl(Ark_NativePointer node,
     };
     ImageModelNG::SetOnError(frameNode, std::move(onError));
 }
-void OnFinishImpl(Ark_NativePointer node,
-                  const Opt_Callback_Void* value)
+void SetOnFinishImpl(Ark_NativePointer node,
+                     const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onFinish = [arkCallback = CallbackHelper(*optValue)]() {
@@ -405,32 +366,32 @@ void OnFinishImpl(Ark_NativePointer node,
     };
     ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(onFinish));
 }
-void EnableAnalyzerImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+void SetEnableAnalyzerImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     ImageModelNG::EnableAnalyzer(frameNode, *convValue);
 }
-void AnalyzerConfigImpl(Ark_NativePointer node,
-                        const Opt_ImageAnalyzerConfig* value)
+void SetAnalyzerConfigImpl(Ark_NativePointer node,
+                           const Opt_ImageAnalyzerConfig* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     ImageModelNG::SetImageAnalyzerConfig(frameNode, reinterpret_cast<void*>(optValue->types.array));
 }
-void ResizableImpl(Ark_NativePointer node,
-                   const Opt_ResizableOptions* value)
+void SetResizableImpl(Ark_NativePointer node,
+                      const Opt_ResizableOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -449,31 +410,26 @@ void ResizableImpl(Ark_NativePointer node,
     // lattice .. This parameter will need to be implemented when Ark_DrawingLattice is supported.
     LOGE("Arkoala: Image.ResizableImpl - method not implemented");
 }
-void PrivacySensitiveImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+void SetPrivacySensitiveImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        return;
-    }
-    ViewAbstractModelStatic::SetPrivacySensitive(frameNode, *convValue);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ViewAbstractModelStatic::SetPrivacySensitive(frameNode, convValue);
 }
-void EnhancedImageQualityImpl(Ark_NativePointer node,
-                              const Opt_ResolutionQuality* value)
+void SetEnhancedImageQualityImpl(Ark_NativePointer node,
+                                 const Opt_image_ResolutionQuality* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<AIImageQuality>(*value);
-    ImageModelStatic::SetEnhancedImageQuality(frameNode, convValue);
 }
-void OrientationImpl(Ark_NativePointer node,
-                     const Opt_ImageRotateOrientation* value)
+void SetOrientationImpl(Ark_NativePointer node,
+                        const Opt_ImageRotateOrientation* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<ImageRotateOrientation>(*value);
+    auto convValue = Converter::OptConvertPtr<ImageRotateOrientation>(value);
     ImageModelStatic::SetOrientation(frameNode, convValue);
 }
 } // ImageAttributeModifier
@@ -481,37 +437,34 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
 {
     static const GENERATED_ArkUIImageModifier ArkUIImageModifierImpl {
         ImageModifier::ConstructImpl,
-        ImageInterfaceModifier::SetImageOptions0Impl,
-        ImageInterfaceModifier::SetImageOptions1Impl,
-        ImageInterfaceModifier::SetImageOptions2Impl,
-        ImageAttributeModifier::AltImpl,
-        ImageAttributeModifier::MatchTextDirectionImpl,
-        ImageAttributeModifier::FitOriginalSizeImpl,
-        ImageAttributeModifier::FillColor0Impl,
-        ImageAttributeModifier::FillColor1Impl,
-        ImageAttributeModifier::ObjectFitImpl,
-        ImageAttributeModifier::ImageMatrixImpl,
-        ImageAttributeModifier::ObjectRepeatImpl,
-        ImageAttributeModifier::AutoResizeImpl,
-        ImageAttributeModifier::RenderModeImpl,
-        ImageAttributeModifier::DynamicRangeModeImpl,
-        ImageAttributeModifier::InterpolationImpl,
-        ImageAttributeModifier::SourceSizeImpl,
-        ImageAttributeModifier::SyncLoadImpl,
-        ImageAttributeModifier::ColorFilterImpl,
-        ImageAttributeModifier::CopyOptionImpl,
-        ImageAttributeModifier::DraggableImpl,
-        ImageAttributeModifier::PointLightImpl,
-        ImageAttributeModifier::EdgeAntialiasingImpl,
-        ImageAttributeModifier::OnCompleteImpl,
-        ImageAttributeModifier::OnErrorImpl,
-        ImageAttributeModifier::OnFinishImpl,
-        ImageAttributeModifier::EnableAnalyzerImpl,
-        ImageAttributeModifier::AnalyzerConfigImpl,
-        ImageAttributeModifier::ResizableImpl,
-        ImageAttributeModifier::PrivacySensitiveImpl,
-        ImageAttributeModifier::EnhancedImageQualityImpl,
-        ImageAttributeModifier::OrientationImpl,
+        ImageInterfaceModifier::SetImageOptionsImpl,
+        ImageAttributeModifier::SetAltImpl,
+        ImageAttributeModifier::SetMatchTextDirectionImpl,
+        ImageAttributeModifier::SetFitOriginalSizeImpl,
+        ImageAttributeModifier::SetFillColorImpl,
+        ImageAttributeModifier::SetObjectFitImpl,
+        ImageAttributeModifier::SetImageMatrixImpl,
+        ImageAttributeModifier::SetObjectRepeatImpl,
+        ImageAttributeModifier::SetAutoResizeImpl,
+        ImageAttributeModifier::SetRenderModeImpl,
+        ImageAttributeModifier::SetDynamicRangeModeImpl,
+        ImageAttributeModifier::SetInterpolationImpl,
+        ImageAttributeModifier::SetSourceSizeImpl,
+        ImageAttributeModifier::SetSyncLoadImpl,
+        ImageAttributeModifier::SetColorFilterImpl,
+        ImageAttributeModifier::SetCopyOptionImpl,
+        ImageAttributeModifier::SetDraggableImpl,
+        ImageAttributeModifier::SetPointLightImpl,
+        ImageAttributeModifier::SetEdgeAntialiasingImpl,
+        ImageAttributeModifier::SetOnCompleteImpl,
+        ImageAttributeModifier::SetOnErrorImpl,
+        ImageAttributeModifier::SetOnFinishImpl,
+        ImageAttributeModifier::SetEnableAnalyzerImpl,
+        ImageAttributeModifier::SetAnalyzerConfigImpl,
+        ImageAttributeModifier::SetResizableImpl,
+        ImageAttributeModifier::SetPrivacySensitiveImpl,
+        ImageAttributeModifier::SetEnhancedImageQualityImpl,
+        ImageAttributeModifier::SetOrientationImpl,
     };
     return &ArkUIImageModifierImpl;
 }

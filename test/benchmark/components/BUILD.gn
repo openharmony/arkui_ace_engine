@@ -19,7 +19,7 @@ ohos_benchmarktest("ace_components") {
   sources = [
     "grid_benchmark.cpp",
     "main.cpp",
-    "text_benchmark.cpp"
+    "text_benchmark.cpp",
   ]
 
   deps = [

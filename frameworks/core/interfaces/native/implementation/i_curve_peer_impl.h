@@ -17,7 +17,7 @@
 
 #include "frameworks/core/animation/curve.h"
 
-struct ICurvePeer {
+struct curves_ICurvePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::Curve> handler;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_HTTP_AUTH_HANDLER_PEER_IMPL_H

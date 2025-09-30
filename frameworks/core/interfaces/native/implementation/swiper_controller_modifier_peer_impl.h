@@ -45,15 +45,6 @@ public:
         }
     }
 
-    void TriggerChangeIndex(int32_t index, const std::optional<bool> &useAnimationOpt)
-    {
-        index = index < 0 ? 0 : index;
-        bool useAnim = useAnimationOpt && *useAnimationOpt;
-        if (auto controller = handler_.Upgrade(); controller) {
-            controller->ChangeIndex(index, useAnim);
-        }
-    }
-
     void SetFinishCallback(const CommonFunc &callbackFunc)
     {
         if (auto controller = handler_.Upgrade(); controller) {

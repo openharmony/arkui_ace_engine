@@ -52,10 +52,10 @@ namespace NavigatorModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = NavigatorModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    return {};
+    auto frameNode = NavigatorModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // NavigatorModifier
 namespace NavigatorInterfaceModifier {
@@ -86,7 +86,7 @@ void ActiveImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     NavigatorModelNG::SetActive(frameNode, *convValue);
@@ -107,7 +107,7 @@ void TargetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<std::string>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     NavigatorModelNG::SetUri(frameNode, *convValue);
@@ -117,8 +117,6 @@ void ParamsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //NavigatorModelNG::SetParams(frameNode, convValue);
     LOGE("NavigatorAttributeModifier::ParamsImpl - the CustomObjects is not implemented yet!");
 }
 } // NavigatorAttributeModifier

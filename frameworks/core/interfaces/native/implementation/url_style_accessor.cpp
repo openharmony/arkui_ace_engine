@@ -23,9 +23,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UrlStyleAccessor {
 void DestroyPeerImpl(Ark_UrlStyle peer)
 {
+    CHECK_NULL_VOID(peer);
     PeerUtils::DestroyPeer(peer);
 }
-Ark_UrlStyle CtorImpl(const Ark_String* url)
+Ark_UrlStyle ConstructImpl(const Ark_String* url)
 {
     auto peer = PeerUtils::CreatePeer<UrlStylePeer>();
     std::string urlAddress;
@@ -49,7 +50,7 @@ const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor()
 {
     static const GENERATED_ArkUIUrlStyleAccessor UrlStyleAccessorImpl {
         UrlStyleAccessor::DestroyPeerImpl,
-        UrlStyleAccessor::CtorImpl,
+        UrlStyleAccessor::ConstructImpl,
         UrlStyleAccessor::GetFinalizerImpl,
         UrlStyleAccessor::GetUrlImpl,
     };

@@ -290,22 +290,6 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     overload push { push, pushOne, pushArray }
 
     /**
-     * Adds the specified elements to the end of an array and returns the new length of the array.
-     *
-     * @returns new length
-     */
-    public override pushECMA(...val: T[]): number {
-        const ret = this.store_.pushECMA(...val);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
-
-        // exec all subscribing @Watch
-        this.executeOnSubscribingWatches('pushECMA');
-
-        return ret;
-    }
-
-    /**
      * Changes the contents of an array by removing or replacing existing elements
      * and/or adding new elements in place.
      *
@@ -314,24 +298,6 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @returns an Array with deleted elements
      */
     public override splice(start: number, deleteIdx: Number | undefined, ...items: T[]): Array<T> {
-        const ret = this.store_.splice(start, deleteIdx, ...items);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
-
-        // exec all subscribing @Watch
-        this.executeOnSubscribingWatches('splice');
-        return ret;
-    }
-
-    /**
-     * Changes the contents of an array by removing or replacing existing elements
-     * and/or adding new elements in place.
-     *
-     * @param start index
-     * @param delete number of items after start index
-     * @returns an Array with deleted elements
-     */
-    public override splice(start: int, deleteIdx: int, ...items: T[]): Array<T> {
         const ret = this.store_.splice(start, deleteIdx, ...items);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -350,24 +316,6 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @returns an Array with deleted elements from start to the last element of the current instance
      */
     public override splice(start: number): Array<T> {
-        const ret = this.store_.splice(start);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
-
-        // exec all subscribing @Watch
-        this.executeOnSubscribingWatches('splice');
-
-        return ret;
-    }
-
-    /**
-     * Changes the contents of an array by removing or replacing existing elements
-     * and/or adding new elements in place.
-     *
-     * @param start index
-     * @returns an Array with deleted elements from start to the last element of the current instance
-     */
-    public override splice(start: int): Array<T> {
         const ret = this.store_.splice(start);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);

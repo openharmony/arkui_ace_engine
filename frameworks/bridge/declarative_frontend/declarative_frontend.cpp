@@ -1268,6 +1268,13 @@ void DeclarativeFrontend::NotifyAppStorage(const std::string& key, const std::st
     delegate_->NotifyAppStorage(jsEngine_, key, value);
 }
 
+void DeclarativeFrontend::CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs)
+{
+    if (jsEngine_) {
+        jsEngine_->CallStateMgmtCleanUpIdleTaskFunc(maxTimeInNs);
+    }
+}
+
 std::string DeclarativeFrontend::GetPagePathByUrl(const std::string& url) const
 {
     if (!delegate_) {

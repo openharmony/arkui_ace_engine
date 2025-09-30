@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { float64, int32, int64, isFiniteNumber, uint32 } from "@koalaui/common"
+import { float64, float64ToLong, int32, int64, isFiniteNumber, uint32 } from "@koalaui/common"
 import { AnimationRange, NumberAnimationRange } from "./AnimationRange"
 import { Easing, EasingCurve } from "./Easing"
 import { scheduleCallback } from "../states/GlobalStateManager"
@@ -250,7 +250,10 @@ class TimeAnimationImpl<Value> implements TimeAnimation<Value> {
 
     running: boolean = false
 
-    constructor(compute: (time: int64) => Value, initial: int64 = 0) {
+    constructor(
+        compute: (time: int64) => Value,
+        initial: int64 = 0
+    ) {
         this.lastState = initial
         this.lastValue = compute(initial)
         this.compute = compute
@@ -298,7 +301,12 @@ class PeriodicAnimationImpl<Value> implements TimeAnimation<Value> {
 
     running: boolean = false
 
-    constructor(delay: int32, period: uint32, compute: (count: int64) => Value, initial: int64 = 0) {
+    constructor(
+        delay: int32,
+        period: uint32,
+        compute: (count: int64) => Value,
+        initial: int64 = 0
+    ) {
         this.lastState = initial
         this.lastValue = compute(initial)
         this.compute = compute
@@ -314,7 +322,7 @@ class PeriodicAnimationImpl<Value> implements TimeAnimation<Value> {
         let result = this.state
         let passedTime = currentTime - startTime
         if (passedTime > this.period) {
-            result += Math.floor(passedTime / this.period) as int64
+            result += float64ToLong(Math.floor(passedTime / this.period))
             passedTime = passedTime % this.period
             // tune start time for long animations
             this.startTime = currentTime - passedTime

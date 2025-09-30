@@ -38,6 +38,7 @@ public:
         int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
+    static void SetAutoCapitalizationMode(FrameNode* frameNode, const std::optional<AutoCapitalizationMode>& value);
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, const std::optional<TextHeightAdaptivePolicy>& valueOpt);
     static void SetInputStyle(FrameNode* frameNode, const std::optional<InputStyle>& valueOpt);
     static void SetPasswordRules(FrameNode* frameNode, const std::optional<std::string>& passwordRules);

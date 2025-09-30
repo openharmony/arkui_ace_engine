@@ -33,7 +33,7 @@
 #include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
-#include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
+#include "core/interfaces/native/implementation/text_style_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
 #include "core/text/html_utils.h"
 
@@ -78,7 +78,7 @@ static bool CheckKeyAndValueTypeEqual(int32_t styledKey, int32_t valueTypeId)
         ARK_STYLED_STRING_KEY_URL, ARK_STYLED_STRING_KEY_CUSTOM_SPAN, ARK_STYLED_STRING_KEY_USER_DATA,
         ARK_STYLED_STRING_KEY_BACKGROUND_COLOR
     };
-    if ((valueTypeId < 0) || (static_cast<uint32_t>(valueTypeId) >= sizeof(KeyAndValueTypeMap) / sizeof(int32_t)) ||
+    if ((valueTypeId >= sizeof(KeyAndValueTypeMap) / sizeof(int32_t)) || (valueTypeId < 0) ||
         KeyAndValueTypeMap[valueTypeId] != styledKey) {
         return false;
     }
@@ -159,8 +159,8 @@ void DestroyPeerImpl(Ark_StyledString peer)
 {
     StyledStringPeer::Destroy(peer);
 }
-Ark_StyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
-                          const Opt_Array_StyleOptions* styles)
+Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+                               const Opt_Array_StyleOptions* styles)
 {
     auto peer = StyledStringPeer::Create();
     if (value) {
@@ -183,7 +183,8 @@ Ark_StyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* val
             [&peer](const Ark_CustomSpan& arkCustomSpan) {
                 CustomSpanPeer* peerCustomSpan = arkCustomSpan;
                 CHECK_NULL_VOID(peerCustomSpan && peerCustomSpan->span);
-                peer->spanString = AceType::MakeRefPtr<SpanString>(peerCustomSpan->span);
+                auto customSpan = AceType::DynamicCast<CustomSpan>(peerCustomSpan->span);
+                peer->spanString = AceType::MakeRefPtr<SpanString>(customSpan);
             },
             []() {}
         );
@@ -205,24 +206,21 @@ Ark_String GetStringImpl(Ark_StyledString peer)
     result = peer->spanString->GetString();
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
-Array_SpanStyle GetStylesImpl(Ark_VMContext vmContext,
-                              Ark_StyledString peer,
-                              const Ark_Number* start,
-                              const Ark_Number* length,
+Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
+                              const Ark_Int32 start,
+                              const Ark_Int32 length,
                               const Opt_StyledStringKey* styledKey)
 {
     CHECK_NULL_RETURN(peer, {});
     CHECK_NULL_RETURN(peer->spanString, {});
-    CHECK_NULL_RETURN(start, {});
-    CHECK_NULL_RETURN(length, {});
-    auto spanStart = Converter::Convert<int32_t>(*start);
-    auto spanLength = Converter::Convert<int32_t>(*length);
+    auto spanStart = Converter::Convert<int32_t>(start);
+    auto spanLength = Converter::Convert<int32_t>(length);
     if (!peer->spanString->CheckRange(spanStart, spanLength)) {
         LOGE("CheckBoundary failed: start:%{public}d length:%{public}d", spanStart, spanLength);
         return {};
     }
     std::vector<RefPtr<SpanBase>> spans;
-    auto spanType = styledKey ? Converter::OptConvert<Ace::SpanType>(*styledKey) : std::nullopt;
+    auto spanType = Converter::OptConvertPtr<Ace::SpanType>(styledKey);
     if (spanType.has_value()) {
         spans = peer->spanString->GetSpans(spanStart, spanLength, spanType.value());
     } else {
@@ -239,18 +237,16 @@ Ark_Boolean EqualsImpl(Ark_StyledString peer,
     CHECK_NULL_RETURN(other->spanString, false);
     return peer->spanString->IsEqualToSpanString(other->spanString);
 }
-Ark_StyledString SubStyledStringImpl(Ark_VMContext vmContext,
-                                     Ark_StyledString peer,
-                                     const Ark_Number* start,
-                                     const Opt_Number* length)
+Ark_StyledString SubStyledStringImpl(Ark_StyledString peer,
+                                     const Ark_Int32 start,
+                                     const Opt_Int32* length)
 {
     Ark_StyledString ret = nullptr;
     CHECK_NULL_RETURN(peer, ret);
     CHECK_NULL_RETURN(peer->spanString, ret);
-    CHECK_NULL_RETURN(start, ret);
-    auto startSpan = Converter::Convert<int32_t>(*start);
+    auto startSpan = Converter::Convert<int32_t>(start);
     auto lengthSpan = peer->spanString->GetLength() - startSpan;
-    auto lengthOpt = length ? Converter::OptConvert<int32_t>(*length) : std::nullopt;
+    auto lengthOpt = Converter::OptConvertPtr<int32_t>(length);
     if (lengthOpt) {
         lengthSpan = std::min(lengthSpan, lengthOpt.value());
     }
@@ -285,8 +281,7 @@ void FromHtmlImpl(Ark_VMContext vmContext,
         }
     });
 }
-Ark_String ToHtmlImpl(Ark_VMContext vmContext,
-                      Ark_StyledString styledString)
+Ark_String ToHtmlImpl(Ark_StyledString styledString)
 {
     std::string result = "";
     CHECK_NULL_RETURN(styledString, Converter::ArkValue<Ark_String>(result, Converter::FC));
@@ -301,16 +296,6 @@ Ark_Buffer Marshalling0Impl(Ark_StyledString styledString,
     CHECK_NULL_RETURN(callback_, {});
     LOGE("Ark_UserDataSpan is not implemented.");
 
-    std::vector<uint8_t> tlvData;
-    styledString->spanString->EncodeTlv(tlvData);
-    Ark_Buffer result = BufferKeeper::Allocate(tlvData.size());
-    copy(tlvData.begin(), tlvData.end(), reinterpret_cast<uint8_t*>(result.data));
-    return result;
-}
-Ark_Buffer Marshalling1Impl(Ark_StyledString styledString)
-{
-    CHECK_NULL_RETURN(styledString, {});
-    CHECK_NULL_RETURN(styledString->spanString, {});
     std::vector<uint8_t> tlvData;
     styledString->spanString->EncodeTlv(tlvData);
     Ark_Buffer result = BufferKeeper::Allocate(tlvData.size());
@@ -354,6 +339,16 @@ void Unmarshalling0Impl(Ark_VMContext vmContext,
 
     promise->StartAsync(vmContext, *asyncWorker, std::move(unmarshallingExec));
 }
+Ark_Buffer Marshalling1Impl(Ark_StyledString styledString)
+{
+    CHECK_NULL_RETURN(styledString, {});
+    CHECK_NULL_RETURN(styledString->spanString, {});
+    std::vector<uint8_t> tlvData;
+    styledString->spanString->EncodeTlv(tlvData);
+    Ark_Buffer result = BufferKeeper::Allocate(tlvData.size());
+    copy(tlvData.begin(), tlvData.end(), reinterpret_cast<uint8_t*>(result.data));
+    return result;
+}
 void Unmarshalling1Impl(Ark_VMContext vmContext,
                         Ark_AsyncWorkerPtr asyncWorker,
                         const Ark_Buffer* buffer,
@@ -361,19 +356,19 @@ void Unmarshalling1Impl(Ark_VMContext vmContext,
 {
     Unmarshalling0Impl(vmContext, asyncWorker, buffer, nullptr, outputArgumentForReturningPromise);
 }
-Ark_Number GetLengthImpl(Ark_StyledString peer)
+Ark_Int32 GetLengthImpl(Ark_StyledString peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->spanString, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->spanString->GetLength());
+    return Converter::ArkValue<Ark_Int32>(peer->spanString->GetLength());
 }
 } // StyledStringAccessor
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
 {
     static const GENERATED_ArkUIStyledStringAccessor StyledStringAccessorImpl {
         StyledStringAccessor::DestroyPeerImpl,
-        StyledStringAccessor::CtorImpl,
+        StyledStringAccessor::ConstructImpl,
         StyledStringAccessor::GetFinalizerImpl,
         StyledStringAccessor::GetStringImpl,
         StyledStringAccessor::GetStylesImpl,
@@ -382,8 +377,8 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
         StyledStringAccessor::FromHtmlImpl,
         StyledStringAccessor::ToHtmlImpl,
         StyledStringAccessor::Marshalling0Impl,
-        StyledStringAccessor::Marshalling1Impl,
         StyledStringAccessor::Unmarshalling0Impl,
+        StyledStringAccessor::Marshalling1Impl,
         StyledStringAccessor::Unmarshalling1Impl,
         StyledStringAccessor::GetLengthImpl,
     };

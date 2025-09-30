@@ -31,6 +31,8 @@ void JSTextEditableController::JSBind(BindingTarget globalObj)
     JSClass<JSTextEditableController>::CustomMethod(
         "getTextContentLineCount", &JSTextEditableController::GetTextContentLinesNum);
     JSClass<JSTextEditableController>::CustomMethod("addText", &JSTextEditableController::AddText);
+    JSClass<JSTextEditableController>::CustomMethod(
+        "setStyledPlaceholder", &JSTextEditableController::SetPlaceholderStyledString);
     JSClass<JSTextEditableController>::CustomMethod("deleteText", &JSTextEditableController::DeleteText);
     JSClass<JSTextEditableController>::CustomMethod("getSelection", &JSTextEditableController::GetSelection);
     JSClass<JSTextEditableController>::CustomMethod("clearPreviewText", &JSTextEditableController::ClearPreviewText);
@@ -304,5 +306,36 @@ void JSTextEditableController::StopEditing()
     } else {
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "StopEditing: The JSTextEditableController is NULL");
     }
+}
+
+void JSTextEditableController::SetPlaceholderStyledString(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsObject()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
+    auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
+    if (!spanString) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
+    auto spanStringController = spanString->GetController();
+    CHECK_NULL_VOID(spanStringController);
+    placeholderStyledString_ = spanStringController;
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    controller->SetPlaceholderStyledString(spanStringController);
+    auto thisObj = info.This();
+    thisObj->SetPropertyObject("STYLED_PLACEHOLDER_IN_CONTROLLER", info[0]);
+}
+
+RefPtr<SpanString> JSTextEditableController::GetPlaceholderStyledString() const
+{
+    return placeholderStyledString_.Upgrade();
+}
+
+void JSTextEditableController::ClearPlaceholderStyledString()
+{
+    placeholderStyledString_ = nullptr;
 }
 } // namespace OHOS::Ace::Framework

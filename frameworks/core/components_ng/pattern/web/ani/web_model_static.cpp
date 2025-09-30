@@ -25,7 +25,7 @@
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/ani/web_pattern_static.h"
 #else
-#include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
 #endif // !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "nweb_helper.h"
 #endif // ARKUI_CAPI_UNITTEST
@@ -304,7 +304,7 @@ void WebModelStatic::SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
-    webPatternStatic->UpdateWebMediaAVSessionEnabled(enable.value());
+    webPatternStatic->UpdateWebMediaAVSessionEnabled(enable.value_or(true));
 }
 
 void WebModelStatic::SetEnableDataDetector(FrameNode* frameNode, bool isEnabled)
@@ -1329,39 +1329,5 @@ void WebModelStatic::SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllow
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
-}
-
-void WebModelStatic::SetGestureFocusMode(FrameNode* frameNode, const GestureFocusMode& mode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPatternStatic);
-    webPatternStatic->UpdateGestureFocusMode(mode);
-}
-
-void WebModelStatic::SetForceEnableZoom(FrameNode* frameNode, bool isEnabled)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPatternStatic);
-    webPatternStatic->UpdateForceEnableZoom(isEnabled);
-}
-
-void WebModelStatic::SetActivateContentEventId(
-    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
-    CHECK_NULL_VOID(webEventHub);
-    webEventHub->SetOnActivateContentEvent(std::move(uiCallback));
-}
-
-void WebModelStatic::SetBackToTop(FrameNode* frameNode, bool isEnabled)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPatternStatic);
-    webPatternStatic->UpdateBackToTop(isEnabled);
 }
 } // namespace OHOS::Ace::NG

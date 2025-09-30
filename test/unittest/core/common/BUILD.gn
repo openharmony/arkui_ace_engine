@@ -50,9 +50,9 @@ group("core_common_unittest") {
     "form:form_manager_test",
     "ime:ime_test",
     "key_event_manager:key_event_manager_test",
-    "plugin:plugin_manager_test",
-    "resource:resource_manager_test",
-    "recorder:event_recorder_test",
     "others:thread_checker_test",
+    "plugin:plugin_manager_test",
+    "recorder:event_recorder_test",
+    "resource:resource_manager_test",
   ]
 }

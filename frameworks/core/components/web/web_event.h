@@ -21,6 +21,9 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/event/ace_events.h"
+#ifdef DELETE
+#undef DELETE
+#endif
 
 namespace OHOS {
 namespace Media {

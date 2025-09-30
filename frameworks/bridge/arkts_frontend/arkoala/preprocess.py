@@ -18,7 +18,6 @@ import os
 import shutil
 from collections import defaultdict
 
-
 def get_ts_files(directory):
     return set(
         f for f in os.listdir(directory)
@@ -26,9 +25,38 @@ def get_ts_files(directory):
     )
 
 
+def merge_generated_files(generated_dir: str, dst_dir: str) -> None:
+    if not os.path.exists(generated_dir):
+        raise FileNotFoundError(f"Generated directory does not exist {generated_dir}.")
+    if not os.path.exists(dst_dir):
+        raise FileNotFoundError(f"Destination directory does not exist {dst_dir}.")
+    
+    for item in os.listdir(generated_dir):
+        src_path = os.path.join(generated_dir, item)
+        dst_path = os.path.join(dst_dir, item)
+        
+        if os.path.isdir(src_path):
+            if os.path.exists(dst_path):
+                merge_generated_files(src_path, dst_path)
+                shutil.rmtree(src_path)
+            else:
+                shutil.move(src_path, dst_path)
+        else:
+            if os.path.exists(dst_path):
+                if os.path.isfile(dst_path):
+                    merge_file(dst_path, src_path)
+                    os.remove(src_path)
+                    print(f"Merge source file: {os.path.basename(dst_path)}")
+                else:
+                    raise SystemError(f"Conflict: {dst_path} is a directory, but {src_path} is a file.")
+            else:
+                shutil.move(src_path, dst_path)
+
 def merge_component(handwritten_path: str, generated_path: str) -> None:
-    if not os.path.exists(handwritten_path) or not os.path.exists(generated_path):
-        return
+    if not os.path.exists(generated_path):
+        raise FileNotFoundError(f"Generated directory does not exist {generated_path}.")
+    if not os.path.exists(handwritten_path):
+        raise FileNotFoundError(f"Handwritten directory does not exist {handwritten_path}.")
 
     handwritten_files = get_ts_files(handwritten_path)
     generated_files = get_ts_files(generated_path)

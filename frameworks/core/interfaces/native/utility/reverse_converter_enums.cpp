@@ -33,7 +33,7 @@ void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAct
         case AccessibilityHoverAction::HOVER_CANCEL: dst = ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_CANCEL; break;
         default:
             dst = static_cast<Ark_AccessibilityHoverType>(-1);
-            LOGE("Unexpected enum value in Ark_AccessibilityHoverType: %{public}d", src);
+            LOGW("Unexpected enum value in Ark_AccessibilityHoverType: %{public}d", src);
             break;
     }
 }
@@ -282,6 +282,19 @@ void AssignArkValue(Ark_IntentionCode& dst, const KeyIntention& src)
     }
 }
 
+void AssignArkValue(Ark_InteractionHand& dst, const ArkUI_InteractionHand& src)
+{
+    switch (src) {
+        case ARKUI_EVENT_HAND_NONE: dst = ARK_INTERACTION_HAND_NONE; break;
+        case ARKUI_EVENT_HAND_LEFT: dst = ARK_INTERACTION_HAND_LEFT; break;
+        case ARKUI_EVENT_HAND_RIGHT: dst = ARK_INTERACTION_HAND_RIGHT; break;
+        default:
+            LOGE("Unexpected enum value in InteractionHand: %{public}d", src);
+            dst = INVALID_ENUM_VAL<Ark_InteractionHand>;
+            break;
+    }
+}
+
 void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src)
 {
     switch (src) {
@@ -369,22 +382,6 @@ void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src)
     }
 }
 
-void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
-{
-    switch (src) {
-        case SecurityComponentHandleResult::CLICK_SUCCESS:
-            dst = ARK_LOCATION_BUTTON_ON_CLICK_RESULT_SUCCESS;
-            break;
-        case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
-            dst = ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
-            break;
-        default:
-            dst = static_cast<Ark_LocationButtonOnClickResult>(-1);
-            LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
-            break;
-    }
-}
-
 void AssignArkValue(Ark_MessageLevel& dst, const MessageLevel& src)
 {
     switch (src) {
@@ -407,8 +404,6 @@ void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
         case MouseAction::RELEASE: dst = ARK_MOUSE_ACTION_RELEASE; break;
         case MouseAction::MOVE: dst = ARK_MOUSE_ACTION_MOVE; break;
         case MouseAction::HOVER: dst = ARK_MOUSE_ACTION_HOVER; break;
-        case MouseAction::WINDOW_ENTER: dst = ARK_MOUSE_ACTION_WINDOW_ENTER; break;
-        case MouseAction::WINDOW_LEAVE: dst = ARK_MOUSE_ACTION_WINDOW_LEAVE; break;
         case MouseAction::CANCEL: dst = ARK_MOUSE_ACTION_CANCEL; break;
         default: {
             dst = static_cast<Ark_MouseAction>(-1);
@@ -495,34 +490,12 @@ void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src
 }
 void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src)
 {
-    switch (src.type) {
-        case PanDirection::NONE:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_NONE;
-            break;
-        case PanDirection::LEFT:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_LEFT;
-            break;
-        case PanDirection::RIGHT:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_RIGHT;
-            break;
-        case PanDirection::HORIZONTAL:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_HORIZONTAL;
-            break;
-        case PanDirection::UP:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_UP;
-            break;
-        case PanDirection::DOWN:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_DOWN;
-            break;
-        case PanDirection::VERTICAL:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_VERTICAL;
-            break;
-        case PanDirection::ALL:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_ALL;
-            break;
-        default:
-            dst = static_cast<Ark_PanDirection>(-1);
-            LOGE("Unexpected enum value in PanDirection: %{public}d", src.type);
+    if (src.type >= static_cast<uint32_t>(Ark_PanDirection::ARK_PAN_DIRECTION_NONE) &&
+        src.type <= static_cast<uint32_t>(Ark_PanDirection::ARK_PAN_DIRECTION_ALL)) {
+        dst = static_cast<Ark_PanDirection>(src.type);
+    } else {
+        dst = static_cast<Ark_PanDirection>(-1);
+        LOGE("Unexpected enum value in PanDirection: %{public}d", src.type);
     }
 }
 void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
@@ -628,17 +601,6 @@ void AssignArkValue(Ark_SheetType& dst, const SheetType& src)
         case SheetType::SHEET_POPUP: dst = ARK_SHEET_TYPE_POPUP; break;
         default: dst = static_cast<Ark_SheetType>(-1);
             LOGE("Unexpected enum value in SheetType: %{public}d", src);
-    }
-}
-
-void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src)
-{
-    switch (src) {
-        case V2::StickyMode::NONE: dst = ARK_STICKY_NONE; break;
-        case V2::StickyMode::NORMAL: dst = ARK_STICKY_NORMAL; break;
-        case V2::StickyMode::OPACITY: dst = ARK_STICKY_OPACITY; break;
-        default: dst = static_cast<Ark_Sticky>(-1);
-            LOGE("Unexpected enum value in V2::StickyMode: %{public}d", src);
     }
 }
 
@@ -842,8 +804,6 @@ void AssignArkValue(Ark_SourceType& dst, const SourceType& src)
         case SourceType::NONE: dst = Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN; break;
         case SourceType::MOUSE: dst = Ark_SourceType::ARK_SOURCE_TYPE_MOUSE; break;
         case SourceType::TOUCH: dst = Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN; break;
-        case SourceType::KEYBOARD: dst = Ark_SourceType::ARK_SOURCE_TYPE_KEYBOARD; break;
-        case SourceType::JOYSTICK: dst = Ark_SourceType::ARK_SOURCE_TYPE_JOYSTICK; break;
         default: dst = static_cast<Ark_SourceType>(-1);
             LOGE("Unexpected enum value in SourceType: %{public}d", src);
     }

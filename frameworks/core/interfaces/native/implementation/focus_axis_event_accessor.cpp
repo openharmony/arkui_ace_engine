@@ -43,7 +43,7 @@ void DestroyPeerImpl(Ark_FocusAxisEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_FocusAxisEvent CtorImpl()
+Ark_FocusAxisEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<FocusAxisEventPeer>();
 }
@@ -62,23 +62,32 @@ void SetAxisMapImpl(Ark_FocusAxisEvent peer,
 {
     LOGW("ARKOALA KeyEventAccessor::SetAxisMapImpl doesn't have sense.");
 }
-void StopPropagationImpl(Ark_FocusAxisEvent peer)
+Callback_Void GetStopPropagationImpl(Ark_FocusAxisEvent peer)
 {
-    CHECK_NULL_VOID(peer);
-    FocusAxisEventInfo* info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    info->SetStopPropagation(true);
+    CHECK_NULL_RETURN(peer, {});
+    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
+        FocusAxisEventInfo* info = peer->GetEventInfo();
+        CHECK_NULL_VOID(info);
+        info->SetStopPropagation(true);
+    });
+    return callback;
+}
+void SetStopPropagationImpl(Ark_FocusAxisEvent peer,
+                            const Callback_Void* stopPropagation)
+{
+    LOGE("FocusAxisEventAccessor::SetStopPropagationImpl we can only GET stopPropagation callback");
 }
 } // FocusAxisEventAccessor
 const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor()
 {
     static const GENERATED_ArkUIFocusAxisEventAccessor FocusAxisEventAccessorImpl {
         FocusAxisEventAccessor::DestroyPeerImpl,
-        FocusAxisEventAccessor::CtorImpl,
+        FocusAxisEventAccessor::ConstructImpl,
         FocusAxisEventAccessor::GetFinalizerImpl,
         FocusAxisEventAccessor::GetAxisMapImpl,
         FocusAxisEventAccessor::SetAxisMapImpl,
-        FocusAxisEventAccessor::StopPropagationImpl,
+        FocusAxisEventAccessor::GetStopPropagationImpl,
+        FocusAxisEventAccessor::SetStopPropagationImpl,
     };
     return &FocusAxisEventAccessorImpl;
 }

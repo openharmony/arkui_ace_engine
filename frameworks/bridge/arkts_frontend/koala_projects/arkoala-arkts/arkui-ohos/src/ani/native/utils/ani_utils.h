@@ -44,13 +44,15 @@
         };                                                                                             \
         ani_status ret;                                                                                \
         if ((ret = (env)->call) != ANI_OK) {                                                           \
-            LOGE("ani call %{public}s failed: %{public}d, %{public}s", #call, ret,                     \
+            HILOGE("ani call %{public}s failed: %{public}d, %{public}s", #call, ret,                   \
                 static_cast<size_t>(ret) < std::extent_v<decltype(aniErr)> ? aniErr[ret] : "ANI_???"); \
             if (ret == ANI_PENDING_ERROR) {                                                            \
                 Ani::AniUtils::ClearAniPendingError(env);                                              \
             }                                                                                          \
             onFail;                                                                                    \
         }                                                                                              \
+    } else {                                                                                           \
+        onFail;                                                                                        \
     }
 
 namespace OHOS::Ace::Ani {
@@ -76,6 +78,10 @@ public:
     static bool GetBigIntValue(ani_env* env, ani_object object, int64_t& longValue);
     static bool GetEnumItem(
         [[maybe_unused]] ani_env* env, ani_size index, const char* enumName, ani_enum_item& enumItem);
+    // Get double value from ani_ref.
+    // The return value means the parse result. True means success.
+    // If the ref is undefined, it will return false.
+    static bool GetOptionalDouble(ani_env* env, ani_ref value, double& result);
     /**
      * Get std/core/Double.
      */

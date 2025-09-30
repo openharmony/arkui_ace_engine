@@ -27,10 +27,10 @@ namespace {
 const char LAYOUT_TYPE[] = "layout";
 const char DRAW_TYPE[] = "draw";
 const char DRAW_CHILDREN_TYPE[] = "drawChildren";
-const char ANI_INSPECTOR_NS[] = "L@ohos/arkui/inspector/inspector;";
-const char ANI_COMPONENT_OBSERVER_CLS[] = "L@ohos/arkui/inspector/inspector/ComponentObserverImpl;";
-const char KOALA_INSPECTOR_CLS[] = "L@koalaui/arkts-arkui/generated/arkts/ohos/arkui/inspector/Inspector;";
-const char KOALA_COMPONENT_CLS[] = "L@koalaui/arkts-arkui/generated/arkts/ohos/arkui/inspector/ComponentObserver;";
+const char ANI_INSPECTOR_NS[] = "@ohos.arkui.inspector.inspector";
+const char ANI_COMPONENT_OBSERVER_CLS[] = "@ohos.arkui.inspector.inspector.ComponentObserverImpl";
+const char KOALA_INSPECTOR_CLS[] = "@koalaui.arkts-arkui.generated.arkts.ohos.arkui.inspector.Inspector";
+const char KOALA_COMPONENT_CLS[] = "@koalaui.arkts-arkui.generated.arkts.ohos.arkui.inspector.ComponentObserver";
 } // namespace
  
 namespace OHOS::Ace {
@@ -256,18 +256,12 @@ static ani_string AniGetInspectorTree(ani_env *env)
 {
     ContainerScope scope {Container::CurrentIdSafelyWithCheck()};
     std::string resultStr = NG::Inspector::GetInspector(false);
-    ani_string ani_str;
-    ani_status status = env->String_NewUTF8(resultStr.c_str(), resultStr.size(), &ani_str);
     if (resultStr.empty()) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani inspector tree is empty.");
-        if (status != ANI_OK) {
-            TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not convert string to ani_string.");
-            return nullptr;
-        }
-        return ani_str;
+        return nullptr;
     }
     ani_string aniResult;
-    status = env->String_NewUTF8(resultStr.c_str(), resultStr.size(), &aniResult);
+    ani_status status = env->String_NewUTF8(resultStr.c_str(), resultStr.size(), &aniResult);
     if (ANI_OK != status) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not convert string to ani_string.");
         return nullptr;
@@ -275,7 +269,7 @@ static ani_string AniGetInspectorTree(ani_env *env)
     return aniResult;
 }
 
-static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array_ref filters)
+static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array filters)
 {
     bool isLayoutInspector = false;
     const NG::InspectorFilter& inspectorFilter = GetInspectorFilter(env, filters, isLayoutInspector);
@@ -283,14 +277,8 @@ static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array_ref filter
     bool needThrow = false;
     auto nodeInfos = NG::Inspector::GetInspector(isLayoutInspector, inspectorFilter, needThrow);
     if (needThrow) {
-        ani_string ani_str;
-        std::string resultStr = "";
-        ani_status status = env->String_NewUTF8(resultStr.c_str(), resultStr.size(), &ani_str);
-        AniThrow(env, "Unable to obtain current ui content", ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED);
-        if (status != ANI_OK) {
-            return nullptr;
-        }
-        return ani_str;
+        AniThrow(env, "Unable to obtain current ui context", ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED);
+        return nullptr;
     }
     ani_string result;
     if (ANI_OK != env->String_NewUTF8(nodeInfos.c_str(), nodeInfos.size(), &result)) {
@@ -300,29 +288,19 @@ static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array_ref filter
     return result;
 }
  
-static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_double depth, ani_array_ref filters)
+static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_double depth, ani_array filters)
 {
-    ani_string ani_str;
-    std::string resultStr = "";
-    ani_status status = env->String_NewUTF8(resultStr.c_str(), resultStr.size(), &ani_str);
     if (depth < 0) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Inspector-ani The parameter depth must be greater than 0.");
-        AniThrow(env, "The parameter depth must be greater than or equal to 0.", ERROR_CODE_PARAM_ERROR);
-        if (status != ANI_OK) {
-            return nullptr;
-        }
-        return ani_str;
+        // AniThrow(env, "The parameter depth must be greater than 0.",
+        //     ERROR_CODE_INSPECTOR_PARAM_DEPTH_INVALID);
+        return nullptr;
     }
     bool isLayoutInspector = false;
     NG::InspectorFilter inspectorFilter = GetInspectorFilter(env, filters, isLayoutInspector);
     std::string idStr;
     if (ANI_OK != ANIUtils_ANIStringToStdString(env, id, idStr)) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Inspector-ani get filter inspector tree failed");
-        if (status != ANI_OK) {
-            TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Inspector-ani can not covert string to ani_string.");
-            return nullptr;
-        }
-        return ani_str;
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "get filter inspector tree failed");
+        return nullptr;
     }
     inspectorFilter.SetFilterID(idStr);
     inspectorFilter.SetFilterDepth(depth);
@@ -330,12 +308,8 @@ static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, a
     bool needThrow = false;
     auto nodeInfos = NG::Inspector::GetInspector(false, inspectorFilter, needThrow);
     if (needThrow) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Unable to obtain current ui content.");
-        AniThrow(env, "Unable to obtain current ui content.", ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED);
-        if (status != ANI_OK) {
-            return nullptr;
-        }
-        return ani_str;
+        AniThrow(env, "Unable to obtain current UI context", ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED);
+        return nullptr;
     }
     ani_string result;
     if (ANI_OK != env->String_NewUTF8(nodeInfos.c_str(), nodeInfos.size(), &result)) {
@@ -347,30 +321,20 @@ static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, a
 
 static ani_string AniGetInspectorByKey(ani_env *env, ani_string key)
 {
-    ani_string ani_str;
-    std::string resultStr = "";
     std::string keyStr;
     ani_status getStdStringStatus = ANIUtils_ANIStringToStdString(env, key, keyStr);
-    ani_status status = env->String_NewUTF8(resultStr.c_str(), resultStr.size(), &ani_str);
     if (getStdStringStatus != ANI_OK) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani get key failed.");
-        if (status != ANI_OK) {
-            TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani can not covert string to ani_string.");
-            return nullptr;
-        }
-        return ani_str;
+        return nullptr;
     }
     ContainerScope scope{Container::CurrentIdSafelyWithCheck()};
-    resultStr = NG::Inspector::GetInspectorNodeByKey(keyStr);
+    std::string resultStr = NG::Inspector::GetInspectorNodeByKey(keyStr);
     if (resultStr.empty()) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani node %{public}s is empty.", keyStr.c_str());
-        if (status != ANI_OK) {
-            TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani can not covert string to ani_string.");
-            return nullptr;
-        }
-        return ani_str;
+        return nullptr;
     }
-    status = env->String_NewUTF8(resultStr.c_str(), resultStr.size(), &ani_str);
+    ani_string ani_str;
+    ani_status status = env->String_NewUTF8(resultStr.c_str(), resultStr.size(), &ani_str);
     if (ANI_OK != status) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not convert string to ani_string.");
         return nullptr;

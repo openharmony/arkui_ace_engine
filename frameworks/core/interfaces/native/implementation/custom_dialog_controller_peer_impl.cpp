@@ -23,6 +23,7 @@
 
 namespace {
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
+constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
 }
 
 namespace OHOS::Ace::NG::Converter {
@@ -78,10 +79,42 @@ void CustomDialogControllerPeerImpl::SetBuilder(
     };
 }
 
+void CustomDialogControllerPeerImpl::SetBuilderExtender(
+    CustomNodeBuilder builder, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
+{
+    builder_ = [callback = CallbackHelper(builder), weakPeer = AceType::WeakClaim(AceType::RawPtr(peer))]() -> void {
+        auto controllerPeer = weakPeer.Upgrade();
+        CHECK_NULL_VOID(controllerPeer);
+        auto weakNode = controllerPeer->GetOwnerViewNode();
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(frameNode);
+        callback.BuildAsync([weakPeer](const RefPtr<UINode>& uiNode) {
+            auto controller = weakPeer.Upgrade();
+            CHECK_NULL_VOID(controller);
+            auto builderFunc = [uiNode]() -> RefPtr<UINode> {
+                return uiNode;
+            };
+            CustomDialogControllerModelStatic::SetOpenDialog(
+                controller->dialogProperties_, controller->dialogs_, weakPeer, std::move(builderFunc));
+        }, reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode)));
+    };
+}
+
 void CustomDialogControllerPeerImpl::SetOnCancel(
     Opt_Callback_Void cancel, const RefPtr<CustomDialogControllerPeer>& peer)
 {
     auto cancelOpt = TransformCallbackToFunctionVoid(cancel, peer);
+    CHECK_NULL_VOID(cancelOpt);
+    dialogProperties_.onCancel = cancelOpt;
+}
+
+void CustomDialogControllerPeerImpl::SetOnCancelExtender(
+    Opt_Callback_Void cancel, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
+{
+    auto cancelOpt = TransformCallbackToFunctionVoidExtender(cancel, peer);
     CHECK_NULL_VOID(cancelOpt);
     dialogProperties_.onCancel = cancelOpt;
 }
@@ -118,6 +151,11 @@ void CustomDialogControllerPeerImpl::SetCustomStyle(Opt_Boolean customStyle)
     }
 }
 
+Opt_Boolean CustomDialogControllerPeerImpl::GetCustomStyle()
+{
+    return Converter::ArkValue<Opt_Boolean>(dialogProperties_.customStyle);
+}
+
 void CustomDialogControllerPeerImpl::SetGridCount(Opt_Number gridCount)
 {
     auto result = Converter::OptConvert<int32_t>(gridCount);
@@ -138,22 +176,20 @@ void CustomDialogControllerPeerImpl::SetMaskRect(Opt_Rectangle maskRect)
 
 void CustomDialogControllerPeerImpl::SetOpenAnimation(Opt_AnimateParam openAnimation)
 {
-    auto result = Converter::OptConvert<Converter::AnimateParam>(openAnimation);
-    if (result) {
-        AnimationOption option;
-        option.SetDuration(result.value().duration.value_or(DEFAULT_ANIMATION_DURATION));
-        option.SetDelay(result.value().delay.value_or(0));
-        option.SetIteration(result.value().iterations.value_or(1));
-        float tempo = result.value().tempo.value_or(1.0f);
-        if (tempo < 0) {
-            tempo = 1.0f;
-        } else if (tempo == 0) {
-            tempo = 1000.0f;
+    auto result = Converter::OptConvert<AnimationOption>(openAnimation);
+    if (result.has_value()) {
+        auto option = result.value();
+        option.SetDuration(
+            Converter::OptConvert<int32_t>(openAnimation.value.duration).value_or(DEFAULT_ANIMATION_DURATION));
+        auto onFinish = Converter::OptConvert<Callback_Void>(openAnimation.value.onFinish);
+        if (onFinish.has_value()) {
+            std::function<void()> onFinishEvent = [
+                arkCallback = CallbackHelper(*onFinish), currentId = Container::CurrentIdSafely()]() mutable {
+                ContainerScope scope(currentId);
+                arkCallback.InvokeSync();
+            };
+            option.SetOnFinishEvent(onFinishEvent);
         }
-        option.SetTempo(tempo);
-        option.SetAnimationDirection(result.value().direction.value_or(AnimationDirection::NORMAL));
-        option.SetFinishCallbackType(result.value().finishCallbackType.value_or(FinishCallbackType::REMOVED));
-        option.SetCurve(result.value().curve.value_or(Curves::EASE_IN_OUT));
         dialogProperties_.openAnimation = option;
     } else {
         dialogProperties_.openAnimation = std::nullopt;
@@ -162,22 +198,20 @@ void CustomDialogControllerPeerImpl::SetOpenAnimation(Opt_AnimateParam openAnima
 
 void CustomDialogControllerPeerImpl::SetCloseAnimation(Opt_AnimateParam closeAnimation)
 {
-    auto result = Converter::OptConvert<Converter::AnimateParam>(closeAnimation);
-    if (result) {
-        AnimationOption option;
-        option.SetDuration(result.value().duration.value_or(DEFAULT_ANIMATION_DURATION));
-        option.SetDelay(result.value().delay.value_or(0));
-        option.SetIteration(result.value().iterations.value_or(1));
-        float tempo = result.value().tempo.value_or(1.0f);
-        if (tempo < 0) {
-            tempo = 1.0f;
-        } else if (tempo == 0) {
-            tempo = 1000.0f;
+    auto result = Converter::OptConvert<AnimationOption>(closeAnimation);
+    if (result.has_value()) {
+        auto option = result.value();
+        option.SetDuration(
+            Converter::OptConvert<int32_t>(closeAnimation.value.duration).value_or(DEFAULT_ANIMATION_DURATION));
+        auto onFinish = Converter::OptConvert<Callback_Void>(closeAnimation.value.onFinish);
+        if (onFinish.has_value()) {
+            std::function<void()> onFinishEvent = [
+                arkCallback = CallbackHelper(*onFinish), currentId = Container::CurrentIdSafely()]() mutable {
+                ContainerScope scope(currentId);
+                arkCallback.InvokeSync();
+            };
+            option.SetOnFinishEvent(onFinishEvent);
         }
-        option.SetTempo(tempo);
-        option.SetAnimationDirection(result.value().direction.value_or(AnimationDirection::NORMAL));
-        option.SetFinishCallbackType(result.value().finishCallbackType.value_or(FinishCallbackType::REMOVED));
-        option.SetCurve(result.value().curve.value_or(Curves::EASE_IN_OUT));
         dialogProperties_.closeAnimation = option;
     } else {
         dialogProperties_.closeAnimation = std::nullopt;
@@ -215,21 +249,19 @@ void CustomDialogControllerPeerImpl::SetDismiss(Opt_Callback_DismissDialogAction
     AddOnWillDismiss(dialogProperties_, onWillDismiss);
 }
 
-void CustomDialogControllerPeerImpl::SetWidth(Opt_Length width)
+void CustomDialogControllerPeerImpl::SetWidth(std::optional<Dimension> width)
 {
-    auto result = Converter::OptConvert<Dimension>(width);
-    Validator::ValidateNonNegative(result);
-    if (result) {
-        dialogProperties_.width = result.value();
+    Validator::ValidateNonNegative(width);
+    if (width) {
+        dialogProperties_.width = *width;
     }
 }
 
-void CustomDialogControllerPeerImpl::SetHeight(Opt_Length height)
+void CustomDialogControllerPeerImpl::SetHeight(std::optional<Dimension> height)
 {
-    auto result = Converter::OptConvert<Dimension>(height);
-    Validator::ValidateNonNegative(result);
-    if (result) {
-        dialogProperties_.height = result.value();
+    Validator::ValidateNonNegative(height);
+    if (height) {
+        dialogProperties_.height = *height;
     }
 }
 
@@ -324,15 +356,56 @@ void CustomDialogControllerPeerImpl::SetOnWillDisappear(
     dialogProperties_.onWillDisappear = callback;
 }
 
-void CustomDialogControllerPeerImpl::SetKeyboardAvoidDistance(Opt_LengthMetrics keyboardAvoidDistance)
+void CustomDialogControllerPeerImpl::SetOnDidAppearExtender(
+    Opt_Callback_Void onDidAppear, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
 {
-    dialogProperties_.keyboardAvoidDistance = Converter::OptConvert<Dimension>(keyboardAvoidDistance);
+    auto callback = TransformCallbackToFunctionVoidExtender(onDidAppear, peer);
+    CHECK_NULL_VOID(callback);
+    dialogProperties_.onDidAppear = callback;
 }
 
-void CustomDialogControllerPeerImpl::SetLevelMode(Opt_LevelMode levelMode)
+void CustomDialogControllerPeerImpl::SetOnDidDisappearExtender(
+    Opt_Callback_Void onDidDisappear, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
+{
+    auto callback = TransformCallbackToFunctionVoidExtender(onDidDisappear, peer);
+    CHECK_NULL_VOID(callback);
+    dialogProperties_.onDidDisappear = callback;
+}
+
+void CustomDialogControllerPeerImpl::SetOnWillAppearExtender(
+    Opt_Callback_Void onWillAppear, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
+{
+    auto callback = TransformCallbackToFunctionVoidExtender(onWillAppear, peer);
+    CHECK_NULL_VOID(callback);
+    dialogProperties_.onWillAppear = callback;
+}
+
+void CustomDialogControllerPeerImpl::SetOnWillDisappearExtender(
+    Opt_Callback_Void onWillDisappear, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
+{
+    auto callback = TransformCallbackToFunctionVoidExtender(onWillDisappear, peer);
+    CHECK_NULL_VOID(callback);
+    dialogProperties_.onWillDisappear = callback;
+}
+
+void CustomDialogControllerPeerImpl::SetKeyboardAvoidDistance(Opt_LengthMetrics keyboardAvoidDistance)
+{
+    auto result = Converter::OptConvert<Dimension>(keyboardAvoidDistance);
+    if (result.has_value()) {
+        if (result.value().IsNonNegative() && result.value().Unit() != OHOS::Ace::DimensionUnit::PERCENT) {
+            dialogProperties_.keyboardAvoidDistance = result;
+        } else {
+            Dimension avoidDistanceDimension(DEFAULT_AVOID_DISTANCE, OHOS::Ace::DimensionUnit::VP);
+            dialogProperties_.keyboardAvoidDistance = avoidDistanceDimension;
+        }
+    }
+}
+
+void CustomDialogControllerPeerImpl::SetLevelMode(Opt_Boolean showInSubWindow, Opt_LevelMode levelMode)
 {
     auto result = Converter::OptConvert<LevelMode>(levelMode);
-    if (result.has_value()) {
+    auto isShowInSubwindow = Converter::OptConvert<bool>(showInSubWindow);
+    if (result.has_value() && !isShowInSubwindow.value_or(false)) {
         dialogProperties_.dialogLevelMode = result.value();
     }
 }
@@ -355,7 +428,9 @@ void CustomDialogControllerPeerImpl::SetImersiveMode(Opt_ImmersiveMode immersive
 
 void CustomDialogControllerPeerImpl::SetLevelOrder(Opt_LevelOrder levelOrder)
 {
-    dialogProperties_.levelOrder = Converter::OptConvert<double>(levelOrder);
+    // the levelOrder is accessor in C-API v.132
+    auto result = Converter::OptConvert<double>(levelOrder);
+    dialogProperties_.levelOrder = result.value_or(NG::LevelOrder::ORDER_DEFAULT);
 }
 
 void CustomDialogControllerPeerImpl::SetFocusable(Opt_Boolean focusable)
@@ -408,6 +483,24 @@ RefPtr<UINode> CustomDialogControllerPeerImpl::GetWindowScene() const
 
 std::function<void()> CustomDialogControllerPeerImpl::TransformCallbackToFunctionVoid(
     Opt_Callback_Void callback, const RefPtr<CustomDialogControllerPeer>& peer)
+{
+    auto callbackOpt = Converter::OptConvert<Callback_Void>(callback);
+    CHECK_NULL_RETURN(callbackOpt, nullptr);
+    return [callbackFunc = CallbackHelper(callbackOpt.value()), weak = AceType::WeakClaim(AceType::RawPtr(peer))]() {
+        auto controllerPeer = weak.Upgrade();
+        CHECK_NULL_VOID(controllerPeer);
+        auto weakNode = controllerPeer->GetOwnerViewNode();
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(frameNode);
+        callbackFunc.InvokeSync();
+    };
+}
+
+std::function<void()> CustomDialogControllerPeerImpl::TransformCallbackToFunctionVoidExtender(
+    Opt_Callback_Void callback, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
 {
     auto callbackOpt = Converter::OptConvert<Callback_Void>(callback);
     CHECK_NULL_RETURN(callbackOpt, nullptr);

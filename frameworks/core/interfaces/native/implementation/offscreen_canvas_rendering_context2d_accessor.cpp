@@ -19,39 +19,33 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "offscreen_canvas_rendering_context2d_peer_impl.h"
+
 #include "arkoala_api_generated.h"
+#include "image_bitmap_peer_impl.h"
+#include "offscreen_canvas_rendering_context2d_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor();
-
 namespace OffscreenCanvasRenderingContext2DAccessor {
 void DestroyPeerImpl(Ark_OffscreenCanvasRenderingContext2D peer)
 {
-    auto peerImpl = reinterpret_cast<OffscreenCanvasRenderingContext2DPeerImpl*>(peer);
-    if (peerImpl) {
-        peerImpl->RemoveOptions();
-        peerImpl->DecRefCount();
-    }
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_OffscreenCanvasRenderingContext2D ConstructImpl(const Ark_Number* width,
                                                     const Ark_Number* height,
                                                     const Opt_RenderingContextSettings* settings,
                                                     const Opt_LengthMetricsUnit* unit)
 {
-    auto peerImpl = Referenced::MakeRefPtr<OffscreenCanvasRenderingContext2DPeerImpl>();
-    peerImpl->IncRefCount();
-    auto offscreenContext = reinterpret_cast<OffscreenCanvasRenderingContext2DPeer*>(Referenced::RawPtr(peerImpl));
+    auto offscreenContext = PeerUtils::CreatePeer<OffscreenCanvasRenderingContext2DPeer>();
     CHECK_NULL_RETURN(width, offscreenContext);
     CHECK_NULL_RETURN(height, offscreenContext);
     auto fWidth = static_cast<double>(Converter::Convert<float>(*width));
     auto fHeight = static_cast<double>(Converter::Convert<float>(*height));
-    auto optSettings = Converter::OptConvert<Ark_RenderingContextSettings>(*settings);
+    auto optSettings = Converter::GetOptPtr(settings);
     auto optUnit = Converter::OptConvertPtr<Ace::CanvasUnit>(unit);
-    if (unit->tag != INTEROP_TAG_UNDEFINED) {
-        peerImpl->SetUnit(optUnit.value());
+    if (optUnit) {
+        offscreenContext->SetUnit(optUnit.value());
     }
-    peerImpl->SetOptions(fWidth, fHeight, optSettings);
+    offscreenContext->SetOptions(fWidth, fHeight, optSettings);
     return offscreenContext;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -60,26 +54,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
                          const Opt_String* type,
-                         const Opt_Float32* quality)
+                         const Opt_Number* quality)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<OffscreenCanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
-    CHECK_NULL_RETURN(type, {});
-    CHECK_NULL_RETURN(quality, {});
-    auto optType = Converter::OptConvert<std::string>(*type);
-    auto optQuality = Converter::OptConvert<float>(*quality);
+    auto optType = Converter::OptConvertPtr<std::string>(type);
+    auto optQuality = Converter::OptConvertPtr<float>(quality);
     auto result = peerImpl->ToDataURL(optType, optQuality);
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_ImageBitmap TransferToImageBitmapImpl(Ark_OffscreenCanvasRenderingContext2D peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<OffscreenCanvasRenderingContext2DPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    Ark_String emptyString;
-    auto bitmap = GetImageBitmapAccessor()->ctor(&emptyString);
-    return peerImpl->TransferToImageBitmap(bitmap);
+    auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
+    return peer->TransferToImageBitmap(bitmap);
 }
 } // OffscreenCanvasRenderingContext2DAccessor
 const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* GetOffscreenCanvasRenderingContext2DAccessor()

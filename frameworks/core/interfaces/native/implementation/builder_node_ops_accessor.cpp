@@ -108,8 +108,7 @@ void SetUpdateConfigurationCallbackImpl(Ark_BuilderNodeOps peer, const Callback_
 void SetOptionsImpl(Ark_BuilderNodeOps peer, const Ark_BuilderNodeOptions* options)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(options);
-    auto renderOptions = Converter::OptConvert<Ark_BuilderNodeOptions>(*options);
+    auto renderOptions = Converter::OptConvertPtr<Ark_BuilderNodeOptions>(options);
     if (!renderOptions.has_value()) {
         return;
     }

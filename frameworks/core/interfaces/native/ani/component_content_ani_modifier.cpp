@@ -16,7 +16,7 @@
 #include "component_content_ani_modifier.h"
 
 #include "base/log/log.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 void RemoveComponentFromFrameNode(ani_long node, ani_long content)

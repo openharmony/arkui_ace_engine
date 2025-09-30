@@ -28,12 +28,6 @@ void OffscreenCanvasPeer::SetOptions(const double cw, const double ch)
     SetHeight(fHeight);
     offscreenCanvasPattern = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::OffscreenCanvasPattern>(
         static_cast<int32_t>(fWidth), static_cast<int32_t>(fHeight));
-    offscreenCanvasPattern->IncRefCount();
-}
-void OffscreenCanvasPeer::RemoveOptions()
-{
-    CHECK_NULL_VOID(offscreenCanvasPattern);
-    offscreenCanvasPattern->DecRefCount();
 }
 ImageBitmapPeer* OffscreenCanvasPeer::TransferToImageBitmap(ImageBitmapPeer* bitmap)
 {

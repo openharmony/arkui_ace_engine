@@ -46,8 +46,6 @@ public:
             auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
             CHECK_NULL_VOID(styledStringController);
             styledStringController->SetStyledString(spanString);
-        } else {
-            SetStyledStringCache(spanString);
         }
     }
 
@@ -79,19 +77,6 @@ public:
         }
         return SelectionRangeInfo(-1, -1);
     }
-
-    void SetStyledStringCache(const RefPtr<SpanStringBase>& styledString)
-    {
-        styledStringCache_ = styledString;
-    }
-
-    RefPtr<SpanStringBase> GetStyledStringCache() const
-    {
-        return styledStringCache_;
-    }
-
-private:
-    RefPtr<SpanStringBase> styledStringCache_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
 

@@ -15,11 +15,10 @@
 import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
 import { DecoratedV1VariableBase, DecoratedV2VariableBase } from '../decoratorImpl/decoratorBase';
 import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
-import { InteropNativeModule } from '@koalaui/interop';
 
 export class StateMgmtConsole {
     static log(str: string): void {
-        InteropNativeModule._NativeLog('StateManagement: [' + str + ']');
+        console.log('StateManagement: [' + str + ']');
     }
     static traceBegin(str: string): void {}
     static traceEnd(): void {}
@@ -36,7 +35,7 @@ class ViewInfo {
 class DecoratorInfo {
     decorator?: string;
     propertyName?: string;
-    value?: NullishType;
+    value?: Any;
 }
 
 export class DumpInfo {
@@ -45,7 +44,7 @@ export class DumpInfo {
 }
 
 export class StateMgmtDFX {
-    static getDecoratedVariableInfo(view: NullishType, dumpInfo: DumpInfo, isV2: boolean): void {
+    static getDecoratedVariableInfo(view: Any, dumpInfo: DumpInfo, isV2: boolean): void {
         if (isV2) {
             StateMgmtDFX.dumpV2VariableInfo(view, dumpInfo);
         } else {
@@ -53,14 +52,14 @@ export class StateMgmtDFX {
         }
     }
 
-    static dumpV1VariableInfo(view: NullishType, dumpInfo: DumpInfo): void {
+    static dumpV1VariableInfo(view: Any, dumpInfo: DumpInfo): void {
         if (view instanceof Object) {
             Object.getOwnPropertyNames(view)
                 .filter((varName) => {
                     return varName.startsWith('__backing');
                 })
                 .forEach((varName) => {
-                    const value = (reflect.Value.of(view) as ClassValue).getFieldByName(varName).getData()
+                    const value = (reflect.Value.of(view) as ClassValue).getFieldByName(varName).getData();
                     if (value && value instanceof DecoratedV1VariableBase) {
                         dumpInfo.observedPropertiesInfo.push({
                             decorator: value.decorator,
@@ -72,7 +71,7 @@ export class StateMgmtDFX {
         }
     }
 
-    static dumpV2VariableInfo(view: NullishType, dumpInfo: DumpInfo): void {
+    static dumpV2VariableInfo(view: Any, dumpInfo: DumpInfo): void {
         if (view instanceof Object) {
             Object.getOwnPropertyNames(view)
                 .filter((varName) => {

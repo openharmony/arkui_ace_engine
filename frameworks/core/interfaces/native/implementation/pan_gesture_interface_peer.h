@@ -16,8 +16,18 @@
 #pragma once
 
 #include "core/components_ng/gestures/pan_gesture.h"
- 
-struct PanGestureInterfacePeer final {
+#include "gesture_peer.h"
+
+struct PanGestureInterfacePeer : public GesturePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::PanGesture> gesture;
+
+    inline OHOS::Ace::RefPtr<OHOS::Ace::NG::Gesture> GetGesture() override
+    {
+        return gesture;
+    }
+
+protected:
+    PanGestureInterfacePeer() = default;
+    ~PanGestureInterfacePeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };
- 

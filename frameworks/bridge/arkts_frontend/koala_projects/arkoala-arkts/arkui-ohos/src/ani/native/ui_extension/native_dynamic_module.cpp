@@ -39,7 +39,7 @@ ani_status NativeDynamicModule::BindNativeDynamicComponent(ani_env *env)
 {
     ani_class cls;
     static const char *className =
-        "Larkui/ani/arkts/ui_extension/ArkUIAniDynamicModal/ArkUIAniDynamicModal;";
+        "arkui.ani.arkts.ui_extension.ArkUIAniDynamicModal.ArkUIAniDynamicModal";
     auto ani_status = env->FindClass(className, &cls);
     if (ani_status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DYNAMIC_COMPONENT,
@@ -47,7 +47,7 @@ ani_status NativeDynamicModule::BindNativeDynamicComponent(ani_env *env)
         return ANI_ERROR;
     }
 
-    std::array methods = {
+    std::array staticMethods = {
         ani_native_function {
             "_Dynamic_Set_Option",
             nullptr, reinterpret_cast<void*>(SetDynamicOption)},
@@ -59,9 +59,9 @@ ani_status NativeDynamicModule::BindNativeDynamicComponent(ani_env *env)
             nullptr, reinterpret_cast<void *>(SetIsReportFrameEvent)},
     };
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DYNAMIC_COMPONENT,
-            "BindNativeDynamicComponent Class_BindNativeMethods failed,"
+            "BindNativeDynamicComponent Class_BindStaticNativeMethods failed,"
             " className: %{public}s", className);
         return ANI_ERROR;
     };
@@ -80,7 +80,7 @@ ani_status NativeDynamicModule::SetDynamicOption(
     }
 
     std::string optionClassName =
-        "Larkui/ani/arkts/ui_extension/ArkUIAniDynamicModal/ArkUIAniDynamicOptions;";
+        "arkui.ani.arkts.ui_extension.ArkUIAniDynamicModal.ArkUIAniDynamicOptions";
     if (!AniUtils::CheckType(env, obj, optionClassName)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DYNAMIC_COMPONENT,
             "CheckType %{public}s failed when SetDynamicOption",

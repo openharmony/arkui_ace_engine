@@ -40,9 +40,7 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         this.sourceProvide_!.registerWatchToSource(this);
     }
     public get(): T {
-        const value = this.sourceProvide_!.get();
-        ObserveSingleton.instance.setV1RenderId(value as NullableObject);
-        return value;
+        return this.sourceProvide_!.get();
     }
 
     public set(newValue: T): void {

@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_StyledStringController peer)
 {
     LOGE("StyledStringControllerAccessor::DestroyPeerImpl is not supported, it's an interface.");
 }
-Ark_StyledStringController CtorImpl()
+Ark_StyledStringController ConstructImpl()
 {
     LOGE("StyledStringControllerAccessor::CtorImpl is not supported, it's an interface.");
     return nullptr;
@@ -49,7 +49,7 @@ const GENERATED_ArkUIStyledStringControllerAccessor* GetStyledStringControllerAc
 {
     static const GENERATED_ArkUIStyledStringControllerAccessor StyledStringControllerAccessorImpl {
         StyledStringControllerAccessor::DestroyPeerImpl,
-        StyledStringControllerAccessor::CtorImpl,
+        StyledStringControllerAccessor::ConstructImpl,
         StyledStringControllerAccessor::GetFinalizerImpl,
         StyledStringControllerAccessor::SetStyledStringImpl,
         StyledStringControllerAccessor::GetStyledStringImpl,

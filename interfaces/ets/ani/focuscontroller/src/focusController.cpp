@@ -137,7 +137,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/arkui/focusController/focusController;", &ns)) {
+    if (ANI_OK != env->FindNamespace("@ohos.arkui.focusController.focusController", &ns)) {
         return ANI_ERROR;
     }
     std::array methods = {

@@ -25,6 +25,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
@@ -1290,5 +1291,80 @@ void CleanNodeResponseArea::OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& the
     if (IsShowSymbol() && SystemProperties::IsNeedSymbol()) {
         UpdateSymbolSource();
     }
+}
+
+void PlaceholderResponseArea::InitResponseArea()
+{
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(textNode);
+    auto gesture = textNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    // 屏蔽子节点所有事件
+    gesture->SetHitTestMode(HitTestMode::HTMNONE);
+    auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToFrame(true);
+    placeholderNode_ = textNode;
+}
+
+void PlaceholderResponseArea::PlacehodlerMountToParent()
+{
+    CHECK_NULL_VOID(placeholderNode_);
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(!placeholderNode_->GetParent());
+    placeholderNode_->MarkModifyDone();
+    placeholderNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    placeholderNode_->MountToParent(host);
+}
+
+void PlaceholderResponseArea::PlaceholderRemoveFromParent()
+{
+    CHECK_NULL_VOID(placeholderNode_);
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChild(placeholderNode_);
+}
+
+void PlaceholderResponseArea::SetStyleString(const RefPtr<SpanString>& value)
+{
+    CHECK_NULL_VOID(placeholderNode_);
+    auto textPattern = placeholderNode_->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetStyledString(value);
+}
+
+const RefPtr<FrameNode> PlaceholderResponseArea::GetFrameNode()
+{
+    return placeholderNode_;
+}
+
+SizeF PlaceholderResponseArea::MeasurePlaceholder(
+    LayoutWrapper* layoutWrapper, int32_t index, const LayoutConstraintF& contentConstraint)
+{
+    CHECK_NULL_RETURN(layoutWrapper, SizeF());
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_RETURN(childWrapper, SizeF());
+    childWrapper->Measure(contentConstraint);
+    auto geometryNode = childWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    return geometryNode->GetFrameSize();
+}
+
+void PlaceholderResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) {}
+
+void PlaceholderResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, OffsetF textRectOffset)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(childWrapper);
+    auto geometryNode = childWrapper->GetGeometryNode();
+    geometryNode->SetFrameOffset(textRectOffset);
+    childWrapper->Layout();
 }
 } // namespace OHOS::Ace::NG

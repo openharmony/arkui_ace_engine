@@ -36,20 +36,22 @@ void SetBlankOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto minDim = Converter::OptConvert<Dimension>(*min);
+    auto minDim = Converter::OptConvertPtr<Dimension>(min);
     Validator::ValidateNonNegative(minDim);
     Validator::ValidateNonPercent(minDim);
-    BlankModelNG::SetBlankMin(frameNode, minDim.value_or(0.0_px));
+    if (minDim) {
+        BlankModelNG::SetBlankMin(frameNode, *minDim);
+    }
 }
 } // BlankInterfaceModifier
 
 namespace BlankAttributeModifier {
-void ColorImpl(Ark_NativePointer node,
-               const Opt_ResourceColor* value)
+void SetColorImpl(Ark_NativePointer node,
+                  const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto color = Converter::OptConvert<Color>(*value);
+    auto color = Converter::OptConvertPtr<Color>(value);
     if (color) {
         BlankModelNG::SetColor(frameNode, color.value());
     } else {
@@ -63,7 +65,7 @@ const GENERATED_ArkUIBlankModifier* GetBlankModifier()
     static const GENERATED_ArkUIBlankModifier ArkUIBlankModifierImpl {
         BlankModifier::ConstructImpl,
         BlankInterfaceModifier::SetBlankOptionsImpl,
-        BlankAttributeModifier::ColorImpl,
+        BlankAttributeModifier::SetColorImpl,
     };
     return &ArkUIBlankModifierImpl;
 }

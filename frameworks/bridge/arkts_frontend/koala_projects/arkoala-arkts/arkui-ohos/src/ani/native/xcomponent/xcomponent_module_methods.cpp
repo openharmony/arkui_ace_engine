@@ -53,13 +53,13 @@ ani_string CreateSurfaceIdAni(ani_env* env, const std::string& surfaceId)
 ani_object CreateSurfaceRectAni(ani_env* env, float width, float height, float offsetX, float offsetY)
 {
     CHECK_NULL_RETURN(env, nullptr);
-    static const char* className = "Larkui/component/xcomponent/SurfaceRectAniInternal;";
+    static const char* className = "arkui.component.xcomponent.SurfaceRectAniInternal";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "DDDD:V", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dddd:", &ctor)) {
         return nullptr;
     }
     ani_object surfaceRectRef;
@@ -230,7 +230,7 @@ void* GetControllerPeerPointer(ani_env* env, ani_object params)
     }
     ani_long controllerPtr;
     if (ANI_OK != env->Object_CallMethodByName_Long(
-        static_cast<ani_object>(controllerPtrRef), "longValue", ":J", &controllerPtr)) {
+        static_cast<ani_object>(controllerPtrRef), "longValue", ":l", &controllerPtr)) {
         return nullptr;
     }
     return reinterpret_cast<void*>(controllerPtr);
@@ -271,7 +271,7 @@ void SetXComponentOptions(ani_env* env, [[maybe_unused]] ani_object aniClass, an
     if (!IsUndefined(env, screenIdRef)) {
         ani_long screenId;
         env->Object_CallMethodByName_Long(
-            static_cast<ani_object>(screenIdRef), "longValue", ":J", &screenId);
+            static_cast<ani_object>(screenIdRef), "longValue", ":l", &screenId);
         xcomponentModifier->setScreenId(arkNode, screenId);
     }
 }

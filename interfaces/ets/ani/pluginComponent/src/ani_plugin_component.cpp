@@ -24,7 +24,7 @@
 #include "tokenid_kit.h"
 
 namespace {
-    const char ANI_PLUGINCOMPONENT_NS[] = "L@ohos/pluginComponent/pluginComponentManager;";
+    const char ANI_PLUGINCOMPONENT_NS[] = "@ohos.pluginComponent.pluginComponentManager";
 } // namespace
 
 namespace OHOS::Ace::Ani {

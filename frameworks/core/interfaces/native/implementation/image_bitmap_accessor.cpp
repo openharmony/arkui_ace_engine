@@ -24,20 +24,26 @@ namespace ImageBitmapAccessor {
 const auto ARK_ERROR_VALUE = Converter::ArkValue<Ark_Number>(0);
 void DestroyPeerImpl(Ark_ImageBitmap peer)
 {
-    if (peer) {
-        peer->DecRefCount();
-    }
+    PeerUtils::DestroyPeer(peer);
 }
-Ark_ImageBitmap CtorImpl(const Ark_String* src)
+Ark_ImageBitmap ConstructImpl(const Ark_Union_PixelMap_String* src,
+                              const Opt_LengthMetricsUnit* unit)
 {
-    auto peer = Referenced::MakeRefPtr<ImageBitmapPeer>();
-    peer->IncRefCount();
-    std::string stringSrc;
-    if (src) {
-        stringSrc = Converter::Convert<std::string>(*src);
+    auto peer = PeerUtils::CreatePeer<ImageBitmapPeer>();
+    Converter::VisitUnionPtr(src,
+        [peer](const Ark_String& src) {
+            auto stringSrc = Converter::Convert<std::string>(src);
+            peer->SetOptions(stringSrc);
+        },
+        [peer](const Ark_image_PixelMap& src) {
+            peer->SetOptions("", src->pixelMap);
+        },
+        []() {});
+    auto optUnit = Converter::OptConvertPtr<Ace::CanvasUnit>(unit);
+    if (optUnit) {
+        peer->SetUnit(optUnit.value());
     }
-    peer->SetOptions(stringSrc);
-    return reinterpret_cast<ImageBitmapPeer*>(Referenced::RawPtr(peer));
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -54,22 +60,40 @@ Ark_Number GetHeightImpl(Ark_ImageBitmap peer)
     auto height = peer->OnGetHeight();
     return NG::Converter::ArkValue<Ark_Number>(static_cast<int32_t>(height));
 }
+void SetHeightImpl(Ark_ImageBitmap peer,
+                   const Ark_Number* height)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(height);
+    auto value = Converter::Convert<float>(*height);
+    peer->SetHeight(value);
+}
 Ark_Number GetWidthImpl(Ark_ImageBitmap peer)
 {
     CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
     double width = peer->OnGetWidth();
     return NG::Converter::ArkValue<Ark_Number>(static_cast<int32_t>(width));
 }
+void SetWidthImpl(Ark_ImageBitmap peer,
+                  const Ark_Number* width)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(width);
+    auto value = Converter::Convert<float>(*width);
+    peer->SetWidth(value);
+}
 } // ImageBitmapAccessor
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
 {
     static const GENERATED_ArkUIImageBitmapAccessor ImageBitmapAccessorImpl {
         ImageBitmapAccessor::DestroyPeerImpl,
-        ImageBitmapAccessor::CtorImpl,
+        ImageBitmapAccessor::ConstructImpl,
         ImageBitmapAccessor::GetFinalizerImpl,
         ImageBitmapAccessor::CloseImpl,
         ImageBitmapAccessor::GetHeightImpl,
+        ImageBitmapAccessor::SetHeightImpl,
         ImageBitmapAccessor::GetWidthImpl,
+        ImageBitmapAccessor::SetWidthImpl,
     };
     return &ImageBitmapAccessorImpl;
 }

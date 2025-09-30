@@ -180,6 +180,8 @@ enum class PreviewTextStyle {
     UNDERLINE,
 };
 
+class SpanStringBase;
+
 class ACE_EXPORT TextFieldControllerBase : public AceType {
     DECLARE_ACE_TYPE(TextFieldControllerBase, AceType);
 
@@ -276,6 +278,8 @@ public:
         }
         return true;
     }
+
+    virtual void SetPlaceholderStyledString(const RefPtr<SpanStringBase>& value) {};
 
 protected:
     std::function<void(const int32_t)> setCaretPosition_;

@@ -13,9 +13,15 @@
  * limitations under the License.
  */
 
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
 #include "text_input_base.h"
 #include "ui/base/geometry/dimension.h"
+
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 
 namespace OHOS::Ace::NG {
 
@@ -905,5 +911,128 @@ HWTEST_F(TextFieldAlgorithmTest, ShouldUseInfiniteMaxLines005, TestSize.Level1)
     textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
     auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
     EXPECT_FALSE(textAreaLayoutAlgorithm->ShouldUseInfiniteMaxLines(textFieldLayoutProperty));
+}
+
+/**
+ * @tc.name: ConstructTextStyles_ConstructStyledPlaceholderStyle_001
+ * @tc.desc: Test the function ConstructStyledPlaceholderStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, ConstructStyledPlaceholderStyle_001, TestSize.Level1)
+{
+    CreateTextField("", "12345");
+
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"0123456789");
+    pattern_->SetPlaceholderStyledString(spanString);
+    auto placeholderResponseArea = pattern_->GetPlaceholderResponseArea();
+    ASSERT_NE(placeholderResponseArea, nullptr);
+
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    std::u16string textContent = u"";
+    bool showPlaceHolder;
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    textInputLayoutAlgorithm->ConstructTextStyles(&layoutWrapper, textStyle, textContent, showPlaceHolder);
+
+    EXPECT_TRUE(showPlaceHolder);
+    EXPECT_EQ(textContent, u"");
+
+    EXPECT_TRUE(pattern_->IsStyledPlaceholder());
+
+    pattern_->UpdateEditingValue(DEFAULT_TEXT, 0);
+    showPlaceHolder = false;
+    textInputLayoutAlgorithm->ConstructTextStyles(&layoutWrapper, textStyle, textContent, showPlaceHolder);
+    EXPECT_FALSE(showPlaceHolder);
+    EXPECT_FALSE(pattern_->IsStyledPlaceholder());
+}
+
+/**
+ * @tc.name: ConstructStyledPlaceholderStyle_002
+ * @tc.desc: test ConstructStyledPlaceholderStyle with normal conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, ConstructStyledPlaceholderStyle_002, TestSize.Level1)
+{
+    CreateTextField("", "placeholder text");
+
+    // 获取布局算法
+    auto layoutAlgorithm = AceType::DynamicCast<TextFieldLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    // 设置占位符样式字符串
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"Styled Placeholder");
+    pattern_->SetPlaceholderStyledString(spanString);
+
+    // textField设置样式
+    auto textFieldLayoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdatePlaceholderFontSize(Dimension(16.0));
+    textFieldLayoutProperty->UpdateTextAlign(TextAlign::END);
+    textFieldLayoutProperty->UpdatePlaceholderTextColor(Color::RED);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextFieldTheme>()));
+    // 调用测试方法
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(frameNode_->GetThemeScopeId());
+    ASSERT_NE(textFieldTheme, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    layoutAlgorithm->ConstructStyledPlaceholderStyle(&layoutWrapper, frameNode_, textFieldTheme);
+
+    // 验证响应区域存在
+    auto responseArea = pattern_->GetPlaceholderResponseArea();
+    ASSERT_NE(responseArea, nullptr);
+
+    auto placeholderResponseArea = AceType::DynamicCast<PlaceholderResponseArea>(responseArea);
+    ASSERT_NE(placeholderResponseArea, nullptr);
+
+    // 验证文本节点存在且正确配置
+    auto textNode = placeholderResponseArea->GetFrameNode();
+    ASSERT_NE(textNode, nullptr);
+
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    // 验证基本属性设置
+    EXPECT_EQ(textLayoutProperty->GetFontSize().value(), Dimension(16.0));
+    EXPECT_EQ(textLayoutProperty->GetTextAlign().value(), TextAlign::END);
+    EXPECT_EQ(textLayoutProperty->GetTextColor().value(), Color::RED);
+    EXPECT_EQ(textLayoutProperty->GetTextOverflow().value(), TextOverflow::ELLIPSIS);
+}
+
+/**
+ * @tc.name: StyledPlaceholderMeasureContent001
+ * @tc.desc: Test the function StyledPlaceholderMeasureContent001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, StyledPlaceholderMeasureContent001, TestSize.Level1)
+{
+    CreateTextField("", "12345");
+
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"0123456789");
+    pattern_->SetPlaceholderStyledString(spanString);
+    auto placeholderResponseArea = pattern_->GetPlaceholderResponseArea();
+    ASSERT_NE(placeholderResponseArea, nullptr);
+
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(100.0f);
+    contentConstraint.maxSize.SetHeight(10.0f);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+
+    // 确认布局后Text挂到了父节点，且布局出大小受contentConstraint约束
+    EXPECT_FALSE(pattern_->IsStyledPlaceholder());
+    auto ret = textInputLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(pattern_->IsStyledPlaceholder());
+
+    EXPECT_EQ(ret.value(), SizeF(100.0f, 10.0f));
+    EXPECT_TRUE(textInputLayoutAlgorithm->IsStyledPlaceholder(pattern_));
 }
 } // namespace OHOS::Ace::NG //

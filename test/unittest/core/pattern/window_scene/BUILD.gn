@@ -42,8 +42,8 @@ ace_unittest("window_scene_test") {
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene_model.cpp",
 
     # test
-    "$ace_root/test/unittest/core/pattern/window_scene/window_scene_test.cpp",
     "$ace_root/adapter/preview/osal/device_config.cpp",
+    "$ace_root/test/unittest/core/pattern/window_scene/window_scene_test.cpp",
   ]
 
   external_deps = [

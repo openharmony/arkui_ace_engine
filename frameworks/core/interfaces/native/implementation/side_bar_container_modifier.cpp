@@ -18,7 +18,6 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
@@ -47,8 +46,43 @@ constexpr float DEFAULT_MIN_SIDEBAR_WIDTH = 240.0f;
 constexpr float DEFAULT_MAX_SIDEBAR_WIDTH = 280.0f;
 constexpr float DEFAULT_MIN_CONTENT_LENGTH = 360.0f;
 constexpr float DEFAULT_DIVIDER_WIDTH = 1.0f;
+
+std::optional<bool> ProcessBindableShowSideBar(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+{
+    std::optional<bool> result;
+    Converter::VisitUnionPtr(value,
+        [&result](const Ark_Boolean& src) {
+            result = Converter::OptConvert<bool>(src);
+        },
+        [&result, frameNode](const Ark_Bindable_Boolean& src) {
+            result = Converter::OptConvert<bool>(src.value);
+            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+            auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](bool isShow) {
+                PipelineContext::SetCallBackNode(weakNode);
+                arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(isShow));
+            };
+            SideBarContainerModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
+        },
+        [] {});
+    return result;
 }
+
+std::optional<Dimension> ProcessBindableSideBarWidth(FrameNode* frameNode, const Opt_Union_Length_Bindable* value)
+{
+    std::optional<Dimension> result;
+    Converter::VisitUnionPtr(value,
+        [&result](const Ark_Length& src) {
+            result = Converter::OptConvert<Dimension>(src);
+        },
+        [&result, frameNode](const Ark_Bindable_Arkui_Component_Units_Length& src) {
+            result = Converter::OptConvert<Dimension>(src.value);
+            // Need to provide callback
+        },
+        [] {});
+    return result;
 }
+} // namespace
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -82,7 +116,7 @@ ControlButtonStyleIcon GetIconStyle(const Ark_Union_String_PixelMap_Resource& sr
             ret.iconStr = Converter::Convert<std::string>(value);
             ret.isPxMap = false;
         },
-        [&ret](const Ark_PixelMap& value) {
+        [&ret](const Ark_image_PixelMap& value) {
             ret.isPxMap = true;
             ret.iconPxMap = Convert<RefPtr<PixelMap>>(value);
         },
@@ -122,7 +156,7 @@ template<>
 DividerOptions Convert(const Ark_DividerStyle& src)
 {
     DividerOptions divider;
-    divider.strokeWidth = Convert<Dimension>(src.strokeWidth);
+    divider.strokeWidth = OptConvert<Dimension>(src.strokeWidth);
     Validator::ValidateNonNegative(divider.strokeWidth);
     divider.startMargin = OptConvert<Dimension>(src.startMargin);
     divider.endMargin = OptConvert<Dimension>(src.endMargin);
@@ -149,28 +183,27 @@ void SetSideBarContainerOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(type);
     SideBarContainerModelStatic::SetSideBarContainerType(
-        frameNode, Converter::OptConvert<SideBarContainerType>(*type).value_or(SideBarContainerType::EMBED));
+        frameNode, Converter::OptConvertPtr<SideBarContainerType>(type).value_or(SideBarContainerType::EMBED));
 }
 } // SideBarContainerInterfaceModifier
 namespace SideBarContainerAttributeModifier {
-void ShowSideBarImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
+void SetShowSideBarImpl(Ark_NativePointer node,
+                        const Opt_Union_Boolean_Bindable* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    SideBarContainerModelStatic::SetShowSideBar(frameNode, Converter::OptConvert<bool>(*value).value_or(true));
+    auto convValue = ProcessBindableShowSideBar(frameNode, value);
+    SideBarContainerModelStatic::SetShowSideBar(frameNode, convValue.value_or(true));
 }
-void ControlButtonImpl(Ark_NativePointer node,
-                       const Opt_ButtonStyle* value)
+void SetControlButtonImpl(Ark_NativePointer node,
+                          const Opt_ButtonStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<LocalControlButtonStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<LocalControlButtonStyle>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto style = *convValue;
@@ -194,22 +227,21 @@ void ControlButtonImpl(Ark_NativePointer node,
             icon.isPxMap, icon.iconPxMap);
     }
 }
-void ShowControlButtonImpl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
+void SetShowControlButtonImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    SideBarContainerModelStatic::SetShowControlButton(frameNode, Converter::OptConvert<bool>(*value).value_or(true));
+    SideBarContainerModelStatic::SetShowControlButton(frameNode, Converter::OptConvertPtr<bool>(value).value_or(true));
 }
-void OnChangeImpl(Ark_NativePointer node,
-                  const Opt_Callback_Boolean_Void* value)
+void SetOnChangeImpl(Ark_NativePointer node,
+                     const Opt_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)](const bool param) {
@@ -218,26 +250,17 @@ void OnChangeImpl(Ark_NativePointer node,
     };
     SideBarContainerModelStatic::SetOnChange(frameNode, std::move(onEvent));
 }
-void SideBarWidth0Impl(Ark_NativePointer node,
-                       const Opt_Number* value)
+void SetSideBarWidthImpl(Ark_NativePointer node,
+                         const Opt_Union_Length_Bindable* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto width = Converter::OptConvert<Dimension>(*value);
+    auto width = ProcessBindableSideBarWidth(frameNode, value);
     Validator::ValidateNonNegative(width);
     SideBarContainerModelStatic::SetSideBarWidth(frameNode, width);
 }
-void SideBarWidth1Impl(Ark_NativePointer node,
-                       const Opt_Length* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto width = Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonNegative(width);
-    SideBarContainerModelStatic::SetSideBarWidth(frameNode, width);
-}
-void MinSideBarWidth0Impl(Ark_NativePointer node,
-                          const Opt_Number* value)
+void SetMinSideBarWidthImpl(Ark_NativePointer node,
+                             const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -247,31 +270,19 @@ void MinSideBarWidth0Impl(Ark_NativePointer node,
         SideBarContainerModelStatic::SetMinSideBarWidth(frameNode, def);
         return;
     }
-    auto width = Converter::Convert<Dimension>(value->value);
-    if (width.IsNegative()) {
-        width.SetValue(DEFAULT_MIN_SIDEBAR_WIDTH);
-    }
-    SideBarContainerModelStatic::SetMinSideBarWidth(frameNode, width);
-}
-void MinSideBarWidth1Impl(Ark_NativePointer node,
-                          const Opt_Length* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+    auto width = Converter::OptConvert<Dimension>(value->value);
+    if (!width.has_value()) {
         Dimension def(DEFAULT_MIN_SIDEBAR_WIDTH, DimensionUnit::VP);
         SideBarContainerModelStatic::SetMinSideBarWidth(frameNode, def);
         return;
     }
-    auto width = Converter::Convert<Dimension>(value->value);
-    if (width.IsNegative()) {
-        width.SetValue(DEFAULT_MIN_SIDEBAR_WIDTH);
+    if (width->IsNegative()) {
+        width->SetValue(DEFAULT_MIN_SIDEBAR_WIDTH);
     }
     SideBarContainerModelStatic::SetMinSideBarWidth(frameNode, width);
 }
-void MaxSideBarWidth0Impl(Ark_NativePointer node,
-                          const Opt_Number* value)
+void SetMaxSideBarWidthImpl(Ark_NativePointer node,
+                             const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -281,52 +292,39 @@ void MaxSideBarWidth0Impl(Ark_NativePointer node,
         SideBarContainerModelStatic::SetMaxSideBarWidth(frameNode, def);
         return;
     }
-    auto width = Converter::Convert<Dimension>(value->value);
-    if (width.IsNegative()) {
-        width.SetValue(DEFAULT_MAX_SIDEBAR_WIDTH);
-    }
-    SideBarContainerModelStatic::SetMaxSideBarWidth(frameNode, width);
-}
-void MaxSideBarWidth1Impl(Ark_NativePointer node,
-                          const Opt_Length* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        Dimension def(DEFAULT_MAX_SIDEBAR_WIDTH, DimensionUnit::VP);
-        SideBarContainerModelStatic::SetMaxSideBarWidth(frameNode, def);
+    auto width = Converter::OptConvert<Dimension>(value->value);
+    if (!width.has_value()) {
+        Dimension def(DEFAULT_MIN_SIDEBAR_WIDTH, DimensionUnit::VP);
+        SideBarContainerModelStatic::SetMinSideBarWidth(frameNode, def);
         return;
     }
-    auto width = Converter::Convert<Dimension>(value->value);
-    if (width.IsNegative()) {
-        width.SetValue(DEFAULT_MAX_SIDEBAR_WIDTH);
+    if (width->IsNegative()) {
+        width->SetValue(DEFAULT_MAX_SIDEBAR_WIDTH);
     }
     SideBarContainerModelStatic::SetMaxSideBarWidth(frameNode, width);
 }
-void AutoHideImpl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
+void SetAutoHideImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     SideBarContainerModelStatic::SetAutoHide(frameNode, *convValue);
 }
-void SideBarPositionImpl(Ark_NativePointer node,
-                         const Opt_SideBarPosition* value)
+void SetSideBarPositionImpl(Ark_NativePointer node,
+                            const Opt_SideBarPosition* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     SideBarContainerModelStatic::SetSideBarPosition(
-        frameNode, Converter::OptConvert<SideBarPosition>(*value).value_or(SideBarPosition::START));
+        frameNode, Converter::OptConvertPtr<SideBarPosition>(value).value_or(SideBarPosition::START));
 }
-void DividerImpl(Ark_NativePointer node,
-                 const Opt_DividerStyle* value)
+void SetDividerImpl(Ark_NativePointer node,
+                    const Opt_DividerStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -351,35 +349,16 @@ void DividerImpl(Ark_NativePointer node,
             SideBarContainerModelStatic::SetDividerEndMargin(frameNode, dividerOpt.endMargin.value());
         }
 }
-void MinContentWidthImpl(Ark_NativePointer node,
-                         const Opt_Length* value)
+void SetMinContentWidthImpl(Ark_NativePointer node,
+                            const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        Dimension def(DEFAULT_MIN_CONTENT_LENGTH, DimensionUnit::VP);
-        SideBarContainerModelStatic::SetMinContentWidth(frameNode, def);
-        return;
-    }
-    auto width = Converter::OptConvert<Dimension>(*value);
+    auto width = Converter::OptConvertPtr<Dimension>(value);
     if (width.has_value() && width->IsNegative()) {
         width->SetValue(DEFAULT_MIN_CONTENT_LENGTH);
     }
     SideBarContainerModelStatic::SetMinContentWidth(frameNode, width);
-}
-void _onChangeEvent_showSideBarImpl(Ark_NativePointer node,
-                                    const Callback_Opt_Boolean_Void* callback)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](bool isShow) {
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Opt_Boolean>(isShow));
-    };
-    SideBarContainerModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // SideBarContainerAttributeModifier
 const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
@@ -387,21 +366,17 @@ const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
     static const GENERATED_ArkUISideBarContainerModifier ArkUISideBarContainerModifierImpl {
         SideBarContainerModifier::ConstructImpl,
         SideBarContainerInterfaceModifier::SetSideBarContainerOptionsImpl,
-        SideBarContainerAttributeModifier::ShowSideBarImpl,
-        SideBarContainerAttributeModifier::ControlButtonImpl,
-        SideBarContainerAttributeModifier::ShowControlButtonImpl,
-        SideBarContainerAttributeModifier::OnChangeImpl,
-        SideBarContainerAttributeModifier::SideBarWidth0Impl,
-        SideBarContainerAttributeModifier::SideBarWidth1Impl,
-        SideBarContainerAttributeModifier::MinSideBarWidth0Impl,
-        SideBarContainerAttributeModifier::MinSideBarWidth1Impl,
-        SideBarContainerAttributeModifier::MaxSideBarWidth0Impl,
-        SideBarContainerAttributeModifier::MaxSideBarWidth1Impl,
-        SideBarContainerAttributeModifier::AutoHideImpl,
-        SideBarContainerAttributeModifier::SideBarPositionImpl,
-        SideBarContainerAttributeModifier::DividerImpl,
-        SideBarContainerAttributeModifier::MinContentWidthImpl,
-        SideBarContainerAttributeModifier::_onChangeEvent_showSideBarImpl,
+        SideBarContainerAttributeModifier::SetShowSideBarImpl,
+        SideBarContainerAttributeModifier::SetControlButtonImpl,
+        SideBarContainerAttributeModifier::SetShowControlButtonImpl,
+        SideBarContainerAttributeModifier::SetOnChangeImpl,
+        SideBarContainerAttributeModifier::SetSideBarWidthImpl,
+        SideBarContainerAttributeModifier::SetMinSideBarWidthImpl,
+        SideBarContainerAttributeModifier::SetMaxSideBarWidthImpl,
+        SideBarContainerAttributeModifier::SetAutoHideImpl,
+        SideBarContainerAttributeModifier::SetSideBarPositionImpl,
+        SideBarContainerAttributeModifier::SetDividerImpl,
+        SideBarContainerAttributeModifier::SetMinContentWidthImpl,
     };
     return &ArkUISideBarContainerModifierImpl;
 }

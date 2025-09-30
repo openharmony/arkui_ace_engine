@@ -15,7 +15,7 @@
 
 export * from "./array"
 export * from "./atomic"
-export * from "./double"
+export * from "./primitive"
 export * from "./finalization"
 export * from "./observable"
 export * from "./performance"

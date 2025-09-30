@@ -713,7 +713,6 @@ void JsiDeclarativeEngineInstance::ResetModulePreLoadFlag()
 
 void JsiDeclarativeEngineInstance::PrepareForResetModulePreLoadFlag()
 {
-    ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(nullptr);
     JsiDeclarativeEngine::ResetNamedRouterRegisterMap();
 }
 
@@ -1012,7 +1011,6 @@ void JsiDeclarativeEngineInstance::InitGroupJsBridge()
         EventReport::SendJsException(JsExcepType::JS_ENGINE_INIT_ERR);
     }
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
-    JsUINodeRegisterCleanUp(JSNApi::GetGlobalObject(runtime->GetEcmaVm()));
 }
 
 void JsiDeclarativeEngineInstance::RootViewHandle(panda::Local<panda::ObjectRef> value)
@@ -1214,6 +1212,30 @@ shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetUIContextFunc(
     }
 
     return retVal;
+}
+
+void JsiDeclarativeEngineInstance::CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs)
+{
+    if (!runtime_) {
+        LOGE("CallStateMgmtCleanUpIdleTaskFunc fail runtime is invalid.");
+        return;
+    }
+    panda::LocalScope Scope(runtime_->GetEcmaVm());
+    shared_ptr<JsValue> global = runtime_->GetGlobal();
+    if (!global) {
+        LOGE("CallStateMgmtCleanUpIdleTaskFunc fail global is invalid.");
+        return;
+    }
+    if (!uiNodeCleanUpIdleFunc_) {
+        shared_ptr<JsValue> uiNodeCleanUpIdleFunc = global->GetProperty(runtime_, "uiNodeCleanUpIdleTask");
+        if (!uiNodeCleanUpIdleFunc || !uiNodeCleanUpIdleFunc->IsFunction(runtime_)) {
+            LOGE("The uiNodeCleanUpIdleTask is invalid or not a function.");
+            return;
+        }
+        uiNodeCleanUpIdleFunc_ = uiNodeCleanUpIdleFunc;
+    }
+    std::vector<shared_ptr<JsValue>> argv = { runtime_->NewNumber(maxTimeInNs / 1e6) };
+    uiNodeCleanUpIdleFunc_->Call(runtime_, global, argv, argv.size());
 }
 
 shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallViewFunc(const shared_ptr<JsRuntime>& runtime,

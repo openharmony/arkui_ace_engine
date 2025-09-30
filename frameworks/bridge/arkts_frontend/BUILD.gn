@@ -54,7 +54,7 @@ template("arkts_frontend") {
     deps = [
       ":ArkoalaNative_ark",
       "$ace_root/build:libace_compatible",
-      "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ani_utils_common"
+      "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ani_utils_common",
     ]
 
     sources = [
@@ -128,8 +128,8 @@ foreach(item, ace_platforms) {
 
 config("arkoala_native_config") {
   include_dirs = [
-    "koala_projects/arkoala/framework/native/src",
-    "koala_projects/arkoala/framework/native/src/generated",
+    "koala_projects/arkoala-arkts/framework/native/src",
+    "koala_projects/arkoala-arkts/framework/native/src/generated",
     "koala_projects/interop/src",
     "koala_projects/interop/src/cpp",
     "koala_projects/interop/src/cpp/ani",
@@ -149,14 +149,15 @@ ohos_shared_library("ArkoalaNative_ark") {
   ]
 
   sources = [
-    "koala_projects/arkoala/framework/native/src/events.cc",
-    "koala_projects/arkoala/framework/native/src/generated/bridge_custom.cc",
-    "koala_projects/arkoala/framework/native/src/generated/bridge_generated.cc",
-    "koala_projects/arkoala/framework/native/src/generated/callback_deserialize_call.cc",
-    "koala_projects/arkoala/framework/native/src/generated/callback_managed_caller.cc",
-    "koala_projects/arkoala/framework/native/src/generated/library.cc",
-    "koala_projects/arkoala/framework/native/src/resource_color_helper.cc",
-    "koala_projects/arkoala/framework/native/src/vsync.cc",
+    "koala_projects/arkoala-arkts/framework/native/src/DeserializerBase.cc",
+    "koala_projects/arkoala-arkts/framework/native/src/events.cc",
+    "koala_projects/arkoala-arkts/framework/native/src/generated/bridge_custom.cc",
+    "koala_projects/arkoala-arkts/framework/native/src/generated/bridge_generated.cc",
+    "koala_projects/arkoala-arkts/framework/native/src/generated/callback_deserialize_call.cc",
+    "koala_projects/arkoala-arkts/framework/native/src/generated/callback_managed_caller.cc",
+    "koala_projects/arkoala-arkts/framework/native/src/generated/library.cc",
+    "koala_projects/arkoala-arkts/framework/native/src/resource_color_helper.cc",
+    "koala_projects/arkoala-arkts/framework/native/src/vsync.cc",
   ]
 
   # interop source

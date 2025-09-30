@@ -19,7 +19,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
- 
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SelectOpsAccessor {
 Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
@@ -28,6 +28,8 @@ Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(numCount, nullptr);
+    CHECK_NULL_RETURN(callback, nullptr);
     auto convVal = Converter::OptConvert<int32_t>(*numCount);
     SelectModelStatic::SetSelected(frameNode, convVal);
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
@@ -44,6 +46,8 @@ Ark_NativePointer RegisterValueCallbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(resStr, nullptr);
+    CHECK_NULL_RETURN(callback, nullptr);
     auto resStrOpt = Converter::OptConvert<std::string>(*resStr);
     SelectModelStatic::SetValue(frameNode, resStrOpt);
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
@@ -64,4 +68,3 @@ const GENERATED_ArkUISelectOpsAccessor* GetSelectOpsAccessor()
     return &SelectOpsAccessorImpl;
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier
- 

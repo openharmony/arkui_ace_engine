@@ -26,9 +26,12 @@ import { ComputableState, MutableState, State, StateContext } from "../states/St
  * which value is changed according to the given animation.
  */
 export interface AnimatedState<Value> extends State<Value> {
-    animation: TimeAnimation<Value>
+    getAnimation(): TimeAnimation<Value>
+    setAnimation(value: TimeAnimation<Value>): void
     readonly running: boolean
-    paused: boolean
+    getPaused(): boolean
+    setPaused(value: boolean): void
+
 }
 
 /**
@@ -51,7 +54,8 @@ export function animatedState<V>(animation: TimeAnimation<V>, startNow: boolean 
  * to change the current value to the target one.
  */
 export interface MutableAnimatedState<Value> extends MutableState<Value> {
-    animation: TimeAnimation<Value>
+    getAnimation(): TimeAnimation<Value>
+    setAnimation(value: TimeAnimation<Value>): void
     readonly running: boolean
 }
 
@@ -137,25 +141,25 @@ class AnimatedStateImpl<Value> implements Disposable, AnimatedState<Value> {
         return this.runningState.value
     }
 
-    get paused(): boolean {
+    getPaused(): boolean {
         return this.pausedState.value
     }
 
-    set paused(paused: boolean) {
+    setPaused(paused: boolean) {
         this.pausedState.value = paused
     }
 
-    get animation(): TimeAnimation<Value> {
+    getAnimation(): TimeAnimation<Value> {
         return this.myAnimation
     }
 
-    set animation(animation: TimeAnimation<Value>) {
+    setAnimation(animation: TimeAnimation<Value>): void {
         if (this.myAnimation === animation) return // nothing to change
         this.myAnimation = animation
-        if (!this.paused) animation.onStart(this.timeProvider())
+        if (!this.getPaused()) animation.onStart(this.timeProvider())
     }
 
-    constructor(myAnimation: TimeAnimation<Value>, startNow: boolean, timeProvider?: () => int64) {
+    constructor(myAnimation: TimeAnimation<Value>, startNow: boolean, timeProvider: (() => int64)|undefined) {
         const manager = GlobalStateManager.instance
         if (timeProvider) {
             this.timeProvider = timeProvider
@@ -176,22 +180,22 @@ class AnimatedStateImpl<Value> implements Disposable, AnimatedState<Value> {
                 const paused = this.pausedState.value
                 if (this.pausedState.modified) {
                     if (paused) {
-                        this.animation.onPause(time)
+                        this.getAnimation().onPause(time)
                     } else {
-                        this.animation.onStart(time)
+                        this.getAnimation().onStart(time)
                     }
                 }
                 // compute value from the time provided
-                let newValue = this.animation.getValue(time)
+                let newValue = this.getAnimation().getValue(time)
                 this.action?.(newValue)
                 return newValue
             } finally {
                 // update running state if needed
-                this.runningState.value = this.animation.running
+                this.runningState.value = this.getAnimation().running
             }
         })
         if (startNow) {
-            this.animation.onStart(this.timeProvider())
+            this.getAnimation().onStart(this.timeProvider())
         }
     }
 
@@ -212,7 +216,7 @@ class MutableAnimatedStateImpl<Value> implements MutableAnimatedState<Value> {
     }
 
     constructor(initial: Value, animationProvider: ImplicitAnimationProvider<Value>) {
-        this.animatedState = new AnimatedStateImpl<Value>(constAnimation(initial), true)
+        this.animatedState = new AnimatedStateImpl<Value>(constAnimation(initial), true, undefined)
         this.animationProvider = animationProvider
     }
 
@@ -229,19 +233,19 @@ class MutableAnimatedStateImpl<Value> implements MutableAnimatedState<Value> {
     }
 
     set value(value: Value) {
-        this.animatedState.animation = this.animationProvider(this.value, value)
+        this.animatedState.setAnimation(this.animationProvider(this.animatedState.value, value))
     }
 
     get running(): boolean {
         return this.animatedState.running
     }
 
-    get animation(): TimeAnimation<Value> {
-        return this.animatedState.animation
+    getAnimation(): TimeAnimation<Value> {
+        return this.animatedState.getAnimation()
     }
 
-    set animation(animation: TimeAnimation<Value>) {
-        this.animatedState.animation = animation
+    setAnimation(animation: TimeAnimation<Value>): void {
+        this.animatedState.setAnimation(animation)
     }
 }
 
@@ -253,7 +257,7 @@ class StateAnimatorImpl<P, V> implements StateAnimator<P, V> {
 
     constructor(parameter: P, animationProvider: ParametrizedAnimationProvider<P, V>) {
         this.parameterState = GlobalStateManager.instance.mutableState<P>(parameter)
-        this.animatedState = new AnimatedStateImpl<V>(animationProvider(parameter, undefined), true)
+        this.animatedState = new AnimatedStateImpl<V>(animationProvider(parameter, undefined), true, undefined)
         this.animationProvider = animationProvider
     }
 
@@ -264,7 +268,7 @@ class StateAnimatorImpl<P, V> implements StateAnimator<P, V> {
     set parameter(parameter: P) {
         if (refEqual(this.parameterState.value, parameter)) return // nothing to change
         this.parameterState.value = parameter
-        this.animatedState.animation = this.animationProvider(parameter, this.animatedState.value)
+        this.animatedState.setAnimation(this.animationProvider(parameter, this.animatedState.value))
     }
 
     get value(): V {
@@ -272,7 +276,7 @@ class StateAnimatorImpl<P, V> implements StateAnimator<P, V> {
     }
 
     onValueChange(action: (newValue: V) => void): void {
-        // TODO: rethink how we'd better subscribe appropriate scope on value change.
+        // Improve: rethink how we'd better subscribe appropriate scope on value change.
         this.value
         this.animatedState.onValueChange(action)
     }

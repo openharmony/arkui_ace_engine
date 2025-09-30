@@ -17,6 +17,8 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTFIELD_H
 
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
@@ -25,7 +27,6 @@
 #include "frameworks/core/components/text_field/textfield_theme.h"
 #include "frameworks/core/components_ng/pattern/text/text_menu_extension.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h"
-#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -163,6 +164,8 @@ private:
     static void SetCancelDefaultIcon();
     static void SetCancelSymbolIcon(const JSCallbackInfo& info);
     static void SetLayoutPolicy(const JSRef<JSVal>& jsValue, bool isWidth);
+    static void SetController(
+        JSTextEditableController* jsController, const RefPtr<TextFieldControllerBase>& controller);
 };
 
 } // namespace OHOS::Ace::Framework

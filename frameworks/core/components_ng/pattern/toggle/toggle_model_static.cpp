@@ -87,4 +87,24 @@ void ToggleModelStatic::OnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChan
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
 
+void ToggleModelStatic::TriggerChange(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
+    if (checkboxPattern) {
+        checkboxPattern->UpdateUIStatus(value);
+        return;
+    }
+    auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    if (buttonPattern) {
+        buttonPattern->SetButtonPress(value);
+        return;
+    }
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(frameNode->GetPattern());
+    if (switchPattern) {
+        switchPattern->SetSwitchIsOn(value);
+        return;
+    }
+}
+
 } // namespace OHOS::Ace::NG

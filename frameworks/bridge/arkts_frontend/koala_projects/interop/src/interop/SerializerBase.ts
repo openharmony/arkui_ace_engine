@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { float32, int32, int64 } from "@koalaui/common"
+import { float32, float64, int32, int64 } from "@koalaui/common"
 import { pointer, KPointer, KSerializerBuffer } from "./InteropTypes"
 import { wrapCallback } from "./InteropOps"
 import { InteropNativeModule } from "./InteropNativeModule"
@@ -75,7 +75,7 @@ export function isInstanceOf(className: string, value: object | undefined): bool
 
 export function registerCallback(value: object|undefined): int32 {
     return wrapCallback((args: Uint8Array, length: int32) => {
-        // TBD: deserialize the callback arguments and call the callback
+        // Improve: deserialize the callback arguments and call the callback
         return 42
     })
 }
@@ -106,6 +106,28 @@ export class SerializerBase {
     private buffer: ArrayBuffer
     private view: DataView
 
+    private static pool: SerializerBase[] = [
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+    ]
+    private static poolTop = 0
+
+    static hold(): SerializerBase {
+        if (SerializerBase.isMultithread) {
+            return new SerializerBase()
+        }
+        if (this.poolTop === this.pool.length) {
+            throw new Error("Pool empty! Release one of taken serializers")
+        }
+        return SerializerBase.pool[this.poolTop++]
+    }
+
     private static customSerializers: CustomSerializer | undefined = undefined
     static registerCustomSerializer(serializer: CustomSerializer) {
         if (SerializerBase.customSerializers == undefined) {
@@ -116,13 +138,30 @@ export class SerializerBase {
             current.next = serializer
         }
     }
+
+    private static isMultithread: boolean = false
+    static setMultithreadMode(): void {
+        if (SerializerBase.isMultithread) {
+            return
+        }
+        SerializerBase.isMultithread = true
+        SerializerBase.pool = []
+    }
+
     constructor() {
         this.buffer = new ArrayBuffer(96)
         this.view = new DataView(this.buffer)
     }
     public release() {
         this.releaseResources()
+        if (SerializerBase.isMultithread) {
+            return
+        }
         this.position = 0
+        if (this !== SerializerBase.pool[SerializerBase.poolTop - 1]) {
+            throw new Error("Serializers should be release in LIFO order")
+        }
+        SerializerBase.poolTop -= 1;
     }
     asBuffer(): KSerializerBuffer {
         return new Uint8Array(this.buffer)
@@ -147,8 +186,8 @@ export class SerializerBase {
             const minSize = this.position + value
             const resizedSize = Math.max(minSize, Math.round(3 * buffSize / 2))
             let resizedBuffer = new ArrayBuffer(resizedSize)
-            // TODO: can we grow without new?
-            // TODO: check the status of ArrayBuffer.transfer function implementation in STS
+            // Improve: can we grow without new?
+            // Improve: check the status of ArrayBuffer.transfer function implementation in STS
             new Uint8Array(resizedBuffer).set(new Uint8Array(this.buffer))
             this.buffer = resizedBuffer
             this.view = new DataView(resizedBuffer)
@@ -166,7 +205,7 @@ export class SerializerBase {
         return resourceId
     }
     holdAndWriteCallbackForPromiseVoid(hold: KPointer = 0, release: KPointer = 0, call: KPointer = 0, callSync = 0): [Promise<void>, ResourceId] {
-        let resourceId: ResourceId
+        let resourceId: ResourceId = 0
         const promise = new Promise<void>((resolve, reject) => {
             const callback = (err: string[]|undefined) => {
                 if (err !== undefined)
@@ -179,7 +218,7 @@ export class SerializerBase {
         return [promise, resourceId]
     }
     holdAndWriteCallbackForPromise<T>(hold: KPointer = 0, release: KPointer = 0, call: KPointer = 0): [Promise<T>, ResourceId] {
-        let resourceId: ResourceId
+        let resourceId: ResourceId = 0
         const promise = new Promise<T>((resolve, reject) => {
             const callback = (value: T|undefined, err: string[]|undefined) => {
                 if (err !== undefined)
@@ -207,7 +246,7 @@ export class SerializerBase {
     private releaseResources() {
         for (const resourceId of this.heldResources)
             InteropNativeModule._ReleaseCallbackResource(resourceId)
-        // todo think about effective array clearing/pushing
+        // Improve: think about effective array clearing/pushing
         this.heldResources = []
     }
     writeCustomObject(kind: string, value: any) {
@@ -264,6 +303,11 @@ export class SerializerBase {
         this.view.setFloat32(this.position, value, true)
         this.position += 4
     }
+    writeFloat64(value: float64) {
+        this.checkCapacity(8)
+        this.view.setFloat64(this.position, value, true)
+        this.position += 8
+    }
     writeBoolean(value: boolean|undefined) {
         this.checkCapacity(1)
         this.view.setInt8(this.position, value == undefined ? RuntimeType.UNDEFINED : +value)
@@ -275,18 +319,15 @@ export class SerializerBase {
     writeString(value: string) {
         this.checkCapacity(4 + value.length * 4) // length, data
         let encodedLength =
-            InteropNativeModule._ManagedStringWrite(value, new Uint8Array(this.view.buffer, 0), this.position + 4)
+            InteropNativeModule._ManagedStringWrite(value, new Uint8Array(this.view.buffer, 0), this.view.buffer.byteLength, this.position + 4)
         this.view.setInt32(this.position, encodedLength, true)
         this.position += encodedLength + 4
     }
-    writeBuffer(buffer: NativeBuffer) {
-        this.writeCallbackResource({
-            resourceId: buffer.resourceId,
-            hold: buffer.hold,
-            release: buffer.release,
-        })
-        this.writePointer(buffer.data)
-        this.writeInt64(buffer.length)
+    writeBuffer(buffer: ArrayBuffer) {
+        this.holdAndWriteObject(buffer)
+        const ptr = InteropNativeModule._GetNativeBufferPointer(buffer)
+        this.writePointer(ptr)
+        this.writeInt64(buffer.byteLength)
     }
 }
 

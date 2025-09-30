@@ -82,6 +82,8 @@ void SetFrameCallbackImpl(const Callback_Number_Void* onFrameCallback,
                           const Callback_Number_Void* onIdleCallback,
                           const Ark_Number* delayTime)
 {
+    CHECK_NULL_VOID(onFrameCallback);
+    CHECK_NULL_VOID(onIdleCallback);
     CHECK_NULL_VOID(delayTime);
     auto delayTimeInt = Converter::Convert<int32_t>(*delayTime);
     auto context = PipelineContext::GetCurrentContext();
@@ -90,9 +92,9 @@ void SetFrameCallbackImpl(const Callback_Number_Void* onFrameCallback,
         auto delayTime = Converter::ArkValue<Ark_Number>(delayTimeInt);
         callback.Invoke(delayTime);
     };
-    auto onIdleCallbackFunc = [callback = CallbackHelper(*onIdleCallback)](double delayTimeInt,
-        int32_t frameCount) -> void {
-        auto delayTime = Converter::ArkValue<Ark_Number>(delayTimeInt);
+    auto onIdleCallbackFunc = [callback = CallbackHelper(*onIdleCallback)](uint64_t nanoTimestamp,
+        uint32_t frameCount) -> void {
+        auto delayTime = Converter::ArkValue<Ark_Number>(nanoTimestamp);
         callback.Invoke(delayTime);
     };
     context->AddFrameCallback(std::move(onFrameCallbackFunc), std::move(onIdleCallbackFunc), delayTimeInt);
@@ -119,18 +121,23 @@ Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
     CalcDimension result;
     const auto errValue = Converter::ArkValue<Ark_LengthMetricsCustom>(result);
     CHECK_NULL_RETURN(res, errValue);
-    auto resId = Converter::Convert<int32_t>(res->id);
+    auto resId = Converter::Convert<int64_t>(res->id);
     auto bundleName = Converter::Convert<std::string>(res->bundleName);
     auto moduleName = Converter::Convert<std::string>(res->moduleName);
     auto resourceWrapper = CreateResourceWrapper(bundleName, moduleName);
     CHECK_NULL_RETURN(resourceWrapper, errValue);
     if (resId == -1) {
-        auto optParams = Converter::OptConvert<std::vector<std::string>>(res->params);
+        auto optParams = Converter::OptConvert<std::vector<Ark_Union_String_I32_I64_F64_Resource>>(res->params);
+        
         if (!optParams.has_value() || optParams->size() < 1) {
             return errValue;
         }
         auto params = optParams.value();
-        result = resourceWrapper->GetDimensionByName(params[0]);
+        if (params[0].selector != 0) {
+            return errValue;
+        }
+        auto params0 = Converter::Convert<std::string>(params[0].value0);
+        result = resourceWrapper->GetDimensionByName(params0);
         return Converter::ArkValue<Ark_LengthMetricsCustom>(result);
     }
     auto resType = Converter::OptConvert<int32_t>(res->type);
@@ -138,15 +145,15 @@ Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
         return errValue;
     }
     auto typeValue = resType.value();
-    if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::STRING)) {
+    if (typeValue == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId);
         StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::VP);
     }
-    if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::INTEGER)) {
+    if (typeValue == static_cast<int32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(resourceWrapper->GetInt(resId));
         StringUtils::StringToDimensionWithUnitNG(value, result, DimensionUnit::VP);
     }
-    if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::FLOAT)) {
+    if (typeValue == static_cast<int32_t>(ResourceType::FLOAT)) {
         result = resourceWrapper->GetDimension(resId);
     }
     return Converter::ArkValue<Ark_LengthMetricsCustom>(result);
@@ -164,63 +171,36 @@ void ParseArrayNumber(Color& color, std::vector<uint32_t>& indexes, bool result)
         indexes.emplace_back(0);
     }
 }
-uint32_t ColorAlphaAdapt(uint32_t origin)
-{
-    uint32_t result = origin;
-    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
-    }
-    return result;
-}
 Array_Number ColorMetricsResourceColorImpl(const Ark_Resource* color)
 {
     Color colorColor;
     std::vector<uint32_t> indexes;
     ParseArrayNumber(colorColor, indexes, false);
     Array_Number errValue = Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    auto resId = Converter::Convert<int32_t>(color->id);
-    auto bundleName = Converter::Convert<std::string>(color->bundleName);
-    auto moduleName = Converter::Convert<std::string>(color->moduleName);
-    auto resourceWrapper = CreateResourceWrapper(bundleName, moduleName);
-    CHECK_NULL_RETURN(resourceWrapper, errValue);
-    if (resId == -1) {
-        auto optParams = Converter::OptConvert<std::vector<std::string>>(color->params);
-        if (!optParams.has_value() || optParams->size() < 1) {
-            return errValue;
-        }
-        auto params = optParams.value();
-        colorColor = resourceWrapper->GetColorByName(params[0]);
-        ParseArrayNumber(colorColor, indexes, true);
-        return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    }
-    auto resType = Converter::OptConvert<int32_t>(color->type);
-    if (!resType.has_value()) {
-        return errValue;
-    }
-    auto typeValue = resType.value();
-    if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resId);
-        if (!Color::ParseColorString(value, colorColor)) {
-            return errValue;
-        }
-        ParseArrayNumber(colorColor, indexes, true);
-        return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    }
-    if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::INTEGER)) {
-        auto value = resourceWrapper->GetInt(resId);
-        colorColor = Color(ColorAlphaAdapt(value));
-        ParseArrayNumber(colorColor, indexes, true);
-        return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    }
-    if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::COLOR)) {
-        colorColor = resourceWrapper->GetColor(resId);
-        ParseArrayNumber(colorColor, indexes, true);
-        indexes.emplace_back(resId);
-        return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    }
-    return errValue;
+    CHECK_NULL_RETURN(color, errValue);
+    auto result = Converter::OptConvert<Color>(*color);
+    CHECK_NULL_RETURN(result, errValue);
+    ParseArrayNumber(*result, indexes, true);
+    return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
 }
-} // namespace SystemOpsAccessor
+Array_Number BlendColorByColorMetricsImpl(const Ark_Number* color,
+                                          const Ark_Number* overlayColor)
+{
+    Color resultErrColor;
+    std::vector<uint32_t> indexes;
+    ParseArrayNumber(resultErrColor, indexes, false);
+    Array_Number errValue = Converter::ArkValue<Array_Number>(indexes, Converter::FC);
+    CHECK_NULL_RETURN(color, errValue);
+    CHECK_NULL_RETURN(overlayColor, errValue);
+    auto colorInt = Converter::Convert<uint32_t>(*color);
+    auto overlayColorInt = Converter::Convert<uint32_t>(*overlayColor);
+    Color colorColor = Color(colorInt);
+    Color overlayColorColor = Color(overlayColorInt);
+    auto blendColor = colorColor.BlendColor(overlayColorColor);
+    ParseArrayNumber(blendColor, indexes, true);
+    return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
+}
+} // SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
     static const GENERATED_ArkUISystemOpsAccessor SystemOpsAccessorImpl {
@@ -231,8 +211,9 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
         SystemOpsAccessor::GetResourceIdImpl,
         SystemOpsAccessor::ResourceManagerResetImpl,
         SystemOpsAccessor::SetFrameCallbackImpl,
-        SystemOpsAccessor::ResourceToLengthMetricsImpl,
         SystemOpsAccessor::ColorMetricsResourceColorImpl,
+        SystemOpsAccessor::BlendColorByColorMetricsImpl,
+        SystemOpsAccessor::ResourceToLengthMetricsImpl,
     };
     return &SystemOpsAccessorImpl;
 }

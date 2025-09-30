@@ -14,7 +14,6 @@
  */
 import { AppStorage } from './appStorage';
 import { ArkUIAniModule } from 'arkui.ani';
-import { ColorMode, LayoutDirection } from './storageProperty';
 
 interface IAniEnvironment {
     getAccessibilityEnabled(): boolean;
@@ -48,7 +47,7 @@ class AniEnvironment implements IAniEnvironment {
 
 interface EnvPropsOptions {
     key: string;
-    defaultValue: int | long | double | string | boolean;
+    defaultValue: number | string | boolean;
 }
 
 /**
@@ -106,11 +105,6 @@ class Environment {
                 break;
             case 'colorMode':
                 tmp = Environment.getOrCreate().aniEnvironment.getColorMode();
-                if (tmp ) {
-                    tmp = ColorMode.DARK;
-                } else {
-                    tmp = ColorMode.LIGHT;
-                }
                 break;
             case 'fontScale':
                 tmp = Environment.getOrCreate().aniEnvironment.getFontScale();
@@ -120,13 +114,6 @@ class Environment {
                 break;
             case 'layoutDirection':
                 tmp = Environment.getOrCreate().aniEnvironment.getLayoutDirection();
-                if (tmp === '0') {
-                    tmp = LayoutDirection.LTR;
-                } else if (tmp === '1') {
-                    tmp = LayoutDirection.RTL;
-                } else {
-                    tmp = LayoutDirection.Auto;
-                }
                 break;
             case 'languageCode':
                 tmp = Environment.getOrCreate().aniEnvironment.getLanguageCode();
@@ -151,7 +138,7 @@ class Environment {
     public static envProps(properties: EnvPropsOptions[]): void {
         properties.forEach((prop) => {
             const key: string = prop.key;
-            const defaultValue: int | long | double | string | boolean = prop.defaultValue;
+            const defaultValue: number | string | boolean = prop.defaultValue;
             Environment.envProp(key, defaultValue);
         });
     }

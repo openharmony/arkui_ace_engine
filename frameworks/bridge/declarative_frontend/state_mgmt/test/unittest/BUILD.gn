@@ -1,4 +1,3 @@
-
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,17 +12,14 @@
 # limitations under the License.
 import("//build/ohos.gni")
 
-
 ohos_app("statemgmt_ut_hap") {
-
-  deps = [
-    ":state_mgmt_js_assets",
-  ]
+  deps = [ ":state_mgmt_js_assets" ]
 
   certificate_profile = "signature/stm.p7b"
   testonly = true
   part_name = "ace_engine"
   subsystem_name = "arkui"
+
   # Will expand to ./out/rk3568/obj/foundation/arkui/ace_engine/test/unittest/statemgmt_ut/StateMgmtTest.hap
   hap_out_dir = "${target_out_dir}"
   module_install_dir = "app/com.arkui.statemgmt.ut"
@@ -34,7 +30,6 @@ ohos_app("statemgmt_ut_hap") {
   assemble_type = "assembleHap"
   build_level = "module"
   build_modules = [ "entry" ]
-
 }
 
 ohos_js_assets("state_mgmt_js_assets") {

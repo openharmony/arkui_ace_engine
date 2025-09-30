@@ -30,6 +30,20 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NodeContainerOpsAccessor {
+Ark_NativePointer NodeContainerOpsConstructImpl(Ark_Int32 id,
+                                                Ark_Int32 flags)
+{
+    auto frameNode = NodeContainerNode::GetOrCreateNodeContainerNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+void NodeContainerSetNodeContainerOptionsImpl(Ark_NativePointer ptr,
+                                              Ark_NativePointer controller)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(ptr);
+    CHECK_NULL_VOID(frameNode);
+}
 void AddNodeContainerRootNodeImpl(Ark_NativePointer self, Ark_NativePointer childNode)
 {
     auto nodeContainer = reinterpret_cast<FrameNode*>(self);
@@ -119,7 +133,7 @@ void SetOnTouchEventImpl(Ark_NativePointer self, const Opt_Callback_TouchEvent_V
     }
     auto onEvent = [callback = CallbackHelper(value->value)](TouchEventInfo& info) {
         const auto event = Converter::ArkTouchEventSync(info);
-        callback.Invoke(event.ArkValue());
+        callback.InvokeSync(event.ArkValue());
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
@@ -127,6 +141,8 @@ void SetOnTouchEventImpl(Ark_NativePointer self, const Opt_Callback_TouchEvent_V
 const GENERATED_ArkUINodeContainerOpsAccessor* GetNodeContainerOpsAccessor()
 {
     static const GENERATED_ArkUINodeContainerOpsAccessor NodeContainerOpsAccessorImpl {
+        NodeContainerOpsAccessor::NodeContainerOpsConstructImpl,
+        NodeContainerOpsAccessor::NodeContainerSetNodeContainerOptionsImpl,
         NodeContainerOpsAccessor::AddNodeContainerRootNodeImpl,
         NodeContainerOpsAccessor::SetAboutToAppearImpl,
         NodeContainerOpsAccessor::SetAboutToDisappearImpl,

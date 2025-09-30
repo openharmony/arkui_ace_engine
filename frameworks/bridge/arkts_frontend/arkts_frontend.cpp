@@ -53,22 +53,22 @@ struct AppInfo {
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
-    "Larkui/ArkUIEntry/Application;",
+    "arkui.ArkUIEntry.Application",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZLstd/core/String;Larkui/UserView/UserView;Larkui/UserView/EntryPoint;"
-    ":Larkui/ArkUIEntry/Application;",
+    "C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}C{arkui.UserView.EntryPoint}"
+    ":C{arkui.ArkUIEntry.Application}",
     "start",
-    "Z:J",
+    ":l",
     "enter",
-    "IIJ:Z",
+    "iil:z",
     "emitEvent",
-    "IIII:V",
+    "iiii:",
     "checkCallbacks",
-    ":V",
+    ":",
     "handleMessage",
-    "JILstd/core/String;:Z",
+    "liC{std.core.String}:z",
     "registerNativeModulePreloader",
-    ":V",
+    ":",
 };
 
 std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property)
@@ -285,7 +285,7 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     }
 
     ani_long result;
-    if (env->Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result, false) != ANI_OK) {
+    if (env->Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result) != ANI_OK) {
         LOGE("call start method returned null");
         return UIContentErrorCode::INVALID_URL;
     }

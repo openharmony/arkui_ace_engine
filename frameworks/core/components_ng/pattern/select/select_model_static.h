@@ -55,6 +55,7 @@ public:
     static void SetMenuOutline(FrameNode* frameNode, const std::optional<MenuParam>& menuParam);
     static void SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize);
     static void ResetDividerStyle(FrameNode* frameNode);
+    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_STATIC_H

@@ -11,40 +11,76 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
 #undef KOALA_INTEROP_MODULE
 #define KOALA_INTEROP_MODULE InteropNativeModule
 #include "common-interop.h"
 #include "interop-types.h"
 #include "callback-resource.h"
+#include "SerializerBase.h"
+#include "interop-utils.h"
 #include <deque>
 #include <unordered_map>
-
+#include <atomic>
+#include <utility>
 
 static bool needReleaseFront = false;
 static std::deque<CallbackEventKind> callbackEventsQueue;
-static std::deque<CallbackBuffer> callbackCallSubqueue;
+static std::deque<std::pair<int, CallbackBuffer>> callbackCallSubqueue;
 static std::deque<InteropInt32> callbackResourceSubqueue;
 
-void enqueueCallback(const CallbackBuffer* event) {
-    callbackEventsQueue.push_back(Event_CallCallback);
-    callbackCallSubqueue.push_back(*event);
+static std::atomic<KVMDeferred*> currentDeferred(nullptr);
+
+static KVMDeferred* takeCurrent(KNativePointer waitContext) {
+    KVMDeferred* current;
+    do {
+        current = currentDeferred.load();
+    } while (!currentDeferred.compare_exchange_strong(current, nullptr));
+    return current;
 }
 
-void enqueueCustomCallback(const CallbackBuffer* event) {
-    callbackEventsQueue.push_back(Event_CallCallback_Customize);
-    callbackCallSubqueue.push_back(*event);
+void notifyWaiter() {
+    auto current = takeCurrent(nullptr);
+    if (current)
+        current->resolve(current, nullptr, 0);
+}
+
+KVMObjectHandle impl_CallbackAwait(KVMContext vmContext, KNativePointer waitContext) {
+    KVMObjectHandle result = nullptr;
+    auto* current = takeCurrent(waitContext);
+    if (current) {
+        current->reject(current, "Wrong");
+    }
+    auto next = CreateDeferred(vmContext, &result);
+    KVMDeferred* null = nullptr;
+    while (!currentDeferred.compare_exchange_strong(null, next)) {}
+    return result;
+}
+KOALA_INTEROP_CTX_1(CallbackAwait, KVMObjectHandle, KNativePointer)
+
+void impl_UnblockCallbackWait(KNativePointer waitContext) {
+    auto current = takeCurrent(waitContext);
+    if (current) current->resolve(current, nullptr, 0);
+}
+KOALA_INTEROP_V1(UnblockCallbackWait, KNativePointer)
+
+void enqueueCallback(int apiKind, const CallbackBuffer* event) {
+    callbackEventsQueue.push_back(Event_CallCallback);
+    callbackCallSubqueue.push_back({ apiKind, *event });
+    notifyWaiter();
 }
 
 void holdManagedCallbackResource(InteropInt32 resourceId) {
     callbackEventsQueue.push_back(Event_HoldManagedResource);
     callbackResourceSubqueue.push_back(resourceId);
+    notifyWaiter();
 }
 
 void releaseManagedCallbackResource(InteropInt32 resourceId) {
     callbackEventsQueue.push_back(Event_ReleaseManagedResource);
     callbackResourceSubqueue.push_back(resourceId);
+    notifyWaiter();
 }
 
 KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
@@ -54,8 +90,7 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
         switch (callbackEventsQueue.front())
         {
             case Event_CallCallback:
-            case Event_CallCallback_Customize:
-                callbackCallSubqueue.front().resourceHolder.release();
+                callbackCallSubqueue.front().second.resourceHolder.release();
                 callbackCallSubqueue.pop_front();
                 break;
             case Event_HoldManagedResource:
@@ -71,18 +106,23 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
     if (callbackEventsQueue.empty()) {
         return 0;
     }
+
+    SerializerBase serializer(result, size);
     const CallbackEventKind frontEventKind = callbackEventsQueue.front();
-    memcpy(result, &frontEventKind, 4);
+    serializer.writeInt32(frontEventKind);
+
     switch (frontEventKind)
     {
-        case Event_CallCallback:
-        case Event_CallCallback_Customize:
-            memcpy(result + 4, callbackCallSubqueue.front().buffer, sizeof(CallbackBuffer::buffer));
+        case Event_CallCallback: {
+            std::pair<int, CallbackBuffer> &callback = callbackCallSubqueue.front();
+            serializer.writeInt32(callback.first);
+            interop_memcpy(result + serializer.length(), size - serializer.length(), callback.second.buffer, sizeof(CallbackBuffer::buffer));
             break;
+        }
         case Event_HoldManagedResource:
         case Event_ReleaseManagedResource: {
             const InteropInt32 resourceId = callbackResourceSubqueue.front();
-            memcpy(result + 4, &resourceId, 4);
+            interop_memcpy(result + serializer.length(), size - serializer.length(), &resourceId, sizeof(InteropInt32));
             break;
         }
         default:

@@ -23,14 +23,16 @@ import { NullableObject } from '../../base/types';
 import { UIUtils } from '../../utils';
 import { uiUtils } from '../../base/uiUtilsImpl';
 
-export class InterfaceProxyHandler<T extends Object> 
+export class InterfaceProxyHandler<T extends Object>
     extends proxy.DefaultProxyHandler<T>
-    implements IObservedObject, ISubscribedWatches {
+    implements IObservedObject, ISubscribedWatches
+{
     private readonly __meta: IMutableStateMeta = STATE_MGMT_FACTORY.makeMutableStateMeta();
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     private ____V1RenderId: RenderIdType = 0;
     private allowDeep_: boolean;
     constructor(allowDeep: boolean) {
+        super();
         this.allowDeep_ = allowDeep;
     }
     public addWatchSubscriber(watchId: WatchIdType): void {
@@ -49,7 +51,7 @@ export class InterfaceProxyHandler<T extends Object>
         return this.allowDeep_ || OBSERVE.shouldAddRef(this.____V1RenderId);
     }
     public get(target: T, name: string): Any {
-        const value = super.get(target, name)
+        const value = super.get(target, name);
         if (typeof value !== 'function' && this.shouldAddRef()) {
             this.__meta.addRef();
         }
