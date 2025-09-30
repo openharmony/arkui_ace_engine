@@ -1079,3 +1079,5 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithmTrans
     algorithm_->TranslateAndRotate(frameNode, offset5);
     EXPECT_TRUE(NearEqual(offset5.GetY(), originalY5));
 }
+
+}
