@@ -189,7 +189,7 @@ export class AlertDialogButtonBaseOptions_serializer {
             if (valueHolderForFontColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
@@ -213,7 +213,7 @@ export class AlertDialogButtonBaseOptions_serializer {
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
@@ -269,7 +269,7 @@ export class AlertDialogButtonBaseOptions_serializer {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let fontColorTmpBuf_ : Color | number | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
-                fontColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -288,7 +288,7 @@ export class AlertDialogButtonBaseOptions_serializer {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -361,7 +361,7 @@ export class AlertDialogButtonOptions_serializer {
             if (valueHolderForFontColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
@@ -385,7 +385,7 @@ export class AlertDialogButtonOptions_serializer {
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
@@ -449,7 +449,7 @@ export class AlertDialogButtonOptions_serializer {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let fontColorTmpBuf_ : Color | number | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
-                fontColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -468,7 +468,7 @@ export class AlertDialogButtonOptions_serializer {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -619,7 +619,7 @@ export class AlertDialogParamWithButtons_serializer {
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
@@ -790,7 +790,7 @@ export class AlertDialogParamWithButtons_serializer {
                 if (valueHolderForBorderColorTmpValueForIdx0 instanceof Color) {
                     valueSerializer.writeInt8((0).toChar())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
-                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.valueOf())
+                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
                     valueSerializer.writeInt8((1).toChar())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
@@ -1048,7 +1048,7 @@ export class AlertDialogParamWithButtons_serializer {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -1202,7 +1202,7 @@ export class AlertDialogParamWithButtons_serializer {
                 const borderColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let borderColorTmpBuf_BufU : Color | number | string | Resource | undefined
                 if (borderColorTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    borderColorTmpBuf_BufU = Color.fromValue(valueDeserializer.readInt32())
+                    borderColorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (borderColorTmpBuf_BufUUnionSelector == (1).toChar()) {
                     borderColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
                 } else if (borderColorTmpBuf_BufUUnionSelector == (2).toChar()) {
@@ -1485,7 +1485,7 @@ export class AlertDialogParamWithConfirm_serializer {
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
@@ -1656,7 +1656,7 @@ export class AlertDialogParamWithConfirm_serializer {
                 if (valueHolderForBorderColorTmpValueForIdx0 instanceof Color) {
                     valueSerializer.writeInt8((0).toChar())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
-                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.valueOf())
+                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
                     valueSerializer.writeInt8((1).toChar())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
@@ -1918,7 +1918,7 @@ export class AlertDialogParamWithConfirm_serializer {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -2072,7 +2072,7 @@ export class AlertDialogParamWithConfirm_serializer {
                 const borderColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let borderColorTmpBuf_BufU : Color | number | string | Resource | undefined
                 if (borderColorTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    borderColorTmpBuf_BufU = Color.fromValue(valueDeserializer.readInt32())
+                    borderColorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (borderColorTmpBuf_BufUUnionSelector == (1).toChar()) {
                     borderColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
                 } else if (borderColorTmpBuf_BufUUnionSelector == (2).toChar()) {
@@ -2359,7 +2359,7 @@ export class AlertDialogParamWithOptions_serializer {
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
@@ -2530,7 +2530,7 @@ export class AlertDialogParamWithOptions_serializer {
                 if (valueHolderForBorderColorTmpValueForIdx0 instanceof Color) {
                     valueSerializer.writeInt8((0).toChar())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
-                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.valueOf())
+                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
                     valueSerializer.writeInt8((1).toChar())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
@@ -2798,7 +2798,7 @@ export class AlertDialogParamWithOptions_serializer {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -2952,7 +2952,7 @@ export class AlertDialogParamWithOptions_serializer {
                 const borderColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let borderColorTmpBuf_BufU : Color | number | string | Resource | undefined
                 if (borderColorTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    borderColorTmpBuf_BufU = Color.fromValue(valueDeserializer.readInt32())
+                    borderColorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (borderColorTmpBuf_BufUUnionSelector == (1).toChar()) {
                     borderColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
                 } else if (borderColorTmpBuf_BufUUnionSelector == (2).toChar()) {

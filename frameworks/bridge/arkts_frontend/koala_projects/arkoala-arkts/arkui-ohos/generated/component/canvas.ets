@@ -1847,7 +1847,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         if (bufferUnionSelector == (0).toChar()) {
             buffer = (retvalDeserializer.readString() as string)
         } else if (bufferUnionSelector == (1).toChar()) {
-            buffer = Color.fromValue(retvalDeserializer.readInt32())
+            buffer = Color.values()[retvalDeserializer.readInt32()]
         } else if (bufferUnionSelector == (2).toChar()) {
             buffer = retvalDeserializer.readInt32()
         } else if (bufferUnionSelector == (3).toChar()) {
@@ -1869,7 +1869,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         } else if (fillStyle instanceof Color) {
             thisSerializer.writeInt8((1).toChar())
             const fillStyleForIdx1  = fillStyle as Color
-            thisSerializer.writeInt32(fillStyleForIdx1.valueOf())
+            thisSerializer.writeInt32(fillStyleForIdx1.getOrdinal())
         } else if (fillStyle instanceof int32) {
             thisSerializer.writeInt8((2).toChar())
             const fillStyleForIdx2  = fillStyle as int32
@@ -1894,7 +1894,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         if (bufferUnionSelector == (0).toChar()) {
             buffer = (retvalDeserializer.readString() as string)
         } else if (bufferUnionSelector == (1).toChar()) {
-            buffer = Color.fromValue(retvalDeserializer.readInt32())
+            buffer = Color.values()[retvalDeserializer.readInt32()]
         } else if (bufferUnionSelector == (2).toChar()) {
             buffer = retvalDeserializer.readInt32()
         } else if (bufferUnionSelector == (3).toChar()) {
@@ -1916,7 +1916,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         } else if (strokeStyle instanceof Color) {
             thisSerializer.writeInt8((1).toChar())
             const strokeStyleForIdx1  = strokeStyle as Color
-            thisSerializer.writeInt32(strokeStyleForIdx1.valueOf())
+            thisSerializer.writeInt32(strokeStyleForIdx1.getOrdinal())
         } else if (strokeStyle instanceof int32) {
             thisSerializer.writeInt8((2).toChar())
             const strokeStyleForIdx2  = strokeStyle as int32

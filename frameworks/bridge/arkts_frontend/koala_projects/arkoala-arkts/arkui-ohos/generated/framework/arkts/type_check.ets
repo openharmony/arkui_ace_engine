@@ -3621,10 +3621,10 @@ export class TypeChecker {
         return ClickEffectLevel.fromValue(ordinal)
     }
     static Color_ToNumeric(value: Color): int32 {
-        return value.valueOf()
+        return value.getOrdinal()
     }
     static Color_FromNumeric(ordinal: int32): Color {
-        return Color.fromValue(ordinal)
+        return Color.values()[ordinal]
     }
     static ColoringStrategy_ToNumeric(value: ColoringStrategy): int32 {
         return value.getOrdinal()

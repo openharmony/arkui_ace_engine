@@ -252,7 +252,7 @@ export class DecorationStyle implements MaterializedBase {
             const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
             let buffer_ : Color | number | string | Resource | undefined
             if (buffer_UnionSelector == (0).toChar()) {
-                buffer_ = Color.fromValue(retvalDeserializer.readInt32())
+                buffer_ = Color.values()[retvalDeserializer.readInt32()]
             } else if (buffer_UnionSelector == (1).toChar()) {
                 buffer_ = (retvalDeserializer.readNumber() as number)
             } else if (buffer_UnionSelector == (2).toChar()) {
@@ -991,7 +991,7 @@ export class TextStyle implements MaterializedBase {
             const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
             let buffer_ : Color | number | string | Resource | undefined
             if (buffer_UnionSelector == (0).toChar()) {
-                buffer_ = Color.fromValue(retvalDeserializer.readInt32())
+                buffer_ = Color.values()[retvalDeserializer.readInt32()]
             } else if (buffer_UnionSelector == (1).toChar()) {
                 buffer_ = (retvalDeserializer.readNumber() as number)
             } else if (buffer_UnionSelector == (2).toChar()) {
@@ -1458,7 +1458,7 @@ export class DecorationStyleInterface_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -1493,7 +1493,7 @@ export class DecorationStyleInterface_serializer {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let colorTmpBuf_ : Color | number | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
@@ -1537,7 +1537,7 @@ export class TextStyleInterface_serializer {
             if (valueHolderForFontColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
@@ -1615,7 +1615,7 @@ export class TextStyleInterface_serializer {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let fontColorTmpBuf_ : Color | number | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
-                fontColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
