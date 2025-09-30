@@ -30,6 +30,10 @@ const float PICKER_DEFAULT_HEIGHT = 910.0f;
 const float PICKER_DEFAULT_WIDTH = 300.0f;
 const float UNDEFINED_SIZE = -1.0f;
 const float HALF = 2.0;
+const Dimension PICKER_DEFAULT_ITEM_HEIGHT = 40.0_vp;
+const int32_t ITEM_COUNTS = 10;
+const float HORIZONTAL_ANGLE = 180.0f;
+const float VERTICAL_ANGLE = 90.0f;
 } // namespace
 
 void ContainerPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -411,18 +415,19 @@ void ContainerPickerLayoutAlgorithm::LayoutItem(
 void ContainerPickerLayoutAlgorithm::TranslateAndRotate(RefPtr<FrameNode> node, OffsetF& offset)
 {
     float offsetY = offset.GetY() - middleItemStartPos_ - topPadding_;
-    float pi = 3.14159;
-    float radius = 130 * 10 / (2 * pi);
+    const float pi = 3.14159;
+    double itemHeight = PICKER_DEFAULT_ITEM_HEIGHT.ConvertToPx();
+    float radius = itemHeight * ITEM_COUNTS / (HALF * pi);
     float yScale = (pi * radius) / PICKER_DEFAULT_HEIGHT;
     float radian = (offsetY * yScale) / radius;
-    float angle = radian * (180 / pi);
+    float angle = radian * (HORIZONTAL_ANGLE / pi);
     float correctFactor = angle > 0 ? 1.0 : -1.0;
     double translateY = correctFactor * radius * std::sin(std::abs(radian)) - offsetY * yScale;
 
-    if (GreatNotEqual(angle, 90.0)) {
-        angle = 90.0;
-    } else if (LessNotEqual(angle, -90.0)) {
-        angle = -90.0;
+    if (GreatNotEqual(angle, VERTICAL_ANGLE)) {
+        angle = VERTICAL_ANGLE;
+    } else if (LessNotEqual(angle, -VERTICAL_ANGLE)) {
+        angle = -VERTICAL_ANGLE;
     } else {
         translateY = translateY / yScale;
         offset.AddY(translateY);

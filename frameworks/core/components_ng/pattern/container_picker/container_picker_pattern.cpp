@@ -265,7 +265,7 @@ void ContainerPickerPattern::CreateChildrenClickEvent(RefPtr<UINode>& host)
             gesture->AddClickEvent(clickListener);
         } else {
             TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER,
-                "CreateChildrenClickEvent does not support this type of the node. id: %{public}d, tag: %{public}s", 
+                "CreateChildrenClickEvent does not support this type of the node. id: %{public}d, tag: %{public}s",
                 host->GetId(), tag.c_str());
         }
     }
