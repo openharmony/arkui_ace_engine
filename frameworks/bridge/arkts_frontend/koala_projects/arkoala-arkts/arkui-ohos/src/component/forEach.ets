@@ -27,8 +27,8 @@ export interface ForEachAttribute<T> extends DynamicNode {
     arr: () => Array<T>;
     setForEachOptions(arr: () => Array<T>,
         /** @memo */
-        itemGenerator: (item: T, index: number) => void,
-        keyGenerator?: (item: T, index: number) => string): this {
+        itemGenerator: (item: T, index: int32) => void,
+        keyGenerator?: (item: T, index: int32) => string): this {
         return this;
     }
     onMove(handler?: OnMoveHandler): this {
@@ -42,8 +42,8 @@ export interface ForEachAttribute<T> extends DynamicNode {
 export class ArkForEachComponent<T> implements ForEachAttribute<T> {
     arr: () => Array<T> = () => new Array<T>();
     /** @memo */
-    itemGenerator: (item: T, index: number) => void = (item: T, index: number) => {};
-    keyGenerator?: (item: T, index: number) => string = undefined;
+    itemGenerator: (item: T, index: int32) => void = (item: T, index: int32) => {};
+    keyGenerator?: (item: T, index: int32) => string = undefined;
     onMoveEvent?: OnMoveHandler = undefined;
     itemDragEvent?: ItemDragEventHandler = undefined;
 
@@ -60,8 +60,8 @@ export class ArkForEachComponent<T> implements ForEachAttribute<T> {
 
     public setForEachOptions(arr: () => Array<T>,
         /** @memo */
-        itemGenerator: (item: T, index: number) => void,
-        keyGenerator?: (item: T, index: number) => string): this {
+        itemGenerator: (item: T, index: int32) => void,
+        keyGenerator?: (item: T, index: int32) => string): this {
         this.arr = arr;
         this.itemGenerator = itemGenerator;
         this.keyGenerator = keyGenerator;
@@ -96,13 +96,13 @@ export function ForEachImpl<T>(
         if (array === null || array === undefined) {
             throw new Error('input array is null or undefined error. Application error!');
         }
-        const length: number = array.length;
+        const length: int32 = array.length;
         const key = (element: T, index: int32): int32 =>
-            receiver.keyGenerator ? hashCodeFromString(receiver.keyGenerator!(element, (index as number))) : index;
+            receiver.keyGenerator ? hashCodeFromString(receiver.keyGenerator!(element, index)) : index;
         /** @memo */
         const action = (element: T, index: int32): void => {
             NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
-                receiver.itemGenerator(element, (index as number));
+                receiver.itemGenerator(element, index);
             });
         };
         for (let i = 0; i < length; i++) {

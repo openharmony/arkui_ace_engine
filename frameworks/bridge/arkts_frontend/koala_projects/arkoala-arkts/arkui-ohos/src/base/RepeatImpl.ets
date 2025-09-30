@@ -47,7 +47,7 @@ export function RepeatImplForOptions<T>(
         const repeatId = __id();
         const node = contextNode<PeerNode>();
         scheduleCallback(() => // postpone until node is attached
-            repeat.templateCacheSize_.forEach((size: number, template: string) =>
+            repeat.templateCacheSize_.forEach((size: int32, template: string) =>
                 node.setReusePoolSize(size, template + repeatId))
         );
         virtualRender<T>(arr, repeat, repeatId);
@@ -56,9 +56,9 @@ export function RepeatImplForOptions<T>(
 
 class RepeatItemImpl<T> implements RepeatItem<T> {
     item_: T;
-    index_: number;
+    index_: int32;
 
-    constructor(initialItem: T, initialIndex: number) {
+    constructor(initialItem: T, initialIndex: int32) {
         this.item_ = initialItem;
         this.index_ = initialIndex;
     }
@@ -67,7 +67,7 @@ class RepeatItemImpl<T> implements RepeatItem<T> {
         return this.item_;
     }
 
-    get index(): number {
+    get index(): int32 {
         return this.index_;
     }
 
@@ -75,7 +75,7 @@ class RepeatItemImpl<T> implements RepeatItem<T> {
         this.item_ = newItem;
     }
 
-    public updateIndex(newIndex: number): void {
+    public updateIndex(newIndex: int32): void {
         this.index_ = newIndex;
     }
 }
@@ -83,21 +83,21 @@ class RepeatItemImpl<T> implements RepeatItem<T> {
 class RepeatDataSource<T> implements IDataSource<T> {
     private arr_: RepeatArray<T>;
     private listener_?: InternalListener;
-    private total_: number;
-    private onLazyLoading_?: (index: number) => void;
+    private total_: int32;
+    private onLazyLoading_?: (index: int32) => void;
 
     constructor(arr: RepeatArray<T>) {
         this.arr_ = arr;
     }
 
-    totalCount(): number {
+    totalCount(): int32 {
         return this.total_;
     }
 
-    updateData(newArr: RepeatArray<T>, totalCount: number) {
+    updateData(newArr: RepeatArray<T>, totalCount: int32) {
         if (this.total_ != totalCount) {
             this.listener_?.update(
-                Math.min(this.total_, totalCount), Number.POSITIVE_INFINITY, totalCount - this.total_);
+                Math.min(this.total_, totalCount).toInt(), Number.POSITIVE_INFINITY.toInt(), totalCount - this.total_);
         }
         this.total_ = totalCount;
         // Compare array references first
@@ -106,13 +106,13 @@ class RepeatDataSource<T> implements IDataSource<T> {
         }
         // Shallow compare: check length and each element by reference
         if (this.arr_.length !== newArr.length) {
-            this.listener_?.update(0, Number.POSITIVE_INFINITY, this.arr_.length - newArr.length);
+            this.listener_?.update(0, Number.POSITIVE_INFINITY.toInt(), this.arr_.length - newArr.length);
             this.arr_ = newArr;
             return;
         }
         for (let i = 0; i < newArr.length; i++) {
             if (this.arr_[i] !== newArr[i]) {
-                this.listener_?.update(i, Number.POSITIVE_INFINITY, 0);
+                this.listener_?.update(i, Number.POSITIVE_INFINITY.toInt(), 0);
                 this.arr_ = newArr;
                 return;
             }
@@ -120,7 +120,7 @@ class RepeatDataSource<T> implements IDataSource<T> {
         // No changes detected
     }
 
-    getData(index: number): T {
+    getData(index: int32): T {
         if (index < 0 || index >= this.total_) {
             throw new Error('index out of range. Application error!');
         }
@@ -131,10 +131,10 @@ class RepeatDataSource<T> implements IDataSource<T> {
                 console.error(`onLazyLoading function execute error: ${error}`);
             }
         }
-        return this.arr_[index as int32];
+        return this.arr_[index];
     }
 
-    setOnLazyLoading(onLazyLoading?: (index: number) => void): void {
+    setOnLazyLoading(onLazyLoading?: (index: int32) => void): void {
         this.onLazyLoading_ = onLazyLoading;
     }
 
@@ -161,12 +161,12 @@ const REPEAT_EACH_FUNC_TYPE: string = '';
 export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     arr: RepeatArray<T> = [];
     itemGenFuncs_: Map<string, RepeatItemBuilder<T>> = new Map<string, RepeatItemBuilder<T>>();
-    keyGenFunc_?: (item: T, index: number) => string;
-    templateCacheSize_: Map<string, number> = new Map<string, number>(); // size of spare nodes for each template
+    keyGenFunc_?: (item: T, index: int32) => string;
+    templateCacheSize_: Map<string, int32> = new Map<string, int32>(); // size of spare nodes for each template
     ttypeGenFunc_: TemplateTypedFunc<T> = () => REPEAT_EACH_FUNC_TYPE;
 
-    userDefinedTotal_?: number; // if totalCount is specified
-    onLazyLoading_?: (index: number) => void;
+    userDefinedTotal_?: int32; // if totalCount is specified
+    onLazyLoading_?: (index: int32) => void;
     onMove_?: OnMoveHandler;
     itemDragEvent_?: ItemDragEventHandler;
 
@@ -182,11 +182,11 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
             throw new Error('item generator function missing. Application error!');
         }
         this.itemGenFuncs_.set(REPEAT_EACH_FUNC_TYPE, itemGenerator);
-        this.templateCacheSize_.set(REPEAT_EACH_FUNC_TYPE, Number.POSITIVE_INFINITY);
+        this.templateCacheSize_.set(REPEAT_EACH_FUNC_TYPE, Number.POSITIVE_INFINITY.toInt());
         return this;
     }
 
-    key(keyGenerator: (item: T, index: number) => string): RepeatAttributeImpl<T> {
+    key(keyGenerator: (item: T, index: int32) => string): RepeatAttributeImpl<T> {
         this.keyGenFunc_ = keyGenerator;
         return this;
     }
@@ -206,7 +206,7 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
             throw new Error('template generator function missing. Application error!');
         }
         this.itemGenFuncs_.set(type, itemBuilder);
-        this.templateCacheSize_.set(type, templateOptions?.cachedCount ?? Number.POSITIVE_INFINITY);
+        this.templateCacheSize_.set(type, templateOptions?.cachedCount ?? Number.POSITIVE_INFINITY.toInt());
         return this;
     }
 
@@ -272,15 +272,15 @@ function virtualRender<T>(
     repeatId: KoalaCallsiteKey,
 ): void {
     let dataSource = remember(() => new RepeatDataSource<T>(arr));
-    const total = attributes.userDefinedTotal_ ?? arr.length.toDouble();
-    dataSource.updateData(arr, (Number.isInteger(total) && total >= 0) ? total : arr.length);
+    const total = attributes.userDefinedTotal_ ?? arr.length;
+    dataSource.updateData(arr, total >= 0 ? total : arr.length);
     if (!attributes.onLazyLoading_ && dataSource.totalCount() > arr.length) {
         console.error(`(${repeatId}) totalCount must not exceed the array length without onLazyLoading callback.`);
     }
     dataSource.setOnLazyLoading(attributes.onLazyLoading_);
 
     /** @memo */
-    const itemGen = (item: T, index: number): void => {
+    const itemGen = (item: T, index: int32): void => {
         const ri = new RepeatItemImpl<T>(item, index);
         let _type: string = attributes.ttypeGenFunc_(item, index);
         if (!attributes.itemGenFuncs_.has(_type)) {
@@ -311,7 +311,7 @@ function onMoveFromTo(moveFrom: int32, moveTo: int32): void {}
 function nonVirtualRender<T>(arr: RepeatArray<T>,
     /** @memo */
     itemGenerator: RepeatItemBuilder<T>,
-    keyGenerator?: (element: T, index: number) => string,
+    keyGenerator?: (element: T, index: int32) => string,
     onMove?: OnMoveHandler,
     itemDragEvent?: ItemDragEventHandler,
 ): void {
@@ -320,10 +320,10 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
     }
     let nodeHolder = remember(() => new NodeHolder())
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
-        keyGenerator ? hashCodeFromString(keyGenerator!(ele, (i as number))) : i;
+        keyGenerator ? hashCodeFromString(keyGenerator!(ele, i)) : i;
     /** @memo */
     const action = (ele: T, i: int32) => {
-        const ri = new RepeatItemImpl<T>(ele, (i as number));
+        const ri = new RepeatItemImpl<T>(ele, i);
         NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
             itemGenerator(ri);
         });

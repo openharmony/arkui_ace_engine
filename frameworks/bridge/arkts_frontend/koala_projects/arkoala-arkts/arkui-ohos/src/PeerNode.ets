@@ -142,7 +142,7 @@ export class PeerNode extends IncrementalNode {
         ArkUIAniModule._UINode_OnUpdateDone(this.peer.ptr)
     }
 
-    setReusePoolSize(size: number, reuseKey: string): void {
+    setReusePoolSize(size: int32, reuseKey: string): void {
         if (size < 0) {
             return
         }

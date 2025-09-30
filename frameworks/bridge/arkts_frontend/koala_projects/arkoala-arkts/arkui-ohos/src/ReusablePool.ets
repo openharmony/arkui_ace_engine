@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
+import { int32 } from "@koalaui/common";
 import { Disposable, scheduleCallback } from "@koalaui/runtime";
 
 export class ReusablePool implements Disposable {
-    private _maxSize: number = Number.POSITIVE_INFINITY
+    private _maxSize: int32 = Number.POSITIVE_INFINITY.toInt()
     private _cache: Disposable[] = []
     private _disposed: boolean = false;
 
@@ -49,10 +50,10 @@ export class ReusablePool implements Disposable {
         this._cache = [];
     }
 
-    setMaxSize(value: number) {
+    setMaxSize(value: int32) {
         this._maxSize = value
         if (this._cache.length > this._maxSize) {
-            const removed = this._cache.splice(this._maxSize.toInt());
+            const removed = this._cache.splice(this._maxSize);
             scheduleCallback(() => {
                 for (const value of removed)
                     value.dispose();

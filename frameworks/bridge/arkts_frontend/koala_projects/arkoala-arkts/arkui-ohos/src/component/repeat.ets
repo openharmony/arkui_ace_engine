@@ -17,36 +17,37 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { __context, __id, remember } from '@koalaui/runtime'
+import { int32 } from "@koalaui/common";
 import { RepeatImplForOptions } from '../base/RepeatImpl'
 import { DynamicNode, OnMoveHandler, ItemDragEventHandler } from '#generated'
 
 export interface RepeatItem<T> {
     readonly item: T;
-    readonly index: number;
+    readonly index: int32;
 }
 
 export type RepeatArray<T> = Array<T> | ReadonlyArray<T> | Readonly<Array<T>>;
 export type RepeatItemBuilder<T> =
     /** @memo */
     (repeatItem: RepeatItem<T>) => void;
-export type TemplateTypedFunc<T> = (item: T, index: number) => string;
+export type TemplateTypedFunc<T> = (item: T, index: int32) => string;
 
 export interface VirtualScrollOptions {
-    totalCount?: number;
+    totalCount?: int32;
     reusable?: boolean;
-    onLazyLoading?: (index: number) => void;
-    onTotalCount?: () => number;
+    onLazyLoading?: (index: int32) => void;
+    onTotalCount?: () => int32;
     disableVirtualScroll?: boolean;
 }
 
 export interface TemplateOptions {
-    cachedCount?: number;
+    cachedCount?: int32;
 }
 
 export interface RepeatAttribute<T> extends DynamicNode {
     arr: RepeatArray<T>;
     each(itemGenerator: RepeatItemBuilder<T>): RepeatAttribute<T>;
-    key(keyGenerator: (item: T, index: number) => string): RepeatAttribute<T>;
+    key(keyGenerator: (item: T, index: int32) => string): RepeatAttribute<T>;
     virtualScroll(options?: VirtualScrollOptions): RepeatAttribute<T>;
     template(type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): RepeatAttribute<T>;
     templateId(typedFunc: TemplateTypedFunc<T>): RepeatAttribute<T>;
@@ -67,7 +68,7 @@ export class ArkRepeatComponent<T> implements RepeatAttribute<T> {
     public each(itemGenerator: RepeatItemBuilder<T>): RepeatAttribute<T> {
         return this;
     };
-    public key(keyGenerator: (item: T, index: number) => string): RepeatAttribute<T> {
+    public key(keyGenerator: (item: T, index: int32) => string): RepeatAttribute<T> {
         return this;
     };
     public virtualScroll(options?: VirtualScrollOptions): RepeatAttribute<T> {
