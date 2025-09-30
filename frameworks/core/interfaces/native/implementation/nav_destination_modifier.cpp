@@ -581,6 +581,10 @@ void SetToolbarConfigurationImpl(Ark_NativePointer node,
                     },
                     node);
         }
+    } else {
+        NavDestinationModelStatic::SetToolbarMorebuttonOptions(frameNode, NG::MoreButtonOptions());
+        NavDestinationModelStatic::SetToolbarConfiguration(frameNode, std::vector<NG::BarItem>());
+        NavDestinationModelStatic::SetCustomToolBar(frameNode, nullptr);
     }
 
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
