@@ -31,6 +31,7 @@ constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
 #ifdef VSYNC_TIMEOUT_CHECK
 constexpr int32_t VSYNC_TASK_DELAY_MILLISECOND = 3000; // if vsync not received in 3s,report an system warning.
 constexpr int32_t VSYNC_RECOVER_DELAY_MILLISECOND = 500; // if vsync not received in 500ms, We simulate a fake Vsync.
+constexpr uint64_t VSYNC_RECOVER_TIMEOUT_NANOSECOND = 501000000; // if recover task isn't executed in 501ms, repost it.
 constexpr char VSYNC_TIMEOUT_CHECK_TASKNAME[] = "ArkUIVsyncTimeoutCheck";
 constexpr char VSYNC_RECOVER_TASKNAME[] = "ArkUIVsyncRecover";
 #endif
@@ -199,14 +200,16 @@ void RosenWindow::PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecut
     static auto recoverTask = [ weakWindow = weak_from_this() ] {
         LOGW("ArkUI request vsync, but no vsync received in 500ms");
         auto window = weakWindow.lock();
-        if (window) {
-            uint64_t nanoTimestamp = static_cast<uint64_t>(GetSysTimestamp());
-            // force flush vsync with now time stamp and UINT64_MAX as frameCount.
-            window->ForceFlushVsync(nanoTimestamp, UINT64_MAX);
-        }
+        CHECK_NULL_VOID(window);
+
+        uint64_t nanoTimestamp = static_cast<uint64_t>(GetSysTimestamp());
+        // force flush vsync with now time stamp and UINT64_MAX as frameCount.
+        window->ForceFlushVsync(nanoTimestamp, UINT64_MAX);
     };
-    taskExecutor->PostDelayedTaskWithoutTraceId(recoverTask, TaskExecutor::TaskType::UI,
-        VSYNC_RECOVER_DELAY_MILLISECOND, VSYNC_RECOVER_TASKNAME);
+
+    std::shared_ptr<RecoverExecutor> recoverExecutor = std::make_shared<RecoverExecutor>(recoverTask, taskExecutor,
+        VSYNC_RECOVER_TIMEOUT_NANOSECOND);
+    recoverExecutor->Start(VSYNC_TIMEOUT_CHECK_TASKNAME, VSYNC_RECOVER_DELAY_MILLISECOND);
 #endif
 }
 
@@ -278,6 +281,10 @@ void RosenWindow::Destroy()
     rsWindow_ = nullptr;
     vsyncCallback_.reset();
     rsUIDirector_->SendMessages();
+    auto rsUIContext = rsUIDirector_->GetRSUIContext();
+    if (rsUIContext) {
+        rsUIContext->DetachFromUI();
+    }
     if (!directorFromWindow_) {
         rsUIDirector_->Destroy();
     }

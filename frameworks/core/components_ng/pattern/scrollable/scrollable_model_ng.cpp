@@ -57,15 +57,27 @@ void ScrollableModelNG::SetScrollBarColor(const std::string& value)
 
 void ScrollableModelNG::ResetScrollBarColor(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
+    SetScrollBarColor(frameNode, std::nullopt);
 }
 
 void ScrollableModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ScrollablePaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER, frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto scrollBarTheme = pipeline->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(scrollBarTheme);
+        Color foregroundColor = scrollBarTheme->GetForegroundColor();
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        scrollBar->SetForegroundColor(foregroundColor);
     }
 }
 

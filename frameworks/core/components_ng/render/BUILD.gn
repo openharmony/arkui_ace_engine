@@ -58,6 +58,7 @@ build_component_ng("render_ng") {
 
   rosen_sources = [
     "adapter/component_snapshot.cpp",
+    "adapter/detached_rs_node_manager.cpp",
     "adapter/focus_animation_modifier.cpp",
     "adapter/focus_state_modifier.cpp",
     "adapter/gradient_style_modifier.cpp",

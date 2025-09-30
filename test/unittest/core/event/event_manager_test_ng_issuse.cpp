@@ -1529,11 +1529,9 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
          */
         auto eventManager = AceType::MakeRefPtr<EventManager>();
         ASSERT_NE(eventManager, nullptr);
-
         eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[0]);
         eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[1]);
         eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[2]);
-
         eventManager->DispatchMouseEventNG(event);
         PressMouseInfo key { 0, event.button };
         EXPECT_EQ(eventManager->pressMouseTestResultsMap_[key] == eventManager->currMouseTestResultsMap_[0],

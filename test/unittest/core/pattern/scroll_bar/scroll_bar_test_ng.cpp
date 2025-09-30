@@ -1312,6 +1312,7 @@ HWTEST_F(ScrollBarTestNg, UpdateOverlayModifierTest001, TestSize.Level1)
     CHECK_NULL_VOID(theme);
     paintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
     EXPECT_EQ(scrollBar->GetForegroundColor(), theme->GetForegroundColor());
+    model.ResetScrollBarColor();
     model.SetScrollBarColor(Color::BLUE);
     paintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
     EXPECT_EQ(scrollBar->GetForegroundColor(), Color::BLUE);
@@ -1327,5 +1328,30 @@ HWTEST_F(ScrollBarTestNg, UpdateOverlayModifierTest001, TestSize.Level1)
     paintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
     EXPECT_EQ(scrollBar->GetForegroundColor(), Color::BLUE);
     ViewStackProcessor::GetInstance()->Pop();
+}
+
+/**
+ * @tc.name: ResetScrollBarColorTest001
+ * @tc.desc: Test ResetScrollBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ResetScrollBarColorTest001, TestSize.Level1)
+{
+    ScrollBarModelNG scrollBarModel;
+    auto scrollBarProxy = scrollBarModel.GetScrollBarProxy(nullptr);
+    scrollBarModel.Create(
+        scrollBarProxy, true, true, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::AUTO));
+    GetScrollBar();
+    ASSERT_NE(frameNode_, nullptr);
+    auto paintProperty = frameNode_->GetPaintProperty<ScrollBarPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    scrollBarModel.ResetScrollBarColor();
+    auto scrollBarColor = paintProperty->GetScrollBarColor();
+    EXPECT_EQ(scrollBarColor, std::nullopt);
+
+    ScrollBarModelNG::ResetScrollBarColor(AceType::RawPtr(frameNode_));
+    scrollBarColor = paintProperty->GetScrollBarColor();
+    EXPECT_EQ(scrollBarColor, std::nullopt);
 }
 } // namespace OHOS::Ace::NG

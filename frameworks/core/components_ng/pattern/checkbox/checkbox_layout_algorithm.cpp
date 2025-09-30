@@ -24,8 +24,11 @@ namespace OHOS::Ace::NG {
 
 PaddingPropertyF CheckBoxLayoutAlgorithm::GetBorderWidth(LayoutWrapper* layoutWrapper)
 {
-    auto borderWidth = layoutWrapper->GetLayoutProperty()->CreateBorder();
     PaddingPropertyF padding;
+    CHECK_NULL_RETURN(layoutWrapper, padding);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, padding);
+    auto borderWidth = layoutProperty->CreateBorder(true);
     padding.left = borderWidth.leftDimen.value_or(0.0f);
     padding.right = borderWidth.rightDimen.value_or(0.0f);
     padding.top = borderWidth.topDimen.value_or(0.0f);

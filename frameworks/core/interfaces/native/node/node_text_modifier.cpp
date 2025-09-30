@@ -326,7 +326,9 @@ void SetTextLineHeight(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 u
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetLineHeight(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+    auto value = Dimension(number, static_cast<DimensionUnit>(unit));
+    value.ResetInvalidValue();
+    TextModelNG::SetLineHeight(frameNode, value);
     NodeModifier::ProcessResourceObj<CalcDimension>(
         frameNode, "LineHeight", Dimension(number, static_cast<DimensionUnit>(unit)), lineHeightRawPtr);
 }

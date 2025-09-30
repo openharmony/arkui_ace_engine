@@ -2873,8 +2873,8 @@ void RichEditorPattern::UpdateStyledStringDecorationType(int32_t start, int32_t 
     std::optional<TextDecorationStyle> styleOption;
     std::optional<TextDecorationOptions> options;
     std::optional<float> lineThicknessScale;
-    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
-        std::vector<TextDecoration>({ type }), colorOption, styleOption, lineThicknessScale, options, start, end);
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({ type }), colorOption,
+        styleOption, lineThicknessScale, options, start, end, nullptr);
     auto updateDecorationSpanFunc = [&type](const RefPtr<DecorationSpan>& oriDecorationSpan) -> RefPtr<DecorationSpan> {
         CHECK_NULL_RETURN(oriDecorationSpan, nullptr);
         if (type == TextDecoration::NONE) {
@@ -8514,6 +8514,7 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, T
     auto selectType = selectedType_.value_or(TextSpanType::NONE);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "textSpanType=%{public}d, responseType=%{public}d", selectType, responseType);
     std::shared_ptr<SelectionMenuParams> menuParams = GetMenuParams(selectType, responseType);
+    IF_TRUE(!menuParams, selectInfo.menuInfo.menuBuilder = nullptr);
     CHECK_NULL_VOID(menuParams);
 
     // long pressing on the image needs to set the position of the pop-up menu following the long pressing position

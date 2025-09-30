@@ -838,6 +838,7 @@ public:
         return magnifierController_;
     }
 
+    void StyledStringRegisterResource();
     void UnRegisterResource(const std::string& key) override;
     void EmplaceSymbolColorIndex(int32_t index)
     {

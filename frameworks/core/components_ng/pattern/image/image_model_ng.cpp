@@ -1319,8 +1319,8 @@ void HandleBorderRadiusResource(const RefPtr<ResourceObject>& resObj, const RefP
             BorderRadiusProperty borderRadius;
             borderRadius.SetRadius(borderRadiusValue);
             borderRadius.multiValued = false;
-            ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true);
-            ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, BorderRadius, borderRadius);
+            ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true, frameNode);
+            ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, BorderRadius, borderRadius, frameNode);
             pattern->SetNeedBorderRadius(true);
         }
     };

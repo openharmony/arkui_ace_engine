@@ -504,6 +504,24 @@ public:
 
     std::optional<TextStyle> textStyle_;
 
+    // 后续修改spanNode逻辑下沉到spanItem
+    void AddResObj(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc);
+    void RemoveResObj(const std::string& key);
+    const RefPtr<PatternResourceManager>& GetResourceMgr()
+    {
+        return resourceMgr_;
+    }
+
+    // 用于属性字符串
+    struct SpanResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<NG::SpanItem>&, const RefPtr<ResourceObject>&)> updateFunc;
+    };
+    void AddResourceObj(const std::string& key, const SpanResourceUpdater& resourceUpdater);
+    void RemoveResourceObj(const std::string& key);
+    const std::unordered_map<std::string, SpanResourceUpdater>& GetResMap() const; // end
+
 private:
     void EncodeFontStyleTlv(std::vector<uint8_t>& buff) const;
     void EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const;
@@ -512,6 +530,11 @@ private:
     WeakPtr<Pattern> pattern_;
     bool symbolEffectSwitch_ = true;
     uint32_t symbolId_ = 0;
+
+    // 用于属性字符串存储颜色资源值
+    std::unordered_map<std::string, SpanResourceUpdater> resMap_; // end
+
+    RefPtr<PatternResourceManager> resourceMgr_;
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -832,7 +855,7 @@ protected:
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
     RefPtr<SpanItem> spanItem_ = MakeRefPtr<SpanItem>();
-    std::vector<int32_t> symbolFontColorResObjIndexArr;
+    std::vector<int32_t> symbolFontColorResObjIndexArr_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SpanNode);
 };

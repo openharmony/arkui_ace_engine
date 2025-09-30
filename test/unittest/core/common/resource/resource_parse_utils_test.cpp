@@ -18,10 +18,12 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_container.h"
 
 #define protected public
 #define private public
 #include "core/common/container.h"
+#include "core/common/color_inverter.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
 #undef private
@@ -1064,5 +1066,44 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest027, TestSize.Level1)
      */
     resObj->SetInstanceId(100000);
     EXPECT_FALSE(ResourceParseUtils::ParseResColorWithColorMode(resObj, result, colorMode));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest028
+ * @tc.desc: Test CompleteResourceObjectFromColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CompleteResourceObjectFromColor with cofigChangePerform false.
+     * @tc.expect: resObj is null.
+     */
+    RefPtr<ResourceObject> resObj;
+    Color color = Color::WHITE;
+    ResourceParseUtils::CompleteResourceObjectFromColor(resObj, color, "");
+    EXPECT_EQ(resObj, nullptr);
+
+    /**
+     * @tc.steps: step2. CompleteResourceObjectFromColor with cofigChangePerform true.
+     * @tc.expect: resObj is not null.
+     */
+    g_isConfigChangePerform = true;
+    auto invertFunc = [](uint32_t color) {
+        return ColorInverter::DefaultInverter(color);
+    };
+    ColorInverter::GetInstance().EnableColorInvert(Container::CurrentIdSafely(), "", std::move(invertFunc));
+    ResourceParseUtils::CompleteResourceObjectFromColor(resObj, color, "");
+    EXPECT_NE(resObj, nullptr);
+
+    /**
+     * @tc.steps: step3. CompleteResourceObjectFromColor with current colormode is dark.
+     * @tc.expect: resObj is not null.
+     */
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    ResourceParseUtils::CompleteResourceObjectFromColor(resObj, color, "");
+    EXPECT_NE(resObj, nullptr);
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace
