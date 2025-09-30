@@ -269,7 +269,7 @@ bool AuthResultOhos::IsHttpAuthInfoSaved()
 }
 void AuthResultOhos::Cancel() {}
 void SslErrorResultOhos::HandleConfirm() {}
-void SslErrorResultOhos::HandleCancel() {}
+void SslErrorResultOhos::HandleCancel(bool abortLoading) {}
 void AllSslErrorResultOhos::HandleConfirm() {}
 void AllSslErrorResultOhos::HandleCancel(bool abortLoading) {}
 void SslSelectCertResultOhos::HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile) {}

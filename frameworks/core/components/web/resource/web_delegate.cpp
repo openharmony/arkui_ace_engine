@@ -303,10 +303,10 @@ void SslErrorResultOhos::HandleConfirm()
     }
 }
 
-void SslErrorResultOhos::HandleCancel()
+void SslErrorResultOhos::HandleCancel(bool abortLoading)
 {
     if (result_) {
-        result_->HandleCancel();
+        result_->HandleCancelV2(abortLoading);
     }
 }
 
