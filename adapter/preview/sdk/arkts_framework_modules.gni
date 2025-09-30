@@ -343,12 +343,12 @@ arkts_framework_modules = [
     label = "//foundation/distributeddatamgr/udmf/interfaces/taihe:udmf_abc"
   },
   {
-    label = "//foundation/distributeddatamgr/data_share/frameworks/js/ani/dataShare:data_share_predicates_abc"
-    name = "data_share_predicates.abc"
+    label = "//foundation/distributeddatamgr/data_share/frameworks/ets/ani:datashare_predicates_ani_abc"
+    name = "dataSharePredicatesAni.abc"
   },
   {
-    label = "//foundation/distributeddatamgr/data_share/frameworks/js/ani/dataShareResultSet:data_share_result_set_abc"
-    name = "data_share_result_set.abc"
+    label = "//foundation/distributeddatamgr/data_share/frameworks/ets/ani:datashare_resultset_ani_abc"
+    name = "DataShareResultSetAni.abc"
   },
   {
     label = "//foundation/distributeddatamgr/kv_store/frameworks/ets:kvstore_framework_abc"
