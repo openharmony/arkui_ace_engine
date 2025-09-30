@@ -49,7 +49,7 @@ void FormLinkTest::TearDownTestSuite()
  * @tc.desc: Test FormLinkPatternTest in Form Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(FormLinkTest, FormLinkPatternTest001, TestSize.Level1)
+HWTEST_F(FormLinkTest, FormLinkPatternTest001, TestSize.Level0)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
