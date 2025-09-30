@@ -1080,4 +1080,4 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithmTrans
     EXPECT_TRUE(NearEqual(offset5.GetY(), originalY5));
 }
 
-}
+} // namespace OHOS::Ace::NG
