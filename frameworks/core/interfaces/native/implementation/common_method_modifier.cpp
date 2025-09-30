@@ -88,6 +88,7 @@ constexpr double LIGHTUPEFFECT_MIN = 0.0;
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int NUM_3 = 3;
+constexpr int NUM_5 = 5;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MIN_ANGEL = 0.0f;
@@ -3227,7 +3228,7 @@ void SetRotateImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<RotateOpt>(value);
     if (!convValue) {
-        std::vector<std::optional<float>> EMPTY_ROTATE_VECTOR(5, std::nullopt);
+        std::vector<std::optional<float>> EMPTY_ROTATE_VECTOR(NUM_5, std::nullopt);
         ViewAbstractModelStatic::SetRotate(frameNode, EMPTY_ROTATE_VECTOR);
         return;
     }
@@ -3851,7 +3852,6 @@ void SetLinearGradientImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
         Gradient defaultGradient;
         ViewAbstract::SetLinearGradient(frameNode, defaultGradient);
         return;
@@ -3878,7 +3878,6 @@ void SetSweepGradientImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
         Gradient defaultGradient;
         ViewAbstract::SetSweepGradient(frameNode, defaultGradient);
         return;
@@ -3910,7 +3909,6 @@ void SetRadialGradientImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Gradient>(value);
     if (!convValue) {
-        // Implement Reset value
         Gradient defaultGradient;
         ViewAbstract::SetRadialGradient(frameNode, defaultGradient);
         return;
@@ -3936,7 +3934,6 @@ void SetShadowImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto shadow = Converter::OptConvertPtr<Shadow>(value);
     if (!shadow) {
-        // Implement Reset value
         Shadow defaultShadow;
         ViewAbstract::SetBackShadow(frameNode, defaultShadow);
         return;
@@ -4347,7 +4344,6 @@ void SetBackgroundBrightnessImpl(Ark_NativePointer node,
     const double rateValue = 0.0;
     const double lightUpDegreeValue = 0.0;
     if (!optValue) {
-        // Implement Reset value
         ViewAbstract::SetDynamicLightUp(frameNode, rateValue, lightUpDegreeValue);
         return;
     }
