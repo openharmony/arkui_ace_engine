@@ -911,7 +911,7 @@ export struct SubHeader {
       Stack() {
         Button({ type: ButtonType.Normal, buttonStyle: ButtonStyleMode.TEXTUAL, stateEffect: false } as ButtonOptions) {
           TextArrowLayout() {
-            ForEach([INDEX_ZERO, INDEX_ONE], (item: Int, index: number) => {
+            ForEach([INDEX_ZERO, INDEX_ONE], (item: Int, index: int) => {
               if (index === INDEX_ZERO) {
                 this.TextStyle(textArrow);
               } else {
@@ -997,7 +997,7 @@ export struct SubHeader {
   @Builder
   IconGroupStyle(operationItem: Array<OperationOption>): void {
     Row() {
-      ForEach(operationItem, (item: OperationOption, index: number) => {
+      ForEach(operationItem, (item: OperationOption, index: int) => {
         if (index <= INDEX_TWO) {
           SingleIconStyle({
             item: {

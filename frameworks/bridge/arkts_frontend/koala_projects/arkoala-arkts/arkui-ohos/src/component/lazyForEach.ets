@@ -17,6 +17,7 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { __context, __id, remember } from '@koalaui/runtime'
+import { int32 } from "@koalaui/common"
 import { DynamicNode, OnMoveHandler, ItemDragEventHandler } from '#generated'
 import { LazyForEachImplForOptions } from '../base/LazyForEachImpl'
 import { InteropNativeModule } from '@koalaui/interop'
@@ -31,27 +32,27 @@ export enum DataOperationType {
 }
 export interface DataAddOperation {
     type: DataOperationType;
-    index: number;
-    count?: number;
+    index: int32;
+    count?: int32;
     key?: string | Array<string>;
 }
 export interface DataDeleteOperation {
     type: DataOperationType;
-    index: number;
-    count?: number;
+    index: int32;
+    count?: int32;
 }
 export interface DataChangeOperation {
     type: DataOperationType;
-    index: number;
+    index: int32;
     key?: string;
 }
 export interface MoveIndex {
-    from: number;
-    to: number;
+    from: int32;
+    to: int32;
 }
 export interface ExchangeIndex {
-    start: number;
-    end: number;
+    start: int32;
+    end: int32;
 }
 export interface ExchangeKey {
     start: string;
@@ -75,10 +76,10 @@ export type DataOperation = DataAddOperation | DataDeleteOperation | DataChangeO
 
 export interface DataChangeListener {
     onDataReloaded(): void;
-    onDataAdd(index: number): void;
-    onDataMove(from: number, to: number): void;
-    onDataDelete(index: number): void;
-    onDataChange(index: number): void;
+    onDataAdd(index: int32): void;
+    onDataMove(from: int32, to: int32): void;
+    onDataDelete(index: int32): void;
+    onDataChange(index: int32): void;
     onDatasetChange(dataOperations: DataOperation[]): void;
 }
 
@@ -91,12 +92,12 @@ export interface IDataSource<T> {
      * Total data count.
      * @since 7
      */
-    totalCount(): number;
+    totalCount(): int32;
     /**
      * Return the data of index.
      * @since 7
      */
-    getData(index: number): T;
+    getData(index: int32): T;
     /**
      * Register data change listener.
      * @since 7
@@ -113,7 +114,7 @@ export interface LazyForEachAttribute<T> extends DynamicNode {
     dataSource: IDataSource<T> | null;
     setLazyForEachOptions(dataSource: IDataSource<T>,
         /** @memo */
-        itemGenerator: (item: T, index: number) => void,
+        itemGenerator: (item: T, index: int32) => void,
         keyGenerator?: (item: T, index: number) => string): this {
         return this;
     }
@@ -129,15 +130,15 @@ export interface LazyForEachAttribute<T> extends DynamicNode {
 export class ArkLazyForEachComponent<T> implements LazyForEachAttribute<T> {
     dataSource: IDataSource<T> | null = null;
     /** @memo */
-    itemGenerator: (item: T, index: number) => void = (item: T, index: number) => {};
-    keyGenerator?: (item: T, index: number) => string = undefined;
+    itemGenerator: (item: T, index: int32) => void = (item: T, index: int32) => {};
+    keyGenerator?: (item: T, index: int32) => string = undefined;
     onMoveEvent?: OnMoveHandler = undefined;
     itemDragEvent?: ItemDragEventHandler = undefined;
 
     public setLazyForEachOptions(dataSource: IDataSource<T>,
         /** @memo */
-        itemGenerator: (item: T, index: number) => void,
-        keyGenerator?: (item: T, index: number) => string): this {
+        itemGenerator: (item: T, index: int32) => void,
+        keyGenerator?: (item: T, index: int32) => string): this {
         this.dataSource = dataSource;
         this.itemGenerator = itemGenerator;
         this.keyGenerator = keyGenerator;

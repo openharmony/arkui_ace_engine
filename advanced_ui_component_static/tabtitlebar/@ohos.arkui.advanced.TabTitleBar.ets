@@ -181,7 +181,7 @@ export struct TabTitleBar {
           Stack({ alignContent: Alignment.Start }) {
             Column() {
               List({ initialIndex: 0, scroller: this.scroller, space: 0 }) {
-                ForEach(this.tabItems, (tabItem: TabTitleBarTabItem, index: number) => {
+                ForEach(this.tabItems, (tabItem: TabTitleBarTabItem, index: int) => {
                   ListItem() {
                     TabContentItem({
                       item: tabItem,
@@ -362,12 +362,12 @@ export struct CollapsibleMenuSection {
     Column() {
       Row() {
         if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-          ForEach(this.menuItems, (item: TabTitleBarMenuItem, index: number) => {
+          ForEach(this.menuItems, (item: TabTitleBarMenuItem, index: int) => {
             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 });
           })
         } else {
           ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
-            (item: TabTitleBarMenuItem, index: number) => {
+            (item: TabTitleBarMenuItem, index: int) => {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 });
             })
           Button({ type: ButtonType.Normal, stateEffect: true } as ButtonOptions) {
@@ -465,7 +465,7 @@ export struct CollapsibleMenuSection {
   popupBuilder() {
     Column() {
       ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length),
-        (item: TabTitleBarMenuItem, index: number) => {
+        (item: TabTitleBarMenuItem, index: int) => {
           ImageMenuItem({
             item: item as TabTitleBarMenuItem, index: this.index * 1000 +
             CollapsibleMenuSection.maxCountOfVisibleItems + index

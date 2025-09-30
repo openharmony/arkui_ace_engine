@@ -586,7 +586,7 @@ export struct SelectDialogV2 {
           }.applyStyles(this.paddingContentStyle).width('100%')
         }
         List() {
-          ForEach(this.radioContent, (item: SheetInfo, index: number) => {
+          ForEach(this.radioContent, (item: SheetInfo, index: int) => {
             ListItem() {
               Column() {
                 Button({ type: ButtonType.Normal } as ButtonOptions) {
@@ -1573,7 +1573,7 @@ struct CustomDialogContentComponent {
     if (this.buttons) {
       Column() {
         ForEach((this.buttons as Array<AdvancedDialogV2Button>).slice(0, VERTICAL_BUTTON_MAX_COUNT),
-          (item: AdvancedDialogV2Button, index: number) => {
+          (item: AdvancedDialogV2Button, index: int) => {
             this.buildButtonWithDivider(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
               HORIZON_BUTTON_MAX_COUNT - index.toInt() - 1 : index.toInt());
           }, (item: AdvancedDialogV2Button) => item.content.toString());
