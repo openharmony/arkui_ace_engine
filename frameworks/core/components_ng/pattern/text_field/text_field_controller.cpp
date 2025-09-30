@@ -18,6 +18,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -212,4 +213,13 @@ SelectionInfo TextFieldController::GetSelection()
     return textFieldPattern->GetSelection();
 }
 
+void TextFieldController::SetPlaceholderStyledString(const RefPtr<SpanStringBase>& value)
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto spanString = AceType::DynamicCast<SpanString>(value);
+    if (spanString) {
+        textFieldPattern->SetPlaceholderStyledString(spanString);
+    }
+}
 } // namespace OHOS::Ace::NG

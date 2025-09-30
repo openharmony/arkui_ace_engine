@@ -35,7 +35,6 @@
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -204,9 +203,7 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
         }
     }
     auto controller = TextFieldModel::GetInstance()->CreateTextInput(placeholderSrc, value);
-    if (jsController) {
-        jsController->SetController(controller);
-    }
+    SetController(jsController, controller);
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseTextFieldTextObject(info, changeEventVal);
     }
@@ -254,9 +251,7 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
         }
     }
     auto controller = TextFieldModel::GetInstance()->CreateTextArea(placeholderSrc, value);
-    if (jsController) {
-        jsController->SetController(controller);
-    }
+    SetController(jsController, controller);
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseTextFieldTextObject(info, changeEventVal);
     }
@@ -272,6 +267,19 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
         UnregisterResource("text");
         if (textResult && textObject) {
             RegisterResource<std::u16string>("text", textObject, text);
+        }
+    }
+}
+
+void JSTextField::SetController(
+    JSTextEditableController* jsController, const RefPtr<TextFieldControllerBase>& controller)
+{
+    if (jsController) {
+        jsController->SetController(controller);
+        auto styledString = jsController->GetPlaceholderStyledString();
+        if (styledString && controller) {
+            controller->SetPlaceholderStyledString(styledString);
+            jsController->ClearPlaceholderStyledString();
         }
     }
 }
