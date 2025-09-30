@@ -58,6 +58,7 @@ ace_unittest("accessibility_session_adapter_ui_extension_test_ng") {
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_renderer_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_render_context.cpp",
     "accessibility_session_adapter_ui_extension_test_ng.cpp",
+    "$ace_root/test/unittest/adapter/ohos/entrance/mock_rs_adapter.cpp",
   ]
   if (is_ohos_standard_system) {
     defines = [
