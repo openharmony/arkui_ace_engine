@@ -41,7 +41,18 @@ void ScrollableModelStatic::SetScrollBarColor(FrameNode* frameNode, const std::o
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ScrollablePaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER, frameNode);
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto scrollBarTheme = context->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(scrollBarTheme);
+        auto defaultScrollBarColor = scrollBarTheme->GetForegroundColor();
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollableScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        scrollBar->SetForegroundColor(defaultScrollBarColor);
     }
 }
 
@@ -50,7 +61,23 @@ void ScrollableModelStatic::SetScrollBarWidth(FrameNode* frameNode, const std::o
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ScrollablePaintProperty, ScrollBarWidth, PROPERTY_UPDATE_RENDER, frameNode);
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto scrollBarTheme = context->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(scrollBarTheme);
+        auto defaultScrollBarWidth = scrollBarTheme->GetNormalWidth();
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollableScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        scrollBar->SetActiveWidth(defaultScrollBarWidth);
+        scrollBar->SetTouchWidth(defaultScrollBarWidth);
+        scrollBar->SetInactiveWidth(defaultScrollBarWidth);
+        scrollBar->SetNormalWidth(defaultScrollBarWidth);
+        scrollBar->SetIsUserNormalWidth(false);
     }
 }
 
@@ -153,6 +180,15 @@ void ScrollableModelStatic::SetBackToTop(FrameNode* frameNode, bool backToTop)
     CHECK_NULL_VOID(pattern);
     pattern->SetBackToTop(backToTop);
     pattern->UseDefaultBackToTop(false);
+}
+
+void ScrollableModelStatic::ResetBackToTop(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetBackToTop();
+    pattern->UseDefaultBackToTop(true);
 }
 
 void ScrollableModelStatic::SetEdgeEffect(

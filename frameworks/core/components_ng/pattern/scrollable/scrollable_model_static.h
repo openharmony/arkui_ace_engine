@@ -37,6 +37,7 @@ public:
     static void SetMaxFlingSpeed(FrameNode* frameNode,  const std::optional<double>& max);
     static void SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& rect);
     static void SetBackToTop(FrameNode* frameNode, bool backToTop);
+    static void ResetBackToTop(FrameNode* frameNode);
     static void SetEdgeEffect(
         FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
         EffectEdge effectEdge = EffectEdge::ALL);

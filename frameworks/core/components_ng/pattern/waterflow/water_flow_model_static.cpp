@@ -94,7 +94,8 @@ void WaterFlowModelStatic::SetCachedCount(FrameNode* frameNode, const std::optio
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value.value(), frameNode);
+        int32_t count = value.value() < 0 ? 1 : value.value();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, frameNode);
     }
@@ -126,24 +127,30 @@ void WaterFlowModelStatic::ResetSections(FrameNode* frameNode)
     pattern->ResetSections();
 }
 
-void WaterFlowModelStatic::SetColumnsTemplate(FrameNode* frameNode, const std::string& value)
+void WaterFlowModelStatic::SetColumnsTemplate(FrameNode* frameNode, const std::optional<std::string>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    if (value.empty()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, "1fr", frameNode);
+    if (!value) {
+        auto layout = frameNode->GetLayoutPropertyPtr<WaterFlowLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        layout->ResetColumnsTemplate();
+        layout->OnColumnsTemplateUpdate("");
         return;
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, value.value(), frameNode);
 }
 
-void WaterFlowModelStatic::SetRowsTemplate(FrameNode* frameNode, const std::string& value)
+void WaterFlowModelStatic::SetRowsTemplate(FrameNode* frameNode, const std::optional<std::string>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    if (value.empty()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsTemplate, "1fr", frameNode);
+    if (!value) {
+        auto layout = frameNode->GetLayoutPropertyPtr<WaterFlowLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        layout->ResetRowsTemplate();
+        layout->OnRowsTemplateUpdate("");
         return;
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsTemplate, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsTemplate, value.value(), frameNode);
 }
 
 void WaterFlowModelStatic::SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled)
@@ -154,19 +161,27 @@ void WaterFlowModelStatic::SetScrollEnabled(FrameNode* frameNode, bool scrollEna
 
 void WaterFlowModelStatic::SetColumnsGap(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, frameNode);
+        auto layout = frameNode->GetLayoutPropertyPtr<WaterFlowLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        layout->ResetColumnsGap();
+        layout->OnColumnsGapUpdate(Dimension());
     }
 }
 
 void WaterFlowModelStatic::SetRowsGap(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, frameNode);
+        auto layout = frameNode->GetLayoutPropertyPtr<WaterFlowLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        layout->ResetRowsGap();
+        layout->OnRowsGapUpdate(Dimension());
     }
 }
 
@@ -204,10 +219,14 @@ void WaterFlowModelStatic::SetItemMaxHeight(FrameNode* frameNode, const std::opt
 
 void WaterFlowModelStatic::SetLayoutDirection(FrameNode* frameNode, const std::optional<FlexDirection>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, WaterflowDirection, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, WaterflowDirection, frameNode);
+        auto layout = frameNode->GetLayoutPropertyPtr<WaterFlowLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        layout->ResetWaterflowDirection();
+        layout->OnWaterflowDirectionUpdate(FlexDirection::ROW);
     }
 }
 
