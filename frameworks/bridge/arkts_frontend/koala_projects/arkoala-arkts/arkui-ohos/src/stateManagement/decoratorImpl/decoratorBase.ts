@@ -166,12 +166,12 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
     }
     
     public isViewActive(): boolean {
-        return this.owningComponent_!.isActive_ < 1;
+        return this.owningComponent_!.isViewActive();
     }
 
     /* compiler BUG: change to protcted */
     public execWatchFuncs(_: string = ''): void {
-        if (this.owningComponent_ && this.isViewActive()) {
+        if (this.owningComponent_ && !this.isViewActive()) {
             StateUpdateLoop.addFreezeTask(this.owningComponent_!.getUniqueId(), this.onObservedObjectChangeExecWatchFuncs_.id());
         }
         else {
