@@ -800,7 +800,7 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar)
                          "lastSnapDirection:%d, id:%d, tag:%s",
             snapDelta, snapDirection, snapDirection_, nodeId_, nodeTag_.c_str());
         SnapAnimationOptions snapAnimationOptions = { .snapDelta = snapDelta, .animationVelocity = currentVelocity_,
-            .snapDirection = snapDirection, .fromScrollBar = fromScrollBar, .source = SCROLL_FROM_AXIS };
+            .snapDirection = snapDirection, .source = SCROLL_FROM_AXIS, .fromScrollBar = fromScrollBar };
         startSnapAnimationCallback_(snapAnimationOptions);
         auto isNeedAdjustDirection = (snapType == SnapType::SCROLL_SNAP && snapDirection == SnapDirection::NONE);
         if (isNeedAdjustDirection) {
