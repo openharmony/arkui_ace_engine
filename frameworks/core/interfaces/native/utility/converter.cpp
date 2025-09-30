@@ -107,8 +107,8 @@ namespace {
     std::string GetReplaceContentStr(int32_t pos, const std::string& type,
         std::vector<Converter::ResourceConverter::ParamType>& params, size_t containCount)
     {
-        auto index = pos + containCount;
-        if (index < 0 || index >= params.size()) {
+        auto index = static_cast<size_t>(pos) + containCount;
+        if (index >= params.size()) {
             return std::string();
         }
         //return params.at(index);
