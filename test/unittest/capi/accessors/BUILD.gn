@@ -82,7 +82,6 @@ ace_unittest("capi_all_accessors_test") {
     "long_press_recognizer_accessor_test.cpp",
     "matrix2d_accessor_test.cpp",
     "menu_item_content_modifier_accessor_test.cpp",
-    # "matrix4_transit_accessor_test.cpp",
     "measurable_accessor_test.cpp",
     "mouse_event_accessor_test.cpp",
     "mutable_styled_string_accessor_test.cpp",
