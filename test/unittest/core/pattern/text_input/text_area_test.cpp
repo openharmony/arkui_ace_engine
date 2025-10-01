@@ -1902,7 +1902,7 @@ HWTEST_F(TextFieldUXTest, TextAreaScrollBarColorTest002, TestSize.Level1)
     /**
      * @tc.expected: Get TextAreaScrollBarColor Value
      */
-    Color defaultColor = Color(0x66182431);
+    Color defaultColor = Color::BLACK;
     auto result = layoutProperty_->GetScrollBarColorValue(defaultColor);
     EXPECT_EQ(TextFieldModelNG::GetTextAreaScrollBarColor(AceType::RawPtr(frameNode_)), defaultColor);
     EXPECT_EQ(result, defaultColor);
