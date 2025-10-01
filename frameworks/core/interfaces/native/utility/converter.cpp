@@ -967,14 +967,14 @@ template<>
 Dimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
-    return StringUtils::StringToDimension(str, true);
+    return StringUtils::StringToDimensionWithUnit(str, ConverterStatus::DEFAULT_UNIT);
 }
 
 template<>
 CalcDimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
-    return StringUtils::StringToCalcDimension(str, true);
+    return StringUtils::StringToCalcDimension(str, false, ConverterStatus::DEFAULT_UNIT);
 }
 
 template<>
@@ -1017,7 +1017,7 @@ std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src
 template<>
 Dimension Convert(const Ark_Number& src)
 {
-    return Dimension(Converter::Convert<float>(src), DimensionUnit::VP);
+    return Dimension(Converter::Convert<float>(src), ConverterStatus::DEFAULT_UNIT);
 }
 
 template<>
@@ -2924,6 +2924,7 @@ PickerTextStyle Convert(const Ark_TextPickerTextStyle& src)
         style.fontWeight = font->fontWeight;
         style.fontStyle = font->fontStyle;
     }
+    DefaultDimensionUnit defaultUnit(DimensionUnit::FP);
     style.minFontSize = Converter::OptConvert<Dimension>(src.minFontSize);
     style.maxFontSize = Converter::OptConvert<Dimension>(src.maxFontSize);
     style.textOverflow = Converter::OptConvert<TextOverflow>(src.overflow);

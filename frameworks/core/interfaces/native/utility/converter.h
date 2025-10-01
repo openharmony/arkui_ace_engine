@@ -953,6 +953,27 @@ namespace Converter {
         }
         return std::nullopt;
     }
+    
+    class ConverterStatus {
+    public:
+        inline static DimensionUnit DEFAULT_UNIT = DimensionUnit::VP;
+    };
+
+    class DefaultDimensionUnit {
+    public:
+        explicit DefaultDimensionUnit(DimensionUnit unit)
+        {
+            save_ = ConverterStatus::DEFAULT_UNIT;
+            ConverterStatus::DEFAULT_UNIT = unit;
+        }
+        ~DefaultDimensionUnit()
+        {
+            ConverterStatus::DEFAULT_UNIT = save_;
+        }
+
+    private:
+        DimensionUnit save_;
+    };
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 
