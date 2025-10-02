@@ -156,7 +156,7 @@ const std::vector<UnionStringResourceTestStep> UNION_RESOURCE_STRING_PLAN = {
 typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
 const std::vector<OptLengthTestStep> FONT_SIZE_TEST_PLAN = {
     { Converter::ArkValue<Opt_Length>(AFLT32_POS), CHECK_AFLT32_POS },
-    { Converter::ArkValue<Opt_Length>(AFLT32_NEG), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE }
+    { Converter::ArkValue<Opt_Length>(AFLT32_NEG), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
 };
 
 typedef std::pair<Opt_Union_Number_String_Resource, std::string> NumberTestStep;
