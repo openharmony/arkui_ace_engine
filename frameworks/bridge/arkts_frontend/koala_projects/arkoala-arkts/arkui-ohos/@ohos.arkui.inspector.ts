@@ -5,17 +5,17 @@ declare namespace inspector {
 
         off(type: 'layout' | 'draw' | 'drawChildren', callback?: Callback<void>): void;
 
-        onLayout(type: 'layout', callback: Callback<void>): void;
+        onLayout(callback: Callback<void>): void;
 
-        offLayout(type: 'layout', callback?: Callback<void>): void;
+        offLayout(callback?: Callback<void>): void;
 
-        onDraw(type: 'draw', callback: Callback<void>): void;
+        onDraw(callback: Callback<void>): void;
 
-        offDraw(type: 'draw', callback?: Callback<void>): void;
+        offDraw(callback?: Callback<void>): void;
 
-        onDrawChildren(type: 'drawChildren', callback: Callback<void>): void;
+        onDrawChildren(callback: Callback<void>): void;
 
-        offDrawChildren(type: 'drawChildren', callback?: Callback<void>): void;
+        offDrawChildren(callback?: Callback<void>): void;
     }
     export function createComponentObserver(id: string): ComponentObserver | undefined;
     export function getFilteredInspectorTree(filters?: Array<string>): string;
