@@ -195,9 +195,6 @@ import { default as AbilityStartCallback } from "application.AbilityStartCallbac
 import { default as AtomicServiceOptions } from "@ohos.app.ability.AtomicServiceOptions"
 import { TextBackgroundStyle } from "./../../component/span"
 export class TypeChecker {
-    static typeInstanceOf<T>(value: Object, prop: string): boolean {
-        return value instanceof T
-    }
     static typeCast<T>(value: Object): T {
         return value as T
     }
