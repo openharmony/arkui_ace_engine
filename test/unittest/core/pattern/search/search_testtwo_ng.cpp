@@ -2148,7 +2148,9 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic013, TestSize.Level1)
     EXPECT_EQ(buttonLayoutProperty->GetFontColor().value(), Color::RED);
 
     SearchModelStatic::SetSearchButtonFontColor(frameNode, std::nullopt);
-    EXPECT_FALSE(buttonLayoutProperty->GetFontColor().has_value());
+    auto searchTheme = SearchModelStatic::GetTheme(frameNode);
+    CHECK_NULL_VOID(searchTheme);
+    EXPECT_EQ(buttonLayoutProperty->GetFontColor().value(), searchTheme->GetSearchButtonTextColor());
 }
 
 /**
