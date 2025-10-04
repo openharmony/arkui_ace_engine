@@ -101,6 +101,11 @@ void SwiperModelNG::ResetDisplayMode()
     ACE_RESET_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayMode);
 }
 
+void SwiperModelNG::ResetDisplayMode(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayMode, frameNode);
+}
+
 void SwiperModelNG::SetDisplayCount(int32_t displayCount)
 {
     if (displayCount <= 0) {
@@ -1813,5 +1818,39 @@ void SwiperModelNG::CreateArrowWithResourceObj(const SwiperArrowParameters& swip
     ProcessArrowSizeWithResourceObj(swiperNode, resObj);
     resObj = swiperArrowParameters.resourceBackgroundSizeValueObject;
     ProcessBackgroundSizeWithResourceObj(swiperNode, resObj);
+}
+
+void SwiperModelNG::SetFillType(int32_t fillType)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, FillType, fillType);
+}
+
+void SwiperModelNG::ResetFillType()
+{
+    ACE_RESET_LAYOUT_PROPERTY(SwiperLayoutProperty, FillType);
+}
+
+void SwiperModelNG::SetFillType(FrameNode* frameNode, int32_t options)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, FillType, options, frameNode);
+}
+
+int32_t SwiperModelNG::GetFillType(FrameNode* frameNode)
+{
+    int32_t value = 0;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, FillType, value, frameNode, value);
+    return value;
+}
+
+void SwiperModelNG::ResetDisplayCountWithObject()
+{
+    ResetMinSize();
+    ResetFillType();
+}
+
+void SwiperModelNG::ResetDisplayCountWithObject(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, MinSize, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, FillType, frameNode);
 }
 } // namespace OHOS::Ace::NG

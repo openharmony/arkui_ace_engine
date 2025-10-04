@@ -1539,6 +1539,19 @@ const RefPtr<NG::PostEventManager>& NG::PipelineContext::GetPostEventManager()
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
+
+WidthBreakpoint PipelineBase::GetCalcWidthBreakpoint(double width)
+{
+    WidthBreakpoint breakpoint;
+    if (LessNotEqual(width, 600)) {
+        breakpoint = WidthBreakpoint::WIDTH_SM;
+    } else if (GreatNotEqual(width, 840)) {
+        breakpoint = WidthBreakpoint::WIDTH_LG;
+    } else {
+        breakpoint = WidthBreakpoint::WIDTH_MD;
+    }
+    return breakpoint;
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
 

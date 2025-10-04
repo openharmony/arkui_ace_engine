@@ -207,6 +207,44 @@ public:
                    (!property->GetDisplayCount().has_value() && SwiperUtils::IsStretch(property)));
     }
 
+    static bool CheckBreakPointDisplayCount(const RefPtr<SwiperLayoutProperty>& property, float contentWidth)
+    {
+        CHECK_NULL_RETURN(property, false);
+        bool isFillType = property->GetFillType().has_value();
+        if (!isFillType) {
+            return false;
+        }
+        int32_t fillType = property->GetFillTypeValue(0);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto breakpoint = pipeline->GetCalcWidthBreakpoint(contentWidth);
+        auto calculatedCount = 1;
+        // BREAKPOINT_DEFAULT = 0, BREAKPOINT_SM1MD2LG3= 1, BREAKPOINT_SM2MD3LG5= 2
+        if (fillType <= 1) {
+            if (breakpoint == WidthBreakpoint::WIDTH_MD) {
+                calculatedCount = 2;
+            } else if (breakpoint >= WidthBreakpoint::WIDTH_LG) {
+                calculatedCount = 3;
+            }
+        }
+        if (fillType == 2) {
+            if (breakpoint <= WidthBreakpoint::WIDTH_SM) {
+                calculatedCount = 2;
+            } else if (breakpoint == WidthBreakpoint::WIDTH_MD) {
+                calculatedCount = 3;
+            } else if (breakpoint >= WidthBreakpoint::WIDTH_LG) {
+                calculatedCount = 5;
+            }
+        }
+
+        auto displayCountProperty = property->GetDisplayCount().value_or(1);
+        if (displayCountProperty != calculatedCount) {
+            property->UpdateDisplayCount(calculatedCount);
+            return true;
+        }
+        return false;
+    }
+
 private:
     static bool CheckMarginPropertyExceed(const RefPtr<SwiperLayoutProperty>& property, float childCalcIdealLength)
     {
