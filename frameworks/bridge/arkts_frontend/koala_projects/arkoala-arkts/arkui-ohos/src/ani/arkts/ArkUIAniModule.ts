@@ -296,6 +296,7 @@ export class ArkUIAniModule {
     native static _Common_px2fp(value:number, instanceId: KInt): number
     native static _Common_lpx2px(value:number, instanceId: KInt): number
     native static _Common_px2lpx(value:number, instanceId: KInt): number
+    native static _Common_getWindowName(instanceId: KInt): string
 
     // for transfer
     native static _createTouchEventAccessorWithPointer(input: KPointer): KPointer
