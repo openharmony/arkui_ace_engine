@@ -63,6 +63,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
@@ -6848,4 +6849,13 @@ void PipelineContext::OnDumpBindAICaller(const std::vector<std::string>& params)
     }
 }
 
+void PipelineContext::SetMagnifierController(const RefPtr<MagnifierController>& magnifierController)
+{
+    magnifierController_ = magnifierController;
+}
+
+RefPtr<MagnifierController> PipelineContext::GetMagnifierController() const
+{
+    return magnifierController_;
+}
 } // namespace OHOS::Ace::NG

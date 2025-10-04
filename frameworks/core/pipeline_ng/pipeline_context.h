@@ -82,6 +82,7 @@ using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
 using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
 using IdleCallbackFunc = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
 class NodeRenderStatusMonitor;
+class MagnifierController;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -1298,6 +1299,8 @@ public:
         return window_->GetIsRequestFrame();
     }
 
+    void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
+    RefPtr<MagnifierController> GetMagnifierController() const;
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1655,6 +1658,7 @@ private:
     uint64_t lastVSyncTime_ = 0;
     bool needReloadResource_ = false;
     std::list<WeakPtr<UINode>> needReloadNodes_;
+    RefPtr<MagnifierController> magnifierController_;
 };
 
 /**

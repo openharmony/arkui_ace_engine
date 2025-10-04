@@ -96,6 +96,7 @@
 #include "bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "bridge/declarative_frontend/jsview/js_location_button.h"
+#include "bridge/declarative_frontend/jsview/js_magnifier_controller.h"
 #include "bridge/declarative_frontend/jsview/js_marquee.h"
 #include "bridge/declarative_frontend/jsview/js_menu.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item.h"
@@ -704,6 +705,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
     { "Gauge", JSGauge::JSBind },
+    { "MagnifierController", JSMagnifierController::JSBind },
     { "Marquee", JSMarquee::JSBind },
     { "Menu", JSMenu::JSBind },
     { "MenuItem", JSMenuItem::JSBind },
@@ -1113,6 +1115,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSPersistent::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
+    JSMagnifierController::JSBind(globalObj);
 
     JSProfiler::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);

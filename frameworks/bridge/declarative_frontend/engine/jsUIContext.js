@@ -904,6 +904,13 @@ class UIContext {
         getUINativeModule().list.setCacheRange(nodePtr, range);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    getMagnifier() {
+        if (this.magnifier_ == null) {
+            this.magnifier_ = new Magnifier(this.instanceId_);
+        }
+        return this.magnifier_;
+    }
 }
 
 class DynamicSyncScene {
@@ -1731,6 +1738,36 @@ class TextMenuController {
     static disableMenuItems(items) {
         let controller = globalThis.requireNapi('arkui.textMenuController');
         controller.disableMenuItems(items);
+    }
+}
+
+class Magnifier {
+    /**
+     * Construct new instance of Magnifier.
+     * initialize with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 22
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+    }
+
+    bind(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        MagnifierController.bind(id);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    show(x, y) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        MagnifierController.show(x, y);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    unbind() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        MagnifierController.unbind();
+        __JSScopeUtil__.restoreInstanceId();
     }
 }
 

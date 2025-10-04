@@ -85,6 +85,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item_group.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_magnifier_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_menu_item.h"
@@ -496,6 +497,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSDataPanel::JSBind(globalObj);
     JSBadge::JSBind(globalObj);
     JSGauge::JSBind(globalObj);
+    JSMagnifierController::JSBind(globalObj);
     JSMarquee::JSBind(globalObj);
     JSMenu::JSBind(globalObj);
     JSMenuItem::JSBind(globalObj);
