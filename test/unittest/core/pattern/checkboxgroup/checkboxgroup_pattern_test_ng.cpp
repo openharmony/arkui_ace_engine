@@ -211,9 +211,9 @@ HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupPatternTest003, TestSize.Level
     paintProperty->UpdateCheckBoxSelect(true);
     child2->paintProperty_ = paintProperty;
     groupManager->AddCheckBoxToGroup(CHECKBOXGROUP_NAME, child2);
-    ElementRegister::GetInstance()->itemMap_[2] = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    ElementRegister::GetInstance()->itemMap_[3] = AceType::WeakClaim(AceType::RawPtr(child1));
-    ElementRegister::GetInstance()->itemMap_[4] = AceType::WeakClaim(AceType::RawPtr(child2));
+    ElementRegister::GetInstance()->AddReferenced(2, frameNode);
+    ElementRegister::GetInstance()->AddReferenced(3, child1);
+    ElementRegister::GetInstance()->AddReferenced(4, child2);
 
     /*
      * @tc.steps: step5. call CheckBoxGroupIsTrue,
@@ -370,8 +370,8 @@ HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupPatternTest006, TestSize.Level
     frameNode->paintProperty_ = groupPaintProperty;
     groupManager->AddCheckBoxGroup(CHECKBOXGROUP_NAME, frameNode);
 
-    ElementRegister::GetInstance()->itemMap_[2] = AceType::WeakClaim(AceType::RawPtr(child));
-    ElementRegister::GetInstance()->itemMap_[3] = nullptr;
+    ElementRegister::GetInstance()->AddReferenced(2, AceType::WeakClaim(AceType::RawPtr(child)));
+    ElementRegister::GetInstance()->AddReferenced(3, nullptr);
 
     /*
      * @tc.steps: step5. call UpdateCheckBoxStyle
