@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier } from "#handwritten"
+import { AttributeModifier, ContentModifier, hookTextClockContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkTextClockPeer, TextClockConfiguration, TextClockAttribute } from "./component/textClock"
@@ -58,6 +58,8 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
     _fontFeature_0_0value?: string | undefined
     _dateTimeOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _dateTimeOptions_0_0value?: intl.DateTimeOptions | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<TextClockConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkTextClockPeer;
@@ -241,6 +243,24 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookTextClockContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<TextClockConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookTextClockContentModifier(peer, (undefined as ContentModifier<TextClockConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: TextClockModifier): void {
         super.mergeModifier(modifier)
@@ -374,6 +394,19 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<TextClockConfiguration> | undefined));
+                }
+            }
+        }
     }
     format(value: ResourceStr | undefined): this {
         if (((this._format_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -482,6 +515,17 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         } else
         {
             this._dateTimeOptions_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<TextClockConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
