@@ -26,8 +26,8 @@ template<> void AssignCast(std::optional<int32_t>& dst, const Ark_TextContentCon
 
 void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src)
 {
-    dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
-    dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
+    dst.x = Converter::ArkValue<Ark_Int32>(src.GetX());
+    dst.y = Converter::ArkValue<Ark_Int32>(src.GetY());
 }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -49,7 +49,7 @@ Ark_CaretOffset GetCaretOffsetImpl(Ark_TextContentControllerBase peer)
     CHECK_NULL_RETURN(peer && peer->controller_, {});
     auto offset = peer->controller_->GetCaretPosition();
     Ark_CaretOffset caretOffset = Converter::ArkValue<Ark_CaretOffset>(offset);
-    caretOffset.index = Converter::ArkValue<Ark_Number>(peer->controller_->GetCaretIndex());
+    caretOffset.index = Converter::ArkValue<Ark_Int32>(peer->controller_->GetCaretIndex());
     return caretOffset;
 }
 Ark_RectResult GetTextContentRectImpl(Ark_TextContentControllerBase peer)

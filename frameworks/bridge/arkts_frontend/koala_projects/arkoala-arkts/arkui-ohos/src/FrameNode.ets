@@ -1465,7 +1465,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createSearchNode(context: UIContext, type: 'Search'): SearchFrameNode {
+    function createSearchNode(context: UIContext): SearchFrameNode {
         return new SearchFrameNode(context, 'Search', (node: FrameNode, type: ModifierType): ArkSearchNode => {
             let arknode = new ArkSearchNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1487,7 +1487,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createTextAreaNode(context: UIContext, type: 'TextArea'): TextAreaFrameNode {
+    function createTextAreaNode(context: UIContext): TextAreaFrameNode {
         return new TextAreaFrameNode(context, 'TextArea', (node: FrameNode, type: ModifierType): ArkTextAreaNode => {
             let arknode = new ArkTextAreaNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1498,7 +1498,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createTextInputNode(context: UIContext, type: 'TextInput'): TextInputFrameNode {
+    function createTextInputNode(context: UIContext): TextInputFrameNode {
         return new TextInputFrameNode(context, 'TextInput', (node: FrameNode, type: ModifierType): ArkTextInputNode => {
             let arknode = new ArkTextInputNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1509,7 +1509,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createTextNode(context: UIContext, type: 'Text'): TextFrameNode {
+    function createTextNode(context: UIContext): TextFrameNode {
         return new TextFrameNode(context, 'Text', (node: FrameNode, type: ModifierType): ArkTextNode => {
             let arknode = new ArkTextNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1525,7 +1525,7 @@ export namespace typeNode {
         }
     }
     // @ts-ignore
-    function createMarqueeNode(context: UIContext, type: 'Marquee'): MarqueeFrameNode {
+    function createMarqueeNode(context: UIContext): MarqueeFrameNode {
         return new MarqueeFrameNode(context, 'Marquee', (node: FrameNode, type: ModifierType): ArkMarqueeNode => {
             let arknode = new ArkMarqueeNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1541,7 +1541,7 @@ export namespace typeNode {
         }
     }
     // @ts-ignore
-    function createSymbolGlyphNode(context: UIContext, type: 'SymbolGlyph'): SymbolGlyphFrameNode {
+    function createSymbolGlyphNode(context: UIContext): SymbolGlyphFrameNode {
         return new SymbolGlyphFrameNode(context, 'SymbolGlyph', (node: FrameNode, type: ModifierType): ArkSymbolGlyphNode => {
             let arknode = new ArkSymbolGlyphNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1602,7 +1602,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createBadgeNode(context: UIContext, type: 'Badge'): BadgeFrameNode {
+    function createBadgeNode(context: UIContext): BadgeFrameNode {
         return new BadgeFrameNode(context, 'Badge', (node: FrameNode, type: ModifierType): ArkBadgeNode => {
             let arknode = new ArkBadgeNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1613,7 +1613,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createQRCodeNode(context: UIContext, type: 'QRCode'): QRCodeFrameNode {
+    function createQRCodeNode(context: UIContext): QRCodeFrameNode {
         return new QRCodeFrameNode(context, 'QRCode', (node: FrameNode, type: ModifierType): ArkQRCodeNode => {
             let arknode = new ArkQRCodeNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1624,7 +1624,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createProgressNode(context: UIContext, type: 'Progress'): ProgressFrameNode {
+    function createProgressNode(context: UIContext): ProgressFrameNode {
         return new ProgressFrameNode(context, 'Progress', (node: FrameNode, type: ModifierType): ArkProgressNode => {
             let arknode = new ArkProgressNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1635,7 +1635,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createLoadingProgressNode(context: UIContext, type: 'LoadingProgress'): LoadingProgressFrameNode {
+    function createLoadingProgressNode(context: UIContext): LoadingProgressFrameNode {
         return new LoadingProgressFrameNode(context, 'LoadingProgress', (node: FrameNode, type: ModifierType): ArkLoadingProgressNode => {
             let arknode = new ArkLoadingProgressNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1646,7 +1646,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createTextClockNode(context: UIContext, type: 'TextClock'): TextClockFrameNode {
+    function createTextClockNode(context: UIContext): TextClockFrameNode {
         return new TextClockFrameNode(context, 'TextClock', (node: FrameNode, type: ModifierType): ArkTextClockNode => {
             let arknode = new ArkTextClockNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1657,7 +1657,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createTextTimerNode(context: UIContext, type: 'TextTimer'): TextTimerFrameNode {
+    function createTextTimerNode(context: UIContext): TextTimerFrameNode {
         return new TextTimerFrameNode(context, 'TextTimer', (node: FrameNode, type: ModifierType): ArkTextTimerNode => {
             let arknode = new ArkTextTimerNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);

@@ -2143,11 +2143,15 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setRenderingStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SymbolGlyphAttribute_setSymbolEffect0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setMinFontScale(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setMaxFontScale(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _SymbolGlyphAttribute_setSymbolEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _SymbolGlyphAttribute_setSymbolEffect1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SymbolGlyphAttribute_setSymbolEffect2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SymbolSpan_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -2555,7 +2559,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextInputAttribute_setLineBreakStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _TextInputAttribute_setCancelButton(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _TextInputAttribute_setCancelButton0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextInputAttribute_setCancelButton1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextInputAttribute_setSelectAll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct

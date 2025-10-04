@@ -5062,7 +5062,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnSubmitImpl(Ark_NativePointer node,
-                         const Opt_Union_Callback_String_Void_SearchSubmitCallback* value)
+                         const Opt_SearchSubmitCallback* value)
     {
     }
     void SetOnChangeImpl(Ark_NativePointer node,
@@ -6031,6 +6031,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                   const Opt_SymbolRenderingStrategy* value)
     {
     }
+    void SetSymbolEffect0Impl(Ark_NativePointer node,
+                              const Opt_SymbolEffect* value)
+    {
+    }
     void SetMinFontScaleImpl(Ark_NativePointer node,
                              const Opt_Union_F64_Resource* value)
     {
@@ -6039,9 +6043,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Opt_Union_F64_Resource* value)
     {
     }
-    void SetSymbolEffectImpl(Ark_NativePointer node,
-                             const Opt_SymbolEffect* symbolEffect,
-                             const Opt_Union_Boolean_I32* triggerValue)
+    void SetSymbolEffect1Impl(Ark_NativePointer node,
+                              const Opt_SymbolEffect* symbolEffect,
+                              const Opt_Boolean* isActive)
+    {
+    }
+    void SetSymbolEffect2Impl(Ark_NativePointer node,
+                              const Opt_SymbolEffect* symbolEffect,
+                              const Opt_Int32* triggerValue)
     {
     }
     } // SymbolGlyphAttributeModifier
@@ -6501,7 +6510,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnSubmitImpl(Ark_NativePointer node,
-                         const Opt_Union_Callback_EnterKeyType_Void_TextAreaSubmitCallback* value)
+                         const Opt_TextAreaSubmitCallback* value)
     {
     }
     void SetOnChangeImpl(Ark_NativePointer node,
@@ -6917,8 +6926,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                   const Opt_LineBreakStrategy* value)
     {
     }
-    void SetCancelButtonImpl(Ark_NativePointer node,
-                             const Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
+    void SetCancelButton0Impl(Ark_NativePointer node,
+                              const Opt_CancelButtonOptions* value)
+    {
+    }
+    void SetCancelButton1Impl(Ark_NativePointer node,
+                              const Opt_CancelButtonSymbolOptions* value)
     {
     }
     void SetSelectAllImpl(Ark_NativePointer node,
@@ -9746,9 +9759,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SymbolGlyphAttributeModifier::SetFontWeightImpl,
             SymbolGlyphAttributeModifier::SetEffectStrategyImpl,
             SymbolGlyphAttributeModifier::SetRenderingStrategyImpl,
+            SymbolGlyphAttributeModifier::SetSymbolEffect0Impl,
             SymbolGlyphAttributeModifier::SetMinFontScaleImpl,
             SymbolGlyphAttributeModifier::SetMaxFontScaleImpl,
-            SymbolGlyphAttributeModifier::SetSymbolEffectImpl,
+            SymbolGlyphAttributeModifier::SetSymbolEffect1Impl,
+            SymbolGlyphAttributeModifier::SetSymbolEffect2Impl,
         };
         return &ArkUISymbolGlyphModifierImpl;
     }
@@ -10001,7 +10016,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextInputAttributeModifier::SetMaxLinesImpl,
             TextInputAttributeModifier::SetWordBreakImpl,
             TextInputAttributeModifier::SetLineBreakStrategyImpl,
-            TextInputAttributeModifier::SetCancelButtonImpl,
+            TextInputAttributeModifier::SetCancelButton0Impl,
+            TextInputAttributeModifier::SetCancelButton1Impl,
             TextInputAttributeModifier::SetSelectAllImpl,
             TextInputAttributeModifier::SetMinFontSizeImpl,
             TextInputAttributeModifier::SetMaxFontSizeImpl,
@@ -13439,7 +13455,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_ImageAttachment ConstructImpl(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value)
+    Ark_ImageAttachment ConstructImpl(const Opt_AttachmentType* value)
     {
         return {};
     }

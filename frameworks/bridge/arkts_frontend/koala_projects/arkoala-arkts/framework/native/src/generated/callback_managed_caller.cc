@@ -832,27 +832,6 @@ void callManagedCallback_EditableTextChangeValue_BooleanSync(Ark_VMContext vmCon
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedCallback_EnterKeyType_Void(Ark_Int32 resourceId, Ark_EnterKeyType enterKey)
-{
-    CallbackBuffer callbackBuffer = {{}, {}};
-    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
-    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_Callback_EnterKeyType_Void);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeInt32(static_cast<Ark_EnterKeyType>(enterKey));
-    enqueueCallback(10, &callbackBuffer);
-}
-void callManagedCallback_EnterKeyType_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_EnterKeyType enterKey)
-{
-    uint8_t dataBuffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
-    argsSerializer.writeInt32(10);
-    argsSerializer.writeInt32(Kind_Callback_EnterKeyType_Void);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeInt32(static_cast<Ark_EnterKeyType>(enterKey));
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-}
 void callManagedCallback_ErrorInformation_Void(Ark_Int32 resourceId, Ark_ErrorInformation value0)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -7581,7 +7560,6 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_DrawContext_CustomSpanDrawInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_DrawContext_CustomSpanDrawInfo_Void);
         case Kind_Callback_DrawContext_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_DrawContext_Void);
         case Kind_Callback_EditableTextChangeValue_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_EditableTextChangeValue_Boolean);
-        case Kind_Callback_EnterKeyType_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_EnterKeyType_Void);
         case Kind_Callback_ErrorInformation_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ErrorInformation_Void);
         case Kind_Callback_Extender_OnFinish: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Extender_OnFinish);
         case Kind_Callback_Extender_OnProgress: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Extender_OnProgress);
@@ -7883,7 +7861,6 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_DrawContext_CustomSpanDrawInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_DrawContext_CustomSpanDrawInfo_VoidSync);
         case Kind_Callback_DrawContext_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_DrawContext_VoidSync);
         case Kind_Callback_EditableTextChangeValue_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_EditableTextChangeValue_BooleanSync);
-        case Kind_Callback_EnterKeyType_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_EnterKeyType_VoidSync);
         case Kind_Callback_ErrorInformation_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ErrorInformation_VoidSync);
         case Kind_Callback_Extender_OnFinish: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Extender_OnFinishSync);
         case Kind_Callback_Extender_OnProgress: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Extender_OnProgressSync);

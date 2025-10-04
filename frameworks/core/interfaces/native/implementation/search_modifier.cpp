@@ -252,57 +252,7 @@ void SetEnterKeyTypeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     SearchModelStatic::SetSearchEnterKeyType(frameNode, Converter::OptConvertPtr<TextInputAction>(value));
 }
-void SetOnSubmitImpl(Ark_NativePointer node,
-                     const Opt_Union_Callback_String_Void_SearchSubmitCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnionPtr(value,
-        [frameNode](const Callback_String_Void& src) {
-            auto onSubmit = [arkCallback = CallbackHelper(src)](const std::u16string& value,
-                NG::TextFieldCommonEvent&) {
-                Converter::ConvContext ctx;
-                auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
-                arkCallback.InvokeSync(arkStringValue);
-            };
-            SearchModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
-        },
-        [frameNode](const SearchSubmitCallback& src) {
-            auto weakNode = AceType::WeakClaim(frameNode);
-            auto onSubmit = [arkCallback = CallbackHelper(src), node = weakNode](
-                    const std::u16string& value, NG::TextFieldCommonEvent& info) {
-                PipelineContext::SetCallBackNode(node);
-                Converter::ConvContext ctx;
-                auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
-                const auto event = Converter::ArkSubmitEventSync(info);
-                auto eventArkValue = Converter::ArkValue<Opt_SubmitEvent, Ark_SubmitEvent>(event.ArkValue());
-                arkCallback.InvokeSync(arkStringValue, eventArkValue);
-            };
-            SearchModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
-        },
-        [] {});
-}
-void OnSubmit0Impl(Ark_NativePointer node,
-                   const Opt_Callback_String_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // Implement Reset value
-        return;
-    }
-    auto onSubmit = [arkCallback = CallbackHelper(*optValue)](const std::u16string& value,
-        NG::TextFieldCommonEvent&
-    ) {
-        Converter::ConvContext ctx;
-        auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
-        arkCallback.InvokeSync(arkStringValue);
-    };
-    SearchModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
-}
-void OnSubmit1Impl(Ark_NativePointer node,
-                   const Opt_SearchSubmitCallback* value)
+void SetOnSubmitImpl(Ark_NativePointer node, const Opt_SearchSubmitCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

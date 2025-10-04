@@ -585,11 +585,13 @@ void SetLineBreakStrategyImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<LineBreakStrategy>(value);
     TextFieldModelStatic::SetLineBreakStrategy(frameNode, convValue);
 }
-void CancelButton0Impl(FrameNode *frameNode,
-                       const Ark_CancelButtonOptions& src)
+void SetCancelButton0Impl(Ark_NativePointer node, const Opt_CancelButtonOptions* value)
 {
-    auto cleanButtonStyle = Converter::OptConvert<CleanNodeStyle>(src.style);
-    auto optIconOptions = Converter::OptConvert<Ark_IconOptions>(src.icon);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    auto cleanButtonStyle = optValue ? Converter::OptConvert<CleanNodeStyle>(optValue->style) : std::nullopt;
+    auto optIconOptions = optValue ? Converter::OptConvert<Ark_IconOptions>(optValue->icon) : std::nullopt;
     TextFieldModelStatic::SetCleanNodeStyle(frameNode, cleanButtonStyle);
     TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
     TextFieldModelNG::SetCancelButtonSymbol(frameNode, false);
@@ -621,8 +623,7 @@ void CancelButton0Impl(FrameNode *frameNode,
     }
     TextFieldModelStatic::SetCancelIconColor(frameNode, iconColor);
 }
-void CancelButton1Impl(Ark_NativePointer node,
-                       const Opt_CancelButtonSymbolOptions* value)
+void SetCancelButton1Impl(Ark_NativePointer node, const Opt_CancelButtonSymbolOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -637,22 +638,6 @@ void CancelButton1Impl(Ark_NativePointer node,
         TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
         LOGE("TextInputModifier::CancelButton1Impl need to know what data is in value->icon");
     }
-}
-void SetCancelButtonImpl(Ark_NativePointer node,
-                         const Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnionPtr(value,
-        [frameNode](const Ark_CancelButtonOptions& src) {
-            CancelButton0Impl(frameNode, src);
-        },
-        [frameNode](const Ark_CancelButtonSymbolOptions& src) {
-            LOGE("ARKOALA CancelButtonSymbolModifier not implemented.");
-        },
-        [frameNode] {
-            TextFieldModelStatic::SetDefaultCancelIcon(frameNode);
-        });
 }
 void SetSelectAllImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
@@ -1086,7 +1071,8 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::SetMaxLinesImpl,
         TextInputAttributeModifier::SetWordBreakImpl,
         TextInputAttributeModifier::SetLineBreakStrategyImpl,
-        TextInputAttributeModifier::SetCancelButtonImpl,
+        TextInputAttributeModifier::SetCancelButton0Impl,
+        TextInputAttributeModifier::SetCancelButton1Impl,
         TextInputAttributeModifier::SetSelectAllImpl,
         TextInputAttributeModifier::SetMinFontSizeImpl,
         TextInputAttributeModifier::SetMaxFontSizeImpl,
