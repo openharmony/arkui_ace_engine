@@ -159,7 +159,7 @@ export class BadgeStyle_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -231,7 +231,7 @@ export class BadgeStyle_serializer {
             if (valueHolderForBadgeColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBadgeColorTmpValueForIdx0  = valueHolderForBadgeColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBadgeColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBadgeColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBadgeColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBadgeColorTmpValueForIdx1  = valueHolderForBadgeColorTmpValue as number
@@ -255,7 +255,7 @@ export class BadgeStyle_serializer {
             if (valueHolderForBorderColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBorderColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as number
@@ -329,7 +329,7 @@ export class BadgeStyle_serializer {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let colorTmpBuf_ : Color | number | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
@@ -396,7 +396,7 @@ export class BadgeStyle_serializer {
             const badgeColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let badgeColorTmpBuf_ : Color | number | string | Resource | undefined
             if (badgeColorTmpBuf_UnionSelector == (0).toChar()) {
-                badgeColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                badgeColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (badgeColorTmpBuf_UnionSelector == (1).toChar()) {
                 badgeColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (badgeColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -415,7 +415,7 @@ export class BadgeStyle_serializer {
             const borderColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let borderColorTmpBuf_ : Color | number | string | Resource | undefined
             if (borderColorTmpBuf_UnionSelector == (0).toChar()) {
-                borderColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                borderColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (borderColorTmpBuf_UnionSelector == (1).toChar()) {
                 borderColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (borderColorTmpBuf_UnionSelector == (2).toChar()) {
