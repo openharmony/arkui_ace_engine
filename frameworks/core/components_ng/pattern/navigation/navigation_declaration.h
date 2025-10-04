@@ -65,7 +65,6 @@ constexpr const char* TITLE_MAIN_WITH_SUB = "MainWithSub";
 // subtitle
 constexpr Dimension SUBTITLE_FONT_SIZE = 14.0_vp; // ohos_id_text_size_sub_title3
 constexpr Dimension SUBTITLE_HEIGHT = 26.0_vp;
-constexpr Dimension MIN_ADAPT_SUBTITLE_FONT_SIZE = 10.0_vp;
 // back button
 constexpr Dimension BACK_BUTTON_SIZE = 48.0_vp;
 constexpr Dimension BACK_BUTTON_ICON_SIZE = 24.0_vp;
@@ -73,7 +72,6 @@ constexpr Dimension BACK_BUTTON_ICON_SIZE = 24.0_vp;
 constexpr Dimension TITLEBAR_HEIGHT_MINI = 56.0_vp;
 constexpr Dimension TITLEBAR_HEIGHT_WITH_SUBTITLE = 137.0_vp;
 constexpr Dimension TITLEBAR_HEIGHT_WITHOUT_SUBTITLE = 112.0_vp;
-constexpr uint32_t TITLEBAR_MAX_LINES = 2;
 // toolbar item
 constexpr Dimension TEXT_FONT_SIZE = 10.0_vp;
 constexpr Color TEXT_COLOR = Color(0xE6000000);
@@ -89,19 +87,14 @@ constexpr Dimension DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING = 2.0_vp;
 constexpr int32_t DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM = 2;
 
 // navigation content
-constexpr Dimension SINGLE_LINE_TITLEBAR_HEIGHT = 56.0_vp;
-constexpr Dimension DOUBLE_LINE_TITLEBAR_HEIGHT = 82.0_vp;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 
 // navBar
-constexpr Dimension FULL_SINGLE_LINE_TITLEBAR_HEIGHT = 112.0_vp;
-constexpr Dimension FULL_DOUBLE_LINE_TITLEBAR_HEIGHT = 138.0_vp;
 constexpr Dimension NAV_HORIZONTAL_MARGIN_L = 16.0_vp; // ohos_id_elements_margin_horizontal_l
 constexpr Dimension NAV_HORIZONTAL_MARGIN_M = 8.0_vp;  // ohos_id_elements_margin_horizontal_m
 constexpr Dimension MENU_ITEM_PADDING = 24.0_vp;
 constexpr Dimension MENU_ITEM_SIZE = 48.0_vp;
 constexpr Dimension BUTTON_PADDING = 12.0_vp;
-constexpr Dimension MENU_BUTTON_PADDING = 8.0_vp;
 constexpr Dimension BACK_BUTTON_SYMBOL_PADDING = 14.0_vp;
 constexpr Dimension BUTTON_RADIUS_SIZE = 5.0_vp;
 constexpr Dimension MAX_OVER_DRAG_OFFSET = 180.0_vp;

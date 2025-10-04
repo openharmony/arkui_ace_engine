@@ -241,7 +241,7 @@ void NavDestinationModelStatic::CreateBackButton(const RefPtr<NavDestinationGrou
         backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(theme->GetCornerRadius()));
         renderContext->UpdateBackgroundColor(theme->GetCompBackgroundColor());
         PaddingProperty padding;
-        padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
+        padding.SetEdges(CalcLength(theme->GetMenuButtonPadding()));
         backButtonLayoutProperty->UpdatePadding(padding);
     } else {
         backButtonLayoutProperty->UpdateUserDefinedIdealSize(

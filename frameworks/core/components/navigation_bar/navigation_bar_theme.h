@@ -22,6 +22,15 @@
 #include "core/components/theme/theme.h"
 #include "core/components_ng/property/border_property.h"
 
+namespace OHOS::Ace::NG {
+inline Dimension SINGLE_LINE_TITLEBAR_HEIGHT = 56.0_vp;
+inline Dimension DOUBLE_LINE_TITLEBAR_HEIGHT = 82.0_vp;
+inline Dimension FULL_SINGLE_LINE_TITLEBAR_HEIGHT = 112.0_vp;
+inline Dimension FULL_DOUBLE_LINE_TITLEBAR_HEIGHT = 138.0_vp;
+inline uint32_t TITLEBAR_MAX_LINES = 2;
+inline Dimension MIN_ADAPT_SUBTITLE_FONT_SIZE = 10.0_fp;
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace {
 
 class NavigationBarTheme : public virtual Theme {
@@ -213,7 +222,7 @@ public:
             theme->iconBackgroundWidth_ = pattern->GetAttr<Dimension>("icon_background_width", 40.0_vp);
             theme->iconBackgroundHeight_ = pattern->GetAttr<Dimension>("icon_background_height", 40.0_vp);
             theme->paddingTopTwolines_ = pattern->GetAttr<Dimension>("padding_top_twolines", 8.0_vp);
-            theme->titleSpaceVertical_ = pattern->GetAttr<Dimension>("title_sapce_vertical", 2.0_vp);
+            theme->titleSpaceVertical_ = pattern->GetAttr<Dimension>("title_space_vertical", 2.0_vp);
             theme->iconDisableAlpha_ = pattern->GetAttr<double>("icon_disable_alpha", 0.0);
             theme->backgroundFocusOutlineColor_ = pattern->GetAttr<Color>(
                 "icon_background_focus_outline_color", Color(0x0A59F7));
@@ -233,6 +242,31 @@ public:
             theme->dividerGradientLightBlue_ = pattern->GetAttr<Color>("divider_light_blue", Color(0x7FCEDEFE));
             theme->dividerGradientDarkBlue_ = pattern->GetAttr<Color>("divider_dark_blue", Color(0xFF0A59F7));
             theme->navigationBack_ = pattern->GetAttr<std::string>("navigation_back", "");
+            NG::SINGLE_LINE_TITLEBAR_HEIGHT = pattern->GetAttr<Dimension>("single_line_titlebar_height", 56.0_vp);
+            NG::DOUBLE_LINE_TITLEBAR_HEIGHT = pattern->GetAttr<Dimension>("double_line_titlebar_height", 82.0_vp);
+            NG::FULL_SINGLE_LINE_TITLEBAR_HEIGHT =
+                pattern->GetAttr<Dimension>("full_single_line_titlebar_height", 112.0_vp);
+            NG::FULL_DOUBLE_LINE_TITLEBAR_HEIGHT =
+                pattern->GetAttr<Dimension>("full_double_line_titlebar_height", 138.0_vp);
+            // back and menu button border width
+            theme->iconBorderWidth_ = pattern->GetAttr<Dimension>("titlebar_icon_border_width", 0.0_vp);
+            // back and menu button border color
+            theme->iconBorderColor_ = pattern->GetAttr<Color>("titlebar_icon_border_color", Color(0x00000000));
+            // menu button focus padding
+            theme->menuItemFocusPadding_ = pattern->GetAttr<Dimension>("menuitem_focus_padding", 0.0_vp);
+            // menu button focus blend color
+            theme->navigationFocusBlendBgColor_ =
+                pattern->GetAttr<Color>("navigation_focus_blend_bg_color", Color(0x00000000));
+            // mini/dest title text min font size
+            theme->navigationMiniMinFontSize_ = pattern->GetAttr<Dimension>("navigation_mini_min_font_size", 14.0_fp);
+            // full title text min font size
+            theme->navigationFullMinFontSize_ = pattern->GetAttr<Dimension>("navigation_full_min_font_size", 14.0_fp);
+            // title max lines
+            NG::TITLEBAR_MAX_LINES = static_cast<uint32_t>(pattern->GetAttr<double>("titlebar_max_lines", 2.0));
+            // min adapt subtitle font size
+            NG::MIN_ADAPT_SUBTITLE_FONT_SIZE = pattern->GetAttr<Dimension>("min_adapt_subtitle_font_size", 10.0_fp);
+            // menu button padding for icon
+            theme->menuButtonPadding_ = pattern->GetAttr<Dimension>("menu_button_padding", 8.0_vp);
         }
     };
 
@@ -734,7 +768,35 @@ public:
     {
         return navigationBack_;
     }
-    
+    const Dimension& GetIconBorderWidth() const
+    {
+        return iconBorderWidth_;
+    }
+    const Color& GetIconBorderColor() const
+    {
+        return iconBorderColor_;
+    }
+    const Dimension& GetMenuItemFocusPadding() const
+    {
+        return menuItemFocusPadding_;
+    }
+    const Color& GetNavigationFocusBlendBgColor() const
+    {
+        return navigationFocusBlendBgColor_;
+    }
+    const Dimension& NavigationMiniMinFontSize() const
+    {
+        return navigationMiniMinFontSize_;
+    }
+    const Dimension& NavigationFullMinFontSize() const
+    {
+        return navigationFullMinFontSize_;
+    }
+    const Dimension& GetMenuButtonPadding() const
+    {
+        return menuButtonPadding_;
+    }
+
 protected:
     NavigationBarTheme() = default;
 
@@ -848,6 +910,13 @@ private:
     Color dragBarItemActiveColor_;
     Color dividerGradientLightBlue_;
     Color dividerGradientDarkBlue_;
+    Dimension iconBorderWidth_ = 0.0_vp;
+    Color iconBorderColor_;
+    Dimension menuItemFocusPadding_ = 0.0_vp;
+    Color navigationFocusBlendBgColor_;
+    Dimension navigationMiniMinFontSize_ = 0.0_vp;
+    Dimension navigationFullMinFontSize_ = 0.0_vp;
+    Dimension menuButtonPadding_ = 0.0_vp;
 };
 
 } // namespace OHOS::Ace
