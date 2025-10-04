@@ -2133,6 +2133,11 @@ struct CJUIWebModifier {
     void (*resetOnPromptCallBack)(ArkUINodeHandle node);
     void (*setOnShowFileSelector)(ArkUINodeHandle node, void* callback);
     void (*resetOnShowFileSelector)(ArkUINodeHandle node);
+    void (*setOnDetectedBlankScreen)(ArkUINodeHandle node, void* callback);
+    void (*resetOnDetectedBlankScreen)(ArkUINodeHandle node);
+    void (*setBlankScreenDetectionConfig)(
+        ArkUINodeHandle node, const struct ArkUIBlankScreenDetectionConfigStruct* arkUITextDetectConfig);
+    void (*resetBlankScreenDetectionConfig)(ArkUINodeHandle node);
     void (*setOnContextMenuShow)(ArkUINodeHandle node, void* callback);
     void (*resetOnContextMenuShow)(ArkUINodeHandle node);
     void (*setOnSafeBrowsingCheckResultCallBack)(ArkUINodeHandle node, void* callback);

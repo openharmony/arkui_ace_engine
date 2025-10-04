@@ -70,6 +70,7 @@ constexpr GestureFocusMode DEFAULT_GESTURE_FOCUS_MODE = GestureFocusMode::DEFAUL
 constexpr WebRotateEffect DEFAULT_WEB_ROTATE_EFFECT = WebRotateEffect::TOPLEFT_EFFECT;
 constexpr bool DEFAULT_ENABLE_DATA_DETECTOR = false;
 constexpr bool DEFAULT_ENABLE_SELECTED_DATA_DETECTOR = true;
+const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0, 3.0, 5.0 };
 } // namespace
 
 void SetJavaScriptAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -1662,6 +1663,77 @@ void ResetOnShowFileSelector(ArkUINodeHandle node)
     WebModelNG::SetOnShowFileSelector(frameNode, nullptr);
 }
 
+void SetOnDetectedBlankScreen(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (extraParam) {
+        auto* onDetectedBlankScreenCallBackPtr =
+            reinterpret_cast<std::function<void(const BaseEventInfo* info)>*>(extraParam);
+        WebModelNG::SetOnDetectedBlankScreen(frameNode, std::move(*onDetectedBlankScreenCallBackPtr));
+    } else {
+        WebModelNG::SetOnDetectedBlankScreen(frameNode, nullptr);
+    }
+}
+
+void ResetOnDetectedBlankScreen(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto callback = [](const BaseEventInfo* info) {};
+    WebModelNG::SetOnDetectedBlankScreen(frameNode, callback);
+}
+
+void SetBlankScreenDetectionConfig(
+    ArkUINodeHandle node, const struct ArkUIBlankScreenDetectionConfigStruct* arkUIBlankScreenDetectionConfig)
+{
+    if (!arkUIBlankScreenDetectionConfig) {
+        return;
+    }
+    BlankScreenDetectionConfig detectConfig;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    std::vector<double> detectionTiming;
+    std::vector<int32_t> detectionMethods;
+    auto timing = arkUIBlankScreenDetectionConfig->detectionTiming;
+    auto timingLength = arkUIBlankScreenDetectionConfig->detectionTimingLength;
+    auto methods = arkUIBlankScreenDetectionConfig->detectionMethods;
+    auto methodsLength = arkUIBlankScreenDetectionConfig->detectionMethodsLength;
+    auto contentfulNodesCountThreshold = arkUIBlankScreenDetectionConfig->contentfulNodesCountThreshold;
+    if (contentfulNodesCountThreshold < 0) {
+        contentfulNodesCountThreshold = 0;
+    }
+    for (int i = 0; i < timingLength; i++) {
+        if (timing[i] > 0.0) {
+            detectionTiming.emplace_back(timing[i]);
+        }
+    }
+    if (detectionTiming.size() == 0) {
+        detectionTiming = BLANK_SCREEN_DETECTION_DEFAULT_TIMING;
+    } else {
+        std::sort(detectionTiming.begin(), detectionTiming.end());
+    }
+    for (int i = 0; i < methodsLength; i++) {
+        if (methods[i] == 0) {
+            detectionMethods.emplace_back(methods[i]);
+        }
+    }
+    if (detectionMethods.size() == 0) {
+        detectionMethods = { 0 };
+    }
+    detectConfig.enable = arkUIBlankScreenDetectionConfig->enable;
+    detectConfig.detectionTiming = detectionTiming;
+    detectConfig.detectionMethods = detectionMethods;
+    detectConfig.contentfulNodesCountThreshold = contentfulNodesCountThreshold;
+    WebModelNG::SetBlankScreenDetectionConfig(frameNode, detectConfig);
+}
+
+void ResetBlankScreenDetectionConfig(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BlankScreenDetectionConfig detectConfig;
+    WebModelNG::SetBlankScreenDetectionConfig(frameNode, detectConfig);
+}
+
 void SetOnContextMenuShow(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2458,6 +2530,10 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnPromptCallBack = ResetOnPromptCallBack,
         .setOnShowFileSelector = SetOnShowFileSelector,
         .resetOnShowFileSelector = ResetOnShowFileSelector,
+        .setOnDetectedBlankScreen = SetOnDetectedBlankScreen,
+        .resetOnDetectedBlankScreen = ResetOnDetectedBlankScreen,
+        .setBlankScreenDetectionConfig = SetBlankScreenDetectionConfig,
+        .resetBlankScreenDetectionConfig = ResetBlankScreenDetectionConfig,
         .setOnContextMenuShow = SetOnContextMenuShow,
         .resetOnContextMenuShow = ResetOnContextMenuShow,
         .setOnSafeBrowsingCheckResultCallBack = SetOnSafeBrowsingCheckResultCallBack,
@@ -2683,6 +2759,10 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnPromptCallBack = ResetOnPromptCallBack,
         .setOnShowFileSelector = SetOnShowFileSelector,
         .resetOnShowFileSelector = ResetOnShowFileSelector,
+        .setOnDetectedBlankScreen = SetOnDetectedBlankScreen,
+        .resetOnDetectedBlankScreen = ResetOnDetectedBlankScreen,
+        .setBlankScreenDetectionConfig = SetBlankScreenDetectionConfig,
+        .resetBlankScreenDetectionConfig = ResetBlankScreenDetectionConfig,
         .setOnContextMenuShow = SetOnContextMenuShow,
         .resetOnContextMenuShow = ResetOnContextMenuShow,
         .setOnSafeBrowsingCheckResultCallBack = SetOnSafeBrowsingCheckResultCallBack,

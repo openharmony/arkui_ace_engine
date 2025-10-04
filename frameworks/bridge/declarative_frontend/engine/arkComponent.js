@@ -19436,6 +19436,27 @@ class TextDataDetectorConfig {
     (this.enablePreviewMenu === another.enablePreviewMenu);
   }
 }
+class BlankScreenDetectionConfig {
+  constructor() {
+    this.enable = undefined;
+    this.detectionTiming = undefined;
+    this.detectionMethods = undefined;
+    this.contentfulNodesCountThreshold = undefined;
+  }
+  isEqual(another) {
+    return (this.enable === another.enable) && (this.detectionTiming === another.detectionTiming) &&
+    (this.detectionMethods === another.detectionMethods) &&
+    (this.contentfulNodesCountThreshold === another.contentfulNodesCountThreshold);
+  }
+}
+class BlankScreenDetectionMethod {
+  constructor() {
+    this.DETECTION_CONTENTFUL_NODES_SEVENTEEN = undefined;
+  }
+  isEqual(another) {
+    return (this.DETECTION_CONTENTFUL_NODES_SEVENTEEN === another.DETECTION_CONTENTFUL_NODES_SEVENTEEN);
+  }
+}
 class ArkOnVisibleAreaChange {
   constructor(ratios, event) {
     this.ratios = ratios;
@@ -31528,6 +31549,22 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnScreenCaptureRequestModifier.identity, WebOnScreenCaptureRequestModifier, callback);
     return this;
   }
+  onDetectedBlankScreen(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnDetectedBlankScreenModifier.identity, WebOnDetectedBlankScreenModifier, callback);
+    return this;
+  }
+  blankScreenDetectionConfig(config) {
+    if (config === undefined || config === null) {
+      return this;
+    }
+    let detectConfig = new BlankScreenDetectionConfig();
+    detectConfig.enable = config.enable;
+    detectConfig.detectionTiming = config.detectionTiming;
+    detectConfig.detectionMethods = config.detectionMethods;
+    detectConfig.contentfulNodesCountThreshold = config.contentfulNodesCountThreshold;
+    modifierWithKey(this._modifiersWithKeys, WebBlankScreenDetectionConfigModifier.identity, WebBlankScreenDetectionConfigModifier, detectConfig);
+    return this;
+  }
   onContextMenuShow(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnContextMenuShowModifier.identity, WebOnContextMenuShowModifier, callback);
     return this;
@@ -33019,6 +33056,46 @@ class WebOnShowFileSelectorModifier extends ModifierWithKey {
 }
 WebOnShowFileSelectorModifier.identity = Symbol('webOnShowFileSelectorModifier');
 
+class WebOnDetectedBlankScreenModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnDetectedBlankScreen(node);
+    }
+    else {
+      getUINativeModule().web.setOnDetectedBlankScreen(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+WebOnDetectedBlankScreenModifier.identity = Symbol('webOnDetectedBlankScreenModifier');
+
+class WebBlankScreenDetectionConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetBlankScreenDetectionConfig(node);
+    }
+    else {
+      getUINativeModule().web.setBlankScreenDetectionConfig(node,
+                                                            this.value.enable,
+                                                            this.value.detectionTiming,
+                                                            this.value.detectionMethods,
+                                                            this.value.contentfulNodesCountThreshold);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+WebBlankScreenDetectionConfigModifier.identity = Symbol('webBlankScreenDetectionConfigModifier');
+  
 class WebOnContextMenuShowModifier extends ModifierWithKey {
   constructor(value) {
       super(value);

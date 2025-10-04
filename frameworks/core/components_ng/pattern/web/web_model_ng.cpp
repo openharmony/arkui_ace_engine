@@ -2592,6 +2592,26 @@ void WebModelNG::SetBlankScreenDetectionConfig(bool enable, const std::vector<do
     webPattern->UpdateBlankScreenDetectionConfig(config);
 }
 
+void WebModelNG::SetOnDetectedBlankScreen(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo> &info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnDetectedBlankScreenEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetBlankScreenDetectionConfig(FrameNode* frameNode, const BlankScreenDetectionConfig& detectConfig)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateBlankScreenDetectionConfig(detectConfig);
+}
+
 void WebModelNG::SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
