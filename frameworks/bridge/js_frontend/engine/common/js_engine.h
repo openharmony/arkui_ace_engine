@@ -322,6 +322,8 @@ public:
 
     virtual void NotifyUIIdle() {}
 
+    virtual void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs) {}
+
     virtual std::string GetStacktraceMessage()
     {
         return "";

@@ -3059,9 +3059,9 @@ HWTEST_F(PanelTestNg, PanelTestNg0058, TestSize.Level1)
      * step1. GetLinearLayoutProperty
      */
     auto patternCreator = []() -> RefPtr<Pattern> { return AceType::MakeRefPtr<SlidingPanelPattern>(); };
-    ElementRegister::GetInstance()->itemMap_.clear();
+    ElementRegister::GetInstance()->Clear();
     auto temp = AceType::MakeRefPtr<SlidingPanelNode>("test", 1, AceType::MakeRefPtr<Pattern>());
-    ElementRegister::GetInstance()->itemMap_.emplace(std::make_pair(5, AceType::WeakClaim(AceType::RawPtr(temp))));
+    ElementRegister::GetInstance()->AddReferenced(5, AceType::WeakClaim(AceType::RawPtr(temp)));
     auto columnLayoutProperty = slidingPanelModelNG.GetOrCreateSlidingPanelNode(V2::PANEL_ETS_TAG, 5, patternCreator);
     EXPECT_NE(columnLayoutProperty, nullptr);
     auto panelNode = ElementRegister::GetInstance()->GetSpecificItemById<SlidingPanelNode>(5);

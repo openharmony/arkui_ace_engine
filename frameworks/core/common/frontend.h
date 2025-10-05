@@ -375,6 +375,8 @@ public:
     // flush frontend for HotReload feature in NG
     virtual void HotReload() {}
 
+    virtual void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs) {}
+
     State GetState() const
     {
         return state_;

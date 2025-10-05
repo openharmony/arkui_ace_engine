@@ -181,6 +181,7 @@ public:
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;
     void NotifyAppStorage(const std::string& key, const std::string& value) override;
+    void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs) override;
     RefPtr<AceEventHandler> GetEventHandler() override
     {
         return handler_;
