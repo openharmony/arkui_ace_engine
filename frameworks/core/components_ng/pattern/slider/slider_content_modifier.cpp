@@ -735,7 +735,8 @@ void SliderContentModifier::DrawBlock(DrawingContext& context)
         } else if (blockType == SliderModelNG::BlockStyleType::IMAGE) {
             auto blockCenter = GetBlockCenter();
             if (updateImageCenterCallback_) {
-                updateImageCenterCallback_(blockCenter);
+                auto updateImageCenterCallback = updateImageCenterCallback_;
+                updateImageCenterCallback(blockCenter);
             }
         }
     }
