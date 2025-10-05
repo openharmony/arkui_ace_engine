@@ -961,7 +961,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         this.__commonStyles.push((instance: CommonMethod): void => instance.stateStyles(value));
         return this
     }
-    restoreId(value: number | undefined): this {
+    restoreId(value: int32 | undefined): this {
         this.__commonStyles.push((instance: CommonMethod): void => instance.restoreId(value));
         return this
     }
@@ -1126,7 +1126,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         this.__commonStyles.push((instance: CommonMethod): void => instance.foregroundBlurStyle(style, options, sysOptions));
         return this
     }
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
         this.__commonStyles.push((instance: CommonMethod): void => instance.onClick(event, distanceThreshold));
         return this
     }
@@ -1246,7 +1246,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         this.__commonStyles.push((instance: CommonMethod): void => instance.bindSheet(isShow, builder, options));
         return this
     }
-    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         this.__commonStyles.push((instance: CommonMethod): void => instance.onVisibleAreaChange(ratios, event));
         return this
     }

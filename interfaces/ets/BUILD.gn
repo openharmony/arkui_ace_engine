@@ -55,5 +55,7 @@ group("ace_ani_package") {
     "${ace_root}/interfaces/ets/ani/shape:shape_etc",
     "${ace_root}/interfaces/ets/ani/systemprompt:systemprompt_ani",
     "${ace_root}/interfaces/ets/ani/systemprompt:systemprompt_etc",
+    "${ace_root}/interfaces/ets/ani/test:test_ani",
+    "${ace_root}/interfaces/ets/ani/test:test_etc",
   ]
 }

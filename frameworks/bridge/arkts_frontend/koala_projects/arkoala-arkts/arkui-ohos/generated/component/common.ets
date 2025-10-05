@@ -83,18 +83,18 @@ import { ArkUIAniModule } from "arkui.ani"
 // instructive change end
 export interface BaseEvent {
     target: EventTarget
-    timestamp: number
+    timestamp: int64
     source: SourceType
-    axisHorizontal?: number | undefined
-    axisVertical?: number | undefined
-    pressure: number
-    tiltX: number
-    tiltY: number
-    rollAngle?: number | undefined
+    axisHorizontal?: double | undefined
+    axisVertical?: double | undefined
+    pressure: double
+    tiltX: double
+    tiltY: double
+    rollAngle?: double | undefined
     sourceTool: SourceTool
     getModifierKeyState?: ModifierKeyStateGetter | undefined
-    deviceId?: number | undefined
-    targetDisplayId?: number | undefined
+    deviceId?: int32 | undefined
+    targetDisplayId?: int32 | undefined
 }
 export class BaseEventInternal implements MaterializedBase,BaseEvent {
     peer?: Finalizable | undefined = undefined
@@ -107,10 +107,10 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     set target(target: EventTarget) {
         this.setTarget(target)
     }
-    get timestamp(): number {
+    get timestamp(): int64 {
         return this.getTimestamp()
     }
-    set timestamp(timestamp: number) {
+    set timestamp(timestamp: int64) {
         this.setTimestamp(timestamp)
     }
     get source(): SourceType {
@@ -119,43 +119,43 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     set source(source: SourceType) {
         this.setSource(source)
     }
-    get axisHorizontal(): number | undefined {
+    get axisHorizontal(): double | undefined {
         return this.getAxisHorizontal()
     }
-    set axisHorizontal(axisHorizontal: number | undefined) {
-        const axisHorizontal_NonNull  = (axisHorizontal as number)
+    set axisHorizontal(axisHorizontal: double | undefined) {
+        const axisHorizontal_NonNull  = (axisHorizontal as double)
         this.setAxisHorizontal(axisHorizontal_NonNull)
     }
-    get axisVertical(): number | undefined {
+    get axisVertical(): double | undefined {
         return this.getAxisVertical()
     }
-    set axisVertical(axisVertical: number | undefined) {
-        const axisVertical_NonNull  = (axisVertical as number)
+    set axisVertical(axisVertical: double | undefined) {
+        const axisVertical_NonNull  = (axisVertical as double)
         this.setAxisVertical(axisVertical_NonNull)
     }
-    get pressure(): number {
+    get pressure(): double {
         return this.getPressure()
     }
-    set pressure(pressure: number) {
+    set pressure(pressure: double) {
         this.setPressure(pressure)
     }
-    get tiltX(): number {
+    get tiltX(): double {
         return this.getTiltX()
     }
-    set tiltX(tiltX: number) {
+    set tiltX(tiltX: double) {
         this.setTiltX(tiltX)
     }
-    get tiltY(): number {
+    get tiltY(): double {
         return this.getTiltY()
     }
-    set tiltY(tiltY: number) {
+    set tiltY(tiltY: double) {
         this.setTiltY(tiltY)
     }
-    get rollAngle(): number | undefined {
+    get rollAngle(): double | undefined {
         return this.getRollAngle()
     }
-    set rollAngle(rollAngle: number | undefined) {
-        const rollAngle_NonNull  = (rollAngle as number)
+    set rollAngle(rollAngle: double | undefined) {
+        const rollAngle_NonNull = (rollAngle as double)
         this.setRollAngle(rollAngle_NonNull)
     }
     get sourceTool(): SourceTool {
@@ -171,18 +171,18 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         const getModifierKeyState_NonNull  = (getModifierKeyState as ModifierKeyStateGetter)
         this.setGetModifierKeyState(getModifierKeyState_NonNull)
     }
-    get deviceId(): number | undefined {
+    get deviceId(): int32 | undefined {
         return this.getDeviceId()
     }
-    set deviceId(deviceId: number | undefined) {
-        const deviceId_NonNull  = (deviceId as number)
+    set deviceId(deviceId: int32 | undefined) {
+        const deviceId_NonNull  = (deviceId as int32)
         this.setDeviceId(deviceId_NonNull)
     }
-    get targetDisplayId(): number | undefined {
+    get targetDisplayId(): int32 | undefined {
         return this.getTargetDisplayId()
     }
-    set targetDisplayId(targetDisplayId: number | undefined) {
-        const targetDisplayId_NonNull  = (targetDisplayId as number)
+    set targetDisplayId(targetDisplayId: int32 | undefined) {
+        const targetDisplayId_NonNull  = (targetDisplayId as int32)
         this.setTargetDisplayId(targetDisplayId_NonNull)
     }
     constructor(peerPtr: KPointer) {
@@ -209,11 +209,11 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         this.setTarget_serialize(target_casted)
         return
     }
-    private getTimestamp(): number {
+    private getTimestamp(): int64 {
         return this.getTimestamp_serialize()
     }
-    private setTimestamp(timestamp: number): void {
-        const timestamp_casted = timestamp as (number)
+    private setTimestamp(timestamp: int64): void {
+        const timestamp_casted = timestamp as (int64)
         this.setTimestamp_serialize(timestamp_casted)
         return
     }
@@ -225,51 +225,51 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         this.setSource_serialize(source_casted)
         return
     }
-    private getAxisHorizontal(): number | undefined {
+    private getAxisHorizontal(): double | undefined {
         return this.getAxisHorizontal_serialize()
     }
-    private setAxisHorizontal(axisHorizontal: number | undefined): void {
-        const axisHorizontal_casted = axisHorizontal as (number | undefined)
+    private setAxisHorizontal(axisHorizontal: double | undefined): void {
+        const axisHorizontal_casted = axisHorizontal as (double | undefined)
         this.setAxisHorizontal_serialize(axisHorizontal_casted)
         return
     }
-    private getAxisVertical(): number | undefined {
+    private getAxisVertical(): double | undefined {
         return this.getAxisVertical_serialize()
     }
-    private setAxisVertical(axisVertical: number | undefined): void {
-        const axisVertical_casted = axisVertical as (number | undefined)
+    private setAxisVertical(axisVertical: double | undefined): void {
+        const axisVertical_casted = axisVertical as (double | undefined)
         this.setAxisVertical_serialize(axisVertical_casted)
         return
     }
-    private getPressure(): number {
+    private getPressure(): double {
         return this.getPressure_serialize()
     }
-    private setPressure(pressure: number): void {
-        const pressure_casted = pressure as (number)
+    private setPressure(pressure: double): void {
+        const pressure_casted = pressure as (double)
         this.setPressure_serialize(pressure_casted)
         return
     }
-    private getTiltX(): number {
+    private getTiltX(): double {
         return this.getTiltX_serialize()
     }
-    private setTiltX(tiltX: number): void {
-        const tiltX_casted = tiltX as (number)
+    private setTiltX(tiltX: double): void {
+        const tiltX_casted = tiltX as (double)
         this.setTiltX_serialize(tiltX_casted)
         return
     }
-    private getTiltY(): number {
+    private getTiltY(): double {
         return this.getTiltY_serialize()
     }
-    private setTiltY(tiltY: number): void {
-        const tiltY_casted = tiltY as (number)
+    private setTiltY(tiltY: double): void {
+        const tiltY_casted = tiltY as (double)
         this.setTiltY_serialize(tiltY_casted)
         return
     }
-    private getRollAngle(): number | undefined {
+    private getRollAngle(): double | undefined {
         return this.getRollAngle_serialize()
     }
-    private setRollAngle(rollAngle: number | undefined): void {
-        const rollAngle_casted = rollAngle as (number | undefined)
+    private setRollAngle(rollAngle: double | undefined): void {
+        const rollAngle_casted = rollAngle as (double | undefined)
         this.setRollAngle_serialize(rollAngle_casted)
         return
     }
@@ -289,19 +289,19 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         this.setGetModifierKeyState_serialize(getModifierKeyState_casted)
         return
     }
-    private getDeviceId(): number | undefined {
+    private getDeviceId(): int32 | undefined {
         return this.getDeviceId_serialize()
     }
-    private setDeviceId(deviceId: number | undefined): void {
-        const deviceId_casted = deviceId as (number | undefined)
+    private setDeviceId(deviceId: int32 | undefined): void {
+        const deviceId_casted = deviceId as (int32 | undefined)
         this.setDeviceId_serialize(deviceId_casted)
         return
     }
-    private getTargetDisplayId(): number | undefined {
+    private getTargetDisplayId(): int32 | undefined {
         return this.getTargetDisplayId_serialize()
     }
-    private setTargetDisplayId(targetDisplayId: number | undefined): void {
-        const targetDisplayId_casted = targetDisplayId as (number | undefined)
+    private setTargetDisplayId(targetDisplayId: int32 | undefined): void {
+        const targetDisplayId_casted = targetDisplayId as (int32 | undefined)
         this.setTargetDisplayId_serialize(targetDisplayId_casted)
         return
     }
@@ -317,11 +317,11 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         ArkUIGeneratedNativeModule._BaseEvent_setTarget(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getTimestamp_serialize(): number {
+    private getTimestamp_serialize(): int64 {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTimestamp(this.peer!.ptr)
         return retval
     }
-    private setTimestamp_serialize(timestamp: number): void {
+    private setTimestamp_serialize(timestamp: int64): void {
         ArkUIGeneratedNativeModule._BaseEvent_setTimestamp(this.peer!.ptr, timestamp)
     }
     private getSource_serialize(): SourceType {
@@ -331,90 +331,90 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     private setSource_serialize(source: SourceType): void {
         ArkUIGeneratedNativeModule._BaseEvent_setSource(this.peer!.ptr, source.valueOf())
     }
-    private getAxisHorizontal_serialize(): number | undefined {
+    private getAxisHorizontal_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisHorizontal(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setAxisHorizontal_serialize(axisHorizontal: number | undefined): void {
+    private setAxisHorizontal_serialize(axisHorizontal: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (axisHorizontal !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const axisHorizontalTmpValue  = axisHorizontal!
-            thisSerializer.writeNumber(axisHorizontalTmpValue)
+            thisSerializer.writeFloat64(axisHorizontalTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._BaseEvent_setAxisHorizontal(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getAxisVertical_serialize(): number | undefined {
+    private getAxisVertical_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisVertical(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setAxisVertical_serialize(axisVertical: number | undefined): void {
+    private setAxisVertical_serialize(axisVertical: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (axisVertical !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const axisVerticalTmpValue  = axisVertical!
-            thisSerializer.writeNumber(axisVerticalTmpValue)
+            thisSerializer.writeFloat64(axisVerticalTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._BaseEvent_setAxisVertical(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getPressure_serialize(): number {
+    private getPressure_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getPressure(this.peer!.ptr)
         return retval
     }
-    private setPressure_serialize(pressure: number): void {
+    private setPressure_serialize(pressure: double): void {
         ArkUIGeneratedNativeModule._BaseEvent_setPressure(this.peer!.ptr, pressure)
     }
-    private getTiltX_serialize(): number {
+    private getTiltX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTiltX(this.peer!.ptr)
         return retval
     }
-    private setTiltX_serialize(tiltX: number): void {
+    private setTiltX_serialize(tiltX: double): void {
         ArkUIGeneratedNativeModule._BaseEvent_setTiltX(this.peer!.ptr, tiltX)
     }
-    private getTiltY_serialize(): number {
+    private getTiltY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTiltY(this.peer!.ptr)
         return retval
     }
-    private setTiltY_serialize(tiltY: number): void {
+    private setTiltY_serialize(tiltY: double): void {
         ArkUIGeneratedNativeModule._BaseEvent_setTiltY(this.peer!.ptr, tiltY)
     }
-    private getRollAngle_serialize(): number | undefined {
+    private getRollAngle_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getRollAngle(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setRollAngle_serialize(rollAngle: number | undefined): void {
+    private setRollAngle_serialize(rollAngle: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (rollAngle !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const rollAngleTmpValue  = rollAngle!
-            thisSerializer.writeNumber(rollAngleTmpValue)
+            thisSerializer.writeFloat64(rollAngleTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -472,46 +472,46 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         ArkUIGeneratedNativeModule._BaseEvent_setGetModifierKeyState(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getDeviceId_serialize(): number | undefined {
+    private getDeviceId_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getDeviceId(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readInt32()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
-    private setDeviceId_serialize(deviceId: number | undefined): void {
+    private setDeviceId_serialize(deviceId: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (deviceId !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const deviceIdTmpValue  = deviceId!
-            thisSerializer.writeNumber(deviceIdTmpValue)
+            thisSerializer.writeInt32(deviceIdTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._BaseEvent_setDeviceId(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getTargetDisplayId_serialize(): number | undefined {
+    private getTargetDisplayId_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTargetDisplayId(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readInt32()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
-    private setTargetDisplayId_serialize(targetDisplayId: number | undefined): void {
+    private setTargetDisplayId_serialize(targetDisplayId: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (targetDisplayId !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const targetDisplayIdTmpValue  = targetDisplayId!
-            thisSerializer.writeNumber(targetDisplayIdTmpValue)
+            thisSerializer.writeInt32(targetDisplayIdTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -661,19 +661,19 @@ export interface DragEvent {
     dragBehavior: DragBehavior
     useCustomDropAnimation: boolean
     getModifierKeyState?: ModifierKeyStateGetter | undefined
-    getDisplayX(): number
-    getDisplayY(): number
-    getWindowX(): number
-    getWindowY(): number
+    getDisplayX(): double
+    getDisplayY(): double
+    getWindowX(): double
+    getWindowY(): double
     setData(unifiedData: unifiedDataChannel.UnifiedData): void
     getData(): unifiedDataChannel.UnifiedData
     getSummary(): unifiedDataChannel.Summary
     setResult(dragResult: DragResult): void
     getResult(): DragResult
     getPreviewRect(): Rectangle
-    getVelocityX(): number
-    getVelocityY(): number
-    getVelocity(): number
+    getVelocityX(): double
+    getVelocityY(): double
+    getVelocity(): double
     executeDropAnimation(customDropAnimation: (() => void)): void
     startDataLoading(options: unifiedDataChannel.GetDataParams): string
     enableInternalDropAnimation(configuration: string): void
@@ -718,16 +718,16 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public static fromPtr(ptr: KPointer): DragEventInternal {
         return new DragEventInternal(ptr)
     }
-    public getDisplayX(): number {
+    public getDisplayX(): double {
         return this.getDisplayX_serialize()
     }
-    public getDisplayY(): number {
+    public getDisplayY(): double {
         return this.getDisplayY_serialize()
     }
-    public getWindowX(): number {
+    public getWindowX(): double {
         return this.getWindowX_serialize()
     }
-    public getWindowY(): number {
+    public getWindowY(): double {
         return this.getWindowY_serialize()
     }
     public setData(unifiedData: unifiedDataChannel.UnifiedData): void {
@@ -752,13 +752,13 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public getPreviewRect(): Rectangle {
         return this.getPreviewRect_serialize()
     }
-    public getVelocityX(): number {
+    public getVelocityX(): double {
         return this.getVelocityX_serialize()
     }
-    public getVelocityY(): number {
+    public getVelocityY(): double {
         return this.getVelocityY_serialize()
     }
-    public getVelocity(): number {
+    public getVelocity(): double {
         return this.getVelocity_serialize()
     }
     public executeDropAnimation(customDropAnimation: (() => void)): void {
@@ -798,19 +798,19 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.setGetModifierKeyState_serialize(getModifierKeyState_casted)
         return
     }
-    getDisplayX_serialize(): number {
+    getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getDisplayX(this.peer!.ptr)
         return retval
     }
-    getDisplayY_serialize(): number {
+    getDisplayY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getDisplayY(this.peer!.ptr)
         return retval
     }
-    getWindowX_serialize(): number {
+    getWindowX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getWindowX(this.peer!.ptr)
         return retval
     }
-    getWindowY_serialize(): number {
+    getWindowY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getWindowY(this.peer!.ptr)
         return retval
     }
@@ -840,15 +840,15 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         const returnResult : Rectangle = Rectangle_serializer.read(retvalDeserializer)
         return returnResult
     }
-    getVelocityX_serialize(): number {
+    getVelocityX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getVelocityX(this.peer!.ptr)
         return retval
     }
-    getVelocityY_serialize(): number {
+    getVelocityY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getVelocityY(this.peer!.ptr)
         return retval
     }
-    getVelocity_serialize(): number {
+    getVelocity_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getVelocity(this.peer!.ptr)
         return retval
     }
@@ -923,16 +923,16 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
 
 export interface KeyEvent {
     type: KeyType
-    keyCode: number
+    keyCode: int32
     keyText: string
     keySource: KeySource
-    deviceId: number
-    metaKey: number
-    timestamp: number
+    deviceId: int32
+    metaKey: int32
+    timestamp: int64
     stopPropagation: (() => void)
     intentionCode: IntentionCode
     getModifierKeyState?: ModifierKeyStateGetter | undefined
-    unicode?: number | undefined
+    unicode?: int64 | undefined
 }
 export class KeyEventInternal implements MaterializedBase,KeyEvent {
     peer?: Finalizable | undefined = undefined
@@ -945,10 +945,10 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     set type(type: KeyType) {
         this.setType(type)
     }
-    get keyCode(): number {
+    get keyCode(): int32 {
         return this.getKeyCode()
     }
-    set keyCode(keyCode: number) {
+    set keyCode(keyCode: int32) {
         this.setKeyCode(keyCode)
     }
     get keyText(): string {
@@ -963,22 +963,22 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     set keySource(keySource: KeySource) {
         this.setKeySource(keySource)
     }
-    get deviceId(): number {
+    get deviceId(): int32 {
         return this.getDeviceId()
     }
-    set deviceId(deviceId: number) {
+    set deviceId(deviceId: int32) {
         this.setDeviceId(deviceId)
     }
-    get metaKey(): number {
+    get metaKey(): int32 {
         return this.getMetaKey()
     }
-    set metaKey(metaKey: number) {
+    set metaKey(metaKey: int32) {
         this.setMetaKey(metaKey)
     }
-    get timestamp(): number {
+    get timestamp(): int64 {
         return this.getTimestamp()
     }
-    set timestamp(timestamp: number) {
+    set timestamp(timestamp: int64) {
         this.setTimestamp(timestamp)
     }
     get stopPropagation(): (() => void) {
@@ -1000,11 +1000,11 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         const getModifierKeyState_NonNull  = (getModifierKeyState as ModifierKeyStateGetter)
         this.setGetModifierKeyState(getModifierKeyState_NonNull)
     }
-    get unicode(): number | undefined {
+    get unicode(): int64 | undefined {
         return this.getUnicode()
     }
-    set unicode(unicode: number | undefined) {
-        const unicode_NonNull  = (unicode as number)
+    set unicode(unicode: int64 | undefined) {
+        const unicode_NonNull  = (unicode as int64)
         this.setUnicode(unicode_NonNull)
     }
     constructor(peerPtr: KPointer) {
@@ -1031,11 +1031,11 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setType_serialize(type_casted)
         return
     }
-    private getKeyCode(): number {
+    private getKeyCode(): int32 {
         return this.getKeyCode_serialize()
     }
-    private setKeyCode(keyCode: number): void {
-        const keyCode_casted = keyCode as (number)
+    private setKeyCode(keyCode: int32): void {
+        const keyCode_casted = keyCode as (int32)
         this.setKeyCode_serialize(keyCode_casted)
         return
     }
@@ -1055,27 +1055,27 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setKeySource_serialize(keySource_casted)
         return
     }
-    private getDeviceId(): number {
+    private getDeviceId(): int32 {
         return this.getDeviceId_serialize()
     }
-    private setDeviceId(deviceId: number): void {
-        const deviceId_casted = deviceId as (number)
+    private setDeviceId(deviceId: int32): void {
+        const deviceId_casted = deviceId as (int32)
         this.setDeviceId_serialize(deviceId_casted)
         return
     }
-    private getMetaKey(): number {
+    private getMetaKey(): int32 {
         return this.getMetaKey_serialize()
     }
-    private setMetaKey(metaKey: number): void {
-        const metaKey_casted = metaKey as (number)
+    private setMetaKey(metaKey: int32): void {
+        const metaKey_casted = metaKey as (int32)
         this.setMetaKey_serialize(metaKey_casted)
         return
     }
-    private getTimestamp(): number {
+    private getTimestamp(): int64 {
         return this.getTimestamp_serialize()
     }
-    private setTimestamp(timestamp: number): void {
-        const timestamp_casted = timestamp as (number)
+    private setTimestamp(timestamp: int64): void {
+        const timestamp_casted = timestamp as (int64)
         this.setTimestamp_serialize(timestamp_casted)
         return
     }
@@ -1103,11 +1103,11 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setGetModifierKeyState_serialize(getModifierKeyState_casted)
         return
     }
-    private getUnicode(): number | undefined {
+    private getUnicode(): int64 | undefined {
         return this.getUnicode_serialize()
     }
-    private setUnicode(unicode: number | undefined): void {
-        const unicode_casted = unicode as (number | undefined)
+    private setUnicode(unicode: int64 | undefined): void {
+        const unicode_casted = unicode as (int64 | undefined)
         this.setUnicode_serialize(unicode_casted)
         return
     }
@@ -1118,11 +1118,11 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     private setType_serialize(type: KeyType): void {
         ArkUIGeneratedNativeModule._KeyEvent_setType(this.peer!.ptr, type.valueOf())
     }
-    private getKeyCode_serialize(): number {
+    private getKeyCode_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getKeyCode(this.peer!.ptr)
         return retval
     }
-    private setKeyCode_serialize(keyCode: number): void {
+    private setKeyCode_serialize(keyCode: int32): void {
         ArkUIGeneratedNativeModule._KeyEvent_setKeyCode(this.peer!.ptr, keyCode)
     }
     private getKeyText_serialize(): string {
@@ -1139,25 +1139,25 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     private setKeySource_serialize(keySource: KeySource): void {
         ArkUIGeneratedNativeModule._KeyEvent_setKeySource(this.peer!.ptr, keySource.valueOf())
     }
-    private getDeviceId_serialize(): number {
+    private getDeviceId_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getDeviceId(this.peer!.ptr)
         return retval
     }
-    private setDeviceId_serialize(deviceId: number): void {
+    private setDeviceId_serialize(deviceId: int32): void {
         ArkUIGeneratedNativeModule._KeyEvent_setDeviceId(this.peer!.ptr, deviceId)
     }
-    private getMetaKey_serialize(): number {
+    private getMetaKey_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getMetaKey(this.peer!.ptr)
         return retval
     }
-    private setMetaKey_serialize(metaKey: number): void {
+    private setMetaKey_serialize(metaKey: int32): void {
         ArkUIGeneratedNativeModule._KeyEvent_setMetaKey(this.peer!.ptr, metaKey)
     }
-    private getTimestamp_serialize(): number {
+    private getTimestamp_serialize(): int64 {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getTimestamp(this.peer!.ptr)
         return retval
     }
-    private setTimestamp_serialize(timestamp: number): void {
+    private setTimestamp_serialize(timestamp: int64): void {
         ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp)
     }
     private getStopPropagation_serialize(): (() => void) {
@@ -1242,23 +1242,23 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         ArkUIGeneratedNativeModule._KeyEvent_setGetModifierKeyState(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getUnicode_serialize(): number | undefined {
+    private getUnicode_serialize(): int64 | undefined {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getUnicode(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int64 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readInt64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int64 | undefined = buffer
         return returnResult
     }
-    private setUnicode_serialize(unicode: number | undefined): void {
+    private setUnicode_serialize(unicode: int64 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (unicode !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const unicodeTmpValue  = unicode!
-            thisSerializer.writeNumber(unicodeTmpValue)
+            thisSerializer.writeInt64(unicodeTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -4271,12 +4271,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setGeometryTransition0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setRestoreIdAttribute(value: number | undefined): void {
+    setRestoreIdAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -4886,7 +4886,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setForegroundBlurStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnClick1Attribute(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): void {
+    setOnClick1Attribute(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (event !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4898,7 +4898,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (distanceThreshold !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const distanceThresholdTmpValue  = distanceThreshold!
-            thisSerializer.writeNumber(distanceThresholdTmpValue)
+            thisSerializer.writeFloat64(distanceThresholdTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5525,15 +5525,15 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBindSheet(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnVisibleAreaChangeAttribute(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): void {
+    setOnVisibleAreaChangeAttribute(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (ratios !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const ratiosTmpValue  = ratios!
             thisSerializer.writeInt32((ratiosTmpValue.length).toInt())
             for (let ratiosTmpValueCounterI = 0; ratiosTmpValueCounterI < ratiosTmpValue.length; ratiosTmpValueCounterI++) {
-                const ratiosTmpValueTmpElement : number = ratiosTmpValue[ratiosTmpValueCounterI]
-                thisSerializer.writeNumber(ratiosTmpValueTmpElement)
+                const ratiosTmpValueTmpElement : double = ratiosTmpValue[ratiosTmpValueCounterI]
+                thisSerializer.writeFloat64(ratiosTmpValueTmpElement)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -6466,8 +6466,8 @@ export interface AsymmetricTransitionOption {
     disappear: TransitionEffect;
 }
 export interface ItemDragInfo {
-    x: number;
-    y: number;
+    x: double;
+    y: double;
 }
 export enum EffectType {
     DEFAULT = 0,
@@ -6668,24 +6668,24 @@ export interface BorderImageOption {
 }
 export interface TouchObject {
     type: TouchType;
-    id: number;
-    displayX: number;
-    displayY: number;
-    windowX: number;
-    windowY: number;
-    x: number;
-    y: number;
+    id: int32;
+    displayX: double;
+    displayY: double;
+    windowX: double;
+    windowY: double;
+    x: double;
+    y: double;
     hand?: InteractionHand;
-    pressedTime?: number;
-    pressure?: number;
-    width?: number;
-    height?: number;
+    pressedTime?: int64;
+    pressure?: double;
+    width?: double;
+    height?: double;
 }
 export interface HistoricalPoint {
     touchObject: TouchObject;
-    size: number;
-    force: number;
-    timestamp: number;
+    size: int32;
+    force: double;
+    timestamp: int64;
 }
 export type SizeChangeCallback = (oldValue: SizeOptions, newValue: SizeOptions) => void;
 export type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>) => GestureJudgeResult;
@@ -6749,9 +6749,9 @@ export interface DropOptions {
     disableDataPrefetch?: boolean;
 }
 export interface CrownEvent {
-    timestamp: number;
-    angularVelocity: number;
-    degree: number;
+    timestamp: int64;
+    angularVelocity: double;
+    degree: double;
     action: CrownAction;
     stopPropagation: (() => void);
 }
@@ -7064,7 +7064,7 @@ export interface PixelStretchEffectOptions {
 }
 export interface ClickEffect {
     level: ClickEffectLevel;
-    scale?: number;
+    scale?: double;
 }
 export interface FadingEdgeOptions {
     fadingEdgeLength?: LengthMetrics;
@@ -7111,7 +7111,7 @@ export enum MenuPolicy {
 export interface DragPreviewOptions {
     mode?: DragPreviewMode | Array<DragPreviewMode>;
     modifier?: ImageModifier;
-    numberBadge?: boolean | number;
+    numberBadge?: boolean | int64;
     sizeChangeEffect?: DraggingSizeChangeEffect;
 }
 export interface DragInteractionOptions {
@@ -7529,7 +7529,7 @@ export interface CommonMethod {
     stateStyles(value: StateStyles | undefined): this {
         throw new Error("Unimplemented method stateStyles")
     }
-    restoreId(value: number | undefined): this {
+    restoreId(value: int32 | undefined): this {
         throw new Error("Unimplemented method restoreId")
     }
     sphericalEffect(value: double | undefined): this {
@@ -7658,7 +7658,7 @@ export interface CommonMethod {
     foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
         throw new Error("Unimplemented method foregroundBlurStyle")
     }
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
         throw new Error("Unimplemented method onClick")
     }
     focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
@@ -7748,7 +7748,7 @@ export interface CommonMethod {
     bindSheet(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
         throw new Error("Unimplemented method bindSheet")
     }
-    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         throw new Error("Unimplemented method onVisibleAreaChange")
     }
     onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
@@ -7903,7 +7903,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     id_value?: string | undefined
     geometryTransition_value?: string | undefined
     stateStyles_value?: StateStyles | undefined
-    restoreId_value?: number | undefined
+    restoreId_value?: int32 | undefined
     sphericalEffect_value?: double | undefined
     lightUpEffect_value?: double | undefined
     pixelStretchEffect_value?: PixelStretchEffectOptions | undefined
@@ -8319,7 +8319,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     stateStyles(value: StateStyles | undefined): this {
         return this
     }
-    restoreId(value: number | undefined): this {
+    restoreId(value: int32 | undefined): this {
         return this
     }
     sphericalEffect(value: double | undefined): this {
@@ -8448,7 +8448,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
         return this
     }
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
         return this
     }
     focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
@@ -8538,7 +8538,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     bindSheet(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
         return this
     }
-    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         return this
     }
     onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
@@ -8563,8 +8563,8 @@ export interface OverlayOptions {
     offset?: OverlayOffset;
 }
 export interface OverlayOffset {
-    x?: number;
-    y?: number;
+    x?: double;
+    y?: double;
 }
 export type FractionStop = [
     double,
@@ -8870,10 +8870,10 @@ export type Callback<T = void,V = void> = (data: T) => V;
 export type HoverCallback = (isHover: boolean, event: HoverEvent) => void;
 export type AccessibilityCallback = (isHover: boolean, event: AccessibilityHoverEvent) => void;
 export interface VisibleAreaEventOptions {
-    ratios: Array<number>;
-    expectedUpdateInterval?: number;
+    ratios: Array<double>;
+    expectedUpdateInterval?: int32;
 }
-export type VisibleAreaChangeCallback = (isExpanding: boolean, currentRatio: number) => void;
+export type VisibleAreaChangeCallback = (isExpanding: boolean, currentRatio: double) => void;
 export interface SelectionOptions {
     menuPolicy?: MenuPolicy;
 }
@@ -9940,9 +9940,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public restoreId(value: number | undefined): this {
+    public restoreId(value: int32 | undefined): this {
         if (this.checkPriority("restoreId")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setRestoreIdAttribute(value_casted)
             return this
         }
@@ -10317,10 +10317,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+    public onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
         if (this.checkPriority("onClick")) {
             const event_casted = event as (((event: ClickEvent) => void) | undefined)
-            const distanceThreshold_casted = distanceThreshold as (number | undefined)
+            const distanceThreshold_casted = distanceThreshold as (double | undefined)
             this.getPeer()?.setOnClick1Attribute(event_casted, distanceThreshold_casted)
             return this
         }
@@ -10583,9 +10583,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+    public onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         if (this.checkPriority("onVisibleAreaChange")) {
-            const ratios_casted = ratios as (Array<number> | undefined)
+            const ratios_casted = ratios as (Array<double> | undefined)
             const event_casted = event as (VisibleAreaChangeCallback | undefined)
             this.getPeer()?.setOnVisibleAreaChangeAttribute(ratios_casted, event_casted)
             return this
@@ -11099,17 +11099,17 @@ export class TouchTestInfo_serializer {
     public static write(buffer: SerializerBase, value: TouchTestInfo): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForWindowX  = value.windowX
-        valueSerializer.writeNumber(valueHolderForWindowX)
+        valueSerializer.writeFloat64(valueHolderForWindowX)
         const valueHolderForWindowY  = value.windowY
-        valueSerializer.writeNumber(valueHolderForWindowY)
+        valueSerializer.writeFloat64(valueHolderForWindowY)
         const valueHolderForParentX  = value.parentX
-        valueSerializer.writeNumber(valueHolderForParentX)
+        valueSerializer.writeFloat64(valueHolderForParentX)
         const valueHolderForParentY  = value.parentY
-        valueSerializer.writeNumber(valueHolderForParentY)
+        valueSerializer.writeFloat64(valueHolderForParentY)
         const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
+        valueSerializer.writeFloat64(valueHolderForX)
         const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
+        valueSerializer.writeFloat64(valueHolderForY)
         const valueHolderForRect  = value.rect
         RectResult_serializer.write(valueSerializer, valueHolderForRect)
         const valueHolderForId  = value.id
@@ -11117,12 +11117,12 @@ export class TouchTestInfo_serializer {
     }
     public static read(buffer: DeserializerBase): TouchTestInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const windowXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const windowYTmpResult : number = (valueDeserializer.readNumber() as number)
-        const parentXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const parentYTmpResult : number = (valueDeserializer.readNumber() as number)
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const windowXTmpResult : double = valueDeserializer.readFloat64()
+        const windowYTmpResult : double = valueDeserializer.readFloat64()
+        const parentXTmpResult : double = valueDeserializer.readFloat64()
+        const parentYTmpResult : double = valueDeserializer.readFloat64()
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
         const rectTmpResult : RectResult = RectResult_serializer.read(valueDeserializer)
         const idTmpResult : string = (valueDeserializer.readString() as string)
         let value : TouchTestInfo = ({windowX: windowXTmpResult, windowY: windowYTmpResult, parentX: parentXTmpResult, parentY: parentYTmpResult, x: xTmpResult, y: yTmpResult, rect: rectTmpResult, id: idTmpResult} as TouchTestInfo)
@@ -11593,7 +11593,7 @@ export class ClickEffect_serializer {
         if (valueHolderForScale !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScaleTmpValue  = valueHolderForScale!
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -11602,11 +11602,11 @@ export class ClickEffect_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const levelTmpResult : ClickEffectLevel = ClickEffectLevel.fromValue(valueDeserializer.readInt32())
         const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let scaleTmpBuf : number | undefined = undefined
+        let scaleTmpBuf : double | undefined = undefined
         if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            scaleTmpBuf = (valueDeserializer.readNumber() as number)
+            scaleTmpBuf = valueDeserializer.readFloat64()
         }
-        const scaleTmpResult : number | undefined = scaleTmpBuf
+        const scaleTmpResult : double | undefined = scaleTmpBuf
         let value : ClickEffect = ({level: levelTmpResult, scale: scaleTmpResult} as ClickEffect)
         return value
     }
@@ -11615,11 +11615,11 @@ export class CrownEvent_serializer {
     public static write(buffer: SerializerBase, value: CrownEvent): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForTimestamp  = value.timestamp
-        valueSerializer.writeNumber(valueHolderForTimestamp)
+        valueSerializer.writeInt64(valueHolderForTimestamp)
         const valueHolderForAngularVelocity  = value.angularVelocity
-        valueSerializer.writeNumber(valueHolderForAngularVelocity)
+        valueSerializer.writeFloat64(valueHolderForAngularVelocity)
         const valueHolderForDegree  = value.degree
-        valueSerializer.writeNumber(valueHolderForDegree)
+        valueSerializer.writeFloat64(valueHolderForDegree)
         const valueHolderForAction  = value.action
         valueSerializer.writeInt32(valueHolderForAction.valueOf())
         const valueHolderForStopPropagation  = value.stopPropagation
@@ -11627,9 +11627,9 @@ export class CrownEvent_serializer {
     }
     public static read(buffer: DeserializerBase): CrownEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const timestampTmpResult : number = (valueDeserializer.readNumber() as number)
-        const angularVelocityTmpResult : number = (valueDeserializer.readNumber() as number)
-        const degreeTmpResult : number = (valueDeserializer.readNumber() as number)
+        const timestampTmpResult : int64 = valueDeserializer.readInt64()
+        const angularVelocityTmpResult : double = valueDeserializer.readFloat64()
+        const degreeTmpResult : double = valueDeserializer.readFloat64()
         const actionTmpResult : CrownAction = CrownAction.fromValue(valueDeserializer.readInt32())
         const stopPropagationTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const stopPropagationTmpBufBufCall : KPointer = valueDeserializer.readPointer()
@@ -12279,14 +12279,14 @@ export class ItemDragInfo_serializer {
     public static write(buffer: SerializerBase, value: ItemDragInfo): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
+        valueSerializer.writeFloat64(valueHolderForX)
         const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
+        valueSerializer.writeFloat64(valueHolderForY)
     }
     public static read(buffer: DeserializerBase): ItemDragInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
         let value : ItemDragInfo = ({x: xTmpResult, y: yTmpResult} as ItemDragInfo)
         return value
     }
@@ -12648,7 +12648,7 @@ export class OverlayOffset_serializer {
         if (valueHolderForX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXTmpValue  = valueHolderForX!
-            valueSerializer.writeNumber(valueHolderForXTmpValue)
+            valueSerializer.writeFloat64(valueHolderForXTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12656,7 +12656,7 @@ export class OverlayOffset_serializer {
         if (valueHolderForY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYTmpValue  = valueHolderForY!
-            valueSerializer.writeNumber(valueHolderForYTmpValue)
+            valueSerializer.writeFloat64(valueHolderForYTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12664,17 +12664,17 @@ export class OverlayOffset_serializer {
     public static read(buffer: DeserializerBase): OverlayOffset {
         let valueDeserializer : DeserializerBase = buffer
         const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xTmpBuf : number | undefined = undefined
+        let xTmpBuf : double | undefined = undefined
         if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            xTmpBuf = (valueDeserializer.readNumber() as number)
+            xTmpBuf = valueDeserializer.readFloat64()
         }
-        const xTmpResult : number | undefined = xTmpBuf
+        const xTmpResult : double | undefined = xTmpBuf
         const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let yTmpBuf : number | undefined = undefined
+        let yTmpBuf : double | undefined = undefined
         if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            yTmpBuf = (valueDeserializer.readNumber() as number)
+            yTmpBuf = valueDeserializer.readFloat64()
         }
-        const yTmpResult : number | undefined = yTmpBuf
+        const yTmpResult : double | undefined = yTmpBuf
         let value : OverlayOffset = ({x: xTmpResult, y: yTmpResult} as OverlayOffset)
         return value
     }
@@ -13392,19 +13392,19 @@ export class TouchObject_serializer {
         const valueHolderForType  = value.type
         valueSerializer.writeInt32(valueHolderForType.valueOf())
         const valueHolderForId  = value.id
-        valueSerializer.writeNumber(valueHolderForId)
+        valueSerializer.writeInt32(valueHolderForId)
         const valueHolderForDisplayX  = value.displayX
-        valueSerializer.writeNumber(valueHolderForDisplayX)
+        valueSerializer.writeFloat64(valueHolderForDisplayX)
         const valueHolderForDisplayY  = value.displayY
-        valueSerializer.writeNumber(valueHolderForDisplayY)
+        valueSerializer.writeFloat64(valueHolderForDisplayY)
         const valueHolderForWindowX  = value.windowX
-        valueSerializer.writeNumber(valueHolderForWindowX)
+        valueSerializer.writeFloat64(valueHolderForWindowX)
         const valueHolderForWindowY  = value.windowY
-        valueSerializer.writeNumber(valueHolderForWindowY)
+        valueSerializer.writeFloat64(valueHolderForWindowY)
         const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
+        valueSerializer.writeFloat64(valueHolderForX)
         const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
+        valueSerializer.writeFloat64(valueHolderForY)
         const valueHolderForHand  = value.hand
         if (valueHolderForHand !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -13417,7 +13417,7 @@ export class TouchObject_serializer {
         if (valueHolderForPressedTime !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPressedTimeTmpValue  = valueHolderForPressedTime!
-            valueSerializer.writeNumber(valueHolderForPressedTimeTmpValue)
+            valueSerializer.writeInt64(valueHolderForPressedTimeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13425,7 +13425,7 @@ export class TouchObject_serializer {
         if (valueHolderForPressure !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPressureTmpValue  = valueHolderForPressure!
-            valueSerializer.writeNumber(valueHolderForPressureTmpValue)
+            valueSerializer.writeFloat64(valueHolderForPressureTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13433,7 +13433,7 @@ export class TouchObject_serializer {
         if (valueHolderForWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
-            valueSerializer.writeNumber(valueHolderForWidthTmpValue)
+            valueSerializer.writeFloat64(valueHolderForWidthTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13441,7 +13441,7 @@ export class TouchObject_serializer {
         if (valueHolderForHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
-            valueSerializer.writeNumber(valueHolderForHeightTmpValue)
+            valueSerializer.writeFloat64(valueHolderForHeightTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13449,13 +13449,13 @@ export class TouchObject_serializer {
     public static read(buffer: DeserializerBase): TouchObject {
         let valueDeserializer : DeserializerBase = buffer
         const typeTmpResult : TouchType = TouchType.fromValue(valueDeserializer.readInt32())
-        const idTmpResult : number = (valueDeserializer.readNumber() as number)
-        const displayXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const displayYTmpResult : number = (valueDeserializer.readNumber() as number)
-        const windowXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const windowYTmpResult : number = (valueDeserializer.readNumber() as number)
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const idTmpResult : int32 = valueDeserializer.readInt32()
+        const displayXTmpResult : double = valueDeserializer.readFloat64()
+        const displayYTmpResult : double = valueDeserializer.readFloat64()
+        const windowXTmpResult : double = valueDeserializer.readFloat64()
+        const windowYTmpResult : double = valueDeserializer.readFloat64()
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
         const handTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let handTmpBuf : InteractionHand | undefined = undefined
         if ((handTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -13463,29 +13463,29 @@ export class TouchObject_serializer {
         }
         const handTmpResult : InteractionHand | undefined = handTmpBuf
         const pressedTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let pressedTimeTmpBuf : number | undefined = undefined
+        let pressedTimeTmpBuf : int64 | undefined = undefined
         if ((pressedTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            pressedTimeTmpBuf = (valueDeserializer.readNumber() as number)
+            pressedTimeTmpBuf = valueDeserializer.readInt64()
         }
-        const pressedTimeTmpResult : number | undefined = pressedTimeTmpBuf
+        const pressedTimeTmpResult : int64 | undefined = pressedTimeTmpBuf
         const pressureTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let pressureTmpBuf : number | undefined = undefined
+        let pressureTmpBuf : double | undefined = undefined
         if ((pressureTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            pressureTmpBuf = (valueDeserializer.readNumber() as number)
+            pressureTmpBuf = valueDeserializer.readFloat64()
         }
-        const pressureTmpResult : number | undefined = pressureTmpBuf
+        const pressureTmpResult : double | undefined = pressureTmpBuf
         const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let widthTmpBuf : number | undefined = undefined
+        let widthTmpBuf : double | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            widthTmpBuf = (valueDeserializer.readNumber() as number)
+            widthTmpBuf = valueDeserializer.readFloat64()
         }
-        const widthTmpResult : number | undefined = widthTmpBuf
+        const widthTmpResult : double | undefined = widthTmpBuf
         const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightTmpBuf : number | undefined = undefined
+        let heightTmpBuf : double | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            heightTmpBuf = (valueDeserializer.readNumber() as number)
+            heightTmpBuf = valueDeserializer.readFloat64()
         }
-        const heightTmpResult : number | undefined = heightTmpBuf
+        const heightTmpResult : double | undefined = heightTmpBuf
         let value : TouchObject = ({type: typeTmpResult, id: idTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult, windowX: windowXTmpResult, windowY: windowYTmpResult, x: xTmpResult, y: yTmpResult, hand: handTmpResult, pressedTime: pressedTimeTmpResult, pressure: pressureTmpResult, width: widthTmpResult, height: heightTmpResult} as TouchObject)
         return value
     }
@@ -13626,14 +13626,14 @@ export class VisibleAreaEventOptions_serializer {
         const valueHolderForRatios  = value.ratios
         valueSerializer.writeInt32((valueHolderForRatios.length).toInt())
         for (let valueHolderForRatiosCounterI = 0; valueHolderForRatiosCounterI < valueHolderForRatios.length; valueHolderForRatiosCounterI++) {
-            const valueHolderForRatiosTmpElement : number = valueHolderForRatios[valueHolderForRatiosCounterI]
-            valueSerializer.writeNumber(valueHolderForRatiosTmpElement)
+            const valueHolderForRatiosTmpElement : double = valueHolderForRatios[valueHolderForRatiosCounterI]
+            valueSerializer.writeFloat64(valueHolderForRatiosTmpElement)
         }
         const valueHolderForExpectedUpdateInterval  = value.expectedUpdateInterval
         if (valueHolderForExpectedUpdateInterval !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForExpectedUpdateIntervalTmpValue  = valueHolderForExpectedUpdateInterval!
-            valueSerializer.writeNumber(valueHolderForExpectedUpdateIntervalTmpValue)
+            valueSerializer.writeInt32(valueHolderForExpectedUpdateIntervalTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13641,17 +13641,17 @@ export class VisibleAreaEventOptions_serializer {
     public static read(buffer: DeserializerBase): VisibleAreaEventOptions {
         let valueDeserializer : DeserializerBase = buffer
         const ratiosTmpBufLength : int32 = valueDeserializer.readInt32()
-        let ratiosTmpBuf : Array<number> = new Array<number>(ratiosTmpBufLength)
+        let ratiosTmpBuf : Array<double> = new Array<double>(ratiosTmpBufLength)
         for (let ratiosTmpBufBufCounterI = 0; ratiosTmpBufBufCounterI < ratiosTmpBufLength; ratiosTmpBufBufCounterI++) {
-            ratiosTmpBuf[ratiosTmpBufBufCounterI] = (valueDeserializer.readNumber() as number)
+            ratiosTmpBuf[ratiosTmpBufBufCounterI] = valueDeserializer.readFloat64()
         }
-        const ratiosTmpResult : Array<number> = ratiosTmpBuf
+        const ratiosTmpResult : Array<double> = ratiosTmpBuf
         const expectedUpdateIntervalTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let expectedUpdateIntervalTmpBuf : number | undefined = undefined
+        let expectedUpdateIntervalTmpBuf : int32 | undefined = undefined
         if ((expectedUpdateIntervalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            expectedUpdateIntervalTmpBuf = (valueDeserializer.readNumber() as number)
+            expectedUpdateIntervalTmpBuf = valueDeserializer.readInt32()
         }
-        const expectedUpdateIntervalTmpResult : number | undefined = expectedUpdateIntervalTmpBuf
+        const expectedUpdateIntervalTmpResult : int32 | undefined = expectedUpdateIntervalTmpBuf
         let value : VisibleAreaEventOptions = ({ratios: ratiosTmpResult, expectedUpdateInterval: expectedUpdateIntervalTmpResult} as VisibleAreaEventOptions)
         return value
     }
@@ -14629,10 +14629,10 @@ export class DragPreviewOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForNumberBadgeTmpValueForIdx0  = valueHolderForNumberBadgeTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForNumberBadgeTmpValueForIdx0)
-            } else if (valueHolderForNumberBadgeTmpValue instanceof number) {
+            } else if (valueHolderForNumberBadgeTmpValue instanceof int64) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForNumberBadgeTmpValueForIdx1  = valueHolderForNumberBadgeTmpValue as number
-                valueSerializer.writeNumber(valueHolderForNumberBadgeTmpValueForIdx1)
+                const valueHolderForNumberBadgeTmpValueForIdx1  = valueHolderForNumberBadgeTmpValue as int64
+                valueSerializer.writeInt64(valueHolderForNumberBadgeTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -14675,20 +14675,20 @@ export class DragPreviewOptions_serializer {
         }
         const modifierTmpResult : ImageModifier | undefined = modifierTmpBuf
         const numberBadgeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let numberBadgeTmpBuf : boolean | number | undefined = undefined
+        let numberBadgeTmpBuf : boolean | int64 | undefined = undefined
         if ((numberBadgeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const numberBadgeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let numberBadgeTmpBuf_ : boolean | number | undefined
+            let numberBadgeTmpBuf_ : boolean | int64 | undefined
             if (numberBadgeTmpBuf_UnionSelector == (0).toChar()) {
                 numberBadgeTmpBuf_ = valueDeserializer.readBoolean()
             } else if (numberBadgeTmpBuf_UnionSelector == (1).toChar()) {
-                numberBadgeTmpBuf_ = (valueDeserializer.readNumber() as number)
+                numberBadgeTmpBuf_ = valueDeserializer.readInt64()
             } else {
                 throw new Error("One of the branches for numberBadgeTmpBuf_ has to be chosen through deserialisation.")
             }
-            numberBadgeTmpBuf = (numberBadgeTmpBuf_ as boolean | number)
+            numberBadgeTmpBuf = (numberBadgeTmpBuf_ as boolean | int64)
         }
-        const numberBadgeTmpResult : boolean | number | undefined = numberBadgeTmpBuf
+        const numberBadgeTmpResult : boolean | int64 | undefined = numberBadgeTmpBuf
         const sizeChangeEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let sizeChangeEffectTmpBuf : DraggingSizeChangeEffect | undefined = undefined
         if ((sizeChangeEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -14795,18 +14795,18 @@ export class HistoricalPoint_serializer {
         const valueHolderForTouchObject  = value.touchObject
         TouchObject_serializer.write(valueSerializer, valueHolderForTouchObject)
         const valueHolderForSize  = value.size
-        valueSerializer.writeNumber(valueHolderForSize)
+        valueSerializer.writeInt32(valueHolderForSize)
         const valueHolderForForce  = value.force
-        valueSerializer.writeNumber(valueHolderForForce)
+        valueSerializer.writeFloat64(valueHolderForForce)
         const valueHolderForTimestamp  = value.timestamp
-        valueSerializer.writeNumber(valueHolderForTimestamp)
+        valueSerializer.writeInt64(valueHolderForTimestamp)
     }
     public static read(buffer: DeserializerBase): HistoricalPoint {
         let valueDeserializer : DeserializerBase = buffer
         const touchObjectTmpResult : TouchObject = TouchObject_serializer.read(valueDeserializer)
-        const sizeTmpResult : number = (valueDeserializer.readNumber() as number)
-        const forceTmpResult : number = (valueDeserializer.readNumber() as number)
-        const timestampTmpResult : number = (valueDeserializer.readNumber() as number)
+        const sizeTmpResult : int32 = valueDeserializer.readInt32()
+        const forceTmpResult : double = valueDeserializer.readFloat64()
+        const timestampTmpResult : int64 = valueDeserializer.readInt64()
         let value : HistoricalPoint = ({touchObject: touchObjectTmpResult, size: sizeTmpResult, force: forceTmpResult, timestamp: timestampTmpResult} as HistoricalPoint)
         return value
     }
@@ -22179,12 +22179,12 @@ export class PopupOptions_serializer {
 }
 export interface AccessibilityHoverEvent {
     type: AccessibilityHoverType
-    x: number
-    y: number
-    displayX: number
-    displayY: number
-    windowX: number
-    windowY: number
+    x: double
+    y: double
+    displayX: double
+    displayY: double
+    windowX: double
+    windowY: double
 }
 export class AccessibilityHoverEventInternal extends BaseEventInternal implements MaterializedBase,AccessibilityHoverEvent {
     get type(): AccessibilityHoverType {
@@ -22193,40 +22193,40 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
     set type(type: AccessibilityHoverType) {
         this.setType(type)
     }
-    get x(): number {
+    get x(): double {
         return this.getX()
     }
-    set x(x: number) {
+    set x(x: double) {
         this.setX(x)
     }
-    get y(): number {
+    get y(): double {
         return this.getY()
     }
-    set y(y: number) {
+    set y(y: double) {
         this.setY(y)
     }
-    get displayX(): number {
+    get displayX(): double {
         return this.getDisplayX()
     }
-    set displayX(displayX: number) {
+    set displayX(displayX: double) {
         this.setDisplayX(displayX)
     }
-    get displayY(): number {
+    get displayY(): double {
         return this.getDisplayY()
     }
-    set displayY(displayY: number) {
+    set displayY(displayY: double) {
         this.setDisplayY(displayY)
     }
-    get windowX(): number {
+    get windowX(): double {
         return this.getWindowX()
     }
-    set windowX(windowX: number) {
+    set windowX(windowX: double) {
         this.setWindowX(windowX)
     }
-    get windowY(): number {
+    get windowY(): double {
         return this.getWindowY()
     }
-    set windowY(windowY: number) {
+    set windowY(windowY: double) {
         this.setWindowY(windowY)
     }
     constructor(peerPtr: KPointer) {
@@ -22253,51 +22253,51 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
         this.setType_serialize(type_casted)
         return
     }
-    private getX(): number {
+    private getX(): double {
         return this.getX_serialize()
     }
-    private setX(x: number): void {
-        const x_casted = x as (number)
+    private setX(x: double): void {
+        const x_casted = x as (double)
         this.setX_serialize(x_casted)
         return
     }
-    private getY(): number {
+    private getY(): double {
         return this.getY_serialize()
     }
-    private setY(y: number): void {
-        const y_casted = y as (number)
+    private setY(y: double): void {
+        const y_casted = y as (double)
         this.setY_serialize(y_casted)
         return
     }
-    private getDisplayX(): number {
+    private getDisplayX(): double {
         return this.getDisplayX_serialize()
     }
-    private setDisplayX(displayX: number): void {
-        const displayX_casted = displayX as (number)
+    private setDisplayX(displayX: double): void {
+        const displayX_casted = displayX as (double)
         this.setDisplayX_serialize(displayX_casted)
         return
     }
-    private getDisplayY(): number {
+    private getDisplayY(): double {
         return this.getDisplayY_serialize()
     }
-    private setDisplayY(displayY: number): void {
-        const displayY_casted = displayY as (number)
+    private setDisplayY(displayY: double): void {
+        const displayY_casted = displayY as (double)
         this.setDisplayY_serialize(displayY_casted)
         return
     }
-    private getWindowX(): number {
+    private getWindowX(): double {
         return this.getWindowX_serialize()
     }
-    private setWindowX(windowX: number): void {
-        const windowX_casted = windowX as (number)
+    private setWindowX(windowX: double): void {
+        const windowX_casted = windowX as (double)
         this.setWindowX_serialize(windowX_casted)
         return
     }
-    private getWindowY(): number {
+    private getWindowY(): double {
         return this.getWindowY_serialize()
     }
-    private setWindowY(windowY: number): void {
-        const windowY_casted = windowY as (number)
+    private setWindowY(windowY: double): void {
+        const windowY_casted = windowY as (double)
         this.setWindowY_serialize(windowY_casted)
         return
     }
@@ -22308,61 +22308,61 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
     private setType_serialize(type: AccessibilityHoverType): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setType(this.peer!.ptr, type.valueOf())
     }
-    private getX_serialize(): number {
+    private getX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getX(this.peer!.ptr)
         return retval
     }
-    private setX_serialize(x: number): void {
+    private setX_serialize(x: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setX(this.peer!.ptr, x)
     }
-    private getY_serialize(): number {
+    private getY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getY(this.peer!.ptr)
         return retval
     }
-    private setY_serialize(y: number): void {
+    private setY_serialize(y: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setY(this.peer!.ptr, y)
     }
-    private getDisplayX_serialize(): number {
+    private getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getDisplayX(this.peer!.ptr)
         return retval
     }
-    private setDisplayX_serialize(displayX: number): void {
+    private setDisplayX_serialize(displayX: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setDisplayX(this.peer!.ptr, displayX)
     }
-    private getDisplayY_serialize(): number {
+    private getDisplayY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getDisplayY(this.peer!.ptr)
         return retval
     }
-    private setDisplayY_serialize(displayY: number): void {
+    private setDisplayY_serialize(displayY: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setDisplayY(this.peer!.ptr, displayY)
     }
-    private getWindowX_serialize(): number {
+    private getWindowX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getWindowX(this.peer!.ptr)
         return retval
     }
-    private setWindowX_serialize(windowX: number): void {
+    private setWindowX_serialize(windowX: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setWindowX(this.peer!.ptr, windowX)
     }
-    private getWindowY_serialize(): number {
+    private getWindowY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getWindowY(this.peer!.ptr)
         return retval
     }
-    private setWindowY_serialize(windowY: number): void {
+    private setWindowY_serialize(windowY: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setWindowY(this.peer!.ptr, windowY)
     }
 }
 export interface AxisEvent {
     action: AxisAction
-    displayX: number
-    displayY: number
-    windowX: number
-    windowY: number
-    x: number
-    y: number
-    scrollStep?: number | undefined
+    displayX: double
+    displayY: double
+    windowX: double
+    windowY: double
+    x: double
+    y: double
+    scrollStep?: int32 | undefined
     propagation(): void
-    getHorizontalAxisValue(): number
-    getVerticalAxisValue(): number
+    getHorizontalAxisValue(): double
+    getVerticalAxisValue(): double
     hasAxis(axisType: AxisType): boolean
 }
 export class AxisEventInternal extends BaseEventInternal implements MaterializedBase,AxisEvent {
@@ -22372,47 +22372,47 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     set action(action: AxisAction) {
         this.setAction(action)
     }
-    get displayX(): number {
+    get displayX(): double {
         return this.getDisplayX()
     }
-    set displayX(displayX: number) {
+    set displayX(displayX: double) {
         this.setDisplayX(displayX)
     }
-    get displayY(): number {
+    get displayY(): double {
         return this.getDisplayY()
     }
-    set displayY(displayY: number) {
+    set displayY(displayY: double) {
         this.setDisplayY(displayY)
     }
-    get windowX(): number {
+    get windowX(): double {
         return this.getWindowX()
     }
-    set windowX(windowX: number) {
+    set windowX(windowX: double) {
         this.setWindowX(windowX)
     }
-    get windowY(): number {
+    get windowY(): double {
         return this.getWindowY()
     }
-    set windowY(windowY: number) {
+    set windowY(windowY: double) {
         this.setWindowY(windowY)
     }
-    get x(): number {
+    get x(): double {
         return this.getX()
     }
-    set x(x: number) {
+    set x(x: double) {
         this.setX(x)
     }
-    get y(): number {
+    get y(): double {
         return this.getY()
     }
-    set y(y: number) {
+    set y(y: double) {
         this.setY(y)
     }
-    get scrollStep(): number | undefined {
+    get scrollStep(): int32 | undefined {
         return this.getScrollStep()
     }
-    set scrollStep(scrollStep: number | undefined) {
-        const scrollStep_NonNull  = (scrollStep as number)
+    set scrollStep(scrollStep: int32 | undefined) {
+        const scrollStep_NonNull  = (scrollStep as int32)
         this.setScrollStep(scrollStep_NonNull)
     }
     public propagation(): void {
@@ -22435,10 +22435,10 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     public static fromPtr(ptr: KPointer): AxisEventInternal {
         return new AxisEventInternal(ptr)
     }
-    public getHorizontalAxisValue(): number {
+    public getHorizontalAxisValue(): double {
         return this.getHorizontalAxisValue_serialize()
     }
-    public getVerticalAxisValue(): number {
+    public getVerticalAxisValue(): double {
         return this.getVerticalAxisValue_serialize()
     }
     public hasAxis(axisType: AxisType): boolean {
@@ -22453,63 +22453,63 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         this.setAction_serialize(action_casted)
         return
     }
-    private getDisplayX(): number {
+    private getDisplayX(): double {
         return this.getDisplayX_serialize()
     }
-    private setDisplayX(displayX: number): void {
-        const displayX_casted = displayX as (number)
+    private setDisplayX(displayX: double): void {
+        const displayX_casted = displayX as (double)
         this.setDisplayX_serialize(displayX_casted)
         return
     }
-    private getDisplayY(): number {
+    private getDisplayY(): double {
         return this.getDisplayY_serialize()
     }
-    private setDisplayY(displayY: number): void {
-        const displayY_casted = displayY as (number)
+    private setDisplayY(displayY: double): void {
+        const displayY_casted = displayY as (double)
         this.setDisplayY_serialize(displayY_casted)
         return
     }
-    private getWindowX(): number {
+    private getWindowX(): double {
         return this.getWindowX_serialize()
     }
-    private setWindowX(windowX: number): void {
-        const windowX_casted = windowX as (number)
+    private setWindowX(windowX: double): void {
+        const windowX_casted = windowX as (double)
         this.setWindowX_serialize(windowX_casted)
         return
     }
-    private getWindowY(): number {
+    private getWindowY(): double {
         return this.getWindowY_serialize()
     }
-    private setWindowY(windowY: number): void {
-        const windowY_casted = windowY as (number)
+    private setWindowY(windowY: double): void {
+        const windowY_casted = windowY as (double)
         this.setWindowY_serialize(windowY_casted)
         return
     }
-    private getX(): number {
+    private getX(): double {
         return this.getX_serialize()
     }
-    private setX(x: number): void {
-        const x_casted = x as (number)
+    private setX(x: double): void {
+        const x_casted = x as (double)
         this.setX_serialize(x_casted)
         return
     }
-    private getY(): number {
+    private getY(): double {
         return this.getY_serialize()
     }
-    private setY(y: number): void {
-        const y_casted = y as (number)
+    private setY(y: double): void {
+        const y_casted = y as (double)
         this.setY_serialize(y_casted)
         return
     }
-    private getScrollStep(): number | undefined {
+    private getScrollStep(): int32 | undefined {
         return this.getScrollStep_serialize()
     }
-    private setScrollStep(scrollStep: number | undefined): void {
-        const scrollStep_casted = scrollStep as (number | undefined)
+    private setScrollStep(scrollStep: int32 | undefined): void {
+        const scrollStep_casted = scrollStep as (int32 | undefined)
         this.setScrollStep_serialize(scrollStep_casted)
         return
     }
-    getHorizontalAxisValue_serialize(): number {
+    getHorizontalAxisValue_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getHorizontalAxisValue(this.peer!.ptr)
         return retval
     }
@@ -22517,7 +22517,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_hasAxis(this.peer!.ptr, axisType.valueOf())
         return retval
     }
-    getVerticalAxisValue_serialize(): number {
+    getVerticalAxisValue_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getVerticalAxisValue(this.peer!.ptr)
         return retval
     }
@@ -22528,65 +22528,65 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     private setAction_serialize(action: AxisAction): void {
         ArkUIGeneratedNativeModule._AxisEvent_setAction(this.peer!.ptr, action.valueOf())
     }
-    private getDisplayX_serialize(): number {
+    private getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getDisplayX(this.peer!.ptr)
         return retval
     }
-    private setDisplayX_serialize(displayX: number): void {
+    private setDisplayX_serialize(displayX: double): void {
         ArkUIGeneratedNativeModule._AxisEvent_setDisplayX(this.peer!.ptr, displayX)
     }
-    private getDisplayY_serialize(): number {
+    private getDisplayY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getDisplayY(this.peer!.ptr)
         return retval
     }
-    private setDisplayY_serialize(displayY: number): void {
+    private setDisplayY_serialize(displayY: double): void {
         ArkUIGeneratedNativeModule._AxisEvent_setDisplayY(this.peer!.ptr, displayY)
     }
-    private getWindowX_serialize(): number {
+    private getWindowX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getWindowX(this.peer!.ptr)
         return retval
     }
-    private setWindowX_serialize(windowX: number): void {
+    private setWindowX_serialize(windowX: double): void {
         ArkUIGeneratedNativeModule._AxisEvent_setWindowX(this.peer!.ptr, windowX)
     }
-    private getWindowY_serialize(): number {
+    private getWindowY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getWindowY(this.peer!.ptr)
         return retval
     }
-    private setWindowY_serialize(windowY: number): void {
+    private setWindowY_serialize(windowY: double): void {
         ArkUIGeneratedNativeModule._AxisEvent_setWindowY(this.peer!.ptr, windowY)
     }
-    private getX_serialize(): number {
+    private getX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getX(this.peer!.ptr)
         return retval
     }
-    private setX_serialize(x: number): void {
+    private setX_serialize(x: double): void {
         ArkUIGeneratedNativeModule._AxisEvent_setX(this.peer!.ptr, x)
     }
-    private getY_serialize(): number {
+    private getY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getY(this.peer!.ptr)
         return retval
     }
-    private setY_serialize(y: number): void {
+    private setY_serialize(y: double): void {
         ArkUIGeneratedNativeModule._AxisEvent_setY(this.peer!.ptr, y)
     }
-    private getScrollStep_serialize(): number | undefined {
+    private getScrollStep_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getScrollStep(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readInt32()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
-    private setScrollStep_serialize(scrollStep: number | undefined): void {
+    private setScrollStep_serialize(scrollStep: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (scrollStep !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const scrollStepTmpValue  = scrollStep!
-            thisSerializer.writeNumber(scrollStepTmpValue)
+            thisSerializer.writeInt32(scrollStepTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -22598,50 +22598,50 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     }
 }
 export interface ClickEvent {
-    displayX: number
-    displayY: number
-    windowX: number
-    windowY: number
-    x: number
-    y: number
+    displayX: double
+    displayY: double
+    windowX: double
+    windowY: double
+    x: double
+    y: double
     hand?: InteractionHand | undefined
     preventDefault(): void
 }
 export class ClickEventInternal extends BaseEventInternal implements MaterializedBase,ClickEvent {
-    get displayX(): number {
+    get displayX(): double {
         return this.getDisplayX()
     }
-    set displayX(displayX: number) {
+    set displayX(displayX: double) {
         this.setDisplayX(displayX)
     }
-    get displayY(): number {
+    get displayY(): double {
         return this.getDisplayY()
     }
-    set displayY(displayY: number) {
+    set displayY(displayY: double) {
         this.setDisplayY(displayY)
     }
-    get windowX(): number {
+    get windowX(): double {
         return this.getWindowX()
     }
-    set windowX(windowX: number) {
+    set windowX(windowX: double) {
         this.setWindowX(windowX)
     }
-    get windowY(): number {
+    get windowY(): double {
         return this.getWindowY()
     }
-    set windowY(windowY: number) {
+    set windowY(windowY: double) {
         this.setWindowY(windowY)
     }
-    get x(): number {
+    get x(): double {
         return this.getX()
     }
-    set x(x: number) {
+    set x(x: double) {
         this.setX(x)
     }
-    get y(): number {
+    get y(): double {
         return this.getY()
     }
-    set y(y: number) {
+    set y(y: double) {
         this.setY(y)
     }
     get hand(): InteractionHand | undefined {
@@ -22671,51 +22671,51 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
     public static fromPtr(ptr: KPointer): ClickEventInternal {
         return new ClickEventInternal(ptr)
     }
-    private getDisplayX(): number {
+    private getDisplayX(): double {
         return this.getDisplayX_serialize()
     }
-    private setDisplayX(displayX: number): void {
-        const displayX_casted = displayX as (number)
+    private setDisplayX(displayX: double): void {
+        const displayX_casted = displayX as (double)
         this.setDisplayX_serialize(displayX_casted)
         return
     }
-    private getDisplayY(): number {
+    private getDisplayY(): double {
         return this.getDisplayY_serialize()
     }
-    private setDisplayY(displayY: number): void {
-        const displayY_casted = displayY as (number)
+    private setDisplayY(displayY: double): void {
+        const displayY_casted = displayY as (double)
         this.setDisplayY_serialize(displayY_casted)
         return
     }
-    private getWindowX(): number {
+    private getWindowX(): double {
         return this.getWindowX_serialize()
     }
-    private setWindowX(windowX: number): void {
-        const windowX_casted = windowX as (number)
+    private setWindowX(windowX: double): void {
+        const windowX_casted = windowX as (double)
         this.setWindowX_serialize(windowX_casted)
         return
     }
-    private getWindowY(): number {
+    private getWindowY(): double {
         return this.getWindowY_serialize()
     }
-    private setWindowY(windowY: number): void {
-        const windowY_casted = windowY as (number)
+    private setWindowY(windowY: double): void {
+        const windowY_casted = windowY as (double)
         this.setWindowY_serialize(windowY_casted)
         return
     }
-    private getX(): number {
+    private getX(): double {
         return this.getX_serialize()
     }
-    private setX(x: number): void {
-        const x_casted = x as (number)
+    private setX(x: double): void {
+        const x_casted = x as (double)
         this.setX_serialize(x_casted)
         return
     }
-    private getY(): number {
+    private getY(): double {
         return this.getY_serialize()
     }
-    private setY(y: number): void {
-        const y_casted = y as (number)
+    private setY(y: double): void {
+        const y_casted = y as (double)
         this.setY_serialize(y_casted)
         return
     }
@@ -22727,46 +22727,46 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         this.setHand_serialize(hand_casted)
         return
     }
-    private getDisplayX_serialize(): number {
+    private getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getDisplayX(this.peer!.ptr)
         return retval
     }
-    private setDisplayX_serialize(displayX: number): void {
+    private setDisplayX_serialize(displayX: double): void {
         ArkUIGeneratedNativeModule._ClickEvent_setDisplayX(this.peer!.ptr, displayX)
     }
-    private getDisplayY_serialize(): number {
+    private getDisplayY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getDisplayY(this.peer!.ptr)
         return retval
     }
-    private setDisplayY_serialize(displayY: number): void {
+    private setDisplayY_serialize(displayY: double): void {
         ArkUIGeneratedNativeModule._ClickEvent_setDisplayY(this.peer!.ptr, displayY)
     }
-    private getWindowX_serialize(): number {
+    private getWindowX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getWindowX(this.peer!.ptr)
         return retval
     }
-    private setWindowX_serialize(windowX: number): void {
+    private setWindowX_serialize(windowX: double): void {
         ArkUIGeneratedNativeModule._ClickEvent_setWindowX(this.peer!.ptr, windowX)
     }
-    private getWindowY_serialize(): number {
+    private getWindowY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getWindowY(this.peer!.ptr)
         return retval
     }
-    private setWindowY_serialize(windowY: number): void {
+    private setWindowY_serialize(windowY: double): void {
         ArkUIGeneratedNativeModule._ClickEvent_setWindowY(this.peer!.ptr, windowY)
     }
-    private getX_serialize(): number {
+    private getX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getX(this.peer!.ptr)
         return retval
     }
-    private setX_serialize(x: number): void {
+    private setX_serialize(x: double): void {
         ArkUIGeneratedNativeModule._ClickEvent_setX(this.peer!.ptr, x)
     }
-    private getY_serialize(): number {
+    private getY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getY(this.peer!.ptr)
         return retval
     }
-    private setY_serialize(y: number): void {
+    private setY_serialize(y: double): void {
         ArkUIGeneratedNativeModule._ClickEvent_setY(this.peer!.ptr, y)
     }
     private getHand_serialize(): InteractionHand | undefined {
@@ -22797,14 +22797,14 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
     }
 }
 export interface FocusAxisEvent {
-    axisMap: Map<AxisModel, number>
+    axisMap: Map<AxisModel, double>
     stopPropagation(): void
 }
 export class FocusAxisEventInternal extends BaseEventInternal implements MaterializedBase,FocusAxisEvent {
-    get axisMap(): Map<AxisModel, number> {
+    get axisMap(): Map<AxisModel, double> {
         return this.getAxisMap()
     }
-    set axisMap(axisMap: Map<AxisModel, number>) {
+    set axisMap(axisMap: Map<AxisModel, double>) {
         this.setAxisMap(axisMap)
     }
     public stopPropagation(): void {
@@ -22827,36 +22827,36 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
     public static fromPtr(ptr: KPointer): FocusAxisEventInternal {
         return new FocusAxisEventInternal(ptr)
     }
-    private getAxisMap(): Map<AxisModel, number> {
+    private getAxisMap(): Map<AxisModel, double> {
         return this.getAxisMap_serialize()
     }
-    private setAxisMap(axisMap: Map<AxisModel, number>): void {
-        const axisMap_casted = axisMap as (Map<AxisModel, number>)
+    private setAxisMap(axisMap: Map<AxisModel, double>): void {
+        const axisMap_casted = axisMap as (Map<AxisModel, double>)
         this.setAxisMap_serialize(axisMap_casted)
         return
     }
-    private getAxisMap_serialize(): Map<AxisModel, number> {
+    private getAxisMap_serialize(): Map<AxisModel, double> {
         const retval  = ArkUIGeneratedNativeModule._FocusAxisEvent_getAxisMap(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferSizeVar : int32 = retvalDeserializer.readInt32()
-        let buffer : Map<AxisModel, number> = new Map<AxisModel, number>()
+        let buffer : Map<AxisModel, double> = new Map<AxisModel, double>()
         // TODO: TS map resize
         for (let bufferIVar = 0; bufferIVar < bufferSizeVar; bufferIVar++) {
             const bufferKeyVar : AxisModel = AxisModel.fromValue(retvalDeserializer.readInt32())
-            const bufferValueVar : number = (retvalDeserializer.readNumber() as number)
+            const bufferValueVar : double = retvalDeserializer.readFloat64()
             buffer.set(bufferKeyVar, bufferValueVar)
         }
-        const returnResult : Map<AxisModel, number> = buffer
+        const returnResult : Map<AxisModel, double> = buffer
         return returnResult
     }
-    private setAxisMap_serialize(axisMap: Map<AxisModel, number>): void {
+    private setAxisMap_serialize(axisMap: Map<AxisModel, double>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((axisMap.size).toInt())
         for (const pair of axisMap) {
             const axisMapKeyVar = pair[0]
             const axisMapValueVar = pair[1]
             thisSerializer.writeInt32(axisMapKeyVar.valueOf())
-            thisSerializer.writeNumber(axisMapValueVar)
+            thisSerializer.writeFloat64(axisMapValueVar)
         }
         ArkUIGeneratedNativeModule._FocusAxisEvent_setAxisMap(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -22866,55 +22866,55 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
     }
 }
 export interface HoverEvent {
-    x?: number | undefined
-    y?: number | undefined
-    windowX?: number | undefined
-    windowY?: number | undefined
-    displayX?: number | undefined
-    displayY?: number | undefined
+    x?: double | undefined
+    y?: double | undefined
+    windowX?: double | undefined
+    windowY?: double | undefined
+    displayX?: double | undefined
+    displayY?: double | undefined
     stopPropagation(): void
 }
 export class HoverEventInternal extends BaseEventInternal implements MaterializedBase,HoverEvent {
-    get x(): number | undefined {
+    get x(): double | undefined {
         return this.getX()
     }
-    set x(x: number | undefined) {
-        const x_NonNull  = (x as number)
+    set x(x: double | undefined) {
+        const x_NonNull  = (x as double)
         this.setX(x_NonNull)
     }
-    get y(): number | undefined {
+    get y(): double | undefined {
         return this.getY()
     }
-    set y(y: number | undefined) {
-        const y_NonNull  = (y as number)
+    set y(y: double | undefined) {
+        const y_NonNull  = (y as double)
         this.setY(y_NonNull)
     }
-    get windowX(): number | undefined {
+    get windowX(): double | undefined {
         return this.getWindowX()
     }
-    set windowX(windowX: number | undefined) {
-        const windowX_NonNull  = (windowX as number)
+    set windowX(windowX: double | undefined) {
+        const windowX_NonNull  = (windowX as double)
         this.setWindowX(windowX_NonNull)
     }
-    get windowY(): number | undefined {
+    get windowY(): double | undefined {
         return this.getWindowY()
     }
-    set windowY(windowY: number | undefined) {
-        const windowY_NonNull  = (windowY as number)
+    set windowY(windowY: double | undefined) {
+        const windowY_NonNull  = (windowY as double)
         this.setWindowY(windowY_NonNull)
     }
-    get displayX(): number | undefined {
+    get displayX(): double | undefined {
         return this.getDisplayX()
     }
-    set displayX(displayX: number | undefined) {
-        const displayX_NonNull  = (displayX as number)
+    set displayX(displayX: double | undefined) {
+        const displayX_NonNull  = (displayX as double)
         this.setDisplayX(displayX_NonNull)
     }
-    get displayY(): number | undefined {
+    get displayY(): double | undefined {
         return this.getDisplayY()
     }
-    set displayY(displayY: number | undefined) {
-        const displayY_NonNull  = (displayY as number)
+    set displayY(displayY: double | undefined) {
+        const displayY_NonNull  = (displayY as double)
         this.setDisplayY(displayY_NonNull)
     }
     public stopPropagation(): void {
@@ -22937,186 +22937,186 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
     public static fromPtr(ptr: KPointer): HoverEventInternal {
         return new HoverEventInternal(ptr)
     }
-    private getX(): number | undefined {
+    private getX(): double | undefined {
         return this.getX_serialize()
     }
-    private setX(x: number | undefined): void {
-        const x_casted = x as (number | undefined)
+    private setX(x: double | undefined): void {
+        const x_casted = x as (double | undefined)
         this.setX_serialize(x_casted)
         return
     }
-    private getY(): number | undefined {
+    private getY(): double | undefined {
         return this.getY_serialize()
     }
-    private setY(y: number | undefined): void {
-        const y_casted = y as (number | undefined)
+    private setY(y: double | undefined): void {
+        const y_casted = y as (double | undefined)
         this.setY_serialize(y_casted)
         return
     }
-    private getWindowX(): number | undefined {
+    private getWindowX(): double | undefined {
         return this.getWindowX_serialize()
     }
-    private setWindowX(windowX: number | undefined): void {
-        const windowX_casted = windowX as (number | undefined)
+    private setWindowX(windowX: double | undefined): void {
+        const windowX_casted = windowX as (double | undefined)
         this.setWindowX_serialize(windowX_casted)
         return
     }
-    private getWindowY(): number | undefined {
+    private getWindowY(): double | undefined {
         return this.getWindowY_serialize()
     }
-    private setWindowY(windowY: number | undefined): void {
-        const windowY_casted = windowY as (number | undefined)
+    private setWindowY(windowY: double | undefined): void {
+        const windowY_casted = windowY as (double | undefined)
         this.setWindowY_serialize(windowY_casted)
         return
     }
-    private getDisplayX(): number | undefined {
+    private getDisplayX(): double | undefined {
         return this.getDisplayX_serialize()
     }
-    private setDisplayX(displayX: number | undefined): void {
-        const displayX_casted = displayX as (number | undefined)
+    private setDisplayX(displayX: double | undefined): void {
+        const displayX_casted = displayX as (double | undefined)
         this.setDisplayX_serialize(displayX_casted)
         return
     }
-    private getDisplayY(): number | undefined {
+    private getDisplayY(): double | undefined {
         return this.getDisplayY_serialize()
     }
-    private setDisplayY(displayY: number | undefined): void {
-        const displayY_casted = displayY as (number | undefined)
+    private setDisplayY(displayY: double | undefined): void {
+        const displayY_casted = displayY as (double | undefined)
         this.setDisplayY_serialize(displayY_casted)
         return
     }
-    private getX_serialize(): number | undefined {
+    private getX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._HoverEvent_getX(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setX_serialize(x: number | undefined): void {
+    private setX_serialize(x: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (x !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const xTmpValue  = x!
-            thisSerializer.writeNumber(xTmpValue)
+            thisSerializer.writeFloat64(xTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._HoverEvent_setX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getY_serialize(): number | undefined {
+    private getY_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._HoverEvent_getY(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setY_serialize(y: number | undefined): void {
+    private setY_serialize(y: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (y !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const yTmpValue  = y!
-            thisSerializer.writeNumber(yTmpValue)
+            thisSerializer.writeFloat64(yTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._HoverEvent_setY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getWindowX_serialize(): number | undefined {
+    private getWindowX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowX(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setWindowX_serialize(windowX: number | undefined): void {
+    private setWindowX_serialize(windowX: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (windowX !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const windowXTmpValue  = windowX!
-            thisSerializer.writeNumber(windowXTmpValue)
+            thisSerializer.writeFloat64(windowXTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._HoverEvent_setWindowX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getWindowY_serialize(): number | undefined {
+    private getWindowY_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowY(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setWindowY_serialize(windowY: number | undefined): void {
+    private setWindowY_serialize(windowY: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (windowY !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const windowYTmpValue  = windowY!
-            thisSerializer.writeNumber(windowYTmpValue)
+            thisSerializer.writeFloat64(windowYTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._HoverEvent_setWindowY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getDisplayX_serialize(): number | undefined {
+    private getDisplayX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayX(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setDisplayX_serialize(displayX: number | undefined): void {
+    private setDisplayX_serialize(displayX: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (displayX !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const displayXTmpValue  = displayX!
-            thisSerializer.writeNumber(displayXTmpValue)
+            thisSerializer.writeFloat64(displayXTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._HoverEvent_setDisplayX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getDisplayY_serialize(): number | undefined {
+    private getDisplayY_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayY(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setDisplayY_serialize(displayY: number | undefined): void {
+    private setDisplayY_serialize(displayY: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (displayY !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const displayYTmpValue  = displayY!
-            thisSerializer.writeNumber(displayYTmpValue)
+            thisSerializer.writeFloat64(displayYTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -23130,15 +23130,15 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
 export interface MouseEvent {
     button: MouseButton
     action: MouseAction
-    displayX: number
-    displayY: number
-    windowX: number
-    windowY: number
-    x: number
-    y: number
+    displayX: double
+    displayY: double
+    windowX: double
+    windowY: double
+    x: double
+    y: double
     stopPropagation: (() => void)
-    rawDeltaX?: number | undefined
-    rawDeltaY?: number | undefined
+    rawDeltaX?: double | undefined
+    rawDeltaY?: double | undefined
     pressedButtons?: Array<MouseButton> | undefined
 }
 export class MouseEventInternal extends BaseEventInternal implements MaterializedBase,MouseEvent {
@@ -23154,40 +23154,40 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     set action(action: MouseAction) {
         this.setAction(action)
     }
-    get displayX(): number {
+    get displayX(): double {
         return this.getDisplayX()
     }
-    set displayX(displayX: number) {
+    set displayX(displayX: double) {
         this.setDisplayX(displayX)
     }
-    get displayY(): number {
+    get displayY(): double {
         return this.getDisplayY()
     }
-    set displayY(displayY: number) {
+    set displayY(displayY: double) {
         this.setDisplayY(displayY)
     }
-    get windowX(): number {
+    get windowX(): double {
         return this.getWindowX()
     }
-    set windowX(windowX: number) {
+    set windowX(windowX: double) {
         this.setWindowX(windowX)
     }
-    get windowY(): number {
+    get windowY(): double {
         return this.getWindowY()
     }
-    set windowY(windowY: number) {
+    set windowY(windowY: double) {
         this.setWindowY(windowY)
     }
-    get x(): number {
+    get x(): double {
         return this.getX()
     }
-    set x(x: number) {
+    set x(x: double) {
         this.setX(x)
     }
-    get y(): number {
+    get y(): double {
         return this.getY()
     }
-    set y(y: number) {
+    set y(y: double) {
         this.setY(y)
     }
     get stopPropagation(): (() => void) {
@@ -23196,18 +23196,18 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     set stopPropagation(stopPropagation: (() => void)) {
         this.setStopPropagation(stopPropagation)
     }
-    get rawDeltaX(): number | undefined {
+    get rawDeltaX(): double | undefined {
         return this.getRawDeltaX()
     }
-    set rawDeltaX(rawDeltaX: number | undefined) {
-        const rawDeltaX_NonNull  = (rawDeltaX as number)
+    set rawDeltaX(rawDeltaX: double | undefined) {
+        const rawDeltaX_NonNull  = (rawDeltaX as double)
         this.setRawDeltaX(rawDeltaX_NonNull)
     }
-    get rawDeltaY(): number | undefined {
+    get rawDeltaY(): double | undefined {
         return this.getRawDeltaY()
     }
-    set rawDeltaY(rawDeltaY: number | undefined) {
-        const rawDeltaY_NonNull  = (rawDeltaY as number)
+    set rawDeltaY(rawDeltaY: double | undefined) {
+        const rawDeltaY_NonNull  = (rawDeltaY as double)
         this.setRawDeltaY(rawDeltaY_NonNull)
     }
     get pressedButtons(): Array<MouseButton> | undefined {
@@ -23249,51 +23249,51 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         this.setAction_serialize(action_casted)
         return
     }
-    private getDisplayX(): number {
+    private getDisplayX(): double {
         return this.getDisplayX_serialize()
     }
-    private setDisplayX(displayX: number): void {
-        const displayX_casted = displayX as (number)
+    private setDisplayX(displayX: double): void {
+        const displayX_casted = displayX as (double)
         this.setDisplayX_serialize(displayX_casted)
         return
     }
-    private getDisplayY(): number {
+    private getDisplayY(): double {
         return this.getDisplayY_serialize()
     }
-    private setDisplayY(displayY: number): void {
-        const displayY_casted = displayY as (number)
+    private setDisplayY(displayY: double): void {
+        const displayY_casted = displayY as (double)
         this.setDisplayY_serialize(displayY_casted)
         return
     }
-    private getWindowX(): number {
+    private getWindowX(): double {
         return this.getWindowX_serialize()
     }
-    private setWindowX(windowX: number): void {
-        const windowX_casted = windowX as (number)
+    private setWindowX(windowX: double): void {
+        const windowX_casted = windowX as (double)
         this.setWindowX_serialize(windowX_casted)
         return
     }
-    private getWindowY(): number {
+    private getWindowY(): double {
         return this.getWindowY_serialize()
     }
-    private setWindowY(windowY: number): void {
-        const windowY_casted = windowY as (number)
+    private setWindowY(windowY: double): void {
+        const windowY_casted = windowY as (double)
         this.setWindowY_serialize(windowY_casted)
         return
     }
-    private getX(): number {
+    private getX(): double {
         return this.getX_serialize()
     }
-    private setX(x: number): void {
-        const x_casted = x as (number)
+    private setX(x: double): void {
+        const x_casted = x as (double)
         this.setX_serialize(x_casted)
         return
     }
-    private getY(): number {
+    private getY(): double {
         return this.getY_serialize()
     }
-    private setY(y: number): void {
-        const y_casted = y as (number)
+    private setY(y: double): void {
+        const y_casted = y as (double)
         this.setY_serialize(y_casted)
         return
     }
@@ -23305,19 +23305,19 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         this.setStopPropagation_serialize(stopPropagation_casted)
         return
     }
-    private getRawDeltaX(): number | undefined {
+    private getRawDeltaX(): double | undefined {
         return this.getRawDeltaX_serialize()
     }
-    private setRawDeltaX(rawDeltaX: number | undefined): void {
-        const rawDeltaX_casted = rawDeltaX as (number | undefined)
+    private setRawDeltaX(rawDeltaX: double | undefined): void {
+        const rawDeltaX_casted = rawDeltaX as (double | undefined)
         this.setRawDeltaX_serialize(rawDeltaX_casted)
         return
     }
-    private getRawDeltaY(): number | undefined {
+    private getRawDeltaY(): double | undefined {
         return this.getRawDeltaY_serialize()
     }
-    private setRawDeltaY(rawDeltaY: number | undefined): void {
-        const rawDeltaY_casted = rawDeltaY as (number | undefined)
+    private setRawDeltaY(rawDeltaY: double | undefined): void {
+        const rawDeltaY_casted = rawDeltaY as (double | undefined)
         this.setRawDeltaY_serialize(rawDeltaY_casted)
         return
     }
@@ -23343,46 +23343,46 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     private setAction_serialize(action: MouseAction): void {
         ArkUIGeneratedNativeModule._MouseEvent_setAction(this.peer!.ptr, action.valueOf())
     }
-    private getDisplayX_serialize(): number {
+    private getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getDisplayX(this.peer!.ptr)
         return retval
     }
-    private setDisplayX_serialize(displayX: number): void {
+    private setDisplayX_serialize(displayX: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setDisplayX(this.peer!.ptr, displayX)
     }
-    private getDisplayY_serialize(): number {
+    private getDisplayY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getDisplayY(this.peer!.ptr)
         return retval
     }
-    private setDisplayY_serialize(displayY: number): void {
+    private setDisplayY_serialize(displayY: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setDisplayY(this.peer!.ptr, displayY)
     }
-    private getWindowX_serialize(): number {
+    private getWindowX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getWindowX(this.peer!.ptr)
         return retval
     }
-    private setWindowX_serialize(windowX: number): void {
+    private setWindowX_serialize(windowX: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setWindowX(this.peer!.ptr, windowX)
     }
-    private getWindowY_serialize(): number {
+    private getWindowY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getWindowY(this.peer!.ptr)
         return retval
     }
-    private setWindowY_serialize(windowY: number): void {
+    private setWindowY_serialize(windowY: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setWindowY(this.peer!.ptr, windowY)
     }
-    private getX_serialize(): number {
+    private getX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getX(this.peer!.ptr)
         return retval
     }
-    private setX_serialize(x: number): void {
+    private setX_serialize(x: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setX(this.peer!.ptr, x)
     }
-    private getY_serialize(): number {
+    private getY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getY(this.peer!.ptr)
         return retval
     }
-    private setY_serialize(y: number): void {
+    private setY_serialize(y: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setY(this.peer!.ptr, y)
     }
     private getStopPropagation_serialize(): (() => void) {
@@ -23416,46 +23416,46 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._MouseEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getRawDeltaX_serialize(): number | undefined {
+    private getRawDeltaX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaX(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setRawDeltaX_serialize(rawDeltaX: number | undefined): void {
+    private setRawDeltaX_serialize(rawDeltaX: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (rawDeltaX !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const rawDeltaXTmpValue  = rawDeltaX!
-            thisSerializer.writeNumber(rawDeltaXTmpValue)
+            thisSerializer.writeFloat64(rawDeltaXTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._MouseEvent_setRawDeltaX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getRawDeltaY_serialize(): number | undefined {
+    private getRawDeltaY_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaY(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setRawDeltaY_serialize(rawDeltaY: number | undefined): void {
+    private setRawDeltaY_serialize(rawDeltaY: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (rawDeltaY !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const rawDeltaYTmpValue  = rawDeltaY!
-            thisSerializer.writeNumber(rawDeltaYTmpValue)
+            thisSerializer.writeFloat64(rawDeltaYTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }

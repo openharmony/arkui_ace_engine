@@ -1806,12 +1806,12 @@ RefPtr<NG::NGGestureRecognizer> Convert(const Ark_GestureRecognizer &src)
 
 void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& src)
 {
-    dst.windowX = ArkValue<Ark_Number>(src.windowPoint.GetX());
-    dst.windowY = ArkValue<Ark_Number>(src.windowPoint.GetY());
-    dst.parentX = ArkValue<Ark_Number>(src.currentCmpPoint.GetX());
-    dst.parentY = ArkValue<Ark_Number>(src.currentCmpPoint.GetY());
-    dst.x = ArkValue<Ark_Number>(src.subCmpPoint.GetX());
-    dst.y = ArkValue<Ark_Number>(src.subCmpPoint.GetY());
+    dst.windowX = ArkValue<Ark_Float64>(src.windowPoint.GetX());
+    dst.windowY = ArkValue<Ark_Float64>(src.windowPoint.GetY());
+    dst.parentX = ArkValue<Ark_Float64>(src.currentCmpPoint.GetX());
+    dst.parentY = ArkValue<Ark_Float64>(src.currentCmpPoint.GetY());
+    dst.x = ArkValue<Ark_Float64>(src.subCmpPoint.GetX());
+    dst.y = ArkValue<Ark_Float64>(src.subCmpPoint.GetY());
     dst.rect = ArkValue<Ark_RectResult>(src.subRect);
     dst.id = ArkValue<Ark_String>(src.id);
 }
@@ -4301,7 +4301,7 @@ void SetGeometryTransition0Impl(Ark_NativePointer node,
         frameNode, idOpt.value(), followWithoutTransition, doRegisterSharedTransition);
 }
 void SetRestoreIdImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4926,7 +4926,7 @@ void SetForegroundBlurStyleImpl(Ark_NativePointer node,
 }
 void SetOnClick1Impl(Ark_NativePointer node,
                      const Opt_Callback_ClickEvent_Void* event,
-                     const Opt_Number* distanceThreshold)
+                     const Opt_Float64* distanceThreshold)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -5629,7 +5629,7 @@ void SetBindSheetImpl(Ark_NativePointer node,
         }, node);
 }
 void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
-                                const Opt_Array_Number* ratios,
+                                const Opt_Array_Float64* ratios,
                                 const Opt_VisibleAreaChangeCallback* event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -5663,7 +5663,7 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
     auto onVisibleAreaChange =
         [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
             Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
-            Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
+            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
             PipelineContext::SetCallBackNode(node);
             arkCallback.InvokeSync(isExpanding, currentRatio);
         };

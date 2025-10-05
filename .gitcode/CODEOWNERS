@@ -3111,6 +3111,10 @@ interfaces/native/ui_input_event.h @ArkUI_Event
 interfaces/native/node/text_native_impl.h @huawei_g_five
 interfaces/native/node/text_native_impl.cpp @huawei_g_five
 
+[ANI Interfaces]
+interfaces/ets/ani/componentSnapshot/src/componentSnapshot.cpp @ArkUI_Event
+interfaces/ets/ani/test/ @ArkUI_Event
+
 [Innerkits Interfaces]
 interfaces/inner_api/ace/ace_forward_compatibility.cpp @arkui_framework_xnode
 interfaces/inner_api/ace/ace_forward_compatibility.h @arkui_framework_xnode
@@ -3243,6 +3247,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generat
 frameworks/core/interfaces/native/implementation/overlay_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/drag_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/drag_drop_accessor.cpp @ArkUI_Event
+frameworks/core/interfaces/native/implementation/accessibility_hover_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/drag_event_peer.h @ArkUI_Event
 frameworks/core/interfaces/native/implementation/image_modifier_peer.h @arkui001
 frameworks/core/interfaces/native/ani/drag_ani_modifier.cpp @ArkUI_Event

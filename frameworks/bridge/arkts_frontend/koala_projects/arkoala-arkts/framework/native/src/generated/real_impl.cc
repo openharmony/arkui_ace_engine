@@ -2056,7 +2056,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetRestoreIdImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Int32* value)
     {
     }
     void SetSphericalEffectImpl(Ark_NativePointer node,
@@ -2230,7 +2230,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetOnClick1Impl(Ark_NativePointer node,
                          const Opt_Callback_ClickEvent_Void* event,
-                         const Opt_Number* distanceThreshold)
+                         const Opt_Float64* distanceThreshold)
     {
     }
     void SetFocusScopeIdImpl(Ark_NativePointer node,
@@ -2381,7 +2381,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
-                                    const Opt_Array_Number* ratios,
+                                    const Opt_Array_Float64* ratios,
                                     const Opt_VisibleAreaChangeCallback* event)
     {
     }
@@ -10641,52 +10641,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                      Ark_AccessibilityHoverType type)
     {
     }
-    Ark_Number GetXImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetXImpl(Ark_AccessibilityHoverEvent peer)
     {
         return {};
     }
     void SetXImpl(Ark_AccessibilityHoverEvent peer,
-                  const Ark_Number* x)
+                  Ark_Float64 x)
     {
     }
-    Ark_Number GetYImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetYImpl(Ark_AccessibilityHoverEvent peer)
     {
         return {};
     }
     void SetYImpl(Ark_AccessibilityHoverEvent peer,
-                  const Ark_Number* y)
+                  Ark_Float64 y)
     {
     }
-    Ark_Number GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
     {
         return {};
     }
     void SetDisplayXImpl(Ark_AccessibilityHoverEvent peer,
-                         const Ark_Number* displayX)
+                         Ark_Float64 displayX)
     {
     }
-    Ark_Number GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
     {
         return {};
     }
     void SetDisplayYImpl(Ark_AccessibilityHoverEvent peer,
-                         const Ark_Number* displayY)
+                         Ark_Float64 displayY)
     {
     }
-    Ark_Number GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
     {
         return {};
     }
     void SetWindowXImpl(Ark_AccessibilityHoverEvent peer,
-                        const Ark_Number* windowX)
+                        Ark_Float64 windowX)
     {
     }
-    Ark_Number GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
     {
         return {};
     }
     void SetWindowYImpl(Ark_AccessibilityHoverEvent peer,
-                        const Ark_Number* windowY)
+                        Ark_Float64 windowY)
     {
     }
     } // AccessibilityHoverEventAccessor
@@ -10935,11 +10935,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetHorizontalAxisValueImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetHorizontalAxisValueImpl(Ark_AxisEvent peer)
     {
         return {};
     }
-    Ark_Number GetVerticalAxisValueImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetVerticalAxisValueImpl(Ark_AxisEvent peer)
     {
         return {};
     }
@@ -10956,60 +10956,60 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        Ark_AxisAction action)
     {
     }
-    Ark_Number GetDisplayXImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_AxisEvent peer)
     {
         return {};
     }
     void SetDisplayXImpl(Ark_AxisEvent peer,
-                         const Ark_Number* displayX)
+                         Ark_Float64 displayX)
     {
     }
-    Ark_Number GetDisplayYImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_AxisEvent peer)
     {
         return {};
     }
     void SetDisplayYImpl(Ark_AxisEvent peer,
-                         const Ark_Number* displayY)
+                         Ark_Float64 displayY)
     {
     }
-    Ark_Number GetWindowXImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_AxisEvent peer)
     {
         return {};
     }
     void SetWindowXImpl(Ark_AxisEvent peer,
-                        const Ark_Number* windowX)
+                        Ark_Float64 windowX)
     {
     }
-    Ark_Number GetWindowYImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_AxisEvent peer)
     {
         return {};
     }
     void SetWindowYImpl(Ark_AxisEvent peer,
-                        const Ark_Number* windowY)
+                        Ark_Float64 windowY)
     {
     }
-    Ark_Number GetXImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetXImpl(Ark_AxisEvent peer)
     {
         return {};
     }
     void SetXImpl(Ark_AxisEvent peer,
-                  const Ark_Number* x)
+                  Ark_Float64 x)
     {
     }
-    Ark_Number GetYImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetYImpl(Ark_AxisEvent peer)
     {
         return {};
     }
     void SetYImpl(Ark_AxisEvent peer,
-                  const Ark_Number* y)
+                  Ark_Float64 y)
     {
     }
-    Opt_Number GetScrollStepImpl(Ark_AxisEvent peer)
+    Opt_Int32 GetScrollStepImpl(Ark_AxisEvent peer)
     {
         return {};
     }
     void SetScrollStepImpl(Ark_AxisEvent peer,
-                           const Opt_Number* scrollStep)
+                           const Opt_Int32* scrollStep)
     {
     }
     void PropagationImpl(Ark_AxisEvent peer)
@@ -11061,12 +11061,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Ark_EventTarget* target)
     {
     }
-    Ark_Number GetTimestampImpl(Ark_BaseEvent peer)
+    Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
     {
         return {};
     }
     void SetTimestampImpl(Ark_BaseEvent peer,
-                          const Ark_Number* timestamp)
+                          Ark_Int64 timestamp)
     {
     }
     Ark_SourceType GetSourceImpl(Ark_BaseEvent peer)
@@ -11077,52 +11077,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        Ark_SourceType source)
     {
     }
-    Opt_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
+    Opt_Float64 GetAxisHorizontalImpl(Ark_BaseEvent peer)
     {
         return {};
     }
     void SetAxisHorizontalImpl(Ark_BaseEvent peer,
-                               const Opt_Number* axisHorizontal)
+                               const Opt_Float64* axisHorizontal)
     {
     }
-    Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
+    Opt_Float64 GetAxisVerticalImpl(Ark_BaseEvent peer)
     {
         return {};
     }
     void SetAxisVerticalImpl(Ark_BaseEvent peer,
-                             const Opt_Number* axisVertical)
+                             const Opt_Float64* axisVertical)
     {
     }
-    Ark_Number GetPressureImpl(Ark_BaseEvent peer)
+    Ark_Float64 GetPressureImpl(Ark_BaseEvent peer)
     {
         return {};
     }
     void SetPressureImpl(Ark_BaseEvent peer,
-                         const Ark_Number* pressure)
+                         Ark_Float64 pressure)
     {
     }
-    Ark_Number GetTiltXImpl(Ark_BaseEvent peer)
+    Ark_Float64 GetTiltXImpl(Ark_BaseEvent peer)
     {
         return {};
     }
     void SetTiltXImpl(Ark_BaseEvent peer,
-                      const Ark_Number* tiltX)
+                      Ark_Float64 tiltX)
     {
     }
-    Ark_Number GetTiltYImpl(Ark_BaseEvent peer)
+    Ark_Float64 GetTiltYImpl(Ark_BaseEvent peer)
     {
         return {};
     }
     void SetTiltYImpl(Ark_BaseEvent peer,
-                      const Ark_Number* tiltY)
+                      Ark_Float64 tiltY)
     {
     }
-    Opt_Number GetRollAngleImpl(Ark_BaseEvent peer)
+    Opt_Float64 GetRollAngleImpl(Ark_BaseEvent peer)
     {
         return {};
     }
     void SetRollAngleImpl(Ark_BaseEvent peer,
-                          const Opt_Number* rollAngle)
+                          const Opt_Float64* rollAngle)
     {
     }
     Ark_SourceTool GetSourceToolImpl(Ark_BaseEvent peer)
@@ -11141,20 +11141,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                     const Opt_ModifierKeyStateGetter* getModifierKeyState)
     {
     }
-    Opt_Number GetDeviceIdImpl(Ark_BaseEvent peer)
+    Opt_Int32 GetDeviceIdImpl(Ark_BaseEvent peer)
     {
         return {};
     }
     void SetDeviceIdImpl(Ark_BaseEvent peer,
-                         const Opt_Number* deviceId)
+                         const Opt_Int32* deviceId)
     {
     }
-    Opt_Number GetTargetDisplayIdImpl(Ark_BaseEvent peer)
+    Opt_Int32 GetTargetDisplayIdImpl(Ark_BaseEvent peer)
     {
         return {};
     }
     void SetTargetDisplayIdImpl(Ark_BaseEvent peer,
-                                const Opt_Number* targetDisplayId)
+                                const Opt_Int32* targetDisplayId)
     {
     }
     } // BaseEventAccessor
@@ -12008,52 +12008,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetDisplayXImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_ClickEvent peer)
     {
         return {};
     }
     void SetDisplayXImpl(Ark_ClickEvent peer,
-                         const Ark_Number* displayX)
+                         Ark_Float64 displayX)
     {
     }
-    Ark_Number GetDisplayYImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_ClickEvent peer)
     {
         return {};
     }
     void SetDisplayYImpl(Ark_ClickEvent peer,
-                         const Ark_Number* displayY)
+                         Ark_Float64 displayY)
     {
     }
-    Ark_Number GetWindowXImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_ClickEvent peer)
     {
         return {};
     }
     void SetWindowXImpl(Ark_ClickEvent peer,
-                        const Ark_Number* windowX)
+                        Ark_Float64 windowX)
     {
     }
-    Ark_Number GetWindowYImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_ClickEvent peer)
     {
         return {};
     }
     void SetWindowYImpl(Ark_ClickEvent peer,
-                        const Ark_Number* windowY)
+                        Ark_Float64 windowY)
     {
     }
-    Ark_Number GetXImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetXImpl(Ark_ClickEvent peer)
     {
         return {};
     }
     void SetXImpl(Ark_ClickEvent peer,
-                  const Ark_Number* x)
+                  Ark_Float64 x)
     {
     }
-    Ark_Number GetYImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetYImpl(Ark_ClickEvent peer)
     {
         return {};
     }
     void SetYImpl(Ark_ClickEvent peer,
-                  const Ark_Number* y)
+                  Ark_Float64 y)
     {
     }
     Opt_InteractionHand GetHandImpl(Ark_ClickEvent peer)
@@ -12693,19 +12693,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetDisplayXImpl(Ark_DragEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_Number GetDisplayYImpl(Ark_DragEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_Number GetWindowXImpl(Ark_DragEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_Number GetWindowYImpl(Ark_DragEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_DragEvent peer)
     {
         return {};
     }
@@ -12733,15 +12733,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number GetVelocityXImpl(Ark_DragEvent peer)
+    Ark_Float64 GetVelocityXImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_Number GetVelocityYImpl(Ark_DragEvent peer)
+    Ark_Float64 GetVelocityYImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_Number GetVelocityImpl(Ark_DragEvent peer)
+    Ark_Float64 GetVelocityImpl(Ark_DragEvent peer)
     {
         return {};
     }
@@ -13014,12 +13014,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Map_AxisModel_Number GetAxisMapImpl(Ark_FocusAxisEvent peer)
+    Map_AxisModel_Float64 GetAxisMapImpl(Ark_FocusAxisEvent peer)
     {
         return {};
     }
     void SetAxisMapImpl(Ark_FocusAxisEvent peer,
-                        const Map_AxisModel_Number* axisMap)
+                        const Map_AxisModel_Float64* axisMap)
     {
     }
     void StopPropagationImpl(Ark_FocusAxisEvent peer)
@@ -13676,52 +13676,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Opt_Number GetXImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetXImpl(Ark_HoverEvent peer)
     {
         return {};
     }
     void SetXImpl(Ark_HoverEvent peer,
-                  const Opt_Number* x)
+                  const Opt_Float64* x)
     {
     }
-    Opt_Number GetYImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetYImpl(Ark_HoverEvent peer)
     {
         return {};
     }
     void SetYImpl(Ark_HoverEvent peer,
-                  const Opt_Number* y)
+                  const Opt_Float64* y)
     {
     }
-    Opt_Number GetWindowXImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetWindowXImpl(Ark_HoverEvent peer)
     {
         return {};
     }
     void SetWindowXImpl(Ark_HoverEvent peer,
-                        const Opt_Number* windowX)
+                        const Opt_Float64* windowX)
     {
     }
-    Opt_Number GetWindowYImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetWindowYImpl(Ark_HoverEvent peer)
     {
         return {};
     }
     void SetWindowYImpl(Ark_HoverEvent peer,
-                        const Opt_Number* windowY)
+                        const Opt_Float64* windowY)
     {
     }
-    Opt_Number GetDisplayXImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetDisplayXImpl(Ark_HoverEvent peer)
     {
         return {};
     }
     void SetDisplayXImpl(Ark_HoverEvent peer,
-                         const Opt_Number* displayX)
+                         const Opt_Float64* displayX)
     {
     }
-    Opt_Number GetDisplayYImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetDisplayYImpl(Ark_HoverEvent peer)
     {
         return {};
     }
     void SetDisplayYImpl(Ark_HoverEvent peer,
-                         const Opt_Number* displayY)
+                         const Opt_Float64* displayY)
     {
     }
     void StopPropagationImpl(Ark_HoverEvent peer)
@@ -14018,12 +14018,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                      Ark_KeyType type)
     {
     }
-    Ark_Number GetKeyCodeImpl(Ark_KeyEvent peer)
+    Ark_Int32 GetKeyCodeImpl(Ark_KeyEvent peer)
     {
         return {};
     }
     void SetKeyCodeImpl(Ark_KeyEvent peer,
-                        const Ark_Number* keyCode)
+                        const Ark_Int32* keyCode)
     {
     }
     Ark_String GetKeyTextImpl(Ark_KeyEvent peer)
@@ -14042,28 +14042,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           Ark_KeySource keySource)
     {
     }
-    Ark_Number GetDeviceIdImpl(Ark_KeyEvent peer)
+    Ark_Int32 GetDeviceIdImpl(Ark_KeyEvent peer)
     {
         return {};
     }
     void SetDeviceIdImpl(Ark_KeyEvent peer,
-                         const Ark_Number* deviceId)
+                         Ark_Int32 deviceId)
     {
     }
-    Ark_Number GetMetaKeyImpl(Ark_KeyEvent peer)
+    Ark_Int32 GetMetaKeyImpl(Ark_KeyEvent peer)
     {
         return {};
     }
     void SetMetaKeyImpl(Ark_KeyEvent peer,
-                        const Ark_Number* metaKey)
+                        Ark_Int32 metaKey)
     {
     }
-    Ark_Number GetTimestampImpl(Ark_KeyEvent peer)
+    Ark_Int64 GetTimestampImpl(Ark_KeyEvent peer)
     {
         return {};
     }
     void SetTimestampImpl(Ark_KeyEvent peer,
-                          const Ark_Number* timestamp)
+                          Ark_Int64 timestamp)
     {
     }
     Callback_Void GetStopPropagationImpl(Ark_KeyEvent peer)
@@ -14090,12 +14090,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                     const Opt_ModifierKeyStateGetter* getModifierKeyState)
     {
     }
-    Opt_Number GetUnicodeImpl(Ark_KeyEvent peer)
+    Opt_Int64 GetUnicodeImpl(Ark_KeyEvent peer)
     {
         return {};
     }
     void SetUnicodeImpl(Ark_KeyEvent peer,
-                        const Opt_Number* unicode)
+                        const Opt_Int64* unicode)
     {
     }
     } // KeyEventAccessor
@@ -14644,52 +14644,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        Ark_MouseAction action)
     {
     }
-    Ark_Number GetDisplayXImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_MouseEvent peer)
     {
         return {};
     }
     void SetDisplayXImpl(Ark_MouseEvent peer,
-                         const Ark_Number* displayX)
+                         Ark_Float64 displayX)
     {
     }
-    Ark_Number GetDisplayYImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_MouseEvent peer)
     {
         return {};
     }
     void SetDisplayYImpl(Ark_MouseEvent peer,
-                         const Ark_Number* displayY)
+                         Ark_Float64 displayY)
     {
     }
-    Ark_Number GetWindowXImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_MouseEvent peer)
     {
         return {};
     }
     void SetWindowXImpl(Ark_MouseEvent peer,
-                        const Ark_Number* windowX)
+                        Ark_Float64 windowX)
     {
     }
-    Ark_Number GetWindowYImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_MouseEvent peer)
     {
         return {};
     }
     void SetWindowYImpl(Ark_MouseEvent peer,
-                        const Ark_Number* windowY)
+                        Ark_Float64 windowY)
     {
     }
-    Ark_Number GetXImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetXImpl(Ark_MouseEvent peer)
     {
         return {};
     }
     void SetXImpl(Ark_MouseEvent peer,
-                  const Ark_Number* x)
+                  Ark_Float64 x)
     {
     }
-    Ark_Number GetYImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetYImpl(Ark_MouseEvent peer)
     {
         return {};
     }
     void SetYImpl(Ark_MouseEvent peer,
-                  const Ark_Number* y)
+                  Ark_Float64 y)
     {
     }
     Callback_Void GetStopPropagationImpl(Ark_MouseEvent peer)
@@ -14700,20 +14700,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                 const Callback_Void* stopPropagation)
     {
     }
-    Opt_Number GetRawDeltaXImpl(Ark_MouseEvent peer)
+    Opt_Float64 GetRawDeltaXImpl(Ark_MouseEvent peer)
     {
         return {};
     }
     void SetRawDeltaXImpl(Ark_MouseEvent peer,
-                          const Opt_Number* rawDeltaX)
+                          const Opt_Float64* rawDeltaX)
     {
     }
-    Opt_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
+    Opt_Float64 GetRawDeltaYImpl(Ark_MouseEvent peer)
     {
         return {};
     }
     void SetRawDeltaYImpl(Ark_MouseEvent peer,
-                          const Opt_Number* rawDeltaY)
+                          const Opt_Float64* rawDeltaY)
     {
     }
     Opt_Array_MouseButton GetPressedButtonsImpl(Ark_MouseEvent peer)

@@ -3929,7 +3929,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetRestoreIdImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -4449,7 +4449,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetOnClick1Impl(Ark_NativePointer node,
                          const Opt_Callback_ClickEvent_Void* event,
-                         const Opt_Number* distanceThreshold)
+                         const Opt_Float64* distanceThreshold)
     {
         if (!needGroupedLog(1))
         {
@@ -4905,7 +4905,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
-                                    const Opt_Array_Number* ratios,
+                                    const Opt_Array_Float64* ratios,
                                     const Opt_VisibleAreaChangeCallback* event)
     {
         if (!needGroupedLog(1))
@@ -23780,20 +23780,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetXImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetXImpl(Ark_AccessibilityHoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetXImpl(Ark_AccessibilityHoverEvent peer,
-                  const Ark_Number* x)
+                  const Ark_Float64* x)
     {
         if (!needGroupedLog(1))
         {
@@ -23804,20 +23804,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetYImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetYImpl(Ark_AccessibilityHoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetYImpl(Ark_AccessibilityHoverEvent peer,
-                  const Ark_Number* y)
+                  const Ark_Float64* y)
     {
         if (!needGroupedLog(1))
         {
@@ -23828,20 +23828,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayXImpl(Ark_AccessibilityHoverEvent peer,
-                         const Ark_Number* displayX)
+                         Ark_Float64 displayX)
     {
         if (!needGroupedLog(1))
         {
@@ -23852,20 +23852,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayYImpl(Ark_AccessibilityHoverEvent peer,
-                         const Ark_Number* displayY)
+                         Ark_Float64 displayY)
     {
         if (!needGroupedLog(1))
         {
@@ -23876,20 +23876,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowXImpl(Ark_AccessibilityHoverEvent peer,
-                        const Ark_Number* windowX)
+                        Ark_Float64 windowX)
     {
         if (!needGroupedLog(1))
         {
@@ -23900,20 +23900,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowYImpl(Ark_AccessibilityHoverEvent peer,
-                        const Ark_Number* windowY)
+                        Ark_Float64 windowY)
     {
         if (!needGroupedLog(1))
         {
@@ -24516,29 +24516,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetHorizontalAxisValueImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetHorizontalAxisValueImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getHorizontalAxisValue(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetVerticalAxisValueImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetVerticalAxisValueImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVerticalAxisValue(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
                             Ark_AxisType axisType)
@@ -24578,20 +24578,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayXImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayXImpl(Ark_AxisEvent peer,
-                         const Ark_Number* displayX)
+                         Ark_Float64 displayX)
     {
         if (!needGroupedLog(1))
         {
@@ -24602,20 +24602,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayYImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayYImpl(Ark_AxisEvent peer,
-                         const Ark_Number* displayY)
+                         Ark_Float64 displayY)
     {
         if (!needGroupedLog(1))
         {
@@ -24626,20 +24626,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowXImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowXImpl(Ark_AxisEvent peer,
-                        const Ark_Number* windowX)
+                        Ark_Float64 windowX)
     {
         if (!needGroupedLog(1))
         {
@@ -24650,20 +24650,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowYImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowYImpl(Ark_AxisEvent peer,
-                        const Ark_Number* windowY)
+                        Ark_Float64 windowY)
     {
         if (!needGroupedLog(1))
         {
@@ -24674,20 +24674,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetXImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetXImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetXImpl(Ark_AxisEvent peer,
-                  const Ark_Number* x)
+                  Ark_Float64 x)
     {
         if (!needGroupedLog(1))
         {
@@ -24698,20 +24698,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetYImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetYImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetYImpl(Ark_AxisEvent peer,
-                  const Ark_Number* y)
+                  Ark_Float64 y)
     {
         if (!needGroupedLog(1))
         {
@@ -24722,7 +24722,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetScrollStepImpl(Ark_AxisEvent peer)
+    Opt_Int32 GetScrollStepImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -24735,7 +24735,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetScrollStepImpl(Ark_AxisEvent peer,
-                           const Opt_Number* scrollStep)
+                           const Opt_Int32* scrollStep)
     {
         if (!needGroupedLog(1))
         {
@@ -24865,20 +24865,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetTimestampImpl(Ark_BaseEvent peer)
+    Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getTimestamp(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetTimestampImpl(Ark_BaseEvent peer,
-                          const Ark_Number* timestamp)
+                          Ark_Int64 timestamp)
     {
         if (!needGroupedLog(1))
         {
@@ -24913,7 +24913,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
+    Opt_Float64 GetAxisHorizontalImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -24926,7 +24926,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetAxisHorizontalImpl(Ark_BaseEvent peer,
-                               const Opt_Number* axisHorizontal)
+                               const Opt_Float64* axisHorizontal)
     {
         if (!needGroupedLog(1))
         {
@@ -24937,7 +24937,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
+    Opt_Float64 GetAxisVerticalImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -24950,7 +24950,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetAxisVerticalImpl(Ark_BaseEvent peer,
-                             const Opt_Number* axisVertical)
+                             const Opt_Float64* axisVertical)
     {
         if (!needGroupedLog(1))
         {
@@ -24961,20 +24961,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetPressureImpl(Ark_BaseEvent peer)
+    Ark_Float64 GetPressureImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPressure(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetPressureImpl(Ark_BaseEvent peer,
-                         const Ark_Number* pressure)
+                         Ark_Float64 pressure)
     {
         if (!needGroupedLog(1))
         {
@@ -24985,20 +24985,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetTiltXImpl(Ark_BaseEvent peer)
+    Ark_Float64 GetTiltXImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getTiltX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetTiltXImpl(Ark_BaseEvent peer,
-                      const Ark_Number* tiltX)
+                      Ark_Float64 tiltX)
     {
         if (!needGroupedLog(1))
         {
@@ -25009,20 +25009,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetTiltYImpl(Ark_BaseEvent peer)
+    Ark_Float64 GetTiltYImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getTiltY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetTiltYImpl(Ark_BaseEvent peer,
-                      const Ark_Number* tiltY)
+                      Ark_Float64 tiltY)
     {
         if (!needGroupedLog(1))
         {
@@ -25033,7 +25033,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetRollAngleImpl(Ark_BaseEvent peer)
+    Opt_Float64 GetRollAngleImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -25046,7 +25046,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetRollAngleImpl(Ark_BaseEvent peer,
-                          const Opt_Number* rollAngle)
+                          const Opt_Float64* rollAngle)
     {
         if (!needGroupedLog(1))
         {
@@ -25105,7 +25105,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetDeviceIdImpl(Ark_BaseEvent peer)
+    Opt_Int32 GetDeviceIdImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -25118,7 +25118,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetDeviceIdImpl(Ark_BaseEvent peer,
-                         const Opt_Number* deviceId)
+                         const Opt_Int32* deviceId)
     {
         if (!needGroupedLog(1))
         {
@@ -25129,7 +25129,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetTargetDisplayIdImpl(Ark_BaseEvent peer)
+    Opt_Int32 GetTargetDisplayIdImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -25142,7 +25142,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetTargetDisplayIdImpl(Ark_BaseEvent peer,
-                                const Opt_Number* targetDisplayId)
+                                const Opt_Int32* targetDisplayId)
     {
         if (!needGroupedLog(1))
         {
@@ -27504,20 +27504,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetDisplayXImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayXImpl(Ark_ClickEvent peer,
-                         const Ark_Number* displayX)
+                         Ark_Float64 displayX)
     {
         if (!needGroupedLog(1))
         {
@@ -27528,20 +27528,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayYImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayYImpl(Ark_ClickEvent peer,
-                         const Ark_Number* displayY)
+                         Ark_Float64 displayY)
     {
         if (!needGroupedLog(1))
         {
@@ -27552,20 +27552,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowXImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowXImpl(Ark_ClickEvent peer,
-                        const Ark_Number* windowX)
+                        Ark_Float64 windowX)
     {
         if (!needGroupedLog(1))
         {
@@ -27576,20 +27576,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowYImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowYImpl(Ark_ClickEvent peer,
-                        const Ark_Number* windowY)
+                        Ark_Float64 windowY)
     {
         if (!needGroupedLog(1))
         {
@@ -27600,20 +27600,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetXImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetXImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetXImpl(Ark_ClickEvent peer,
-                  const Ark_Number* x)
+                  Ark_Float64 x)
     {
         if (!needGroupedLog(1))
         {
@@ -27624,20 +27624,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetYImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetYImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetYImpl(Ark_ClickEvent peer,
-                  const Ark_Number* y)
+                  Ark_Float64 y)
     {
         if (!needGroupedLog(1))
         {
@@ -29199,53 +29199,53 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetDisplayXImpl(Ark_DragEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetDisplayYImpl(Ark_DragEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetWindowXImpl(Ark_DragEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetWindowYImpl(Ark_DragEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDataImpl(Ark_DragEvent peer,
                      Ark_unifiedDataChannel_UnifiedData unifiedData)
@@ -29319,41 +29319,41 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Number GetVelocityXImpl(Ark_DragEvent peer)
+    Ark_Float64 GetVelocityXImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetVelocityYImpl(Ark_DragEvent peer)
+    Ark_Float64 GetVelocityYImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetVelocityImpl(Ark_DragEvent peer)
+    Ark_Float64 GetVelocityImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocity(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void ExecuteDropAnimationImpl(Ark_DragEvent peer,
                                   const Callback_Void* customDropAnimation)
@@ -29956,7 +29956,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Map_AxisModel_Number GetAxisMapImpl(Ark_FocusAxisEvent peer)
+    Map_AxisModel_Float64 GetAxisMapImpl(Ark_FocusAxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -29969,7 +29969,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetAxisMapImpl(Ark_FocusAxisEvent peer,
-                        const Map_AxisModel_Number* axisMap)
+                        const Map_AxisModel_Float64* axisMap)
     {
         if (!needGroupedLog(1))
         {
@@ -31898,7 +31898,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Opt_Number GetXImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetXImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -31911,7 +31911,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetXImpl(Ark_HoverEvent peer,
-                  const Opt_Number* x)
+                  const Opt_Float64* x)
     {
         if (!needGroupedLog(1))
         {
@@ -31922,7 +31922,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetYImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetYImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -31935,7 +31935,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetYImpl(Ark_HoverEvent peer,
-                  const Opt_Number* y)
+                  const Opt_Float64* y)
     {
         if (!needGroupedLog(1))
         {
@@ -31946,7 +31946,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetWindowXImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetWindowXImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -31959,7 +31959,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetWindowXImpl(Ark_HoverEvent peer,
-                        const Opt_Number* windowX)
+                        const Opt_Float64* windowX)
     {
         if (!needGroupedLog(1))
         {
@@ -31970,7 +31970,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetWindowYImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetWindowYImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -31983,7 +31983,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetWindowYImpl(Ark_HoverEvent peer,
-                        const Opt_Number* windowY)
+                        const Opt_Float64* windowY)
     {
         if (!needGroupedLog(1))
         {
@@ -31994,7 +31994,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetDisplayXImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetDisplayXImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -32007,7 +32007,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetDisplayXImpl(Ark_HoverEvent peer,
-                         const Opt_Number* displayX)
+                         const Opt_Float64* displayX)
     {
         if (!needGroupedLog(1))
         {
@@ -32018,7 +32018,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetDisplayYImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetDisplayYImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -32031,7 +32031,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetDisplayYImpl(Ark_HoverEvent peer,
-                         const Opt_Number* displayY)
+                         const Opt_Float64* displayY)
     {
         if (!needGroupedLog(1))
         {
@@ -32799,20 +32799,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetKeyCodeImpl(Ark_KeyEvent peer)
+    Ark_Int32 GetKeyCodeImpl(Ark_KeyEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getKeyCode(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetKeyCodeImpl(Ark_KeyEvent peer,
-                        const Ark_Number* keyCode)
+                        Ark_Int32 keyCode)
     {
         if (!needGroupedLog(1))
         {
@@ -32871,20 +32871,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDeviceIdImpl(Ark_KeyEvent peer)
+    Ark_Int32 GetDeviceIdImpl(Ark_KeyEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDeviceId(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDeviceIdImpl(Ark_KeyEvent peer,
-                         const Ark_Number* deviceId)
+                         Ark_Int32 deviceId)
     {
         if (!needGroupedLog(1))
         {
@@ -32895,20 +32895,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetMetaKeyImpl(Ark_KeyEvent peer)
+    Ark_Int32 GetMetaKeyImpl(Ark_KeyEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getMetaKey(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetMetaKeyImpl(Ark_KeyEvent peer,
-                        const Ark_Number* metaKey)
+                        Ark_Int32 metaKey)
     {
         if (!needGroupedLog(1))
         {
@@ -32919,20 +32919,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetTimestampImpl(Ark_KeyEvent peer)
+    Ark_Int64 GetTimestampImpl(Ark_KeyEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getTimestamp(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetTimestampImpl(Ark_KeyEvent peer,
-                          const Ark_Number* timestamp)
+                          Ark_Int64 timestamp)
     {
         if (!needGroupedLog(1))
         {
@@ -33015,7 +33015,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetUnicodeImpl(Ark_KeyEvent peer)
+    Opt_Int64 GetUnicodeImpl(Ark_KeyEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -33028,7 +33028,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetUnicodeImpl(Ark_KeyEvent peer,
-                        const Opt_Number* unicode)
+                        const Opt_Int64* unicode)
     {
         if (!needGroupedLog(1))
         {
@@ -34429,20 +34429,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayXImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayXImpl(Ark_MouseEvent peer,
-                         const Ark_Number* displayX)
+                         Ark_Float64 displayX)
     {
         if (!needGroupedLog(1))
         {
@@ -34453,20 +34453,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayYImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayYImpl(Ark_MouseEvent peer,
-                         const Ark_Number* displayY)
+                         Ark_Float64 displayY)
     {
         if (!needGroupedLog(1))
         {
@@ -34477,20 +34477,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowXImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowXImpl(Ark_MouseEvent peer,
-                        const Ark_Number* windowX)
+                        Ark_Float64 windowX)
     {
         if (!needGroupedLog(1))
         {
@@ -34501,20 +34501,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowYImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowYImpl(Ark_MouseEvent peer,
-                        const Ark_Number* windowY)
+                        Ark_Float64 windowY)
     {
         if (!needGroupedLog(1))
         {
@@ -34525,20 +34525,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetXImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetXImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetXImpl(Ark_MouseEvent peer,
-                  const Ark_Number* x)
+                  Ark_Float64 x)
     {
         if (!needGroupedLog(1))
         {
@@ -34549,20 +34549,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetYImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetXImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
-        string out("getY(");
+        string out("getX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    void SetYImpl(Ark_MouseEvent peer,
-                  const Ark_Number* y)
+    void SetXImpl(Ark_MouseEvent peer,
+                  Ark_Float64 x)
     {
         if (!needGroupedLog(1))
         {
@@ -34597,7 +34597,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetRawDeltaXImpl(Ark_MouseEvent peer)
+    Opt_Float64 GetRawDeltaXImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -34610,7 +34610,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetRawDeltaXImpl(Ark_MouseEvent peer,
-                          const Opt_Number* rawDeltaX)
+                          const Opt_Float64* rawDeltaX)
     {
         if (!needGroupedLog(1))
         {
@@ -34621,7 +34621,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
+    Opt_Float64 GetRawDeltaYImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -34634,7 +34634,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetRawDeltaYImpl(Ark_MouseEvent peer,
-                          const Opt_Number* rawDeltaY)
+                          const Opt_Float64* rawDeltaY)
     {
         if (!needGroupedLog(1))
         {

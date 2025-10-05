@@ -55,7 +55,7 @@ void AssignOptionalTo(std::optional<T>& dst, const P& src);
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Boolean_Number& src)
+                   const Ark_Union_Boolean_I64& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3789,7 +3789,7 @@ ASSIGN_OPT(Opt_uiObserver_NavigationInfo)
 ASSIGN_OPT(Opt_uiObserver_RouterPageState)
 ASSIGN_OPT(Opt_unifiedDataChannel_UnifiedData)
 ASSIGN_OPT(Opt_uniformTypeDescriptor_UniformDataType)
-ASSIGN_OPT(Opt_Union_Boolean_Number)
+ASSIGN_OPT(Opt_Union_Boolean_I64)
 ASSIGN_OPT(Opt_Union_CircleShape_EllipseShape_PathShape_RectShape)
 ASSIGN_OPT(Opt_Union_Color_Number_String)
 ASSIGN_OPT(Opt_Union_ColorFilter_DrawingColorFilter)
@@ -4158,7 +4158,7 @@ ASSIGN_OPT(Opt_Initializer)
 ASSIGN_OPT(Opt_InterceptionModeCallback)
 ASSIGN_OPT(Opt_InterceptionShowCallback)
 ASSIGN_OPT(Opt_LoadingProgressModifierBuilder)
-ASSIGN_OPT(Opt_Map_AxisModel_Number)
+ASSIGN_OPT(Opt_Map_AxisModel_Float64)
 ASSIGN_OPT(Opt_Map_String_ComponentContent)
 ASSIGN_OPT(Opt_Map_String_Int32)
 ASSIGN_OPT(Opt_Map_String_Number)
