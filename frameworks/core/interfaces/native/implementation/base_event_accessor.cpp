@@ -30,7 +30,7 @@ namespace BaseEventAccessor {
 
 namespace {
 const Ark_Boolean DefaultValueBoolean = Converter::ArkValue<Ark_Boolean>(false);
-const Ark_Number DefaultValueArkNumber = Converter::ArkValue<Ark_Number>(0);
+const Ark_Float64 DefaultValueArkNumber = Converter::ArkValue<Ark_Float64>(0);
 }  // namespace
 
 Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
@@ -67,16 +67,16 @@ void SetTargetImpl(Ark_BaseEvent peer,
     CHECK_NULL_VOID(target);
     peer->GetBaseInfo()->SetTarget(Converter::Convert<EventTarget>(*target));
 }
-Ark_Number GetTimestampImpl(Ark_BaseEvent peer)
+Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
 {
-    auto errValue = Converter::ArkValue<Ark_Number>(-1);
+    auto errValue = Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(-1));
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), errValue);
     auto tstamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
-    return Converter::ArkValue<Ark_Number>(tstamp);
+    return Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(tstamp));
 }
 void SetTimestampImpl(Ark_BaseEvent peer,
-                      const Ark_Number* timestamp)
+                      const Ark_Int64* timestamp)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(timestamp);
@@ -100,81 +100,81 @@ void SetSourceImpl(Ark_BaseEvent peer,
         peer->GetBaseInfo()->SetSourceDevice(*value);
     }
 }
-Opt_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
+Opt_Float64 GetAxisHorizontalImpl(Ark_BaseEvent peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Number>();
+    auto invalid = Converter::ArkValue<Opt_Float64>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
     float value = peer->GetBaseInfo()->GetHorizontalAxis();
-    return Converter::ArkValue<Opt_Number>(value);
+    return Converter::ArkValue<Opt_Float64>(value);
 }
 void SetAxisHorizontalImpl(Ark_BaseEvent peer,
-                           const Opt_Number* axisHorizontal)
+                           const Opt_Float64* axisHorizontal)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     auto value = Converter::OptConvertPtr<float>(axisHorizontal).value_or(0.f);
     peer->GetBaseInfo()->SetHorizontalAxis(value);
 }
-Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
+Opt_Float64 GetAxisVerticalImpl(Ark_BaseEvent peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Number>();
+    auto invalid = Converter::ArkValue<Opt_Float64>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
     float value = peer->GetBaseInfo()->GetVerticalAxis();
-    return Converter::ArkValue<Opt_Number>(value);
+    return Converter::ArkValue<Opt_Float64>(value);
 }
 void SetAxisVerticalImpl(Ark_BaseEvent peer,
-                         const Opt_Number* axisVertical)
+                         const Opt_Float64* axisVertical)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(axisVertical);
     auto value = Converter::OptConvertPtr<float>(axisVertical).value_or(0.f);
     peer->GetBaseInfo()->SetVerticalAxis(value);
 }
-Ark_Number GetPressureImpl(Ark_BaseEvent peer)
+Ark_Float64 GetPressureImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
-    return Converter::ArkValue<Ark_Number>(static_cast<float>(peer->GetBaseInfo()->GetForce()));
+    return Converter::ArkValue<Ark_Float64>(static_cast<float>(peer->GetBaseInfo()->GetForce()));
 }
 void SetPressureImpl(Ark_BaseEvent peer,
-                     const Ark_Number* pressure)
+                     const Ark_Float64* pressure)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(pressure);
     peer->GetBaseInfo()->SetForce(Converter::Convert<float>(*pressure));
 }
-Ark_Number GetTiltXImpl(Ark_BaseEvent peer)
+Ark_Float64 GetTiltXImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
     auto value = peer->GetBaseInfo()->GetTiltX();
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value.value_or(0)));
+    return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value.value_or(0)));
 }
 void SetTiltXImpl(Ark_BaseEvent peer,
-                  const Ark_Number* tiltX)
+                  const Ark_Float64* tiltX)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(tiltX);
     peer->GetBaseInfo()->SetTiltX(Converter::Convert<float>(*tiltX));
 }
-Ark_Number GetTiltYImpl(Ark_BaseEvent peer)
+Ark_Float64 GetTiltYImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
     auto value = peer->GetBaseInfo()->GetTiltY();
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value.value_or(0)));
+    return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value.value_or(0)));
 }
 void SetTiltYImpl(Ark_BaseEvent peer,
-                  const Ark_Number* tiltY)
+                  const Ark_Float64* tiltY)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(tiltY);
     peer->GetBaseInfo()->SetTiltY(Converter::Convert<float>(*tiltY));
 }
-Opt_Number GetRollAngleImpl(Ark_BaseEvent peer)
+Opt_Float64 GetRollAngleImpl(Ark_BaseEvent peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Number>();
+    auto invalid = Converter::ArkValue<Opt_Float64>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    return Converter::ArkValue<Opt_Number>(peer->GetBaseInfo()->GetRollAngle());
+    return Converter::ArkValue<Opt_Float64>(peer->GetBaseInfo()->GetRollAngle());
 }
 void SetRollAngleImpl(Ark_BaseEvent peer,
-                      const Opt_Number* rollAngle)
+                      const Opt_Float64* rollAngle)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(rollAngle);
@@ -216,31 +216,31 @@ void SetGetModifierKeyStateImpl(Ark_BaseEvent peer,
 {
     LOGE("BaseEventAccessor.SetGetModifierKeyStateImpl does nothing");
 }
-Opt_Number GetDeviceIdImpl(Ark_BaseEvent peer)
+Opt_Int32 GetDeviceIdImpl(Ark_BaseEvent peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Number>();
+    auto invalid = Converter::ArkValue<Opt_Int32>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
     // GetDeviceId returns int64_t, but it is int32_t in MMI
     // Need to change return type if int64_t is ever required
     int32_t value = static_cast<int32_t>(peer->GetBaseInfo()->GetDeviceId());
-    return Converter::ArkValue<Opt_Number>(value);
+    return Converter::ArkValue<Opt_Int32>(value);
 }
 void SetDeviceIdImpl(Ark_BaseEvent peer,
-                     const Opt_Number* deviceId)
+                     const Opt_Int32* deviceId)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(deviceId);
     peer->GetBaseInfo()->SetDeviceId(Converter::OptConvertPtr<int>(deviceId).value_or(0));
 }
-Opt_Number GetTargetDisplayIdImpl(Ark_BaseEvent peer)
+Opt_Int32 GetTargetDisplayIdImpl(Ark_BaseEvent peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Number>();
+    auto invalid = Converter::ArkValue<Opt_Int32>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
     int32_t value = peer->GetBaseInfo()->GetTargetDisplayId();
-    return Converter::ArkValue<Opt_Number>(value);
+    return Converter::ArkValue<Opt_Int32>(value);
 }
 void SetTargetDisplayIdImpl(Ark_BaseEvent peer,
-                            const Opt_Number* targetDisplayId)
+                            const Opt_Int32* targetDisplayId)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(targetDisplayId);
