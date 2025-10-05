@@ -960,6 +960,7 @@ void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src)
         case WordBreak::NORMAL: dst = ARK_WORD_BREAK_NORMAL; break;
         case WordBreak::BREAK_ALL: dst = ARK_WORD_BREAK_BREAK_ALL; break;
         case WordBreak::BREAK_WORD: dst = ARK_WORD_BREAK_BREAK_WORD; break;
+        case WordBreak::HYPHENATION: dst = ARK_WORD_BREAK_HYPHENATION; break;
         default:
             dst = static_cast<Ark_WordBreak>(-1);
             LOGE("Unexpected enum value in WordBreak: %{public}d", src);
