@@ -2169,11 +2169,11 @@ export class RichEditorSymbolSpanStyle_serializer {
             let fontColorTmpBuf_ : Array<ResourceColor> = new Array<ResourceColor>(fontColorTmpBuf_Length)
             for (let fontColorTmpBuf_BufCounterI = 0; fontColorTmpBuf_BufCounterI < fontColorTmpBuf_Length; fontColorTmpBuf_BufCounterI++) {
                 const fontColorTmpBuf_TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-                let fontColorTmpBuf_TempBuf : Color | number | string | Resource | undefined
+                let fontColorTmpBuf_TempBuf : Color | int32 | string | Resource | undefined
                 if (fontColorTmpBuf_TempBufUnionSelector == (0).toChar()) {
                     fontColorTmpBuf_TempBuf = Color.values()[valueDeserializer.readInt32()]
                 } else if (fontColorTmpBuf_TempBufUnionSelector == (1).toChar()) {
-                    fontColorTmpBuf_TempBuf = (valueDeserializer.readNumber() as number)
+                    fontColorTmpBuf_TempBuf = (valueDeserializer.readInt32())
                 } else if (fontColorTmpBuf_TempBufUnionSelector == (2).toChar()) {
                     fontColorTmpBuf_TempBuf = (valueDeserializer.readString() as string)
                 } else if (fontColorTmpBuf_TempBufUnionSelector == (3).toChar()) {
@@ -2181,7 +2181,7 @@ export class RichEditorSymbolSpanStyle_serializer {
                 } else {
                     throw new Error("One of the branches for fontColorTmpBuf_TempBuf has to be chosen through deserialisation.")
                 }
-                fontColorTmpBuf_[fontColorTmpBuf_BufCounterI] = (fontColorTmpBuf_TempBuf as Color | number | string | Resource)
+                fontColorTmpBuf_[fontColorTmpBuf_BufCounterI] = (fontColorTmpBuf_TempBuf as Color | int32 | string | Resource)
             }
             fontColorTmpBuf = fontColorTmpBuf_
         }
@@ -2598,11 +2598,11 @@ export class PlaceholderStyle_serializer {
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
                 fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -2610,7 +2610,7 @@ export class PlaceholderStyle_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         let value : PlaceholderStyle = ({font: fontTmpResult, fontColor: fontColorTmpResult} as PlaceholderStyle)
@@ -3258,11 +3258,11 @@ export class RichEditorTextStyle_serializer {
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
                 fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -3270,7 +3270,7 @@ export class RichEditorTextStyle_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -3495,11 +3495,11 @@ export class RichEditorTextStyleResult_serializer {
     public static read(buffer: DeserializerBase): RichEditorTextStyleResult {
         let valueDeserializer : DeserializerBase = buffer
         const fontColorTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let fontColorTmpBuf : Color | number | string | Resource | undefined
+        let fontColorTmpBuf : Color | int32 | string | Resource | undefined
         if (fontColorTmpBufUnionSelector == (0).toChar()) {
             fontColorTmpBuf = Color.values()[valueDeserializer.readInt32()]
         } else if (fontColorTmpBufUnionSelector == (1).toChar()) {
-            fontColorTmpBuf = (valueDeserializer.readNumber() as number)
+            fontColorTmpBuf = (valueDeserializer.readInt32())
         } else if (fontColorTmpBufUnionSelector == (2).toChar()) {
             fontColorTmpBuf = (valueDeserializer.readString() as string)
         } else if (fontColorTmpBufUnionSelector == (3).toChar()) {
@@ -3507,7 +3507,7 @@ export class RichEditorTextStyleResult_serializer {
         } else {
             throw new Error("One of the branches for fontColorTmpBuf has to be chosen through deserialisation.")
         }
-        const fontColorTmpResult : ResourceColor = (fontColorTmpBuf as Color | number | string | Resource)
+        const fontColorTmpResult : ResourceColor = (fontColorTmpBuf as Color | int32 | string | Resource)
         const fontSizeTmpResult : double = (valueDeserializer.readFloat64() as double)
         const fontStyleTmpResult : FontStyle = FontStyle.fromValue(valueDeserializer.readInt32())
         const fontWeightTmpResult : int32 = (valueDeserializer.readInt32() as int32)

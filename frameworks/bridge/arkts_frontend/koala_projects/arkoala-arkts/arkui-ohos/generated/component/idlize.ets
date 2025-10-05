@@ -4451,11 +4451,11 @@ export class CustomDialogControllerOptionsExtender_serializer {
         let maskColorTmpBuf : ResourceColor | undefined = undefined
         if ((maskColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const maskColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let maskColorTmpBuf_ : Color | number | string | Resource | undefined
+            let maskColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (maskColorTmpBuf_UnionSelector == (0).toChar()) {
                 maskColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (maskColorTmpBuf_UnionSelector == (1).toChar()) {
-                maskColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                maskColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (maskColorTmpBuf_UnionSelector == (2).toChar()) {
                 maskColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (maskColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -4463,7 +4463,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             } else {
                 throw new Error("One of the branches for maskColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            maskColorTmpBuf = (maskColorTmpBuf_ as Color | number | string | Resource)
+            maskColorTmpBuf = (maskColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const maskColorTmpResult : ResourceColor | undefined = maskColorTmpBuf
         const maskRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -4494,11 +4494,11 @@ export class CustomDialogControllerOptionsExtender_serializer {
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                backgroundColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -4506,7 +4506,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             } else {
                 throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
         const cornerRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -4626,11 +4626,11 @@ export class CustomDialogControllerOptionsExtender_serializer {
             let borderColorTmpBuf_ : ResourceColor | EdgeColors | undefined
             if (borderColorTmpBuf_UnionSelector == (0).toChar()) {
                 const borderColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let borderColorTmpBuf_BufU : Color | number | string | Resource | undefined
+                let borderColorTmpBuf_BufU : Color | int32 | string | Resource | undefined
                 if (borderColorTmpBuf_BufUUnionSelector == (0).toChar()) {
                     borderColorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (borderColorTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    borderColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    borderColorTmpBuf_BufU = (valueDeserializer.readInt32())
                 } else if (borderColorTmpBuf_BufUUnionSelector == (2).toChar()) {
                     borderColorTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (borderColorTmpBuf_BufUUnionSelector == (3).toChar()) {
@@ -4638,7 +4638,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 } else {
                     throw new Error("One of the branches for borderColorTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                borderColorTmpBuf_ = (borderColorTmpBuf_BufU as Color | number | string | Resource)
+                borderColorTmpBuf_ = (borderColorTmpBuf_BufU as Color | int32 | string | Resource)
             } else if (borderColorTmpBuf_UnionSelector == (1).toChar()) {
                 borderColorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
             } else {

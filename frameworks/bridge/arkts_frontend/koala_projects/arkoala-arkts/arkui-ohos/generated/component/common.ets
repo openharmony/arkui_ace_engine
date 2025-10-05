@@ -12317,11 +12317,11 @@ export class LinearGradientOptions_serializer {
         let colorsTmpBuf : Array<[ ResourceColor, number ]> = new Array<[ ResourceColor, number ]>(colorsTmpBufLength)
         for (let colorsTmpBufBufCounterI = 0; colorsTmpBufBufCounterI < colorsTmpBufLength; colorsTmpBufBufCounterI++) {
             const colorsTmpBufTempBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-            let colorsTmpBufTempBufValue0TempBuf : Color | number | string | Resource | undefined
+            let colorsTmpBufTempBufValue0TempBuf : Color | int32 | string | Resource | undefined
             if (colorsTmpBufTempBufValue0TempBufUnionSelector == (0).toChar()) {
                 colorsTmpBufTempBufValue0TempBuf = Color.values()[valueDeserializer.readInt32()]
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (1).toChar()) {
-                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readNumber() as number)
+                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readInt32())
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (2).toChar()) {
                 colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readString() as string)
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (3).toChar()) {
@@ -12329,7 +12329,7 @@ export class LinearGradientOptions_serializer {
             } else {
                 throw new Error("One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.")
             }
-            const colorsTmpBufTempBufValue0 : ResourceColor = (colorsTmpBufTempBufValue0TempBuf as Color | number | string | Resource)
+            const colorsTmpBufTempBufValue0 : ResourceColor = (colorsTmpBufTempBufValue0TempBuf as Color | int32 | string | Resource)
             const colorsTmpBufTempBufValue1 : number = (valueDeserializer.readNumber() as number)
             colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, number ])
         }
@@ -13707,11 +13707,11 @@ export class BackgroundBlurStyleOptions_serializer {
         let inactiveColorTmpBuf : ResourceColor | undefined = undefined
         if ((inactiveColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const inactiveColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let inactiveColorTmpBuf_ : Color | number | string | Resource | undefined
+            let inactiveColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (inactiveColorTmpBuf_UnionSelector == (0).toChar()) {
                 inactiveColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (inactiveColorTmpBuf_UnionSelector == (1).toChar()) {
-                inactiveColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                inactiveColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (inactiveColorTmpBuf_UnionSelector == (2).toChar()) {
                 inactiveColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (inactiveColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -13719,7 +13719,7 @@ export class BackgroundBlurStyleOptions_serializer {
             } else {
                 throw new Error("One of the branches for inactiveColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            inactiveColorTmpBuf = (inactiveColorTmpBuf_ as Color | number | string | Resource)
+            inactiveColorTmpBuf = (inactiveColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const inactiveColorTmpResult : ResourceColor | undefined = inactiveColorTmpBuf
         let value : BackgroundBlurStyleOptions = ({colorMode: colorModeTmpResult, adaptiveColor: adaptiveColorTmpResult, scale: scaleTmpResult, blurOptions: blurOptionsTmpResult, policy: policyTmpResult, inactiveColor: inactiveColorTmpResult} as BackgroundBlurStyleOptions)
@@ -13839,11 +13839,11 @@ export class BackgroundEffectOptions_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -13851,7 +13851,7 @@ export class BackgroundEffectOptions_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const adaptiveColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -13876,11 +13876,11 @@ export class BackgroundEffectOptions_serializer {
         let inactiveColorTmpBuf : ResourceColor | undefined = undefined
         if ((inactiveColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const inactiveColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let inactiveColorTmpBuf_ : Color | number | string | Resource | undefined
+            let inactiveColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (inactiveColorTmpBuf_UnionSelector == (0).toChar()) {
                 inactiveColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (inactiveColorTmpBuf_UnionSelector == (1).toChar()) {
-                inactiveColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                inactiveColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (inactiveColorTmpBuf_UnionSelector == (2).toChar()) {
                 inactiveColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (inactiveColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -13888,7 +13888,7 @@ export class BackgroundEffectOptions_serializer {
             } else {
                 throw new Error("One of the branches for inactiveColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            inactiveColorTmpBuf = (inactiveColorTmpBuf_ as Color | number | string | Resource)
+            inactiveColorTmpBuf = (inactiveColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const inactiveColorTmpResult : ResourceColor | undefined = inactiveColorTmpBuf
         let value : BackgroundEffectOptions = ({radius: radiusTmpResult, saturation: saturationTmpResult, brightness: brightnessTmpResult, color: colorTmpResult, adaptiveColor: adaptiveColorTmpResult, blurOptions: blurOptionsTmpResult, policy: policyTmpResult, inactiveColor: inactiveColorTmpResult} as BackgroundEffectOptions)
@@ -14066,11 +14066,11 @@ export class ContentCoverOptions_serializer {
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                backgroundColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -14078,7 +14078,7 @@ export class ContentCoverOptions_serializer {
             } else {
                 throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
         const onAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -14629,11 +14629,11 @@ export class LightSource_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -14641,7 +14641,7 @@ export class LightSource_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         let value : LightSource = ({positionX: positionXTmpResult, positionY: positionYTmpResult, intensity: intensityTmpResult, color: colorTmpResult} as LightSource)
@@ -14922,11 +14922,11 @@ export class PopupMaskType_serializer {
     public static read(buffer: DeserializerBase): PopupMaskType {
         let valueDeserializer : DeserializerBase = buffer
         const colorTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let colorTmpBuf : Color | number | string | Resource | undefined
+        let colorTmpBuf : Color | int32 | string | Resource | undefined
         if (colorTmpBufUnionSelector == (0).toChar()) {
             colorTmpBuf = Color.values()[valueDeserializer.readInt32()]
         } else if (colorTmpBufUnionSelector == (1).toChar()) {
-            colorTmpBuf = (valueDeserializer.readNumber() as number)
+            colorTmpBuf = (valueDeserializer.readInt32())
         } else if (colorTmpBufUnionSelector == (2).toChar()) {
             colorTmpBuf = (valueDeserializer.readString() as string)
         } else if (colorTmpBufUnionSelector == (3).toChar()) {
@@ -14934,7 +14934,7 @@ export class PopupMaskType_serializer {
         } else {
             throw new Error("One of the branches for colorTmpBuf has to be chosen through deserialisation.")
         }
-        const colorTmpResult : ResourceColor = (colorTmpBuf as Color | number | string | Resource)
+        const colorTmpResult : ResourceColor = (colorTmpBuf as Color | int32 | string | Resource)
         let value : PopupMaskType = ({color: colorTmpResult} as PopupMaskType)
         return value
     }
@@ -15392,11 +15392,11 @@ export class TextDecorationOptions_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -15404,7 +15404,7 @@ export class TextDecorationOptions_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -15591,11 +15591,11 @@ export class DividerStyle_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -15603,7 +15603,7 @@ export class DividerStyle_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const startMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -15977,11 +15977,11 @@ export class RadialGradientOptions_serializer {
         let colorsTmpBuf : Array<[ ResourceColor, number ]> = new Array<[ ResourceColor, number ]>(colorsTmpBufLength)
         for (let colorsTmpBufBufCounterI = 0; colorsTmpBufBufCounterI < colorsTmpBufLength; colorsTmpBufBufCounterI++) {
             const colorsTmpBufTempBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-            let colorsTmpBufTempBufValue0TempBuf : Color | number | string | Resource | undefined
+            let colorsTmpBufTempBufValue0TempBuf : Color | int32 | string | Resource | undefined
             if (colorsTmpBufTempBufValue0TempBufUnionSelector == (0).toChar()) {
                 colorsTmpBufTempBufValue0TempBuf = Color.values()[valueDeserializer.readInt32()]
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (1).toChar()) {
-                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readNumber() as number)
+                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readInt32())
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (2).toChar()) {
                 colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readString() as string)
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (3).toChar()) {
@@ -15989,7 +15989,7 @@ export class RadialGradientOptions_serializer {
             } else {
                 throw new Error("One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.")
             }
-            const colorsTmpBufTempBufValue0 : ResourceColor = (colorsTmpBufTempBufValue0TempBuf as Color | number | string | Resource)
+            const colorsTmpBufTempBufValue0 : ResourceColor = (colorsTmpBufTempBufValue0TempBuf as Color | int32 | string | Resource)
             const colorsTmpBufTempBufValue1 : number = (valueDeserializer.readNumber() as number)
             colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, number ])
         }
@@ -16352,11 +16352,11 @@ export class SweepGradientOptions_serializer {
         let colorsTmpBuf : Array<[ ResourceColor, number ]> = new Array<[ ResourceColor, number ]>(colorsTmpBufLength)
         for (let colorsTmpBufBufCounterI = 0; colorsTmpBufBufCounterI < colorsTmpBufLength; colorsTmpBufBufCounterI++) {
             const colorsTmpBufTempBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-            let colorsTmpBufTempBufValue0TempBuf : Color | number | string | Resource | undefined
+            let colorsTmpBufTempBufValue0TempBuf : Color | int32 | string | Resource | undefined
             if (colorsTmpBufTempBufValue0TempBufUnionSelector == (0).toChar()) {
                 colorsTmpBufTempBufValue0TempBuf = Color.values()[valueDeserializer.readInt32()]
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (1).toChar()) {
-                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readNumber() as number)
+                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readInt32())
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (2).toChar()) {
                 colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readString() as string)
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (3).toChar()) {
@@ -16364,7 +16364,7 @@ export class SweepGradientOptions_serializer {
             } else {
                 throw new Error("One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.")
             }
-            const colorsTmpBufTempBufValue0 : ResourceColor = (colorsTmpBufTempBufValue0TempBuf as Color | number | string | Resource)
+            const colorsTmpBufTempBufValue0 : ResourceColor = (colorsTmpBufTempBufValue0TempBuf as Color | int32 | string | Resource)
             const colorsTmpBufTempBufValue1 : number = (valueDeserializer.readNumber() as number)
             colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, number ])
         }
@@ -17313,11 +17313,11 @@ export class ContextMenuOptions_serializer {
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                backgroundColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -17325,7 +17325,7 @@ export class ContextMenuOptions_serializer {
             } else {
                 throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
         const backgroundBlurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -17365,11 +17365,11 @@ export class ContextMenuOptions_serializer {
             let outlineColorTmpBuf_ : ResourceColor | EdgeColors | undefined
             if (outlineColorTmpBuf_UnionSelector == (0).toChar()) {
                 const outlineColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let outlineColorTmpBuf_BufU : Color | number | string | Resource | undefined
+                let outlineColorTmpBuf_BufU : Color | int32 | string | Resource | undefined
                 if (outlineColorTmpBuf_BufUUnionSelector == (0).toChar()) {
                     outlineColorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (outlineColorTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    outlineColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    outlineColorTmpBuf_BufU = (valueDeserializer.readInt32())
                 } else if (outlineColorTmpBuf_BufUUnionSelector == (2).toChar()) {
                     outlineColorTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (outlineColorTmpBuf_BufUUnionSelector == (3).toChar()) {
@@ -17377,7 +17377,7 @@ export class ContextMenuOptions_serializer {
                 } else {
                     throw new Error("One of the branches for outlineColorTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                outlineColorTmpBuf_ = (outlineColorTmpBuf_BufU as Color | number | string | Resource)
+                outlineColorTmpBuf_ = (outlineColorTmpBuf_BufU as Color | int32 | string | Resource)
             } else if (outlineColorTmpBuf_UnionSelector == (1).toChar()) {
                 outlineColorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
             } else {
@@ -18619,11 +18619,11 @@ export class MenuOptions_serializer {
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                backgroundColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -18631,7 +18631,7 @@ export class MenuOptions_serializer {
             } else {
                 throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
         const backgroundBlurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -18671,11 +18671,11 @@ export class MenuOptions_serializer {
             let outlineColorTmpBuf_ : ResourceColor | EdgeColors | undefined
             if (outlineColorTmpBuf_UnionSelector == (0).toChar()) {
                 const outlineColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let outlineColorTmpBuf_BufU : Color | number | string | Resource | undefined
+                let outlineColorTmpBuf_BufU : Color | int32 | string | Resource | undefined
                 if (outlineColorTmpBuf_BufUUnionSelector == (0).toChar()) {
                     outlineColorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (outlineColorTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    outlineColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    outlineColorTmpBuf_BufU = (valueDeserializer.readInt32())
                 } else if (outlineColorTmpBuf_BufUUnionSelector == (2).toChar()) {
                     outlineColorTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (outlineColorTmpBuf_BufUUnionSelector == (3).toChar()) {
@@ -18683,7 +18683,7 @@ export class MenuOptions_serializer {
                 } else {
                     throw new Error("One of the branches for outlineColorTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                outlineColorTmpBuf_ = (outlineColorTmpBuf_BufU as Color | number | string | Resource)
+                outlineColorTmpBuf_ = (outlineColorTmpBuf_BufU as Color | int32 | string | Resource)
             } else if (outlineColorTmpBuf_UnionSelector == (1).toChar()) {
                 outlineColorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
             } else {
@@ -18977,11 +18977,11 @@ export class PickerDialogButtonStyle_serializer {
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
                 fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -18989,7 +18989,7 @@ export class PickerDialogButtonStyle_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         const fontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -19034,11 +19034,11 @@ export class PickerDialogButtonStyle_serializer {
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                backgroundColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -19046,7 +19046,7 @@ export class PickerDialogButtonStyle_serializer {
             } else {
                 throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
         const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -19127,11 +19127,11 @@ export class PickerTextStyle_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -19139,7 +19139,7 @@ export class PickerTextStyle_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const fontTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -19456,11 +19456,11 @@ export class PopupCommonOptions_serializer {
         let popupColorTmpBuf : ResourceColor | undefined = undefined
         if ((popupColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const popupColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let popupColorTmpBuf_ : Color | number | string | Resource | undefined
+            let popupColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (popupColorTmpBuf_UnionSelector == (0).toChar()) {
                 popupColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (popupColorTmpBuf_UnionSelector == (1).toChar()) {
-                popupColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                popupColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (popupColorTmpBuf_UnionSelector == (2).toChar()) {
                 popupColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (popupColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -19468,7 +19468,7 @@ export class PopupCommonOptions_serializer {
             } else {
                 throw new Error("One of the branches for popupColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            popupColorTmpBuf = (popupColorTmpBuf_ as Color | number | string | Resource)
+            popupColorTmpBuf = (popupColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const popupColorTmpResult : ResourceColor | undefined = popupColorTmpBuf
         const enableArrowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -19754,11 +19754,11 @@ export class PopupMessageOptions_serializer {
         let textColorTmpBuf : ResourceColor | undefined = undefined
         if ((textColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const textColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let textColorTmpBuf_ : Color | number | string | Resource | undefined
+            let textColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (textColorTmpBuf_UnionSelector == (0).toChar()) {
                 textColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (textColorTmpBuf_UnionSelector == (1).toChar()) {
-                textColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                textColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (textColorTmpBuf_UnionSelector == (2).toChar()) {
                 textColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (textColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -19766,7 +19766,7 @@ export class PopupMessageOptions_serializer {
             } else {
                 throw new Error("One of the branches for textColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            textColorTmpBuf = (textColorTmpBuf_ as Color | number | string | Resource)
+            textColorTmpBuf = (textColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const textColorTmpResult : ResourceColor | undefined = textColorTmpBuf
         const fontTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -20358,11 +20358,11 @@ export class SheetOptions_serializer {
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                backgroundColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -20370,7 +20370,7 @@ export class SheetOptions_serializer {
             } else {
                 throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
         const onAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -20477,11 +20477,11 @@ export class SheetOptions_serializer {
         let maskColorTmpBuf : ResourceColor | undefined = undefined
         if ((maskColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const maskColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let maskColorTmpBuf_ : Color | number | string | Resource | undefined
+            let maskColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (maskColorTmpBuf_UnionSelector == (0).toChar()) {
                 maskColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (maskColorTmpBuf_UnionSelector == (1).toChar()) {
-                maskColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                maskColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (maskColorTmpBuf_UnionSelector == (2).toChar()) {
                 maskColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (maskColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -20489,7 +20489,7 @@ export class SheetOptions_serializer {
             } else {
                 throw new Error("One of the branches for maskColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            maskColorTmpBuf = (maskColorTmpBuf_ as Color | number | string | Resource)
+            maskColorTmpBuf = (maskColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const maskColorTmpResult : ResourceColor | undefined = maskColorTmpBuf
         const detentsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -20736,11 +20736,11 @@ export class SheetOptions_serializer {
             let borderColorTmpBuf_ : ResourceColor | EdgeColors | LocalizedEdgeColors | undefined
             if (borderColorTmpBuf_UnionSelector == (0).toChar()) {
                 const borderColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let borderColorTmpBuf_BufU : Color | number | string | Resource | undefined
+                let borderColorTmpBuf_BufU : Color | int32 | string | Resource | undefined
                 if (borderColorTmpBuf_BufUUnionSelector == (0).toChar()) {
                     borderColorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (borderColorTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    borderColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    borderColorTmpBuf_BufU = (valueDeserializer.readInt32())
                 } else if (borderColorTmpBuf_BufUUnionSelector == (2).toChar()) {
                     borderColorTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (borderColorTmpBuf_BufUUnionSelector == (3).toChar()) {
@@ -20748,7 +20748,7 @@ export class SheetOptions_serializer {
                 } else {
                     throw new Error("One of the branches for borderColorTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                borderColorTmpBuf_ = (borderColorTmpBuf_BufU as Color | number | string | Resource)
+                borderColorTmpBuf_ = (borderColorTmpBuf_BufU as Color | int32 | string | Resource)
             } else if (borderColorTmpBuf_UnionSelector == (1).toChar()) {
                 borderColorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
             } else if (borderColorTmpBuf_UnionSelector == (2).toChar()) {

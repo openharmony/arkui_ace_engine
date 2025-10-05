@@ -1380,11 +1380,11 @@ export class MenuOutlineOptions_serializer {
             let colorTmpBuf_ : ResourceColor | EdgeColors | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 const colorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let colorTmpBuf_BufU : Color | number | string | Resource | undefined
+                let colorTmpBuf_BufU : Color | int32 | string | Resource | undefined
                 if (colorTmpBuf_BufUUnionSelector == (0).toChar()) {
                     colorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (colorTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    colorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    colorTmpBuf_BufU = (valueDeserializer.readInt32())
                 } else if (colorTmpBuf_BufUUnionSelector == (2).toChar()) {
                     colorTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (colorTmpBuf_BufUUnionSelector == (3).toChar()) {
@@ -1392,7 +1392,7 @@ export class MenuOutlineOptions_serializer {
                 } else {
                     throw new Error("One of the branches for colorTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                colorTmpBuf_ = (colorTmpBuf_BufU as Color | number | string | Resource)
+                colorTmpBuf_ = (colorTmpBuf_BufU as Color | int32 | string | Resource)
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
             } else {

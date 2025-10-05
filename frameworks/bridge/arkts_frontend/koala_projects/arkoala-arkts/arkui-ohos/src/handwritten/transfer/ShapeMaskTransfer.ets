@@ -18,6 +18,7 @@ import { ArkUIAniModule } from 'arkui.ani'
 import { ShapeMask, Rect, RoundRect, CornerRadius, Vector2, Circle, CommandPath } from '../../Graphics'
 import { ShapeBaseTransfer } from './ShapeBaseTransfer';
 import { TransferUtil } from './TransferUtil';
+import { int32 } from '@koalaui/common';
 
 export class ShapeMaskTransfer {
     static transferStatic(input: Any): Object {
@@ -54,11 +55,11 @@ export class ShapeMaskTransfer {
         let maskVal = ESValue.wrap(input);
         let fiColor = TransferUtil.getPropColorInt(maskVal, 'fillColor');
         if (fiColor !== undefined) {
-            shapeMask.fillColor = fiColor as number;
+            shapeMask.fillColor = fiColor as int32;
         }
         let stroColor = TransferUtil.getPropColorInt(maskVal, 'strokeColor');
         if (stroColor !== undefined) {
-            shapeMask.strokeColor = stroColor as number;
+            shapeMask.strokeColor = stroColor as int32;
         }
         if (ESValue.wrap(input).getProperty('strokeWidth').isNumber()) {
             const strokeWidth = ESValue.wrap(input).getProperty('strokeWidth').toNumber();
