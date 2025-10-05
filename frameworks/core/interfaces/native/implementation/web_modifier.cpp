@@ -214,6 +214,7 @@ void SetWebOptionsImpl(Ark_NativePointer node,
         }
         WebModelStatic::SetWebIdCallback(frameNode, std::move(controller->setWebIdFunc));
         WebModelStatic::SetHapPathCallback(frameNode, std::move(controller->setHapPathFunc));
+        WebModelStatic::SetWebDetachCallback(frameNode, std::move(controller->setWebDetachFunc));
         /* This controller is only used to pass the hook function for initializing the webviewController.
          * After passing, the corresponding memory needs to be released.
          */
@@ -2353,6 +2354,112 @@ void SetBindSelectionMenuImpl(Ark_NativePointer node,
         }, node);
 #endif // WEB_SUPPORTED
 }
+
+void SetRotateRenderEffectImpl(Ark_NativePointer node,
+                               const Opt_WebRotateEffect* value)
+{
+}
+
+void SetOnOverrideErrorPageImpl(Ark_NativePointer node,
+                                const Opt_OnOverrideErrorPageCallback* value)
+{
+}
+
+void SetOnPdfScrollAtBottomImpl(Ark_NativePointer node,
+                                const Opt_Callback_OnPdfScrollEvent_Void* value)
+{
+}
+
+void SetOnPdfLoadEventImpl(Ark_NativePointer node,
+                           const Opt_Callback_OnPdfLoadEvent_Void* value)
+{
+}
+
+void SetOnSafeBrowsingCheckFinishImpl(Ark_NativePointer node,
+                                      const Opt_OnSafeBrowsingCheckResultCallback* value)
+{
+}
+
+void SetOnNativeEmbedMouseEventImpl(Ark_NativePointer node,
+                                    const Opt_MouseInfoCallback* value)
+{
+}
+
+void SetOnNativeEmbedObjectParamChangeImpl(Ark_NativePointer node,
+                                           const Opt_OnNativeEmbedObjectParamChangeCallback* value)
+{
+}
+
+void SetEnableDataDetectorImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+{
+}
+
+void SetDataDetectorConfigImpl(Ark_NativePointer node,
+                               const Opt_TextDataDetectorConfig* value)
+{
+}
+
+void SetOnActivateContentImpl(Ark_NativePointer node,
+                           const Opt_VoidCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onActivateContent = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnActivateContent(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetActivateContentEventId(frameNode, onActivateContent);
+#endif // WEB_SUPPORTED
+}
+
+void SetBypassVsyncConditionImpl(Ark_NativePointer node,
+                                 const Opt_WebBypassVsyncCondition* value)
+{
+}
+
+void SetGestureFocusModeImpl(Ark_NativePointer node,
+                             const Opt_GestureFocusMode* value)
+{
+}
+
+void SetForceEnableZoomImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
+{
+}
+
+void SetBackToTopImpl(Ark_NativePointer node,
+                      const Opt_Boolean* value)
+{
+}
+
+void SetOnDetectedBlankScreenImpl(Ark_NativePointer node,
+                                  const Opt_OnDetectBlankScreenCallback* value)
+{
+}
+
+void SetBlankScreenDetectionConfigImpl(Ark_NativePointer node,
+                                       const Opt_BlankScreenDetectionConfig* value)
+{
+}
+
+void SetZoomControlAccessImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
+{
+}
+
+void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+{
+}
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()
 {
@@ -2366,6 +2473,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetImageAccessImpl,
         WebAttributeModifier::SetMixedModeImpl,
         WebAttributeModifier::SetZoomAccessImpl,
+        WebAttributeModifier::SetRotateRenderEffectImpl,
         WebAttributeModifier::SetGeolocationAccessImpl,
         WebAttributeModifier::SetJavaScriptProxyImpl,
         WebAttributeModifier::SetCacheModeImpl,
@@ -2395,6 +2503,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnConsoleImpl,
         WebAttributeModifier::SetOnErrorReceiveImpl,
         WebAttributeModifier::SetOnHttpErrorReceiveImpl,
+        WebAttributeModifier::SetOnOverrideErrorPageImpl,
         WebAttributeModifier::SetOnDownloadStartImpl,
         WebAttributeModifier::SetOnRefreshAccessedHistoryImpl,
         WebAttributeModifier::SetOnRenderExitedImpl,
@@ -2447,7 +2556,10 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnLoadInterceptImpl,
         WebAttributeModifier::SetOnControllerAttachedImpl,
         WebAttributeModifier::SetOnOverScrollImpl,
+        WebAttributeModifier::SetOnPdfScrollAtBottomImpl,
+        WebAttributeModifier::SetOnPdfLoadEventImpl,
         WebAttributeModifier::SetOnSafeBrowsingCheckResultImpl,
+        WebAttributeModifier::SetOnSafeBrowsingCheckFinishImpl,
         WebAttributeModifier::SetOnNavigationEntryCommittedImpl,
         WebAttributeModifier::SetOnIntelligentTrackingPreventionResultImpl,
         WebAttributeModifier::SetJavaScriptOnDocumentStartImpl,
@@ -2458,6 +2570,8 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnNativeEmbedLifecycleChangeImpl,
         WebAttributeModifier::SetOnNativeEmbedVisibilityChangeImpl,
         WebAttributeModifier::SetOnNativeEmbedGestureEventImpl,
+        WebAttributeModifier::SetOnNativeEmbedMouseEventImpl,
+        WebAttributeModifier::SetOnNativeEmbedObjectParamChangeImpl,
         WebAttributeModifier::SetCopyOptionsImpl,
         WebAttributeModifier::SetOnOverrideUrlLoadingImpl,
         WebAttributeModifier::SetTextAutosizingImpl,
@@ -2477,6 +2591,17 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetRunJavaScriptOnDocumentEndImpl,
         WebAttributeModifier::SetRunJavaScriptOnHeadEndImpl,
         WebAttributeModifier::SetNativeEmbedOptionsImpl,
+        WebAttributeModifier::SetEnableDataDetectorImpl,
+        WebAttributeModifier::SetDataDetectorConfigImpl,
+        WebAttributeModifier::SetOnActivateContentImpl,
+        WebAttributeModifier::SetBypassVsyncConditionImpl,
+        WebAttributeModifier::SetGestureFocusModeImpl,
+        WebAttributeModifier::SetForceEnableZoomImpl,
+        WebAttributeModifier::SetBackToTopImpl,
+        WebAttributeModifier::SetOnDetectedBlankScreenImpl,
+        WebAttributeModifier::SetBlankScreenDetectionConfigImpl,
+        WebAttributeModifier::SetZoomControlAccessImpl,
+        WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
     };

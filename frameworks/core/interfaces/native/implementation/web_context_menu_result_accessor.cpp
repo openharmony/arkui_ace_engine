@@ -62,6 +62,21 @@ void SelectAllImpl(Ark_WebContextMenuResult peer)
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->SelectAll();
 }
+void RedoImpl(Ark_WebContextMenuResult peer)
+{
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->Redo();
+}
+void UndoImpl(Ark_WebContextMenuResult peer)
+{
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->Undo();
+}
+void PasteAndMatchStyleImpl(Ark_WebContextMenuResult peer)
+{
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->PasteAndMatchStyle();
+}
 } // WebContextMenuResultAccessor
 const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccessor()
 {
@@ -75,6 +90,9 @@ const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccess
         WebContextMenuResultAccessor::PasteImpl,
         WebContextMenuResultAccessor::CutImpl,
         WebContextMenuResultAccessor::SelectAllImpl,
+        WebContextMenuResultAccessor::RedoImpl,
+        WebContextMenuResultAccessor::UndoImpl,
+        WebContextMenuResultAccessor::PasteAndMatchStyleImpl,
     };
     return &WebContextMenuResultAccessorImpl;
 }

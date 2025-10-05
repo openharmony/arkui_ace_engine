@@ -2545,7 +2545,6 @@ HWTEST_F(WebModelStaticTest, SetActivateContentEventId001, TestSize.Level1)
     auto callback = [&callCount](const BaseEventInfo* info) {
         callCount++;
     };
-
     WebModelStatic::SetActivateContentEventId(AccessibilityManager::RawPtr(frameNode), callback);
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     ASSERT_NE(webEventHub, nullptr);

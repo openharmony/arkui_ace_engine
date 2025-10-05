@@ -4697,7 +4697,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // RichTextModifier
     namespace RichTextInterfaceModifier {
     void SetRichTextOptionsImpl(Ark_NativePointer node,
-                                const Ark_String* content)
+                                const Ark_Union_String_Resource* content)
     {
     }
     } // RichTextInterfaceModifier
@@ -7499,6 +7499,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Opt_Boolean* value)
     {
     }
+    void SetRotateRenderEffectImpl(Ark_NativePointer node,
+                                   const Opt_WebRotateEffect* value)
+    {
+    }
     void SetGeolocationAccessImpl(Ark_NativePointer node,
                                   const Opt_Boolean* value)
     {
@@ -7613,6 +7617,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetOnHttpErrorReceiveImpl(Ark_NativePointer node,
                                    const Opt_Callback_OnHttpErrorReceiveEvent_Void* value)
+    {
+    }
+    void SetOnOverrideErrorPageImpl(Ark_NativePointer node,
+                                    const Opt_OnOverrideErrorPageCallback* value)
     {
     }
     void SetOnDownloadStartImpl(Ark_NativePointer node,
@@ -7823,7 +7831,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Opt_Callback_OnOverScrollEvent_Void* value)
     {
     }
+    void SetOnPdfScrollAtBottomImpl(Ark_NativePointer node,
+                                    const Opt_Callback_OnPdfScrollEvent_Void* value)
+    {
+    }
+    void SetOnPdfLoadEventImpl(Ark_NativePointer node,
+                               const Opt_Callback_OnPdfLoadEvent_Void* value)
+    {
+    }
     void SetOnSafeBrowsingCheckResultImpl(Ark_NativePointer node,
+                                          const Opt_OnSafeBrowsingCheckResultCallback* value)
+    {
+    }
+    void SetOnSafeBrowsingCheckFinishImpl(Ark_NativePointer node,
                                           const Opt_OnSafeBrowsingCheckResultCallback* value)
     {
     }
@@ -7865,6 +7885,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetOnNativeEmbedGestureEventImpl(Ark_NativePointer node,
                                           const Opt_Callback_NativeEmbedTouchInfo_Void* value)
+    {
+    }
+    void SetOnNativeEmbedMouseEventImpl(Ark_NativePointer node,
+                                        const Opt_MouseInfoCallback* value)
+    {
+    }
+    void SetOnNativeEmbedObjectParamChangeImpl(Ark_NativePointer node,
+                                               const Opt_OnNativeEmbedObjectParamChangeCallback* value)
     {
     }
     void SetCopyOptionsImpl(Ark_NativePointer node,
@@ -7941,6 +7969,50 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetNativeEmbedOptionsImpl(Ark_NativePointer node,
                                    const Opt_EmbedOptions* value)
+    {
+    }
+    void SetEnableDataDetectorImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+    {
+    }
+    void SetDataDetectorConfigImpl(Ark_NativePointer node,
+                                   const Opt_TextDataDetectorConfig* value)
+    {
+    }
+    void SetOnActivateContentImpl(Ark_NativePointer node,
+                                  const Opt_VoidCallback* value)
+    {
+    }
+    void SetBypassVsyncConditionImpl(Ark_NativePointer node,
+                                     const Opt_WebBypassVsyncCondition* value)
+    {
+    }
+    void SetGestureFocusModeImpl(Ark_NativePointer node,
+                                 const Opt_GestureFocusMode* value)
+    {
+    }
+    void SetForceEnableZoomImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+    {
+    }
+    void SetBackToTopImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
+    {
+    }
+    void SetOnDetectedBlankScreenImpl(Ark_NativePointer node,
+                                      const Opt_OnDetectBlankScreenCallback* value)
+    {
+    }
+    void SetBlankScreenDetectionConfigImpl(Ark_NativePointer node,
+                                           const Opt_BlankScreenDetectionConfig* value)
+    {
+    }
+    void SetZoomControlAccessImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+    {
+    }
+    void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
+                                           const Opt_Boolean* value)
     {
     }
     void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
@@ -10193,6 +10265,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetImageAccessImpl,
             WebAttributeModifier::SetMixedModeImpl,
             WebAttributeModifier::SetZoomAccessImpl,
+            WebAttributeModifier::SetRotateRenderEffectImpl,
             WebAttributeModifier::SetGeolocationAccessImpl,
             WebAttributeModifier::SetJavaScriptProxyImpl,
             WebAttributeModifier::SetCacheModeImpl,
@@ -10222,6 +10295,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnConsoleImpl,
             WebAttributeModifier::SetOnErrorReceiveImpl,
             WebAttributeModifier::SetOnHttpErrorReceiveImpl,
+            WebAttributeModifier::SetOnOverrideErrorPageImpl,
             WebAttributeModifier::SetOnDownloadStartImpl,
             WebAttributeModifier::SetOnRefreshAccessedHistoryImpl,
             WebAttributeModifier::SetOnRenderExitedImpl,
@@ -10274,7 +10348,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnLoadInterceptImpl,
             WebAttributeModifier::SetOnControllerAttachedImpl,
             WebAttributeModifier::SetOnOverScrollImpl,
+            WebAttributeModifier::SetOnPdfScrollAtBottomImpl,
+            WebAttributeModifier::SetOnPdfLoadEventImpl,
             WebAttributeModifier::SetOnSafeBrowsingCheckResultImpl,
+            WebAttributeModifier::SetOnSafeBrowsingCheckFinishImpl,
             WebAttributeModifier::SetOnNavigationEntryCommittedImpl,
             WebAttributeModifier::SetOnIntelligentTrackingPreventionResultImpl,
             WebAttributeModifier::SetJavaScriptOnDocumentStartImpl,
@@ -10285,6 +10362,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnNativeEmbedLifecycleChangeImpl,
             WebAttributeModifier::SetOnNativeEmbedVisibilityChangeImpl,
             WebAttributeModifier::SetOnNativeEmbedGestureEventImpl,
+            WebAttributeModifier::SetOnNativeEmbedMouseEventImpl,
+            WebAttributeModifier::SetOnNativeEmbedObjectParamChangeImpl,
             WebAttributeModifier::SetCopyOptionsImpl,
             WebAttributeModifier::SetOnOverrideUrlLoadingImpl,
             WebAttributeModifier::SetTextAutosizingImpl,
@@ -10304,6 +10383,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetRunJavaScriptOnDocumentEndImpl,
             WebAttributeModifier::SetRunJavaScriptOnHeadEndImpl,
             WebAttributeModifier::SetNativeEmbedOptionsImpl,
+            WebAttributeModifier::SetEnableDataDetectorImpl,
+            WebAttributeModifier::SetDataDetectorConfigImpl,
+            WebAttributeModifier::SetOnActivateContentImpl,
+            WebAttributeModifier::SetBypassVsyncConditionImpl,
+            WebAttributeModifier::SetGestureFocusModeImpl,
+            WebAttributeModifier::SetForceEnableZoomImpl,
+            WebAttributeModifier::SetBackToTopImpl,
+            WebAttributeModifier::SetOnDetectedBlankScreenImpl,
+            WebAttributeModifier::SetBlankScreenDetectionConfigImpl,
+            WebAttributeModifier::SetZoomControlAccessImpl,
+            WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
         };
@@ -12546,6 +12636,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetGestureEventResult1Impl(Ark_EventResult peer,
                                     Ark_Boolean result,
                                     Ark_Boolean stopPropagation)
+    {
+    }
+    void SetMouseEventResultImpl(Ark_EventResult peer,
+                                 Ark_Boolean result,
+                                 const Opt_Boolean* stopPropagation)
     {
     }
     } // EventResultAccessor
@@ -16213,7 +16308,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void HandleConfirmImpl(Ark_SslErrorHandler peer)
     {
     }
-    void HandleCancelImpl(Ark_SslErrorHandler peer)
+    void HandleCancel0Impl(Ark_SslErrorHandler peer)
+    {
+    }
+    void HandleCancel1Impl(Ark_SslErrorHandler peer,
+                           Ark_Boolean abortLoading)
     {
     }
     } // SslErrorHandlerAccessor
@@ -17694,6 +17793,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_ContextMenuDataMediaType GetContextMenuMediaTypeImpl(Ark_WebContextMenuParam peer)
+    {
+        return {};
+    }
     } // WebContextMenuParamAccessor
     namespace WebContextMenuResultAccessor {
     void DestroyPeerImpl(Ark_WebContextMenuResult peer)
@@ -17727,6 +17830,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SelectAllImpl(Ark_WebContextMenuResult peer)
+    {
+    }
+    void RedoImpl(Ark_WebContextMenuResult peer)
+    {
+    }
+    void UndoImpl(Ark_WebContextMenuResult peer)
+    {
+    }
+    void PasteAndMatchStyleImpl(Ark_WebContextMenuResult peer)
     {
     }
     } // WebContextMenuResultAccessor
@@ -18870,6 +18982,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             EventResultAccessor::GetFinalizerImpl,
             EventResultAccessor::SetGestureEventResult0Impl,
             EventResultAccessor::SetGestureEventResult1Impl,
+            EventResultAccessor::SetMouseEventResultImpl,
         };
         return &EventResultAccessorImpl;
     }
@@ -20493,7 +20606,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SslErrorHandlerAccessor::ConstructImpl,
             SslErrorHandlerAccessor::GetFinalizerImpl,
             SslErrorHandlerAccessor::HandleConfirmImpl,
-            SslErrorHandlerAccessor::HandleCancelImpl,
+            SslErrorHandlerAccessor::HandleCancel0Impl,
+            SslErrorHandlerAccessor::HandleCancel1Impl,
         };
         return &SslErrorHandlerAccessorImpl;
     }
@@ -21190,6 +21304,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebContextMenuParamAccessor::GetEditStateFlagsImpl,
             WebContextMenuParamAccessor::GetPreviewWidthImpl,
             WebContextMenuParamAccessor::GetPreviewHeightImpl,
+            WebContextMenuParamAccessor::GetContextMenuMediaTypeImpl,
         };
         return &WebContextMenuParamAccessorImpl;
     }
@@ -21209,6 +21324,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebContextMenuResultAccessor::PasteImpl,
             WebContextMenuResultAccessor::CutImpl,
             WebContextMenuResultAccessor::SelectAllImpl,
+            WebContextMenuResultAccessor::RedoImpl,
+            WebContextMenuResultAccessor::UndoImpl,
+            WebContextMenuResultAccessor::PasteAndMatchStyleImpl,
         };
         return &WebContextMenuResultAccessorImpl;
     }

@@ -85,10 +85,21 @@ static void GetWebOptionsFunc(ani_vm* vm, ani_ref savePtr,
                 reinterpret_cast<ani_object>(object), "_setHapPath", "C{std.core.String}:", aniHapPath) != ANI_OK) {
             HILOGE("setHapPathFunc callback to call _setHapPath failed");
         }
+    };
+    auto setWebDetachFunc = [vm, object = savePtr](int32_t nwebId) {
+        ani_env* envTemp = GetAniEnv(vm);
+        if (!envTemp) {
+            return;
+        }
+        if (envTemp->Object_CallMethodByName_Void(
+            reinterpret_cast<ani_object>(object), "setWebDetach", "i:", static_cast<ani_int>(nwebId)) != ANI_OK) {
+            HILOGE("SetWebDetach callback to call setWebDetach failed");
+        }
         envTemp->GlobalReference_Delete(object);
     };
     webviewControllerPeer->setWebIdFunc = std::move(setWebIdFunc);
     webviewControllerPeer->setHapPathFunc = std::move(setHapPathFunc);
+    webviewControllerPeer->setWebDetachFunc = std::move(setWebDetachFunc);
 }
 
 static void GetWebviewControllerHandlerFunc(ani_vm* vm, ani_ref savePtr,

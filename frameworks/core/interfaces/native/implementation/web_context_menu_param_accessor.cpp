@@ -116,6 +116,12 @@ Ark_Int32 GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
     CHECK_NULL_RETURN(peer && peer->handler, errValue);
     return Converter::ArkValue<Ark_Int32>(peer->GetPreviewHeight());
 }
+Ark_ContextMenuDataMediaType GetContextMenuMediaTypeImpl(Ark_WebContextMenuParam peer)
+{
+    Ark_ContextMenuDataMediaType value = ARK_CONTEXT_MENU_DATA_MEDIA_TYPE_NONE;
+    CHECK_NULL_RETURN(peer && peer->handler, value);
+    return value;
+}
 } // WebContextMenuParamAccessor
 const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor()
 {
@@ -137,6 +143,7 @@ const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor
         WebContextMenuParamAccessor::GetEditStateFlagsImpl,
         WebContextMenuParamAccessor::GetPreviewWidthImpl,
         WebContextMenuParamAccessor::GetPreviewHeightImpl,
+        WebContextMenuParamAccessor::GetContextMenuMediaTypeImpl,
     };
     return &WebContextMenuParamAccessorImpl;
 }

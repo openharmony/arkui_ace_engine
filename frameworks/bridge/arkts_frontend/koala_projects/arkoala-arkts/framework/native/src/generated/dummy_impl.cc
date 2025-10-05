@@ -11298,7 +11298,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // RichTextModifier
     namespace RichTextInterfaceModifier {
     void SetRichTextOptionsImpl(Ark_NativePointer node,
-                                const Ark_String* content)
+                                const Ark_Union_String_Resource* content)
     {
         if (!needGroupedLog(1))
         {
@@ -19335,6 +19335,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetRotateRenderEffectImpl(Ark_NativePointer node,
+                                   const Opt_WebRotateEffect* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setRotateRenderEffect(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetGeolocationAccessImpl(Ark_NativePointer node,
                                   const Opt_Boolean* value)
     {
@@ -19679,6 +19691,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setOnHttpErrorReceive(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnOverrideErrorPageImpl(Ark_NativePointer node,
+                                    const Opt_OnOverrideErrorPageCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnOverrideErrorPage(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -20307,6 +20331,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnPdfScrollAtBottomImpl(Ark_NativePointer node,
+                                    const Opt_Callback_OnPdfScrollEvent_Void* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnPdfScrollAtBottom(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnPdfLoadEventImpl(Ark_NativePointer node,
+                               const Opt_Callback_OnPdfLoadEvent_Void* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnPdfLoadEvent(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetOnSafeBrowsingCheckResultImpl(Ark_NativePointer node,
                                           const Opt_OnSafeBrowsingCheckResultCallback* value)
     {
@@ -20315,6 +20363,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setOnSafeBrowsingCheckResult(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnSafeBrowsingCheckFinishImpl(Ark_NativePointer node,
+                                          const Opt_OnSafeBrowsingCheckResultCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnSafeBrowsingCheckFinish(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -20435,6 +20495,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setOnNativeEmbedGestureEvent(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnNativeEmbedMouseEventImpl(Ark_NativePointer node,
+                                        const Opt_MouseInfoCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnNativeEmbedMouseEvent(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnNativeEmbedObjectParamChangeImpl(Ark_NativePointer node,
+                                               const Opt_OnNativeEmbedObjectParamChangeCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnNativeEmbedObjectParamChange(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -20663,6 +20747,138 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setNativeEmbedOptions(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetEnableDataDetectorImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setEnableDataDetector(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetDataDetectorConfigImpl(Ark_NativePointer node,
+                                   const Opt_TextDataDetectorConfig* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setDataDetectorConfig(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnActivateContentImpl(Ark_NativePointer node,
+                                  const Opt_VoidCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnActivateContent(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBypassVsyncConditionImpl(Ark_NativePointer node,
+                                     const Opt_WebBypassVsyncCondition* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBypassVsyncCondition(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetGestureFocusModeImpl(Ark_NativePointer node,
+                                 const Opt_GestureFocusMode* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setGestureFocusMode(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetForceEnableZoomImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setForceEnableZoom(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBackToTopImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBackToTop(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnDetectedBlankScreenImpl(Ark_NativePointer node,
+                                      const Opt_OnDetectBlankScreenCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnDetectedBlankScreen(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBlankScreenDetectionConfigImpl(Ark_NativePointer node,
+                                           const Opt_BlankScreenDetectionConfig* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBlankScreenDetectionConfig(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetZoomControlAccessImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setZoomControlAccess(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
+                                           const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setEnableSelectedDataDetector(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -23048,6 +23264,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetImageAccessImpl,
             WebAttributeModifier::SetMixedModeImpl,
             WebAttributeModifier::SetZoomAccessImpl,
+            WebAttributeModifier::SetRotateRenderEffectImpl,
             WebAttributeModifier::SetGeolocationAccessImpl,
             WebAttributeModifier::SetJavaScriptProxyImpl,
             WebAttributeModifier::SetCacheModeImpl,
@@ -23077,6 +23294,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnConsoleImpl,
             WebAttributeModifier::SetOnErrorReceiveImpl,
             WebAttributeModifier::SetOnHttpErrorReceiveImpl,
+            WebAttributeModifier::SetOnOverrideErrorPageImpl,
             WebAttributeModifier::SetOnDownloadStartImpl,
             WebAttributeModifier::SetOnRefreshAccessedHistoryImpl,
             WebAttributeModifier::SetOnRenderExitedImpl,
@@ -23129,7 +23347,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnLoadInterceptImpl,
             WebAttributeModifier::SetOnControllerAttachedImpl,
             WebAttributeModifier::SetOnOverScrollImpl,
+            WebAttributeModifier::SetOnPdfScrollAtBottomImpl,
+            WebAttributeModifier::SetOnPdfLoadEventImpl,
             WebAttributeModifier::SetOnSafeBrowsingCheckResultImpl,
+            WebAttributeModifier::SetOnSafeBrowsingCheckFinishImpl,
             WebAttributeModifier::SetOnNavigationEntryCommittedImpl,
             WebAttributeModifier::SetOnIntelligentTrackingPreventionResultImpl,
             WebAttributeModifier::SetJavaScriptOnDocumentStartImpl,
@@ -23140,6 +23361,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnNativeEmbedLifecycleChangeImpl,
             WebAttributeModifier::SetOnNativeEmbedVisibilityChangeImpl,
             WebAttributeModifier::SetOnNativeEmbedGestureEventImpl,
+            WebAttributeModifier::SetOnNativeEmbedMouseEventImpl,
+            WebAttributeModifier::SetOnNativeEmbedObjectParamChangeImpl,
             WebAttributeModifier::SetCopyOptionsImpl,
             WebAttributeModifier::SetOnOverrideUrlLoadingImpl,
             WebAttributeModifier::SetTextAutosizingImpl,
@@ -23159,6 +23382,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetRunJavaScriptOnDocumentEndImpl,
             WebAttributeModifier::SetRunJavaScriptOnHeadEndImpl,
             WebAttributeModifier::SetNativeEmbedOptionsImpl,
+            WebAttributeModifier::SetEnableDataDetectorImpl,
+            WebAttributeModifier::SetDataDetectorConfigImpl,
+            WebAttributeModifier::SetOnActivateContentImpl,
+            WebAttributeModifier::SetBypassVsyncConditionImpl,
+            WebAttributeModifier::SetGestureFocusModeImpl,
+            WebAttributeModifier::SetForceEnableZoomImpl,
+            WebAttributeModifier::SetBackToTopImpl,
+            WebAttributeModifier::SetOnDetectedBlankScreenImpl,
+            WebAttributeModifier::SetBlankScreenDetectionConfigImpl,
+            WebAttributeModifier::SetZoomControlAccessImpl,
+            WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
         };
@@ -28772,6 +29006,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setGestureEventResult1(");
+        WriteToString(&out, result);
+        out.append(", ");
+        WriteToString(&out, stopPropagation);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetMouseEventResultImpl(Ark_EventResult peer,
+                                 Ark_Boolean result,
+                                 const Opt_Boolean* stopPropagation)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setMouseEventResult(");
         WriteToString(&out, result);
         out.append(", ");
         WriteToString(&out, stopPropagation);
@@ -38523,13 +38772,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void HandleCancelImpl(Ark_SslErrorHandler peer)
+    void HandleCancel0Impl(Ark_SslErrorHandler peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("handleCancel(");
+        string out("handleCancel0(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void HandleCancel1Impl(Ark_SslErrorHandler peer,
+                           Ark_Boolean abortLoading)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("handleCancel1(");
+        WriteToString(&out, abortLoading);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -42381,6 +42642,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
+    Ark_ContextMenuDataMediaType GetContextMenuMediaTypeImpl(Ark_WebContextMenuParam peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getContextMenuMediaType(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // WebContextMenuParamAccessor
     namespace WebContextMenuResultAccessor {
     void DestroyPeerImpl(Ark_WebContextMenuResult peer)
@@ -42474,6 +42747,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("selectAll(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void RedoImpl(Ark_WebContextMenuResult peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("redo(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void UndoImpl(Ark_WebContextMenuResult peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("undo(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void PasteAndMatchStyleImpl(Ark_WebContextMenuResult peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("pasteAndMatchStyle(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -44165,6 +44468,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             EventResultAccessor::GetFinalizerImpl,
             EventResultAccessor::SetGestureEventResult0Impl,
             EventResultAccessor::SetGestureEventResult1Impl,
+            EventResultAccessor::SetMouseEventResultImpl,
         };
         return &EventResultAccessorImpl;
     }
@@ -45788,7 +46092,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SslErrorHandlerAccessor::ConstructImpl,
             SslErrorHandlerAccessor::GetFinalizerImpl,
             SslErrorHandlerAccessor::HandleConfirmImpl,
-            SslErrorHandlerAccessor::HandleCancelImpl,
+            SslErrorHandlerAccessor::HandleCancel0Impl,
+            SslErrorHandlerAccessor::HandleCancel1Impl,
         };
         return &SslErrorHandlerAccessorImpl;
     }
@@ -46485,6 +46790,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebContextMenuParamAccessor::GetEditStateFlagsImpl,
             WebContextMenuParamAccessor::GetPreviewWidthImpl,
             WebContextMenuParamAccessor::GetPreviewHeightImpl,
+            WebContextMenuParamAccessor::GetContextMenuMediaTypeImpl,
         };
         return &WebContextMenuParamAccessorImpl;
     }
@@ -46504,6 +46810,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebContextMenuResultAccessor::PasteImpl,
             WebContextMenuResultAccessor::CutImpl,
             WebContextMenuResultAccessor::SelectAllImpl,
+            WebContextMenuResultAccessor::RedoImpl,
+            WebContextMenuResultAccessor::UndoImpl,
+            WebContextMenuResultAccessor::PasteAndMatchStyleImpl,
         };
         return &WebContextMenuResultAccessorImpl;
     }

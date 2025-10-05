@@ -45,6 +45,11 @@ void SetGestureEventResult1Impl(EventResultPeer* peer,
                                 Ark_Boolean stopPropagation)
 {
 }
+void SetMouseEventResultImpl(Ark_EventResult peer,
+                             Ark_Boolean result,
+                             const Opt_Boolean* stopPropagation)
+{
+}
 } // EventResultAccessor
 const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor()
 {
@@ -54,6 +59,7 @@ const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor()
         EventResultAccessor::GetFinalizerImpl,
         EventResultAccessor::SetGestureEventResult0Impl,
         EventResultAccessor::SetGestureEventResult1Impl,
+        EventResultAccessor::SetMouseEventResultImpl,
     };
     return &EventResultAccessorImpl;
 }
