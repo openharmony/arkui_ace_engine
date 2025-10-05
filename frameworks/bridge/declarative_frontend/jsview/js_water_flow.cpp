@@ -58,39 +58,6 @@ namespace {
 const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDirection::COLUMN,
     FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
 
-namespace {
-void ParseChanges(
-    const JSCallbackInfo& args, const JSRef<JSArray>& changeArray, RefPtr<NG::WaterFlowSections>& waterFlowSections)
-{
-    auto length = changeArray->Length();
-    for (size_t i = 0; i < length; ++i) {
-        auto change = changeArray->GetValueAt(i);
-        if (!change->IsObject()) {
-            continue;
-        }
-        auto changeObject = JSRef<JSObject>::Cast(change);
-        auto sectionValue = changeObject->GetProperty("sections");
-        if (!sectionValue->IsArray()) {
-            continue;
-        }
-        auto sectionArray = JSRef<JSArray>::Cast(sectionValue);
-        auto sectionsCount = sectionArray->Length();
-        std::vector<NG::WaterFlowSections::Section> newSections;
-        for (size_t j = 0; j < sectionsCount; ++j) {
-            NG::WaterFlowSections::Section section;
-            auto newSection = sectionArray->GetValueAt(j);
-            if (JSWaterFlowSections::ParseSectionOptions(args, newSection, section)) {
-                newSections.emplace_back(section);
-            }
-        }
-        auto start = changeObject->GetProperty("start");
-        auto deleteCount = changeObject->GetProperty("deleteCount");
-        if (start->IsNumber() && deleteCount->IsNumber()) {
-            waterFlowSections->ChangeData(start->ToNumber<int32_t>(), deleteCount->ToNumber<int32_t>(), newSections);
-        }
-    }
-}
-
 void ParseSections(
     const JSCallbackInfo& args, const JSRef<JSArray>& sectionArray, RefPtr<NG::WaterFlowSections>& waterFlowSections)
 {
@@ -126,17 +93,42 @@ void ParseScroller(const JSRef<JSObject>& obj)
     }
 }
 } // namespace
-} // namespace
 
 void UpdateSections(
     const JSCallbackInfo& args, const JSRef<JSVal>& sections, RefPtr<NG::WaterFlowSections>& waterFlowSections)
 {
     CHECK_NULL_VOID(waterFlowSections);
     auto sectionsObject = JSRef<JSObject>::Cast(sections);
-    auto changes = sectionsObject->GetProperty("changeArray");
-    CHECK_NULL_VOID(changes->IsArray());
-    auto changeArray = JSRef<JSArray>::Cast(changes);
-    ParseChanges(args, changeArray, waterFlowSections);
+    auto property = sectionsObject->GetProperty("getNativeSection");
+    CHECK_NULL_VOID(property->IsFunction());
+    auto getNativeSectionFunc = JSRef<JSFunc>::Cast(property);
+    auto nativeSection = getNativeSectionFunc->Call(sectionsObject);
+    if (nativeSection->IsEmpty()) {
+        nativeSection = JSClass<JSWaterFlowSections>::NewInstance();
+        JSWaterFlowSections::SetNativeWaterFlowSection(sectionsObject, nativeSection);
+    }
+    CHECK_NULL_VOID(nativeSection->IsObject());
+    auto nativeSectionObj = JSRef<JSObject>::Cast(nativeSection);
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    JSWaterFlowSections* section = nativeSectionObj->Unwrap<JSWaterFlowSections>();
+    CHECK_NULL_VOID(section);
+    if (section->IsBound(frameNode)) {
+        return;
+    }
+    auto id = Container::CurrentId();
+    auto callback = [id, weak = AceType::WeakClaim(AceType::RawPtr(waterFlowSections))](
+                        size_t start, size_t deleteCount, std::vector<NG::WaterFlowSections::Section>& newSections) {
+        ContainerScope scope(id);
+        auto context = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->AddBuildFinishCallBack([start, deleteCount, change = newSections, weak]() {
+            auto nodeSection = weak.Upgrade();
+            CHECK_NULL_VOID(nodeSection);
+            nodeSection->ChangeData(start, deleteCount, change);
+        });
+        context->RequestFrame();
+    };
+    section->SetOnSectionChangedCallback(frameNode, callback);
 
     auto lengthFunc = sectionsObject->GetProperty("length");
     CHECK_NULL_VOID(lengthFunc->IsFunction());
@@ -147,11 +139,6 @@ void UpdateSections(
         CHECK_NULL_VOID(allSections->IsArray());
         ParseSections(args, JSRef<JSArray>::Cast(allSections), waterFlowSections);
     }
-
-    auto clearFunc = sectionsObject->GetProperty("clearChanges");
-    CHECK_NULL_VOID(clearFunc->IsFunction());
-    auto func = JSRef<JSFunc>::Cast(clearFunc);
-    func->Call(sectionsObject);
 }
 
 void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sections)

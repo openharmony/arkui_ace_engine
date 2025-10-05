@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,6 +165,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/js_water_flow.h"
 #include "bridge/declarative_frontend/jsview/js_water_flow_item.h"
+#include "bridge/declarative_frontend/jsview/js_water_flow_sections.h"
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
@@ -761,6 +762,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Refresh", JSRefresh::JSBind },
     { "WaterFlow", JSWaterFlow::JSBind },
     { "FlowItem", JSWaterFlowItem::JSBind },
+    { "NativeWaterFlowSection", JSWaterFlowSections::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },

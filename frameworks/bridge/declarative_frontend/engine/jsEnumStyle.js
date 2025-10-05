@@ -3298,9 +3298,17 @@ globalThis.NavPathStackExtent = NavPathStackExtent;
 class WaterFlowSections {
   constructor() {
     this.sectionArray = [];
-    // indicate class has changed.
-    this.changeFlag = true;
+    // native waterflow section, implement in cpp
+    this.nativeSection = undefined;
     this.changeArray = [];
+  }
+
+  setNativeSection(section) {
+    UIUtilsImpl.instance().getTarget(this).nativeSection = section;
+  }
+
+  getNativeSection() {
+    return UIUtilsImpl.instance().getTarget(this).nativeSection;
   }
 
   isNonNegativeInt32(input) {
@@ -3354,8 +3362,11 @@ class WaterFlowSections {
     }
     intDeleteCount = intDeleteCount < 0 ? 0 : intDeleteCount;
 
-    this.changeArray.push({ start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : [] });
-    this.changeFlag = !this.changeFlag;
+    if (this.nativeSection) {
+      this.nativeSection.onSectionChanged({ start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : [] });
+    } else {
+      this.changeArray.push({ start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : [] });
+    }
     return true;
   }
 
@@ -3365,8 +3376,11 @@ class WaterFlowSections {
     }
     let oldLength = this.sectionArray.length;
     this.sectionArray.push(section);
-    this.changeArray.push({ start: oldLength, deleteCount: 0, sections: [section] });
-    this.changeFlag = !this.changeFlag;
+    if (this.nativeSection) {
+      this.nativeSection.onSectionChanged({ start: oldLength, deleteCount: 0, sections: [section] });
+    } else {
+      this.changeArray.push({ start: oldLength, deleteCount: 0, sections: [section] });
+    }
     return true;
   }
 
@@ -3378,8 +3392,11 @@ class WaterFlowSections {
     this.sectionArray.splice(sectionIndex, 1, section);
 
     let intStart = this.toArrayIndex(sectionIndex, oldLength);
-    this.changeArray.push({ start: intStart, deleteCount: 1, sections: [section] });
-    this.changeFlag = !this.changeFlag;
+    if (this.nativeSection) {
+      this.nativeSection.onSectionChanged({ start: intStart, deleteCount: 1, sections: [section] });
+    } else {
+      this.changeArray.push({ start: intStart, deleteCount: 1, sections: [section] });
+    }
     return true;
   }
 
