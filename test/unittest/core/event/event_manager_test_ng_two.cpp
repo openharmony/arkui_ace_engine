@@ -1414,4 +1414,56 @@ HWTEST_F(EventManagerTestNg, HandleAxisEventWithDifferentDeviceId001, TestSize.L
             testCase.result);
     }
 }
+
+/**
+ * @tc.name: InitCoastingAxisEventGenerator001
+ * @tc.desc: Test InitCoastingAxisEventGenerator function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, InitCoastingAxisEventGenerator001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->InitCoastingAxisEventGenerator();
+    ASSERT_NE(eventManager->coastingAxisEventGenerator_, nullptr);
+    ASSERT_NE(eventManager->coastingAxisEventGenerator_->axisToTouchConverter_, nullptr);
+    AxisEvent axisEvent;
+    axisEvent.action = AxisAction::BEGIN;
+    auto touchEvent = eventManager->coastingAxisEventGenerator_->axisToTouchConverter_(axisEvent);
+    EXPECT_EQ(touchEvent.type, TouchType::DOWN);
+
+    eventManager->coastingAxisEventGenerator_ = nullptr;
+    eventManager->InitCoastingAxisEventGenerator();
+    ASSERT_NE(eventManager->coastingAxisEventGenerator_, nullptr);
+}
+
+/**
+ * @tc.name: NotifyAxisEvent001
+ * @tc.desc: Test NotifyAxisEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, NotifyAxisEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    ASSERT_NE(eventManager->coastingAxisEventGenerator_, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 0, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    AxisEvent axisEvent;
+    axisEvent.action = AxisAction::UPDATE;
+    axisEvent.sourceType = SourceType::MOUSE;
+    axisEvent.sourceTool = SourceTool::TOUCHPAD;
+    axisEvent.verticalAxis = 30.0;
+    axisEvent.horizontalAxis = 40.0;
+    eventManager->NotifyAxisEvent(axisEvent, frameNode);
+    EXPECT_EQ(eventManager->coastingAxisEventGenerator_->velocityTracker_.GetMainAxisPos(), 50);
+}
 } // namespace OHOS::Ace::NG

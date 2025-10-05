@@ -767,4 +767,52 @@ HWTEST_F(InputEventHubTestNg, HandleHoverEventTest001, TestSize.Level1)
     EXPECT_EQ(actualDisplayLocation, expectedOffset);
     EXPECT_EQ(actualGlobalDisplayLocation, expectedOffset);
 }
+
+
+/**
+ * @tc.name: InputEventHubProcessAxisTestHitTest001
+ * @tc.desc: Create InputEventHub and invoke ProcessAxisTestHit functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, InputEventHubProcessAxisTestHitTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create InputEventHub.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. Initialize coastingAxisEventActuator_ and its inputEvents_ is empty and userCallback_ is
+     * nullptr.
+     * @tc.expected: OnCollectAxisEvent will return directly, and ProcessAxisTestHit return false.
+     */
+    AxisTestResult result;
+    auto inputEventHub2 = AceType::MakeRefPtr<InputEventHub>(nullptr);
+    EXPECT_FALSE(inputEventHub2->ProcessAxisTestHit(COORDINATE_OFFSET, result, true));
+    inputEventHub->coastingAxisEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    EXPECT_FALSE(inputEventHub2->ProcessAxisTestHit(COORDINATE_OFFSET, result, true));
+
+    /**
+     * @tc.steps: step4. Initialize userCallback_.
+     */
+    OnCoastingAxisEventFunc onCoastingAxis = [](CoastingAxisInfo& info) {};
+    auto onCoastingAxisEvent = AceType::MakeRefPtr<InputEvent>(std::move(onCoastingAxis));
+    inputEventHub->coastingAxisEventActuator_->userCallback_ = onCoastingAxisEvent;
+
+    /**
+     * @tc.steps: step5. Invoke ProcessAxisTestHit when inputEvents_ is not empty and userCallback_ has already been
+     * initialized.
+     * @tc.expected: ProcessAxisTestHit return false, axis result size has been increased one.
+     */
+    EXPECT_FALSE(inputEventHub->ProcessAxisTestHit(COORDINATE_OFFSET, result, true));
+    EXPECT_EQ(result.size(), AXIS_RESULT_SIZE);
+
+    EXPECT_FALSE(inputEventHub->ProcessAxisTestHit(COORDINATE_OFFSET, result, false));
+    EXPECT_EQ(result.size(), AXIS_RESULT_SIZE);
+}
 } // namespace OHOS::Ace::NG

@@ -80,13 +80,20 @@ bool InputEventHub::ProcessPenHoverTestHit(const OffsetF& coordinateOffset, Touc
     return false;
 }
 
-bool InputEventHub::ProcessAxisTestHit(const OffsetF& coordinateOffset, AxisTestResult& onAxisResult)
+bool InputEventHub::ProcessAxisTestHit(
+    const OffsetF& coordinateOffset, AxisTestResult& onAxisResult, bool isCoastingAxis)
 {
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
 
-    if (axisEventActuator_) {
+    if (axisEventActuator_ && !isCoastingAxis) {
         axisEventActuator_->OnCollectAxisEvent(coordinateOffset, getEventTargetImpl, onAxisResult);
+        return false;
+    }
+
+    if (coastingAxisEventActuator_ && isCoastingAxis) {
+        coastingAxisEventActuator_->OnCollectCoastingAxisEvent(onAxisResult);
+        return false;
     }
     return false;
 }

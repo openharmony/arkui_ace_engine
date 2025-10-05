@@ -192,6 +192,22 @@ public:
         axisEventActuator_->ReplaceInputEvent(std::move(onAxisEventFunc));
     }
 
+    void SetCoastingAxisEvent(OnCoastingAxisEventFunc&& onCoastingAxisEventFunc)
+    {
+        if (!coastingAxisEventActuator_) {
+            coastingAxisEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        }
+        coastingAxisEventActuator_->ReplaceInputEvent(std::move(onCoastingAxisEventFunc));
+    }
+
+    bool HasCoastingAxisEvent()
+    {
+        if (coastingAxisEventActuator_) {
+            return coastingAxisEventActuator_->HasUserCallback();
+        }
+        return false;
+    }
+
     void AddOnAxisEvent(const RefPtr<InputEvent>& onAxisEvent)
     {
         if (!axisEventActuator_) {
@@ -214,7 +230,7 @@ public:
 
     bool ProcessPenHoverTestHit(const OffsetF& coordinateOffset, TouchTestResult& result);
 
-    bool ProcessAxisTestHit(const OffsetF& coordinateOffset, AxisTestResult& onAxisResult);
+    bool ProcessAxisTestHit(const OffsetF& coordinateOffset, AxisTestResult& onAxisResult, bool isCoastingAxis = false);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -279,6 +295,13 @@ public:
         }
     }
 
+    void ClearUserOnCoastingAxisEvent()
+    {
+        if (coastingAxisEventActuator_) {
+            coastingAxisEventActuator_->ClearUserCallback();
+        }
+    }
+
 private:
     WeakPtr<EventHub> eventHub_;
     RefPtr<InputEventActuator> mouseEventActuator_;
@@ -286,6 +309,7 @@ private:
     RefPtr<InputEventActuator> hoverMoveEventActuator_;
     RefPtr<InputEventActuator> hoverEffectActuator_;
     RefPtr<InputEventActuator> axisEventActuator_;
+    RefPtr<InputEventActuator> coastingAxisEventActuator_;
     RefPtr<InputEventActuator> accessibilityHoverEventActuator_;
 
     RefPtr<InputEvent> showMenu_;

@@ -172,6 +172,7 @@ group("core_base_unittest") {
     ":ui_node_test_ng",
     ":view_abstract_model_test_ng",
     ":view_abstract_test_ng",
+    ":view_abstract_test_resetposition_ng",
     ":view_full_update_model_ng_test",
     ":view_partial_update_model_test_ng",
     ":view_stack_processor_test_ng",

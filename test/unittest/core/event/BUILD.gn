@@ -36,6 +36,12 @@ ace_unittest("click_event_test_ng") {
   sources = [ "click_event_test_ng.cpp" ]
 }
 
+ace_unittest("coasting_axis_event_test_ng") {
+  module_output = "events"
+  type = "new"
+  sources = [ "coasting_axis_event_test_ng.cpp" ]
+}
+
 ace_unittest("drag_event_test_ng") {
   type = "new"
   module_output = "events"
@@ -186,6 +192,7 @@ group("core_event_unittest") {
   deps = [
     ":axis_event_test_ng",
     ":click_event_test_ng",
+    ":coasting_axis_event_test_ng",
     ":drag_drop_event_test_ng",
     ":drag_event_test_ng",
     ":event_hub_test_ng",

@@ -157,6 +157,7 @@ enum class UIInputEventType {
     FOCUS_AXIS,
     CROWN,
     MOUSE,
+    TOUCHPAD_ACTIVE,
 };
 
 enum class KeyIntention : int32_t {
@@ -224,6 +225,13 @@ enum class AxisType : int32_t {
     VERTICAL_AXIS = 0,
     HORIZONTAL_AXIS,
     PINCH_AXIS,
+};
+
+enum class CoastingAxisPhase: int32_t {
+    NONE = 0,
+    BEGIN,
+    UPDATE,
+    END,
 };
 } // namespace OHOS::Ace
 

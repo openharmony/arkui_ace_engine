@@ -125,6 +125,7 @@ ace_unittest("pipeline_context_test_ng") {
     "mock_rosen_render_context.cpp",
     "pipeline_context_test_ng.cpp",
     "pipeline_context_test_ng_new.cpp",
+    "pipeline_context_test_ng_three.cpp",
     "pipeline_context_test_ng_two.cpp",
     "resample_and_velocity_test_ng.cpp",
     "velocity_tracker_test.cpp",

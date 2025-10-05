@@ -1333,6 +1333,27 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
 
+    auto&& touchpadInteractionBeginCallback = [context = pipelineContext_, id = instanceId_](
+                                                  const NonPointerEvent& event,
+                                                  const std::function<void()>& markProcess) {
+        ContainerScope scope(id);
+        auto callback = [context, event, markProcess, id]() {
+            ContainerScope scope(id);
+            context->OnNonPointerEvent(event);
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+            callback();
+        } else {
+            taskExecutor->PostTask(
+                callback, TaskExecutor::TaskType::UI, "ArkUITouchpadInteractionBegin", PriorityType::VIP);
+        }
+    };
+    aceView_->RegisterTouchpadInteractionBeginCallback(touchpadInteractionBeginCallback);
+
     auto&& rotationEventCallback = [context = pipelineContext_, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
         bool result = false;

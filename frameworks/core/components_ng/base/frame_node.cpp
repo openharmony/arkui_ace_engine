@@ -3660,7 +3660,7 @@ void FrameNode::CollectSelfAxisResult(const PointF& globalPoint, const PointF& l
         auto inputHub = eventHub_ ? eventHub_->GetInputEventHub() : nullptr;
         if (inputHub) {
             const auto coordinateOffset = globalPoint - localPoint;
-            inputHub->ProcessAxisTestHit(coordinateOffset, axisResult);
+            inputHub->ProcessAxisTestHit(coordinateOffset, axisResult, touchRestrict.isCoastingAxisEvent);
         }
     }
 }

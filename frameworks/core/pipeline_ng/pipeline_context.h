@@ -1462,6 +1462,8 @@ private:
     void UpdateOcclusionCullingStatus();
 
     void UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string& abilityName, uint64_t vsyncPeriod);
+    void NotifyCoastingAxisEventOnHide();
+    void ResSchedReportAxisEvent(const AxisEvent& event) const;
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 

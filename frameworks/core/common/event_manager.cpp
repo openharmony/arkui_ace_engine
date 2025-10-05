@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/event/focus_axis_event.h"
 #include "core/event/crown_event.h"
+#include "core/event/coasting_axis_event_generator.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -1994,6 +1995,7 @@ EventManager::EventManager()
     referee_ = AceType::MakeRefPtr<GestureReferee>();
     responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
     mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
+    InitCoastingAxisEventGenerator();
 
     auto callback = [weak = WeakClaim(this)](size_t touchId) -> bool {
         auto eventManager = weak.Upgrade();
@@ -2569,6 +2571,8 @@ bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
         return OnFocusAxisEvent(static_cast<const NG::FocusAxisEvent&>(event));
     } else if (event.eventType == UIInputEventType::CROWN) {
         return OnCrownEvent(static_cast<const CrownEvent&>(event));
+    } else if (event.eventType == UIInputEventType::TOUCHPAD_ACTIVE) {
+        return OnTouchpadInteractionBegin();
     } else {
         return false;
     }
@@ -2698,5 +2702,42 @@ void EventManager::DelegateTouchEvent(const TouchEvent& touchEvent)
     for (auto item : delegateVector) {
         item->DelegateTouchEvent(touchEvent);
     }
+}
+
+bool EventManager::OnTouchpadInteractionBegin() const
+{
+    CHECK_NULL_RETURN(coastingAxisEventGenerator_, true);
+    coastingAxisEventGenerator_->NotifyStop();
+    return true;
+}
+
+void EventManager::InitCoastingAxisEventGenerator()
+{
+    if (!coastingAxisEventGenerator_) {
+        coastingAxisEventGenerator_ = AceType::MakeRefPtr<CoastingAxisEventGenerator>();
+    }
+
+    coastingAxisEventGenerator_->SetAxisToTouchConverter(
+        [weak = WeakClaim(this)](const AxisEvent& event) -> TouchEvent {
+            auto eventManager = weak.Upgrade();
+            CHECK_NULL_RETURN(eventManager, {});
+            return eventManager->ConvertAxisEventToTouchEvent(event);
+        });
+}
+
+void EventManager::NotifyAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) const
+{
+    CHECK_NULL_VOID(coastingAxisEventGenerator_);
+    if (event.action == AxisAction::BEGIN) {
+        coastingAxisEventGenerator_->NotifyStop();
+    }
+    CHECK_NULL_VOID(node);
+    coastingAxisEventGenerator_->NotifyAxisEvent(event, node);
+}
+
+void EventManager::NotifyCoastingAxisEventStop() const
+{
+    CHECK_NULL_VOID(coastingAxisEventGenerator_);
+    coastingAxisEventGenerator_->NotifyStop();
 }
 } // namespace OHOS::Ace

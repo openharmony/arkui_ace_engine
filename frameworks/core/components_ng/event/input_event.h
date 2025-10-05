@@ -38,6 +38,8 @@ public:
 
     explicit InputEvent(OnAccessibilityHoverFunc&& callback) : onAccessibilityHoverFunc_(std::move(callback)) {}
 
+    explicit InputEvent(OnCoastingAxisEventFunc&& callback) : onCoastingAxisCallback_(std::move(callback)) {}
+
     ~InputEvent() override = default;
 
     const OnMouseEventFunc& GetOnMouseEventFunc() const
@@ -97,6 +99,13 @@ public:
         }
     }
 
+    void operator()(CoastingAxisInfo& info) const
+    {
+        if (onCoastingAxisCallback_) {
+            onCoastingAxisCallback_(info);
+        }
+    }
+
     void operator()(HoverInfo& info) const
     {
         if (onHoverMoveCallback_) {
@@ -136,6 +145,7 @@ private:
     OnHoverFunc onHoverEventCallback_;
     OnHoverMoveFunc onHoverMoveCallback_;
     OnAxisEventFunc onAxisCallback_;
+    OnCoastingAxisEventFunc onCoastingAxisCallback_;
     OnAccessibilityHoverFunc onAccessibilityHoverFunc_;
     bool istips_ = false;
     bool followCursor_ = false;
@@ -220,6 +230,14 @@ public:
         userCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
     }
 
+    void ReplaceInputEvent(OnCoastingAxisEventFunc&& callback)
+    {
+        if (userCallback_) {
+            userCallback_.Reset();
+        }
+        userCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
+    }
+
     void ReplaceInputEvent(OnAccessibilityHoverFunc&& callback)
     {
         if (userCallback_) {
@@ -279,6 +297,8 @@ public:
     void OnCollectAxisEvent(
         const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, AxisTestResult& onAxisResult);
 
+    void OnCollectCoastingAxisEvent(AxisTestResult& onAxisResult);
+
 private:
     WeakPtr<InputEventHub> inputEventHub_;
     RefPtr<MouseEventTarget> mouseEventTarget_;
@@ -288,6 +308,7 @@ private:
     RefPtr<HoverEventTarget> penHoverEventTarget_;
     RefPtr<HoverEventTarget> penHoverMoveEventTarget_;
     RefPtr<AxisEventTarget> axisEventTarget_;
+    RefPtr<AxisEventTarget> coastingAxisEventTarget_;
     std::list<RefPtr<InputEvent>> inputEvents_;
     RefPtr<InputEvent> userCallback_;
     RefPtr<InputEvent> userJSFrameNodeCallback_;

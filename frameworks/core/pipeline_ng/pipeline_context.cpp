@@ -4499,6 +4499,7 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node)
 {
+    eventManager_->NotifyAxisEvent(event);
     if (!axisEventChecker_.IsAxisEventSequenceCorrect(event)) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
             "AxisEvent error occurred, the currentAction is %{public}d, the preAction is %{public}d", event.action,
@@ -4536,22 +4537,14 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     if (event.action == AxisAction::BEGIN && formEventMgr) {
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
     }
-    if (scaleEvent.action == AxisAction::BEGIN) {
-        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Begin");
-        ResSchedReport::GetInstance().OnAxisEvent(scaleEvent);
-    } else if (scaleEvent.verticalAxis == 0 && scaleEvent.horizontalAxis == 0) {
-        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis End");
-        ResSchedReport::GetInstance().ResSchedDataReport("axis_off");
-    } else {
-        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Update");
-        ResSchedReport::GetInstance().OnAxisEvent(scaleEvent);
-    }
+    ResSchedReportAxisEvent(scaleEvent);
     auto mouseEvent = ConvertAxisToMouse(event);
     OnMouseMoveEventForAxisEvent(mouseEvent, node);
     if (formEventMgr && ((scaleEvent.action == AxisAction::END) || (scaleEvent.action == AxisAction::CANCEL))) {
         formEventMgr->RemoveEtsCardAxisEventCallback(event.id);
         formEventMgr->RemoveEtsCardTouchEventCallback(event.id);
     }
+    eventManager_->NotifyAxisEvent(event, node);
 }
 
 void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node,
@@ -4743,6 +4736,7 @@ void PipelineContext::OnHide()
 {
     CHECK_RUN_ON(UI);
     NotifyDragOnHide();
+    NotifyCoastingAxisEventOnHide();
     onShow_ = false;
     isNeedCallbackAreaChange_ = true;
     window_->OnHide();
@@ -5254,6 +5248,12 @@ void PipelineContext::NotifyDragOnHide()
     CHECK_NULL_VOID(manager);
     manager->HandlePipelineOnHide();
     manager->OnDragEnd();
+}
+
+void PipelineContext::NotifyCoastingAxisEventOnHide()
+{
+    CHECK_NULL_VOID(eventManager_);
+    eventManager_->NotifyCoastingAxisEventStop();
 }
 
 void PipelineContext::CompensatePointerMoveEvent(const DragPointerEvent& event, const RefPtr<FrameNode>& node)
@@ -6857,5 +6857,19 @@ void PipelineContext::SetMagnifierController(const RefPtr<MagnifierController>& 
 RefPtr<MagnifierController> PipelineContext::GetMagnifierController() const
 {
     return magnifierController_;
+}
+
+void PipelineContext::ResSchedReportAxisEvent(const AxisEvent& event) const
+{
+    if (event.action == AxisAction::BEGIN) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Begin");
+        ResSchedReport::GetInstance().OnAxisEvent(event);
+    } else if (event.verticalAxis == 0 && event.horizontalAxis == 0) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis End");
+        ResSchedReport::GetInstance().ResSchedDataReport("axis_off");
+    } else {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Update");
+        ResSchedReport::GetInstance().OnAxisEvent(event);
+    }
 }
 } // namespace OHOS::Ace::NG
