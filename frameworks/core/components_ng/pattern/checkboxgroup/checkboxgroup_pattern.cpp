@@ -712,7 +712,8 @@ RefPtr<FrameNode> CheckBoxGroupPattern::BuildContentModifierNode()
     CHECK_NULL_RETURN(paintProperty, nullptr);
     auto selectStatus = paintProperty->GetSelectStatus();
     CheckBoxGroupConfiguration checkBoxGroupConfiguration(name, selectStatus, enabled);
-    return (makeFunc_.value())(checkBoxGroupConfiguration);
+    auto makeFunc = makeFunc_.value();
+    return makeFunc(checkBoxGroupConfiguration);
 }
 
 void CheckBoxGroupPattern::OnColorConfigurationUpdate()
