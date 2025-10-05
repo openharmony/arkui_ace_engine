@@ -250,6 +250,8 @@ public:
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
 
+    float footerHeight_ = 0.0f;
+
     // Stores the tail item index of each segment.
     std::vector<int32_t> segmentTails_;
     // K: item index; V: corresponding segment index

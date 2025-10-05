@@ -639,7 +639,12 @@ float WaterFlowLayoutInfo::EstimateTotalHeight() const
     if (childCount == 0) {
         return 0;
     }
-    auto estimateHeight = GetMaxMainHeight() / childCount * totalChildrenCount;
+    float maxMainHeight = GetMaxMainHeight();
+    if (footerIndex_ >= 0) {
+        maxMainHeight += footerHeight_;
+        childCount += 1;
+    }
+    auto estimateHeight = maxMainHeight / childCount * totalChildrenCount;
     return estimateHeight + contentEndOffset_;
 }
 

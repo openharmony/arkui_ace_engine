@@ -549,6 +549,30 @@ HWTEST_F(WaterFlowTestNg, EstimateTotalHeight001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: EstimateTotalHeight002
+ * @tc.desc: Test EstimateTotalHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, EstimateTotalHeight002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    constexpr int32_t number = 4;
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * number);
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateDone();
+    FlushUITasks();
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    constexpr float offset = 5000.f;
+    pattern_->UpdateCurrentOffset(-offset, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    auto prevOffset = info->EstimateTotalHeight();
+    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(info->EstimateTotalHeight(), prevOffset);
+}
+
+/**
  * @tc.name: ScrollToIndex004
  * @tc.desc: Test ScrollToIndex with extraOffset
  * @tc.type: FUNC
