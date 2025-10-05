@@ -987,7 +987,7 @@ std::optional<float> ScrollPattern::CalcPredictSnapOffset(
     if (snapDirection != SnapDirection::NONE) {
         return CalcPredictNextSnapOffset(delta, snapDirection);
     }
-    float finalPosition = currentOffset_ + delta;
+    float finalPosition = currentOffset_ - contentStartOffset_ + delta;
     if (IsEnablePagingValid()) {
         finalPosition = GetPagingOffset(delta, dragDistance, velocity);
     }
@@ -1025,7 +1025,7 @@ std::optional<float> ScrollPattern::CalcPredictSnapOffset(
         }
     }
     if (predictSnapOffset.has_value()) {
-        predictSnapOffset = predictSnapOffset.value() - currentOffset_;
+        predictSnapOffset = predictSnapOffset.value() - (currentOffset_ - contentStartOffset_);
     }
     return predictSnapOffset;
 }
