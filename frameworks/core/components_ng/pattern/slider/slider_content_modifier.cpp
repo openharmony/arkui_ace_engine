@@ -391,8 +391,7 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
 std::vector<GradientColor> SliderContentModifier::GetBlockColor() const
 {
     Gradient gradient = SortGradientColorsByOffset(blockGradientColor_->Get().GetGradient());
-    std::vector<GradientColor> gradientColors = gradient.GetColors();
-    return gradientColors;
+    return gradient.GetColors();
 }
 
 void SliderContentModifier::CreateDefaultBlockBrush(RSBrush& brush, float& radius)
