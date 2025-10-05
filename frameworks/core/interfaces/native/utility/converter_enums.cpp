@@ -301,6 +301,15 @@ void AssignCast(std::optional<ImageRenderMode>& dst, const Ark_ImageRenderMode& 
 }
 
 template<>
+void AssignCast(std::optional<WebAudioSessionType>& dst, const Ark_AudioSessionType& src)
+{
+    switch (src) {
+        case ARK_AUDIO_SESSION_TYPE_AMBIENT: dst = WebAudioSessionType::AMBIENT; break;
+        default: LOGE("Unexpected enum value in Ark_AudioSessionType: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ImageRepeat>& dst, const Ark_ImageRepeat& src)
 {
     switch (src) {

@@ -457,6 +457,19 @@ void WebModelStatic::SetAudioExclusive(FrameNode* frameNode, const std::optional
     }
 }
 
+void WebModelStatic::SetAudioSessionType(
+    FrameNode* frameNode, const std::optional<WebAudioSessionType>& audioSessionType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    if (audioSessionType) {
+        webPatternStatic->UpdateAudioSessionType(audioSessionType.value());
+    } else {
+        webPatternStatic->ResetAudioSessionType();
+    }
+}
+
 void WebModelStatic::SetBlurOnKeyboardHideMode(FrameNode* frameNode, const std::optional<BlurOnKeyboardHideMode>& mode)
 {
     CHECK_NULL_VOID(frameNode);
