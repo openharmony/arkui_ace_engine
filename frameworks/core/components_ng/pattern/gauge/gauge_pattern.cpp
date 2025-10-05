@@ -475,6 +475,9 @@ void GaugePattern::OnColorConfigurationUpdate()
     auto colorMode = Container::CurrentColorMode();
     auto gradientColors = paintProperty->GetGradientColorsValue();
     bool needInitRevert = false;
+    if (!paintProperty->GetColorModeInit().has_value()) {
+        return;
+    }
     auto colorModeInit = paintProperty->GetColorModeInitValue();
     if (colorModeInit == static_cast<int>(colorMode)) {
         needInitRevert = true;
@@ -482,7 +485,9 @@ void GaugePattern::OnColorConfigurationUpdate()
         isGradientColorsResEmpty = ProcessGradientColors(gradientColors, invertFunc);
     }
     if (needInitRevert) {
-        paintProperty->UpdateGradientColors(paintProperty->GetGradientColorsInitValue());
+        if (paintProperty->GetGradientColorsInit().has_value()) {
+            paintProperty->UpdateGradientColors(paintProperty->GetGradientColorsInitValue());
+        }
     } else if (!isGradientColorsResEmpty) {
         paintProperty->UpdateGradientColors(gradientColors);
     }
