@@ -683,12 +683,12 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
     switch (align) {
         case ScrollAlign::START: {
             if (noSkip) {
-                ApplyDelta(
-                    -info_->DistanceToTop(jumpIdx, mainGaps_[info_->GetSegment(jumpIdx)]) + info_->contentStartOffset_);
+                ApplyDelta(-info_->DistanceToTop(jumpIdx, mainGaps_[info_->GetSegment(jumpIdx)]));
             } else {
                 info_->ResetWithLaneOffset(info_->contentStartOffset_);
                 FillBack(mainLen_, jumpIdx, itemCnt_ - 1);
             }
+            info_->delta_ += info_->contentStartOffset_;
             break;
         }
         case ScrollAlign::CENTER: {
@@ -719,12 +719,12 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
         }
         case ScrollAlign::END: {
             if (noSkip) {
-                ApplyDelta(info_->DistanceToBottom(jumpIdx, mainLen_, mainGaps_[info_->GetSegment(jumpIdx)]) -
-                           info_->contentEndOffset_);
+                ApplyDelta(info_->DistanceToBottom(jumpIdx, mainLen_, mainGaps_[info_->GetSegment(jumpIdx)]));
             } else {
                 info_->ResetWithLaneOffset(mainLen_);
                 FillFront(info_->contentStartOffset_, jumpIdx, 0);
             }
+            info_->delta_ -= info_->contentEndOffset_;
             break;
         }
         default:

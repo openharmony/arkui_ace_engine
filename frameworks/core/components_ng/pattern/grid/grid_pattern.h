@@ -27,7 +27,6 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-
 class ACE_EXPORT GridPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
 

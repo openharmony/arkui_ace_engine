@@ -1500,4 +1500,28 @@ HWTEST_F(WaterFlowTestNg, LazyVGridInWaterFlowTopDown002, TestSize.Level1)
         EXPECT_EQ(rect.Width(), 480.0f);
     }
 }
+
+/**
+ * @tc.name: ChangeLayoutModeWithContentStartOffset
+ * @tc.desc: Test offset after change LayoutMode with contentStartOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ChangeLayoutModeWithContentStartOffset, TestSize.Level1) {
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(WaterFlowLayoutMode::TOP_DOWN);
+    model.SetColumnsTemplate("1fr 1fr");
+    auto startOffset = 20.0f;
+    ScrollableModelNG::SetContentStartOffset(startOffset);
+    CreateWaterFlowItems(10);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), startOffset);
+
+    model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), startOffset);
+
+    model.SetLayoutMode(WaterFlowLayoutMode::TOP_DOWN);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), startOffset);
+}
 } // namespace OHOS::Ace::NG
