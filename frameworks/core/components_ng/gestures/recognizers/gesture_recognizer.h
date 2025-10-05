@@ -247,7 +247,7 @@ public:
     }
 
     // called when gesture scope is closed.
-    void ResetStatusOnFinish(bool isBlocked = false)
+    virtual void ResetStatusOnFinish(bool isBlocked = false)
     {
         if (isBlocked && refereeState_ == RefereeState::SUCCEED) {
             OnSucceedCancel();
