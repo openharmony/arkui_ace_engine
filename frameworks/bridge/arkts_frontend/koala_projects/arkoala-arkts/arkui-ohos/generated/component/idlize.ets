@@ -41,10 +41,13 @@ import { SliderConfiguration } from "./slider"
 import { TextClockConfiguration } from "./textClock"
 import { TextTimerConfiguration } from "./textTimer"
 import { ToggleConfiguration } from "./toggle"
-import { Size_serializer, Frame_serializer, LengthMetrics_serializer } from "./../Graphics"
+import { Size_serializer, Frame_serializer, LengthMetrics_serializer, Vector2_serializer, Vector3_serializer,
+    Circle_serializer, RoundRect_serializer, CommandPath_serializer } from "./../Graphics"
 import { LayoutConstraint_serializer } from "./../FrameNode"
 import { FrameNode, LayoutConstraint } from "arkui.FrameNode"
-import { Size, Frame, LengthMetrics } from "arkui.Graphics"
+import { Size, Frame, LengthMetrics, Vector2, Vector3, Matrix4, Circle, RoundRect, CommandPath } from "arkui.Graphics"
+import { RenderNode } from "arkui.RenderNode"
+import { default as common2D } from "@ohos.graphics.common2D"
 import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask } from "./gesture"
 import { default as image } from "@ohos.multimedia.image"
 import { font_FontOptions_serializer, font_FontInfo_serializer } from "./../framework/ohos.font"
@@ -73,6 +76,7 @@ import { CustomLayoutRootModifier } from "./../CustomLayoutRootModifier"
 import { GlobalScope } from "./../framework/GlobalScope"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { LevelOrder_serializer } from "./../framework/ohos.promptAction"
+import { common2D_Rect_serializer } from "./../framework/ohos.graphics.common2D"
 export class ActionSheet {
     static show_serialize(options: ActionSheetOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -1074,6 +1078,10 @@ export class FrameNodeExtender {
         const obj : UICommonEvent = UICommonEventInternal.fromPtr(retval)
         return obj
     }
+    static getRenderNode_serialize(peer: KPointer): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getRenderNode(peer)
+        return retval
+    }
     public static constructorFrameNode(): KPointer {
         return FrameNodeExtender.constructorFrameNode_serialize()
     }
@@ -1322,6 +1330,10 @@ export class FrameNodeExtender {
     public static getCommonEvent(peer: FrameNode): UICommonEvent {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getCommonEvent_serialize(peer_casted)
+    }
+    public static getRenderNode(peer: KPointer): KPointer {
+        const peer_casted = peer as (KPointer)
+        return FrameNodeExtender.getRenderNode_serialize(peer_casted)
     }
 }
 export class GestureOps {
@@ -2169,6 +2181,472 @@ export class PromptActionExtender {
     public static closeMenu(content: KPointer): Promise<void> {
         const content_casted = content as (KPointer)
         return PromptActionExtender.closeMenu_serialize(content_casted)
+    }
+}
+export class RenderNodeExtender {
+    static constructorRenderNode_serialize(nodeId: int32): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._RenderNodeExtender_constructorRenderNode(nodeId)
+        return retval
+    }
+    static getDestroy_serialize(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._RenderNodeExtender_getDestroy()
+        return retval
+    }
+    static destroyPeer_serialize(peer: RenderNode): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_destroyPeer(extractors.toRenderNodePtr(peer))
+    }
+    static setBackgroundColor_serialize(peer: RenderNode, backgroundColor: number): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setBackgroundColor(extractors.toRenderNodePtr(peer), backgroundColor)
+    }
+    static setClipToFrame_serialize(peer: RenderNode, clipToFrame: boolean): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setClipToFrame(extractors.toRenderNodePtr(peer), clipToFrame ? 1 : 0)
+    }
+    static setOpacity_serialize(peer: RenderNode, opacity: number): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setOpacity(extractors.toRenderNodePtr(peer), opacity)
+    }
+    static setSize_serialize(peer: RenderNode, size: Size, unitValue: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Size_serializer.write(thisSerializer, size)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setSize(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
+        thisSerializer.release()
+    }
+    static setPosition_serialize(peer: RenderNode, position: Vector2, unitValue: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector2_serializer.write(thisSerializer, position)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setPosition(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
+        thisSerializer.release()
+    }
+    static setPivot_serialize(peer: RenderNode, pivot: Vector2): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector2_serializer.write(thisSerializer, pivot)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setPivot(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setScale_serialize(peer: RenderNode, scale: Vector2): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector2_serializer.write(thisSerializer, scale)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setScale(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setTranslation_serialize(peer: RenderNode, translation: Vector2): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector2_serializer.write(thisSerializer, translation)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setTranslation(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setRotation_serialize(peer: RenderNode, rotation: Vector3, unitValue: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector3_serializer.write(thisSerializer, rotation)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setRotation(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
+        thisSerializer.release()
+    }
+    static setTransform_serialize(peer: RenderNode, transform: Matrix4): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const transform_0  = transform[0]
+        thisSerializer.writeNumber(transform_0)
+        const transform_1  = transform[1]
+        thisSerializer.writeNumber(transform_1)
+        const transform_2  = transform[2]
+        thisSerializer.writeNumber(transform_2)
+        const transform_3  = transform[3]
+        thisSerializer.writeNumber(transform_3)
+        const transform_4  = transform[4]
+        thisSerializer.writeNumber(transform_4)
+        const transform_5  = transform[5]
+        thisSerializer.writeNumber(transform_5)
+        const transform_6  = transform[6]
+        thisSerializer.writeNumber(transform_6)
+        const transform_7  = transform[7]
+        thisSerializer.writeNumber(transform_7)
+        const transform_8  = transform[8]
+        thisSerializer.writeNumber(transform_8)
+        const transform_9  = transform[9]
+        thisSerializer.writeNumber(transform_9)
+        const transform_10  = transform[10]
+        thisSerializer.writeNumber(transform_10)
+        const transform_11  = transform[11]
+        thisSerializer.writeNumber(transform_11)
+        const transform_12  = transform[12]
+        thisSerializer.writeNumber(transform_12)
+        const transform_13  = transform[13]
+        thisSerializer.writeNumber(transform_13)
+        const transform_14  = transform[14]
+        thisSerializer.writeNumber(transform_14)
+        const transform_15  = transform[15]
+        thisSerializer.writeNumber(transform_15)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setTransform(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setShadowColor_serialize(peer: RenderNode, shadowColor: number): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowColor(extractors.toRenderNodePtr(peer), shadowColor)
+    }
+    static setShadowOffset_serialize(peer: RenderNode, shadowOffset: Vector2, unitValue: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector2_serializer.write(thisSerializer, shadowOffset)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowOffset(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
+        thisSerializer.release()
+    }
+    static setLabel_serialize(peer: RenderNode, label: string): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setLabel(extractors.toRenderNodePtr(peer), label)
+    }
+    static setShadowAlpha_serialize(peer: RenderNode, shadowAlpha: number): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowAlpha(extractors.toRenderNodePtr(peer), shadowAlpha)
+    }
+    static setShadowElevation_serialize(peer: RenderNode, shadowElevation: number): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowElevation(extractors.toRenderNodePtr(peer), shadowElevation)
+    }
+    static setShadowRadius_serialize(peer: RenderNode, shadowRadius: number): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowRadius(extractors.toRenderNodePtr(peer), shadowRadius)
+    }
+    static setBorderStyle_serialize(peer: RenderNode, borderStyle: NodeEdgeStyles): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        NodeEdgeStyles_serializer.write(thisSerializer, borderStyle)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setBorderStyle(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setBorderWidth_serialize(peer: RenderNode, borderWidth: EdgeNumber, unitValue: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        EdgeNumber_serializer.write(thisSerializer, borderWidth)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setBorderWidth(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
+        thisSerializer.release()
+    }
+    static setBorderColor_serialize(peer: RenderNode, borderColor: EdgeNumber): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        EdgeNumber_serializer.write(thisSerializer, borderColor)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setBorderColor(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setBorderRadius_serialize(peer: RenderNode, borderRadius: BorderRadiuses_graphics, unitValue: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        BorderRadiuses_graphics_serializer.write(thisSerializer, borderRadius)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setBorderRadius(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
+        thisSerializer.release()
+    }
+    static setMarkNodeGroup_serialize(peer: RenderNode, markNodeGroup: boolean): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setMarkNodeGroup(extractors.toRenderNodePtr(peer), markNodeGroup ? 1 : 0)
+    }
+    static setRectMask_serialize(peer: RenderNode, rect: common2D.Rect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        common2D_Rect_serializer.write(thisSerializer, rect)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setRectMask(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    static setCircleMask_serialize(peer: RenderNode, circle: Circle, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Circle_serializer.write(thisSerializer, circle)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setCircleMask(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    static setRoundRectMask_serialize(peer: RenderNode, roundRect: RoundRect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        RoundRect_serializer.write(thisSerializer, roundRect)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setRoundRectMask(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    static setOvalMask_serialize(peer: RenderNode, rect: common2D.Rect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        common2D_Rect_serializer.write(thisSerializer, rect)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setOvalMask(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    static setPath_serialize(peer: RenderNode, path: CommandPath, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        CommandPath_serializer.write(thisSerializer, path)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setPath(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    static setRectClip_serialize(peer: RenderNode, rect: common2D.Rect): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        common2D_Rect_serializer.write(thisSerializer, rect)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setRectClip(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setCircleClip_serialize(peer: RenderNode, circle: Circle): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Circle_serializer.write(thisSerializer, circle)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setCircleClip(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setRoundRectClip_serialize(peer: RenderNode, roundRect: RoundRect): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        RoundRect_serializer.write(thisSerializer, roundRect)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setRoundRectClip(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOvalClip_serialize(peer: RenderNode, rect: common2D.Rect): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        common2D_Rect_serializer.write(thisSerializer, rect)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setOvalClip(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setPathClip_serialize(peer: RenderNode, path: CommandPath): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        CommandPath_serializer.write(thisSerializer, path)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setPathClip(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static appendChild_serialize(peer: RenderNode, node: RenderNode): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_appendChild(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(node))
+    }
+    static insertChildAfter_serialize(peer: RenderNode, child: RenderNode, sibling: RenderNode): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_insertChildAfter(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(child), extractors.toRenderNodePtr(sibling))
+    }
+    static removeChild_serialize(peer: RenderNode, node: RenderNode): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_removeChild(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(node))
+    }
+    static clearChildren_serialize(peer: RenderNode): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_clearChildren(extractors.toRenderNodePtr(peer))
+    }
+    static invalidate_serialize(peer: RenderNode): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_invalidate(extractors.toRenderNodePtr(peer))
+    }
+    public static constructorRenderNode(nodeId: int32): KPointer {
+        const nodeId_casted = nodeId as (int32)
+        return RenderNodeExtender.constructorRenderNode_serialize(nodeId_casted)
+    }
+    public static getDestroy(): KPointer {
+        return RenderNodeExtender.getDestroy_serialize()
+    }
+    public static destroyPeer(peer: RenderNode): void {
+        const peer_casted = peer as (RenderNode)
+        RenderNodeExtender.destroyPeer_serialize(peer_casted)
+        return
+    }
+    public static setBackgroundColor(peer: RenderNode, backgroundColor: number): void {
+        const peer_casted = peer as (RenderNode)
+        const backgroundColor_casted = backgroundColor as (number)
+        RenderNodeExtender.setBackgroundColor_serialize(peer_casted, backgroundColor_casted)
+        return
+    }
+    public static setClipToFrame(peer: RenderNode, clipToFrame: boolean): void {
+        const peer_casted = peer as (RenderNode)
+        const clipToFrame_casted = clipToFrame as (boolean)
+        RenderNodeExtender.setClipToFrame_serialize(peer_casted, clipToFrame_casted)
+        return
+    }
+    public static setOpacity(peer: RenderNode, opacity: number): void {
+        const peer_casted = peer as (RenderNode)
+        const opacity_casted = opacity as (number)
+        RenderNodeExtender.setOpacity_serialize(peer_casted, opacity_casted)
+        return
+    }
+    public static setSize(peer: RenderNode, size: Size, unitValue: int32): void {
+        const peer_casted = peer as (RenderNode)
+        const size_casted = size as (Size)
+        const unitValue_casted = unitValue as (int32)
+        RenderNodeExtender.setSize_serialize(peer_casted, size_casted, unitValue_casted)
+        return
+    }
+    public static setPosition(peer: RenderNode, position: Vector2, unitValue: int32): void {
+        const peer_casted = peer as (RenderNode)
+        const position_casted = position as (Vector2)
+        const unitValue_casted = unitValue as (int32)
+        RenderNodeExtender.setPosition_serialize(peer_casted, position_casted, unitValue_casted)
+        return
+    }
+    public static setPivot(peer: RenderNode, pivot: Vector2): void {
+        const peer_casted = peer as (RenderNode)
+        const pivot_casted = pivot as (Vector2)
+        RenderNodeExtender.setPivot_serialize(peer_casted, pivot_casted)
+        return
+    }
+    public static setScale(peer: RenderNode, scale: Vector2): void {
+        const peer_casted = peer as (RenderNode)
+        const scale_casted = scale as (Vector2)
+        RenderNodeExtender.setScale_serialize(peer_casted, scale_casted)
+        return
+    }
+    public static setTranslation(peer: RenderNode, translation: Vector2): void {
+        const peer_casted = peer as (RenderNode)
+        const translation_casted = translation as (Vector2)
+        RenderNodeExtender.setTranslation_serialize(peer_casted, translation_casted)
+        return
+    }
+    public static setRotation(peer: RenderNode, rotation: Vector3, unitValue: int32): void {
+        const peer_casted = peer as (RenderNode)
+        const rotation_casted = rotation as (Vector3)
+        const unitValue_casted = unitValue as (int32)
+        RenderNodeExtender.setRotation_serialize(peer_casted, rotation_casted, unitValue_casted)
+        return
+    }
+    public static setTransform(peer: RenderNode, transform: Matrix4): void {
+        const peer_casted = peer as (RenderNode)
+        const transform_casted = transform as (Matrix4)
+        RenderNodeExtender.setTransform_serialize(peer_casted, transform_casted)
+        return
+    }
+    public static setShadowColor(peer: RenderNode, shadowColor: number): void {
+        const peer_casted = peer as (RenderNode)
+        const shadowColor_casted = shadowColor as (number)
+        RenderNodeExtender.setShadowColor_serialize(peer_casted, shadowColor_casted)
+        return
+    }
+    public static setShadowOffset(peer: RenderNode, shadowOffset: Vector2, unitValue: int32): void {
+        const peer_casted = peer as (RenderNode)
+        const shadowOffset_casted = shadowOffset as (Vector2)
+        const unitValue_casted = unitValue as (int32)
+        RenderNodeExtender.setShadowOffset_serialize(peer_casted, shadowOffset_casted, unitValue_casted)
+        return
+    }
+    public static setLabel(peer: RenderNode, label: string): void {
+        const peer_casted = peer as (RenderNode)
+        const label_casted = label as (string)
+        RenderNodeExtender.setLabel_serialize(peer_casted, label_casted)
+        return
+    }
+    public static setShadowAlpha(peer: RenderNode, shadowAlpha: number): void {
+        const peer_casted = peer as (RenderNode)
+        const shadowAlpha_casted = shadowAlpha as (number)
+        RenderNodeExtender.setShadowAlpha_serialize(peer_casted, shadowAlpha_casted)
+        return
+    }
+    public static setShadowElevation(peer: RenderNode, shadowElevation: number): void {
+        const peer_casted = peer as (RenderNode)
+        const shadowElevation_casted = shadowElevation as (number)
+        RenderNodeExtender.setShadowElevation_serialize(peer_casted, shadowElevation_casted)
+        return
+    }
+    public static setShadowRadius(peer: RenderNode, shadowRadius: number): void {
+        const peer_casted = peer as (RenderNode)
+        const shadowRadius_casted = shadowRadius as (number)
+        RenderNodeExtender.setShadowRadius_serialize(peer_casted, shadowRadius_casted)
+        return
+    }
+    public static setBorderStyle(peer: RenderNode, borderStyle: NodeEdgeStyles): void {
+        const peer_casted = peer as (RenderNode)
+        const borderStyle_casted = borderStyle as (NodeEdgeStyles)
+        RenderNodeExtender.setBorderStyle_serialize(peer_casted, borderStyle_casted)
+        return
+    }
+    public static setBorderWidth(peer: RenderNode, borderWidth: EdgeNumber, unitValue: int32): void {
+        const peer_casted = peer as (RenderNode)
+        const borderWidth_casted = borderWidth as (EdgeNumber)
+        const unitValue_casted = unitValue as (int32)
+        RenderNodeExtender.setBorderWidth_serialize(peer_casted, borderWidth_casted, unitValue_casted)
+        return
+    }
+    public static setBorderColor(peer: RenderNode, borderColor: EdgeNumber): void {
+        const peer_casted = peer as (RenderNode)
+        const borderColor_casted = borderColor as (EdgeNumber)
+        RenderNodeExtender.setBorderColor_serialize(peer_casted, borderColor_casted)
+        return
+    }
+    public static setBorderRadius(peer: RenderNode, borderRadius: BorderRadiuses_graphics, unitValue: int32): void {
+        const peer_casted = peer as (RenderNode)
+        const borderRadius_casted = borderRadius as (BorderRadiuses_graphics)
+        const unitValue_casted = unitValue as (int32)
+        RenderNodeExtender.setBorderRadius_serialize(peer_casted, borderRadius_casted, unitValue_casted)
+        return
+    }
+    public static setMarkNodeGroup(peer: RenderNode, markNodeGroup: boolean): void {
+        const peer_casted = peer as (RenderNode)
+        const markNodeGroup_casted = markNodeGroup as (boolean)
+        RenderNodeExtender.setMarkNodeGroup_serialize(peer_casted, markNodeGroup_casted)
+        return
+    }
+    public static setRectMask(peer: RenderNode, rect: common2D.Rect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const peer_casted = peer as (RenderNode)
+        const rect_casted = rect as (common2D.Rect)
+        const fillColor_casted = fillColor as (number)
+        const strokeColor_casted = strokeColor as (number)
+        const strokeWidth_casted = strokeWidth as (number)
+        RenderNodeExtender.setRectMask_serialize(peer_casted, rect_casted, fillColor_casted, strokeColor_casted, strokeWidth_casted)
+        return
+    }
+    public static setCircleMask(peer: RenderNode, circle: Circle, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const peer_casted = peer as (RenderNode)
+        const circle_casted = circle as (Circle)
+        const fillColor_casted = fillColor as (number)
+        const strokeColor_casted = strokeColor as (number)
+        const strokeWidth_casted = strokeWidth as (number)
+        RenderNodeExtender.setCircleMask_serialize(peer_casted, circle_casted, fillColor_casted, strokeColor_casted, strokeWidth_casted)
+        return
+    }
+    public static setRoundRectMask(peer: RenderNode, roundRect: RoundRect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const peer_casted = peer as (RenderNode)
+        const roundRect_casted = roundRect as (RoundRect)
+        const fillColor_casted = fillColor as (number)
+        const strokeColor_casted = strokeColor as (number)
+        const strokeWidth_casted = strokeWidth as (number)
+        RenderNodeExtender.setRoundRectMask_serialize(peer_casted, roundRect_casted, fillColor_casted, strokeColor_casted, strokeWidth_casted)
+        return
+    }
+    public static setOvalMask(peer: RenderNode, rect: common2D.Rect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const peer_casted = peer as (RenderNode)
+        const rect_casted = rect as (common2D.Rect)
+        const fillColor_casted = fillColor as (number)
+        const strokeColor_casted = strokeColor as (number)
+        const strokeWidth_casted = strokeWidth as (number)
+        RenderNodeExtender.setOvalMask_serialize(peer_casted, rect_casted, fillColor_casted, strokeColor_casted, strokeWidth_casted)
+        return
+    }
+    public static setPath(peer: RenderNode, path: CommandPath, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const peer_casted = peer as (RenderNode)
+        const path_casted = path as (CommandPath)
+        const fillColor_casted = fillColor as (number)
+        const strokeColor_casted = strokeColor as (number)
+        const strokeWidth_casted = strokeWidth as (number)
+        RenderNodeExtender.setPath_serialize(peer_casted, path_casted, fillColor_casted, strokeColor_casted, strokeWidth_casted)
+        return
+    }
+    public static setRectClip(peer: RenderNode, rect: common2D.Rect): void {
+        const peer_casted = peer as (RenderNode)
+        const rect_casted = rect as (common2D.Rect)
+        RenderNodeExtender.setRectClip_serialize(peer_casted, rect_casted)
+        return
+    }
+    public static setCircleClip(peer: RenderNode, circle: Circle): void {
+        const peer_casted = peer as (RenderNode)
+        const circle_casted = circle as (Circle)
+        RenderNodeExtender.setCircleClip_serialize(peer_casted, circle_casted)
+        return
+    }
+    public static setRoundRectClip(peer: RenderNode, roundRect: RoundRect): void {
+        const peer_casted = peer as (RenderNode)
+        const roundRect_casted = roundRect as (RoundRect)
+        RenderNodeExtender.setRoundRectClip_serialize(peer_casted, roundRect_casted)
+        return
+    }
+    public static setOvalClip(peer: RenderNode, rect: common2D.Rect): void {
+        const peer_casted = peer as (RenderNode)
+        const rect_casted = rect as (common2D.Rect)
+        RenderNodeExtender.setOvalClip_serialize(peer_casted, rect_casted)
+        return
+    }
+    public static setPathClip(peer: RenderNode, path: CommandPath): void {
+        const peer_casted = peer as (RenderNode)
+        const path_casted = path as (CommandPath)
+        RenderNodeExtender.setPathClip_serialize(peer_casted, path_casted)
+        return
+    }
+    public static appendChild(peer: RenderNode, node: RenderNode): void {
+        const peer_casted = peer as (RenderNode)
+        const node_casted = node as (RenderNode)
+        RenderNodeExtender.appendChild_serialize(peer_casted, node_casted)
+        return
+    }
+    public static insertChildAfter(peer: RenderNode, child: RenderNode, sibling: RenderNode): void {
+        const peer_casted = peer as (RenderNode)
+        const child_casted = child as (RenderNode)
+        const sibling_casted = sibling as (RenderNode)
+        RenderNodeExtender.insertChildAfter_serialize(peer_casted, child_casted, sibling_casted)
+        return
+    }
+    public static removeChild(peer: RenderNode, node: RenderNode): void {
+        const peer_casted = peer as (RenderNode)
+        const node_casted = node as (RenderNode)
+        RenderNodeExtender.removeChild_serialize(peer_casted, node_casted)
+        return
+    }
+    public static clearChildren(peer: RenderNode): void {
+        const peer_casted = peer as (RenderNode)
+        RenderNodeExtender.clearChildren_serialize(peer_casted)
+        return
+    }
+    public static invalidate(peer: RenderNode): void {
+        const peer_casted = peer as (RenderNode)
+        RenderNodeExtender.invalidate_serialize(peer_casted)
+        return
     }
 }
 export class RenderServiceNode {
@@ -3199,6 +3677,24 @@ export interface IndicatorStyle {
 }
 export type CustomNodeBuilder = (parentNode: KPointer) => KPointer;
 export type NavExtender_OnUpdateStack = () => void;
+export interface BorderRadiuses_graphics {
+    topLeft: number;
+    topRight: number;
+    bottomLeft: number;
+    bottomRight: number;
+}
+export interface NodeEdgeStyles {
+    top: BorderStyle;
+    right: BorderStyle;
+    bottom: BorderStyle;
+    left: BorderStyle;
+}
+export interface EdgeNumber {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+}
 export interface Root {
     attributeModifier(value: AttributeModifier<Root> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
@@ -3385,6 +3881,28 @@ export class CustomDialogControllerExtender_serializer {
         return CustomDialogControllerExtenderInternal.fromPtr(ptr)
     }
 }
+export class NodeEdgeStyles_serializer {
+    public static write(buffer: SerializerBase, value: NodeEdgeStyles): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForTop  = value.top
+        valueSerializer.writeInt32(valueHolderForTop.valueOf())
+        const valueHolderForRight  = value.right
+        valueSerializer.writeInt32(valueHolderForRight.valueOf())
+        const valueHolderForBottom  = value.bottom
+        valueSerializer.writeInt32(valueHolderForBottom.valueOf())
+        const valueHolderForLeft  = value.left
+        valueSerializer.writeInt32(valueHolderForLeft.valueOf())
+    }
+    public static read(buffer: DeserializerBase): NodeEdgeStyles {
+        let valueDeserializer : DeserializerBase = buffer
+        const topTmpResult : BorderStyle = BorderStyle.fromValue(valueDeserializer.readInt32())
+        const rightTmpResult : BorderStyle = BorderStyle.fromValue(valueDeserializer.readInt32())
+        const bottomTmpResult : BorderStyle = BorderStyle.fromValue(valueDeserializer.readInt32())
+        const leftTmpResult : BorderStyle = BorderStyle.fromValue(valueDeserializer.readInt32())
+        let value : NodeEdgeStyles = ({top: topTmpResult, right: rightTmpResult, bottom: bottomTmpResult, left: leftTmpResult} as NodeEdgeStyles)
+        return value
+    }
+}
 export class Offset_componentutils_serializer {
     public static write(buffer: SerializerBase, value: Offset_componentutils): void {
         let valueSerializer : SerializerBase = buffer
@@ -3471,6 +3989,19 @@ export class TranslateResult_serializer {
         const zTmpResult : number = (valueDeserializer.readNumber() as number)
         let value : TranslateResult = ({x: xTmpResult, y: yTmpResult, z: zTmpResult} as TranslateResult)
         return value
+    }
+}
+export class BorderRadiuses_graphics_serializer {
+    public static write(buffer: SerializerBase, value: BorderRadiuses_graphics): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForTopLeft  = value.topLeft
+        valueSerializer.writeNumber(valueHolderForTopLeft)
+        const valueHolderForTopRight  = value.topRight
+        valueSerializer.writeNumber(valueHolderForTopRight)
+        const valueHolderForBottomLeft  = value.bottomLeft
+        valueSerializer.writeNumber(valueHolderForBottomLeft)
+        const valueHolderForBottomRight  = value.bottomRight
+        valueSerializer.writeNumber(valueHolderForBottomRight)
     }
 }
 export class BuilderNodeOptions_serializer {
@@ -3648,6 +4179,28 @@ export class DoubleAnimationParam_serializer {
         }
         const onFinishTmpResult : Callback_Extender_OnFinish | undefined = onFinishTmpBuf
         let value : DoubleAnimationParam = ({propertyName: propertyNameTmpResult, startValue: startValueTmpResult, endValue: endValueTmpResult, duration: durationTmpResult, delay: delayTmpResult, curve: curveTmpResult, onProgress: onProgressTmpResult, onFinish: onFinishTmpResult} as DoubleAnimationParam)
+        return value
+    }
+}
+export class EdgeNumber_serializer {
+    public static write(buffer: SerializerBase, value: EdgeNumber): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForTop  = value.top
+        valueSerializer.writeNumber(valueHolderForTop)
+        const valueHolderForRight  = value.right
+        valueSerializer.writeNumber(valueHolderForRight)
+        const valueHolderForBottom  = value.bottom
+        valueSerializer.writeNumber(valueHolderForBottom)
+        const valueHolderForLeft  = value.left
+        valueSerializer.writeNumber(valueHolderForLeft)
+    }
+    public static read(buffer: DeserializerBase): EdgeNumber {
+        let valueDeserializer : DeserializerBase = buffer
+        const topTmpResult : number = (valueDeserializer.readNumber() as number)
+        const rightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const bottomTmpResult : number = (valueDeserializer.readNumber() as number)
+        const leftTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : EdgeNumber = ({top: topTmpResult, right: rightTmpResult, bottom: bottomTmpResult, left: leftTmpResult} as EdgeNumber)
         return value
     }
 }

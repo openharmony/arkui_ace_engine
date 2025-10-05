@@ -42,6 +42,7 @@ import {
   PathShape,
 } from "@ohos.arkui.shape";
 import { FrameNode } from "arkui.FrameNode";
+import { RenderNode } from "arkui.RenderNode";
 import { default as resourceManager } from "@ohos.resourceManager";
 import { LevelOrder } from "@ohos.promptAction";
 import { SymbolGlyphModifier } from "../SymbolGlyphModifier";
@@ -113,6 +114,14 @@ export namespace extractors {
   export function fromNodeControllerPtr(ptr: KPointer): NodeController {
     const x: Object = {};
     return x as NodeController;
+  }
+
+  export function toRenderNodePtr(value: RenderNode): KPointer {
+    return value.getPeer()!.ptr;
+  }
+  export function fromRenderNodePtr(ptr: KPointer): RenderNode {
+    const x: Object = {};
+    return x as RenderNode;
   }
 
   export function toFrameNodePtr(value: FrameNode): KPointer {

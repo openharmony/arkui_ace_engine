@@ -2595,6 +2595,18 @@ BorderStyleProperty Convert(const Ark_EdgeStyles& src)
 }
 
 template<>
+BorderStyleProperty Convert(const Ark_NodeEdgeStyles& src)
+{
+    BorderStyleProperty property;
+    property.styleLeft = OptConvert<BorderStyle>(src.left);
+    property.styleTop = OptConvert<BorderStyle>(src.top);
+    property.styleRight = OptConvert<BorderStyle>(src.right);
+    property.styleBottom = OptConvert<BorderStyle>(src.bottom);
+    property.multiValued = true;
+    return property;
+}
+
+template<>
 CalcDimension Convert(const Ark_LengthMetrics& src)
 {
     return CalcDimension(Convert<Dimension>(src));
@@ -3212,6 +3224,11 @@ std::set<std::string> Convert(const Array_uniformTypeDescriptor_UniformDataType&
         }
     }
     return dst;
+}
+template<>
+std::string Convert(const Ark_CommandPath& src)
+{
+    return Converter::Convert<std::string>(src.commands);
 }
 
 template<>
