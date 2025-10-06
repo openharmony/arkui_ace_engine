@@ -395,6 +395,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     public reconnectToConsumerV2<T>(varName: string, consumerVal: T): void {
         let providerInfo = ProviderConsumerUtilV2.findProvider(this, varName);
         if (providerInfo && providerInfo[0] && providerInfo[1]) {
+            this[varName] = providerInfo[0][providerInfo[1]];
             ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
         }
         if (!providerInfo) {
