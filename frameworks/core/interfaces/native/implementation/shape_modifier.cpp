@@ -94,7 +94,7 @@ void SetFillImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ShapeModelStatic::SetFill(frameNode, Converter::OptConvertPtr<Color>(value));
+    ShapeModelStatic::SetFill(frameNode, Converter::OptConvertPtr<Color>(value).value_or(Color::BLACK));
 }
 void SetStrokeDashOffsetImpl(Ark_NativePointer node,
                              const Opt_Union_F64_String* value)
@@ -190,7 +190,7 @@ void SetAntiAliasImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        ShapeModelNG::SetAntiAlias(frameNode, false);
+        ShapeModelNG::SetAntiAlias(frameNode, true);
         return;
     }
     ShapeModelNG::SetAntiAlias(frameNode, *convValue);
