@@ -214,7 +214,7 @@ class VariableUtilV2 {
     public static connectConsumer2Provider<T>(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): T {
       const weakView = new WeakRef<ViewV2>(provideView);
       const provideViewName = provideView.constructor?.name;
-      consumeView[consumeVarName] = provideView[provideVarName];
+      
       Reflect.defineProperty(consumeView, consumeVarName, {
         get() {
           let view = weakView.deref();
