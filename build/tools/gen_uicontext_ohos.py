@@ -46,7 +46,8 @@ def main(input_path, output_path):
         export_content += "globalThis.__getFrameNodeByNodeId__ = __getFrameNodeByNodeId__;\n"
         export_content += "globalThis.__addAvailableInstanceId__ = __addAvailableInstanceId__;\n"
         export_content += "globalThis.__removeAvailableInstanceId__ = __removeAvailableInstanceId__;\n"
-        export_content += "globalThis.__checkRegexValid__ = __checkRegexValid__;"
+        export_content += "globalThis.__checkRegexValid__ = __checkRegexValid__;\n"
+        export_content += "globalThis.__getResourceId__ = __getResourceId__;"
         ohos.write("\n" + export_content)
 
 

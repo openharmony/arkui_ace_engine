@@ -761,21 +761,15 @@ std::string GetModuleNameFromContainer()
     return container->GetModuleName();
 }
 
-void CompleteResourceObjectFromParams(
-    int32_t resId, JSRef<JSObject>& jsObj, std::string& targetModule, ResourceType& resType, std::string& resName)
+void CompleteResourceObjectFromParams(int32_t resId, int32_t typeNum, JSRef<JSObject>& jsObj, std::string& targetModule,
+    ResourceType& resType, std::string& resName)
 {
-    JSRef<JSVal> type = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TYPE));
-    int32_t typeNum = -1;
-    if (type->IsNumber()) {
-        typeNum = type->ToNumber<int32_t>();
-    }
-
     JSRef<JSVal> args = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::PARAMS));
     if (!args->IsArray()) {
         return;
     }
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
-    if (resId != UNKNOWN_RESOURCE_ID) {
+    if (resId != UNKNOWN_RESOURCE_ID && typeNum != UNKNOWN_RESOURCE_TYPE) {
         return;
     }
     JSRef<JSVal> identity = params->GetValueAt(0);
@@ -6006,39 +6000,50 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
     std::string bundleName;
     std::string moduleName;
     int32_t resId = -1;
-    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId);
+    int32_t resType = UNKNOWN_RESOURCE_TYPE;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType);
 }
 
 void JSViewAbstract::CompleteResourceObjectWithBundleName(
     JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resId)
 {
-    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId);
+    int32_t resType = UNKNOWN_RESOURCE_TYPE;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType);
 }
 
-void JSViewAbstract::CompleteResourceObjectInner(
-    JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue)
+void JSViewAbstract::CompleteResourceObjectWithResIdType(JSRef<JSObject>& jsObj, int32_t& resId, int32_t& resType)
+{
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType);
+}
+
+void JSViewAbstract::CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::string& bundleName,
+    std::string& moduleName, int32_t& resIdValue, int32_t& resTypeValue)
 {
     // dynamic $r raw input format is
     // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}
     JSRef<JSVal> resId = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ID));
     ResourceType resType;
 
+    JSRef<JSVal> type = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TYPE));
+    if (type->IsNumber()) {
+        resTypeValue = type->ToNumber<int32_t>();
+    } else {
+        resTypeValue = UNKNOWN_RESOURCE_TYPE;
+    }
+
     std::string targetModule;
     std::string resName;
     if (resId->IsString()) {
-        JSRef<JSVal> type = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TYPE));
-        int32_t typeNum = -1;
-        if (type->IsNumber()) {
-            typeNum = type->ToNumber<int32_t>();
-        }
-        if (!ParseDollarResource(resId, targetModule, resType, resName, typeNum == UNKNOWN_RESOURCE_TYPE)) {
+        if (!ParseDollarResource(resId, targetModule, resType, resName, resTypeValue == UNKNOWN_RESOURCE_TYPE)) {
             return;
         }
         CompleteResourceObjectFromId(type, jsObj, resType, resName);
     } else if (resId->IsNumber()) {
         resIdValue = resId->ToNumber<int32_t>();
-        if (resIdValue == -1) {
-            CompleteResourceObjectFromParams(resIdValue, jsObj, targetModule, resType, resName);
+        if (resIdValue == -1 || resTypeValue == UNKNOWN_RESOURCE_TYPE) {
+            CompleteResourceObjectFromParams(resIdValue, resTypeValue, jsObj, targetModule, resType, resName);
         }
     }
 
@@ -6050,6 +6055,10 @@ void JSViewAbstract::CompleteResourceObjectInner(
     if (moduleName == DEFAULT_HAR_MODULE_NAME) {
         moduleName = GetModuleNameFromContainer();
         jsObj->SetProperty<std::string>(static_cast<int32_t>(ArkUIIndex::MODULE_NAME), moduleName);
+    }
+
+    if (resTypeValue == UNKNOWN_RESOURCE_TYPE) {
+        resTypeValue = static_cast<int32_t>(resType);
     }
 }
 
@@ -6075,13 +6084,10 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
         return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
     }
     if (jsValue->IsObject()) {
+        int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+        int32_t resType = UNKNOWN_RESOURCE_TYPE;
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        CompleteResourceObject(jsObj);
-        JSRef<JSVal> resId = jsObj->GetProperty("id");
-        if (!resId->IsNumber()) {
-            return false;
-        }
-        auto resType = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
+        CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
         if (resType == UNKNOWN_RESOURCE_TYPE) {
             return false;
         }
@@ -6091,7 +6097,6 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
         if (!resourceWrapper) {
             return false;
         }
-        auto resIdNum = resId->ToNumber<int32_t>();
         if (resIdNum == -1) {
             if (!IsGetResourceByName(jsObj)) {
                 return false;
@@ -6115,16 +6120,16 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
             return true;
         }
         if (resType == static_cast<int32_t>(ResourceType::STRING)) {
-            auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
+            auto value = resourceWrapper->GetString(static_cast<uint32_t>(resIdNum));
             return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
         }
         if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
-            auto value = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
+            auto value = std::to_string(resourceWrapper->GetInt(static_cast<uint32_t>(resIdNum)));
             StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
             return true;
         }
         if (resType == static_cast<int32_t>(ResourceType::FLOAT)) {
-            result = resourceWrapper->GetDimension(resId->ToNumber<uint32_t>()); // float return true pixel value
+            result = resourceWrapper->GetDimension(static_cast<uint32_t>(resIdNum)); // float return true pixel value
             return true;
         }
     }
@@ -6234,20 +6239,16 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     if (!jsValue->IsObject()) {
         return false;
     }
+    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+    int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObject(jsObj);
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
-        return false;
-    }
+    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
     resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
         GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
     }
-    auto resIdNum = resId->ToNumber<int32_t>();
-    int32_t resType = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
     if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -6255,16 +6256,16 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         return ParseJsDimensionByNameInternal(jsObj, result, defaultUnit, resourceWrapper, resType);
     }
     if (resType == static_cast<int32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
+        auto value = resourceWrapper->GetString(static_cast<uint32_t>(resIdNum));
         result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
         return true;
     }
     if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
+        auto value = std::to_string(resourceWrapper->GetInt(static_cast<uint32_t>(resIdNum)));
         result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
         return true;
     }
-    result = resourceWrapper->GetDimension(resId->ToNumber<uint32_t>());
+    result = resourceWrapper->GetDimension(static_cast<uint32_t>(resIdNum));
     return true;
 }
 
@@ -6463,18 +6464,13 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
     if (!jsValue->IsObject()) {
         return false;
     }
+    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+    int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObject(jsObj);
+    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
     if (jsObj->IsEmpty()) {
         return false;
     }
-    JSRef<JSVal> id = jsObj->GetProperty("id");
-    if (!id->IsNumber()) {
-        return false;
-    }
-
-    auto resId = id->ToNumber<int32_t>();
-    int32_t resType = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
     if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -6486,10 +6482,10 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
         return false;
     }
 
-    if (resId == -1) {
+    if (resIdNum == -1) {
         return ParseResourceToDoubleByName(jsObj, resType, resourceWrapper, result);
     }
-    return ParseResourceToDoubleById(resId, resType, resourceWrapper, result);
+    return ParseResourceToDoubleById(resIdNum, resType, resourceWrapper, result);
 }
 
 bool JSViewAbstract::ParseResourceToDoubleByName(
@@ -6572,12 +6568,10 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
     if (!jsValue->IsObject()) {
         return false;
     }
+    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+    int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObject(jsObj);
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
-        return false;
-    }
+    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
 
     auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
@@ -6585,7 +6579,6 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
         return false;
     }
 
-    auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
             return false;
@@ -6599,7 +6592,7 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
         result = resourceWrapper->GetIntByName(param->ToString());
         return true;
     }
-    result = resourceWrapper->GetInt(resId->ToNumber<uint32_t>());
+    result = resourceWrapper->GetInt(static_cast<uint32_t>(resIdNum));
     return true;
 }
 
@@ -6609,10 +6602,12 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     if (!jsValue->IsObject()) {
         return false;
     }
+    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+    int32_t type = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObject(jsObj);
+    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
 
-    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result, resObj);
+    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result, resObj, resIdNum, type);
     if (ok) {
         JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
         if (jsOpacityRatio->IsNumber()) {
@@ -6624,12 +6619,8 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
 }
 
 bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
-    RefPtr<ResourceObject>& resObj)
+    RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type)
 {
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
-        return false;
-    }
 
     resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
         GetResourceObjectByBundleAndModule(jsObj);
@@ -6638,7 +6629,6 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
         return false;
     }
 
-    auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
             return false;
@@ -6653,19 +6643,18 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
         return true;
     }
 
-    auto type = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
+        auto value = resourceWrapper->GetString(static_cast<uint32_t>(resIdNum));
         return Color::ParseColorString(value, result);
     }
     if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto value = resourceWrapper->GetInt(resId->ToNumber<uint32_t>());
+        auto value = resourceWrapper->GetInt(static_cast<uint32_t>(resIdNum));
         result = Color(ColorAlphaAdapt(value));
         return true;
     }
     if (type == static_cast<int32_t>(ResourceType::COLOR)) {
-        result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
-        result.SetResourceId(resId->ToNumber<uint32_t>());
+        result = resourceWrapper->GetColor(static_cast<uint32_t>(resIdNum));
+        result.SetResourceId(static_cast<uint32_t>(resIdNum));
         return true;
     }
     return false;
@@ -6833,12 +6822,10 @@ void JSViewAbstract::ParseJsSymbolCustomFamilyNames(std::vector<std::string>& cu
     if (!jsValue->IsObject()) {
         return;
     }
+    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+    int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObject(jsObj);
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (resId->IsNull() || !resId->IsNumber()) {
-        return;
-    }
+    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
     auto resourceObject = GetResourceObject(jsObj);
     std::string bundleName = resourceObject->GetBundleName();
     std::string moduleName = resourceObject->GetModuleName();
@@ -6858,10 +6845,10 @@ bool JSViewAbstract::CheckResource(RefPtr<ResourceObject> resourceObject, RefPtr
     return true;
 }
 
-bool JSViewAbstract::CheckCustomSymbolId(RefPtr<ResourceWrapper> resourceWrapper, JSRef<JSVal>& resId,
+bool JSViewAbstract::CheckCustomSymbolId(RefPtr<ResourceWrapper> resourceWrapper, int32_t resIdNum,
     std::uint32_t& symbolId)
 {
-    auto strValue = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
+    auto strValue = resourceWrapper->GetString(static_cast<uint32_t>(resIdNum));
     if (!strValue.empty()) {
         auto customSymbolId = static_cast<uint32_t>(strtol(strValue.c_str(), nullptr, 16));
         symbolId = customSymbolId;
@@ -6884,23 +6871,19 @@ bool JSViewAbstract::ParseJsSymbolId(
     if (!jsValue->IsObject()) {
         return false;
     }
+    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+    int32_t type = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObject(jsObj);
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (resId->IsNull() || !resId->IsNumber()) {
-        return false;
-    }
+    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
     auto resourceObject = GetResourceObject(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     symbolResourceObject = resourceObject;
-    int32_t type = jsObj->GetPropertyValue<int32_t>(static_cast<int32_t>(ArkUIIndex::TYPE), UNKNOWN_RESOURCE_TYPE);
-    if (type == static_cast<int32_t>(ResourceType::STRING) && CheckCustomSymbolId(resourceWrapper, resId, symbolId)) {
+    if (type == static_cast<int32_t>(ResourceType::STRING) && CheckCustomSymbolId(resourceWrapper, resIdNum, symbolId)) {
         return true;
     }
     if (!CheckResource(resourceObject, resourceWrapper)) {
         return false;
     }
-    auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
             return false;
@@ -6976,12 +6959,10 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
         result = ConvertStrToFontFamilies(jsValue->ToString());
         return true;
     }
+    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+    int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObject(jsObj);
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
-        return false;
-    }
+    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
 
     resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
         GetResourceObjectByBundleAndModule(jsObj);
@@ -6990,7 +6971,6 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
         return false;
     }
 
-    auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
             return false;
@@ -7004,7 +6984,7 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
         result.emplace_back(resourceWrapper->GetStringByName(param->ToString()));
         return true;
     }
-    result.emplace_back(resourceWrapper->GetString(resId->ToNumber<uint32_t>()));
+    result.emplace_back(resourceWrapper->GetString(static_cast<uint32_t>(resIdNum)));
     return true;
 }
 
@@ -7014,13 +6994,10 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
     if (!jsValue->IsObject()) {
         return false;
     }
+    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+    int32_t type = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObject(jsObj);
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
-        return false;
-    }
-    auto type = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
+    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
     if (type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -7035,7 +7012,6 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
         return false;
     }
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
-    auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
             return false;
@@ -7061,23 +7037,25 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
         return true;
     }
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto originStr = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
-        ReplaceHolder(originStr, params, 0);
+        auto originStr = resourceWrapper->GetString(static_cast<uint32_t>(resIdNum));
+        auto startIndex = GetStringFormatStartIndex(jsObj);
+        ReplaceHolder(originStr, params, startIndex);
         result = originStr;
     } else if (type == static_cast<int32_t>(ResourceType::PLURAL)) {
-        auto countJsVal = params->GetValueAt(0);
+        auto startIndex = GetStringFormatStartIndex(jsObj);
+        auto countJsVal = params->GetValueAt(startIndex);
         int count = 0;
         if (!countJsVal->IsNumber()) {
             return false;
         }
         count = countJsVal->ToNumber<int>();
-        auto pluralStr = resourceWrapper->GetPluralString(resId->ToNumber<uint32_t>(), count);
-        ReplaceHolder(pluralStr, params, 1);
+        auto pluralStr = resourceWrapper->GetPluralString(static_cast<uint32_t>(resIdNum), count);
+        ReplaceHolder(pluralStr, params, startIndex + 1);
         result = pluralStr;
     } else if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
-        result = std::to_string(resourceWrapper->GetDouble(resId->ToNumber<uint32_t>()));
+        result = std::to_string(resourceWrapper->GetDouble(static_cast<uint32_t>(resIdNum)));
     } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        result = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
+        result = std::to_string(resourceWrapper->GetInt(static_cast<uint32_t>(resIdNum)));
     } else {
         return false;
     }
@@ -7280,16 +7258,11 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result,
         result = jsValue->ToBoolean();
         return true;
     }
-
+    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+    int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObject(jsObj);
-    int32_t resType = jsObj->GetPropertyValue<int32_t>(static_cast<int32_t>(ArkUIIndex::TYPE), UNKNOWN_RESOURCE_TYPE);
+    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
     if (resType == UNKNOWN_RESOURCE_TYPE) {
-        return false;
-    }
-
-    JSRef<JSVal> resId = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ID));
-    if (!resId->IsNumber()) {
         return false;
     }
 
@@ -7300,7 +7273,6 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result,
         return false;
     }
 
-    auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
             return false;
@@ -7319,7 +7291,7 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result,
     }
 
     if (resType == static_cast<int32_t>(ResourceType::BOOLEAN)) {
-        result = resourceWrapper->GetBoolean(resId->ToNumber<uint32_t>());
+        result = resourceWrapper->GetBoolean(static_cast<uint32_t>(resIdNum));
         return true;
     }
     return false;
@@ -7377,14 +7349,11 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
         JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsValue);
         return ParseJsIntegerArrayInternal(jsArray, result, resObjArray);
     }
+    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+    int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObject(jsObj);
-    int32_t resType = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
+    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
     if (resType == UNKNOWN_RESOURCE_TYPE) {
-        return false;
-    }
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
         return false;
     }
     resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
@@ -7393,7 +7362,6 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
     if (!resourceWrapper) {
         return false;
     }
-    auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
             return false;
@@ -7411,7 +7379,7 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
         return false;
     }
     if (resType == static_cast<int32_t>(ResourceType::INTARRAY)) {
-        result = resourceWrapper->GetIntArray(resId->ToNumber<uint32_t>());
+        result = resourceWrapper->GetIntArray(static_cast<uint32_t>(resIdNum));
         return true;
     }
     return false;
@@ -7459,14 +7427,11 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsValue);
         return ParseJsStrArrayInternal(jsArray, result, resObjArray);
     }
+    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+    int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObject(jsObj);
-    int32_t resType = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
+    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
     if (resType == UNKNOWN_RESOURCE_TYPE) {
-        return false;
-    }
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
         return false;
     }
     resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
@@ -7475,7 +7440,6 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
     if (!resourceWrapper) {
         return false;
     }
-    auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
             return false;
@@ -7493,7 +7457,7 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         return false;
     }
     if (resType == static_cast<int32_t>(ResourceType::STRARRAY)) {
-        result = resourceWrapper->GetStringArray(resId->ToNumber<uint32_t>());
+        result = resourceWrapper->GetStringArray(static_cast<uint32_t>(resIdNum));
         return true;
     }
     return false;
@@ -12989,4 +12953,8 @@ bool JSViewAbstract::CheckLengthMetrics(const JSRef<JSObject>& object)
     return false;
 }
 
+int32_t JSViewAbstract::GetStringFormatStartIndex(const JSRef<JSObject>& jsObj)
+{
+    return jsObj->HasGetter(static_cast<int32_t>(ArkUIIndex::ID)) ? 1 : 0;
+}
 } // namespace OHOS::Ace::Framework

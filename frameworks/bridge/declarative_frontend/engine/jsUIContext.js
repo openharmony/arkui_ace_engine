@@ -1824,3 +1824,16 @@ function __addAvailableInstanceId__(instanceId) {
 function __removeAvailableInstanceId__(instanceId) {
     __availableInstanceIds__.delete(instanceId);
 }
+
+function __getResourceId__(params) {
+    let resName = "";
+    if (params.params.length > 0) {
+        resName = params.params[0];
+    }
+    let bundleName = params.bundleName;
+    let moduleName = params.moduleName;
+
+    const re = new RegExp('^\\[\\S+]');
+    resName = resName.replace(re, 'app'); // Process [hsp].type.name. GetResId only accept app or sys format.
+    return getUINativeModule().resource.getResourceId(resName, bundleName, moduleName);
+}

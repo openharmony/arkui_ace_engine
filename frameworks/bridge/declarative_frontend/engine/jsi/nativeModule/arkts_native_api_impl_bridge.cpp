@@ -6530,6 +6530,8 @@ void ArkUINativeModule::RegisterResourceAttributes(Local<panda::ObjectRef> objec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ResourceBridge::ClearCache));
     resource->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResourceManagerCacheMaxCountForHSP"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ResourceBridge::SetResourceManagerCacheMaxCountForHSP));
+        resource->Set(vm, panda::StringRef::NewFromUtf8(vm, "getResourceId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ResourceBridge::GetResourceId));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "resource"), resource);
 }
 
