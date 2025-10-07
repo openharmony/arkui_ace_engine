@@ -14,7 +14,7 @@ declare namespace uiObserver {
     export interface UIObserver {
         on(type: string, callback: object): void;
         off(type: string, callback?: object): void;
-        
+
         on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
 
@@ -47,6 +47,15 @@ declare namespace uiObserver {
             observerOptions: NavDestinationSwitchObserverOptions,
             callback?: Callback<NavDestinationSwitchInfo>
           ): void;
+
+        onDensityUpdate(callback: Callback<DensityInfo>): void;
+        offDensityUpdate(callback?: Callback<DensityInfo>): void;
+
+        onWillDraw(callback: Callback<void>): void;
+        offWillDraw(callback?: Callback<void>): void;
+
+        onDidLayout(callback: Callback<void>): void;
+        offDidLayout(callback?: Callback<void>): void;
     }
     export function createUIObserver(id: number): UIObserver;
 

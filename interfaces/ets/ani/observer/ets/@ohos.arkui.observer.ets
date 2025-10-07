@@ -59,6 +59,14 @@ import hilog from '@ohos.hilog'
             observerOptions: NavDestinationSwitchObserverOptions,
             callback?: Callback<NavDestinationSwitchInfo>
           ): void;
+        onDensityUpdate(callback: Callback<DensityInfo>): void;
+        offDensityUpdate(callback?: Callback<DensityInfo>): void;
+
+        onWillDraw(callback: Callback<void>): void;
+        offWillDraw(callback?: Callback<void>): void;
+
+        onDidLayout(callback: Callback<void>): void;
+        offDidLayout(callback?: Callback<void>): void;
     }
     
     class UIObserverImpl implements UIObserver
@@ -106,6 +114,13 @@ import hilog from '@ohos.hilog'
             observerOptions: NavDestinationSwitchObserverOptions,
             callback?: Callback<NavDestinationSwitchInfo>
           ): void;
+
+        public native onDensityUpdate(callback: Callback<DensityInfo>): void;
+        public native offDensityUpdate(callback?: Callback<DensityInfo>): void;
+        public native onWillDraw(callback: Callback<void>): void;
+        public native offWillDraw(callback?: Callback<void>): void;
+        public native onDidLayout(callback: Callback<void>): void;
+        public native offDidLayout(callback?: Callback<void>): void;
     }
 
     export interface NavigationInfo {
