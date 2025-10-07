@@ -2276,6 +2276,7 @@ private:
     PreviewText callbackOldPreviewText_;
     bool isFilterChanged_ = false;
     std::optional<bool> showPasswordState_;
+    bool textFieldInitTheme_ = false;
     bool cancelButtonTouched_ = false;
     KeyboardGradientMode imeGradientMode_ = KeyboardGradientMode::NONE;
     KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
