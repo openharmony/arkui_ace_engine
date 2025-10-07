@@ -32,7 +32,7 @@
 #include "list_ani_modifier.h"
 #include "node_adapter_ani_modifier.h"
 #include "rich_editor_ani_modifier.h"
-#include "search_ani_modifier.h"
+#include "text_based_ani_modifier.h"
 #include "shape_ani_modifier.h"
 #include "stateMgmt_ani_modifier.h"
 #include "styled_string_ani_modifier.h"
@@ -66,7 +66,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getInteropAniModifier = OHOS::Ace::NG::GetInteropAniModifier,
         .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
         .getStyledStringAniModifier = OHOS::Ace::NG::GetStyledStringAniModifier,
-        .getSearchAniModifier = OHOS::Ace::NG::GetSearchAniModifier,
+        .getTextBasedAniModifier = OHOS::Ace::NG::GetTextBasedAniModifier,
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
         .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,
         .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
