@@ -348,6 +348,7 @@ public:
     static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
         .disableSystemAdaptation = false
     };
+    static void SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect);
 
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
