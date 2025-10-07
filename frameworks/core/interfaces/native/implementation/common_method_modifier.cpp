@@ -5314,7 +5314,7 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
             Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
             Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
             PipelineContext::SetCallBackNode(node);
-            arkCallback.Invoke(isExpanding, currentRatio);
+            arkCallback.InvokeSync(isExpanding, currentRatio);
         };
     ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec);
 }
