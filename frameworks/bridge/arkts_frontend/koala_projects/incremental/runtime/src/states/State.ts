@@ -22,6 +22,7 @@ import { RuntimeProfiler } from "../common/RuntimeProfiler"
 import { IncrementalNode } from "../tree/IncrementalNode"
 import { ReadonlyTreeNode } from "../tree/ReadonlyTreeNode"
 import { GlobalStateManager } from "./GlobalStateManager"
+import { State, StateContext as StateContextBase, IncrementalScope } from 'arkui.incremental.runtime.state';
 
 export const CONTEXT_ROOT_SCOPE = "ohos.koala.context.root.scope"
 export const CONTEXT_ROOT_NODE = "ohos.koala.context.root.node"
@@ -56,26 +57,11 @@ export interface StateManager extends StateContext {
     syncChanges(): void
     isUpdateNeeded(): boolean
     updateSnapshot(): uint32
-    updatableNode<Node extends IncrementalNode>(node: Node, update: (context: StateContext) => void, cleanup?: () => void): ComputableState<Node>
+    updatableNode<Node extends IncrementalNode>(node: Node, update: (context: StateContextBase) => void, cleanup?: () => void): ComputableState<Node>
     scheduleCallback(callback: () => void): void
     callCallbacks(): void
     frozen: boolean
     reset(): void
-}
-
-/**
- * Individual state, wrapping a value of type `Value`.
- */
-export interface State<Value> {
-    /**
-     * If state was modified since last UI computations.
-     */
-    readonly modified: boolean
-    /**
-     * Current value of the state.
-     * State value doesn't change during memo code execution.
-     */
-    readonly value: Value
 }
 
 /**
@@ -131,7 +117,7 @@ export interface ComputableState<Value> extends Disposable, State<Value> {
  * Internal interface of state manager, please do not use directly in
  * applications.
  */
-export interface StateContext {
+export interface StateContext extends StateContextBase {
     readonly node: IncrementalNode | undefined // defined for all scopes within the scope that creates a node
     attach<Node extends IncrementalNode>(id: KoalaCallsiteKey, create: () => Node, update: () => void, cleanup?: () => void): void
     compute<Value>(id: KoalaCallsiteKey, compute: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean): Value
@@ -142,15 +128,7 @@ export interface StateContext {
     stateBy<Value>(name: string, global?: boolean): MutableState<Value> | undefined
     valueBy<Value>(name: string, global?: boolean): Value
     /** @internal */
-    scope<Value>(
-        id: KoalaCallsiteKey,
-        paramCount?: int32,
-        create?: () => IncrementalNode,
-        compute?: () => Value,
-        cleanup?: (value: Value | undefined) => void,
-        once?: boolean,
-        reuseKey?: string
-    ): InternalScope<Value>
+    scope<Value>(id: KoalaCallsiteKey, paramCount: int32): IncrementalScope<Value>
     /** @internal */
     scopeEx<Value>(
         id: KoalaCallsiteKey,
@@ -163,7 +141,7 @@ export interface StateContext {
     ): InternalScope<Value>
     controlledScope(id: KoalaCallsiteKey, invalidate: () => void): ControlledScope
     fork(builder: (manager: StateContext) => void, complete: () => void): StateContext
-    merge<Value>(main: StateContext, rootNode: ComputableState<Value>, compute: () => void): void
+    merge<Value>(main: StateContextBase, rootNode: ComputableState<Value>, compute: () => void): void
     terminate<Value>(rootScope: ComputableState<Value>): void
 }
 
@@ -186,11 +164,11 @@ export interface ValueTracker<Value> {
 }
 
 /** @internal */
-export interface InternalScope<Value> {
+export interface InternalScope<Value> extends IncrementalScope<Value> {
     /** @returns true if internal value can be returned as is */
-    readonly unchanged: boolean
+    get unchanged(): boolean
     /** @returns internal value if it is already computed */
-    readonly cached: Value
+    get cached(): Value
     /** @returns internal value updated after the computation */
     recache(newValue?: Value): Value
     /** @returns internal state for parameter */
@@ -660,7 +638,7 @@ export class StateManagerImpl implements StateManager {
         return modified
     }
 
-    updatableNode<Node extends IncrementalNode>(node: Node, update: (context: StateContext) => void, cleanup?: () => void): ComputableState<Node> {
+    updatableNode<Node extends IncrementalNode>(node: Node, update: (context: StateContextBase) => void, cleanup?: () => void): ComputableState<Node> {
         this.checkForStateComputing()
         const scope = ScopeImpl.create<Node>(KoalaCallsiteKeys.empty, 0, (): Node => {
             update(this)
@@ -736,8 +714,8 @@ export class StateManagerImpl implements StateManager {
         return this.external
     }
 
-    scope<Value>(id: KoalaCallsiteKey, paramCount?: int32, create?: () => IncrementalNode, compute?: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean, reuseKey?: string): InternalScope<Value> {
-        return this.scopeEx<Value>(id, paramCount ?? 0, create, compute, cleanup, once, reuseKey);
+    scope<Value>(id: KoalaCallsiteKey, paramCount: int32): IncrementalScope<Value> {
+        return this.scopeEx<Value>(id, paramCount, undefined, undefined, undefined, false, undefined);
     }
 
     scopeEx<Value>(id: KoalaCallsiteKey, paramCount: int32, create?: () => IncrementalNode, compute?: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean, reuseKey?: string): InternalScope<Value> {
@@ -897,12 +875,12 @@ export class StateManagerImpl implements StateManager {
         return context;
     }
 
-    merge<Value>(main: StateContext, rootScope: ComputableState<Value>, compute: () => void): void {
+    merge<Value>(main: StateContextBase, rootScope: ComputableState<Value>, compute: () => void): void {
         const mainContext = main as StateManagerImpl
         RuntimeProfiler.startTrace(`merge`)
         mainContext.childManager.push(this)
         const current = rootScope as ScopeImpl<Value>
-        const scope = main!.scope<void>(0, 1, () => {
+        const scope = mainContext!.scopeEx<void>(0, 1, () => {
             return current.nodeRef!
         }) as ScopeImpl<void>
         compute()

@@ -15,9 +15,10 @@
 
 import { KoalaCallsiteKey, int32 } from '@koalaui/common'
 import { KPointer } from "@koalaui/interop"
-import { __context, __id, Disposable, IncrementalNode, InternalScope, NodeAttach } from '@koalaui/runtime';
+import { __context, __id, Disposable, IncrementalNode, NodeAttach } from '@koalaui/runtime';
 import { ArkUIAniModule } from "arkui.ani"
 import { PeerNode } from '../PeerNode';
+import { IncrementalScope } from 'arkui.incremental.runtime.state';
 
 class ConditionScopePeer extends PeerNode {
     public static create(): ConditionScopePeer {
@@ -154,7 +155,7 @@ function calcIntersection<T>(oldValue: Array<T>, newValue: Array<T>): Array<T> {
 }
 
 /** @memo:intrinsic */
-function buildBranches(scope: InternalScope<void>, branches: Array<ConditionBranchNode>): void {
+function buildBranches(scope: IncrementalScope<void>, branches: Array<ConditionBranchNode>): void {
     const paramBranches = scope.param(0, branches);
     if (scope.unchanged) {
         scope.cached;

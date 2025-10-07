@@ -1,6 +1,7 @@
 
 import { int32, KoalaCallsiteKey, observableProxy } from "@koalaui/common"
-import { MutableState, rememberDisposable, mutableState, __context, StateContext, memoEntry, __id, StateManager, ComputableState, remember, memoize } from "@koalaui/runtime"
+import { MutableState, rememberDisposable, mutableState, __context, memoEntry, __id, StateManager, ComputableState, remember, memoize } from "@koalaui/runtime"
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { PeerNode } from "arkui/PeerNode";
 import { ArkContentSlotPeer } from "arkui/component/contentSlot";
 import { ArkUIGeneratedNativeModule } from "#components"
@@ -63,7 +64,7 @@ export class ParallelNode {
             return;
         }
         if (this.status == 0) {
-            this.manager = __context().fork(
+            this.manager = (__context() as StateManager).fork(
                 (manager: StateContext) => {
                     const stateManager = manager as StateManager
                     const data: ContextRecord | undefined = stateManager.contextData ? stateManager.contextData as ContextRecord : undefined
