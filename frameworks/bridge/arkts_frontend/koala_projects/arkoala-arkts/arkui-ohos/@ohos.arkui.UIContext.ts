@@ -851,6 +851,42 @@ export class UIObserver {
             this.observerImpl!.offTabContentUpdate(options, callback);
         }
     }
+
+    public onDensityUpdate(callback: Callback<uiObserver.DensityInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onDensityUpdate(callback);
+        }
+    }
+
+    public offDensityUpdate(callback?: Callback<uiObserver.DensityInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offDensityUpdate(callback);
+        }
+    }
+
+    public onWillDraw(callback: Callback<void>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onWillDraw(callback);
+        }
+    }
+
+    public offWillDraw(callback?: Callback<void>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offWillDraw(callback);
+        }
+    }
+
+    public onDidLayout(callback: Callback<void>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onDidLayout(callback);
+        }
+    }
+
+    public offDidLayout(callback?: Callback<void>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offDidLayout(callback);
+        }
+    }
 }
 export interface PageInfo {}
 export interface ContentCoverController {}
