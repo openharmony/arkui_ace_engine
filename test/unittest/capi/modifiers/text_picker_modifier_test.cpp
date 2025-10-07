@@ -75,6 +75,7 @@ const auto RES_PIC_1_ID = IntResourceId { 444, ResourceType::STRING };
 const auto RES_PIC_2_ID = IntResourceId { 555, ResourceType::STRING };
 const auto RES_PIC_3_ID = IntResourceId { 666, ResourceType::STRING };
 const auto RES_INT_1_ID = IntResourceId { 777, ResourceType::INTEGER };
+const auto RES_INT_VALUE = 28;
 const auto TEST_COMMENT_ID = 0;
 const auto RANGE_ID = 1;
 const auto VALUES_ID = 2;
@@ -405,7 +406,7 @@ class TextPickerModifierTest : public ModifierTestBase<GENERATED_ArkUITextPicker
         AddResource(RES_PIC_1_ID, "pic1");
         AddResource(RES_PIC_2_ID, "pic2");
         AddResource(RES_PIC_3_ID, "pic3");
-        AddResource(RES_INT_1_ID, 28);
+        AddResource(RES_INT_1_ID, RES_INT_VALUE);
     }
 };
 
@@ -2311,11 +2312,11 @@ HWTEST_F(TextPickerModifierTest, DISABLED_defaultTextColor, TestSize.Level1)
 }
 
 /**
- * @tc.name: defaultTextStyleMinFontSize
+ * @tc.name: defaultTextStyleMinMaxFontSize
  * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, defaultTextStyleMinFontSize, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, defaultTextStyleMinMaxFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
     Ark_TextPickerTextStyle pickerStyle;
@@ -2325,35 +2326,14 @@ HWTEST_F(TextPickerModifierTest, defaultTextStyleMinFontSize, TestSize.Level1)
 
     for (auto size : MIN_MAX_FONT_SIZE_TEST_PLAN) {
         pickerStyle.minFontSize = size.first;
-        auto style = Converter::ArkValue<Opt_TextPickerTextStyle>(pickerStyle);
-        modifier_->setDefaultTextStyle(node_, &style);
-        auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
-        auto minSize = GetAttrValue<std::string>(styleObject, ATTRIBUTE_DEFAULT_TEXT_STYLE_MIN_FONT_SIZE_NAME);
-        EXPECT_EQ(minSize, size.second);
-    }
-}
-
-/**
- * @tc.name: defaultTextStyleMaxFontSize
- * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerModifierTest, defaultTextStyleMaxFontSize, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
-    Ark_TextPickerTextStyle pickerStyle;
-
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
-    for (auto size : MIN_MAX_FONT_SIZE_TEST_PLAN) {
         pickerStyle.maxFontSize = size.first;
         auto style = Converter::ArkValue<Opt_TextPickerTextStyle>(pickerStyle);
         modifier_->setDefaultTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        auto minSize = GetAttrValue<std::string>(styleObject, ATTRIBUTE_DEFAULT_TEXT_STYLE_MIN_FONT_SIZE_NAME);
         auto maxSize = GetAttrValue<std::string>(styleObject, ATTRIBUTE_DEFAULT_TEXT_STYLE_MAX_FONT_SIZE_NAME);
+        EXPECT_EQ(minSize, size.second);
         EXPECT_EQ(maxSize, size.second);
     }
 }

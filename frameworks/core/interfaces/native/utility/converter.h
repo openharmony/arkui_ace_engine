@@ -902,7 +902,7 @@ namespace Converter {
 
     class DefaultDimensionUnit {
     public:
-        DefaultDimensionUnit(DimensionUnit unit)
+        explicit DefaultDimensionUnit(DimensionUnit unit)
         {
             save_ = ConverterStatus::DEFAULT_UNIT;
             ConverterStatus::DEFAULT_UNIT = unit;
