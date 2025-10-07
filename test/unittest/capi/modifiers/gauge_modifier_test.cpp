@@ -110,7 +110,7 @@ HWTEST_F(GaugeModifierTest, setGaugeOptionsTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'value' of method 'setGaugeOptions'
-static std::vector<std::tuple<std::string, Ark_Number, std::string>> setGaugeOptionsValueValidValues = {
+static std::vector<std::tuple<std::string, Opt_Number, std::string>> setGaugeOptionsValueValidValues = {
     {"20.15f", Converter::ArkValue<Opt_Number>(20.15f), "20.15"},
     {"499.0f", Converter::ArkValue<Opt_Number>(499.0f), "499.00"},
     {"-99.0f", Converter::ArkValue<Opt_Number>(-99.0f), "-99.00"},

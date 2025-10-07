@@ -69,7 +69,7 @@ HWTEST_F(LetterSpacingStyleAccessorTest, getLetterSpacingTest, TestSize.Level1)
     ASSERT_NE(accessor_->getLetterSpacing, nullptr);
     for (auto& [input, value, expected] : testFixtureSpacingValues) {
         DestroyPeer(peer_);
-        peer_ = accessor_->construct(value);
+        peer_ = accessor_->construct(&value);
         auto spacing = accessor_->getLetterSpacing(peer_);
         EXPECT_NEAR(expected.ConvertToVp(), Converter::Convert<double>(spacing), EPSILON) <<
             "Input value is: " << input << ", method: getType";

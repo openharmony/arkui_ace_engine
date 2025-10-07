@@ -80,7 +80,6 @@ const auto ATTRIBUTE_SELECTED_DEFAULT_VALUE = "0";
 const auto ATTRIBUTE_POPUP_POSITION_DEFAULT_VALUE = "0.00px";
 const auto ATTRIBUTE_AUTOCOLLAPSE_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE = "24.00vp";
-const auto ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE = 24.0;
 const auto ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE = "8.00vp";
 const auto ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE = 8.0;
 const auto ATTRIBUTE_POPUP_BACKGROUND_BLUR_STYLE_DEFAULT_VALUE = "BlurStyle.COMPONENT_REGULAR";
@@ -101,39 +100,37 @@ static const std::vector<ArrayValueTestStep> ARRAY_VALUE_TEST_PLAN = {
 };
 static const std::vector<int32_t> SELECTED_INDEX_TEST_PLAN = { 1, 10, 32, -1, -35, 832 };
 
-typedef std::tuple<Ark_Number, std::string, std::string> ArkNumberTestStep;
+typedef std::tuple<Opt_Float64, std::string, std::string> ArkNumberTestStep;
 static const std::vector<ArkNumberTestStep> BORDER_RADIUS_TEST_PLAN = {
-    {ArkValue<Ark_Number>(10), StringUtils::DoubleToString(10).append("vp"),
-        StringUtils::DoubleToString(10).append("vp")},
-    {ArkValue<Ark_Number>(832.599345f), StringUtils::DoubleToString(832.599345f).append("vp"),
-        StringUtils::DoubleToString(832.599345f).append("vp")},
-    {ArkValue<Ark_Number>(-123), ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
-        StringUtils::DoubleToString(ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE).append("vp")},
-    {ArkValue<Ark_Number>(25.01), StringUtils::DoubleToString(25.01).append("vp"),
-        StringUtils::DoubleToString(25.01).append("vp")},
-    {ArkValue<Ark_Number>(-832.5f), ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
-        StringUtils::DoubleToString(ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE).append("vp")},
-    {ArkValue<Ark_Number>(0.0f), "0.00vp", "0.00vp"},
+    {ArkValue<Opt_Float64>(10), "10.00vp", "10.00vp"},
+    {ArkValue<Opt_Float64>(832.599345f), "832.59vp", "832.59vp"},
+    {ArkValue<Opt_Float64>(-123), ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
+        ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE},
+    {ArkValue<Opt_Float64>(25.01), "25.01vp", "25.01vp"},
+    {ArkValue<Opt_Float64>(-832.5f), ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
+        ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE},
+    {ArkValue<Opt_Float64>(0.0f), "0.00vp", "0.00vp"},
 };
-static const std::vector<ArkNumberTestStep> SELECTED_TEST_PLAN = {
-    { ArkValue<Ark_Number>(10), "10", "10" },
-    { ArkValue<Ark_Number>(-10), "0", "0"},
-    { ArkValue<Ark_Number>(12.5), "12", "12"},
-    { ArkValue<Ark_Number>(-5.5), "0", "0"},
-    { ArkValue<Ark_Number>(832), "832", "832"},
-    { ArkValue<Ark_Number>(1.0f), "1", "1"}
+static const std::vector<std::tuple<Ark_Int32, std::string, std::string>> SELECTED_TEST_PLAN = {
+    { ArkValue<Ark_Int32>(10), "10", "10" },
+    { ArkValue<Ark_Int32>(-10), "0", "0"},
+    { ArkValue<Ark_Int32>(12), "12", "12"},
+    { ArkValue<Ark_Int32>(-5), "0", "0"},
+    { ArkValue<Ark_Int32>(832), "832", "832"},
+    { ArkValue<Ark_Int32>(1), "1", "1"},
+    { ArkValue<Ark_Int32>(0), "0", "0"},
 };
 
-typedef std::pair<Ark_Union_String_Number, std::string> ItemSizeTestStep;
+typedef std::pair<Opt_Union_String_F64, std::string> ItemSizeTestStep;
 static const std::vector<ItemSizeTestStep> ITEM_SIZE_TEST_PLAN = {
-    { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(45.0f) }, "45.00vp"},
-    { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(-45) }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
-    { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(32) }, "32.00vp"},
-    { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(0) }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
-    { { .selector = 0, .value0 = Converter::ArkValue<Ark_String>("15px") }, "15.00px"},
-    { { .selector = 0, .value0 = Converter::ArkValue<Ark_String>("99%") }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
-    { { .selector = 0, .value0 = Converter::ArkValue<Ark_String>("45vp") }, "45.00vp"},
-    { { .selector = 0, .value0 = Converter::ArkValue<Ark_String>("-13px") }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE}
+    { Converter::ArkUnion<Opt_Union_String_F64, Ark_Float64>(45), "45.00vp"},
+    { Converter::ArkUnion<Opt_Union_String_F64, Ark_Float64>(-45), ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
+    { Converter::ArkUnion<Opt_Union_String_F64, Ark_Float64>(32), "32.00vp"},
+    { Converter::ArkUnion<Opt_Union_String_F64, Ark_Float64>(0), ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
+    { Converter::ArkUnion<Opt_Union_String_F64, Ark_String>("15px"), "15.00px"},
+    { Converter::ArkUnion<Opt_Union_String_F64, Ark_String>("99%"), ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
+    { Converter::ArkUnion<Opt_Union_String_F64, Ark_String>("45vp"), "45.00vp"},
+    { Converter::ArkUnion<Opt_Union_String_F64, Ark_String>("-13px"), ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE}
 };
 
 const std::string COLOR_RED = "#FFFF0000";
@@ -200,71 +197,53 @@ const std::vector<ArkFontStyleTestStep> FONT_STYLE_TEST_PLAN = {
     { Converter::ArkValue<Opt_FontStyle>(static_cast<Ark_FontStyle>(-1)), "FontStyle::NORMAL" },
 };
 
-typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
+typedef std::pair<Opt_Union_FontWeight_I32_String, std::string> ArkFontWeightTest;
 const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN = {
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_LIGHTER),
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_LIGHTER),
         "FontWeight.Lighter" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_NORMAL),
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_NORMAL),
         "FontWeight.Normal" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR),
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR),
         "FontWeight.Regular" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_MEDIUM),
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_MEDIUM),
         "FontWeight.Medium" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD),
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD),
         "FontWeight.Bold" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLDER),
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLDER),
         "FontWeight.Bolder" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("lighter")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(Converter::ArkValue<Ark_String>("lighter")),
         "FontWeight.Lighter" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("normal")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(Converter::ArkValue<Ark_String>("normal")),
         "FontWeight.Normal" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("regular")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(Converter::ArkValue<Ark_String>("regular")),
         "FontWeight.Regular" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("medium")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(Converter::ArkValue<Ark_String>("medium")),
         "FontWeight.Medium" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("bold")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(Converter::ArkValue<Ark_String>("bold")),
         "FontWeight.Bold" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("bolder")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(Converter::ArkValue<Ark_String>("bolder")),
         "FontWeight.Bolder" }
 };
 
 const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(100)),
-        "100" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(200)),
-        "200" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(300)),
-        "300" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(400)),
-        "400" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(500)),
-        "500" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(600)),
-        "600" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(700)),
-        "700" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(800)),
-        "800" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(900)),
-        "900" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("100")),
-        "100" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("200")),
-        "200" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("300")),
-        "300" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("400")),
-        "400" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("500")),
-        "500" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("600")),
-        "600" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("700")),
-        "700" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("800")),
-        "800" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("900")),
-        "900" }
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(100), "100" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(200), "200" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(300), "300" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(400), "400" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(500), "500" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(600), "600" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(700), "700" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(800), "800" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(900), "900" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("100"), "100" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("200"), "200" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("300"), "300" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("400"), "400" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("500"), "500" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("600"), "600" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("700"), "700" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("800"), "800" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("900"), "900" },
 };
 
 typedef std::pair<Ark_IndexerAlign, std::string> AlignTestStep;
@@ -365,7 +344,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setAlphabetIndexerOptionsSelected, TestSi
 
     Ark_AlphabetIndexerOptions options;
     for (const auto& [value, expectVal, _] : SELECTED_TEST_PLAN) {
-        options.selected = Converter::ArkUnion<Ark_Union_Number_Bindable, Ark_Number>(value);
+        options.selected = Converter::ArkUnion<Ark_Union_I32_Bindable, Ark_Int32>(value);
         modifier_->setAlphabetIndexerOptions(node_, &options);
         checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED);
         EXPECT_EQ(checkVal, expectVal);
@@ -1068,8 +1047,7 @@ HWTEST_F(IndexerModifierTest, setItemSize, TestSize.Level1)
     EXPECT_EQ(checkVal, ATTRIBUTE_ITEM_SIZE_INITIAL_VALUE);
 
     for (const auto& [size, expectVal] : ITEM_SIZE_TEST_PLAN) {
-        auto optSize = ArkValue<Opt_Union_String_Number>(size);
-        modifier_->setItemSize(node_, &optSize);
+        modifier_->setItemSize(node_, &size);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_SIZE);
         EXPECT_EQ(checkVal, expectVal);
     }
@@ -1282,14 +1260,12 @@ HWTEST_F(IndexerModifierTest, setOnSelect, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
 
     static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
-    void (*checkCallback)(const Ark_Int32, const Ark_Number) =
-        [](const Ark_Int32 resourceId, const Ark_Number param) {
-            selectedIndex = Converter::Convert<int32_t>(param);
-        };
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Int32 param) {
+        selectedIndex = Converter::Convert<int32_t>(param);
+    };
 
     auto func = Converter::ArkValue<OnAlphabetIndexerSelectCallback>(checkCallback, CONTEXT_ID);
-    auto optFunc = Converter::ArkValue<Opt_OnAlphabetIndexerSelectCallback,
-                                        OnAlphabetIndexerSelectCallback>(func);
+    auto optFunc = Converter::ArkValue<Opt_OnAlphabetIndexerSelectCallback>(func);
     modifier_->setOnSelect(node_, &optFunc);
     EXPECT_EQ(selectedIndex, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
 
@@ -1321,7 +1297,7 @@ HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
 
     static bool wasInvoke = false;
-    auto callback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number index,
+    auto callback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Int32 index,
         Callback_Array_String_Void cbReturn) {
         wasInvoke = true;
         EXPECT_EQ(Converter::Convert<int32_t>(resourceId), expectedResourceId);
@@ -1330,8 +1306,7 @@ HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
         CallbackHelper(cbReturn).InvokeSync(arkArrStr.ArkValue());
     };
     auto func = Converter::ArkValue<OnAlphabetIndexerRequestPopupDataCallback>(callback, CONTEXT_ID);
-    auto optFunc = Converter::ArkValue<Opt_OnAlphabetIndexerRequestPopupDataCallback,
-                                        OnAlphabetIndexerRequestPopupDataCallback>(func);
+    auto optFunc = Converter::ArkValue<Opt_OnAlphabetIndexerRequestPopupDataCallback>(func);
     modifier_->setOnRequestPopupData(node_, &optFunc);
 
     auto onRequestPopupData = eventHub->GetOnRequestPopupData();
@@ -1353,14 +1328,12 @@ HWTEST_F(IndexerModifierTest, setOnPopupSelect, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
 
     static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
-    void (*checkCallback)(const Ark_Int32, const Ark_Number) =
-        [](const Ark_Int32 resourceId, const Ark_Number param) {
-            selectedIndex = Converter::Convert<int32_t>(param);
-        };
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Int32 param) {
+        selectedIndex = Converter::Convert<int32_t>(param);
+    };
 
     auto func = Converter::ArkValue<OnAlphabetIndexerPopupSelectCallback>(checkCallback, CONTEXT_ID);
-    auto optFunc = Converter::ArkValue<Opt_OnAlphabetIndexerPopupSelectCallback,
-                                        OnAlphabetIndexerPopupSelectCallback>(func);
+    auto optFunc = Converter::ArkValue<Opt_OnAlphabetIndexerPopupSelectCallback>(func);
     modifier_->setOnPopupSelect(node_, &optFunc);
     EXPECT_EQ(selectedIndex, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
 
@@ -1384,7 +1357,7 @@ HWTEST_F(IndexerModifierTest, setSelected, TestSize.Level1)
     EXPECT_EQ(checkVal, ATTRIBUTE_SELECTED_DEFAULT_VALUE);
 
     for (const auto& [value, expectVal, _] : SELECTED_TEST_PLAN) {
-        auto optValue = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(value);
+        auto optValue = Converter::ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(value);
         modifier_->setSelected(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED);
         EXPECT_EQ(checkVal, expectVal);
@@ -1483,7 +1456,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupItemBorderRadius, TestSize.Level1
     EXPECT_EQ(checkVal, ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE);
 
     for (const auto& [value, expectItemVal, expectVal] : BORDER_RADIUS_TEST_PLAN) {
-        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        auto optValue = Converter::ArkValue<Opt_Float64>(value);
         modifier_->setPopupItemBorderRadius(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BORDER_RADIUS);
         EXPECT_EQ(checkVal, expectItemVal);

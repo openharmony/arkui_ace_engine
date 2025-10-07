@@ -66,20 +66,20 @@ const std::vector<std::pair<int32_t, std::optional<SheetTestType>>> numberInt32T
 struct CheckEvent {
     int32_t resourceId;
     std::optional<SheetTestType> reason;
-    };
-    struct CheckBuilderEvent {
-        int32_t resourceId;
-        Ark_NativePointer parentNode;
-    };
-    struct CheckNestedEvent {
-        int32_t resourceId;
-        std::optional<BindSheetDismissReason> reason;
-        bool fired;
-    };
-    static std::optional<CheckBuilderEvent> checkBuilderEvent = std::nullopt;
-    static std::optional<CheckNestedEvent> checkNestedEvent = std::nullopt;
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    } // namespace
+};
+struct CheckBuilderEvent {
+    int32_t resourceId;
+    Ark_NativePointer parentNode;
+};
+struct CheckNestedEvent {
+    int32_t resourceId;
+    std::optional<BindSheetDismissReason> reason;
+    bool fired;
+};
+static std::optional<CheckBuilderEvent> checkBuilderEvent = std::nullopt;
+static std::optional<CheckNestedEvent> checkNestedEvent = std::nullopt;
+static std::optional<CheckEvent> checkEvent = std::nullopt;
+} // namespace
 
 class CommonMethodModifierTest15 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
     &GENERATED_ArkUINodeModifiers::getCommonMethodModifier,
@@ -125,7 +125,7 @@ public:
         auto arkCallback = Converter::ArkValue<ArkCallback>(callback, frameNode->GetId());
         return Converter::ArkValue<OptCallback>(arkCallback);
     }
-    template<typename OptCallback, typename ArkCallback, typename ArkReasonType, typename ReasonType>
+    template<typename OptCallback, typename ArkReasonType, typename ReasonType>
     OptCallback CreateOnChangeCallback(FrameNode* frameNode)
     {
         checkEvent.reset();
@@ -135,7 +135,7 @@ public:
                 .reason = Converter::OptConvert<ReasonType>(parameter),
             };
         };
-        auto arkCallback = Converter::ArkValue<ArkCallback>(callback, frameNode->GetId());
+        auto arkCallback = Converter::ArkValue<decltype(OptCallback().value)>(callback, frameNode->GetId());
         return Converter::ArkValue<OptCallback>(arkCallback);
     }
     Opt_Callback_SheetDismiss_Void CreateDismissSheetVoidCallback(FrameNode* frameNode)
@@ -544,9 +544,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnTypeDidChangeTest, T
     EXPECT_NE(node, nullptr);
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-    auto onChangeCallback =
-        CreateOnChangeCallback<Opt_Callback_SheetType_Void, Callback_SheetType_Void, Ark_SheetType, SheetType>(
-            frameNode);
+    auto onChangeCallback = CreateOnChangeCallback<Opt_Callback_SheetType_Void, Ark_SheetType, SheetType>(frameNode);
     // parameters
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .onTypeDidChange = onChangeCallback };
@@ -591,8 +589,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnHeightDidChangeTest,
     EXPECT_NE(node, nullptr);
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-    auto onChangeCallback =
-        CreateOnChangeCallback<Opt_Callback_Number_Void, Callback_Number_Void, Ark_Number, int32_t>(frameNode);
+    auto onChangeCallback = CreateOnChangeCallback<Opt_Callback_I32_Void, Ark_Int32, int32_t>(frameNode);
     // parameters
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .onHeightDidChange = onChangeCallback };
@@ -637,8 +634,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWidthDidChangeTest, 
     EXPECT_NE(node, nullptr);
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-    auto onChangeCallback =
-        CreateOnChangeCallback<Opt_Callback_Number_Void, Callback_Number_Void, Ark_Number, int32_t>(frameNode);
+    auto onChangeCallback = CreateOnChangeCallback<Opt_Callback_I32_Void, Ark_Int32, int32_t>(frameNode);
     // parameters
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .onWidthDidChange = onChangeCallback };
@@ -683,8 +679,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnDetentsDidChangeTest
     EXPECT_NE(node, nullptr);
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-    auto onChangeCallback =
-        CreateOnChangeCallback<Opt_Callback_Number_Void, Callback_Number_Void, Ark_Number, int32_t>(frameNode);
+    auto onChangeCallback = CreateOnChangeCallback<Opt_Callback_I32_Void, Ark_Int32, int32_t>(frameNode);
     // parameters
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .onDetentsDidChange = onChangeCallback };

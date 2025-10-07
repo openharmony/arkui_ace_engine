@@ -90,14 +90,14 @@ HWTEST_F(GlobalScopeCommonAccessorTest, animateToTest, TestSize.Level1)
 
     Ark_AnimateParam param;
     param.curve = Converter::ArkValue<Opt_Union_Curve_String_ICurve>(Ark_Empty());
-    param.delay = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    param.duration = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.delay = Converter::ArkValue<Opt_Int32>(Ark_Empty());
+    param.duration = Converter::ArkValue<Opt_Int32>(Ark_Empty());
     param.expectedFrameRateRange = Converter::ArkValue<Opt_ExpectedFrameRateRange>(Ark_Empty());
     param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(Ark_Empty());
-    param.iterations = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.iterations = Converter::ArkValue<Opt_Int32>(Ark_Empty());
     param.onFinish = Converter::ArkValue<Opt_Callback_Void>(Ark_Empty());
     param.playMode = Converter::ArkValue<Opt_PlayMode>(Ark_Empty());
-    param.tempo = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.tempo = Converter::ArkValue<Opt_Float64>(Ark_Empty());
 
     static uint32_t contextId = 123;
     auto event = [](const Ark_Int32 resourceId) {
@@ -119,14 +119,14 @@ HWTEST_F(GlobalScopeCommonAccessorTest, animateToImmediatelyTest, TestSize.Level
 
     Ark_AnimateParam param;
     param.curve = Converter::ArkValue<Opt_Union_Curve_String_ICurve>(Ark_Empty());
-    param.delay = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    param.duration = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.delay = Converter::ArkValue<Opt_Int32>(Ark_Empty());
+    param.duration = Converter::ArkValue<Opt_Int32>(Ark_Empty());
     param.expectedFrameRateRange = Converter::ArkValue<Opt_ExpectedFrameRateRange>(Ark_Empty());
     param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(Ark_Empty());
-    param.iterations = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.iterations = Converter::ArkValue<Opt_Int32>(Ark_Empty());
     param.onFinish = Converter::ArkValue<Opt_Callback_Void>(Ark_Empty());
     param.playMode = Converter::ArkValue<Opt_PlayMode>(Ark_Empty());
-    param.tempo = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.tempo = Converter::ArkValue<Opt_Float64>(Ark_Empty());
 
     static uint32_t contextId = 123;
     auto event = [](const Ark_Int32 resourceId) {

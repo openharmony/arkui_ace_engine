@@ -107,15 +107,12 @@ HWTEST_F(TabsControllerAccessorTest, changeIndexTest, TestSize.Level1)
     ASSERT_NE(accessor_->changeIndex, nullptr);
 
     EXPECT_CALL(*mockSwiperController_, SwipeTo(indexValidValue, reverseDefaultValue)).Times(1);
-    auto arkNumValid = ArkValue<Ark_Number>(indexValidValue);
-    accessor_->changeIndex(peer_, &arkNumValid);
+    auto arkNumValid = ArkValue<Ark_Int32>(indexValidValue);
+    accessor_->changeIndex(peer_, arkNumValid);
 
     EXPECT_CALL(*mockSwiperController_, SwipeTo(indexDefaultValue, reverseDefaultValue)).Times(1);
-    auto arkNumInvalid = ArkValue<Ark_Number>(INT_MIN);
-    accessor_->changeIndex(peer_, &arkNumInvalid);
-
-    // nothing calls expected
-    accessor_->changeIndex(peer_, nullptr);
+    auto arkNumInvalid = ArkValue<Ark_Int32>(INT_MIN);
+    accessor_->changeIndex(peer_, arkNumInvalid);
 }
 
 /**
@@ -142,8 +139,7 @@ HWTEST_F(TabsControllerAccessorTest, DISABLED_preloadItemsTest, TestSize.Level1)
     auto cont = Converter::ArkValue<Callback_Opt_Array_String_Void>(returnResFunc, expectedResourceId);
 
     // check of the work created
-    Converter::ArkArrayHolder<Array_Number> arrayHolder(indexList);
-    auto validValue = arrayHolder.OptValue<Opt_Array_Number>();
+    auto validValue = Converter::ArkValue<Opt_Array_Int32>(indexList, Converter::FC);
     accessor_->preloadItems(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), peer_, &validValue, &cont);
     ASSERT_TRUE(AsyncWorkTestHelper::HasWorkCreated());
     auto fireFinish = mockSwiperController_->GetPreloadFinishCallback();
@@ -186,9 +182,9 @@ HWTEST_F(TabsControllerAccessorTest, setTabBarTranslateTest, TestSize.Level1)
     ASSERT_NE(accessor_->setTabBarTranslate, nullptr);
 
     Ark_TranslateOptions arkTranslate;
-    arkTranslate.x = ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(1.0f));
-    arkTranslate.y = ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("-2.2vp"));
-    arkTranslate.z = ArkValue<Opt_Union_Number_String>(Ark_Empty());
+    arkTranslate.x = ArkUnion<Opt_Union_F64_String, Ark_Float64>(1.0f);
+    arkTranslate.y = ArkUnion<Opt_Union_F64_String, Ark_String>("-2.2vp");
+    arkTranslate.z = ArkValue<Opt_Union_F64_String>(Ark_Empty());
 
     static bool wasInvoke = false;
     mockSwiperController_->SetTabBarTranslateImpl([](const NG::TranslateOptions& translate) {
@@ -215,19 +211,15 @@ HWTEST_F(TabsControllerAccessorTest, setTabBarOpacityTest, TestSize.Level1)
     ASSERT_NE(accessor_->setTabBarOpacity, nullptr);
 
     EXPECT_CALL(*mockSwiperController_, SetTabBarOpacity(validOpacity)).Times(1);
-    auto arkNumValid = ArkValue<Ark_Number>(validOpacity);
-    accessor_->setTabBarOpacity(peer_, &arkNumValid);
+    auto arkNumValid = ArkValue<Ark_Float64>(validOpacity);
+    accessor_->setTabBarOpacity(peer_, arkNumValid);
 
     EXPECT_CALL(*mockSwiperController_, SetTabBarOpacity(minOpacity)).Times(1);
-    auto arkNumInValidMin = ArkValue<Ark_Number>(-FLT_MAX);
-    accessor_->setTabBarOpacity(peer_, &arkNumInValidMin);
+    auto arkNumInValidMin = ArkValue<Ark_Float64>(-FLT_MAX);
+    accessor_->setTabBarOpacity(peer_, arkNumInValidMin);
 
     EXPECT_CALL(*mockSwiperController_, SetTabBarOpacity(maxOpacity)).Times(1);
-    auto arkNumInValidMax = ArkValue<Ark_Number>(FLT_MAX);
-    accessor_->setTabBarOpacity(peer_, &arkNumInValidMax);
-
-    // nothing calls expected
-    EXPECT_CALL(*mockSwiperController_, SetTabBarOpacity(testing::_)).Times(0);
-    accessor_->setTabBarOpacity(peer_, nullptr);
+    auto arkNumInValidMax = ArkValue<Ark_Float64>(FLT_MAX);
+    accessor_->setTabBarOpacity(peer_, arkNumInValidMax);
 }
 } // namespace OHOS::Ace::NG

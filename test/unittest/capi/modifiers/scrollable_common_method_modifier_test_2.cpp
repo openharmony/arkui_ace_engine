@@ -227,7 +227,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestRectShape, TestS
     Ark_RectShape peer = PeerUtils::CreatePeer<RectShapePeer>();
     RefPtr<ShapeRect> shape = Referenced::MakeRefPtr<ShapeRect>();
     initRectShape(shape);
-    peer->shape = shape;
+    peer->rectShape = shape;
     auto clipContentUnion = ArkUnion<Opt_Union_ContentClipMode_RectShape, Ark_RectShape>(peer);
     modifier_->setClipContent(node_, &clipContentUnion);
     auto jsonValue = GetJsonValue(node_);

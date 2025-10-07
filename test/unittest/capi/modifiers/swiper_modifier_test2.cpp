@@ -216,15 +216,15 @@ HWTEST_F(SwiperModifierTest2, setOnSelectedTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
 
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number parameter) {
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Int32 parameter) {
         checkEvent = {
             .nodeId = resourceId,
             .value = Converter::Convert<int32_t>(parameter)
         };
     };
 
-    Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Void>(arkCallback);
+    auto arkCallback = Converter::ArkValue<Callback_I32_Void>(checkCallback, contextId);
+    auto optCallback = Converter::ArkValue<Opt_Callback_I32_Void>(arkCallback);
 
     modifier_->setOnSelected(node_, &optCallback);
 
@@ -259,15 +259,15 @@ HWTEST_F(SwiperModifierTest2, setOnUnselectedTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
 
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number parameter) {
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Int32 parameter) {
         checkEvent = {
             .nodeId = resourceId,
             .value = Converter::Convert<int32_t>(parameter)
         };
     };
 
-    Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Void>(arkCallback);
+    auto arkCallback = Converter::ArkValue<Callback_I32_Void>(checkCallback, contextId);
+    auto optCallback = Converter::ArkValue<Opt_Callback_I32_Void>(arkCallback);
 
     modifier_->setOnUnselected(node_, &optCallback);
 

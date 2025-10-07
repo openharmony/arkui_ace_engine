@@ -223,20 +223,12 @@ struct StyleOptionsKeeper {
 
     void TearDown()
     {
-        while (!lengthMetrics.empty()) {
-            auto item = lengthMetrics.back();
-            lengthMetrics.pop_back();
-            LengthMetricsPeer::Destroy(item);
-        }
     }
 
 private:
-    std::vector<LengthMetricsPeer*> lengthMetrics = {};
-    LengthMetricsPeer* CreateLengthMetricsPeer(const Dimension& dimension)
+    Ark_LengthMetrics CreateLengthMetricsPeer(const Dimension& dimension)
     {
-        auto lengthMetricsPeer = Converter::ArkValue<Ark_LengthMetrics>(dimension);
-        lengthMetrics.push_back(lengthMetricsPeer);
-        return lengthMetricsPeer;
+        return Converter::ArkValue<Ark_LengthMetrics>(dimension);
     }
 
     // TextStyle_styled_string
@@ -248,7 +240,7 @@ private:
             .fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_FONT_COLOR)),
             .fontFamily =  Converter::ArkUnion<Opt_ResourceStr, Ark_String>(TEST_FONT_FAMILIES[0]),
             .fontSize = Converter::ArkValue<Opt_LengthMetrics>(fontSizePeer),
-            .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(
+            .fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(
                 std::get<1>(TEST_FONT_WEIGHT)),
             .fontStyle = Converter::ArkValue<Opt_FontStyle>(TEST_FONT_STYLE),
         };
@@ -275,7 +267,7 @@ private:
     void FillBaselineOffsetStyle(Ark_StyledStringValue& styledValue)
     {
         auto baselineOffsetOffset = CreateLengthMetricsPeer(std::get<1>(TEST_BASELINE_OFFSET));
-        peerBaselineOffsetStyle = GeneratedModifier::GetBaselineOffsetStyleAccessor()->construct(baselineOffsetOffset);
+        peerBaselineOffsetStyle = GeneratedModifier::GetBaselineOffsetStyleAccessor()->construct(&baselineOffsetOffset);
         styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_BaselineOffsetStyle>(peerBaselineOffsetStyle);
     }
 
@@ -284,7 +276,7 @@ private:
     void FillLetterSpacing(Ark_StyledStringValue& styledValue)
     {
         auto letterSpacingPeer = CreateLengthMetricsPeer(std::get<1>(TEST_LETTER_SPACING));
-        peerLetterSpacingStyle = GeneratedModifier::GetLetterSpacingStyleAccessor()->construct(letterSpacingPeer);
+        peerLetterSpacingStyle = GeneratedModifier::GetLetterSpacingStyleAccessor()->construct(&letterSpacingPeer);
         styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_LetterSpacingStyle>(peerLetterSpacingStyle);
     }
 
@@ -293,12 +285,12 @@ private:
     void FillTextShadow(Ark_StyledStringValue& styledValue)
     {
         const Ark_ShadowOptions shadowOptions = {
-            .radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_RADIUS),
+            .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(TEST_TEXT_SHADOW_RADIUS),
             .type = Converter::ArkValue<Opt_ShadowType>(std::get<1>(TEST_TEXT_SHADOW_TYPE)),
             .color= Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
                 std::get<1>(TEST_TEXT_SHADOW_COLOR)),
-            .offsetX = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_OFFSET),
-            .offsetY = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_OFFSET),
+            .offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(TEST_TEXT_SHADOW_OFFSET),
+            .offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(TEST_TEXT_SHADOW_OFFSET),
             .fill = Converter::ArkValue<Opt_Boolean>(true)
         };
         auto textShadow = Converter::ArkUnion<Ark_Union_ShadowOptions_Array_ShadowOptions,
@@ -312,7 +304,7 @@ private:
     void FillLineHeight(Ark_StyledStringValue& styledValue)
     {
         auto lineHeightPeer = CreateLengthMetricsPeer(std::get<1>(TEST_LINE_HEIGHT));
-        peerLineHeightStyle = GeneratedModifier::GetLineHeightStyleAccessor()->construct(lineHeightPeer);
+        peerLineHeightStyle = GeneratedModifier::GetLineHeightStyleAccessor()->construct(&lineHeightPeer);
         styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_LineHeightStyle>(peerLineHeightStyle);
     }
 
@@ -348,7 +340,7 @@ private:
         Ark_ParagraphStyleInterface paragraphStyle = {
             .textAlign = Converter::ArkValue<Opt_TextAlign>(std::get<1>(TEST_PSST_TEXT_ALIGN)),
             .textIndent = Converter::ArkValue<Opt_LengthMetrics>(textIndentPeer),
-            .maxLines = Converter::ArkValue<Opt_Number>(TEST_PSST_MAX_LINES),
+            .maxLines = Converter::ArkValue<Opt_Int32>(TEST_PSST_MAX_LINES),
             .overflow = Converter::ArkValue<Opt_TextOverflow>(std::get<1>(TEST_PSST_OVERFLOW)),
             .wordBreak = Converter::ArkValue<Opt_WordBreak>(std::get<1>(TEST_PSST_WORD_BREAK)),
             .leadingMargin = Converter::ArkUnion<
@@ -369,7 +361,7 @@ private:
         Ark_ParagraphStyleInterface paragraphStyle = {
             .textAlign = Converter::ArkValue<Opt_TextAlign>(std::get<1>(TEST_PSST_TEXT_ALIGN)),
             .textIndent = Converter::ArkValue<Opt_LengthMetrics>(textIndentPMPeer),
-            .maxLines = Converter::ArkValue<Opt_Number>(TEST_PSST_MAX_LINES),
+            .maxLines = Converter::ArkValue<Opt_Int32>(TEST_PSST_MAX_LINES),
             .overflow = Converter::ArkValue<Opt_TextOverflow>(std::get<1>(TEST_PSST_OVERFLOW)),
             .wordBreak = Converter::ArkValue<Opt_WordBreak>(std::get<1>(TEST_PSST_WORD_BREAK)),
             .leadingMargin = leadingMargin,
@@ -416,7 +408,7 @@ struct StyledStringUnionString {
 struct StyledStringUnionImageAttachment {
     Ark_Union_String_ImageAttachment_CustomSpan* Union()
     {
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(IMAGEATTACHMENT_TEST_VALUE);
         peer = GeneratedModifier::GetImageAttachmentAccessor()->construct(&inputValue);
         static Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
@@ -864,13 +856,13 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringGetString, TestSize.Le
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringGetStyles, TestSize.Level1)
 {
-    auto start = Converter::ArkValue<Ark_Number>(TEST_START_TSH);
-    auto length = Converter::ArkValue<Ark_Number>(TEST_LENGTH);
+    auto start = Converter::ArkValue<Ark_Int32>(TEST_START_TSH);
+    auto length = Converter::ArkValue<Ark_Int32>(TEST_LENGTH);
     auto key = Converter::ArkValue<Opt_StyledStringKey>(Ace::SpanType::ParagraphStyle);
-    auto resultArk = accessor_->getStyles(peer_, &start, &length, &key);
+    auto resultArk = accessor_->getStyles(peer_, start, length, &key);
     auto result = Converter::Convert<std::vector<RefPtr<SpanBase>>>(resultArk);
     EXPECT_EQ(result.size(), 0);
-    resultArk = accessor_->getStyles(peer_, &start, &length, nullptr);
+    resultArk = accessor_->getStyles(peer_, start, length, nullptr);
     result = Converter::Convert<std::vector<RefPtr<SpanBase>>>(resultArk);
     EXPECT_EQ(result.size(), 1);
 }

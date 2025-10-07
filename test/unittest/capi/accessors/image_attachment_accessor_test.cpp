@@ -171,7 +171,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestPixelMap, TestSize.Level1)
     Ark_ImageAttachmentInterface content {
         .value = arkPixelMap,
     };
-    auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+    auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
     auto peer = accessor_->construct(&inputValue);
     EXPECT_EQ(peer->span->GetImageSpanOptions().imagePixelMap, pixelMap);
@@ -193,7 +193,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestSize, TestSize.Level1)
         Ark_ImageAttachmentInterface content {
             .size = ArkValue<Opt_SizeOptions>(size),
         };
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         ASSERT_TRUE(peer->span->GetImageAttribute());
@@ -233,7 +233,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestSizeResources, TestSize.Level1)
         Ark_ImageAttachmentInterface content {
             .size = ArkValue<Opt_SizeOptions>(size),
         };
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         ASSERT_TRUE(peer->span->GetImageAttribute());
@@ -262,7 +262,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignValidValues, TestSize
         Ark_ImageAttachmentInterface content {
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
         };
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         ASSERT_TRUE(peer->span->GetImageAttribute());
@@ -283,7 +283,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignInvalidValues, TestSi
         Ark_ImageAttachmentInterface content {
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
         };
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         ASSERT_TRUE(peer->span->GetImageAttribute());
@@ -303,7 +303,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitValidValues, TestSize.Lev
         Ark_ImageAttachmentInterface content {
             .objectFit = ArkValue<Opt_ImageFit>(test),
         };
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         ASSERT_TRUE(peer->span->GetImageAttribute());
@@ -324,7 +324,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitInvalidValues, TestSize.L
         Ark_ImageAttachmentInterface content {
             .objectFit = ArkValue<Opt_ImageFit>(test),
         };
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         ASSERT_TRUE(peer->span->GetImageAttribute());
@@ -343,7 +343,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleOptional, TestSize.Level
     const Ark_ImageAttachmentInterface content {
         .layoutStyle = getImageLayoutStyleOptional(),
     };
-    auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+    auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
     auto peer = accessor_->construct(&inputValue);
     ASSERT_TRUE(peer->span->GetImageAttribute());
@@ -363,7 +363,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleLengthMetrics, TestSize.
     Ark_ImageAttachmentInterface content {
         .layoutStyle = getImageLayoutStyleLengthMetrics(),
     };
-    auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+    auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
     auto peer = accessor_->construct(&inputValue);
     ASSERT_TRUE(peer->span->GetImageAttribute());
@@ -386,7 +386,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleFilled, TestSize.Level1)
     const Ark_ImageAttachmentInterface content {
         .layoutStyle = getImageLayoutStyleFilled(),
     };
-    auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+    auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
     auto peer = accessor_->construct(&inputValue);
     ASSERT_TRUE(peer->span->GetImageAttribute());
@@ -415,7 +415,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestColorFilter, TestSize.Level1)
         const Ark_ImageAttachmentInterface content {
             .colorFilter = unionValue,
         };
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         ASSERT_TRUE(peer->span->GetImageAttribute());
@@ -455,7 +455,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getValueTest, TestSize.Level1)
     Ark_ImageAttachmentInterface content {
         .value = arkPixelMap,
     };
-    auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+    auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
     auto peer = accessor_->construct(&inputValue);
     auto pixelMapPeerValue = accessor_->getValue(peer);
@@ -479,7 +479,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getSizeTest, TestSize.Level1)
         Ark_ImageAttachmentInterface content {
             .size = ArkValue<Opt_SizeOptions>(size),
         };
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         if (expected.IsNonNegative()) {
@@ -507,7 +507,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignTestValidValues, TestSize.
         Ark_ImageAttachmentInterface content {
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
         };
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         EXPECT_EQ(Converter::GetOpt(accessor_->getVerticalAlign(peer)), test);
@@ -526,7 +526,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignTestInvalidValues, TestSiz
         Ark_ImageAttachmentInterface content {
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
         };
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         EXPECT_EQ(Converter::GetOpt(accessor_->getVerticalAlign(peer)), std::nullopt);
@@ -545,7 +545,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getObjectFitTestValidValues, TestSize.Leve
         Ark_ImageAttachmentInterface content {
             .objectFit = ArkValue<Opt_ImageFit>(test),
         };
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         EXPECT_EQ(Converter::GetOpt(accessor_->getObjectFit(peer)), test);
@@ -564,7 +564,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getObjectFitTestInvalidValues, TestSize.Le
         Ark_ImageAttachmentInterface content {
             .objectFit = ArkValue<Opt_ImageFit>(test),
         };
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         EXPECT_EQ(Converter::GetOpt(accessor_->getObjectFit(peer)), std::nullopt);
@@ -583,7 +583,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestOptional, TestSize.Level
     const Ark_ImageAttachmentInterface content {
         .layoutStyle = getImageLayoutStyleOptional(),
     };
-    auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+    auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
     auto peer = accessor_->construct(&inputValue);
     auto optGetValue = Converter::GetOpt(accessor_->getLayoutStyle(peer));
@@ -607,7 +607,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestFilled, TestSize.Level1)
     const Ark_ImageAttachmentInterface content {
         .layoutStyle = getImageLayoutStyleFilled(),
     };
-    auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+    auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
     auto peer = accessor_->construct(&inputValue);
     auto optGetValue = Converter::GetOpt(accessor_->getLayoutStyle(peer));
@@ -636,7 +636,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getColorFilterTestColorFilter, TestSize.Le
         const Ark_ImageAttachmentInterface content {
             .colorFilter = unionValue,
         };
-        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+        auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         ASSERT_TRUE(peer);

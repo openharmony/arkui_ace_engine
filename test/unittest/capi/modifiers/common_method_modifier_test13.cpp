@@ -466,9 +466,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     // valid value
-    auto arkRadius = Converter::ArkValue<Ark_Number>(1.0f);
-    Ark_Union_Number_Resource arkUnionRadius;
-    TypeHelper::WriteToUnion<Ark_Number>(arkUnionRadius) = arkRadius;
+    auto arkRadius = Converter::ArkValue<Ark_Float64>(1.0f);
+    Ark_Union_F64_Resource arkUnionRadius;
+    TypeHelper::WriteToUnion<Ark_Float64>(arkUnionRadius) = arkRadius;
 
     Ark_ShadowOptions arkShadowOptions = { .radius = arkUnionRadius };
 
@@ -499,8 +499,8 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
     EXPECT_EQ(checkValue, "1.000000");
 
     // negative value
-    arkRadius = Converter::ArkValue<Ark_Number>(-1.0f);
-    TypeHelper::WriteToUnion<Ark_Number>(arkUnionRadius) = arkRadius;
+    arkRadius = Converter::ArkValue<Ark_Float64>(-1.0f);
+    TypeHelper::WriteToUnion<Ark_Float64>(arkUnionRadius) = arkRadius;
 
     arkShadowOptions = { .radius = arkUnionRadius };
     TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
@@ -533,7 +533,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 {
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    Ark_Union_Number_Resource arkUnionRadius;
+    Ark_Union_F64_Resource arkUnionRadius;
     TypeHelper::WriteToUnion<Ark_Resource>(arkUnionRadius) = TEST_FLOAT_RESOURCE;
 
     Ark_ShadowOptions arkShadowOptions = {
@@ -575,12 +575,12 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 {
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto arkOffsetX = Converter::ArkValue<Ark_Number>(1.0f);
-    Ark_Union_Number_Resource arkUnionOffsetX;
-    TypeHelper::WriteToUnion<Ark_Number>(arkUnionOffsetX) = arkOffsetX;
+    auto arkOffsetX = Converter::ArkValue<Ark_Float64>(1.0f);
+    Ark_Union_F64_Resource arkUnionOffsetX;
+    TypeHelper::WriteToUnion<Ark_Float64>(arkUnionOffsetX) = arkOffsetX;
 
     Ark_ShadowOptions arkShadowOptions = {
-        .offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(arkUnionOffsetX)
+        .offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(arkUnionOffsetX)
     };
 
     auto arkUnionShadow = Converter::ArkUnion<Ark_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions);
@@ -608,11 +608,11 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
     EXPECT_EQ(checkValue, "1.000000");
 
     // negative value
-    arkOffsetX = Converter::ArkValue<Ark_Number>(-1.0f);
-    TypeHelper::WriteToUnion<Ark_Number>(arkUnionOffsetX) = arkOffsetX;
+    arkOffsetX = Converter::ArkValue<Ark_Float64>(-1.0f);
+    TypeHelper::WriteToUnion<Ark_Float64>(arkUnionOffsetX) = arkOffsetX;
 
     arkShadowOptions = {
-        .offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(arkUnionOffsetX)
+        .offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(arkUnionOffsetX)
     };
     TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
 
@@ -643,10 +643,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 {
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto arkUnionOffsetX = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(TEST_FLOAT_RESOURCE);
 
     Ark_ShadowOptions arkShadowOptions = {
-        .offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(arkUnionOffsetX)
+        .offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(TEST_FLOAT_RESOURCE),
     };
 
     auto arkUnionShadow = Converter::ArkUnion<Ark_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions);
@@ -684,11 +683,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 {
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto arkOffsetY = Converter::ArkValue<Ark_Number>(1.0f);
-    auto arkUnionOffsetY = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(arkOffsetY);
 
     Ark_ShadowOptions arkShadowOptions = {
-        .offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(arkUnionOffsetY)
+        .offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1.0),
     };
 
     auto arkUnionShadow = Converter::ArkUnion<Ark_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions);
@@ -716,11 +713,8 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
     EXPECT_EQ(checkValue, "1.000000");
 
     // negative value
-    arkOffsetY = Converter::ArkValue<Ark_Number>(-1.0f);
-    TypeHelper::WriteToUnion<Ark_Number>(arkUnionOffsetY) = arkOffsetY;
-
     arkShadowOptions = {
-        .offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(arkUnionOffsetY)
+        .offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-1.0),
     };
     TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
 
@@ -751,11 +745,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 {
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    Ark_Union_Number_Resource arkUnionOffsetY;
-    TypeHelper::WriteToUnion<Ark_Resource>(arkUnionOffsetY) = TEST_FLOAT_RESOURCE;
 
     Ark_ShadowOptions arkShadowOptions = {
-        .offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(arkUnionOffsetY)
+        .offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(TEST_FLOAT_RESOURCE),
     };
 
     Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
@@ -1390,11 +1382,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsMessageOption
 HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsMessageOptionsFontWeightWeightTest, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto arkFontWeight = Converter::ArkValue<Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_BOLDER);
-    auto arkUnionWeight = Converter::ArkUnion<Ark_Union_FontWeight_Number_String, Ark_FontWeight>(arkFontWeight);
 
     Ark_Font arkFont = {
-        .weight = Converter::ArkValue<Opt_Union_FontWeight_Number_String>(arkUnionWeight)
+        .weight = Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLDER),
     };
 
     Ark_PopupMessageOptions arkMessageOptions = {
@@ -1440,11 +1430,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsMessageOption
 HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsMessageOptionsFontWeightNumberTest, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto arkFontNumber = Converter::ArkValue<Ark_Number>(400);
-    auto arkUnionWeight = Converter::ArkUnion<Ark_Union_FontWeight_Number_String, Ark_Number>(arkFontNumber);
 
     Ark_Font arkFont = {
-        .weight = Converter::ArkValue<Opt_Union_FontWeight_Number_String>(arkUnionWeight)
+        .weight = Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(400),
     };
 
     Ark_PopupMessageOptions arkMessageOptions = {
@@ -1490,11 +1478,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsMessageOption
 HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsMessageOptionsFontWeightStringTest, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto arkFontStr = Converter::ArkValue<Ark_String>("medium");
-    auto arkUnionWeight = Converter::ArkUnion<Ark_Union_FontWeight_Number_String, Ark_String>(arkFontStr);
 
     Ark_Font arkFont = {
-        .weight = Converter::ArkValue<Opt_Union_FontWeight_Number_String>(arkUnionWeight)
+        .weight = Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("medium"),
     };
 
     Ark_PopupMessageOptions arkMessageOptions = {

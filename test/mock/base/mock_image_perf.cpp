@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <gmock/gmock.h>
+
 #include "test/mock/base/mock_image_perf.h"
 
 #include "base/image/image_perf.h"
@@ -19,7 +21,7 @@
 namespace OHOS::Ace {
 ImagePerf* ImagePerf::GetPerfMonitor()
 {
-    static MockImagePerf instance;
+    static ::testing::NiceMock<MockImagePerf> instance;
     return &instance;
 }
 } // namespace OHOS::Ace

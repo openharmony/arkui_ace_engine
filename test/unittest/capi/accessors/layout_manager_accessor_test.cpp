@@ -125,14 +125,14 @@ HWTEST_F(LayoutManagerAccessorTest, GetGlyphPositionAtCoordinate, TestSize.Level
 {
     ASSERT_NE(accessor_->getGlyphPositionAtCoordinate, nullptr);
 
-    auto actualX = Converter::ArkValue<Ark_Number>(EXPECTED_X);
-    auto actualY = Converter::ArkValue<Ark_Number>(EXPECTED_Y);
+    auto actualX = Converter::ArkValue<Ark_Float64>(EXPECTED_X);
+    auto actualY = Converter::ArkValue<Ark_Float64>(EXPECTED_Y);
     auto target = PositionWithAffinity(32, TextAffinity::DOWNSTREAM);
     auto targetError = PositionWithAffinity(1111, static_cast<TextAffinity>(-1));
 
     ON_CALL(*handlerKeeper_, GetGlyphPositionAtCoordinate(_, _)).WillByDefault(Return(targetError));
     EXPECT_CALL(*handlerKeeper_, GetGlyphPositionAtCoordinate(EXPECTED_X, EXPECTED_Y)).WillOnce(Return(target));
-    Ark_PositionWithAffinity result = accessor_->getGlyphPositionAtCoordinate(peer_, &actualX, &actualY);
+    Ark_PositionWithAffinity result = accessor_->getGlyphPositionAtCoordinate(peer_, actualX, actualY);
 
     PositionWithAffinity position = Converter::Convert<PositionWithAffinity>(result);
     EXPECT_EQ(position.position_, target.position_);

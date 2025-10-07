@@ -21,7 +21,6 @@
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "generated/type_helpers.h"
 #include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
@@ -151,10 +150,8 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowD
 HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowStyleTest, TestSize.Level1)
 {
     // valid value
+    auto arkShadowStyle = ARK_SHADOW_STYLE_OUTER_FLOATING_MD;
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto arkShadowStyle = Converter::ArkValue<Ark_ShadowStyle>(Ark_ShadowStyle::ARK_SHADOW_STYLE_OUTER_FLOATING_MD);
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowStyle>(arkUnionShadow) = arkShadowStyle;
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -163,7 +160,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowS
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowStyle>(arkShadowStyle),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -184,12 +181,10 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowS
     EXPECT_EQ(checkValue, "ShadowStyle.OuterFloatingMD");
 
     // invalid value
-    arkShadowStyle = Converter::ArkValue<Ark_ShadowStyle>(static_cast<Ark_ShadowStyle>(-1));
-    TypeHelper::WriteToUnion<Ark_ShadowStyle>(arkUnionShadow) = arkShadowStyle;
-
+    arkShadowStyle = Converter::INVALID_ENUM_VAL<Ark_ShadowStyle>;
     arkOptions = {
         .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowStyle>(arkShadowStyle),
     };
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -212,14 +207,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowS
 HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsRadiusNumberTest, TestSize.Level1)
 {
     // valid value
-    auto arkRadius = Converter::ArkValue<Ark_Number>(1.0f);
-    Ark_Union_Number_Resource arkUnionRadius;
-    TypeHelper::WriteToUnion<Ark_Number>(arkUnionRadius) = arkRadius;
-
-    Ark_ShadowOptions arkShadowOptions = { .radius = arkUnionRadius };
-
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
+    Ark_ShadowOptions arkShadowOptions = {
+        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(1.0),
+    };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -227,7 +217,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = { .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -250,14 +240,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     EXPECT_EQ(checkValue, DOUBLE_1_STR);
 
     // negative value
-    arkRadius = Converter::ArkValue<Ark_Number>(-1.0f);
-    TypeHelper::WriteToUnion<Ark_Number>(arkUnionRadius) = arkRadius;
-
-    arkShadowOptions = { .radius = arkUnionRadius };
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
-
+    arkShadowOptions = {
+        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(-1.0),
+    };
     arkOptions = { .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
 
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
@@ -284,15 +271,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 {
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    Ark_Union_Number_Resource arkUnionRadius;
-    TypeHelper::WriteToUnion<Ark_Resource>(arkUnionRadius) = TEST_FLOAT_RESOURCE;
-
     Ark_ShadowOptions arkShadowOptions = {
-        .radius = arkUnionRadius
+        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Resource>(TEST_FLOAT_RESOURCE),
     };
-
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -301,7 +282,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -332,14 +313,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     TestSize.Level1)
 {
     // valid value
-    auto arkOffsetX = Converter::ArkValue<Ark_Number>(1.0f);
-    Ark_Union_Number_Resource arkUnionOffsetX;
-    TypeHelper::WriteToUnion<Ark_Number>(arkUnionOffsetX) = arkOffsetX;
-
-    Ark_ShadowOptions arkShadowOptions = {.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(arkUnionOffsetX)};
-
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
+    Ark_ShadowOptions arkShadowOptions = {
+        .offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1.0),
+    };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -347,7 +323,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = { .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -384,17 +360,14 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     const CustomNodeBuilderTestHelper<CommonMethodModifierTest18> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     static auto* arkBuilder = &builder;
-    Ark_Union_Number_Resource arkUnionOffsetX;
-    auto arkOffsetX = Converter::ArkValue<Ark_Number>(-1.0f);
-    TypeHelper::WriteToUnion<Ark_Number>(arkUnionOffsetX) = arkOffsetX;
 
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    Ark_ShadowOptions arkShadowOptions = { .offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(arkUnionOffsetX) };
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
+    Ark_ShadowOptions arkShadowOptions = {
+        .offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-1.0),
+    };
 
     auto arkOptions = Ark_CustomPopupOptions  {
         .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -426,15 +399,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 {
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    Ark_Union_Number_Resource arkUnionOffsetX;
-    TypeHelper::WriteToUnion<Ark_Resource>(arkUnionOffsetX) = TEST_FLOAT_RESOURCE;
-
     Ark_ShadowOptions arkShadowOptions = {
-        .offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(arkUnionOffsetX)
+        .offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(TEST_FLOAT_RESOURCE),
     };
-
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -443,7 +410,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -474,16 +441,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     TestSize.Level1)
 {
     // valid value
-    auto arkOffsetY = Converter::ArkValue<Ark_Number>(1.0f);
-    Ark_Union_Number_Resource arkUnionOffsetY;
-    TypeHelper::WriteToUnion<Ark_Number>(arkUnionOffsetY) = arkOffsetY;
-
     Ark_ShadowOptions arkShadowOptions = {
-        .offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(arkUnionOffsetY)
+        .offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1.0),
     };
-
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -492,7 +452,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -524,16 +484,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     TestSize.Level1)
 {
     // valid value
-    auto arkOffsetY = Converter::ArkValue<Ark_Number>(-1.0f);
-    Ark_Union_Number_Resource arkUnionOffsetY;
-    TypeHelper::WriteToUnion<Ark_Number>(arkUnionOffsetY) = arkOffsetY;
-
     Ark_ShadowOptions arkShadowOptions = {
-        .offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(arkUnionOffsetY)
+        .offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-1.0),
     };
-
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -542,7 +495,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -575,15 +528,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 {
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    Ark_Union_Number_Resource arkUnionOffsetY;
-    TypeHelper::WriteToUnion<Ark_Resource>(arkUnionOffsetY) = TEST_FLOAT_RESOURCE;
-
     Ark_ShadowOptions arkShadowOptions = {
-        .offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(arkUnionOffsetY)
+        .offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(TEST_FLOAT_RESOURCE),
     };
-
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -592,7 +539,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -627,16 +574,13 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
         .fill = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true))
     };
 
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
-
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     const CustomNodeBuilderTestHelper<CommonMethodModifierTest18> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = { .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -659,10 +603,8 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 
     // false value
     arkShadowOptions = { .fill = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)) };
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
-
     arkOptions = { .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
 
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
@@ -692,16 +634,13 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
         Converter::ArkValue<Ark_ShadowType>(Ark_ShadowType::ARK_SHADOW_TYPE_BLUR))
     };
 
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
-
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     const CustomNodeBuilderTestHelper<CommonMethodModifierTest18> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = { .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -726,10 +665,8 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     arkShadowOptions = { .type = Converter::ArkValue<Opt_ShadowType>(
         Converter::ArkValue<Ark_ShadowType>(static_cast<Ark_ShadowType>(-1)))
     };
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
-
     arkOptions = { .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
 
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
@@ -754,16 +691,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsColorColorTest, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto colorArkColor = Converter::ArkValue<Ark_Color>(Ark_Color::ARK_COLOR_BLUE);
-    Ark_Union_Color_String_Resource_ColoringStrategy arkUnionColor;
-    TypeHelper::WriteToUnion<Ark_Color>(arkUnionColor) = colorArkColor;
-
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkValue<Opt_Union_Color_String_Resource_ColoringStrategy>(arkUnionColor)
+        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(ARK_COLOR_BLUE),
     };
-
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -772,7 +702,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -802,16 +732,10 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsColorStringTest, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto colorArkStr = Converter::ArkValue<Ark_String>(TEST_COLOR_BLUE_STR);
-    Ark_Union_Color_String_Resource_ColoringStrategy arkUnionColor;
-    TypeHelper::WriteToUnion<Ark_String>(arkUnionColor) = colorArkStr;
-
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkValue<Opt_Union_Color_String_Resource_ColoringStrategy>(arkUnionColor)
+        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(
+            TEST_COLOR_BLUE_STR),
     };
-
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -820,7 +744,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -851,15 +775,10 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    Ark_Union_Color_String_Resource_ColoringStrategy arkUnionColor;
-    TypeHelper::WriteToUnion<Ark_Resource>(arkUnionColor) = TEST_COLOR_RESOURCE;
-
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkValue<Opt_Union_Color_String_Resource_ColoringStrategy>(arkUnionColor)
+        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Resource>(
+            TEST_COLOR_RESOURCE),
     };
-
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -868,7 +787,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -899,17 +818,10 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     TestSize.Level1)
 {
     // valid value
-    auto colorArkStrategy = Converter::ArkValue<Ark_ColoringStrategy>(
-        Ark_ColoringStrategy::ARK_COLORING_STRATEGY_PRIMARY);
-    Ark_Union_Color_String_Resource_ColoringStrategy arkUnionColor;
-    TypeHelper::WriteToUnion<Ark_ColoringStrategy>(arkUnionColor) = colorArkStrategy;
-
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkValue<Opt_Union_Color_String_Resource_ColoringStrategy>(arkUnionColor)
+        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_ColoringStrategy>(
+            ARK_COLORING_STRATEGY_PRIMARY),
     };
-
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -918,7 +830,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -949,17 +861,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsColorStrategyInvalidTest,
     TestSize.Level1)
 {
-    // valid value
-    auto colorArkStrategy = Converter::ArkValue<Ark_ColoringStrategy>(static_cast<Ark_ColoringStrategy>(-1));
-    Ark_Union_Color_String_Resource_ColoringStrategy arkUnionColor;
-    TypeHelper::WriteToUnion<Ark_ColoringStrategy>(arkUnionColor) = colorArkStrategy;
-
+    // invalid value
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkValue<Opt_Union_Color_String_Resource_ColoringStrategy>(arkUnionColor)
+        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_ColoringStrategy>(
+            Converter::INVALID_ENUM_VAL<Ark_ColoringStrategy>),
     };
-
-    Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
-    TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -968,7 +874,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .shadow = Converter::ArkValue<Opt_Union_ShadowOptions_ShadowStyle>(arkUnionShadow)
+        .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -991,4 +897,3 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     EXPECT_EQ(checkValue, TEST_COLOR_BLACK_STR);
 }
 }
-

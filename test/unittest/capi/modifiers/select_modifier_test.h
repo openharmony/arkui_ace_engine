@@ -197,14 +197,13 @@ const auto ATTRIBUTE_MENU_ALIGN_I_OFFSET_I_DY_DEFAULT_VALUE = "!NOT-DEFINED!";
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testColorsResValidValues;
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testStringResValidValues;
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testIntResValidValues;
-extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testWeightNumberValidValues;
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testWeightStringValidValues;
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testNumberNonNegIntValidValues;
 extern std::vector<std::tuple<ResIntegerID, std::string, OHOS::Ace::ResRawValue>> resourceInitTable;
 
 const Ark_Font TEST_ARK_FONT = {
     .size = ArkValue<Opt_Length>("12.0px"),
-    .weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD),
+    .weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD),
     .family = ArkUnion<Opt_Union_String_Resource, Ark_String>("TestFontFamily"),
     .style = ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC),
 };
