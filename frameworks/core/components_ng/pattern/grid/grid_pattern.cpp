@@ -196,8 +196,7 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
             auto result = itemToBeSelected_.emplace(itemFrameNode->GetId(), ItemSelectedStatus());
             iter = result.first;
             iter->second.onSelected = itemPattern->GetEventHub<GridItemEventHub>()->GetOnSelect();
-            iter->second.selectChangeEvent =
-                itemPattern->GetEventHub<GridItemEventHub>()->GetSelectChangeEvent();
+            iter->second.selectChangeEvent = itemPattern->GetEventHub<GridItemEventHub>()->GetSelectChangeEvent();
         }
         auto startMainOffset = mouseStartOffset_.GetMainOffset(info_.axis_);
         if (info_.axis_ == Axis::VERTICAL) {
@@ -321,16 +320,16 @@ void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnRea
         AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
     }
     auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
-    if (!NearZero(finalOffset)) {
-        bool scrollUpToStart = GreatOrEqual(info_.prevHeight_, info_.contentStartOffset_) &&
-                               LessOrEqual(info_.currentHeight_, info_.contentStartOffset_);
-        bool scrollDownToStart = LessNotEqual(info_.prevHeight_, info_.contentStartOffset_) &&
-                                 GreatOrEqual(info_.currentHeight_, info_.contentStartOffset_);
+    if (isInitialized_ && !NearZero(finalOffset)) {
+        bool scrollUpToStart = GreatOrEqual(info_.prevHeight_, -info_.contentStartOffset_) &&
+                               LessOrEqual(info_.currentHeight_, -info_.contentStartOffset_);
+        bool scrollDownToStart = LessNotEqual(info_.prevHeight_, -info_.contentStartOffset_) &&
+                                 GreatOrEqual(info_.currentHeight_, -info_.contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             FireObserverOnReachStart();
             CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
-            ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:Grid",
-                scrollUpToStart, scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
+            ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:Grid", scrollUpToStart,
+                scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
             if (onReachStart) {
                 onReachStart();
             }
@@ -1126,7 +1125,7 @@ void GridPattern::SyncLayoutBeforeSpring()
     }
     if (!UseIrregularLayout()) {
         const float delta = info.currentOffset_ - info.prevOffset_;
-        if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info_.lastMainSize_)) {
+        if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info.lastMainSize_)) {
             // old layout can't handle large overScroll offset. Avoid by skipping this layout.
             // Spring animation plays immediately afterwards, so losing this frame's offset is fine
             info.currentOffset_ = info.prevOffset_;
@@ -1355,8 +1354,8 @@ void GridPattern::GetEventDumpInfo()
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
                   : DumpLog::GetInstance().AddDesc("hasOnScrollIndex: false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnGridScrollIndex();
-    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: true")
-                             : DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: false");
+    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: true")
+                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: false");
 }
 
 void GridPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
@@ -1369,7 +1368,7 @@ void GridPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnGridScrollIndex();
-    json->Put("nodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
+    json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
 }
 
 std::string GridPattern::GetIrregularIndexesString() const
@@ -1758,7 +1757,7 @@ void GridPattern::HandleOnItemFocus(int32_t index)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(focusHub);
     if (focusHub->GetFocusDependence() != FocusDependence::AUTO) {
         focusHub->SetFocusDependence(FocusDependence::AUTO);
     }
