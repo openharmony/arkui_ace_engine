@@ -91,7 +91,7 @@ public:
         }
     }
 
-    static void On([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, const char* type,
+    static void On([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         ani_object callback, ani_long dragActionPtr)
     {
         HILOGI("AceDrag, drag action On function has been called.");
@@ -99,7 +99,7 @@ public:
         if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
             return;
         }
-        auto argc = ParseArgs(env, type, callback);
+        auto argc = ParseArgs(env, callback);
         if (argc != TWO_ARGS) {
             AniUtils::AniThrow(env, "check param failed.", ERROR_CODE_PARAM_INVALID);
             HILOGE("AceDrag, check param failed.");
@@ -130,7 +130,7 @@ public:
         env->DestroyLocalScope();
     }
 
-    static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, const char* type,
+    static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_object callback, ani_long dragActionPtr)
     {
         HILOGI("AceDrag, drag action Off function has been called.");
@@ -146,7 +146,7 @@ public:
             return;
         }
         dragAction->Initialize(env);
-        auto argc = ParseArgs(env, type, callback);
+        auto argc = ParseArgs(env, callback);
         if (argc == 1) {
             for (const auto& item : dragAction->cbList_) {
                 if (ANI_OK != dragAction->env_->GlobalReference_Delete(item)) {
@@ -222,14 +222,9 @@ private:
         env_ = env;
     }
 
-    static size_t ParseArgs(ani_env* env, const char* type, ani_object callback)
+    static size_t ParseArgs(ani_env* env, ani_object callback)
     {
         CHECK_NULL_RETURN(env, 0);
-        std::string aniType = type;
-        if (aniType != "statusChange") {
-            HILOGE("AceDrag, type mismatch('statusChange').");
-            return 0;
-        }
         ani_boolean isUndefinedResponse;
         env->Reference_IsUndefined(callback, &isUndefinedResponse);
         if (isUndefinedResponse) {
@@ -868,18 +863,16 @@ ani_object ANIDragActionStartDrag(
     return DragAction::StartDrag(env, aniClass, dragActionPtr);
 }
 
-void ANIDragActionOn([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string type,
+void ANIDragActionOn([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
     ani_object callback, ani_long dragActionPtr)
 {
-    std::string aniType = AniUtils::ANIStringToStdString(env, type);
-    DragAction::On(env, aniClass, aniType.c_str(), callback, dragActionPtr);
+    DragAction::On(env, aniClass, callback, dragActionPtr);
 }
 
-void ANIDragActionOff([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string type,
+void ANIDragActionOff([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
     [[maybe_unused]] ani_object callback, ani_long dragActionPtr)
 {
-    std::string aniType = AniUtils::ANIStringToStdString(env, type);
-    DragAction::Off(env, aniClass, aniType.c_str(), callback, dragActionPtr);
+    DragAction::Off(env, aniClass, callback, dragActionPtr);
 }
 
 ani_object ANIGetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass)
