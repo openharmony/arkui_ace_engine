@@ -302,6 +302,8 @@ public:
     virtual void RequestKeyboardOnFocus(bool needToRequest) = 0;
     virtual void SetWidthAuto(bool isAuto) {}
     virtual void SetType(TextInputType value) = 0;
+    virtual void SetSelectDetectEnable(bool value) = 0;
+    virtual void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) = 0;
     virtual void SetContentType(const NG::TextContentType& value) = 0;
     virtual void SetPlaceholderColor(const Color& value) = 0;
     virtual void ResetPlaceholderColor() = 0;

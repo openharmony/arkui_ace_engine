@@ -34,6 +34,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "base/view_data/hint_to_type_wrap.h"
+#include "core/common/ai/data_detector_adapter.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -1752,6 +1753,29 @@ public:
         contentScroller_.scrollingCallback = std::move(callback);
     }
     void SetPlaceholderStyledString(const RefPtr<SpanString>& value);
+    bool IsShowAIMenuOption() const
+    {
+        return isShowAIMenuOption_;
+    }
+    RefPtr<DataDetectorAdapter> GetSelectDetectorAdapter()
+    {
+        if (!selectDetectorAdapter_) {
+            selectDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
+        }
+        return selectDetectorAdapter_;
+    }
+    const std::unordered_map<TextDataDetectType, AISpan>& GetAIItemOption() const
+    {
+        return aiMenuOptions_;
+    }
+    void SetSelectDetectEnable(bool value);
+    bool GetSelectDetectEnable();
+    void ResetSelectDetectEnable();
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types);
+    std::vector<TextDataDetectType> GetSelectDetectConfig();
+    void ResetSelectDetectConfig();
+    void SelectAIDetect();
+    void HandleAIMenuOption(const std::string& labelInfo = "");
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1798,6 +1822,14 @@ protected:
     RefPtr<AutoFillController> autoFillController_;
     virtual IMEClient GetIMEClientInfo();
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
+    /* --------- select AI detect ---------- */
+    bool isShowAIMenuOption_;
+    RefPtr<DataDetectorAdapter> selectDetectorAdapter_;
+    std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
+    bool selectDetectEnabledIsUserSet_ = false;
+    bool selectDetectEnabled_ = true;
+    bool selectDetectTypesIsUserSet_ = false;
+    std::vector<TextDataDetectType> selectDataDetectorTypes_;
 
 private:
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;

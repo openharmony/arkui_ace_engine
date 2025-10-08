@@ -173,6 +173,8 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("onWillChange", &JSSearch::SetOnWillChange);
     JSClass<JSSearch>::StaticMethod("enableAutoSpacing", &JSSearch::SetEnableAutoSpacing);
     JSClass<JSSearch>::StaticMethod("onWillAttachIME", &JSSearch::SetOnWillAttachIME);
+    JSClass<JSSearch>::StaticMethod("enableSelectedDataDetector", &JSSearch::SetSelectDetectEnable);
+    JSClass<JSSearch>::StaticMethod("selectedDataDetectorConfig", &JSSearch::SetSelectDetectConfig);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -201,6 +203,36 @@ void JSSearch::SetFontFeature(const JSCallbackInfo& info)
     }
     std::string fontFeatureSettings = info[0]->ToString();
     SearchModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
+}
+
+void JSSearch::SetSelectDetectEnable(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        auto enabled = info[0]->ToBoolean();
+        SearchModel::GetInstance()->SetSelectDetectEnable(enabled);
+    }
+}
+
+void JSSearch::SetSelectDetectConfig(const JSCallbackInfo& info)
+{
+    std::vector<TextDataDetectType> typesList;
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto args = info[0];
+    auto paramObject = JSRef<JSObject>::Cast(args);
+    auto getTypes = paramObject->GetProperty("types");
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(getTypes);
+    if (!array->IsArray()) {
+        return;
+    }
+    for (size_t i = 0; i < array->Length(); ++i) {
+        JSRef<JSVal> type = array->GetValueAt(i);
+        if (type->IsNumber()) {
+            typesList.push_back(static_cast<TextDataDetectType>(type->ToNumber<int32_t>()));
+        }
+    }
+    SearchModel::GetInstance()->SetSelectDetectConfig(typesList);
 }
 
 void JSSearch::Create(const JSCallbackInfo& info)

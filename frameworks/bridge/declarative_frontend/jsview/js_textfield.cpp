@@ -445,6 +445,36 @@ void JSTextField::SetTextAlign(int32_t value)
     }
 }
 
+void JSTextField::SetSelectDetectEnable(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        auto enabled = info[0]->ToBoolean();
+        TextFieldModel::GetInstance()->SetSelectDetectEnable(enabled);
+    }
+}
+
+void JSTextField::SetSelectDetectConfig(const JSCallbackInfo& info)
+{
+    std::vector<TextDataDetectType> typesList;
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto args = info[0];
+    auto paramObject = JSRef<JSObject>::Cast(args);
+    auto getTypes = paramObject->GetProperty("types");
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(getTypes);
+    if (!array->IsArray()) {
+        return;
+    }
+    for (size_t i = 0; i < array->Length(); ++i) {
+        JSRef<JSVal> type = array->GetValueAt(i);
+        if (type->IsNumber()) {
+            typesList.push_back(static_cast<TextDataDetectType>(type->ToNumber<int32_t>()));
+        }
+    }
+    TextFieldModel::GetInstance()->SetSelectDetectConfig(typesList);
+}
+
 void JSTextField::SetLineBreakStrategy(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {

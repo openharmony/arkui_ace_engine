@@ -4338,5 +4338,21 @@
     {
         "first_introduced": "22",
         "name": "OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_SelectedDataDetectorConfig_Create"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_SelectedDataDetectorConfig_Dispose"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_SelectedDataDetectorConfig_SetTypes"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_SelectedDataDetectorConfig_GetTypes"
     }
 ]

@@ -251,6 +251,10 @@ void TextFieldModelImpl::SetPlaceholderFont(const Font& value)
     component->SetPlaceHoldStyle(textStyle);
 }
 
+void TextFieldModelImpl::SetSelectDetectEnable(bool value) {}
+
+void TextFieldModelImpl::SetSelectDetectConfig(std::vector<TextDataDetectType>& types) {}
+
 void TextFieldModelImpl::SetEnterKeyType(TextInputAction value)
 {
     auto* stack = ViewStackProcessor::GetInstance();

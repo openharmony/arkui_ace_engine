@@ -11843,6 +11843,39 @@ class SearchMarginModifier extends ModifierWithKey {
 }
 SearchMarginModifier.identity = Symbol('searchMargin');
 
+class SearchSelectDetectorEnableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetSelectDetectorEnable(node);
+    } else {
+      getUINativeModule().search.setSelectDetectorEnable(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchSelectDetectorEnableModifier.identity = Symbol('searchSelectDetectorEnable');
+class SearchSelectDetectorConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetSelectDetectorConfig(node);
+    } else {
+      getUINativeModule().search.setSelectDetectorConfig(node, this.value.types);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
+  }
+}
+SearchSelectDetectorConfigModifier.identity = Symbol('searchSelectDetectorConfig');
+
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -11909,6 +11942,17 @@ class ArkSearchComponent extends ArkComponent {
   }
   onPaste(callback) {
     modifierWithKey(this._modifiersWithKeys, SearchOnPasteModifier.identity, SearchOnPasteModifier, callback);
+    return this;
+  }
+  enableSelectedDataDetector(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorEnableModifier.identity, SearchSelectDetectorEnableModifier, value);
+    return this;
+  }
+  selectedDataDetectorConfig(config) {
+    if (config === undefined || config === null) {
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorConfigModifier.identity, SearchSelectDetectorConfigModifier, config);
     return this;
   }
   showCounter(value) {
@@ -14331,6 +14375,38 @@ class TextDataDetectorConfigModifier extends ModifierWithKey {
   }
 }
 TextDataDetectorConfigModifier.identity = Symbol('textDataDetectorConfig');
+class TextSelectDetectorEnableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetSelectDetectorEnable(node);
+    } else {
+      getUINativeModule().text.setSelectDetectorEnable(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextSelectDetectorEnableModifier.identity = Symbol('textSelectDetectorEnable');
+class TextSelectDetectorConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetSelectDetectorConfig(node);
+    } else {
+      getUINativeModule().text.setSelectDetectorConfig(node, this.value.types);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
+  }
+}
+TextSelectDetectorConfigModifier.identity = Symbol('textSelectDetectorConfig');
 class TextOnCopyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14600,6 +14676,17 @@ class ArkTextComponent extends ArkComponent {
     }
     detectorConfig.enablePreviewMenu = config.enablePreviewMenu;
     modifierWithKey(this._modifiersWithKeys, TextDataDetectorConfigModifier.identity, TextDataDetectorConfigModifier, detectorConfig);
+    return this;
+  }
+  enableSelectedDataDetector(value) {
+    modifierWithKey(this._modifiersWithKeys, TextSelectDetectorEnableModifier.identity, TextSelectDetectorEnableModifier, value);
+    return this;
+  }
+  selectedDataDetectorConfig(config) {
+    if (config === undefined || config === null) {
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, TextSelectDetectorConfigModifier.identity, TextSelectDetectorConfigModifier, config);
     return this;
   }
   font(value, options) {
@@ -16223,9 +16310,53 @@ class TextAreaScrollBarColorModifier extends ModifierWithKey {
 }
 TextAreaScrollBarColorModifier.identity = Symbol('textAreaBarColor');
 
+class TextAreaSelectDetectorEnableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetSelectDetectorEnable(node);
+    } else {
+      getUINativeModule().textArea.setSelectDetectorEnable(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaSelectDetectorEnableModifier.identity = Symbol('textAreaSelectDetectorEnable');
+class TextAreaSelectDetectorConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetSelectDetectorConfig(node);
+    } else {
+      getUINativeModule().textArea.setSelectDetectorConfig(node, this.value.types);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
+  }
+}
+TextAreaSelectDetectorConfigModifier.identity = Symbol('textAreaSelectDetectorConfig');
+
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  enableSelectedDataDetector(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorEnableModifier.identity, TextAreaSelectDetectorEnableModifier, value);
+    return this;
+  }
+  selectedDataDetectorConfig(config) {
+    if (config === undefined || config === null) {
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorConfigModifier.identity, TextAreaSelectDetectorConfigModifier, config);
+    return this;
   }
   allowChildCount() {
     return 0;
@@ -18202,6 +18333,40 @@ class TextInputOnSecurityStateChangeModifier extends ModifierWithKey {
   }
 }
 TextInputOnSecurityStateChangeModifier.identity = Symbol('textInputOnSecurityStateChange');
+
+class TextInputSelectDetectorEnableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetSelectDetectorEnable(node);
+    } else {
+      getUINativeModule().textInput.setSelectDetectorEnable(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputSelectDetectorEnableModifier.identity = Symbol('textInputSelectDetectorEnable');
+class TextInputSelectDetectorConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetSelectDetectorConfig(node);
+    } else {
+      getUINativeModule().textInput.setSelectDetectorConfig(node, this.value.types);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
+  }
+}
+TextInputSelectDetectorConfigModifier.identity = Symbol('textInputSelectDetectorConfig');
+
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -18212,6 +18377,17 @@ class ArkTextInputComponent extends ArkComponent {
       this.setText(value[0].text);
       this.setController(value[0].controller);
     }
+    return this;
+  }
+  enableSelectedDataDetector(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorEnableModifier.identity, TextInputSelectDetectorEnableModifier, value);
+    return this;
+  }
+  selectedDataDetectorConfig(config) {
+    if (config === undefined || config === null) {
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorConfigModifier.identity, TextInputSelectDetectorConfigModifier, config);
     return this;
   }
   setText(value) {

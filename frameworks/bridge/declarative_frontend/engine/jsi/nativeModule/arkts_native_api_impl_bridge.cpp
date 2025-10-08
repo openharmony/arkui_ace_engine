@@ -1591,6 +1591,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetEnableDataDetector));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDataDetector"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetEnableDataDetector));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDetectorEnable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetSelectDetectorEnable));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorEnable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetSelectDetectorEnable));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDetectorConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetSelectDetectorConfig));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetSelectDetectorConfig));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFeature"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFontFeature));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
@@ -1674,6 +1682,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 
     auto search = panda::ObjectRef::New(vm);
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDetectorEnable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSelectDetectorEnable));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorEnable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSelectDetectorEnable));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDetectorConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSelectDetectorConfig));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSelectDetectorConfig));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchInitialize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchInitialize));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchInitialize"),
@@ -2274,6 +2290,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "linearIndicator"), linearIndicator);
 
     auto textArea = panda::ObjectRef::New(vm);
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDetectorEnable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetSelectDetectorEnable));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorEnable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetSelectDetectorEnable));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDetectorConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetSelectDetectorConfig));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetSelectDetectorConfig));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetStyle));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStyle"),
@@ -2645,6 +2669,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterImageAnimatorAttributes(object, vm);
 
     auto textInput = panda::ObjectRef::New(vm);
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDetectorEnable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetSelectDetectorEnable));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorEnable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetSelectDetectorEnable));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDetectorConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetSelectDetectorConfig));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetSelectDetectorConfig));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCaretColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetCaretColor));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCaretColor"),

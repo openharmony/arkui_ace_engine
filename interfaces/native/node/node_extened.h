@@ -86,6 +86,10 @@ struct ArkUI_OptionalFloat {
     float value;
 };
 
+struct ArkUI_SelectedDataDetectorConfig {
+    std::vector<uint32_t> types;
+};
+
 struct ArkUI_OptionalInt {
     int32_t isSet;
     int32_t value;

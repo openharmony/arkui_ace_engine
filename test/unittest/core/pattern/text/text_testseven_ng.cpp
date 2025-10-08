@@ -56,7 +56,6 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString001, TestSize.Level1)
     EXPECT_CALL(*mockClipboardImpl, AddTextRecord(_, _)).Times(0);
     EXPECT_CALL(*mockClipboardImpl, AddSpanStringRecord(_, _)).Times(0);
     pattern->clipboard_ = mockClipboardImpl;
-
     pattern->textSelector_.Update(0, 6);
     std::list<RefPtr<NG::SpanItem>> selectSpanItems;
     auto span0 = AceType::MakeRefPtr<SpanItem>();
