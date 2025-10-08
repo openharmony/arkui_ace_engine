@@ -127,6 +127,7 @@ public:
     static bool IsPixelMap(const JSRef<JSVal>& jsValue);
 
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     JSRef<JSObject>& GetJsLeadingMarginSpanObject();
     void SetJsLeadingMarginSpanObject(const JSRef<JSObject>& leadingMarginSpanObj);
 

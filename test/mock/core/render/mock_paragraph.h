@@ -97,6 +97,11 @@ public:
         return false;
     }
 
+    bool HandleCaretWhenEmpty(CaretMetricsF& result, bool needLineHighest)
+    {
+        return false;
+    }
+
     LineMetrics GetLineMetricsByRectF(RectF& rect) override
     {
         LineMetrics lineMetrics;

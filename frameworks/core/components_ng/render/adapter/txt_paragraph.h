@@ -133,7 +133,7 @@ public:
 protected:
     ParagraphStyle paraStyle_;
     virtual Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest);
-    virtual bool HandleCaretWhenEmpty(CaretMetricsF& result, bool needLineHighest);
+    virtual bool HandleCaretWhenEmpty(CaretMetricsF& result, bool needLineHighest) override;
     RSParagraph* GetParagraph();
     Rosen::RSSymbolAnimation rsSymbolAnimation_;
     std::unique_ptr<RSParagraph> paragraph_;
@@ -151,6 +151,7 @@ private:
     float MakeEmptyOffsetX(bool isLtr);
     void HandleTextAlign(CaretMetricsF& result, TextAlign align);
     void HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin);
+    void HandleLeadingMarginSpan(CaretMetricsF& result, DrawableLeadingMargin drawableLeadingMargin);
     void GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects,
         RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE);
     int32_t AdjustIndexForEmoji(int32_t index);
