@@ -599,7 +599,6 @@ public:
     static void JsAccessibilitySelected(const JSCallbackInfo& info);
     static void JsAccessibilityChecked(const JSCallbackInfo& info);
     static void JsAccessibilityRole(const JSCallbackInfo& info);
-    static std::string GetRoleByType(AccessibilityRoleType roleType);
     static void JsOnAccessibilityFocus(const JSCallbackInfo& info);
     static void JsOnAccessibilityActionIntercept(const JSCallbackInfo& info);
     static void JsOnAccessibilityHoverTransparent(const JSCallbackInfo& info);

@@ -1178,33 +1178,6 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
     }
 }
 
-void UpdateUserAccessibilityElementInfo(
-    const RefPtr<NG::AccessibilityProperty>& accessibilityProperty, AccessibilityElementInfo& nodeInfo)
-{
-    CHECK_NULL_VOID(accessibilityProperty);
-    if (accessibilityProperty->HasUserDisabled()) {
-        nodeInfo.SetEnabled(!accessibilityProperty->IsUserDisabled());
-    }
-    if (accessibilityProperty->HasUserCheckedType()) {
-        nodeInfo.SetChecked(accessibilityProperty->GetUserCheckedType());
-    } else {
-        nodeInfo.SetChecked(accessibilityProperty->IsChecked());
-    }
-    if (accessibilityProperty->HasUserSelected()) {
-        nodeInfo.SetSelected(accessibilityProperty->IsUserSelected());
-    } else {
-        nodeInfo.SetSelected(accessibilityProperty->IsSelected());
-    }
-
-    if (nodeInfo.IsEnabled()) {
-        if (accessibilityProperty->HasUserCheckable()) {
-            nodeInfo.SetCheckable(accessibilityProperty->IsUserCheckable());
-        } else {
-            nodeInfo.SetCheckable(accessibilityProperty->IsCheckable());
-        }
-    }
-}
-
 bool IsUserCheckedOrSelected(const RefPtr<NG::FrameNode> frameNode)
 {
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -1554,6 +1527,8 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
             nodeInfo.AddAction(action);
         }
     }
+    CheckStateTakeOver(node, nodeInfo);
+    CheckActionTakeOver(node, nodeInfo);
 }
 #ifdef WEB_SUPPORTED
 
@@ -2290,6 +2265,11 @@ bool ActClick(RefPtr<NG::FrameNode>& frameNode, const NG::SecCompEnhanceEvent& s
         // notify child action happened to parent
         NG::AccessibilityFunctionUtils::HandleNotifyChildAction(frameNode, NotifyChildActionType::ACTION_CLICK);
         return true;
+    }
+    RefPtr<NG::FrameNode> controllerNode;
+    auto controllerType = NG::AccessibilityPropertyUtils::CheckAndGetActionController(frameNode, controllerNode);
+    if ((controllerType == NG::ActionControllerType::CONTROLLER_CLICK) && (controllerNode)) {
+        return ActClick(controllerNode, secEvent);
     }
 
     auto interceptResult =

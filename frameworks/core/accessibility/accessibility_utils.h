@@ -23,6 +23,8 @@
 
 namespace OHOS::Ace {
 
+enum class AccessibilityRoleType;
+
 // define accessibility node tags
 extern const char ACCESSIBILITY_TAG_DIV[];
 extern const char ACCESSIBILITY_TAG_CALENDAR[];
@@ -247,6 +249,10 @@ enum class AccessibilityActionInterceptResult : uint32_t {
 };
 bool CheckBetterRect(const Rect& nodeRect, int direction, const Rect& itemRect, const Rect& tempBest);
 
+class AccessibilityUtils {
+public:
+    static std::string GetRoleByType(AccessibilityRoleType roleType);
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_ACCESSIBILITY_UTILS_H

@@ -816,6 +816,11 @@ private:
 
     ActionType ConvertAceAction(AceAction aceAction);
 
+    void CheckStateTakeOver(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
+    void CheckActionTakeOver(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
+    void UpdateUserAccessibilityElementInfo(
+        const RefPtr<NG::AccessibilityProperty>& accessibilityProperty, AccessibilityElementInfo& nodeInfo);
+
     std::string callbackKey_;
     uint32_t windowId_ = 0;
     std::unordered_map<uint32_t, std::shared_ptr<JsAccessibilityStateObserver>> stateObserver_;

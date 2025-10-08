@@ -161,6 +161,7 @@ template("ace_osal_ohos_source_set") {
           config.accessibility_support) {
         sources += [
           "accessibility/accessibility_hidumper_osal.cpp",
+          "accessibility/element_info/accessibility_element_info_osal.cpp",
           "accessibility/element_info/accessibility_node_osal.cpp",
           "accessibility/focus_move/accessibility_focus_strategy.cpp",
           "js_accessibility_manager.cpp",

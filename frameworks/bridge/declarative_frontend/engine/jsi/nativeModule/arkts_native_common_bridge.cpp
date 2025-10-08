@@ -35,6 +35,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_accessibility_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "frameworks/core/accessibility/static/accessibility_static_utils.h"
 #include "frameworks/core/components_ng/pattern/text/span_model_ng.h"
 
 #include "base/log/ace_scoring_log.h"
@@ -4801,7 +4802,7 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityRoleType(ArkUIRuntimeCallIn
     if (secondArg->IsInt()) {
         auto index = secondArg->Int32Value(vm);
         AccessibilityRoleType roleType = static_cast<AccessibilityRoleType>(index);
-        std::string role = JSAccessibilityAbstract::GetRoleByType(roleType);
+        std::string role = AccessibilityUtils::GetRoleByType(roleType);
         if (!role.empty()) {
             GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityCustomRole(nativeNode, role.c_str());
         } else {

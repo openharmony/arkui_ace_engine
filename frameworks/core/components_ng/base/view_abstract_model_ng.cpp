@@ -916,6 +916,15 @@ void ViewAbstractModelNG::SetAccessibilityTextPreferred(bool accessibilityTextPr
     accessibilityProperty->SetAccessibilityTextPreferred(accessibilityTextPreferred);
 }
 
+void ViewAbstractModelNG::SetAccessibilityGroupOptions(AccessibilityGroupOptions groupOptions)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityGroupOptions(groupOptions);
+}
+
 void ViewAbstractModelNG::SetAccessibilityText(const std::string& text)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1174,6 +1183,14 @@ void ViewAbstractModelNG::SetAccessibilityTextPreferred(FrameNode* frameNode, bo
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityTextPreferred(accessibilityTextPreferred);
+}
+
+void ViewAbstractModelNG::SetAccessibilityGroupOptions(FrameNode* frameNode, AccessibilityGroupOptions groupOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityGroupOptions(groupOptions);
 }
 
 void ViewAbstractModelNG::SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus)
