@@ -222,7 +222,7 @@ void ReplaceStyledStringImpl(Ark_MutableStyledString peer,
     CHECK_NULL_VOID(peer && other);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
-    auto otherString = other->GetMutableString();
+    auto otherString = other->GetString();
     CHECK_NULL_VOID(otherString);
     const auto convStart = Converter::Convert<int32_t>(start);
     const auto convLength = Converter::Convert<int32_t>(length);
@@ -244,7 +244,7 @@ void InsertStyledStringImpl(Ark_MutableStyledString peer,
     auto strLength = mutableString->GetLength();
     const auto convStart = Converter::Convert<int32_t>(start);
     if (convStart >= 0 && convStart <= strLength) {
-        auto otherString = other->GetMutableString();
+        auto otherString = other->GetString();
         CHECK_NULL_VOID(otherString);
         mutableString->InsertSpanString(convStart, otherString);
     } else {
@@ -259,7 +259,7 @@ void AppendStyledStringImpl(Ark_MutableStyledString peer,
     CHECK_NULL_VOID(peer && other);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
-    auto otherString = other->GetMutableString();
+    auto otherString = other->GetString();
     CHECK_NULL_VOID(otherString);
     mutableString->AppendSpanString(otherString);
 }
