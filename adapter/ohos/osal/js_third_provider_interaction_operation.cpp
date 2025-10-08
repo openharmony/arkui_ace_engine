@@ -698,6 +698,18 @@ void JsThirdProviderInteractionOperation::SetBelongTreeId(const int32_t treeId)
     belongTreeId_ = treeId;
 }
 
+void JsThirdProviderInteractionOperation::FocusMoveSearchWithCondition(
+    const int64_t elementId, const AccessibilityFocusMoveParam param,
+    const int32_t requestId, AccessibilityElementOperatorCallback &callback)
+{
+}
+
+void JsThirdProviderInteractionOperation::DetectElementInfoFocusableThroughAncestor(
+    const AccessibilityElementInfo &info, const int64_t parentId, const int32_t requestId,
+    AccessibilityElementOperatorCallback &callback)
+{
+}
+
 int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEventForThird(
     int64_t thirdElementId,
     Accessibility::EventType eventType)

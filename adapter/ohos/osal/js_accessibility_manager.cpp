@@ -5648,6 +5648,14 @@ void JsAccessibilityManager::WebInteractionOperation::SetChildTreeIdAndWinId(con
 
 void JsAccessibilityManager::WebInteractionOperation::SetBelongTreeId(const int32_t treeId) {}
 
+void JsAccessibilityManager::WebInteractionOperation::FocusMoveSearchWithCondition(
+    const int64_t elementId, const AccessibilityFocusMoveParam param,
+    const int32_t requestId, AccessibilityElementOperatorCallback &callback) {}
+
+void JsAccessibilityManager::WebInteractionOperation::DetectElementInfoFocusableThroughAncestor(
+    const AccessibilityElementInfo &info, const int64_t parentId, const int32_t requestId,
+    AccessibilityElementOperatorCallback &callback) {}
+
 void JsAccessibilityManager::WebInteractionOperation::GetCursorPosition(
     const int64_t elementId, const int32_t requestId, AccessibilityElementOperatorCallback& callback)
 {
@@ -7766,6 +7774,14 @@ void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityClearCurrentFocus");
 }
+
+void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearchWithCondition(
+    const int64_t elementId, const AccessibilityFocusMoveParam param,
+    const int32_t requestId, AccessibilityElementOperatorCallback &callback) {}
+
+void JsAccessibilityManager::JsInteractionOperation::DetectElementInfoFocusableThroughAncestor(
+    const AccessibilityElementInfo &info, const int64_t parentId, const int32_t requestId,
+    AccessibilityElementOperatorCallback &callback) {}
 
 void JsAccessibilityManager::UpdateElementInfoTreeId(Accessibility::AccessibilityElementInfo& info)
 {
