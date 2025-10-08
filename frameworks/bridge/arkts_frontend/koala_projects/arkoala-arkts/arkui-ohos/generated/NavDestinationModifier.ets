@@ -111,8 +111,9 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
     _enableStatusBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableStatusBar_0_0value?: boolean | undefined
     _enableStatusBar_0_1value?: boolean | undefined
-    applyModifierPatch(peer: ArkNavDestinationPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkNavDestinationPeer;
         if (this._hideTitleBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._hideTitleBar_0_flag) {
