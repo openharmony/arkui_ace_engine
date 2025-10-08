@@ -31,7 +31,6 @@ import { ArkUIAniModule } from 'arkui.ani'
 import { UIContextImpl, ContextRecord } from "./base/UIContextImpl"
 import { RecordData } from "@ohos.base"
 import { ParallelizeUI } from "../@ohos.arkui.Parallelize"
-import { memorizeUpdatedState } from "./stateManagement/remember"
 
 export enum NodeRenderType {
     RENDER_TYPE_DISPLAY = 0,
@@ -295,18 +294,17 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             if (this.__params) {
                 const result = setNeedCreate(true);
                 if (this.__buildOptions?.useParallel) {
-                    const params = memorizeUpdatedState<T>(() => { return this.__params!.value })
                     /** @memo */
-                    const builder = () => {
-                        this.__builder?.builder(params!.value);
+                    const builder = (params: T) => {
+                        this.__builder?.builder(params);
                     }
-                    ParallelizeUI({
+                    ParallelizeUI<T>({
                         completed: () => {
                             const ptr = this.__root!.getPeerPtr()
                             this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
                         },
                         updateUseParallel: this.__updateUseParallel
-                    }, builder);
+                    }, () => { return this.__params!.value }, builder);
                 } else {
                     this.__builder?.builder(this.__params!.value);
                 }
