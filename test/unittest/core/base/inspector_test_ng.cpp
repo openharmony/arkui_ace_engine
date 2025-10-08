@@ -1738,6 +1738,18 @@ HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InspectorTestNg028
+ * @tc.desc: Test GetInspectorOfNode when nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg028, TestSize.Level1)
+{
+    auto resultFrameNode = Inspector::GetInspectorOfNode(nullptr);
+    std::string emptyString = "";
+    EXPECT_NE(resultFrameNode, emptyString);
+}
+
+/**
  * @tc.name: GetOverlayNode_001
  * @tc.desc: Test the operation of GetOverlayNode in stage  overlay
  * column
