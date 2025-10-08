@@ -1748,9 +1748,10 @@ void FormPattern::FireFormSurfaceNodeCallback(
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
-    CHECK_NULL_VOID(parent);
-    parent->MarkNeedSyncRenderTree();
-    parent->RebuildRenderContextTree();
+    if (parent) {
+        parent->MarkNeedSyncRenderTree();
+        parent->RebuildRenderContextTree();
+    }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->RequestNextFrame();
