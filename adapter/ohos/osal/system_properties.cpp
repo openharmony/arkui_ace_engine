@@ -925,7 +925,7 @@ void SystemProperties::InitDeviceInfo(
     softPagetransition_ = system::GetBoolParameter("const.arkui.softPagetransition", false);
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
     resourceDecoupling_ = IsResourceDecoupling();
-    configChangePerform_ = IsConfigChangePerform();
+    configChangePerform_ = configChangePerform_ || IsConfigChangePerform();
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
     forceSplitIgnoreOrientationEnabled_ = IsForceSplitIgnoreOrientationEnabled();
     arkUIHookEnabled_ = IsArkUIHookEnabled();
