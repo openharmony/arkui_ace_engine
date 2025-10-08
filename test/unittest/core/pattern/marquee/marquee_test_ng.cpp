@@ -1903,7 +1903,6 @@ HWTEST_F(MarqueeTestNg, OnFontScaleConfigurationUpdate_001, TestSize.Level1)
     EXPECT_FALSE(AnimationUtils::IsImplicitAnimationOpen());
 }
 
-
 /**
  * @tc.name: MarqueeMultiThreadTest01
  * @tc.desc: Test marquee multi thread function

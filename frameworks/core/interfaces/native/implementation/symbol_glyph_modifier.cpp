@@ -243,9 +243,7 @@ void SetSymbolEffectImpl(Ark_NativePointer node,
         [&symbolEffectOptions](const Ark_Number& src) {
             symbolEffectOptions.SetTriggerNum(Converter::Convert<int32_t>(src));
         },
-        [&symbolEffectOptions]() {
-            symbolEffectOptions.SetIsActive(false);
-        });
+        [&symbolEffectOptions]() {});
     SymbolModelNG::SetSymbolEffectOptions(frameNode, symbolEffectOptions);
 }
 } // SymbolGlyphAttributeModifier
