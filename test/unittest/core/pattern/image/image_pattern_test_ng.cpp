@@ -2673,4 +2673,131 @@ HWTEST_F(ImagePatternTestNg, altErrorCallback001, TestSize.Level0)
     callback3(sourceInfo);
     EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
 }
+
+/**
+ * @tc.name: altErrorCallback002
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, altErrorCallback002, TestSize.Level0)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isActive_ = true;
+
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    ImageModelNG image;
+    image.SetAltError(ImageSourceInfo { RESOURCE_URL });
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto altImageSourceInfo = imageLayoutProperty->GetAltError().value_or(ImageSourceInfo(""));
+    std::string errorMsg = "erormsg";
+    ImageErrorInfo errorInfo;
+    auto callback1 = imagePattern->CreateLoadFailCallbackForAltError();
+    callback1(altImageSourceInfo, errorMsg, errorInfo);
+
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
+
+    ImageSourceInfo sourceInfo("testmsg");
+    auto callback2 = imagePattern->CreateLoadFailCallbackForAltError();
+    callback2(sourceInfo, errorMsg, errorInfo);
+}
+
+/**
+ * @tc.name: ImagePatternAltError001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImagePatternAltError001, TestSize.Level0)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageModelNG image;
+    image.SetAltError(ImageSourceInfo { RESOURCE_URL });
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    frameNode->GetGeometryNode()->SetContentSize(SizeF());
+    auto altImageSourceInfo = imageLayoutProperty->GetAltError().value_or(ImageSourceInfo(""));
+    imagePattern->LoadAltErrorImage(altImageSourceInfo);
+    imagePattern->StartDecoding(SizeF());
+    EXPECT_NE(frameNode->GetGeometryNode()->GetContent().get(), nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternAltError002
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImagePatternAltError002, TestSize.Level0)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageModelNG image;
+    image.SetAltError(ImageSourceInfo { RESOURCE_URL });
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    auto altImageSourceInfo = imageLayoutProperty->GetAltError().value_or(ImageSourceInfo(""));
+    imagePattern->LoadAltErrorImage(altImageSourceInfo);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, imageLayoutProperty);
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    layoutWrapper->skipMeasureContent_ = false;
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    imagePattern->altErrorCtx_ =
+        AceType::MakeRefPtr<ImageLoadingContext>(altImageSourceInfo, LoadNotifier(nullptr, nullptr, nullptr), true);
+    imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+
+    imagePattern->altErrorImage_ = imagePattern->altErrorCtx_->MoveCanvasImage();
+    EXPECT_NE(imagePattern->altErrorImage_, nullptr);
+    auto renderProp = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ImageResizableSlice imageResizableSlice {
+        .left = Dimension(1),
+    };
+    image.SetResizableSlice(imageResizableSlice);
+    EXPECT_TRUE(imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    imagePattern->LoadImageDataIfNeed();
+}
+
+/**
+ * @tc.name: ImagePatternAltError003
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImagePatternAltError003, TestSize.Level0)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageModelNG image;
+    image.SetAltError(ImageSourceInfo { RESOURCE_URL });
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    imageLayoutProperty->GetAltError();
+    image.SetAltError(ImageSourceInfo { RESOURCE_URL });
+    auto altImageSourceInfo = imageLayoutProperty->GetAltError().value_or(ImageSourceInfo(""));
+    image.SetAltError(ImageSourceInfo { ALT_SRC_URL });
+    imagePattern->LoadAltErrorImage(altImageSourceInfo);
+    imagePattern->altErrorImage_ = imagePattern->altErrorCtx_->MoveCanvasImage();
+    imagePattern->loadFailed_ = true;
+    EXPECT_EQ(frameNode->GetGeometryNode()->GetContent().get(), nullptr);
+}
 } // namespace OHOS::Ace::NG
