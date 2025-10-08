@@ -245,15 +245,18 @@ class DRAWABLE_FORCE_EXPORT DrawableDescriptorFactory {
 public:
     using DrawableType = DrawableDescriptor::DrawableType;
     static std::unique_ptr<DrawableDescriptor> Create(int32_t id, const SharedResourceManager& resourceMgr,
-        RState& state, DrawableType& drawableType, uint32_t density);
+        RState& state, DrawableType& drawableType, uint32_t density, bool foregroundOverBackground = false);
     static std::unique_ptr<DrawableDescriptor> Create(const char* name, const SharedResourceManager& resourceMgr,
-        RState& state, DrawableType& drawableType, uint32_t density);
+        RState& state, DrawableType& drawableType, uint32_t density, bool foregroundOverBackground = false);
     static std::unique_ptr<DrawableDescriptor> Create(DataInfo& foregroundInfo, DataInfo& backgroundInfo,
-        std::string& path, DrawableType& drawableType, const SharedResourceManager& resourceMgr);
+        std::string& path, DrawableType& drawableType, const SharedResourceManager& resourceMgr,
+        bool foregroundOverBackground = false);
     static std::unique_ptr<DrawableDescriptor> Create(std::tuple<int32_t, uint32_t, uint32_t>& drawableInfo,
-        const SharedResourceManager& resourceMgr, RState& state, DrawableType& drawableType);
+        const SharedResourceManager& resourceMgr, RState& state, DrawableType& drawableType,
+        bool foregroundOverBackground = false);
     static std::unique_ptr<DrawableDescriptor> Create(std::tuple<const char*, uint32_t, uint32_t>& drawableInfo,
-        const SharedResourceManager& resourceMgr, RState& state, DrawableType& drawableType);
+        const SharedResourceManager& resourceMgr, RState& state, DrawableType& drawableType,
+        bool foregroundOverBackground = false);
 };
 } // namespace Napi
 } // namespace Ace

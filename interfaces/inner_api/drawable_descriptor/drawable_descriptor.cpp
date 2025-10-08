@@ -869,8 +869,9 @@ std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
 }
 
 // drawable factory implement
-std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(
-    int32_t id, const SharedResourceManager& resourceMgr, RState& state, DrawableType& drawableType, uint32_t density)
+std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(int32_t id,
+    const SharedResourceManager& resourceMgr, RState& state, DrawableType& drawableType, uint32_t density,
+    bool foregroundOverBackground)
 {
     std::string type;
     size_t len;
@@ -885,7 +886,8 @@ std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(
         HILOGD("Create LayeredDrawableDescriptor object");
         drawableType = DrawableDescriptor::DrawableType::LAYERED;
         state = Global::Resource::SUCCESS;
-        return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
+        return std::make_unique<LayeredDrawableDescriptor>(
+            std::move(jsonBuf), len, resourceMgr, foregroundOverBackground);
     }
     if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp" ||
         type == "astc" || type == "sut") {
@@ -900,7 +902,8 @@ std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(
 }
 
 std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(const char* name,
-    const SharedResourceManager& resourceMgr, RState& state, DrawableType& drawableType, uint32_t density)
+    const SharedResourceManager& resourceMgr, RState& state, DrawableType& drawableType, uint32_t density,
+    bool foregroundOverBackground)
 {
     std::string type;
     size_t len;
@@ -915,7 +918,8 @@ std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(const char
         HILOGD("Create LayeredDrawableDescriptor object");
         drawableType = DrawableDescriptor::DrawableType::LAYERED;
         state = Global::Resource::SUCCESS;
-        return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
+        return std::make_unique<LayeredDrawableDescriptor>(
+            std::move(jsonBuf), len, resourceMgr, foregroundOverBackground);
     }
     if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp" ||
         type == "astc" || type == "sut") {
@@ -930,18 +934,19 @@ std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(const char
 }
 
 std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(DataInfo& foregroundInfo,
-    DataInfo& backgroundInfo, std::string& path, DrawableType& drawableType, const SharedResourceManager& resourceMgr)
+    DataInfo& backgroundInfo, std::string& path, DrawableType& drawableType, const SharedResourceManager& resourceMgr,
+    bool foregroundOverBackground)
 {
     UINT8 jsonBuf;
     drawableType = DrawableDescriptor::DrawableType::LAYERED;
     auto layeredDrawableDescriptor = std::make_unique<LayeredDrawableDescriptor>(
-        std::move(jsonBuf), 0, resourceMgr, path, 1, foregroundInfo, backgroundInfo);
+        std::move(jsonBuf), 0, resourceMgr, path, 1, foregroundInfo, backgroundInfo, foregroundOverBackground);
     return layeredDrawableDescriptor;
 }
 
 std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(
     std::tuple<int32_t, uint32_t, uint32_t>& drawableInfo, const SharedResourceManager& resourceMgr, RState& state,
-    DrawableType& drawableType)
+    DrawableType& drawableType, bool foregroundOverBackground)
 {
     int32_t resId = std::get<0>(drawableInfo);
     uint32_t iconType = std::get<1>(drawableInfo);
@@ -960,8 +965,8 @@ std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(
     if (type == "json") {
         HILOGD("Create LayeredDrawableDescriptor object");
         drawableType = DrawableDescriptor::DrawableType::LAYERED;
-        auto layeredDrawableDescriptor =
-            std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr, path, iconType, density);
+        auto layeredDrawableDescriptor = std::make_unique<LayeredDrawableDescriptor>(
+            std::move(jsonBuf), len, resourceMgr, path, iconType, density, foregroundOverBackground);
         return layeredDrawableDescriptor;
     }
     if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp" ||
@@ -977,7 +982,7 @@ std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(
 
 std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(
     std::tuple<const char*, uint32_t, uint32_t>& drawableInfo, const SharedResourceManager& resourceMgr, RState& state,
-    DrawableType& drawableType)
+    DrawableType& drawableType, bool foregroundOverBackground)
 {
     const char* name = std::get<0>(drawableInfo);
     uint32_t iconType = std::get<1>(drawableInfo);
@@ -996,8 +1001,8 @@ std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(
     if (type == "json") {
         HILOGD("Create LayeredDrawableDescriptor object");
         drawableType = DrawableDescriptor::DrawableType::LAYERED;
-        auto layeredDrawableDescriptor =
-            std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr, path, iconType, density);
+        auto layeredDrawableDescriptor = std::make_unique<LayeredDrawableDescriptor>(
+            std::move(jsonBuf), len, resourceMgr, path, iconType, density, foregroundOverBackground);
         return layeredDrawableDescriptor;
     }
     if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp" ||
