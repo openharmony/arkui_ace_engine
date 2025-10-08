@@ -64,6 +64,9 @@ const auto ATTRIBUTE_GRADIENT_HEIGHT_NAME = "gradientHeight";
 const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME = "enableHapticFeedback";
 const auto ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_NAME = "disableTextStyleAnimation";
 const auto ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME = "defaultTextStyle";
+const auto ATTRIBUTE_DEFAULT_TEXT_STYLE_MIN_FONT_SIZE_NAME = "minFontSize";
+const auto ATTRIBUTE_DEFAULT_TEXT_STYLE_MAX_FONT_SIZE_NAME = "maxFontSize";
+const auto ATTRIBUTE_DEFAULT_TEXT_STYLE_TEXT_OVERFLOW_NAME = "overflow";
 
 const auto RES_STR_1_ID = IntResourceId { 111, ResourceType::STRING };
 const auto RES_STR_2_ID = IntResourceId { 222, ResourceType::STRING };
@@ -71,6 +74,8 @@ const auto RES_STR_3_ID = IntResourceId { 333, ResourceType::STRING };
 const auto RES_PIC_1_ID = IntResourceId { 444, ResourceType::STRING };
 const auto RES_PIC_2_ID = IntResourceId { 555, ResourceType::STRING };
 const auto RES_PIC_3_ID = IntResourceId { 666, ResourceType::STRING };
+const auto RES_INT_1_ID = IntResourceId { 777, ResourceType::INTEGER };
+const auto RES_INT_VALUE = 28;
 const auto TEST_COMMENT_ID = 0;
 const auto RANGE_ID = 1;
 const auto VALUES_ID = 2;
@@ -153,6 +158,23 @@ typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
 const std::vector<OptLengthTestStep> FONT_SIZE_TEST_PLAN = {
     { Converter::ArkValue<Opt_Length>(AFLT32_POS), CHECK_AFLT32_POS },
     { Converter::ArkValue<Opt_Length>(AFLT32_NEG), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
+};
+
+typedef std::pair<Opt_Union_Number_String_Resource, std::string> NumberTestStep;
+const std::vector<NumberTestStep> MIN_MAX_FONT_SIZE_TEST_PLAN = {
+    { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(28), "28.00fp" },
+    { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("28px"), "28.00px" },
+    { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("28"), "28.00fp" },
+    { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("28%"), "28.00%" },
+    { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_INT_1_ID)), "28.00vp" },
+};
+
+typedef std::pair<Opt_TextOverflow, std::string> TextOverflowTestStep;
+std::vector<TextOverflowTestStep> TEXT_OVERFLOW_TEST_PLAN = {
+    { Converter::ArkValue<Opt_TextOverflow>(ARK_TEXT_OVERFLOW_NONE), "TextOverflow.None" },
+    { Converter::ArkValue<Opt_TextOverflow>(ARK_TEXT_OVERFLOW_CLIP), "TextOverflow.Clip" },
+    { Converter::ArkValue<Opt_TextOverflow>(ARK_TEXT_OVERFLOW_ELLIPSIS), "TextOverflow.Ellipsis" },
+    { Converter::ArkValue<Opt_TextOverflow>(ARK_TEXT_OVERFLOW_MARQUEE), "TextOverflow.Marquee" },
 };
 
 typedef std::pair<Opt_FontStyle, std::string> ArkFontStyleTestStep;
@@ -384,6 +406,7 @@ class TextPickerModifierTest : public ModifierTestBase<GENERATED_ArkUITextPicker
         AddResource(RES_PIC_1_ID, "pic1");
         AddResource(RES_PIC_2_ID, "pic2");
         AddResource(RES_PIC_3_ID, "pic3");
+        AddResource(RES_INT_1_ID, RES_INT_VALUE);
     }
 };
 
@@ -2285,6 +2308,57 @@ HWTEST_F(TextPickerModifierTest, DISABLED_defaultTextColor, TestSize.Level1)
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
         checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
         EXPECT_EQ(checkVal, expectVal);
+    }
+}
+
+/**
+ * @tc.name: defaultTextStyleMinMaxFontSize
+ * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, defaultTextStyleMinMaxFontSize, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
+    Ark_TextPickerTextStyle pickerStyle;
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto size : MIN_MAX_FONT_SIZE_TEST_PLAN) {
+        pickerStyle.minFontSize = size.first;
+        pickerStyle.maxFontSize = size.first;
+        auto style = Converter::ArkValue<Opt_TextPickerTextStyle>(pickerStyle);
+        modifier_->setDefaultTextStyle(node_, &style);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        auto minSize = GetAttrValue<std::string>(styleObject, ATTRIBUTE_DEFAULT_TEXT_STYLE_MIN_FONT_SIZE_NAME);
+        auto maxSize = GetAttrValue<std::string>(styleObject, ATTRIBUTE_DEFAULT_TEXT_STYLE_MAX_FONT_SIZE_NAME);
+        EXPECT_EQ(minSize, size.second);
+        EXPECT_EQ(maxSize, size.second);
+    }
+}
+
+/**
+ * @tc.name: defaultTextStyleTextOverflow
+ * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, defaultTextStyleTextOverflow, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
+    Ark_TextPickerTextStyle pickerStyle;
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto overflow : TEXT_OVERFLOW_TEST_PLAN) {
+        pickerStyle.overflow = overflow.first;
+        auto style = Converter::ArkValue<Opt_TextPickerTextStyle>(pickerStyle);
+        modifier_->setDefaultTextStyle(node_, &style);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        auto strRes = GetAttrValue<std::string>(styleObject, ATTRIBUTE_DEFAULT_TEXT_STYLE_TEXT_OVERFLOW_NAME);
+        EXPECT_EQ(strRes, overflow.second);
     }
 }
 
