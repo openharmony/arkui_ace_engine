@@ -1157,6 +1157,7 @@ void SearchModelNG::CreateDivider(const RefPtr<SearchNode>& parentNode, bool has
     if (hasDividerNode) {
         return;
     }
+    FREE_NODE_CHECK(parentNode, CreateDivider, parentNode, hasDividerNode);
     auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetDividerId();
     auto dividerNode = FrameNode::GetOrCreateFrameNode(

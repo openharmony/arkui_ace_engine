@@ -47,6 +47,9 @@ public:
     void OnAreaChangedInner() override;
     void SetKeyboardAreaChange(bool keyboardAvoidance = false);
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
 
     void SetKeyboardOption(bool keyboardAvoidance)
     {

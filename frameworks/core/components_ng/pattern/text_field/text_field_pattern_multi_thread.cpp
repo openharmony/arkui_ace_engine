@@ -115,7 +115,6 @@ void TextFieldPattern::OnAttachToMainTreeMultiThread()
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
-        auto host = GetHost();
         fontManager->AddFontNodeNG(host);
     }
     auto onTextSelectorChange = [weak = WeakClaim(this)]() {
@@ -250,6 +249,10 @@ void TextFieldPattern::MultiThreadDelayedExecution()
         setCustomKeyboardWithNodeMultiThread_ = false;
         SetCustomKeyboardWithNodeMultiThreadAction(setCustomKeyboardWithNodeMultiThreadValue_);
         setCustomKeyboardWithNodeMultiThreadValue_.Reset();
+    } else if (setCustomKeyboardMultiThread_) {
+        setCustomKeyboardMultiThread_ = false;
+        SetCustomKeyboardMultiThreadAction(std::move(setCustomKeyboardMultiThreadValue_));
+        setCustomKeyboardMultiThreadValue_ = nullptr;
     }
     if (moveCaretToContentRectMultiThread_) {
         moveCaretToContentRectMultiThread_ = false;
@@ -586,9 +589,49 @@ void TextFieldPattern::SetShowKeyBoardOnFocusMultiThread(bool value)
     setShowKeyBoardOnFocusMultiThreadValue_ = value;
 }
 
+FocusPattern TextFieldPattern::GetFocusPatternMultiThread() const
+{
+    FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
+    focusPattern.SetIsFocusActiveWhenFocused(true);
+    return focusPattern;
+}
+
+void TextFieldPattern::SetCustomKeyboardMultiThread(const std::function<void()>&& keyboardBuilder)
+{
+    setCustomKeyboardMultiThread_ = true;
+    setCustomKeyboardWithNodeMultiThread_ = false;
+    setCustomKeyboardMultiThreadValue_ = keyboardBuilder;
+}
+
+void TextFieldPattern::SetCustomKeyboardMultiThreadAction(const std::function<void()>&& keyboardBuilder)
+{
+    if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+        // close customKeyboard and request system keyboard
+        CloseCustomKeyboard();
+        customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+        RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
+        StartTwinkling();
+        return;
+    }
+    if (!customKeyboardBuilder_ && keyboardBuilder) {
+        // close system keyboard and request custom keyboard
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        if (imeShown_) {
+            CloseKeyboard(true);
+            customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+            RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
+            StartTwinkling();
+            return;
+        }
+#endif
+    }
+    customKeyboardBuilder_ = keyboardBuilder;
+}
+
 void TextFieldPattern::SetCustomKeyboardWithNodeMultiThread(const RefPtr<UINode>& keyboardBuilder)
 {
     setCustomKeyboardWithNodeMultiThread_ = true;
+    setCustomKeyboardMultiThread_ = false;
     setCustomKeyboardWithNodeMultiThreadValue_ = keyboardBuilder;
 }
 
@@ -639,22 +682,30 @@ void TextFieldPattern::ProcessDefaultStyleAndBehaviorsMultiThread()
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
     auto renderContext = frameNode->GetRenderContext();
-    renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
-    auto radius = textFieldTheme->GetBorderRadius();
-    textfieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
-    BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
-    renderContext->UpdateBorderRadius(borderRadius);
+    if (!textfieldPaintProperty->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    }
+    if (!textfieldPaintProperty->HasCaretColorFlagByUser()) {
+        textfieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+    }
+    if (!textfieldPaintProperty->HasBorderRadiusFlagByUser()) {
+        auto radius = textFieldTheme->GetBorderRadius();
+        BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
+        renderContext->UpdateBorderRadius(borderRadius);
+    }
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->AddTextFieldDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
-    PaddingProperty paddings;
-    auto themePadding = textFieldTheme->GetPadding();
-    paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
-    paddings.bottom = NG::CalcLength(themePadding.Bottom().ConvertToPx());
-    paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
-    paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
-    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
-    layoutProperty->UpdatePadding(paddings);
+    if (textfieldPaintProperty->HasPaddingByUser()) {
+        PaddingProperty paddings;
+        auto themePadding = textFieldTheme->GetPadding();
+        paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
+        paddings.bottom = NG::CalcLength(themePadding.Bottom().ConvertToPx());
+        paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
+        paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
+        auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdatePadding(paddings);
+    }
     if (frameNode->IsFirstBuilding()) {
         auto draggable = pipeline->GetDraggable<TextFieldTheme>();
         frameNode->SetDraggable(draggable);

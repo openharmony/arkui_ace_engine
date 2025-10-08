@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
 
 #include "base/utils/utf_helper.h"
+#include "base/utils/multi_thread.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/common/font_manager.h"
 #include "core/common/udmf/udmf_client.h"
@@ -23,9 +24,10 @@
 namespace OHOS::Ace::NG {
 void HyperlinkPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
@@ -35,10 +37,54 @@ void HyperlinkPattern::OnAttachToFrameNode()
 
 void HyperlinkPattern::OnDetachFromFrameNode(FrameNode* node)
 {
+    THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode, node);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = WeakClaim(node);
     pipeline->RemoveFontNodeNG(frameNode);
+}
+
+void HyperlinkPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
+void HyperlinkPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+}
+
+void HyperlinkPattern::OnAttachToFrameNodeMultiThread()
+{
+    // nothing, thread unsafe
+}
+
+void HyperlinkPattern::OnDetachFromFrameNodeMultiThread(FrameNode* frameNode)
+{
+    // nothing, thread unsafe
+}
+
+void HyperlinkPattern::OnAttachToMainTreeMultiThread()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        fontManager->AddFontNodeNG(host);
+    }
+}
+
+void HyperlinkPattern::OnDetachFromMainTreeMultiThread()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveFontNodeNG(host);
 }
 
 void HyperlinkPattern::EnableDrag()

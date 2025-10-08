@@ -26,9 +26,6 @@ namespace ContainerSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    if (MultiThreadBuildManager::IsParallelScope()) {
-        LOGF_ABORT("Unsupported UI components ContainerSpan used in ParallelizeUI");
-    }
     auto spanNode = SpanModelStatic::CreateContainerSpanNode(id);
     CHECK_NULL_RETURN(spanNode, nullptr);
     spanNode->IncRefCount();

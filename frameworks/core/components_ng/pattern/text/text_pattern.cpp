@@ -4983,6 +4983,26 @@ void TextPattern::DumpSpanItem()
     }
 }
 
+void TextPattern::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetTextDetectConfig, textDetectConfig);
+    CHECK_NULL_VOID(GetDataDetectorAdapter());
+    dataDetectorAdapter_->SetTextDetectTypes(textDetectConfig.types);
+    dataDetectorAdapter_->onResult_ = std::move(textDetectConfig.onResult);
+    dataDetectorAdapter_->entityColor_ = textDetectConfig.entityColor;
+    dataDetectorAdapter_->entityDecorationType_ = textDetectConfig.entityDecorationType;
+    dataDetectorAdapter_->entityDecorationColor_ = textDetectConfig.entityDecorationColor;
+    dataDetectorAdapter_->entityDecorationStyle_ = textDetectConfig.entityDecorationStyle;
+    auto textDetectConfigCache = dataDetectorAdapter_->textDetectConfigStr_;
+    dataDetectorAdapter_->enablePreviewMenu_ = textDetectConfig.enablePreviewMenu;
+    dataDetectorAdapter_->textDetectConfigStr_ = textDetectConfig.ToString();
+    if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
+        MarkAISpanStyleChanged();
+    }
+}
+
 void TextPattern::DumpTextStyleInfo()
 {
     auto& dumpLog = DumpLog::GetInstance();

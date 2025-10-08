@@ -210,6 +210,8 @@ public:
     void UpdateBorderResource() override;
     void ProcessTextFieldDefaultStyleAndBehaviors();
     void ProcessTextFieldDefaultStyleAndBehaviorsMultiThread();
+    void ProcessDividerDefaultStyleAndBehaviors();
+    void ProcessDividerDefaultStyleAndBehaviorsMultiThread();
 
 private:
     void OnModifyDone() override;
@@ -371,6 +373,7 @@ private:
 
     // ----- multi thread state variables -----
     bool processTextFieldDefaultStyleAndBehaviorsMultiThread_ = false;
+    bool processDividerDefaultStyleAndBehaviorsMultiThread_ = false;
     // ----- multi thread state variables end -----
 };
 

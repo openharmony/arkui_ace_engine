@@ -174,8 +174,22 @@ void TextPattern::MultiThreadDelayedExecution()
     }
     if (setTextSelectionMultiThread_) {
         setTextSelectionMultiThread_ = false;
-        SetTextSelectionMultiThreadAction(
-            setTextSelectionMultiThreadValue0_, setTextSelectionMultiThreadValue1_);
+        SetTextSelectionMultiThreadAction(setTextSelectionMultiThreadValue0_, setTextSelectionMultiThreadValue1_);
+    }
+    if (textDetectConfigMultiThread_) {
+        textDetectConfigMultiThread_ = false;
+        dataDetectorAdapter_->SetTextDetectTypes(textDetectConfigMultiThreadValue_.types);
+        dataDetectorAdapter_->onResult_ = std::move(textDetectConfigMultiThreadValue_.onResult);
+        dataDetectorAdapter_->entityColor_ = textDetectConfigMultiThreadValue_.entityColor;
+        dataDetectorAdapter_->entityDecorationType_ = textDetectConfigMultiThreadValue_.entityDecorationType;
+        dataDetectorAdapter_->entityDecorationColor_ = textDetectConfigMultiThreadValue_.entityDecorationColor;
+        dataDetectorAdapter_->entityDecorationStyle_ = textDetectConfigMultiThreadValue_.entityDecorationStyle;
+        auto textDetectConfigCache = dataDetectorAdapter_->textDetectConfigStr_;
+        dataDetectorAdapter_->enablePreviewMenu_ = textDetectConfigMultiThreadValue_.enablePreviewMenu;
+        dataDetectorAdapter_->textDetectConfigStr_ = textDetectConfigMultiThreadValue_.ToString();
+        if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
+            MarkAISpanStyleChanged();
+        }
     }
 }
 
@@ -190,6 +204,15 @@ void TextPattern::SetTextDetectEnableMultiThread(bool enable)
     }
     textDetectEnable_ = enable;
     setTextDetectEnableMultiThread_ = true;
+}
+
+void TextPattern::SetTextDetectConfigMultiThread(const TextDetectConfig& textDetectConfig)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(GetDataDetectorAdapter());
+    textDetectConfigMultiThread_ = true;
+    textDetectConfigMultiThreadValue_ = textDetectConfig;
 }
 
 void TextPattern::SetStyledStringMultiThread(const RefPtr<SpanString>& value, bool closeSelectOverlay)

@@ -43,6 +43,7 @@ const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
 const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
     "Button__", "Divider__" };
+constexpr int32_t DIVIDER_INDEX = 5;
 } // namespace
 
 void SearchModelNG::CreateTextFieldMultiThread(const RefPtr<SearchNode>& parentNode,
@@ -77,10 +78,6 @@ void SearchModelNG::CreateTextFieldMultiThread(const RefPtr<SearchNode>& parentN
     }
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
-    pattern->InitSurfaceChangedCallback();
-    pattern->RegisterWindowSizeCallback();
-    pattern->SetTextFadeoutCapacity(true);
-    pattern->InitSurfacePositionChangedCallback();
     TextFieldUpdateContextMultiThread(frameNode);
     if (!hasTextFieldNode) {
         auto pattern = parentNode->GetPattern<SearchPattern>();
@@ -88,7 +85,6 @@ void SearchModelNG::CreateTextFieldMultiThread(const RefPtr<SearchNode>& parentN
         pattern->SetTextFieldNode(frameNode);
         frameNode->MountToParent(parentNode);
     }
-    
     auto searchPattern = parentNode->GetPattern<SearchPattern>();
     CHECK_NULL_VOID(searchPattern);
     searchPattern->ProcessTextFieldDefaultStyleAndBehaviors();
@@ -111,6 +107,24 @@ void SearchModelNG::TextFieldUpdateContextMultiThread(const RefPtr<FrameNode>& f
     textFieldPaintProperty->UpdateBorderRadiusFlagByUser(borderRadius);
     pattern->SetEnableTouchAndHoverEffect(true);
     textFieldPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
+}
+
+void SearchModelNG::CreateDividerMultiThread(const RefPtr<SearchNode>& parentNode, bool hasDividerNode)
+{
+    if (hasDividerNode) {
+        return;
+    }
+    auto parentInspector = parentNode->GetInspectorIdValue("");
+    auto nodeId = parentNode->GetDividerId();
+    auto dividerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    CHECK_NULL_VOID(dividerNode);
+    dividerNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[DIVIDER_INDEX] + parentInspector);
+    dividerNode->MountToParent(parentNode);
+    dividerNode->MarkModifyDone();
+    auto searchPattern = parentNode->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(searchPattern);
+    searchPattern->ProcessDividerDefaultStyleAndBehaviors();
 }
 
 } // namespace OHOS::Ace::NG

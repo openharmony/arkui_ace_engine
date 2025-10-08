@@ -382,6 +382,9 @@ private:
     void SetTextRectWillChange();
     void SetDefaultPadding();
     void SetBackBorderRadius();
+
+    static void SetOnWillInsertValueEventMultiThread(FrameNode* frameNode,
+        std::function<bool(const InsertValueInfo&)>&& func);
 };
 
 } // namespace OHOS::Ace::NG
