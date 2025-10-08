@@ -164,14 +164,14 @@ std::optional<SizeF> RatingLayoutAlgorithm::LayoutPolicyIsFixAtIdelSize(const La
         } else {
             height = std::min(defaultHeight, parentHeight);
         }
-        width = height * static_cast<float>(stars);
+        width = defaultWidth;
     } else if (layoutPolicy->IsHeightFix()) {
         if (contentConstraint.selfIdealSize.Width()) {
             width = contentConstraint.selfIdealSize.Width().value();
         } else {
             width = std::min(defaultWidth, parentWidth);
         }
-        height = width / static_cast<float>(stars);
+        height = defaultHeight;
     }
     return SizeF(width, height);
 }
