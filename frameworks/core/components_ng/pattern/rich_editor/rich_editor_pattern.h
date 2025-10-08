@@ -890,6 +890,11 @@ public:
         return paragraphs_.GetParagraphs();
     }
 
+    RichEditorParagraphManager& GetRichEditorParagraphManager()
+    {
+        return paragraphs_;
+    }
+
     std::optional<SelectHandleInfo> GetFirstHandleInfo() const
     {
         return selectOverlay_->GetFirstHandleInfo();

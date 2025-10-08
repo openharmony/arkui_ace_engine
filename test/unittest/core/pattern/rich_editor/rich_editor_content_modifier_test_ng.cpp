@@ -443,11 +443,9 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintLeadingMarginSpan001, TestSize.Le
     /**
      * @tc.steps: step2. test PaintLeadingMarginSpan without drawableLeadingMargin
      */
-    size_t lineCount = 0;
     auto offset = richEditorPattern->GetTextRect().GetOffset();
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
-    testContentModifier->PaintLeadingMarginSpan(paragraphInfo, offset, lineCount, context);
-    EXPECT_EQ(lineCount, 2);
+    testContentModifier->pManager_->PaintLeadingMarginSpan(paragraphInfo, offset, context);
 
     /**
      * @tc.steps: step3. set paragraphStyle
@@ -459,15 +457,20 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintLeadingMarginSpan001, TestSize.Le
     /**
      * @tc.steps: step4. test PaintLeadingMarginSpan
      */
-    testContentModifier->PaintLeadingMarginSpan(paragraphInfo, offset, lineCount, context);
-    EXPECT_EQ(lineCount, 2);
+    testContentModifier->pManager_->PaintLeadingMarginSpan(paragraphInfo, offset, context);
 
     DrawableLeadingMargin leadingMargin;
     leadingMargin.onDraw_ = [](NG::DrawingContext& context, NG::LeadingMarginSpanOptions options) {};
     paragraphStyle.drawableLeadingMargin = std::make_optional<NG::DrawableLeadingMargin>(leadingMargin);
     paragraphInfo.paragraphStyle = paragraphStyle;
-    testContentModifier->PaintLeadingMarginSpan(paragraphInfo, offset, lineCount, context);
-    EXPECT_EQ(lineCount, 4);
+    testContentModifier->pManager_->PaintLeadingMarginSpan(paragraphInfo, offset, context);
+
+    EXPECT_CALL(*paragraph, empty()).WillRepeatedly(Return(true));
+    testContentModifier->pManager_->PaintLeadingMarginSpan(paragraphInfo, offset, context);
+
+    paragraphInfo.topLineIndex = 0;
+    paragraphInfo.bottomLineIndex = 1;
+    testContentModifier->pManager_->PaintLeadingMarginSpan(paragraphInfo, offset, context);
 }
 
 /**

@@ -3117,6 +3117,9 @@ HWTEST_F(TextTestFiveNg, PaintLeadingMarginSpan001, TestSize.Level1)
     paraStyle.drawableLeadingMargin = std::make_optional<NG::DrawableLeadingMargin>(leadingMargin);
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .paragraphStyle = paraStyle, .start = 0, .end = 1 });
     textContentModifier->PaintLeadingMarginSpan(pattern, drawingContext, pManager);
+
+    EXPECT_CALL(*paragraph, empty()).WillRepeatedly(Return(true));
+    textContentModifier->PaintLeadingMarginSpan(pattern, drawingContext, pManager);
 }
 
 /**

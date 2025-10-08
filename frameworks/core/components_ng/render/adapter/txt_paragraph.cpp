@@ -797,6 +797,11 @@ void TxtParagraph::HandleLeadingMargin(CaretMetricsF& result, LeadingMargin lead
     result.offset.SetX(leadingMargin.size.Width().ConvertToPx());
 }
 
+void TxtParagraph::HandleLeadingMarginSpan(CaretMetricsF& result, DrawableLeadingMargin drawableLeadingMargin)
+{
+    result.offset.SetX(drawableLeadingMargin.size.Width().ConvertToPx());
+}
+
 Rosen::TextRectHeightStyle TxtParagraph::GetHeightStyle(bool needLineHighest)
 {
     return Rosen::TextRectHeightStyle::TIGHT;
@@ -835,7 +840,9 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result, bool needLineHigh
     if (textAlign != TextAlign::START) {
         HandleTextAlign(result, textAlign);
     } else {
-        if (paraStyle_.leadingMargin) {
+        if (paraStyle_.drawableLeadingMargin) {
+            HandleLeadingMarginSpan(result, *(paraStyle_.drawableLeadingMargin));
+        } else if (paraStyle_.leadingMargin) {
             HandleLeadingMargin(result, *(paraStyle_.leadingMargin));
         }
         result.offset.SetX(result.offset.GetX() + paraStyle_.indent.ConvertToPx());

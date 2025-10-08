@@ -333,6 +333,42 @@ void ParagraphManager::GetPaintRegion(RectF& boundsRect, float x, float y) const
     }
 }
 
+void ParagraphManager::PaintLeadingMarginSpan(const ParagraphManager::ParagraphInfo& paragraphInfo,
+    const OffsetT<float>& offset, DrawingContext& drawingContext)
+{
+    const auto& drawableLeadingMargin = paragraphInfo.paragraphStyle.drawableLeadingMargin;
+    CHECK_NULL_VOID(drawableLeadingMargin.has_value());
+    if (SystemProperties::GetTextTraceEnabled()) {
+        ACE_TEXT_SCOPED_TRACE("ParagraphManager::PaintLeadingMarginSpan");
+    }
+    CHECK_NULL_VOID(paragraphInfo.paragraph);
+    const auto& leadingMarginOnDraw = drawableLeadingMargin.value().onDraw_;
+    CHECK_NULL_VOID(leadingMarginOnDraw);
+    CHECK_NULL_VOID(paragraphInfo.topLineIndex >= 0 && paragraphInfo.topLineIndex <= paragraphInfo.bottomLineIndex);
+    for (size_t i = paragraphInfo.topLineIndex; i <= paragraphInfo.bottomLineIndex; i++) {
+        auto lineMetrics = GetLineMetrics(i);
+        if (paragraphInfo.paragraph->empty()) {
+            CaretMetricsF caretMetricsF;
+            paragraphInfo.paragraph->HandleCaretWhenEmpty(caretMetricsF, true);
+            lineMetrics.x = caretMetricsF.offset.GetX();
+            lineMetrics.height = caretMetricsF.height;
+        }
+        LeadingMarginSpanOptions options;
+        options.x = paragraphInfo.paragraphStyle.direction != TextDirection::RTL ?
+            lineMetrics.x + offset.GetX() : lineMetrics.x + offset.GetX() + lineMetrics.width;
+        options.direction = paragraphInfo.paragraphStyle.direction;
+        options.top = lineMetrics.y + offset.GetY();
+        options.baseline = lineMetrics.baseline + offset.GetY();
+        options.bottom = options.top + lineMetrics.height;
+        options.start = lineMetrics.startIndex;
+        options.end = lineMetrics.endIndex;
+        if (i == paragraphInfo.topLineIndex) {
+            options.first = true;
+        }
+        leadingMarginOnDraw(drawingContext, options);
+    }
+}
+
 std::vector<ParagraphManager::TextBox> ParagraphManager::GetRectsForRange(
     int32_t start, int32_t end, RectHeightStyle heightStyle, RectWidthStyle widthStyle)
 {
@@ -644,6 +680,8 @@ bool ParagraphManager::IsSelectLineHeadAndUseLeadingMargin(int32_t start) const
         if (auto paragraph = curParagraph.paragraph; curParagraph.start == start && paragraph) {
             auto leadingMargin = paragraph->GetParagraphStyle().leadingMargin;
             CHECK_EQUAL_RETURN(leadingMargin && leadingMargin.value().IsValid(), true, true);
+            auto drawableLeadingMargin = paragraph->GetParagraphStyle().drawableLeadingMargin;
+            CHECK_EQUAL_RETURN(drawableLeadingMargin && drawableLeadingMargin.value().IsValid(), true, true);
         }
         auto next = std::next(iter);
         if (next != paragraphs_.end()) {
@@ -651,6 +689,8 @@ bool ParagraphManager::IsSelectLineHeadAndUseLeadingMargin(int32_t start) const
             if (auto paragraph = nextParagraph.paragraph; nextParagraph.start == start + 1) {
                 auto leadingMargin = paragraph->GetParagraphStyle().leadingMargin;
                 CHECK_EQUAL_RETURN(leadingMargin && leadingMargin.value().IsValid(), true, true);
+                auto drawableLeadingMargin = paragraph->GetParagraphStyle().drawableLeadingMargin;
+                CHECK_EQUAL_RETURN(drawableLeadingMargin && drawableLeadingMargin.value().IsValid(), true, true);
             }
         }
     }
