@@ -908,13 +908,13 @@ HWTEST_F(ViewAbstractTestNg, SetOverlayBuilder003, TestSize.Level1)
     std::optional<Alignment> align;
     std::optional<Dimension> offsetX;
     std::optional<Dimension> offsetY;
-    auto state = static_cast<VisualState>(INDEX);
+
     ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
     bool result = ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
     ASSERT_TRUE(result);
-    ifElseNode1 = AceType::MakeRefPtr<IfElseNode>(1);
+    auto ifElseNode1 = AceType::MakeRefPtr<IfElseNode>(1);
     ASSERT_NE(ifElseNode1, nullptr);
-    ifElseNode2 = AceType::MakeRefPtr<IfElseNode>(2);
+    auto ifElseNode2 = AceType::MakeRefPtr<IfElseNode>(2);
     ASSERT_NE(ifElseNode2, nullptr);
     ifElseNode1->AddChild(ifElseNode2);
     
