@@ -53,7 +53,7 @@ const int32_t ROW = 3;
 static constexpr double STROKE_MITERLIMIT_FIRST = -0.1f;
 static constexpr double STROKE_MITERLIMIT_SECONG = 0.0f;
 static constexpr double STROKE_MITERLIMIT_THIRD = 4.0f;
-SizeF sizeF(80.0f, 20.0f);
+SizeF g_sizeF(80.0f, 20.0f);
 std::vector<float> MESH = { 1, 2, 4, 6, 4, 2, 1, 3, 5, 1, 3, 5, 6, 3, 2, 2, 4, 5, 5, 3, 2, 2, 2, 4 };
 } // namespace
 
@@ -174,7 +174,7 @@ HWTEST_F(ShapeContainerPatternTestNg, ViewPortTransform001, TestSize.Level1)
     auto pattern03 = frameNode03->GetPattern<ShapeContainerPattern>();
     auto paintProperty03 = frameNode03->GetPaintProperty<ShapeContainerPaintProperty>();
     auto geometryNode = frameNode03->GetGeometryNode();
-    geometryNode->SetContentSize(sizeF);
+    geometryNode->SetContentSize(g_sizeF);
     // add frameNode child
     auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto rowNode = FrameNode::GetOrCreateFrameNode(
