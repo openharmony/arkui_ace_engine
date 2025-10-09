@@ -60,7 +60,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest002, TestSize.Level0)
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
     frameNode->MarkModifyDone();
     /**
-     * Creating a colorfilter through a graphical interface
+     * Creating a colorfilter through a graphical interface.
      * @tc.steps: step3. set drawingcolorFilter.
      */
     auto imagePattern = frameNode->GetPattern<ImagePattern>();

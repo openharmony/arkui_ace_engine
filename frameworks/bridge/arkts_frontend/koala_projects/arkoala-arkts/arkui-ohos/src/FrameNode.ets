@@ -1259,7 +1259,7 @@ export namespace typeNode {
         createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNodeDefault,
         createXComponentNodeWithOptions, createXComponentNodeWithNativeParameters, createSwiperNode, createBadgeNode,
         createQRCodeNode, createProgressNode, createLoadingProgressNode, createTextClockNode, createTextTimerNode,
-        createImageNode, createButtonNode, createCheckboxNode, createCheckboxGroupNode, createRadioNode, createRatingNode,
+        createButtonNode, createCheckboxNode, createCheckboxGroupNode, createRadioNode, createRatingNode,
         createSelectNode, createSliderNode, createToggleNode
     }
 
@@ -1577,7 +1577,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createImageNode(context: UIContext, type: 'Image'): ImageFrameNode {
+    function createImageNode(context: UIContext): ImageFrameNode {
         return new ImageFrameNode(context, 'Image', (node: FrameNode, type: ModifierType): ArkImageNode => {
             let arknode = new ArkImageNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
