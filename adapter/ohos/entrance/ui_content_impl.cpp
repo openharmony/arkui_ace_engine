@@ -73,6 +73,7 @@
 #endif
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "interfaces/napi/kits/observer/ui_observer.h"
 
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #include "adapter/ohos/entrance/ace_application_info.h"
@@ -3776,11 +3777,35 @@ void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceI
     pipelineContext->OnVirtualKeyboardAreaChange(keyboardRect, textFieldPositionY, textFieldHeight);
 }
 
+void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange()
+{
+    WidthLayoutBreakPoint layoutWidthBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
+    HeightLayoutBreakPoint layoutHeightBreakpoints = SystemProperties::GetHeightLayoutBreakpoints();
+    double density = PipelineBase::GetCurrentDensity();
+    auto container = Platform::AceContainer::GetContainer(GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto window = pipelineContext->GetWindow();
+    CHECK_NULL_VOID(window);
+
+    NG::WindowSizeBreakpoint breakpoint;
+    breakpoint.widthBreakpoint = window->GetWidthBreakpoint(layoutWidthBreakpoints);
+    breakpoint.heightBreakpoint = window->GetHeightBreakpoint(layoutHeightBreakpoints);
+
+    if (breakpoint.widthBreakpoint != lastBreakpoint_.widthBreakpoint ||
+        breakpoint.heightBreakpoint != lastBreakpoint_.heightBreakpoint) {
+        NG::UIObserverHandler::GetInstance().NotifyWinSizeLayoutBreakpointChangeFunc(GetInstanceId(), breakpoint);
+        lastBreakpoint_ = breakpoint;
+    }
+}
+
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
     const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
+    ProcessWindowSizeLayoutBreakPointChange();
     if (KeyFrameActionPolicy(config, reason, rsTransaction, avoidAreas)) {
         return;
     }

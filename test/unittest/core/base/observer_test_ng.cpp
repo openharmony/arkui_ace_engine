@@ -536,4 +536,25 @@ HWTEST_F(ObserverTestNg, ObserverTestNg019, TestSize.Level1)
     UIObserverHandler::GetInstance().NotifyTextChangeEvent(info);
     UIObserverHandler::GetInstance().SetHandleTextChangeEventFunc(std::move(handleFunc));
 }
+
+/**
+ * @tc.name: ObserverTestNg020
+ * @tc.desc: Test the NotifyWinSizeLayoutBreakpointChangeFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg020, TestSize.Level1)
+{
+    int32_t instanceId = 1;
+    static bool callbackTriggered = false;
+    callbackTriggered = false;
+    WindowSizeBreakpoint breakpoint { WidthBreakpoint::WIDTH_XS, HeightBreakpoint::HEIGHT_SM };
+    UIObserverHandler::GetInstance().NotifyWinSizeLayoutBreakpointChangeFunc(instanceId, breakpoint);
+    EXPECT_FALSE(callbackTriggered);
+    UIObserverHandler::GetInstance().SetWinSizeLayoutBreakpointChangeFunc(
+        [](int32_t instanceId, const WindowSizeBreakpoint& breakpoint) {
+            callbackTriggered = true;
+        });
+    UIObserverHandler::GetInstance().NotifyWinSizeLayoutBreakpointChangeFunc(instanceId, breakpoint);
+    EXPECT_TRUE(callbackTriggered);
+}
 }

@@ -103,6 +103,7 @@ constexpr char AFTER_PAN_START[] = "afterPanStart";
 constexpr char AFTER_PAN_END[] = "afterPanEnd";
 constexpr char NODE_RENDER_STATE[] = "nodeRenderState";
 constexpr char TEXT_CHANGE[] = "textChange";
+constexpr char WIN_SIZE_LAYOUT_BREAKPOINT[] = "windowSizeLayoutBreakpointChange";
 constexpr char NODE_RENDER_STATE_REGISTER_ERR_MSG[] =
     "The count of nodes monitoring render state is over the limitation";
 
@@ -378,6 +379,7 @@ ObserverProcess::ObserverProcess()
         { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageRegister },
         { DENSITY_UPDATE, &ObserverProcess::ProcessDensityRegister },
+        { WIN_SIZE_LAYOUT_BREAKPOINT, &ObserverProcess::ProcessWinSizeLayoutBreakpointRegister },
         { LAYOUT_DONE, &ObserverProcess::ProcessLayoutDoneRegister },
         { DRAW_COMMAND_SEND, &ObserverProcess::ProcessDrawCommandSendRegister },
         { NAVDESTINATION_SWITCH, &ObserverProcess::ProcessNavDestinationSwitchRegister },
@@ -398,6 +400,7 @@ ObserverProcess::ObserverProcess()
         { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventUnRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageUnRegister },
         { DENSITY_UPDATE, &ObserverProcess::ProcessDensityUnRegister },
+        { WIN_SIZE_LAYOUT_BREAKPOINT, &ObserverProcess::ProcessWinSizeLayoutBreakpointUnRegister },
         { LAYOUT_DONE, &ObserverProcess::ProcessLayoutDoneUnRegister },
         { DRAW_COMMAND_SEND, &ObserverProcess::ProcessDrawCommandSendUnRegister},
         { NAVDESTINATION_SWITCH, &ObserverProcess::ProcessNavDestinationSwitchUnRegister },
@@ -740,6 +743,43 @@ napi_value ObserverProcess::ProcessDensityUnRegister(napi_env env, napi_callback
             auto uiContextInstanceId = GetUIContextInstanceId(env, context);
             UIObserver::UnRegisterDensityCallback(uiContextInstanceId, argv[PARAM_INDEX_TWO]);
         }
+    }
+
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessWinSizeLayoutBreakpointRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (!isWinSizeLayoutBreakpointChangeSetted_) {
+        NG::UIObserverHandler::GetInstance().SetWinSizeLayoutBreakpointChangeFunc(
+            &UIObserver::HandleWinSizeLayoutBreakpointChange);
+        isWinSizeLayoutBreakpointChangeSetted_ = true;
+    }
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::RegisterWinSizeLayoutBreakpointCallback(instanceId, listener);
+    }
+
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessWinSizeLayoutBreakpointUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (argc == PARAM_SIZE_ONE) {
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::UnRegisterWinSizeLayoutBreakpointCallback(instanceId, nullptr);
+    }
+
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        int32_t instanceId = ContainerScope::CurrentId();
+        UIObserver::UnRegisterWinSizeLayoutBreakpointCallback(instanceId, argv[PARAM_INDEX_ONE]);
     }
 
     napi_value result = nullptr;
