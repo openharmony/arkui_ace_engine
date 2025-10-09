@@ -302,7 +302,7 @@ class VariableUtilV2 {
   Real @Trace decorator function is in v2_decorators.ts
 */
 const Trace_Internal = (target: Object, propertyKey: string): void => {
-  return trackInternal(target, propertyKey);
+    return trackInternal(target, propertyKey);
 };
 
 /*
@@ -310,7 +310,7 @@ const Trace_Internal = (target: Object, propertyKey: string): void => {
   Real @ObservedV2 decorator function is in v2_decorators.ts
 */
 function ObservedV2_Internal<T extends ConstructorV2>(BaseClass: T): T {
-  return observedV2Internal<T>(BaseClass);
+    return observedV2Internal<T>(BaseClass);
 }
 
 /*
