@@ -218,6 +218,7 @@ class ProviderConsumerUtilV2 {
         return undefined
       }
   }
+  
  /**
  * Connects a consumer property of a view (`consumeView`) to a provider property of another view (`provideView`).
  * This function establishes a link between the consumer and provider, allowing the consumer to access and update
@@ -233,6 +234,7 @@ class ProviderConsumerUtilV2 {
   public static connectConsumer2Provider<T>(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): T {
     const weakView = new WeakRef<ViewV2>(provideView);
     const provideViewName = provideView.constructor?.name;
+
     Reflect.defineProperty(consumeView, consumeVarName, {
       get() {
         let view = weakView.deref();
@@ -341,7 +343,6 @@ const observedClass =  class extends BaseClass {
     }
     AsyncAddComputedV2.addComputed(this, BaseClass.name);
     AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
-    WeakRefPool.asyncRegisterToFinalizationRegistry(this);
   }
 };
 Object.defineProperty(observedClass, 'name', { value: BaseClass.name });
