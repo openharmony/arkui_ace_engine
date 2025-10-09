@@ -3434,9 +3434,15 @@ class ChildrenMainSize {
     }
     this.defaultMainSize = childDefaultSize;
     this.sizeArray = [];
-    this.changeFlag = true;
-    // -1: represent newly created.
-    this.changeArray = [ { start: -1 } ];
+    this.nativeMainSize = undefined;
+  }
+
+  setNativeMainSize(value) {
+    this.nativeMainSize = value;
+  }
+
+  getNativeMainSize() {
+    return this.nativeMainSize;
   }
 
   set childDefaultSize(value) {
@@ -3444,6 +3450,9 @@ class ChildrenMainSize {
       throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
     }
     this.defaultMainSize = value;
+    if (this.nativeMainSize) {
+      this.nativeMainSize.updateDefaultMainSize(value);
+    }
   }
 
   get childDefaultSize() {
@@ -3460,10 +3469,14 @@ class ChildrenMainSize {
     let deleteCountValue = deleteCount && !(this.isInvalid(deleteCount)) ? Math.trunc(deleteCount) : 0;
     if (paramCount === 1) {
       this.sizeArray.splice(startValue);
-      this.changeArray.push({ start: startValue });
+      if (this.nativeMainSize) {
+        this.nativeMainSize.onStateChanged({ start: startValue });
+      }
     } else if (paramCount === 2) {
       this.sizeArray.splice(startValue, deleteCountValue);
-      this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
+      if (this.nativeMainSize) {
+        this.nativeMainSize.onStateChanged({ start: startValue, deleteCount: deleteCountValue });
+      }
     } else if (paramCount === 3) {
       let childrenSizeLength = childrenSize ? childrenSize.length : 0;
       if (childrenSizeLength === 0) {
@@ -3479,9 +3492,10 @@ class ChildrenMainSize {
         this.sizeArray.push(-1);
       }
       this.sizeArray.splice(startValue, deleteCountValue, ...childrenSize);
-      this.changeArray.push({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
+      if (this.nativeMainSize) {
+        this.nativeMainSize.onStateChanged({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
+      }
     }
-    this.changeFlag = !this.changeFlag;
   }
 
   update(index, childSize) {
@@ -3496,8 +3510,9 @@ class ChildrenMainSize {
       this.sizeArray.push(-1);
     }
     this.sizeArray.splice(startValue, 1, childSize);
-    this.changeArray.push({ start: startValue, deleteCount: 1, childrenSize: [childSize] });
-    this.changeFlag = !this.changeFlag;
+    if (this.nativeMainSize) {
+      this.nativeMainSize.onStateChanged({ start: startValue, deleteCount: 1, childrenSize: [childSize] });
+    }
   }
 
   isInvalid(input) {
