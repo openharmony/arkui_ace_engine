@@ -283,11 +283,7 @@ void TextFieldModelStatic::SetCopyOption(FrameNode* frameNode,  const std::optio
 
 void TextFieldModelStatic::SetShowPassword(FrameNode* frameNode, const std::optional<bool>& valueOpt)
 {
-    if (valueOpt) {
-        TextFieldModelNG::SetShowPassword(frameNode, valueOpt.value());
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordText, frameNode);
-    }
+    TextFieldModelNG::SetShowPassword(frameNode, valueOpt.value_or(false));
 }
 
 void TextFieldModelStatic::SetTextAlign(FrameNode* frameNode, const std::optional<TextAlign>& valueOpt)
@@ -346,6 +342,15 @@ void TextFieldModelStatic::SetCaretStyle(FrameNode* frameNode, const std::option
 {
     if (valueOpt.has_value()) {
         TextFieldModelNG::SetCaretStyle(frameNode, valueOpt.value());
+        return;
+    }
+    ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, frameNode);
+}
+
+void TextFieldModelStatic::SetCaretWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value.value(), frameNode);
         return;
     }
     ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, frameNode);
