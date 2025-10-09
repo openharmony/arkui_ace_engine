@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier } from "#handwritten"
+import { AttributeModifier, ContentModifier, hookTextTimerContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkTextTimerPeer, TextTimerConfiguration, TextTimerAttribute } from "./component/textTimer"
@@ -53,6 +53,8 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
     _onTimer_0_0value?: ((utc: number,elapsedTime: number) => void) | undefined
     _textShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textShadow_0_0value?: ShadowOptions | Array<ShadowOptions> | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<TextTimerConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkTextTimerPeer;
@@ -200,6 +202,24 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookTextTimerContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<TextTimerConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookTextTimerContentModifier(peer, (undefined as ContentModifier<TextTimerConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: TextTimerModifier): void {
         super.mergeModifier(modifier)
@@ -307,6 +327,19 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<TextTimerConfiguration> | undefined));
+                }
+            }
+        }
     }
     format(value: string | undefined): this {
         if (((this._format_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._format_0_0value) !== (value)))
@@ -393,6 +426,17 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         } else
         {
             this._textShadow_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<TextTimerConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

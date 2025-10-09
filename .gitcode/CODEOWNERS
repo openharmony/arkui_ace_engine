@@ -2393,6 +2393,8 @@ frameworks/core/components_ng/base/view_abstract.h @ArkUI_Event
 frameworks/core/components_ng/base/view_abstract_model.h @ArkUI_Event
 frameworks/core/components_ng/base/view_abstract_model_ng.cpp @ArkUI_Event
 frameworks/core/components_ng/base/view_abstract_model_ng.h @ArkUI_Event
+frameworks/core/components_ng/base/view_abstract_model_static.cpp @ArkUI_Event
+frameworks/core/components_ng/base/view_abstract_model_static.h @ArkUI_Event
 frameworks/core/components_ng/base/view_advanced_register.cpp @arkuicodepulse
 frameworks/core/components_ng/base/view_advanced_register.h @arkuicodepulse
 frameworks/core/components_ng/base/view_full_update_model.h @arkui_statemgmt
@@ -3182,18 +3184,24 @@ frameworks/core/interfaces/native/implementation/dismiss_popup_action_accessor.c
 frameworks/core/interfaces/native/implementation/dismiss_popup_action_peer.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/divider_modifier.cpp @ArkUI_Layout
 frameworks/core/interfaces/native/implementation/folder_stack_modifier.cpp @ArkUI_Layout
+frameworks/core/interfaces/native/implementation/grid_item_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/grid_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/grid_row_modifier.cpp @ArkUI_Layout
 frameworks/core/interfaces/native/implementation/level_order_accessor.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/level_order_peer.h @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/list_item_group_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/list_item_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/mouse_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/mouse_event_peer.h @ArkUI_Event
 frameworks/core/interfaces/native/implementation/prompt_action_accessor_peer.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/prompt_action_extender_accessor.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/refresh_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/relative_container_modifier.cpp @ArkUI_Layout
 frameworks/core/interfaces/native/implementation/row_modifier.cpp @ArkUI_Layout
 frameworks/core/interfaces/native/implementation/row_split_modifier.cpp @ArkUI_Layout
+frameworks/core/interfaces/native/implementation/scroll_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/scrollable_common_method_modifier.cpp @arkuiscroll
 
 frameworks/core/interfaces/native/implementation/button_modifier.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/checkbox_group_modifier.cpp @arkuipopupwindow_all
@@ -3292,6 +3300,7 @@ frameworks/core/interfaces/native/ani/waterflow_ani_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/water_flow_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/implementation/water_flow_modifier.cpp @arkuiscroll
 
+frameworks/core/interfaces/native/implementation/select_modifier.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/text_input_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/search_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_area_modifier.cpp @huawei_g_five
@@ -3455,6 +3464,7 @@ test/mock/core/animation/mock_implicit_animation.cpp @arkuiscroll
 
 test/unittest/core/accessibility/ @ArkUI_ability_group
 test/unittest/core/animation/ @arkuicodepulse
+test/unittest/core/base/view_abstract_test_static.cpp @ArkUI_Event
 test/unittest/core/common/ace_engine/ @arkui_framework_xnode
 test/unittest/core/common/asset/ @arkui_framework_xnode
 test/unittest/core/common/clipboard/ @huawei_g_five

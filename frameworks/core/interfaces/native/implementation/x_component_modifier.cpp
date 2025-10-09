@@ -82,9 +82,9 @@ void SetXComponentOptionsImpl(Ark_NativePointer node,
             CHECK_NULL_VOID(peerImpl);
             bool isUpdated = XComponentModelStatic::SetXComponentController(frameNode, peerImpl->controller);
             CHECK_EQUAL_VOID(isUpdated, false);
-            XComponentModelNG::SetControllerOnCreated(frameNode, peerImpl->GetOnSurfaceCreatedEvent());
-            XComponentModelNG::SetControllerOnChanged(frameNode, peerImpl->GetOnSurfaceChangedEvent());
-            XComponentModelNG::SetControllerOnDestroyed(frameNode, peerImpl->GetOnSurfaceDestroyedEvent());
+            XComponentModelNG::SetControllerOnCreated(frameNode, std::move(peerImpl->onSurfaceCreatedEvent));
+            XComponentModelNG::SetControllerOnChanged(frameNode, std::move(peerImpl->onSurfaceChangedEvent));
+            XComponentModelNG::SetControllerOnDestroyed(frameNode, std::move(peerImpl->onSurfaceDestroyedEvent));
         },
         [frameNode](const Ark_NativeXComponentParameters& src) {
             XComponentType type = ConvertXComponentType(src.type);

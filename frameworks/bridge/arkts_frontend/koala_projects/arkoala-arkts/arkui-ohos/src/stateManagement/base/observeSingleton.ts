@@ -36,14 +36,14 @@ enum NotifyMutableStateMode {
 export class ObserveSingleton implements IObserve {
     public static readonly instance: ObserveSingleton = new ObserveSingleton();
     public static readonly InvalidRenderId: RenderIdType | undefined = undefined;
-    public static readonly RenderingComponent: number = 0;
-    public static readonly RenderingComponentV1: number = 1;
-    public static readonly RenderingComponentV2: number = 2;
-    public static readonly RenderingMonitor: number = 3;
-    public static readonly RenderingComputed: number = 4;
-    public static readonly RenderingPersistentStorage: number = 5;
+    public static readonly RenderingComponent: int = 0;
+    public static readonly RenderingComponentV1: int = 1;
+    public static readonly RenderingComponentV2: int = 2;
+    public static readonly RenderingMonitor: int = 3;
+    public static readonly RenderingComputed: int = 4;
+    public static readonly RenderingPersistentStorage: int = 5;
 
-    public _renderingComponent: number = ObserveSingleton.RenderingComponent;
+    public _renderingComponent: int = ObserveSingleton.RenderingComponent;
     private mutateMutableStateMode_: NotifyMutableStateMode = NotifyMutableStateMode.normal;
     public renderingComponentRef?: ITrackedDecoratorRef;
     private monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
@@ -55,10 +55,10 @@ export class ObserveSingleton implements IObserve {
     );
     private reverseBindingRefsToSet_ = new Map<WeakRef<ITrackedDecoratorRef>, Set<WeakRef<IBindingSource>>>();
 
-    get renderingComponent(): number {
+    get renderingComponent(): int {
         return this._renderingComponent;
     }
-    set renderingComponent(value: number) {
+    set renderingComponent(value: int) {
         this._renderingComponent = value;
     }
 

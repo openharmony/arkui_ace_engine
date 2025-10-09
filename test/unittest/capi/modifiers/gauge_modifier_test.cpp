@@ -1095,7 +1095,7 @@ privacySensitivePrivacySensitiveIsPrivacySensitiveModeValidValues = {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, DISABLED_setPrivacySensitiveTestValidValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, setPrivacySensitiveTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

@@ -389,6 +389,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/transfer/TransferUtil.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/UIContextTransfer.ets",
   "arkui-preprocessed/arkui/hooks/NavigationOpsHandWritten.ets",
+  "arkui-preprocessed/arkui/hooks/XComponentOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/content_modifiers/ContentModifierHooks.ets",
   "arkui-preprocessed/arkui/hooks/index.ets",
   "arkui-preprocessed/arkui/hooks/modifiers/ArkCommonModifier.ets",
