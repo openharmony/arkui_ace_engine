@@ -145,6 +145,16 @@ extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_AnimatedDrawableDescriptor_GetTotal
     return duration;
 }
 
+extern "C" ACE_FORCE_EXPORT uint32_t OHOS_ACE_AnimatedDrawableDescriptor_GetFrameCount(void* object)
+{
+    auto* drawable = reinterpret_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    if (drawable) {
+        return drawable->GetFrameCount();
+    } else {
+        return 0;
+    }
+}
+
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_AnimatedDrawableDescriptor_SetDurations(
     void* object, const std::vector<int32_t>& durations)
 {
@@ -168,7 +178,10 @@ extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_AnimatedDrawableDescriptor_GetDurat
         return ERROR_CODE_PARAM_INVALID;
     }
     for (size_t i = 0; i < frameVec.size(); i++) {
-        durations[i] = frameVec[i];
+        if (frameVec[i] < 0) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        durations[i] = static_cast<uint32_t>(frameVec[i]);
     }
     return ERROR_CODE_NO_ERROR;
 }
