@@ -334,21 +334,24 @@ bool FolderStackLayoutAlgorithm::IsIntoFolderStack(
     CHECK_NULL_RETURN(displayInfo, false);
     bool isFullWindow = IsFullWindow(frameSize, foldStackLayoutProperty, layoutWrapper);
     bool isFoldable = OHOS::Ace::SystemProperties::IsBigFoldProduct();
+    bool isSmallFoldable = OHOS::Ace::SystemProperties::IsSmallFoldProduct();
     auto foldStatus = displayInfo->GetFoldStatus();
     auto rotation = displayInfo->GetRotation();
     auto isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
+    auto isPortrait = rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
     TAG_LOGI(AceLogTag::ACE_FOLDER_STACK,
         "folderStack state isFullWindow:%{public}d, isFoldable:%{public}d, "
         "foldStatus:%{public}d, isLandscape:%{public}d",
         isFullWindow, isFoldable, foldStatus, isLandscape);
-    return isFullWindow && isFoldable && foldStatus == FoldStatus::HALF_FOLD && isLandscape;
+    return isFullWindow && foldStatus == FoldStatus::HALF_FOLD && ((isLandscape && isFoldable) || (isPortrait && isSmallFoldable));
 }
-
+ 
 void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrapper)
 {
     auto pattern = layoutWrapper->GetHostNode()->GetPattern<FolderStackPattern>();
     CHECK_NULL_VOID(pattern);
-    if (isIntoFolderStack_ == pattern->IsInHoverMode() || !OHOS::Ace::SystemProperties::IsBigFoldProduct()) {
+    if (isIntoFolderStack_ == pattern->IsInHoverMode() ||
+        (!OHOS::Ace::SystemProperties::IsBigFoldProduct() && !OHOS::Ace::SystemProperties::IsSmallFoldProduct())) {
         return;
     }
     auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();

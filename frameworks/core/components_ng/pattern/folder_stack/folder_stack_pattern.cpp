@@ -35,7 +35,7 @@ void FolderStackPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    CHECK_NULL_VOID(OHOS::Ace::SystemProperties::IsBigFoldProduct());
+    CHECK_NULL_VOID(OHOS::Ace::SystemProperties::IsBigFoldProduct() || OHOS::Ace::SystemProperties::IsSmallFoldProduct());
     auto callbackId = pipeline->RegisterFoldStatusChangedCallback([weak = WeakClaim(this)](FoldStatus folderStatus) {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -147,9 +147,7 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
         }
         auto windowManager = pipeline->GetWindowManager();
         auto windowMode = windowManager->GetWindowMode();
-        auto rotation = displayInfo->GetRotation();
-        auto isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
-        if (currentFoldStatus == displayInfo->GetFoldStatus() && isLandscape &&
+        if (currentFoldStatus == displayInfo->GetFoldStatus() &&
             windowMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
