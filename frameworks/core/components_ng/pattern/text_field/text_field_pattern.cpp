@@ -7189,12 +7189,14 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
 
 void TextFieldPattern::InitTheme()
 {
+    CHECK_NULL_VOID(!textFieldInitTheme_);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto context = tmpHost->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
     textFieldTheme_ = theme;
+    textFieldInitTheme_ = true;
     // for normal app add version protection, enable keyboard as default start from API 10 or higher
     if (context->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
         if (theme) {
