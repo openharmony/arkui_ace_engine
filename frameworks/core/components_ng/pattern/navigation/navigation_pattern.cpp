@@ -5733,7 +5733,7 @@ void NavigationPattern::RemoveRedundantPrimaryNavDestination()
     }
 }
 
-bool NavigationPattern::IsHomeDestinationVisible()
+bool NavigationPattern::IsHomeDestinationOrNavBarVisible()
 {
     auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(host, false);
