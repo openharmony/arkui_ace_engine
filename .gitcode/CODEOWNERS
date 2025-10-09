@@ -261,6 +261,7 @@ examples/ImageAnimator/ @arkui001
 examples/Picker/ @arkui001
 examples/PickDialog/ @arkui001
 examples/ScrollableComponentTest/ @arkuiscroll
+examples/ScrollableComponentStatic/ @arkuiscroll
 examples/UIExtension @ArkUI_ability_group
 
 [Frameworks Base]
