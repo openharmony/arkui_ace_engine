@@ -27,19 +27,18 @@ void DestroyPeerImpl(Ark_DecorationStyle peer)
 }
 Ark_DecorationStyle ConstructImpl(const Ark_DecorationStyleInterface* value)
 {
-    // auto peer = PeerUtils::CreatePeer<DecorationStylePeer>();
-    // if (value) {
-    //     auto aceTypeOpt = Converter::OptConvert<TextDecoration>(value->type);
-    //     auto aceColorOpt = Converter::OptConvert<Color>(value->color);
-    //     auto aceStyleOpt = Converter::OptConvert<TextDecorationStyle>(value->style);
-    //     peer->span = AceType::MakeRefPtr<DecorationSpan>(
-    //         std::vector<TextDecoration>({aceTypeOpt.value_or(TextDecoration::NONE)}),
-    //         aceColorOpt, aceStyleOpt, std::optional<TextDecorationOptions>());
-    // } else {
-    //     peer->span = AceType::MakeRefPtr<DecorationSpan>();
-    // }
-    // return peer;
-    return {};
+    auto peer = PeerUtils::CreatePeer<DecorationStylePeer>();
+    if (value) {
+        auto aceTypeOpt = Converter::OptConvert<TextDecoration>(value->type);
+        auto aceColorOpt = Converter::OptConvert<Color>(value->color);
+        auto aceStyleOpt = Converter::OptConvert<TextDecorationStyle>(value->style);
+        peer->span = AceType::MakeRefPtr<DecorationSpan>(
+            std::vector<TextDecoration>({aceTypeOpt.value_or(TextDecoration::NONE)}),
+            aceColorOpt, aceStyleOpt, std::optional<TextDecorationOptions>(), nullptr);
+    } else {
+        peer->span = AceType::MakeRefPtr<DecorationSpan>();
+    }
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
