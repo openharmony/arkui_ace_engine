@@ -74,6 +74,7 @@ void ImageUtils::PostToBg(
 {
     CHECK_NULL_VOID(task);
 #if defined(PREVIEW) || defined(CROSS_PLATFORM)
+    ContainerScope scope(containerId);
     ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::BACKGROUND, name.c_str(), priorityType);
 #else
     ImageTaskPool::GetInstance()->PostTask(
