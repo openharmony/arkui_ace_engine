@@ -3943,10 +3943,6 @@ void SetIdImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto id = Converter::OptConvertPtr<std::string>(value);
-    if ((!id) || id->empty()) {
-        // Implement Reset value
-        return;
-    }
     ViewAbstract::SetInspectorId(frameNode, *id);
 }
 void SetGeometryTransition0Impl(Ark_NativePointer node,
