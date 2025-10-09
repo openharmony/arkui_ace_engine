@@ -3570,6 +3570,7 @@ test/unittest/core/base/inspector_test_ng.cpp @ArkUI_ability_group
 test/unittest/core/base/observer_test_ng.cpp @arkui_framework_resource
 test/unittest/core/base/simplified_inspector_test_ng.cpp @arkui_framework_xnode
 test/unittest/interfaces/ @arkui_framework_xnode
+test/unittest/interfaces/drawable_descriptor_test.cpp @arkui001
 test/unittest/interfaces/ui_input_event_test.cpp @ArkUI_Event
 test/unittest/interfaces/ace_ui_input_event/ @ArkUI_Event
 test/unittest/interfaces/ace_gesture/ @ArkUI_Event
