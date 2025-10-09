@@ -92,10 +92,6 @@ void SetStartPointImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<ShapePoint>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
     LineModelNG::StartPoint(frameNode, *convValue);
 }
 void SetEndPointImpl(Ark_NativePointer node,
@@ -104,10 +100,6 @@ void SetEndPointImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<ShapePoint>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
     LineModelNG::EndPoint(frameNode, *convValue);
 }
 } // LineAttributeModifier
