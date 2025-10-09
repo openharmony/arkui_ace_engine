@@ -226,6 +226,36 @@ class AppStorageV2Impl extends StorageHelper {
       this.oldTypeValues_.delete(key);
     }
   }
+
+  public hasKey(key: string): boolean {
+    return this.memorizedValues_.has(key);
+  }
+
+  public getValue(key: string): any {
+      const obj = this.memorizedValues_.get(key);
+      return obj;
+  }
+
+  public removeByInterop<T>(keyOrType: string | TypeConstructorWithArgs<T>): boolean {
+    if (keyOrType === null || keyOrType === undefined) {
+      stateMgmtConsole.applicationWarn(AppStorageV2Impl.NULL_OR_UNDEFINED_KEY);
+      return false;
+    }
+
+    const key: string = this.getKeyOrTypeName(keyOrType);
+    if (!this.isKeyValid(key)) {
+      return false;
+    }
+
+    const isDeleted: boolean = this.memorizedValues_.delete(key);
+    if (!isDeleted) {
+      stateMgmtConsole.applicationWarn(AppStorageV2Impl.DELETE_NOT_EXIST_KEY);
+      return false;
+    } else {
+      this.oldTypeValues_.delete(key);
+      return true
+    }
+  }
 }
 
 class PersistenceV2Impl extends StorageHelper {
