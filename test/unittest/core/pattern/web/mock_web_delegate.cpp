@@ -1432,6 +1432,7 @@ void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double bord
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
 void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
 void WebDelegate::OnStatusBarClick() {}
+bool WebDelegate::IsQuickMenuShow() { return false; }
 void WebDelegate::WebScrollStopFling() {}
 bool WebDelegate::IsShowHandle() { return false; }
 bool WebDelegate::IsPcMode()
