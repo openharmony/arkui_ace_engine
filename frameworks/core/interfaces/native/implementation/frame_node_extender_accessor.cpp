@@ -781,6 +781,13 @@ Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
     ret->node = peer->node;
     return ret;
 }
+Ark_NativePointer GetRenderNodeImpl(Ark_NativePointer peer)
+{
+    auto nodePeer = reinterpret_cast<FrameNodePeer*>(peer);
+    // auto currentNode = FrameNodePeer::GetFrameNodeByPeer(nodePeer);
+    // CHECK_NULL_RETURN(currentNode, nullptr);
+    return nodePeer->GetRenderNodePeer();
+}
 } // FrameNodeExtenderAccessor
 const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
 {
@@ -840,6 +847,7 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::CreateByRawPtrImpl,
         FrameNodeExtenderAccessor::UnWrapRawPtrImpl,
         FrameNodeExtenderAccessor::GetCommonEventImpl,
+        FrameNodeExtenderAccessor::GetRenderNodeImpl,
     };
     return &FrameNodeExtenderAccessorImpl;
 }

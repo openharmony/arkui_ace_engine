@@ -4040,6 +4040,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getCommonEvent(peer: KPointer): KPointer
     @ani.unsafe.Direct
+    native static _FrameNodeExtender_getRenderNode(peer: KPointer): KPointer
+    @ani.unsafe.Direct
     native static _FrictionMotion_construct(friction: number, position: number, velocity: number): KPointer
     @ani.unsafe.Direct
     native static _FrictionMotion_getFinalizer(): KPointer
@@ -4960,6 +4962,84 @@ export class ArkUIGeneratedNativeModule {
     native static _RenderingContextSettings_getAntialias(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _RenderingContextSettings_setAntialias(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_constructorRenderNode(nodeId: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_getDestroy(): KPointer
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_destroyPeer(peer: KPointer): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setBackgroundColor(peer: KPointer, backgroundColor: number): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setClipToFrame(peer: KPointer, clipToFrame: KInt): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setOpacity(peer: KPointer, opacity: number): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setSize(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, unitValue: KInt): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setPosition(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, unitValue: KInt): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setPivot(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setScale(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setTranslation(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setRotation(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, unitValue: KInt): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setTransform(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setShadowColor(peer: KPointer, shadowColor: number): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setShadowOffset(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, unitValue: KInt): void
+    @ani.unsafe.Quick
+    native static _RenderNodeExtender_setLabel(peer: KPointer, label: KStringPtr): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setShadowAlpha(peer: KPointer, shadowAlpha: number): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setShadowElevation(peer: KPointer, shadowElevation: number): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setShadowRadius(peer: KPointer, shadowRadius: number): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setBorderStyle(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setBorderWidth(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, unitValue: KInt): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setBorderColor(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setBorderRadius(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, unitValue: KInt): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setMarkNodeGroup(peer: KPointer, markNodeGroup: KInt): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setRectMask(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setCircleMask(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setRoundRectMask(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setOvalMask(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setPath(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, fillColor: number, strokeColor: number, strokeWidth: number): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setRectClip(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setCircleClip(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setRoundRectClip(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setOvalClip(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setPathClip(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_appendChild(peer: KPointer, node: KPointer): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_insertChildAfter(peer: KPointer, child: KPointer, sibling: KPointer): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_removeChild(peer: KPointer, node: KPointer): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_clearChildren(peer: KPointer): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_invalidate(peer: KPointer): void
     @ani.unsafe.Quick
     native static _RenderServiceNode_getNodeId(nodeId: KStringPtr): int32
     @ani.unsafe.Direct
