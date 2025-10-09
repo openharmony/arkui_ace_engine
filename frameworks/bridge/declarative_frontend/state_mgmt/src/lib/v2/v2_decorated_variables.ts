@@ -36,7 +36,7 @@ class VariableUtilV2 {
       stateMgmtConsole.propertyAccess(`initParam '@Param ${attrName}' - setting backing store`);
       target[storeProp] = newValue;
       ObserveV2.getObserve().addRef(target, attrName);
-      }
+    }
 
     /**
      * setReadOnlyAttr - helper function used to update @Param
@@ -297,26 +297,26 @@ class VariableUtilV2 {
     }
   }
 
-  /*
+/*
   Internal decorator for @Trace without usingV2ObservedTrack call.
   Real @Trace decorator function is in v2_decorators.ts
-  */
-  const Trace_Internal = (target: Object, propertyKey: string): void => {
-    return trackInternal(target, propertyKey);
-  };
+*/
+const Trace_Internal = (target: Object, propertyKey: string): void => {
+  return trackInternal(target, propertyKey);
+};
 
-  /*
+/*
   Internal decorator for @ObservedV2 without usingV2ObservedTrack call.
   Real @ObservedV2 decorator function is in v2_decorators.ts
-  */
-  function ObservedV2_Internal<T extends ConstructorV2>(BaseClass: T): T {
-    return observedV2Internal<T>(BaseClass);
-  }
+*/
+function ObservedV2_Internal<T extends ConstructorV2>(BaseClass: T): T {
+  return observedV2Internal<T>(BaseClass);
+}
 
-  /*
+/*
   @ObservedV2 decorator function uses this in v2_decorators.ts
-  */
-  function observedV2Internal<T extends ConstructorV2>(BaseClass: T): T {
+*/
+function observedV2Internal<T extends ConstructorV2>(BaseClass: T): T {
 
   // prevent @Track inside @ObservedV2 class
   if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
@@ -347,4 +347,4 @@ class VariableUtilV2 {
   };
   Object.defineProperty(observedClass, 'name', { value: BaseClass.name });
   return observedClass;
-  }
+}
