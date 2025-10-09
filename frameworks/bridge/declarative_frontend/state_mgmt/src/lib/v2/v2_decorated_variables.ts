@@ -136,7 +136,6 @@ class ProviderConsumerUtilV2 {
         return buildNodeProvider;
       }
     }
-    
 
     while (checkView) {
       const meta = checkView.constructor?.prototype[ObserveV2.V2_DECO_META];
@@ -219,7 +218,6 @@ class ProviderConsumerUtilV2 {
         return undefined
       }
   }
-  
  /**
  * Connects a consumer property of a view (`consumeView`) to a provider property of another view (`provideView`).
  * This function establishes a link between the consumer and provider, allowing the consumer to access and update
@@ -343,6 +341,7 @@ const observedClass =  class extends BaseClass {
     }
     AsyncAddComputedV2.addComputed(this, BaseClass.name);
     AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
+    WeakRefPool.asyncRegisterToFinalizationRegistry(this);
   }
 };
 Object.defineProperty(observedClass, 'name', { value: BaseClass.name });
