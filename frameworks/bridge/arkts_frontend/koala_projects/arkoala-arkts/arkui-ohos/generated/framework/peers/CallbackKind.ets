@@ -34,7 +34,6 @@ export enum CallbackKind {
     Kind_Callback_DrawContext_CustomSpanDrawInfo_Void = -2106022018,
     Kind_Callback_DrawContext_Void = 38085488,
     Kind_Callback_EditableTextChangeValue_Boolean = -602545319,
-    Kind_Callback_EnterKeyType_Void = -1802605016,
     Kind_Callback_ErrorInformation_Void = 1187455675,
     Kind_Callback_Extender_OnFinish = -733525640,
     Kind_Callback_Extender_OnProgress = 1264236374,

@@ -3161,6 +3161,12 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typ
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkScrollNode.ets @arkuiscroll
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkScrollableNode.ets @arkuiscroll
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkWaterFlowNode.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkSymbolGlyphNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkTextInputNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkTextAreaNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkTextNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkSearchNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkMarqueeNode.ets @huawei_g_five
 frameworks/core/interfaces/native/implementation/action_sheet_accessor.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/alert_dialog_accessor.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/column_modifier.cpp @ArkUI_Layout
@@ -3589,6 +3595,7 @@ frameworks/bridge/arkts_frontend/koala_mirror/ @arkui-idlize
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/ @arkui-idlize
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/generated/ @arkui-idlize
 frameworks/core/interfaces/native/generated/ @arkui-idlize
+frameworks/core/interfaces/native/utility/generated/ @arkui-idlize
 
 [render-control]
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/forEach.ets @arkuieco3

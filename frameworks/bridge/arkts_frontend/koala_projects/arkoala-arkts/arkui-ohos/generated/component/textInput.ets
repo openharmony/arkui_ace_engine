@@ -743,24 +743,28 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setLineBreakStrategy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCancelButtonAttribute(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): void {
+    setCancelButton0Attribute(value: CancelButtonOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof CancelButtonOptions) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as CancelButtonOptions
-                CancelButtonOptions_serializer.write(thisSerializer, valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof CancelButtonSymbolOptions) {
-                thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as CancelButtonSymbolOptions
-                CancelButtonSymbolOptions_serializer.write(thisSerializer, valueTmpValueForIdx1)
-            }
+            CancelButtonOptions_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._TextInputAttribute_setCancelButton(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextInputAttribute_setCancelButton0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setCancelButton1Attribute(value: CancelButtonSymbolOptions | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            CancelButtonSymbolOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setCancelButton1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSelectAllAttribute(value: boolean | undefined): void {
@@ -1433,7 +1437,10 @@ export interface TextInputAttribute extends CommonMethod {
     lineBreakStrategy(value: LineBreakStrategy | undefined): this {
         throw new Error("Unimplemented method lineBreakStrategy")
     }
-    cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
+    cancelButton(value: CancelButtonOptions | undefined): this {
+        throw new Error("Unimplemented method cancelButton")
+    }
+    cancelButton(value: CancelButtonSymbolOptions | undefined): this {
         throw new Error("Unimplemented method cancelButton")
     }
     selectAll(value: boolean | undefined): this {
@@ -1571,7 +1578,7 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     maxLines_value?: int32 | undefined
     wordBreak_value?: WordBreak | undefined
     lineBreakStrategy_value?: LineBreakStrategy | undefined
-    cancelButton_value?: CancelButtonOptions | CancelButtonSymbolOptions | undefined
+    cancelButton_value?: CancelButtonOptions | undefined
     selectAll_value?: boolean | undefined
     minFontSize_value?: double | string | Resource | undefined
     maxFontSize_value?: double | string | Resource | undefined
@@ -1723,7 +1730,10 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     lineBreakStrategy(value: LineBreakStrategy | undefined): this {
         return this
     }
-    cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
+    cancelButton(value: CancelButtonOptions | undefined): this {
+        return this
+    }
+    cancelButton(value: CancelButtonSymbolOptions | undefined): this {
         return this
     }
     selectAll(value: boolean | undefined): this {
@@ -2156,10 +2166,18 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
+    public cancelButton(value: CancelButtonOptions | undefined): this {
         if (this.checkPriority("cancelButton")) {
-            const value_casted = value as (CancelButtonOptions | CancelButtonSymbolOptions | undefined)
-            this.getPeer()?.setCancelButtonAttribute(value_casted)
+            const value_casted = value as (CancelButtonOptions | undefined)
+            this.getPeer()?.setCancelButton0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public cancelButton(value: CancelButtonSymbolOptions | undefined): this {
+        if (this.checkPriority("cancelButton")) {
+            const value_casted = value as (CancelButtonSymbolOptions | undefined)
+            this.getPeer()?.setCancelButton1Attribute(value_casted)
             return this
         }
         return this

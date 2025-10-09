@@ -216,51 +216,7 @@ void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     TextFieldModelStatic::SetSelectedBackgroundColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
-void SetOnSubmitImpl(Ark_NativePointer node,
-                     const Opt_Union_Callback_EnterKeyType_Void_TextAreaSubmitCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnionPtr(value,
-        [frameNode](const Callback_EnterKeyType_Void& src) {
-            auto onSubmit = [arkCallback = CallbackHelper(src)](int32_t enterKey, NG::TextFieldCommonEvent& event) {
-                auto enterKeyType = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(enterKey));
-                arkCallback.InvokeSync(enterKeyType);
-            };
-            TextFieldModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
-        },
-        [frameNode](const TextAreaSubmitCallback& src) {
-            auto weakNode = AceType::WeakClaim(frameNode);
-            auto onSubmit = [arkCallback = CallbackHelper(src), node = weakNode](
-                    const int32_t& keyType, NG::TextFieldCommonEvent& info) {
-                PipelineContext::SetCallBackNode(node);
-                auto enterKeyType = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(keyType));
-                const auto event = Converter::ArkSubmitEventSync(info);
-                auto eventArkValue = Converter::ArkValue<Opt_SubmitEvent, Ark_SubmitEvent>(event.ArkValue());
-                arkCallback.InvokeSync(enterKeyType, eventArkValue);
-            };
-            TextFieldModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
-        },
-        [] {});
-}
-void OnSubmit0Impl(Ark_NativePointer node,
-                   const Opt_Callback_EnterKeyType_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // Implement Reset value
-        return;
-    }
-    auto onSubmit = [arkCallback = CallbackHelper(*optValue)](int32_t enterKey, NG::TextFieldCommonEvent& event) {
-        auto enterKeyType = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(enterKey));
-        arkCallback.InvokeSync(enterKeyType);
-    };
-    TextFieldModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
-}
-void OnSubmit1Impl(Ark_NativePointer node,
-                   const Opt_TextAreaSubmitCallback* value)
+void SetOnSubmitImpl(Ark_NativePointer node, const Opt_TextAreaSubmitCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -271,20 +271,12 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setEnterKeyType(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnSubmitAttribute(value: ((value0: string) => void) | SearchSubmitCallback | undefined): void {
+    setOnSubmitAttribute(value: SearchSubmitCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof ((value0: string) => void)) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as ((value0: string) => void)
-                thisSerializer.holdAndWriteCallback(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof SearchSubmitCallback) {
-                thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as SearchSubmitCallback
-                thisSerializer.holdAndWriteCallback(valueTmpValueForIdx1)
-            }
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -880,7 +872,7 @@ export interface SearchAttribute extends CommonMethod {
     enterKeyType(value: EnterKeyType | undefined): this {
         throw new Error("Unimplemented method enterKeyType")
     }
-    onSubmit(value: ((value0: string) => void) | SearchSubmitCallback | undefined): this {
+    onSubmit(value: SearchSubmitCallback | undefined): this {
         throw new Error("Unimplemented method onSubmit")
     }
     onChange(value: EditableTextOnChangeCallback | undefined): this {
@@ -1004,7 +996,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     placeholderFont_value?: Font | undefined
     textFont_value?: Font | undefined
     enterKeyType_value?: EnterKeyType | undefined
-    onSubmit_value?: ((value0: string) => void) | SearchSubmitCallback | undefined
+    onSubmit_value?: SearchSubmitCallback | undefined
     onChange_value?: EditableTextOnChangeCallback | undefined
     onTextSelectionChange_value?: OnTextSelectionChangeCallback | undefined
     onContentScroll_value?: OnContentScrollCallback | undefined
@@ -1074,7 +1066,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     enterKeyType(value: EnterKeyType | undefined): this {
         return this
     }
-    onSubmit(value: ((value0: string) => void) | SearchSubmitCallback | undefined): this {
+    onSubmit(value: SearchSubmitCallback | undefined): this {
         return this
     }
     onChange(value: EditableTextOnChangeCallback | undefined): this {
@@ -1290,9 +1282,9 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         }
         return this
     }
-    public onSubmit(value: ((value0: string) => void) | SearchSubmitCallback | undefined): this {
+    public onSubmit(value: SearchSubmitCallback | undefined): this {
         if (this.checkPriority("onSubmit")) {
-            const value_casted = value as (((value0: string) => void) | SearchSubmitCallback | undefined)
+            const value_casted = value as (SearchSubmitCallback | undefined)
             this.getPeer()?.setOnSubmitAttribute(value_casted)
             return this
         }

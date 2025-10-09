@@ -12305,7 +12305,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnSubmitImpl(Ark_NativePointer node,
-                         const Opt_Union_Callback_String_Void_SearchSubmitCallback* value)
+                         const Opt_SearchSubmitCallback* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15102,6 +15102,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetSymbolEffect0Impl(Ark_NativePointer node,
+                              const Opt_SymbolEffect* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSymbolEffect0(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetMinFontScaleImpl(Ark_NativePointer node,
                              const Opt_Union_F64_Resource* value)
     {
@@ -15126,15 +15138,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetSymbolEffectImpl(Ark_NativePointer node,
-                             const Opt_SymbolEffect* symbolEffect,
-                             const Opt_Union_Boolean_I32* triggerValue)
+    void SetSymbolEffect1Impl(Ark_NativePointer node,
+                              const Opt_SymbolEffect* symbolEffect,
+                              const Opt_Boolean* isActive)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setSymbolEffect(");
+        string out("setSymbolEffect1(");
+        WriteToString(&out, symbolEffect);
+        out.append(", ");
+        WriteToString(&out, isActive);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetSymbolEffect2Impl(Ark_NativePointer node,
+                              const Opt_SymbolEffect* symbolEffect,
+                              const Opt_Int32* triggerValue)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSymbolEffect2(");
         WriteToString(&out, symbolEffect);
         out.append(", ");
         WriteToString(&out, triggerValue);
@@ -16456,7 +16483,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnSubmitImpl(Ark_NativePointer node,
-                         const Opt_Union_Callback_EnterKeyType_Void_TextAreaSubmitCallback* value)
+                         const Opt_TextAreaSubmitCallback* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17684,14 +17711,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetCancelButtonImpl(Ark_NativePointer node,
-                             const Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
+    void SetCancelButton0Impl(Ark_NativePointer node,
+                              const Opt_CancelButtonOptions* value)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setCancelButton(");
+        string out("setCancelButton0(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetCancelButton1Impl(Ark_NativePointer node,
+                              const Opt_CancelButtonSymbolOptions* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setCancelButton1(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -22601,9 +22640,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SymbolGlyphAttributeModifier::SetFontWeightImpl,
             SymbolGlyphAttributeModifier::SetEffectStrategyImpl,
             SymbolGlyphAttributeModifier::SetRenderingStrategyImpl,
+            SymbolGlyphAttributeModifier::SetSymbolEffect0Impl,
             SymbolGlyphAttributeModifier::SetMinFontScaleImpl,
             SymbolGlyphAttributeModifier::SetMaxFontScaleImpl,
-            SymbolGlyphAttributeModifier::SetSymbolEffectImpl,
+            SymbolGlyphAttributeModifier::SetSymbolEffect1Impl,
+            SymbolGlyphAttributeModifier::SetSymbolEffect2Impl,
         };
         return &ArkUISymbolGlyphModifierImpl;
     }
@@ -22856,7 +22897,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextInputAttributeModifier::SetMaxLinesImpl,
             TextInputAttributeModifier::SetWordBreakImpl,
             TextInputAttributeModifier::SetLineBreakStrategyImpl,
-            TextInputAttributeModifier::SetCancelButtonImpl,
+            TextInputAttributeModifier::SetCancelButton0Impl,
+            TextInputAttributeModifier::SetCancelButton1Impl,
             TextInputAttributeModifier::SetSelectAllImpl,
             TextInputAttributeModifier::SetMinFontSizeImpl,
             TextInputAttributeModifier::SetMaxFontSizeImpl,
@@ -31223,7 +31265,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_ImageAttachment ConstructImpl(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value)
+    Ark_ImageAttachment ConstructImpl(const Opt_AttachmentType* value)
     {
         if (!needGroupedLog(1))
         {

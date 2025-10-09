@@ -337,33 +337,25 @@ export class ImageAttachment implements MaterializedBase {
         this.layoutStyle = this.getLayoutStyle()
         this.colorFilter = this.getColorFilter()
     }
-    constructor(value: ImageAttachmentInterface | AttachmentType | undefined) {
+    constructor(value: AttachmentType | undefined) {
         this(false, ImageAttachment.construct(value))
     }
-    static construct(value: ImageAttachmentInterface | AttachmentType | undefined): KPointer {
+    static construct(value: AttachmentType | undefined): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value instanceof ImageAttachmentInterface) {
-            thisSerializer.writeInt8((0).toChar())
-            const valueForIdx0  = value as ImageAttachmentInterface
-            ImageAttachmentInterface_serializer.write(thisSerializer, valueForIdx0)
-        } else if (value instanceof AttachmentType | undefined) {
-            thisSerializer.writeInt8((1).toChar())
-            const valueForIdx1  = value as AttachmentType | undefined
-            if (valueForIdx1 !== undefined) {
-                thisSerializer.writeInt8(RuntimeType.OBJECT)
-                const valueForIdx1TmpValue  = valueForIdx1!
-                if (valueForIdx1TmpValue instanceof ImageAttachmentInterface) {
-                    thisSerializer.writeInt8((0).toChar())
-                    const valueForIdx1TmpValueForIdx0  = valueForIdx1TmpValue as ImageAttachmentInterface
-                    ImageAttachmentInterface_serializer.write(thisSerializer, valueForIdx1TmpValueForIdx0)
-                } else if (valueForIdx1TmpValue instanceof ResourceImageAttachmentOptions) {
-                    thisSerializer.writeInt8((1).toChar())
-                    const valueForIdx1TmpValueForIdx1  = valueForIdx1TmpValue as ResourceImageAttachmentOptions
-                    ResourceImageAttachmentOptions_serializer.write(thisSerializer, valueForIdx1TmpValueForIdx1)
-                }
-            } else {
-                thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof ImageAttachmentInterface) {
+                thisSerializer.writeInt8((0).toChar())
+                const valueTmpValueForIdx0  = valueTmpValue as ImageAttachmentInterface
+                ImageAttachmentInterface_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof ResourceImageAttachmentOptions) {
+                thisSerializer.writeInt8((1).toChar())
+                const valueTmpValueForIdx1  = valueTmpValue as ResourceImageAttachmentOptions
+                ResourceImageAttachmentOptions_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
