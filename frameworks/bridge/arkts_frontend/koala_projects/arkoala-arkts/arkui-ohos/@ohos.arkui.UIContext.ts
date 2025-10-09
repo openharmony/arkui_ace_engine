@@ -105,11 +105,71 @@ export class Router {
         throw Error("pushUrl not implemented in Router!");
     }
 
+    public pushUrl(options: router.RouterOptions, mode: router.RouterMode): Promise<void> {
+        throw Error("pushUrl not implemented in Router!");
+    }
+
+    public pushUrl(options: router.RouterOptions, callback: AsyncCallback<void>): void {
+        throw Error("pushUrl not implemented in Router!");
+    }
+
+    public pushUrl(options: router.RouterOptions, mode: router.RouterMode, callback: AsyncCallback<void>): void {
+        throw Error("pushUrl not implemented in Router!");
+    }
+
+    public pushNamedRoute(options: router.NamedRouterOptions): Promise<void> {
+        throw Error("pushNamedRoute not implemented in Router!");
+    }
+
+    public pushNamedRoute(options: router.NamedRouterOptions, mode: router.RouterMode): Promise<void> {
+        throw Error("pushNamedRoute not implemented in Router!");
+    }
+
+    public pushNamedRoute(options: router.NamedRouterOptions, callback: AsyncCallback<void>): void {
+        throw Error("pushNamedRoute not implemented in Router!");
+    }
+
+    public pushNamedRoute(options: router.NamedRouterOptions, mode: router.RouterMode, callback: AsyncCallback<void>): void {
+        throw Error("pushNamedRoute not implemented in Router!");
+    }
+
     public replaceUrl(options: router.RouterOptions): Promise<void> {
         throw Error("replaceUrl not implemented in Router!");
     }
 
+    public replaceUrl(options: router.RouterOptions, mode: router.RouterMode): Promise<void> {
+        throw Error("replaceUrl not implemented in Router!");
+    }
+
+    public replaceUrl(options: router.RouterOptions, callback: AsyncCallback<void>): void {
+        throw Error("replaceUrl not implemented in Router!");
+    }
+
+    public replaceUrl(options: router.RouterOptions, mode: router.RouterMode, callback: AsyncCallback<void>): void {
+        throw Error("replaceUrl not implemented in Router!");
+    }
+
+    public replaceNamedRoute(options: router.NamedRouterOptions): Promise<void> {
+        throw Error("replaceNamedRoute not implemented in Router!");
+    }
+
+    public replaceNamedRoute(options: router.NamedRouterOptions, mode: router.RouterMode): Promise<void> {
+        throw Error("replaceNamedRoute not implemented in Router!");
+    }
+
+    public replaceNamedRoute(options: router.NamedRouterOptions, callback: AsyncCallback<void>): void {
+        throw Error("replaceNamedRoute not implemented in Router!");
+    }
+
+    public replaceNamedRoute(options: router.NamedRouterOptions, mode: router.RouterMode, callback: AsyncCallback<void>): void {
+        throw Error("replaceNamedRoute not implemented in Router!");
+    }
+
     public back(options?:router.RouterOptions): void {
+        throw Error("back not implemented in Router!");
+    }
+
+    public back(index: int, params?: Object): void {
         throw Error("back not implemented in Router!");
     }
 

@@ -372,40 +372,74 @@ ani_vm *ArktsFrontend::GetVM()
     return vm_;
 }
 
-void* ArktsFrontend::PushExtender(const std::string& url, const std::string& params, bool recoverable,
-    std::function<void()>&& finishCallback, void* jsNode)
+void ArktsFrontend::PushExtender(
+    const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
 {
-    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    CHECK_NULL_VOID(pageRouterManager_);
     NG::RouterPageInfo routerPageInfo;
-    routerPageInfo.url = url;
-    routerPageInfo.params = params;
-    routerPageInfo.recoverable = recoverable;
-    auto pageNode = pageRouterManager_->PushExtender(routerPageInfo, std::move(finishCallback), jsNode);
-    return pageNode.GetRawPtr();
+    routerPageInfo.url = options.url;
+    routerPageInfo.params = options.params;
+    routerPageInfo.recoverable = options.recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(options.routerMode);
+    routerPageInfo.errorCallback = options.errorCallback;
+    routerPageInfo.isNamedRouterMode = options.isNamedRouterMode;
+    pageRouterManager_->PushExtender(routerPageInfo, std::move(finishCallback), jsNode);
 }
 
-void* ArktsFrontend::ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
-    std::function<void()>&& enterFinishCallback, void* jsNode)
+void ArktsFrontend::PushNamedRouteExtender(
+    const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
 {
-    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    CHECK_NULL_VOID(pageRouterManager_);
     NG::RouterPageInfo routerPageInfo;
-    routerPageInfo.url = url;
-    routerPageInfo.params = params;
-    routerPageInfo.recoverable = recoverable;
-    auto pageNode = pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(enterFinishCallback), jsNode);
-    return pageNode.GetRawPtr();
+    routerPageInfo.url = options.url;
+    routerPageInfo.params = options.params;
+    routerPageInfo.recoverable = options.recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(options.routerMode);
+    routerPageInfo.errorCallback = options.errorCallback;
+    routerPageInfo.isNamedRouterMode = options.isNamedRouterMode;
+    pageRouterManager_->PushNamedRouteExtender(routerPageInfo, std::move(finishCallback), jsNode);
 }
 
-void* ArktsFrontend::RunPageExtender(const std::string& url, const std::string& params, bool recoverable,
-    std::function<void()>&& finishCallback, void* jsNode)
+void ArktsFrontend::ReplaceExtender(
+    const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
 {
-    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    CHECK_NULL_VOID(pageRouterManager_);
     NG::RouterPageInfo routerPageInfo;
-    routerPageInfo.url = url;
-    routerPageInfo.params = params;
-    routerPageInfo.recoverable = recoverable;
-    auto pageNode = pageRouterManager_->RunPageExtender(routerPageInfo, std::move(finishCallback), jsNode);
-    return pageNode.GetRawPtr();
+    routerPageInfo.url = options.url;
+    routerPageInfo.params = options.params;
+    routerPageInfo.recoverable = options.recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(options.routerMode);
+    routerPageInfo.errorCallback = options.errorCallback;
+    routerPageInfo.isNamedRouterMode = options.isNamedRouterMode;
+    pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(finishCallback), jsNode);
+}
+
+void ArktsFrontend::ReplaceNamedRouteExtender(
+    const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = options.url;
+    routerPageInfo.params = options.params;
+    routerPageInfo.recoverable = options.recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(options.routerMode);
+    routerPageInfo.errorCallback = options.errorCallback;
+    routerPageInfo.isNamedRouterMode = options.isNamedRouterMode;
+    pageRouterManager_->ReplaceNamedRouteExtender(routerPageInfo, std::move(finishCallback), jsNode);
+}
+
+void ArktsFrontend::RunPageExtender(
+    const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = options.url;
+    routerPageInfo.params = options.params;
+    routerPageInfo.recoverable = options.recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(options.routerMode);
+    routerPageInfo.errorCallback = options.errorCallback;
+    routerPageInfo.isNamedRouterMode = options.isNamedRouterMode;
+    pageRouterManager_->RunPageExtender(routerPageInfo, std::move(finishCallback), jsNode);
 }
 
 void ArktsFrontend::BackExtender(const std::string& url, const std::string& params)

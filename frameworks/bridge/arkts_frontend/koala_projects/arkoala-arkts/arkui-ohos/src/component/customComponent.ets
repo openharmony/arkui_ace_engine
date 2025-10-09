@@ -28,6 +28,8 @@ import { PeerNode } from '../PeerNode';
 import { UIContext } from '@ohos/arkui/UIContext';
 import promptAction from '@ohos/promptAction';
 import { RecordData } from "@ohos.base"
+import { UIContextImpl } from "arkui/base/UIContextImpl"
+import { UIContextUtil } from "arkui/base/UIContextUtil"
 
 export class ReuseObject {
     readonly _raw: RecordData;
@@ -439,7 +441,9 @@ export class EntryPoint {
     }
 
     public static RegisterNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface) {
-        
+        let uiContext : UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImpl = uiContext.getRouter().getRouter();
+        globalRouterImpl.registerNamedRouter(routerName, instance, param);
     }
 }
 

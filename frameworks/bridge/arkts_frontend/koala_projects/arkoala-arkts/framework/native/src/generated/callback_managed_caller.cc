@@ -85,6 +85,51 @@ void callManagedAsyncCallback_image_PixelMap_VoidSync(Ark_VMContext vmContext, A
     image_PixelMap_serializer::write(argsSerializer, result);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
+void callManagedAsyncCallback_Void(Ark_Int32 resourceId, Opt_BusinessError err, Opt_void data)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_AsyncCallback_Void);
+    argsSerializer.writeInt32(resourceId);
+    if (runtimeType(err) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto errTmpValue = err.value;
+        BusinessError_serializer::write(argsSerializer, errTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    // if (runtimeType(data) != INTEROP_RUNTIME_UNDEFINED) {
+    //     argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+    //     const auto dataTmpValue = data.value;
+    // } else {
+    //     argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    // }
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedAsyncCallback_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Opt_BusinessError err, Opt_void data)
+{
+    uint8_t dataBuffer[4096];
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_AsyncCallback_Void);
+    argsSerializer.writeInt32(resourceId);
+    if (runtimeType(err) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto errTmpValue = err.value;
+        BusinessError_serializer::write(argsSerializer, errTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    // if (runtimeType(data) != INTEROP_RUNTIME_UNDEFINED) {
+    //     argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+    //     const auto dataTmpValue = data.value;
+    // } else {
+    //     argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    // }
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+}
 void callManagedButtonModifierBuilder(Ark_Int32 resourceId, Ark_NativePointer parentNode, Ark_ButtonConfiguration config, Callback_Pointer_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -7529,6 +7574,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_AccessibilityCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityCallback);
         case Kind_AccessibilityFocusCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityFocusCallback);
         case Kind_AsyncCallback_image_PixelMap_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_image_PixelMap_Void);
+        case Kind_AsyncCallback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_Void);
         case Kind_ButtonModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedButtonModifierBuilder);
         case Kind_ButtonTriggerClickCallback: return reinterpret_cast<Ark_NativePointer>(callManagedButtonTriggerClickCallback);
         case Kind_Callback_Area_Area_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Area_Area_Void);
@@ -7830,6 +7876,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_AccessibilityCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityCallbackSync);
         case Kind_AccessibilityFocusCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityFocusCallbackSync);
         case Kind_AsyncCallback_image_PixelMap_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_image_PixelMap_VoidSync);
+        case Kind_AsyncCallback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_VoidSync);
         case Kind_ButtonModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedButtonModifierBuilderSync);
         case Kind_ButtonTriggerClickCallback: return reinterpret_cast<Ark_NativePointer>(callManagedButtonTriggerClickCallbackSync);
         case Kind_Callback_Area_Area_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Area_Area_VoidSync);

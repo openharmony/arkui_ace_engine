@@ -73,7 +73,7 @@ import { CustomBuilder, CustomBuilderT, PageMapBuilder } from "./../../component
 import { RefreshStatus } from "./../../component/refresh"
 import { SwipeActionState } from "./../../component/listItem"
 import { Resource } from "global.resource"
-import { ErrorCallback, BusinessError } from "@ohos.base"
+import { AsyncCallback, ErrorCallback, BusinessError } from "@ohos.base"
 import { GetItemMainSizeByIndex } from "./../../component/waterFlow"
 import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback } from "./../../component/alphabetIndexer"
 import { OnLinearIndicatorChangeCallback } from "./../../component/linearindicator"
@@ -104,6 +104,25 @@ export function deserializeAndCallAsyncCallback_image_PixelMap_Void(thisDeserial
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((result: image.PixelMap) => void))
     let result : image.PixelMap = (image_PixelMap_serializer.read(thisDeserializer) as image.PixelMap)
     _call(result)
+}
+export function deserializeAndCallAsyncCallback_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as AsyncCallback<void>)
+    const errTmpBuf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let errTmpBuf : BusinessError | null = null
+    if ((errTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+        errTmpBuf = (BusinessError_serializer.read(thisDeserializer) as BusinessError)
+    }
+    // let err : BusinessError | null = errTmpBuf
+    // const dataTmpBuf_runtimeType  = thisDeserializer.readInt8().toInt()
+    // //@ts-ignore
+    // let dataTmpBuf : void | undefined = undefined
+    // if ((dataTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+    //     dataTmpBuf = undefined
+    // }
+    // //@ts-ignore
+    // let data : void | undefined = dataTmpBuf
+    // _call(err, data)
 }
 export function deserializeAndCallButtonModifierBuilder(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -3323,6 +3342,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_AccessibilityCallback: return deserializeAndCallAccessibilityCallback(thisDeserializer);
         case CallbackKind.Kind_AccessibilityFocusCallback: return deserializeAndCallAccessibilityFocusCallback(thisDeserializer);
         case CallbackKind.Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallAsyncCallback_image_PixelMap_Void(thisDeserializer);
+        case CallbackKind.Kind_AsyncCallback_Void: return deserializeAndCallAsyncCallback_Void(thisDeserializer);
         case CallbackKind.Kind_ButtonModifierBuilder: return deserializeAndCallButtonModifierBuilder(thisDeserializer);
         case CallbackKind.Kind_ButtonTriggerClickCallback: return deserializeAndCallButtonTriggerClickCallback(thisDeserializer);
         case CallbackKind.Kind_Callback_Area_Area_Void: return deserializeAndCallCallback_Area_Area_Void(thisDeserializer);
