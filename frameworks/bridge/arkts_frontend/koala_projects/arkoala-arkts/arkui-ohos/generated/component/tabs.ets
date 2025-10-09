@@ -22,12 +22,14 @@ import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { TranslateOptions_serializer, TranslateOptions, DividerStyle_serializer, BackgroundEffectOptions_serializer, BackgroundBlurStyleOptions_serializer, ArkCommonMethodPeer, CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, BlurStyleOptions, BlurStyleActivePolicy, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Number_serializer } from "./common"
 import { Resource_serializer } from "./../framework/resource"
+import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Length, ResourceColor, Dimension } from "./units"
 import { Resource } from "global.resource"
 import { EdgeEffect, Color, PageFlipMode } from "./enums"
-import { AttributeModifier, hookTabsAttributeModifier, AttributeUpdater } from "#handwritten"
+import { default as curves } from "@ohos.curves"
+import { extractors, AttributeModifier, hookTabsAttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -266,28 +268,24 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBarHeightAttribute(value: Length | undefined): void {
+    setAnimationCurveAttribute(value: curves.Curve | curves.ICurve | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof string) {
+            if (valueTmpValue instanceof curves.Curve) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+                const valueTmpValueForIdx0  = valueTmpValue as curves.Curve
+                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+            } else if (valueTmpValue instanceof curves.ICurve) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx1  = valueTmpValue as curves.ICurve
+                curves_ICurve_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._TabsAttribute_setBarHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TabsAttribute_setAnimationCurve(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAnimationDurationAttribute(value: number | undefined): void {
@@ -565,6 +563,37 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setBarMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setBarHeightAttribute(height: Length | undefined, noMinHeightLimit: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (height !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const heightTmpValue  = height!
+            if (heightTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toChar())
+                const heightTmpValueForIdx0  = heightTmpValue as string
+                thisSerializer.writeString(heightTmpValueForIdx0)
+            } else if (heightTmpValue instanceof number) {
+                thisSerializer.writeInt8((1).toChar())
+                const heightTmpValueForIdx1  = heightTmpValue as number
+                thisSerializer.writeNumber(heightTmpValueForIdx1)
+            } else if (heightTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((2).toChar())
+                const heightTmpValueForIdx2  = heightTmpValue as Resource
+                Resource_serializer.write(thisSerializer, heightTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (noMinHeightLimit !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const noMinHeightLimitTmpValue  = noMinHeightLimit!
+            thisSerializer.writeBoolean(noMinHeightLimitTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setBarHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBarBackgroundBlurStyle1Attribute(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (style !== undefined) {
@@ -674,8 +703,8 @@ export interface TabsAttribute extends CommonMethod {
     barWidth(value: Length | undefined): this {
         throw new Error("Unimplemented method barWidth")
     }
-    barHeight(value: Length | undefined): this {
-        throw new Error("Unimplemented method barHeight")
+    animationCurve(value: curves.Curve | curves.ICurve | undefined): this {
+        throw new Error("Unimplemented method animationCurve")
     }
     animationDuration(value: number | undefined): this {
         throw new Error("Unimplemented method animationDuration")
@@ -740,6 +769,9 @@ export interface TabsAttribute extends CommonMethod {
     barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
         throw new Error("Unimplemented method barMode")
     }
+    barHeight(height: Length | undefined, noMinHeightLimit: boolean | undefined): this {
+        throw new Error("Unimplemented method barHeight")
+    }
     barBackgroundBlurStyle(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): this {
         throw new Error("Unimplemented method barBackgroundBlurStyle")
     }
@@ -755,7 +787,7 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     barPosition_value?: BarPosition | undefined
     scrollable_value?: boolean | undefined
     barWidth_value?: Length | undefined
-    barHeight_value?: Length | undefined
+    animationCurve_value?: curves.Curve | curves.ICurve | undefined
     animationDuration_value?: number | undefined
     animationMode_value?: AnimationMode | undefined
     edgeEffect_value?: EdgeEffect | undefined
@@ -792,7 +824,7 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     barWidth(value: Length | undefined): this {
         return this
     }
-    barHeight(value: Length | undefined): this {
+    animationCurve(value: curves.Curve | curves.ICurve | undefined): this {
         return this
     }
     animationDuration(value: number | undefined): this {
@@ -858,6 +890,9 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
         return this
     }
+    barHeight(height: Length | undefined, noMinHeightLimit: boolean | undefined): this {
+        return this
+    }
     barBackgroundBlurStyle(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): this {
         return this
     }
@@ -920,10 +955,10 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         }
         return this
     }
-    public barHeight(value: Length | undefined): this {
-        if (this.checkPriority("barHeight")) {
-            const value_casted = value as (Length | undefined)
-            this.getPeer()?.setBarHeightAttribute(value_casted)
+    public animationCurve(value: curves.Curve | curves.ICurve | undefined): this {
+        if (this.checkPriority("animationCurve")) {
+            const value_casted = value as (curves.Curve | curves.ICurve | undefined)
+            this.getPeer()?.setAnimationCurveAttribute(value_casted)
             return this
         }
         return this
@@ -1093,6 +1128,15 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
             const value_casted = value as (BarMode | undefined)
             const options_casted = options as (ScrollableBarModeOptions | undefined)
             this.getPeer()?.setBarModeAttribute(value_casted, options_casted)
+            return this
+        }
+        return this
+    }
+    public barHeight(height: Length | undefined, noMinHeightLimit: boolean | undefined): this {
+        if (this.checkPriority("barHeight")) {
+            const height_casted = height as (Length | undefined)
+            const noMinHeightLimit_casted = noMinHeightLimit as (boolean | undefined)
+            this.getPeer()?.setBarHeightAttribute(height_casted, noMinHeightLimit_casted)
             return this
         }
         return this

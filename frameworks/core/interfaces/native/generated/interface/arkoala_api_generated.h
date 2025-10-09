@@ -848,6 +848,8 @@ typedef struct Array_AlertDialogButtonOptions Array_AlertDialogButtonOptions;
 typedef struct Opt_Array_AlertDialogButtonOptions Opt_Array_AlertDialogButtonOptions;
 typedef struct Array_Animation Array_Animation;
 typedef struct Opt_Array_Animation Opt_Array_Animation;
+typedef struct Array_AnimationPropertyType Array_AnimationPropertyType;
+typedef struct Opt_Array_AnimationPropertyType Opt_Array_AnimationPropertyType;
 typedef struct Array_Array_String Array_Array_String;
 typedef struct Opt_Array_Array_String Opt_Array_Array_String;
 typedef struct Array_BarrierStyle Array_BarrierStyle;
@@ -2152,6 +2154,8 @@ typedef struct Ark_RichEditorSelection Ark_RichEditorSelection;
 typedef struct Opt_RichEditorSelection Opt_RichEditorSelection;
 typedef struct Ark_RichEditorSpanPosition Ark_RichEditorSpanPosition;
 typedef struct Opt_RichEditorSpanPosition Opt_RichEditorSpanPosition;
+typedef struct Ark_RotateAngleOptions Ark_RotateAngleOptions;
+typedef struct Opt_RotateAngleOptions Opt_RotateAngleOptions;
 typedef struct Ark_RotateOptions Ark_RotateOptions;
 typedef struct Opt_RotateOptions Opt_RotateOptions;
 typedef struct Ark_RoundedRectOptions Ark_RoundedRectOptions;
@@ -2384,6 +2388,8 @@ typedef struct Ark_Union_ResourceStr_TabBarSymbol Ark_Union_ResourceStr_TabBarSy
 typedef struct Opt_Union_ResourceStr_TabBarSymbol Opt_Union_ResourceStr_TabBarSymbol;
 typedef struct Ark_Union_ResourceStr_Union_ResourceStr_ComponentContent Ark_Union_ResourceStr_Union_ResourceStr_ComponentContent;
 typedef struct Opt_Union_ResourceStr_Union_ResourceStr_ComponentContent Opt_Union_ResourceStr_Union_ResourceStr_ComponentContent;
+typedef struct Ark_Union_RotateOptions_RotateAngleOptions Ark_Union_RotateOptions_RotateAngleOptions;
+typedef struct Opt_Union_RotateOptions_RotateAngleOptions Opt_Union_RotateOptions_RotateAngleOptions;
 typedef struct Ark_Union_RowOptions_RowOptionsV2 Ark_Union_RowOptions_RowOptionsV2;
 typedef struct Opt_Union_RowOptions_RowOptionsV2 Opt_Union_RowOptions_RowOptionsV2;
 typedef struct Ark_Union_ScrollAnimationOptions_Boolean Ark_Union_ScrollAnimationOptions_Boolean;
@@ -3390,6 +3396,16 @@ typedef struct Opt_AnimationMode {
     Ark_Tag tag;
     Ark_AnimationMode value;
 } Opt_AnimationMode;
+typedef enum Ark_AnimationPropertyType {
+    ARK_ANIMATION_PROPERTY_TYPE_ROTATION = 0,
+    ARK_ANIMATION_PROPERTY_TYPE_TRANSLATION = 1,
+    ARK_ANIMATION_PROPERTY_TYPE_SCALE = 2,
+    ARK_ANIMATION_PROPERTY_TYPE_OPACITY = 3,
+} Ark_AnimationPropertyType;
+typedef struct Opt_AnimationPropertyType {
+    Ark_Tag tag;
+    Ark_AnimationPropertyType value;
+} Opt_AnimationPropertyType;
 typedef enum Ark_AnimationStatus {
     ARK_ANIMATION_STATUS_INITIAL = 0,
     ARK_ANIMATION_STATUS_RUNNING = 1,
@@ -4136,6 +4152,7 @@ typedef enum Ark_DismissReason {
     ARK_DISMISS_REASON_TOUCH_OUTSIDE = 1,
     ARK_DISMISS_REASON_CLOSE_BUTTON = 2,
     ARK_DISMISS_REASON_SLIDE_DOWN = 3,
+    ARK_DISMISS_REASON_SLIDE = 4,
 } Ark_DismissReason;
 typedef struct Opt_DismissReason {
     Ark_Tag tag;
@@ -5937,6 +5954,7 @@ typedef enum Ark_SheetKeyboardAvoidMode {
     ARK_SHEET_KEYBOARD_AVOID_MODE_TRANSLATE_AND_RESIZE = 1,
     ARK_SHEET_KEYBOARD_AVOID_MODE_RESIZE_ONLY = 2,
     ARK_SHEET_KEYBOARD_AVOID_MODE_TRANSLATE_AND_SCROLL = 3,
+    ARK_SHEET_KEYBOARD_AVOID_MODE_POPUP_SHEET = 4,
 } Ark_SheetKeyboardAvoidMode;
 typedef struct Opt_SheetKeyboardAvoidMode {
     Ark_Tag tag;
@@ -5963,6 +5981,8 @@ typedef enum Ark_SheetType {
     ARK_SHEET_TYPE_BOTTOM = 0,
     ARK_SHEET_TYPE_CENTER = 1,
     ARK_SHEET_TYPE_POPUP = 2,
+    ARK_SHEET_TYPE_SIDE = 3,
+    ARK_SHEET_TYPE_CONTENT_COVER = 4,
 } Ark_SheetType;
 typedef struct Opt_SheetType {
     Ark_Tag tag;
@@ -8385,6 +8405,15 @@ typedef struct Opt_Array_Animation {
     Ark_Tag tag;
     Array_Animation value;
 } Opt_Array_Animation;
+typedef struct Array_AnimationPropertyType {
+    /* kind: ContainerType */
+    Ark_AnimationPropertyType* array;
+    Ark_Int32 length;
+} Array_AnimationPropertyType;
+typedef struct Opt_Array_AnimationPropertyType {
+    Ark_Tag tag;
+    Array_AnimationPropertyType value;
+} Opt_Array_AnimationPropertyType;
 typedef struct Array_Array_String {
     /* kind: ContainerType */
     Array_String* array;
@@ -14439,6 +14468,20 @@ typedef struct Opt_RichEditorSpanPosition {
     Ark_Tag tag;
     Ark_RichEditorSpanPosition value;
 } Opt_RichEditorSpanPosition;
+typedef struct Ark_RotateAngleOptions {
+    /* kind: Interface */
+    Opt_Union_Number_String angleX;
+    Opt_Union_Number_String angleY;
+    Opt_Union_Number_String angleZ;
+    Opt_Union_Number_String centerX;
+    Opt_Union_Number_String centerY;
+    Opt_Number centerZ;
+    Opt_Number perspective;
+} Ark_RotateAngleOptions;
+typedef struct Opt_RotateAngleOptions {
+    Ark_Tag tag;
+    Ark_RotateAngleOptions value;
+} Opt_RotateAngleOptions;
 typedef struct Ark_RotateOptions {
     /* kind: Interface */
     Opt_Number x;
@@ -15669,6 +15712,18 @@ typedef struct Opt_Union_ResourceStr_Union_ResourceStr_ComponentContent {
     Ark_Tag tag;
     Ark_Union_ResourceStr_Union_ResourceStr_ComponentContent value;
 } Opt_Union_ResourceStr_Union_ResourceStr_ComponentContent;
+typedef struct Ark_Union_RotateOptions_RotateAngleOptions {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_RotateOptions value0;
+        Ark_RotateAngleOptions value1;
+    };
+} Ark_Union_RotateOptions_RotateAngleOptions;
+typedef struct Opt_Union_RotateOptions_RotateAngleOptions {
+    Ark_Tag tag;
+    Ark_Union_RotateOptions_RotateAngleOptions value;
+} Opt_Union_RotateOptions_RotateAngleOptions;
 typedef struct Ark_Union_RowOptions_RowOptionsV2 {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -16195,6 +16250,7 @@ typedef struct Ark_ContentCoverOptions {
     Opt_ModalTransition modalTransition;
     Opt_Callback_DismissContentCoverAction_Void onWillDismiss;
     Opt_TransitionEffect transition;
+    Opt_Boolean enableSafeArea;
 } Ark_ContentCoverOptions;
 typedef struct Opt_ContentCoverOptions {
     Ark_Tag tag;
@@ -19587,6 +19643,8 @@ typedef struct Ark_SheetOptions {
     Opt_Callback_Void onWillDisappear;
     Opt_Union_SheetSize_Length height;
     Opt_Boolean dragBar;
+    Opt_Boolean enableFloatingDragBar;
+    Opt_ModalTransition modalTransition;
     Opt_ResourceColor maskColor;
     Opt_TripleLengthDetents detents;
     Opt_BlurStyle blurStyle;
@@ -20667,9 +20725,11 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setScale)(Ark_NativePointer node,
                      const Opt_ScaleOptions* value);
     void (*setRotate)(Ark_NativePointer node,
-                      const Opt_RotateOptions* value);
+                      const Opt_Union_RotateOptions_RotateAngleOptions* value);
     void (*setTransform)(Ark_NativePointer node,
                          const Opt_matrix4_Matrix4Transit* value);
+    void (*setTransform3D)(Ark_NativePointer node,
+                           const Opt_matrix4_Matrix4Transit* value);
     void (*setOnAppear)(Ark_NativePointer node,
                         const Opt_Callback_Void* value);
     void (*setOnDisAppear)(Ark_NativePointer node,
@@ -22811,8 +22871,8 @@ typedef struct GENERATED_ArkUITabsModifier {
                           const Opt_Boolean* value);
     void (*setBarWidth)(Ark_NativePointer node,
                         const Opt_Length* value);
-    void (*setBarHeight)(Ark_NativePointer node,
-                         const Opt_Length* value);
+    void (*setAnimationCurve)(Ark_NativePointer node,
+                              const Opt_Union_Curve_ICurve* value);
     void (*setAnimationDuration)(Ark_NativePointer node,
                                  const Opt_Number* value);
     void (*setAnimationMode)(Ark_NativePointer node,
@@ -22856,6 +22916,9 @@ typedef struct GENERATED_ArkUITabsModifier {
     void (*setBarMode)(Ark_NativePointer node,
                        const Opt_BarMode* value,
                        const Opt_ScrollableBarModeOptions* options);
+    void (*setBarHeight)(Ark_NativePointer node,
+                         const Opt_Length* height,
+                         const Opt_Boolean* noMinHeightLimit);
     void (*setBarBackgroundBlurStyle1)(Ark_NativePointer node,
                                        const Opt_BlurStyle* style,
                                        const Opt_BackgroundBlurStyleOptions* options);
@@ -24781,6 +24844,15 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_NativePointer (*getFrameNodeByUniqueId)(const Ark_Number* id);
     void (*reuse)(Ark_FrameNode peer);
     void (*recycle)(Ark_FrameNode peer);
+    Ark_Boolean (*createAnimation)(Ark_FrameNode peer,
+                                   Ark_AnimationPropertyType property,
+                                   const Opt_Array_Float64* startValue,
+                                   const Array_Float64* endValue,
+                                   const Ark_AnimateParam* param);
+    Ark_Boolean (*cancelAnimations)(Ark_FrameNode peer,
+                                    const Array_AnimationPropertyType* properties);
+    Array_Float64 (*getNodePropertyValue)(Ark_FrameNode peer,
+                                          Ark_AnimationPropertyType property);
     Ark_NativePointer (*getFrameNodePtr)(Ark_FrameNode node);
     Ark_NativePointer (*createTypedFrameNode)(const Ark_String* type);
     Ark_NativePointer (*createByRawPtr)(Ark_FrameNode peer,

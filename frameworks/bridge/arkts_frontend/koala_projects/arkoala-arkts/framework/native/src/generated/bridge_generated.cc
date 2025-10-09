@@ -3250,13 +3250,25 @@ void impl_CommonMethod_setRotate(Ark_NativePointer thisPtr, KSerializerBuffer th
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_RotateOptions valueValueTempTmpBuf = {};
+        Opt_Union_RotateOptions_RotateAngleOptions valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = RotateOptions_serializer::read(thisDeserializer);
+            const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Union_RotateOptions_RotateAngleOptions valueValueTempTmpBuf_ = {};
+            valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
+            if (valueValueTempTmpBuf_UnionSelector == 0) {
+                valueValueTempTmpBuf_.selector = 0;
+                valueValueTempTmpBuf_.value0 = RotateOptions_serializer::read(thisDeserializer);
+            } else if (valueValueTempTmpBuf_UnionSelector == 1) {
+                valueValueTempTmpBuf_.selector = 1;
+                valueValueTempTmpBuf_.value1 = RotateAngleOptions_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
+            }
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_RotateOptions_RotateAngleOptions>(valueValueTempTmpBuf_);
         }
-        Opt_RotateOptions valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setRotate(self, static_cast<Opt_RotateOptions*>(&valueValueTemp));
+        Opt_Union_RotateOptions_RotateAngleOptions valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getCommonMethodModifier()->setRotate(self, static_cast<Opt_Union_RotateOptions_RotateAngleOptions*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setRotate, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setTransform(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -3272,6 +3284,19 @@ void impl_CommonMethod_setTransform(Ark_NativePointer thisPtr, KSerializerBuffer
         GetNodeModifiers()->getCommonMethodModifier()->setTransform(self, static_cast<Opt_matrix4_Matrix4Transit*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setTransform, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CommonMethod_setTransform3D(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_matrix4_Matrix4Transit valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = static_cast<Ark_matrix4_Matrix4Transit>(matrix4_Matrix4Transit_serializer::read(thisDeserializer));
+        }
+        Opt_matrix4_Matrix4Transit valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getCommonMethodModifier()->setTransform3D(self, static_cast<Opt_matrix4_Matrix4Transit*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setTransform3D, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setOnAppear(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -18730,34 +18755,31 @@ void impl_TabsAttribute_setBarWidth(Ark_NativePointer thisPtr, KSerializerBuffer
         GetNodeModifiers()->getTabsModifier()->setBarWidth(self, static_cast<Opt_Length*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TabsAttribute_setBarWidth, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_TabsAttribute_setBarHeight(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_TabsAttribute_setAnimationCurve(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Length valueValueTempTmpBuf = {};
+        Opt_Union_Curve_ICurve valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
             const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_Length valueValueTempTmpBuf_ = {};
+            Ark_Union_Curve_ICurve valueValueTempTmpBuf_ = {};
             valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
             if (valueValueTempTmpBuf_UnionSelector == 0) {
                 valueValueTempTmpBuf_.selector = 0;
-                valueValueTempTmpBuf_.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+                valueValueTempTmpBuf_.value0 = static_cast<Ark_curves_Curve>(thisDeserializer.readInt32());
             } else if (valueValueTempTmpBuf_UnionSelector == 1) {
                 valueValueTempTmpBuf_.selector = 1;
-                valueValueTempTmpBuf_.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
-            } else if (valueValueTempTmpBuf_UnionSelector == 2) {
-                valueValueTempTmpBuf_.selector = 2;
-                valueValueTempTmpBuf_.value2 = Resource_serializer::read(thisDeserializer);
+                valueValueTempTmpBuf_.value1 = static_cast<Ark_curves_ICurve>(curves_ICurve_serializer::read(thisDeserializer));
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            valueValueTempTmpBuf.value = static_cast<Ark_Length>(valueValueTempTmpBuf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_Curve_ICurve>(valueValueTempTmpBuf_);
         }
-        Opt_Length valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getTabsModifier()->setBarHeight(self, static_cast<Opt_Length*>(&valueValueTemp));
+        Opt_Union_Curve_ICurve valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTabsModifier()->setAnimationCurve(self, static_cast<Opt_Union_Curve_ICurve*>(&valueValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(TabsAttribute_setBarHeight, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(TabsAttribute_setAnimationCurve, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TabsAttribute_setAnimationDuration(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -19056,6 +19078,41 @@ void impl_TabsAttribute_setBarMode(Ark_NativePointer thisPtr, KSerializerBuffer 
         GetNodeModifiers()->getTabsModifier()->setBarMode(self, static_cast<Opt_BarMode*>(&valueValueTemp), static_cast<Opt_ScrollableBarModeOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TabsAttribute_setBarMode, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_TabsAttribute_setBarHeight(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto heightValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Length heightValueTempTmpBuf = {};
+        heightValueTempTmpBuf.tag = heightValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((heightValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int8 heightValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Length heightValueTempTmpBuf_ = {};
+            heightValueTempTmpBuf_.selector = heightValueTempTmpBuf_UnionSelector;
+            if (heightValueTempTmpBuf_UnionSelector == 0) {
+                heightValueTempTmpBuf_.selector = 0;
+                heightValueTempTmpBuf_.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+            } else if (heightValueTempTmpBuf_UnionSelector == 1) {
+                heightValueTempTmpBuf_.selector = 1;
+                heightValueTempTmpBuf_.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            } else if (heightValueTempTmpBuf_UnionSelector == 2) {
+                heightValueTempTmpBuf_.selector = 2;
+                heightValueTempTmpBuf_.value2 = Resource_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for heightValueTempTmpBuf_ has to be chosen through deserialisation.");
+            }
+            heightValueTempTmpBuf.value = static_cast<Ark_Length>(heightValueTempTmpBuf_);
+        }
+        Opt_Length heightValueTemp = heightValueTempTmpBuf;;
+        const auto noMinHeightLimitValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean noMinHeightLimitValueTempTmpBuf = {};
+        noMinHeightLimitValueTempTmpBuf.tag = noMinHeightLimitValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((noMinHeightLimitValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            noMinHeightLimitValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean noMinHeightLimitValueTemp = noMinHeightLimitValueTempTmpBuf;;
+        GetNodeModifiers()->getTabsModifier()->setBarHeight(self, static_cast<Opt_Length*>(&heightValueTemp), static_cast<Opt_Boolean*>(&noMinHeightLimitValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(TabsAttribute_setBarHeight, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TabsAttribute_setBarBackgroundBlurStyle1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -29123,6 +29180,58 @@ void impl_FrameNodeExtender_recycle(Ark_NativePointer peer) {
         GetAccessors()->getFrameNodeExtenderAccessor()->recycle(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_recycle, Ark_NativePointer)
+Ark_Boolean impl_FrameNodeExtender_createAnimation(Ark_NativePointer peer, Ark_Int32 property, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto startValueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_Float64 startValueValueTempTmpBuf = {};
+        startValueValueTempTmpBuf.tag = startValueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((startValueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int32 startValueValueTempTmpBuf_Length = thisDeserializer.readInt32();
+            Array_Float64 startValueValueTempTmpBuf_ = {};
+            thisDeserializer.resizeArray<std::decay<decltype(startValueValueTempTmpBuf_)>::type,
+        std::decay<decltype(*startValueValueTempTmpBuf_.array)>::type>(&startValueValueTempTmpBuf_, startValueValueTempTmpBuf_Length);
+            for (int startValueValueTempTmpBuf_BufCounterI = 0; startValueValueTempTmpBuf_BufCounterI < startValueValueTempTmpBuf_Length; startValueValueTempTmpBuf_BufCounterI++) {
+                startValueValueTempTmpBuf_.array[startValueValueTempTmpBuf_BufCounterI] = thisDeserializer.readFloat64();
+            }
+            startValueValueTempTmpBuf.value = startValueValueTempTmpBuf_;
+        }
+        Opt_Array_Float64 startValueValueTemp = startValueValueTempTmpBuf;;
+        const Ark_Int32 endValueValueTempTmpBufLength = thisDeserializer.readInt32();
+        Array_Float64 endValueValueTempTmpBuf = {};
+        thisDeserializer.resizeArray<std::decay<decltype(endValueValueTempTmpBuf)>::type,
+        std::decay<decltype(*endValueValueTempTmpBuf.array)>::type>(&endValueValueTempTmpBuf, endValueValueTempTmpBufLength);
+        for (int endValueValueTempTmpBufBufCounterI = 0; endValueValueTempTmpBufBufCounterI < endValueValueTempTmpBufLength; endValueValueTempTmpBufBufCounterI++) {
+            endValueValueTempTmpBuf.array[endValueValueTempTmpBufBufCounterI] = thisDeserializer.readFloat64();
+        }
+        Array_Float64 endValueValueTemp = endValueValueTempTmpBuf;;
+        Ark_AnimateParam paramValueTemp = AnimateParam_serializer::read(thisDeserializer);;
+        return GetAccessors()->getFrameNodeExtenderAccessor()->createAnimation(static_cast<Ark_FrameNode>(peer), static_cast<Ark_AnimationPropertyType>(property), static_cast<Opt_Array_Float64*>(&startValueValueTemp), static_cast<Array_Float64*>(&endValueValueTemp), static_cast<Ark_AnimateParam*>(&paramValueTemp));
+}
+KOALA_INTEROP_DIRECT_4(FrameNodeExtender_createAnimation, Ark_Boolean, Ark_NativePointer, Ark_Int32, KSerializerBuffer, int32_t)
+Ark_Boolean impl_FrameNodeExtender_cancelAnimations(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const Ark_Int32 propertiesValueTempTmpBufLength = thisDeserializer.readInt32();
+        Array_AnimationPropertyType propertiesValueTempTmpBuf = {};
+        thisDeserializer.resizeArray<std::decay<decltype(propertiesValueTempTmpBuf)>::type,
+        std::decay<decltype(*propertiesValueTempTmpBuf.array)>::type>(&propertiesValueTempTmpBuf, propertiesValueTempTmpBufLength);
+        for (int propertiesValueTempTmpBufBufCounterI = 0; propertiesValueTempTmpBufBufCounterI < propertiesValueTempTmpBufLength; propertiesValueTempTmpBufBufCounterI++) {
+            propertiesValueTempTmpBuf.array[propertiesValueTempTmpBufBufCounterI] = static_cast<Ark_AnimationPropertyType>(thisDeserializer.readInt32());
+        }
+        Array_AnimationPropertyType propertiesValueTemp = propertiesValueTempTmpBuf;;
+        return GetAccessors()->getFrameNodeExtenderAccessor()->cancelAnimations(static_cast<Ark_FrameNode>(peer), static_cast<Array_AnimationPropertyType*>(&propertiesValueTemp));
+}
+KOALA_INTEROP_DIRECT_3(FrameNodeExtender_cancelAnimations, Ark_Boolean, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_FrameNodeExtender_getNodePropertyValue(Ark_NativePointer peer, Ark_Int32 property) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getNodePropertyValue(static_cast<Ark_FrameNode>(peer), static_cast<Ark_AnimationPropertyType>(property));
+        SerializerBase _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
+            const Ark_Float64 retValueTmpElement = retValue.array[retValueCounterI];
+            _retSerializer.writeFloat64(retValueTmpElement);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_2(FrameNodeExtender_getNodePropertyValue, KInteropReturnBuffer, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_FrameNodeExtender_getFrameNodePtr(Ark_NativePointer node) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getFrameNodePtr(static_cast<Ark_FrameNode>(node));
 }

@@ -719,3 +719,9 @@ export enum DividerMode {
     FLOATING_ABOVE_MENU = 0,
     EMBEDDED_IN_MENU = 1
 }
+export enum AnimationPropertyType {
+    ROTATION = 0,
+    TRANSLATION = 1,
+    SCALE = 2,
+    OPACITY = 3
+}

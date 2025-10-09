@@ -44,6 +44,8 @@ public:
     static void SetTabBarMode(FrameNode* frameNode, const std::optional<TabBarMode>& tabBarModeOpt);
     static void SetTabBarWidth(FrameNode* frameNode, const std::optional<Dimension>& tabBarWidth);
     static void SetTabBarHeight(FrameNode* frameNode, const std::optional<Dimension>& tabBarHeightOpt);
+    static void SetAnimationCurve(FrameNode* frameNode, const RefPtr<Curve>& curve);
+    static void SetNoMinHeightLimit(FrameNode* frameNode, bool noMinHeightLimit);
     static void SetAnimationDuration(FrameNode* frameNode, float duration);
     static void SetAnimateMode(FrameNode* frameNode, const std::optional<TabAnimateMode>& modeOpt);
     static void SetEdgeEffect(FrameNode* frameNode, const std::optional<int32_t>& edgeEffect);

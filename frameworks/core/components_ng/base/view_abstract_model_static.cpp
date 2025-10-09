@@ -636,6 +636,27 @@ void ViewAbstractModelStatic::SetGeometryTransition(FrameNode* frameNode, const 
     ViewAbstract::SetGeometryTransition(frameNode, id, followWithoutTransition, doRegisterSharedTransition);
 }
 
+bool ViewAbstractModelStatic::CreatePropertyAnimation(FrameNode* frameNode, AnimationPropertyType property,
+    const std::vector<float>& startValue, const std::vector<float>& endValue, const AnimationOption& option)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    return ViewAbstract::CreatePropertyAnimation(frameNode, property, startValue, endValue, option);
+}
+
+bool ViewAbstractModelStatic::CancelPropertyAnimations(
+    FrameNode* frameNode, const std::vector<AnimationPropertyType>& properties)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    return ViewAbstract::CancelPropertyAnimations(frameNode, properties);
+}
+
+std::vector<float> ViewAbstractModelStatic::GetRenderNodePropertyValue(
+    FrameNode* frameNode, AnimationPropertyType property)
+{
+    CHECK_NULL_RETURN(frameNode, {});
+    return ViewAbstract::GetRenderNodePropertyValue(frameNode, property);
+}
+
 void ViewAbstractModelStatic::DismissSheetStatic()
 {
     auto sheetId = SheetManager::GetInstance().GetDismissSheet();
@@ -1084,6 +1105,11 @@ void ViewAbstractModelStatic::SetPositionLocalizedEdges(FrameNode* frameNode, bo
     layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
 }
 
+void ViewAbstractModelStatic::SetTransform3DMatrix(FrameNode* frameNode, const Matrix4& matrix)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetTransform3DMatrix(frameNode, matrix);
+}
 
 void ViewAbstractModelStatic::SetMarkAnchorStart(FrameNode* frameNode, const std::optional<Dimension>& markAnchorStart)
 {
@@ -1271,6 +1297,29 @@ void  ViewAbstractModelStatic::SetRotate(FrameNode* frameNode, const std::vector
     rotateVec.w = value[indA].has_value() ? value[indA].value() : DEFAULT_ROTATE_VEC.w;
     rotateVec.v = value[indP].has_value() ? value[indP].value() : DEFAULT_ROTATE_VEC.v;
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, rotateVec, frameNode);
+}
+
+void  ViewAbstractModelStatic::SetRotateAngle(FrameNode* frameNode, const std::vector<std::optional<float>>& value)
+{
+    constexpr size_t requiredSize = 4;
+    if (value.size() != requiredSize) {
+        return;
+    }
+    NG::Vector4F rotateVec = { 0.0f, 0.0f, 0.0f, 0.0f };
+    const NG::Vector4F DEFAULT_ROTATE_VEC = { 0.0f, 0.0f, 0.0f, 0.0f };
+    constexpr int32_t indX = 0;
+    constexpr int32_t indY = 1;
+    constexpr int32_t indZ = 2;
+    constexpr int32_t indP = 3;
+    if (!value[indX] && !value[indY] && !value[indZ]) {
+        rotateVec.z = 1.0f;
+    } else {
+        rotateVec.x = value[indX].has_value() ? value[indX].value() : DEFAULT_ROTATE_VEC.x;
+        rotateVec.y = value[indY].has_value() ? value[indY].value() : DEFAULT_ROTATE_VEC.y;
+        rotateVec.z = value[indZ].has_value() ? value[indZ].value() : DEFAULT_ROTATE_VEC.z;
+    }
+    rotateVec.w = value[indP].has_value() ? value[indP].value() : DEFAULT_ROTATE_VEC.w;
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotateAngle, rotateVec, frameNode);
 }
 
 void ViewAbstractModelStatic::SetBackdropBlur(FrameNode *frameNode, const std::optional<Dimension>& radius,

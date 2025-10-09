@@ -109,6 +109,11 @@ public:
     static void BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub);
 
     static RefPtr<PipelineContext> GetSheetContext(NG::SheetStyle& sheetStyle);
+    static bool CreatePropertyAnimation(FrameNode* frameNode, AnimationPropertyType property,
+        const std::vector<float>& startValue, const std::vector<float>& endValue, const AnimationOption& option);
+    static bool CancelPropertyAnimations(
+        FrameNode* frameNode, const std::vector<AnimationPropertyType>& properties);
+    static std::vector<float> GetRenderNodePropertyValue(FrameNode* frameNode, AnimationPropertyType property);
     static void DismissSheetStatic();
     static void DismissContentCoverStatic();
     static void SheetSpringBackStatic();
@@ -281,6 +286,7 @@ public:
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
     static void SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized);
+    static void SetTransform3DMatrix(FrameNode* frameNode, const Matrix4& matrix);
     static void SetMarkAnchorStart(FrameNode* frameNode, const std::optional<Dimension>& markAnchorStart);
     static void MarkAnchor(FrameNode* frameNode, const std::optional<OffsetT<Dimension>>& value);
     static void ResetMarkAnchorStart(FrameNode* frameNode);
@@ -302,6 +308,7 @@ public:
     static void SetBackgroundColor(FrameNode *frameNode, const std::optional<Color>& color);
     static void SetPivot(FrameNode* frameNode, const std::optional<DimensionOffset>& optValue);
     static void SetRotate(FrameNode* frameNode, const std::vector<std::optional<float>>& value);
+    static void SetRotateAngle(FrameNode* frameNode, const std::vector<std::optional<float>>& value);
     static void SetBackdropBlur(FrameNode* frameNode, const std::optional<Dimension>& radius,
         const std::optional<BlurOption> &blurOption, const SysOptions& sysOptions = SysOptions());
     static void SetClipEdge(FrameNode* frameNode, std::optional<bool> isClip);

@@ -3683,12 +3683,20 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setRotateAttribute(value: RotateOptions | undefined): void {
+    setRotateAttribute(value: RotateOptions | RotateAngleOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            RotateOptions_serializer.write(thisSerializer, valueTmpValue)
+            if (valueTmpValue instanceof RotateOptions) {
+                thisSerializer.writeInt8((0).toChar())
+                const valueTmpValueForIdx0  = valueTmpValue as RotateOptions
+                RotateOptions_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof RotateAngleOptions) {
+                thisSerializer.writeInt8((1).toChar())
+                const valueTmpValueForIdx1  = valueTmpValue as RotateAngleOptions
+                RotateAngleOptions_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -3705,6 +3713,18 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setTransform(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setTransform3DAttribute(value: matrix4.Matrix4Transit | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            matrix4_Matrix4Transit_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setTransform3D(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnAppearAttribute(value: (() => void) | undefined): void {
@@ -6475,6 +6495,15 @@ export interface RotateOptions {
     perspective?: number;
     angle: number | string;
 }
+export interface RotateAngleOptions {
+    angleX?: number | string;
+    angleY?: number | string;
+    angleZ?: number | string;
+    centerX?: number | string;
+    centerY?: number | string;
+    centerZ?: number;
+    perspective?: number;
+}
 export enum TransitionEdge {
     TOP = 0,
     BOTTOM = 1,
@@ -6786,6 +6815,7 @@ export interface ContentCoverOptions extends BindOptions {
     modalTransition?: ModalTransition;
     onWillDismiss?: ((value0: DismissContentCoverAction) => void);
     transition?: TransitionEffect;
+    enableSafeArea?: boolean;
 }
 export interface SheetTitleOptions {
     title: ResourceStr;
@@ -6794,7 +6824,9 @@ export interface SheetTitleOptions {
 export enum SheetType {
     BOTTOM = 0,
     CENTER = 1,
-    POPUP = 2
+    POPUP = 2,
+    SIDE = 3,
+    CONTENT_COVER = 4
 }
 export enum SheetMode {
     OVERLAY = 0,
@@ -6808,7 +6840,8 @@ export enum SheetKeyboardAvoidMode {
     NONE = 0,
     TRANSLATE_AND_RESIZE = 1,
     RESIZE_ONLY = 2,
-    TRANSLATE_AND_SCROLL = 3
+    TRANSLATE_AND_SCROLL = 3,
+    POPUP_SHEET = 4
 }
 export interface SheetDismiss {
     dismiss: VoidCallback;
@@ -6835,6 +6868,8 @@ export type TripleLengthDetents = [
 export interface SheetOptions extends BindOptions {
     height?: SheetSize | Length;
     dragBar?: boolean;
+    enableFloatingDragBar?: boolean;
+    modalTransition?: ModalTransition;
     maskColor?: ResourceColor;
     detents?: TripleLengthDetents;
     blurStyle?: BlurStyle;
@@ -6884,7 +6919,8 @@ export enum DismissReason {
     PRESS_BACK = 0,
     TOUCH_OUTSIDE = 1,
     CLOSE_BUTTON = 2,
-    SLIDE_DOWN = 3
+    SLIDE_DOWN = 3,
+    SLIDE = 4
 }
 export interface PopupStateChangeParam {
     isVisible: boolean;
@@ -7371,11 +7407,14 @@ export interface CommonMethod {
     scale(value: ScaleOptions | undefined): this {
         throw new Error("Unimplemented method scale")
     }
-    rotate(value: RotateOptions | undefined): this {
+    rotate(value: RotateOptions | RotateAngleOptions | undefined): this {
         throw new Error("Unimplemented method rotate")
     }
     transform(value: matrix4.Matrix4Transit | undefined): this {
         throw new Error("Unimplemented method transform")
+    }
+    transform3D(value: matrix4.Matrix4Transit | undefined): this {
+        throw new Error("Unimplemented method transform3D")
     }
     onAppear(value: (() => void) | undefined): this {
         throw new Error("Unimplemented method onAppear")
@@ -7827,8 +7866,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     freeze_value?: boolean | undefined
     translate_value?: TranslateOptions | undefined
     scale_value?: ScaleOptions | undefined
-    rotate_value?: RotateOptions | undefined
+    rotate_value?: RotateOptions | RotateAngleOptions | undefined
     transform_value?: matrix4.Matrix4Transit | undefined
+    transform3D_value?: matrix4.Matrix4Transit | undefined
     onAppear_value?: (() => void) | undefined
     onDisAppear_value?: (() => void) | undefined
     onAttach_value?: VoidCallback | undefined
@@ -8145,10 +8185,13 @@ export class ArkCommonMethodStyle implements CommonMethod {
     scale(value: ScaleOptions | undefined): this {
         return this
     }
-    rotate(value: RotateOptions | undefined): this {
+    rotate(value: RotateOptions | RotateAngleOptions | undefined): this {
         return this
     }
     transform(value: matrix4.Matrix4Transit | undefined): this {
+        return this
+    }
+    transform3D(value: matrix4.Matrix4Transit | undefined): this {
         return this
     }
     onAppear(value: (() => void) | undefined): this {
@@ -9513,9 +9556,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public rotate(value: RotateOptions | undefined): this {
+    public rotate(value: RotateOptions | RotateAngleOptions | undefined): this {
         if (this.checkPriority("rotate")) {
-            const value_casted = value as (RotateOptions | undefined)
+            const value_casted = value as (RotateOptions | RotateAngleOptions | undefined)
             this.getPeer()?.setRotateAttribute(value_casted)
             return this
         }
@@ -9525,6 +9568,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("transform")) {
             const value_casted = value as (matrix4.Matrix4Transit | undefined)
             this.getPeer()?.setTransformAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public transform3D(value: matrix4.Matrix4Transit | undefined): this {
+        InteropNativeModule._NativeLog("zx transform3D")
+        if (this.checkPriority("transform3D")) {
+            const value_casted = value as (matrix4.Matrix4Transit | undefined)
+            this.getPeer()?.setTransform3DAttribute(value_casted)
             return this
         }
         return this
@@ -12662,6 +12714,199 @@ export class PreviewConfiguration_serializer {
         return value
     }
 }
+export class RotateAngleOptions_serializer {
+    public static write(buffer: SerializerBase, value: RotateAngleOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForAngleX  = value.angleX
+        if (valueHolderForAngleX !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAngleXTmpValue  = valueHolderForAngleX!
+            if (valueHolderForAngleXTmpValue instanceof number) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForAngleXTmpValueForIdx0  = valueHolderForAngleXTmpValue as number
+                valueSerializer.writeNumber(valueHolderForAngleXTmpValueForIdx0)
+            } else if (valueHolderForAngleXTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForAngleXTmpValueForIdx1  = valueHolderForAngleXTmpValue as string
+                valueSerializer.writeString(valueHolderForAngleXTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAngleY  = value.angleY
+        if (valueHolderForAngleY !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAngleYTmpValue  = valueHolderForAngleY!
+            if (valueHolderForAngleYTmpValue instanceof number) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForAngleYTmpValueForIdx0  = valueHolderForAngleYTmpValue as number
+                valueSerializer.writeNumber(valueHolderForAngleYTmpValueForIdx0)
+            } else if (valueHolderForAngleYTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForAngleYTmpValueForIdx1  = valueHolderForAngleYTmpValue as string
+                valueSerializer.writeString(valueHolderForAngleYTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAngleZ  = value.angleZ
+        if (valueHolderForAngleZ !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAngleZTmpValue  = valueHolderForAngleZ!
+            if (valueHolderForAngleZTmpValue instanceof number) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForAngleZTmpValueForIdx0  = valueHolderForAngleZTmpValue as number
+                valueSerializer.writeNumber(valueHolderForAngleZTmpValueForIdx0)
+            } else if (valueHolderForAngleZTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForAngleZTmpValueForIdx1  = valueHolderForAngleZTmpValue as string
+                valueSerializer.writeString(valueHolderForAngleZTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForCenterX  = value.centerX
+        if (valueHolderForCenterX !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCenterXTmpValue  = valueHolderForCenterX!
+            if (valueHolderForCenterXTmpValue instanceof number) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForCenterXTmpValueForIdx0  = valueHolderForCenterXTmpValue as number
+                valueSerializer.writeNumber(valueHolderForCenterXTmpValueForIdx0)
+            } else if (valueHolderForCenterXTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForCenterXTmpValueForIdx1  = valueHolderForCenterXTmpValue as string
+                valueSerializer.writeString(valueHolderForCenterXTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForCenterY  = value.centerY
+        if (valueHolderForCenterY !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCenterYTmpValue  = valueHolderForCenterY!
+            if (valueHolderForCenterYTmpValue instanceof number) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForCenterYTmpValueForIdx0  = valueHolderForCenterYTmpValue as number
+                valueSerializer.writeNumber(valueHolderForCenterYTmpValueForIdx0)
+            } else if (valueHolderForCenterYTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForCenterYTmpValueForIdx1  = valueHolderForCenterYTmpValue as string
+                valueSerializer.writeString(valueHolderForCenterYTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForCenterZ  = value.centerZ
+        if (valueHolderForCenterZ !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCenterZTmpValue  = valueHolderForCenterZ!
+            valueSerializer.writeNumber(valueHolderForCenterZTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForPerspective  = value.perspective
+        if (valueHolderForPerspective !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPerspectiveTmpValue  = valueHolderForPerspective!
+            valueSerializer.writeNumber(valueHolderForPerspectiveTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): RotateAngleOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const angleXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let angleXTmpBuf : number | string | undefined = undefined
+        if ((angleXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const angleXTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let angleXTmpBuf_ : number | string | undefined
+            if (angleXTmpBuf_UnionSelector == (0).toChar()) {
+                angleXTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (angleXTmpBuf_UnionSelector == (1).toChar()) {
+                angleXTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for angleXTmpBuf_ has to be chosen through deserialisation.")
+            }
+            angleXTmpBuf = (angleXTmpBuf_ as number | string)
+        }
+        const angleXTmpResult : number | string | undefined = angleXTmpBuf
+        const angleYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let angleYTmpBuf : number | string | undefined = undefined
+        if ((angleYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const angleYTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let angleYTmpBuf_ : number | string | undefined
+            if (angleYTmpBuf_UnionSelector == (0).toChar()) {
+                angleYTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (angleYTmpBuf_UnionSelector == (1).toChar()) {
+                angleYTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for angleYTmpBuf_ has to be chosen through deserialisation.")
+            }
+            angleYTmpBuf = (angleYTmpBuf_ as number | string)
+        }
+        const angleYTmpResult : number | string | undefined = angleYTmpBuf
+        const angleZTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let angleZTmpBuf : number | string | undefined = undefined
+        if ((angleZTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const angleZTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let angleZTmpBuf_ : number | string | undefined
+            if (angleZTmpBuf_UnionSelector == (0).toChar()) {
+                angleZTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (angleZTmpBuf_UnionSelector == (1).toChar()) {
+                angleZTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for angleZTmpBuf_ has to be chosen through deserialisation.")
+            }
+            angleZTmpBuf = (angleZTmpBuf_ as number | string)
+        }
+        const angleZTmpResult : number | string | undefined = angleZTmpBuf
+        const centerXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let centerXTmpBuf : number | string | undefined = undefined
+        if ((centerXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const centerXTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let centerXTmpBuf_ : number | string | undefined
+            if (centerXTmpBuf_UnionSelector == (0).toChar()) {
+                centerXTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (centerXTmpBuf_UnionSelector == (1).toChar()) {
+                centerXTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for centerXTmpBuf_ has to be chosen through deserialisation.")
+            }
+            centerXTmpBuf = (centerXTmpBuf_ as number | string)
+        }
+        const centerXTmpResult : number | string | undefined = centerXTmpBuf
+        const centerYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let centerYTmpBuf : number | string | undefined = undefined
+        if ((centerYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const centerYTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let centerYTmpBuf_ : number | string | undefined
+            if (centerYTmpBuf_UnionSelector == (0).toChar()) {
+                centerYTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (centerYTmpBuf_UnionSelector == (1).toChar()) {
+                centerYTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for centerYTmpBuf_ has to be chosen through deserialisation.")
+            }
+            centerYTmpBuf = (centerYTmpBuf_ as number | string)
+        }
+        const centerYTmpResult : number | string | undefined = centerYTmpBuf
+        const centerZTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let centerZTmpBuf : number | undefined = undefined
+        if ((centerZTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            centerZTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const centerZTmpResult : number | undefined = centerZTmpBuf
+        const perspectiveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let perspectiveTmpBuf : number | undefined = undefined
+        if ((perspectiveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            perspectiveTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const perspectiveTmpResult : number | undefined = perspectiveTmpBuf
+        let value : RotateAngleOptions = ({angleX: angleXTmpResult, angleY: angleYTmpResult, angleZ: angleZTmpResult, centerX: centerXTmpResult, centerY: centerYTmpResult, centerZ: centerZTmpResult, perspective: perspectiveTmpResult} as RotateAngleOptions)
+        return value
+    }
+}
 export class RotateOptions_serializer {
     public static write(buffer: SerializerBase, value: RotateOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -14062,6 +14307,14 @@ export class ContentCoverOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForEnableSafeArea  = value.enableSafeArea
+        if (valueHolderForEnableSafeArea !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableSafeAreaTmpValue  = valueHolderForEnableSafeArea!
+            valueSerializer.writeBoolean(valueHolderForEnableSafeAreaTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ContentCoverOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -14182,7 +14435,13 @@ export class ContentCoverOptions_serializer {
             transitionTmpBuf = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
         }
         const transitionTmpResult : TransitionEffect | undefined = transitionTmpBuf
-        let value : ContentCoverOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, modalTransition: modalTransitionTmpResult, onWillDismiss: onWillDismissTmpResult, transition: transitionTmpResult} as ContentCoverOptions)
+        const enableSafeAreaTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableSafeAreaTmpBuf : boolean | undefined = undefined
+        if ((enableSafeAreaTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableSafeAreaTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableSafeAreaTmpResult : boolean | undefined = enableSafeAreaTmpBuf
+        let value : ContentCoverOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, modalTransition: modalTransitionTmpResult, onWillDismiss: onWillDismissTmpResult, transition: transitionTmpResult, enableSafeArea: enableSafeAreaTmpResult} as ContentCoverOptions)
         return value
     }
 }
@@ -20487,6 +20746,18 @@ export class SheetOptions_serializer {
             dragBarTmpBuf = valueDeserializer.readBoolean()
         }
         const dragBarTmpResult : boolean | undefined = dragBarTmpBuf
+        const enableFloatingDragBarTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableFloatingDragBarTmpBuf : boolean | undefined = undefined
+        if ((enableFloatingDragBarTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableFloatingDragBarTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableFloatingDragBarTmpResult : boolean | undefined = enableFloatingDragBarTmpBuf
+        const modalTransitionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let modalTransitionTmpBuf : ModalTransition | undefined = undefined
+        if ((modalTransitionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            modalTransitionTmpBuf = ModalTransition.fromValue(valueDeserializer.readInt32())
+        }
+        const modalTransitionTmpResult : ModalTransition | undefined = modalTransitionTmpBuf
         const maskColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maskColorTmpBuf : ResourceColor | undefined = undefined
         if ((maskColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -20984,7 +21255,7 @@ export class SheetOptions_serializer {
             placementOnTargetTmpBuf = valueDeserializer.readBoolean()
         }
         const placementOnTargetTmpResult : boolean | undefined = placementOnTargetTmpBuf
-        let value : SheetOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, height: heightTmpResult, dragBar: dragBarTmpResult, maskColor: maskColorTmpResult, detents: detentsTmpResult, blurStyle: blurStyleTmpResult, showClose: showCloseTmpResult, preferType: preferTypeTmpResult, title: titleTmpResult, shouldDismiss: shouldDismissTmpResult, onWillDismiss: onWillDismissTmpResult, onWillSpringBackWhenDismiss: onWillSpringBackWhenDismissTmpResult, enableOutsideInteractive: enableOutsideInteractiveTmpResult, width: widthTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, onHeightDidChange: onHeightDidChangeTmpResult, mode: modeTmpResult, scrollSizeMode: scrollSizeModeTmpResult, onDetentsDidChange: onDetentsDidChangeTmpResult, onWidthDidChange: onWidthDidChangeTmpResult, onTypeDidChange: onTypeDidChangeTmpResult, uiContext: uiContextTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, offset: offsetTmpResult, effectEdge: effectEdgeTmpResult, radius: radiusTmpResult, detentSelection: detentSelectionTmpResult, showInSubWindow: showInSubWindowTmpResult, placement: placementTmpResult, placementOnTarget: placementOnTargetTmpResult} as SheetOptions)
+        let value : SheetOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, height: heightTmpResult, dragBar: dragBarTmpResult, enableFloatingDragBar: enableFloatingDragBarTmpResult, modalTransition: modalTransitionTmpResult, maskColor: maskColorTmpResult, detents: detentsTmpResult, blurStyle: blurStyleTmpResult, showClose: showCloseTmpResult, preferType: preferTypeTmpResult, title: titleTmpResult, shouldDismiss: shouldDismissTmpResult, onWillDismiss: onWillDismissTmpResult, onWillSpringBackWhenDismiss: onWillSpringBackWhenDismissTmpResult, enableOutsideInteractive: enableOutsideInteractiveTmpResult, width: widthTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, onHeightDidChange: onHeightDidChangeTmpResult, mode: modeTmpResult, scrollSizeMode: scrollSizeModeTmpResult, onDetentsDidChange: onDetentsDidChangeTmpResult, onWidthDidChange: onWidthDidChangeTmpResult, onTypeDidChange: onTypeDidChangeTmpResult, uiContext: uiContextTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, offset: offsetTmpResult, effectEdge: effectEdgeTmpResult, radius: radiusTmpResult, detentSelection: detentSelectionTmpResult, showInSubWindow: showInSubWindowTmpResult, placement: placementTmpResult, placementOnTarget: placementOnTargetTmpResult} as SheetOptions)
         return value
     }
 }
