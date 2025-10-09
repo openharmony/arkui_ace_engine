@@ -30,6 +30,8 @@ import { Resource } from "global.resource"
 import { ResourceStr } from "./component/units"
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
+import { PeerNode } from "./PeerNode"
+
 export class NavDestinationModifier extends CommonMethodModifier implements NavDestinationAttribute,AttributeModifier<NavDestinationAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
