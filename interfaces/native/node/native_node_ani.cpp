@@ -268,14 +268,9 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromAniValue(
     if (object == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    auto increaseRefApi = reinterpret_cast<void (*)(void*)>(OHOS::Ace::NodeModel::IncreaseRefDrawable());
-    if (!increaseRefApi) {
-        LOGE("find increase drawable ref count api failed in libace module");
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
     ArkUI_DrawableDescriptor* drawable =
         new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, object, nullptr, nullptr, nullptr, nullptr };
-    increaseRefApi(object);
+    OHOS::Ace::NodeModel::IncreaseRefDrawable(object);
     *drawableDescriptor = drawable;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }

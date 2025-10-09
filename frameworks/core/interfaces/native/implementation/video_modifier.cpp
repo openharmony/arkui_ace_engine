@@ -184,7 +184,7 @@ void SetOnStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        VideoModelStatic::SetOnStart(frameNode, nullptr);
         return;
     }
     auto onStart = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -199,7 +199,7 @@ void SetOnPauseImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        VideoModelStatic::SetOnPause(frameNode, nullptr);
         return;
     }
     auto onPause = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -214,7 +214,7 @@ void SetOnFinishImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        VideoModelStatic::SetOnFinish(frameNode, nullptr);
         return;
     }
     auto onFinish = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -229,7 +229,7 @@ void SetOnFullscreenChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        VideoModelStatic::SetOnFullScreenChange(frameNode, nullptr);
         return;
     }
     auto onFullscreenChange = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -250,7 +250,7 @@ void SetOnPreparedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        VideoModelStatic::SetOnPrepared(frameNode, nullptr);
         return;
     }
     auto onPrepared = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -271,7 +271,7 @@ void SetOnSeekingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        VideoModelStatic::SetOnSeeking(frameNode, nullptr);
         return;
     }
     auto onSeeking = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -291,7 +291,7 @@ void SetOnSeekedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        VideoModelStatic::SetOnSeeked(frameNode, nullptr);
         return;
     }
     auto onSeeked = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -311,7 +311,7 @@ void SetOnUpdateImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        VideoModelStatic::SetOnUpdate(frameNode, nullptr);
         return;
     }
     auto onUpdate = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -331,7 +331,7 @@ void SetOnErrorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        VideoModelStatic::SetOnError(frameNode, nullptr);
         return;
     }
     auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -346,7 +346,7 @@ void SetOnStopImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        VideoModelStatic::SetOnStop(frameNode, nullptr);
         return;
     }
     auto onStop = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {

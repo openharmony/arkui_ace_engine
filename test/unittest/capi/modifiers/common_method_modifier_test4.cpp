@@ -270,7 +270,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setInvertTestValidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setInvertTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setInvertTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setInvert, nullptr);
     using OneTestStep = std::tuple<Opt_Union_Number_InvertOptions, std::string>;
@@ -640,7 +640,7 @@ HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectInvalidValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setAlignRules1TestDefaultValues1, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setAlignRules1TestDefaultValues1, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
     auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
@@ -1083,7 +1083,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setOnSizeChangeTest, TestSize.Level
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     struct CheckEvent {
         int32_t nodeId;

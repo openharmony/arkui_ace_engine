@@ -30,11 +30,11 @@ export class ColumnModifier extends CommonMethodModifier implements ColumnAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ColumnAttribute): void { }
+    applyPressedAttribute(instance: ColumnAttribute): void { }
+    applyFocusedAttribute(instance: ColumnAttribute): void { }
+    applyDisabledAttribute(instance: ColumnAttribute): void { }
+    applySelectedAttribute(instance: ColumnAttribute): void { }
     _alignItems_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignItems_0_0value?: HorizontalAlign | undefined
     _justifyContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

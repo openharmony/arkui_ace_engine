@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 void CheckBoxModelStatic::SetSelect(FrameNode* frameNode, const std::optional<bool>& isSelected)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected.value_or(false));
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
@@ -117,7 +117,7 @@ void CheckBoxModelStatic::SetCheckboxStyle(FrameNode* frameNode, const std::opti
 void CheckBoxModelStatic::SetChangeEvent(FrameNode* frameNode, ChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
 }

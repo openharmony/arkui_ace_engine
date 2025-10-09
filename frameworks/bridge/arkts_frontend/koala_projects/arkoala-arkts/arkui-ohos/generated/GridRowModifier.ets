@@ -30,11 +30,11 @@ export class GridRowModifier extends CommonMethodModifier implements GridRowAttr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: GridRowAttribute): void { }
+    applyPressedAttribute(instance: GridRowAttribute): void { }
+    applyFocusedAttribute(instance: GridRowAttribute): void { }
+    applyDisabledAttribute(instance: GridRowAttribute): void { }
+    applySelectedAttribute(instance: GridRowAttribute): void { }
     _onBreakpointChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onBreakpointChange_0_0value?: ((breakpoints: string) => void) | undefined
     _alignItems_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

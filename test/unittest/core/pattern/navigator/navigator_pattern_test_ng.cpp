@@ -83,7 +83,7 @@ HWTEST_F(NavigatorPatternTestNg, NavigatorFrameNodeCreator001, TestSize.Level1)
      * @tc.steps: step2. check if properties are initiated correctly
      */
     EXPECT_EQ(frameNode == nullptr, false);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     EXPECT_EQ(eventHub->GetUrl(), URL_VALUE);
     EXPECT_FALSE(eventHub->GetActive());
     EXPECT_EQ(eventHub->GetParams(), PARAMS_VALUE);
@@ -113,7 +113,7 @@ HWTEST_F(NavigatorPatternTestNg, NavigatorFrameNodeCreator002, TestSize.Level1)
      * @tc.steps: step2. check if properties are initiated correctly
      */
     EXPECT_EQ(frameNode == nullptr, false);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     EXPECT_EQ(eventHub->GetUrl(), URL_VALUE2);
     EXPECT_FALSE(eventHub->GetActive());
     EXPECT_EQ(eventHub->GetType(), NavigatorType::BACK);
@@ -146,7 +146,7 @@ HWTEST_F(NavigatorPatternTestNg, NavigatorFrameNodeCreator003, TestSize.Level1)
      * @tc.steps: step2. check if properties are initiated correctly
      */
     EXPECT_EQ(frameNode == nullptr, false);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     EXPECT_EQ(eventHub->GetUrl(), URL_VALUE);
     EXPECT_FALSE(eventHub->GetActive());
     EXPECT_EQ(eventHub->GetParams(), PARAMS_VALUE);
@@ -176,7 +176,7 @@ HWTEST_F(NavigatorPatternTestNg, NavigatorFrameNodeCreator004, TestSize.Level1)
      * @tc.steps: step2. check if properties are initiated correctly
      */
     EXPECT_EQ(frameNode == nullptr, false);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     EXPECT_EQ(eventHub->GetUrl(), URL_VALUE2);
     EXPECT_FALSE(eventHub->GetActive());
     EXPECT_EQ(eventHub->GetParams(), PARAMS_VALUE2);
@@ -202,7 +202,7 @@ HWTEST_F(NavigatorPatternTestNg, NavigatorFrameNodeCreator005, TestSize.Level1)
      * @tc.steps: step2. check if properties are initiated correctly
      */
     EXPECT_EQ(frameNode == nullptr, false);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     EXPECT_EQ(eventHub->GetUrl(), "");
     EXPECT_FALSE(eventHub->GetActive());
     EXPECT_EQ(eventHub->GetParams(), "");
@@ -232,7 +232,7 @@ HWTEST_F(NavigatorPatternTestNg, NavigatorFrameNodeSetFuncs, TestSize.Level1)
      */
     RefPtr<FrameNode> frameNode = CreateNavigator(testProperty);
     EXPECT_TRUE(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     EXPECT_EQ(eventHub->GetUrl(), URL_VALUE);
     EXPECT_FALSE(eventHub->GetActive());
     EXPECT_EQ(eventHub->GetParams(), PARAMS_VALUE);

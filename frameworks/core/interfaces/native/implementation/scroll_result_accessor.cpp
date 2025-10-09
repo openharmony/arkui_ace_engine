@@ -15,16 +15,19 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/scroll_result_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollResultAccessor {
 void DestroyPeerImpl(Ark_ScrollResult peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_ScrollResult ConstructImpl()
 {
-    return {};
+    return PeerUtils::CreatePeer<ScrollResultPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,11 +35,14 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetOffsetRemainImpl(Ark_ScrollResult peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    return Converter::ArkValue<Ark_Number>(peer->offsetRemain);
 }
 void SetOffsetRemainImpl(Ark_ScrollResult peer,
                          const Ark_Number* offsetRemain)
 {
+    CHECK_NULL_VOID(peer && offsetRemain);
+    peer->offsetRemain = Converter::Convert<float>(*offsetRemain);
 }
 } // ScrollResultAccessor
 const GENERATED_ArkUIScrollResultAccessor* GetScrollResultAccessor()

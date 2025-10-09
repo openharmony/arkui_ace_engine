@@ -29,11 +29,11 @@ export class FormLinkModifier extends CommonMethodModifier implements FormLinkAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: FormLinkAttribute): void { }
+    applyPressedAttribute(instance: FormLinkAttribute): void { }
+    applyFocusedAttribute(instance: FormLinkAttribute): void { }
+    applyDisabledAttribute(instance: FormLinkAttribute): void { }
+    applySelectedAttribute(instance: FormLinkAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkFormLinkPeer;

@@ -14,13 +14,15 @@
  */
 
 import { memo } from "@koalaui/runtime/annotations"
-import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks } from "@koalaui/runtime"
+import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, RuntimeProfiler } from "@koalaui/runtime"
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { int32, int64 } from "@koalaui/common"
-import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback } from "@koalaui/interop"
+import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback, loadNativeModuleLibrary } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
 import { ArkUINativeModule } from "#components"
 import { EventEmulator } from "#generated"
-import { UserView, UserViewBuilder, EntryPoint } from "./UserView"
+import { UserView, UserViewBuilder } from "./UserView"
+import { EntryPoint } from './component/customComponent';
 import { ClickEvent, ClickEventInternal } from "#generated"
 import { setCustomEventsChecker } from "./Events"
 import { checkArkoalaCallbacks } from "./CallbacksChecker"
@@ -34,6 +36,7 @@ import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { registerArkuiApiHandler } from "./framework/peers/CallbackDeserializeCall"
 import { ObserveSingleton } from './stateManagement/base/observeSingleton'
 import { StateUpdateLoop } from './stateManagement'
+import { AceTrace } from 'arkui/base/AceTrace'
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -242,6 +245,8 @@ export class Application {
     }
 
     start(): pointer {
+        RuntimeProfiler.initTrace(AceTrace.begin, AceTrace.end)
+        RuntimeProfiler.initNativeLog(InteropNativeModule._NativeLog)
         if (this.withLog) UserView.startNativeLog(1)
         let root: PeerNode | undefined = undefined
         try {
@@ -497,6 +502,16 @@ export class Application {
             Application.firstRegisterArkuiApiHandler = false
         }
         return new Application(useNativeLog, moduleName, startUrl, startParams, userView, entryPoint)
+    }
+    static registerNativeModulePreloader(): void {
+        registerNativeModuleLibraryName('InteropNativeModule', 'ArkoalaNative_ark.z');
+        registerNativeModuleLibraryName('ArkUINativeModule', 'ArkoalaNative_ark.z');
+        registerNativeModuleLibraryName('ArkUIGeneratedNativeModule', 'ArkoalaNative_ark.z');
+        registerNativeModuleLibraryName('TestNativeModule', 'ArkoalaNative_ark.z');
+        registerNativeModuleLibraryName('ArkNativeAni', 'arkoala_native_ani');
+        wrapSystemApiHandlerCallback();
+        loadNativeModuleLibrary('InteropNativeModule');
+        loadNativeModuleLibrary('ArkNativeAni');
     }
 }
 

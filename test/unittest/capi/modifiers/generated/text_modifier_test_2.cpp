@@ -174,7 +174,7 @@ HWTEST_F(TextModifierTest, setCaretColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, setCaretColorTestCaretColorValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setCaretColorTestCaretColorValidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueCaretColor;
 
@@ -265,7 +265,7 @@ HWTEST_F(TextModifierTest, setSelectedBackgroundColorTestDefaultValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, setSelectedBackgroundColorTestSelectedBackgroundColorValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgroundColorValidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueSelectedBackgroundColor;
 

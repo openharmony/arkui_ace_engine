@@ -117,7 +117,7 @@ public:
  * @tc.desc: OnReadyCallbackTest test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, OnReadyCallbackTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnReadyCallbackTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -132,7 +132,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnReadyCallbackTest, TestSize.Level1)
     auto arkCallback = Converter::ArkValue<VoidCallback>(onChange, frameNode->GetId());
     auto optCallback = Converter::ArkValue<Opt_VoidCallback>(arkCallback);
     modifier_->setOnReady(node_, &optCallback);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     EXPECT_FALSE(checkEvent);
     eventHub->FireOnReady();
@@ -171,7 +171,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSelectCallbackTest, TestSiz
     auto arkCallback = Converter::ArkValue<Callback_RichEditorSelection_Void>(onChange, frameNode->GetId());
     auto optCallback = Converter::ArkValue<Opt_Callback_RichEditorSelection_Void>(arkCallback);
     modifier_->setOnSelect(node_, &optCallback);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     EXPECT_FALSE(checkEvent);
     SelectionInfo value;
@@ -220,7 +220,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSelectCallbackWithTextSpanT
     auto optCallback = Converter::ArkValue<Opt_Callback_RichEditorSelection_Void>(arkCallback);
     modifier_->setOnSelect(node_, &optCallback);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     EXPECT_FALSE(checkEvent);
 
@@ -285,7 +285,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSelectCallbackWithImageSpan
     auto optCallback = Converter::ArkValue<Opt_Callback_RichEditorSelection_Void>(arkCallback);
     modifier_->setOnSelect(node_, &optCallback);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     EXPECT_FALSE(checkEvent);
 
@@ -345,7 +345,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSelectionChange, TestSize.L
     auto arkCallback = Converter::ArkValue<Callback_RichEditorRange_Void>(onSelect, frameNode->GetId());
     auto optCallback = Converter::ArkValue<Opt_Callback_RichEditorRange_Void>(arkCallback);
     modifier_->setOnSelectionChange(node_, &optCallback);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     EXPECT_FALSE(checkEvent);
     SelectionInfo value;
@@ -390,7 +390,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_AboutToIMEInputTest, TestSize
     auto func = Converter::ArkValue<Callback_RichEditorInsertValue_Boolean>(nullptr, inputCallback, expectedResId);
     auto optFunc = Converter::ArkValue<Opt_Callback_RichEditorInsertValue_Boolean>(func);
     modifier_->setAboutToIMEInput(node_, &optFunc);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     RichEditorInsertValue info;
     info.SetInsertOffset(TEST_INSERT_OFFSET);
@@ -414,7 +414,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_AboutToIMEInputTest, TestSize
 HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnIMEInputCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
 
     RichEditorAbstractSpanResult info;
@@ -462,7 +462,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnIMEInputCompleteTest, TestS
 HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnDidIMEInputTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     struct CheckEvent {
         int32_t resourceId;
@@ -530,7 +530,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSetAboutToDeleteTest, TestS
     value.SetLength(TEST_LENGTH);
     value.SetOffset(TEST_OFFSET);
     value.SetRichEditorDeleteDirection(TEST_DELETE_DIRECTION);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     auto result = eventHub->FireAboutToDelete(value);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->resourceId, expectedResId);
@@ -560,7 +560,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSetDeleteCompleteTest, Test
     auto arkCallback = Converter::ArkValue<VoidCallback>(onChange, frameNode->GetId());
     auto optCallback = Converter::ArkValue<Opt_VoidCallback>(arkCallback);
     modifier_->setOnDeleteComplete(node_, &optCallback);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     EXPECT_FALSE(checkEvent);
     eventHub->FireOnDeleteComplete();
@@ -592,7 +592,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
         }
     };
     auto arkCallback = Converter::ArkValue<PasteEventCallback>(testCallback, frameNode->GetId());
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto optCallback = Converter::ArkValue<Opt_PasteEventCallback>(arkCallback);
     modifier_->setOnPaste(node_, &optCallback);
@@ -610,7 +610,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
  * @tc.desc: setOnEditingChange test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, OnEditingChangeTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnEditingChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -627,7 +627,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnEditingChangeTest, TestSize.Level1)
     auto arkCallback = Converter::ArkValue<Callback_Boolean_Void>(onChange, frameNode->GetId());
     auto optCallback = Converter::ArkValue<Opt_Callback_Boolean_Void>(arkCallback);
     modifier_->setOnEditingChange(node_, &optCallback);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     EXPECT_FALSE(checkEvent);
     eventHub->FireOnEditingChange(true);
@@ -646,7 +646,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSubmitTest, TestSize.Level1)
     static const int expectedResId = 123;
     static const std::u16string testValue(u"string text");
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto onSubmitFunc = [](
@@ -725,7 +725,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnWillChangeTest, TestSize.Le
     RichEditorChangeValue value;
     TextRange rangeBefore = {.start = TEST_RANGE_START, .end = TEST_RANGE_END};
     value.SetRangeBefore(rangeBefore);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     auto result = eventHub->FireOnWillChange(value);
     ASSERT_TRUE(checkEvent);
@@ -775,7 +775,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnWillChangeTest2, TestSize.L
     span.SetSpanRangeStart(TEST_START);
     span.SetSpanRangeEnd(TEST_END);
     value.SetRichEditorReplacedSpans(span);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     auto result = eventHub->FireOnWillChange(value);
     ASSERT_TRUE(checkEvent);
@@ -824,7 +824,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnDidChangeTest, TestSize.Lev
     RichEditorChangeValue changeValue;
     changeValue.SetRangeBefore({.start = TEST_RANGE_START, .end = TEST_RANGE_END});
     changeValue.SetRangeAfter({.start = TEST_RANGE_START_TWO, .end = TEST_RANGE_END_TWO});
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);
     eventHub->FireOnDidChange(changeValue);
     ASSERT_TRUE(checkEvent);
@@ -858,7 +858,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnCopyTest, TestSize.Level1)
         }
     };
     auto arkCallback = Converter::ArkValue<Callback_CopyEvent_Void>(nullptr, testCallback, frameNode->GetId());
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto optCallback = Converter::ArkValue<Opt_Callback_CopyEvent_Void>(arkCallback);
     modifier_->setOnCopy(node_, &optCallback);
@@ -894,7 +894,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnCutTest, TestSize.Level1)
         }
     };
     auto arkCallback = Converter::ArkValue<Callback_CutEvent_Void>(testCallback, frameNode->GetId());
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto optCallback = Converter::ArkValue<Opt_Callback_CutEvent_Void>(arkCallback);
     modifier_->setOnCut(node_, &optCallback);

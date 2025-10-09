@@ -19,8 +19,10 @@
 #include "load.h"
 #include "log/log.h"
 
+#include "core/interfaces/ani/ani_api.h"
 #include "interop_js/arkts_esvalue.h"
 #include "interop_js/arkts_interop_js_api.h"
+#include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
 
@@ -38,9 +40,9 @@ static ani_env* GetAniEnv(ani_vm* vm)
 }
 
 static void GetCommonFunc(ani_vm* vm, ani_ref savePtr,
-    std::function<long()> &getNativePtrFunc, std::function<void()> &releaseRefFunc)
+    WebviewControllerPeer* webviewControllerPeer)
 {
-    getNativePtrFunc = [vm, object = savePtr]() -> long {
+    auto getNativePtrFunc = [vm, object = savePtr]() -> long {
         ani_long nativePtr = 0;
         ani_env* envTemp = GetAniEnv(vm);
         if (!envTemp || envTemp->Object_CallMethodByName_Long(
@@ -49,82 +51,54 @@ static void GetCommonFunc(ani_vm* vm, ani_ref savePtr,
         }
         return static_cast<long>(nativePtr);
     };
-    releaseRefFunc = [vm, object = savePtr]() {
+    auto releaseRefFunc = [vm, object = savePtr]() {
         ani_env* envTemp = GetAniEnv(vm);
         if (!envTemp) {
             return;
         }
         envTemp->GlobalReference_Delete(object);
     };
+    webviewControllerPeer->getNativePtrFunc = std::move(getNativePtrFunc);
+    webviewControllerPeer->releaseRefFunc = std::move(releaseRefFunc);
 }
 
-void SetWebOptions(ani_env* env, ani_class aniClass, ani_long node, ani_object object)
+static void GetWebOptionsFunc(ani_vm* vm, ani_ref savePtr,
+    WebviewControllerPeer* webviewControllerPeer)
 {
-    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getWebAniModifier() || !env || !arkNode) {
-        return;
-    }
-
-    ani_vm* vm = nullptr;
-    ani_ref savePtr;
-    if (env->GetVM(&vm) != ANI_OK ||
-        env->GlobalReference_Create(reinterpret_cast<ani_ref>(object), &savePtr) != ANI_OK) {
-        return;
-    }
-
     auto setWebIdFunc = [vm, object = savePtr](int32_t nwebId) {
         ani_env* envTemp = GetAniEnv(vm);
         if (!envTemp || envTemp->Object_CallMethodByName_Void(
             reinterpret_cast<ani_object>(object), "_setNWebId", "i:", static_cast<ani_int>(nwebId)) != ANI_OK) {
-            return;
+            HILOGE("setWebIdFunc callback to call _setNWebId failed");
         }
     };
     auto setHapPathFunc = [vm, object = savePtr](const std::string& hapPath) {
         ani_string aniHapPath = nullptr;
         ani_env* envTemp = GetAniEnv(vm);
         if (!envTemp) {
+            HILOGE("setHapPathFunc callback envTemp is nullptr");
             return;
         }
         if (envTemp->String_NewUTF8(hapPath.c_str(), hapPath.size(), &aniHapPath) != ANI_OK ||
             envTemp->Object_CallMethodByName_Void(
                 reinterpret_cast<ani_object>(object), "_setHapPath", "C{std.core.String}:", aniHapPath) != ANI_OK) {
-            envTemp->GlobalReference_Delete(object);
-            return;
+            HILOGE("setHapPathFunc callback to call _setHapPath failed");
         }
         envTemp->GlobalReference_Delete(object);
     };
-    std::function<long()> getNativePtrFunc = nullptr;
-    std::function<void()> releaseRefFunc = nullptr;
-    GetCommonFunc(vm, savePtr, getNativePtrFunc, releaseRefFunc);
-    modifier->getWebAniModifier()->setWebOptions(arkNode, {
-        .setWebIdFunc = std::move(setWebIdFunc),
-        .setHapPathFunc = std::move(setHapPathFunc),
-        .getNativePtrFunc = std::move(getNativePtrFunc),
-        .releaseRefFunc = std::move(releaseRefFunc),
-    });
+    webviewControllerPeer->setWebIdFunc = std::move(setWebIdFunc);
+    webviewControllerPeer->setHapPathFunc = std::move(setHapPathFunc);
 }
 
-void SetWebControllerControllerHandler(ani_env* env, ani_class aniClass, ani_long handler, ani_object object)
+static void GetWebviewControllerHandlerFunc(ani_vm* vm, ani_ref savePtr,
+    WebviewControllerPeer* webviewControllerPeer)
 {
-    void* controllerHandler = reinterpret_cast<void*>(handler);
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getWebAniModifier() || !env || !controllerHandler) {
-        return;
-    }
-
-    ani_vm* vm = nullptr;
-    ani_ref savePtr;
-    if (env->GetVM(&vm) != ANI_OK ||
-        env->GlobalReference_Create(reinterpret_cast<ani_ref>(object), &savePtr) != ANI_OK) {
-        return;
-    }
-
     auto getWebIdFunc = [vm, object = savePtr]() -> int32_t {
         ani_int nwebId;
         ani_env* envTemp = GetAniEnv(vm);
         if (!envTemp || envTemp->Object_CallMethodByName_Int(
             reinterpret_cast<ani_object>(object), "innerGetWebId", ":i", &nwebId) != ANI_OK) {
+            HILOGE("getWebIdFunc callback to call innerGetWebId failed");
             return -1;
         }
         return static_cast<int32_t>(nwebId);
@@ -132,20 +106,41 @@ void SetWebControllerControllerHandler(ani_env* env, ani_class aniClass, ani_lon
     auto completeWindowNewFunc = [vm, object = savePtr](int32_t parentId) {
         ani_env* envTemp = GetAniEnv(vm);
         if (!envTemp) {
+            HILOGE("completeWindowNewFunc callback envTemp is nullptr");
             return;
         }
-        envTemp->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_object>(object), "innerCompleteWindowNew", "i:", static_cast<ani_int>(parentId));
+        if (envTemp->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(object),
+            "innerCompleteWindowNew", "i:", static_cast<ani_int>(parentId))) {
+            HILOGE("completeWindowNewFunc callback to call innerCompleteWindowNew failed");
+        }
     };
-    std::function<long()> getNativePtrFunc = nullptr;
-    std::function<void()> releaseRefFunc = nullptr;
-    GetCommonFunc(vm, savePtr, getNativePtrFunc, releaseRefFunc);
-    modifier->getWebAniModifier()->setWebControllerControllerHandler(controllerHandler, {
-        .getWebIdFunc = std::move(getWebIdFunc),
-        .completeWindowNewFunc = std::move(completeWindowNewFunc),
-        .getNativePtrFunc = std::move(getNativePtrFunc),
-        .releaseRefFunc = std::move(releaseRefFunc),
-    });
+    webviewControllerPeer->getWebIdFunc = std::move(getWebIdFunc);
+    webviewControllerPeer->completeWindowNewFunc = std::move(completeWindowNewFunc);
+}
+
+ani_long ExtractorsToWebviewWebviewControllerPtr(ani_env* env, ani_class aniClass, ani_object object)
+{
+    HILOGI("ExtractorsToWebviewWebviewControllerPtr entry");
+    ani_vm* vm = nullptr;
+    ani_ref savePtr;
+    if (env->GetVM(&vm) != ANI_OK ||
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(object), &savePtr) != ANI_OK) {
+        HILOGE("ExtractorsToWebviewWebviewControllerPtr get global object failed");
+        return 0L;
+    }
+
+    auto controllerPeer = new WebviewControllerPeer();
+    GetWebOptionsFunc(vm, savePtr, controllerPeer);
+    GetWebviewControllerHandlerFunc(vm, savePtr, controllerPeer);
+    GetCommonFunc(vm, savePtr, controllerPeer);
+    return reinterpret_cast<ani_long>(controllerPeer);
+}
+
+ani_object ExtractorsFromWebviewWebviewControllerPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
+{
+    HILOGD("ExtractorsFromWebviewWebviewControllerPtr entry");
+    ani_ref resultRef = nullptr;
+    return static_cast<ani_object>(resultRef);
 }
 
 ani_boolean TransferScreenCaptureHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)

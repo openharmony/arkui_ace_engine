@@ -291,7 +291,7 @@ void SpanModelNG::SetOnLongPress(UINode* uiNode, GestureEventFunc&& onLongPress)
     } else {
         auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
         CHECK_NULL_VOID(frameNode);
-        auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+        auto eventHub = frameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         auto focusHub = eventHub->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
@@ -306,7 +306,7 @@ void SpanModelNG::ClearOnLongPress(UINode* uiNode)
     } else {
         auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
         CHECK_NULL_VOID (frameNode);
-        auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+        auto eventHub = frameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         auto focusHub = eventHub->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);

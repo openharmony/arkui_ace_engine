@@ -1761,7 +1761,7 @@ HWTEST_F(SwiperCommonTestNg, UpdateOnUnselectedEvent, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->unselectedEvents_.clear();
@@ -1790,7 +1790,7 @@ HWTEST_F(SwiperCommonTestNg, UpdateOnSelectedEvent, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->selectedEvents_.clear();

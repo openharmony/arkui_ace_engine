@@ -24,6 +24,11 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
+constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
+const std::vector<std::string> DEFAULT_FONT_FAMILY = { "HarmonyOS Sans" };
+constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
+constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
+const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
 struct TextTimerOptions {
     std::optional<bool> isCountDown;
     std::optional<double> count;
@@ -105,6 +110,9 @@ void SetFormatImpl(Ark_NativePointer node,
         if (pos != std::string::npos) {
             format->replace(pos, sizeof("hh") - 1, "HH");
         }
+    } else {
+        TextTimerModelStatic::SetFormat(frameNode, DEFAULT_FORMAT);
+        return;
     }
     TextTimerModelStatic::SetFormat(frameNode, format);
 }
@@ -114,7 +122,11 @@ void SetFontColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto color = Converter::OptConvertPtr<Color>(value);
-    TextTimerModelStatic::SetFontColor(frameNode, color);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    TextTimerModelStatic::SetFontColor(frameNode, color.value_or(theme->GetTextStyle().GetTextColor()));
 }
 void SetFontSizeImpl(Ark_NativePointer node,
                      const Opt_Length* value)
@@ -124,7 +136,7 @@ void SetFontSizeImpl(Ark_NativePointer node,
     auto size = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(size);
     Validator::ValidateNonPercent(size);
-    TextTimerModelStatic::SetFontSize(frameNode, size);
+    TextTimerModelStatic::SetFontSize(frameNode, size.value_or(DEFAULT_FONT_SIZE));
 }
 void SetFontStyleImpl(Ark_NativePointer node,
                       const Opt_FontStyle* value)
@@ -132,7 +144,7 @@ void SetFontStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto style = Converter::OptConvertPtr<Ace::FontStyle>(value);
-    TextTimerModelStatic::SetFontStyle(frameNode, style);
+    TextTimerModelStatic::SetFontStyle(frameNode, style.value_or(DEFAULT_FONT_STYLE));
 }
 void SetFontWeightImpl(Ark_NativePointer node,
                        const Opt_Union_Number_FontWeight_ResourceStr* value)
@@ -140,7 +152,7 @@ void SetFontWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto weight = Converter::OptConvertPtr<Ace::FontWeight>(value);
-    TextTimerModelStatic::SetFontWeight(frameNode, weight);
+    TextTimerModelStatic::SetFontWeight(frameNode, weight.value_or(DEFAULT_FONT_WEIGHT));
 }
 void SetFontFamilyImpl(Ark_NativePointer node,
                        const Opt_ResourceStr* value)
@@ -148,7 +160,12 @@ void SetFontFamilyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<StringArray> families;
-    if (auto fontfamiliesOpt = Converter::OptConvertPtr<Converter::FontFamilies>(value); fontfamiliesOpt) {
+    auto optValue = Converter::OptConvertPtr<Converter::FontFamilies>(value);
+    if (!optValue) {
+        TextTimerModelStatic::SetFontFamily(frameNode, DEFAULT_FONT_FAMILY);
+        return;
+    }
+    if (auto fontfamiliesOpt = optValue; fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
     TextTimerModelStatic::SetFontFamily(frameNode, families);
@@ -161,7 +178,7 @@ void SetOnTimerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextTimerModelNG::SetOnTimer(frameNode, nullptr);
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue), node = AceType::WeakClaim(frameNode)](
@@ -180,7 +197,11 @@ void SetTextShadowImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value);
+    Shadow shadow;
+    shadow.SetOffsetX(0.0);
+    shadow.SetOffsetY(0.0);
+    std::vector<Shadow> defaultShadows = { shadow };
+    auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value).value_or(std::vector<Shadow>(defaultShadows));
     TextTimerModelStatic::SetTextShadow(frameNode, shadowList);
 }
 } // TextTimerAttributeModifier

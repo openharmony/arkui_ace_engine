@@ -51,10 +51,12 @@ export interface IExtendableComponent {
     getDialogController(): promptAction.DialogController | undefined;
     __removeChildWhenDispose__IExtendableComponent_Internal(): void;
     __addMeToParent__IExtendableComponent_Internal(): void;
+    setActiveInternal(active: boolean, isReuse: boolean): void;
 }
 
 export abstract class ExtendableComponent implements LifeCycle {
     static current: object | undefined = undefined;
+    isActive_: number = 1;
 
     private parent_: ExtendableComponent | undefined;
     private providedVars_: Map<string, IProvideDecoratedVariable<object>> = new Map<string, IProvideDecoratedVariable<object>>();
@@ -97,6 +99,19 @@ export abstract class ExtendableComponent implements LifeCycle {
             child?.setParent(undefined);
         });
         this.childrenWeakRefMap_.clear();
+    }
+
+    propagateToChild(active: boolean, isReuse: boolean): void {
+        if (this.childrenWeakRefMap_.size > 0) {
+            this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
+                const child = weak.deref();
+                child?.setActiveInternal(active, isReuse);
+            });
+        }
+    }
+
+    setActiveInternal(active: boolean, isReuse: boolean): void {
+        this.delegate_!.setActiveInternal(active, isReuse);
     }
 
     setDelegate(delegate: IExtendableComponent): void {

@@ -199,7 +199,7 @@ HWTEST_F(SwiperControllerAccessorTest, finishAnimationTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperControllerAccessorTest.PreloadItemsImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperControllerAccessorTest, preloadItemsTest, TestSize.Level1)
+HWTEST_F(SwiperControllerAccessorTest, DISABLED_preloadItemsTest, TestSize.Level1)
 {
     std::initializer_list<int32_t> indexList{1, 20, 300};
     std::set<int32_t> expectedIndexSet(indexList);

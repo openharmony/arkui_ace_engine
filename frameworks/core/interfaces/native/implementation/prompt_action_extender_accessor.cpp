@@ -143,6 +143,25 @@ auto g_bindMenuOptionsParamCallbacks = [](
     }
 };
 
+auto g_parseLayoutRegionMargin = [](const auto& menuOptions, MenuParam& menuParam) {
+    auto layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
+    if (layoutRegionMargin->left.has_value() && !layoutRegionMargin->left.value().IsValid()) {
+        layoutRegionMargin->left = std::nullopt;
+    }
+    if (layoutRegionMargin->right.has_value() && !layoutRegionMargin->right.value().IsValid()) {
+        layoutRegionMargin->right = std::nullopt;
+    }
+    if (layoutRegionMargin->top.has_value() && !layoutRegionMargin->top.value().IsValid()) {
+        layoutRegionMargin->top = std::nullopt;
+    }
+    if (layoutRegionMargin->bottom.has_value() && !layoutRegionMargin->bottom.value().IsValid()) {
+        layoutRegionMargin->bottom = std::nullopt;
+    }
+    layoutRegionMargin->start = layoutRegionMargin->left;
+    layoutRegionMargin->end = layoutRegionMargin->right;
+    menuParam.layoutRegionMargin = layoutRegionMargin;
+};
+
 auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) {
     auto offsetVal =
         OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(menuOptions.offset);
@@ -161,10 +180,6 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     menuParam.enableArrow = OptConvert<bool>(menuOptions.enableArrow);
     menuParam.arrowOffset = OptConvert<CalcDimension>(menuOptions.arrowOffset);
     menuParam.placement = OptConvert<Placement>(menuOptions.placement);
-    // if enableArrow is true and placement not set, set placement default value to top.
-    if (menuParam.enableArrow.has_value() && !menuParam.placement.has_value() && menuParam.enableArrow.value()) {
-        menuParam.placement = Placement::TOP;
-    }
     if (!menuParam.placement.has_value()) {
         menuParam.placement = Placement::BOTTOM_LEFT;
     }
@@ -185,9 +200,7 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
         },
         [](const CustomNodeBuilder& value) {}, []() {});
     menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
-    menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
-    menuParam.layoutRegionMargin->start = menuParam.layoutRegionMargin->left;
-    menuParam.layoutRegionMargin->end = menuParam.layoutRegionMargin->right;
+    g_parseLayoutRegionMargin(menuOptions, menuParam);
     menuParam.hapticFeedbackMode =
         OptConvert<HapticFeedbackMode>(menuOptions.hapticFeedbackMode).value_or(menuParam.hapticFeedbackMode);
     menuParam.outlineColor = OptConvert<BorderColorProperty>(menuOptions.outlineColor);
@@ -322,13 +335,13 @@ void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<Popup
         popupParam->SetChildWidth(widthOpt.value());
     }
     auto arrowWidthOpt = Converter::OptConvert<CalcDimension>(src.arrowWidth);
-    Validator::ValidateNonNegative(arrowWidthOpt);
+    Validator::ValidatePositive(arrowWidthOpt);
     Validator::ValidateNonPercent(arrowWidthOpt);
     if (arrowWidthOpt.has_value()) {
         popupParam->SetArrowWidth(arrowWidthOpt.value());
     }
     auto arrowHeightOpt = Converter::OptConvert<CalcDimension>(src.arrowHeight);
-    Validator::ValidateNonNegative(arrowHeightOpt);
+    Validator::ValidatePositive(arrowHeightOpt);
     Validator::ValidateNonPercent(arrowHeightOpt);
     if (arrowHeightOpt.has_value()) {
         popupParam->SetArrowHeight(arrowHeightOpt.value());
@@ -356,6 +369,7 @@ void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<Popup
     popupParam->SetFocusable(Converter::OptConvert<bool>(src.focusable).value_or(popupParam->GetFocusable()));
     auto popupTransitionEffectsOpt = Converter::OptConvert<RefPtr<NG::ChainedTransitionEffect>>(src.transition);
     if (popupTransitionEffectsOpt.has_value()) {
+        popupParam->SetHasTransition(true);
         popupParam->SetTransitionEffects(popupTransitionEffectsOpt.value());
     }
     g_onWillDismissPopup(src.onWillDismiss, popupParam);

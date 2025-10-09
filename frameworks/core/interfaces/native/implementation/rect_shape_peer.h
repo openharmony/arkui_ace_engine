@@ -15,8 +15,7 @@
 
 #pragma once
 
-#include "base/geometry/shape.h"
+#include "interfaces/ets/ani/shape/src/shape_peer.h"
 
-struct RectShapePeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::ShapeRect> shape;
+struct RectShapePeer : public OHOS::Ace::RectPeer {
 };

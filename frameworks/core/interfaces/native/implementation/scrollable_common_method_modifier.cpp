@@ -50,7 +50,15 @@ void AssignCast(std::optional<Dimension>& dst, const Ark_FadingEdgeOptions& src)
 template<>
 ScrollFrameResult Convert<ScrollFrameResult>(const Ark_OffsetResult& src)
 {
-    return { .offset = Convert<Dimension>(src.xOffset) };
+    return { .offset = Convert<Dimension>(src.xOffset)
+    };
+}
+
+template<>
+RefPtr<ShapeRect> Convert(const Ark_RectShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->rectShape;
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -217,8 +225,9 @@ void SetClipContentImpl(Ark_NativePointer node,
             ScrollableModelStatic::SetContentClip(frameNode, mode.value_or(ContentClipMode::DEFAULT), nullptr);
         },
         [frameNode](const Ark_RectShape& value) {
-            if (value && value->shape) {
-                ScrollableModelStatic::SetContentClip(frameNode, ContentClipMode::CUSTOM, value->shape);
+            auto rectShape = Converter::Convert<RefPtr<ShapeRect>>(value);
+            if (rectShape) {
+                ScrollableModelStatic::SetContentClip(frameNode, ContentClipMode::CUSTOM, rectShape);
             } else {
                 ScrollableModelStatic::SetContentClip(frameNode, ContentClipMode::DEFAULT, nullptr);
             }

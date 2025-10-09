@@ -96,7 +96,7 @@ void RefreshModelStatic::SetPullDownRatio(FrameNode* frameNode, const std::optio
 void RefreshModelStatic::SetOnOffsetChange(FrameNode* frameNode, OffsetChangeEvent&& dragOffset)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnOffsetChange(std::move(dragOffset));
 }
@@ -104,7 +104,7 @@ void RefreshModelStatic::SetOnOffsetChange(FrameNode* frameNode, OffsetChangeEve
 void RefreshModelStatic::ResetOnOffsetChange(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ResetOnOffsetChange();
 }
@@ -112,7 +112,7 @@ void RefreshModelStatic::ResetOnOffsetChange(FrameNode* frameNode)
 void RefreshModelStatic::SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStateChange(std::move(stateChange));
 }
@@ -120,7 +120,7 @@ void RefreshModelStatic::SetOnStateChange(FrameNode* frameNode, StateChangeEvent
 void RefreshModelStatic::SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRefreshing(std::move(refreshing));
 }
@@ -128,7 +128,7 @@ void RefreshModelStatic::SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&&
 void RefreshModelStatic::SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }

@@ -29,11 +29,11 @@ export class LinearIndicatorModifier extends CommonMethodModifier implements Lin
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: LinearIndicatorAttribute): void { }
+    applyPressedAttribute(instance: LinearIndicatorAttribute): void { }
+    applyFocusedAttribute(instance: LinearIndicatorAttribute): void { }
+    applyDisabledAttribute(instance: LinearIndicatorAttribute): void { }
+    applySelectedAttribute(instance: LinearIndicatorAttribute): void { }
     _indicatorStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _indicatorStyle_0_0value?: LinearIndicatorStyle | undefined
     _indicatorLoop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

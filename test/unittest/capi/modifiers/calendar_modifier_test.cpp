@@ -986,7 +986,7 @@ HWTEST_F(CalendarModifierTest, setOnRequestDataTest, TestSize.Level1)
     modifier_->setCalendarOptions(node_, &calendarOptions);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<CalendarEventHub>();
+    auto eventHub = frameNode->GetEventHub<CalendarEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto callback = [](const Ark_Int32 resourceId, const Ark_CalendarRequestedData event) {

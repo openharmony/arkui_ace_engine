@@ -311,7 +311,7 @@ void IndexerModelStatic::SetPopupHorizontalSpace(
 void IndexerModelStatic::SetOnSelected(FrameNode* frameNode, std::function<void(const int32_t selected)>&& onSelect)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelected(std::move(onSelect));
 }
@@ -320,7 +320,7 @@ void IndexerModelStatic::SetOnRequestPopupData(
     FrameNode* frameNode, std::function<std::vector<std::string>(const int32_t selected)>&& RequestPopupData)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRequestPopupData(std::move(RequestPopupData));
 }
@@ -329,7 +329,7 @@ void IndexerModelStatic::SetOnPopupSelected(
     FrameNode* frameNode, std::function<void(const int32_t selected)>&& onPopupSelected)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPopupSelected(std::move(onPopupSelected));
 }
@@ -337,7 +337,7 @@ void IndexerModelStatic::SetOnPopupSelected(
 void IndexerModelStatic::SetChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
@@ -346,7 +346,7 @@ void IndexerModelStatic::SetCreateChangeEvent(
     FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCreatChangeEvent(std::move(changeEvent));
 }

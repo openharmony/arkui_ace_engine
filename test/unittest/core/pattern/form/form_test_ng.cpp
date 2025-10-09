@@ -669,7 +669,7 @@ HWTEST_F(FormTestNg, FireOnEvent, TestSize.Level1)
     RefPtr<FrameNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**
@@ -759,7 +759,7 @@ HWTEST_F(FormTestNg, OnActionEvent, TestSize.Level1)
     RefPtr<FrameNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetOnRouter([](const std::string& string) {
         auto json = JsonUtil::Create(true);

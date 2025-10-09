@@ -16,31 +16,32 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { CommonMethod } from "./component/common"
+import { TextBackgroundStyle, BaseSpan } from "./component/span"
+import { extractors, AttributeModifier } from "#handwritten"
+import { LengthMetrics } from "arkui.Graphics"
 import { BaseSpanModifier } from "./BaseSpanModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkImageSpanPeer, ImageCompleteCallback, ImageLoadResult, ImageSpanAttribute } from "./component/imageSpan"
 import { int32 } from "@koalaui/common"
-import { BaseSpan } from "./component/span"
 import { ImageSpanAlignment, ImageFit } from "./component/enums"
 import { ColorFilter } from "./component/units"
 import { default as drawing } from "@ohos.graphics.drawing"
 import { ImageErrorCallback, ImageError } from "./component/image"
 import { default as image } from "@ohos.multimedia.image"
-import { CommonMethod } from "./component/common"
-export class ImageSpanModifier extends BaseSpanModifier implements ImageSpanAttribute,AttributeModifier<ImageSpanAttribute> {
+export class ImageSpanModifier extends CommonMethodModifier implements ImageSpanAttribute,AttributeModifier<ImageSpanAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ImageSpanAttribute): void { }
+    applyPressedAttribute(instance: ImageSpanAttribute): void { }
+    applyFocusedAttribute(instance: ImageSpanAttribute): void { }
+    applyDisabledAttribute(instance: ImageSpanAttribute): void { }
+    applySelectedAttribute(instance: ImageSpanAttribute): void { }
     _verticalAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _verticalAlign_0_0value?: ImageSpanAlignment | undefined
     _colorFilter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -53,6 +54,10 @@ export class ImageSpanModifier extends BaseSpanModifier implements ImageSpanAttr
     _onError_0_0value?: ImageErrorCallback | undefined
     _alt_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alt_0_0value?: image.PixelMap | undefined
+    _textBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
+    _baselineOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _baselineOffset_0_0value?: LengthMetrics | undefined
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkImageSpanPeer;
@@ -164,6 +169,42 @@ export class ImageSpanModifier extends BaseSpanModifier implements ImageSpanAttr
                 }
             }
         }
+        if (this._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textBackgroundStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextBackgroundStyleAttribute((this._textBackgroundStyle_0_0value as TextBackgroundStyle | undefined));
+                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextBackgroundStyleAttribute((undefined as TextBackgroundStyle | undefined));
+                }
+            }
+        }
+        if (this._baselineOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._baselineOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBaselineOffsetAttribute((this._baselineOffset_0_0value as LengthMetrics | undefined));
+                    this._baselineOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._baselineOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._baselineOffset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBaselineOffsetAttribute((undefined as LengthMetrics | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: ImageSpanModifier): void {
         super.mergeModifier(modifier)
@@ -245,6 +286,32 @@ export class ImageSpanModifier extends BaseSpanModifier implements ImageSpanAttr
                 }
             }
         }
+        if (modifier._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textBackgroundStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textBackgroundStyle(modifier._textBackgroundStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.textBackgroundStyle((undefined as TextBackgroundStyle | undefined));
+                }
+            }
+        }
+        if (modifier._baselineOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._baselineOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.baselineOffset(modifier._baselineOffset_0_0value);
+                    break;
+                }
+                default: {
+                    this.baselineOffset((undefined as LengthMetrics | undefined));
+                }
+            }
+        }
     }
     verticalAlign(value: ImageSpanAlignment | undefined): this {
         if (((this._verticalAlign_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -309,6 +376,28 @@ export class ImageSpanModifier extends BaseSpanModifier implements ImageSpanAttr
         } else
         {
             this._alt_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
+        if (((this._textBackgroundStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textBackgroundStyle_0_0value = value
+        } else
+        {
+            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    baselineOffset(value: LengthMetrics | undefined): this {
+        if (((this._baselineOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._baselineOffset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._baselineOffset_0_0value = value
+        } else
+        {
+            this._baselineOffset_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

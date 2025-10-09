@@ -37,11 +37,11 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: TextAreaAttribute): void { }
+    applyPressedAttribute(instance: TextAreaAttribute): void { }
+    applyFocusedAttribute(instance: TextAreaAttribute): void { }
+    applyDisabledAttribute(instance: TextAreaAttribute): void { }
+    applySelectedAttribute(instance: TextAreaAttribute): void { }
     _placeholderColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _placeholderColor_0_0value?: ResourceColor | undefined
     _placeholderFont_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -71,7 +71,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _selectedBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selectedBackgroundColor_0_0value?: ResourceColor | undefined
     _onSubmit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSubmit_0_0value?: ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined
+    _onSubmit_0_0value?: TextAreaSubmitCallback | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: EditableTextOnChangeCallback | undefined
     _onTextSelectionChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -424,7 +424,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._onSubmit_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnSubmitAttribute((this._onSubmit_0_0value as ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined));
+                    peer.setOnSubmitAttribute((this._onSubmit_0_0value as TextAreaSubmitCallback | undefined));
                     this._onSubmit_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -434,7 +434,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._onSubmit_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnSubmitAttribute((undefined as ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined));
+                    peer.setOnSubmitAttribute((undefined as TextAreaSubmitCallback | undefined));
                 }
             }
         }
@@ -1198,7 +1198,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._inputFilter_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setInputFilterAttribute((this._inputFilter_0_0value as ResourceStr | undefined), (this._inputFilter_0_1value as ((value: string) => void) | undefined));
+                    peer.setInputFilterAttribute((this._inputFilter_0_0value as ResourceStr | undefined), (this._inputFilter_0_1value as ((value: string) => void) | undefined | undefined));
                     this._inputFilter_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1216,7 +1216,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._showCounter_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setShowCounterAttribute((this._showCounter_0_0value as boolean | undefined), (this._showCounter_0_1value as InputCounterOptions | undefined));
+                    peer.setShowCounterAttribute((this._showCounter_0_0value as boolean | undefined), (this._showCounter_0_1value as InputCounterOptions | undefined | undefined));
                     this._showCounter_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1234,7 +1234,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._customKeyboard_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined));
+                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1442,7 +1442,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.onSubmit((undefined as ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined));
+                    this.onSubmit((undefined as TextAreaSubmitCallback | undefined));
                 }
             }
         }
@@ -2186,7 +2186,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    onSubmit(value: ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined): this {
+    onSubmit(value: TextAreaSubmitCallback | undefined): this {
         if (((this._onSubmit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onSubmit_0_flag = AttributeUpdaterFlag.UPDATE

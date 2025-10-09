@@ -40,7 +40,7 @@ void StepperPattern::OnModifyDone()
     CHECK_NULL_VOID(swiperNode);
     index_ = swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->GetIndex().value_or(0);
 
-    auto swiperEventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     auto stepperLayoutProperty = hostNode->GetLayoutProperty();
     auto layoutPolicy = stepperLayoutProperty->GetLayoutPolicyProperty();
@@ -306,8 +306,8 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(stepperTheme->GetRadius()));
         buttonNode->MountToParent(hostNode);
     }
-    isDisabled ? buttonNode->GetOrCreateEventHub<ButtonEventHub>()->SetEnabled(false)
-               : buttonNode->GetOrCreateEventHub<ButtonEventHub>()->SetEnabled(true);
+    isDisabled ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
+               : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
     if (!isDisabled) {
         auto focusHub = buttonNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
@@ -415,8 +415,8 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, bool isDisabl
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(stepperTheme->GetRadius()));
         buttonNode->MountToParent(hostNode);
     }
-    isDisabled ? buttonNode->GetOrCreateEventHub<ButtonEventHub>()->SetEnabled(false)
-               : buttonNode->GetOrCreateEventHub<ButtonEventHub>()->SetEnabled(true);
+    isDisabled ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
+               : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
     if (!isDisabled) {
         auto focusHub = buttonNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
@@ -511,7 +511,7 @@ void StepperPattern::HandlingLeftButtonClickEvent()
 {
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto stepperHub = hostNode->GetOrCreateEventHub<StepperEventHub>();
+    auto stepperHub = hostNode->GetEventHub<StepperEventHub>();
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
@@ -529,7 +529,7 @@ void StepperPattern::HandlingRightButtonClickEvent()
 {
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto stepperHub = hostNode->GetOrCreateEventHub<StepperEventHub>();
+    auto stepperHub = hostNode->GetEventHub<StepperEventHub>();
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));

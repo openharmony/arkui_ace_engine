@@ -855,6 +855,7 @@ void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src)
         case ARK_STICKY_STYLE_NONE: dst = V2::StickyStyle::NONE; break;
         case ARK_STICKY_STYLE_HEADER: dst = V2::StickyStyle::HEADER; break;
         case ARK_STICKY_STYLE_FOOTER: dst = V2::StickyStyle::FOOTER; break;
+        case ARK_STICKY_STYLE_BOTH: dst = V2::StickyStyle::BOTH; break;
         default: LOGE("Unexpected enum value in Ark_StickyStyle: %{public}d", src);
     }
 }
@@ -1847,19 +1848,13 @@ template<>
 void AssignCast(std::optional<PanDirection>& dst, const Ark_PanDirection& src)
 {
     dst = PanDirection();
-    switch (src) {
-        case ARK_PAN_DIRECTION_NONE: dst->type = PanDirection::NONE; break;
-        case ARK_PAN_DIRECTION_HORIZONTAL: dst->type = PanDirection::HORIZONTAL; break;
-        case ARK_PAN_DIRECTION_LEFT: dst->type = PanDirection::LEFT; break;
-        case ARK_PAN_DIRECTION_RIGHT: dst->type = PanDirection::RIGHT; break;
-        case ARK_PAN_DIRECTION_VERTICAL: dst->type = PanDirection::VERTICAL; break;
-        case ARK_PAN_DIRECTION_UP: dst->type = PanDirection::UP; break;
-        case ARK_PAN_DIRECTION_DOWN: dst->type = PanDirection::DOWN; break;
-        case ARK_PAN_DIRECTION_ALL: dst->type = PanDirection::ALL; break;
-        default: {
-            LOGE("Unexpected enum value in Ark_PanDirection: %{public}d", src);
-            dst = std::nullopt;
-        }
+    uint32_t directNum = static_cast<uint32_t>(src);
+    if (directNum >= static_cast<uint32_t>(PanDirection::NONE) &&
+        directNum <= static_cast<uint32_t>(PanDirection::ALL)) {
+        dst->type = directNum;
+    } else {
+        LOGE("Unexpected enum value in Ark_PanDirection: %{public}d", src);
+        dst = std::nullopt;
     }
 }
 

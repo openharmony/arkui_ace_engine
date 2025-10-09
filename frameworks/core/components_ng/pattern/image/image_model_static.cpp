@@ -39,6 +39,17 @@ constexpr int32_t LAYERED_TYPE = 1;
 constexpr int32_t ANIMATED_TYPE = 2;
 constexpr int32_t PIXELMAP_TYPE = 3;
 } // namespace
+
+void ImageModelStatic::SetSrc(FrameNode* frameNode, const std::optional<ImageSourceInfo>& info)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (info) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, info.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, frameNode);
+    }
+}
+
 void ImageModelStatic::SetSmoothEdge(FrameNode* frameNode, const std::optional<float>& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -131,8 +142,13 @@ void ImageModelStatic::SetImageFill(FrameNode* frameNode, const std::optional<Co
         ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color.value(), frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ImageRenderProperty, SvgFillColor, PROPERTY_UPDATE_RENDER, frameNode);
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<ImageTheme>();
+        CHECK_NULL_VOID(theme);
+        auto fillColor = theme->GetFillColor();
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, fillColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, fillColor, frameNode);
     }
 }
 

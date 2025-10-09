@@ -30,11 +30,11 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: CalendarPickerAttribute): void { }
+    applyPressedAttribute(instance: CalendarPickerAttribute): void { }
+    applyFocusedAttribute(instance: CalendarPickerAttribute): void { }
+    applyDisabledAttribute(instance: CalendarPickerAttribute): void { }
+    applySelectedAttribute(instance: CalendarPickerAttribute): void { }
     _textStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textStyle_0_0value?: PickerTextStyle | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -105,7 +105,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
         {
             switch (this._edgeAlign_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEdgeAlignAttribute((this._edgeAlign_0_0value as CalendarAlign | undefined), (this._edgeAlign_0_1value as Offset | undefined));
+                    peer.setEdgeAlignAttribute((this._edgeAlign_0_0value as CalendarAlign | undefined), (this._edgeAlign_0_1value as Offset | undefined | undefined));
                     this._edgeAlign_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

@@ -163,7 +163,7 @@ void RegisterToolbarHotZoneEvent(const RefPtr<FrameNode>& buttonNode, const RefP
         }
         auto barItemNode = weakNode.Upgrade();
         CHECK_NULL_VOID(barItemNode);
-        auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
+        auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto pattern = barItemNode->GetPattern<BarItemPattern>();
         CHECK_NULL_VOID(pattern);
@@ -224,7 +224,7 @@ void UpdateToolbarItemNodeWithConfiguration(
         barItemNode->AddChild(iconNode);
     }
     if (barItem.action) {
-        auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
+        auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetItemAction(barItem.action);
         RegisterToolbarHotZoneEvent(buttonNode, barItemNode);
@@ -237,14 +237,14 @@ void UpdateToolbarItemNodeWithConfiguration(
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateOpacity(theme->GetToolbarItemDisabledAlpha());
 
-        auto itemEventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
+        auto itemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(itemEventHub);
         itemEventHub->SetEnabled(false);
         auto itemFocusHub = barItemNode->GetFocusHub();
         CHECK_NULL_VOID(itemFocusHub);
         itemFocusHub->SetEnabled(false);
 
-        auto buttonEventHub = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
+        auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
         CHECK_NULL_VOID(buttonEventHub);
         buttonEventHub->SetEnabled(false);
         auto buttonFocusHub = buttonNode->GetFocusHub();
@@ -437,7 +437,7 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
 void BuildToolbarMoreMenuNodeAction(const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode, 
     const RefPtr<FrameNode>& buttonNode, const MenuParam& menuParam)
 {
-    auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
+    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto context = PipelineContext::GetCurrentContext();

@@ -47,10 +47,14 @@ void TextClockModelStatic::SetFontColor(FrameNode* frameNode,  const std::option
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColor, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextClockLayoutProperty, TextColor, PROPERTY_UPDATE_RENDER, frameNode);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+        CHECK_NULL_VOID(textNode);
+        TextModelNG::ResetTextColor(Referenced::RawPtr<FrameNode>(textNode));
     }
 }
 
@@ -89,5 +93,10 @@ void TextClockModelStatic::SetDateTimeOptions(FrameNode* frameNode, const std::o
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, PrefixHour, frameNode);
     }
+}
+
+void TextClockModelStatic::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFeature, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

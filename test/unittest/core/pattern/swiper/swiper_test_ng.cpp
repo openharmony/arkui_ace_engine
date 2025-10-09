@@ -82,7 +82,7 @@ void SwiperTestNg::GetSwiper()
 {
     frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     pattern_ = frameNode_->GetPattern<SwiperPattern>();
-    eventHub_ = frameNode_->GetOrCreateEventHub<SwiperEventHub>();
+    eventHub_ = frameNode_->GetEventHub<SwiperEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<SwiperLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<SwiperPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<SwiperAccessibilityProperty>();

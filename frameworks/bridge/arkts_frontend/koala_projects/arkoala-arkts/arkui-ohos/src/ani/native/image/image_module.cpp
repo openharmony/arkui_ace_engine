@@ -20,8 +20,106 @@
 #include "load.h"
 #include "log/log.h"
 #include "pixel_map_taihe_ani.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 
 namespace OHOS::Ace::Ani {
+
+ani_long ExtractorsToDrawableDescriptorPtr(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_object drawableAni, ani_int drawableType)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return 0;
+    }
+    ani_long nativeObj = 0;
+    env->Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj);
+    auto* drawable = reinterpret_cast<void*>(nativeObj);
+    if (drawable == nullptr) {
+        HILOGE("image construct with drawable descriptor failed, nativeObj is nullptr");
+        return 0;
+    }
+    auto drawableDescriptorPeer =
+        modifier->getImageAniModifier()->getDrawableDescriptorPeer(drawable, static_cast<int>(drawableType));
+    return reinterpret_cast<ani_long>(drawableDescriptorPeer);
+}
+
+ani_long ExtractorsToDrawingColorFilterPtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object colorFilterAni)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return 0;
+    }
+    ani_long nativeObj = 0;
+    env->Object_GetPropertyByName_Long(colorFilterAni, "nativeObj", &nativeObj);
+    auto* colorFilter = reinterpret_cast<void*>(nativeObj);
+    if (colorFilter == nullptr) {
+        HILOGE("image colorFilter options is null");
+        return 0;
+    }
+    auto* aniColorFilter = reinterpret_cast<OHOS::Rosen::Drawing::AniColorFilter*>(colorFilter);
+    if (aniColorFilter == nullptr) {
+        HILOGE("image aniColorFilter options is null");
+        return 0;
+    }
+    auto drawingColorFilter = aniColorFilter->GetColorFilter();
+    if (drawingColorFilter == nullptr) {
+        HILOGE("image drawingColorFilter options is null");
+        return 0;
+    }
+    auto colorFilterPeer =
+        modifier->getImageAniModifier()->getDrawingColorFilterPeer(reinterpret_cast<void*>(&drawingColorFilter));
+    return reinterpret_cast<ani_long>(colorFilterPeer);
+}
+
+ani_long ExtractorsToDrawingLatticePtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object latticeAni)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return 0;
+    }
+    ani_long nativeObj = 0;
+    env->Object_GetPropertyByName_Long(latticeAni, "nativeObj", &nativeObj);
+    auto* lattice = reinterpret_cast<void*>(nativeObj);
+    if (lattice == nullptr) {
+        HILOGE("image reziable options is null");
+        return 0;
+    }
+    auto* aniLattice = reinterpret_cast<OHOS::Rosen::Drawing::AniLattice*>(lattice);
+    if (aniLattice == nullptr) {
+        HILOGE("image reziable aniLattice is null");
+        return 0;
+    }
+    auto resizableLattic = aniLattice->GetLattice();
+    if (resizableLattic == nullptr) {
+        HILOGE("image reziable resizableLattic is null");
+        return 0;
+    }
+    auto lattcePeer = modifier->getImageAniModifier()->getDrawingLatticePeer(reinterpret_cast<void*>(&resizableLattic));
+    return reinterpret_cast<ani_long>(lattcePeer);
+}
+
+ani_object ExtractorsFromImagePixelMapPtr(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_long pointer)
+{
+    auto* pixelMapPeer = reinterpret_cast<image_PixelMapPeer*>(pointer);
+    CHECK_NULL_RETURN(pixelMapPeer, nullptr);
+    CHECK_NULL_RETURN(pixelMapPeer->pixelMap, nullptr);
+    auto mediaPixelMap = pixelMapPeer->pixelMap->GetPixelMapSharedPtr();
+    CHECK_NULL_RETURN(mediaPixelMap, nullptr);
+    return Media::PixelMapTaiheAni::CreateEtsPixelMap(env, mediaPixelMap);
+}
+
+ani_long ExtractorsToImagePixelMapPtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object pixelMapObj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return 0;
+    }
+    auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapObj);
+    auto pixelMapPtr = reinterpret_cast<void*>(&pixelMap);
+    auto imagePixelMapPeer = modifier->getImageAniModifier()->getPixelMapPeer(pixelMapPtr);
+    return reinterpret_cast<ani_long>(imagePixelMapPeer);
+}
+
 void ImageResizableOptions(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object latticeAni)
 {
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);

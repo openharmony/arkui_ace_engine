@@ -33,11 +33,11 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: SliderAttribute): void { }
+    applyPressedAttribute(instance: SliderAttribute): void { }
+    applyFocusedAttribute(instance: SliderAttribute): void { }
+    applyDisabledAttribute(instance: SliderAttribute): void { }
+    applySelectedAttribute(instance: SliderAttribute): void { }
     _blockColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _blockColor_0_0value?: ResourceColor | undefined
     _trackColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -428,7 +428,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             switch (this._showTips_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setShowTipsAttribute((this._showTips_0_0value as boolean | undefined), (this._showTips_0_1value as ResourceStr | undefined));
+                    peer.setShowTipsAttribute((this._showTips_0_0value as boolean | undefined), (this._showTips_0_1value as ResourceStr | undefined | undefined));
                     this._showTips_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

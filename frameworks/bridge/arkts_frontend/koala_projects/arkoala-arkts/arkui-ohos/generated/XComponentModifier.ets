@@ -30,11 +30,11 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: XComponentAttribute): void { }
+    applyPressedAttribute(instance: XComponentAttribute): void { }
+    applyFocusedAttribute(instance: XComponentAttribute): void { }
+    applyDisabledAttribute(instance: XComponentAttribute): void { }
+    applySelectedAttribute(instance: XComponentAttribute): void { }
     _onLoad_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onLoad_0_0value?: VoidCallback | undefined
     _onDestroy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

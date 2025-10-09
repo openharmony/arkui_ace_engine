@@ -33,11 +33,11 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: MenuItemAttribute): void { }
+    applyPressedAttribute(instance: MenuItemAttribute): void { }
+    applyFocusedAttribute(instance: MenuItemAttribute): void { }
+    applyDisabledAttribute(instance: MenuItemAttribute): void { }
+    applySelectedAttribute(instance: MenuItemAttribute): void { }
     _selected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selected_0_0value?: boolean | Bindable<boolean> | undefined
     _selectIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

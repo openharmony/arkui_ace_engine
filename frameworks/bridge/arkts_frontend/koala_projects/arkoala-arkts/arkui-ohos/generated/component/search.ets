@@ -71,7 +71,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -175,7 +175,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -215,7 +215,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -271,20 +271,12 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setEnterKeyType(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnSubmitAttribute(value: ((value0: string) => void) | SearchSubmitCallback | undefined): void {
+    setOnSubmitAttribute(value: SearchSubmitCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof ((value0: string) => void)) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as ((value0: string) => void)
-                thisSerializer.holdAndWriteCallback(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof SearchSubmitCallback) {
-                thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as SearchSubmitCallback
-                thisSerializer.holdAndWriteCallback(valueTmpValueForIdx1)
-            }
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -880,7 +872,7 @@ export interface SearchAttribute extends CommonMethod {
     enterKeyType(value: EnterKeyType | undefined): this {
         throw new Error("Unimplemented method enterKeyType")
     }
-    onSubmit(value: ((value0: string) => void) | SearchSubmitCallback | undefined): this {
+    onSubmit(value: SearchSubmitCallback | undefined): this {
         throw new Error("Unimplemented method onSubmit")
     }
     onChange(value: EditableTextOnChangeCallback | undefined): this {
@@ -1004,7 +996,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     placeholderFont_value?: Font | undefined
     textFont_value?: Font | undefined
     enterKeyType_value?: EnterKeyType | undefined
-    onSubmit_value?: ((value0: string) => void) | SearchSubmitCallback | undefined
+    onSubmit_value?: SearchSubmitCallback | undefined
     onChange_value?: EditableTextOnChangeCallback | undefined
     onTextSelectionChange_value?: OnTextSelectionChangeCallback | undefined
     onContentScroll_value?: OnContentScrollCallback | undefined
@@ -1074,7 +1066,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     enterKeyType(value: EnterKeyType | undefined): this {
         return this
     }
-    onSubmit(value: ((value0: string) => void) | SearchSubmitCallback | undefined): this {
+    onSubmit(value: SearchSubmitCallback | undefined): this {
         return this
     }
     onChange(value: EditableTextOnChangeCallback | undefined): this {
@@ -1290,9 +1282,9 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         }
         return this
     }
-    public onSubmit(value: ((value0: string) => void) | SearchSubmitCallback | undefined): this {
+    public onSubmit(value: SearchSubmitCallback | undefined): this {
         if (this.checkPriority("onSubmit")) {
-            const value_casted = value as (((value0: string) => void) | SearchSubmitCallback | undefined)
+            const value_casted = value as (SearchSubmitCallback | undefined)
             this.getPeer()?.setOnSubmitAttribute(value_casted)
             return this
         }
@@ -1788,7 +1780,7 @@ export class IconOptions_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -1847,7 +1839,7 @@ export class IconOptions_serializer {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let colorTmpBuf_ : Color | number | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
@@ -1909,7 +1901,7 @@ export class SearchButtonOptions_serializer {
             if (valueHolderForFontColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
@@ -1960,7 +1952,7 @@ export class SearchButtonOptions_serializer {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let fontColorTmpBuf_ : Color | number | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
-                fontColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {

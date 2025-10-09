@@ -32,11 +32,11 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: TextTimerAttribute): void { }
+    applyPressedAttribute(instance: TextTimerAttribute): void { }
+    applyFocusedAttribute(instance: TextTimerAttribute): void { }
+    applyDisabledAttribute(instance: TextTimerAttribute): void { }
+    applySelectedAttribute(instance: TextTimerAttribute): void { }
     _format_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _format_0_0value?: string | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

@@ -58,7 +58,7 @@ void GridItemModelStatic::SetSelected(FrameNode* frameNode, bool selected)
     auto pattern = frameNode->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(selected);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
@@ -94,7 +94,7 @@ void GridItemModelStatic::SetGridItemStyle(FrameNode* frameNode, GridItemStyle g
 void GridItemModelStatic::SetOnSelect(FrameNode* frameNode, SelectFunc&& onSelect)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(onSelect));
 }
@@ -102,7 +102,7 @@ void GridItemModelStatic::SetOnSelect(FrameNode* frameNode, SelectFunc&& onSelec
 void GridItemModelStatic::SetSelectChangeEvent(FrameNode* frameNode, SelectFunc&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetSelectChangeEvent(std::move(changeEvent));
 }

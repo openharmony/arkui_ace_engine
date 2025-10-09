@@ -278,7 +278,7 @@ inline std::vector<Dimension> ParseColumnWidths(const Opt_Array_LengthMetrics& c
         result.reserve(static_cast<size_t>(columnWidths.value.length));
         for (auto i = 0; i < columnWidths.value.length; i++) {
             Ark_LengthMetrics lengthMetrics = columnWidths.value.array[i];
-            result.emplace_back(lengthMetrics ? lengthMetrics->value : Dimension(0.0f));
+            result.emplace_back(Converter::OptConvert<Dimension>(lengthMetrics).value_or(Dimension()));
         }
     }
     return result;
@@ -467,7 +467,7 @@ void SetCanLoopImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        TextPickerModelStatic::SetCanLoop(frameNode, true);
         return;
     }
     TextPickerModelStatic::SetCanLoop(frameNode, *convValue);
@@ -482,10 +482,6 @@ void SetDisappearTextStyleImpl(Ark_NativePointer node,
     auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
     TextPickerModelStatic::SetDisappearTextStyle(frameNode, theme, *convValue);
 }
 void SetTextStyleImpl(Ark_NativePointer node,
@@ -498,10 +494,6 @@ void SetTextStyleImpl(Ark_NativePointer node,
     auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
     TextPickerModelStatic::SetNormalTextStyle(frameNode, theme, *convValue);
 }
 void SetSelectedTextStyleImpl(Ark_NativePointer node,
@@ -514,10 +506,6 @@ void SetSelectedTextStyleImpl(Ark_NativePointer node,
     auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
     TextPickerModelStatic::SetSelectedTextStyle(frameNode, theme, *convValue);
 }
 void SetDisableTextStyleAnimationImpl(Ark_NativePointer node,
@@ -527,7 +515,7 @@ void SetDisableTextStyleAnimationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        TextPickerModelStatic::SetDisableTextStyleAnimation(frameNode, false);
         return;
     }
     TextPickerModelStatic::SetDisableTextStyleAnimation(frameNode, *convValue);
@@ -538,10 +526,6 @@ void SetDefaultTextStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
     TextPickerModelStatic::SetDefaultTextStyle(frameNode, *convValue);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
@@ -551,7 +535,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextPickerModelStatic::SetOnCascadeChange(frameNode, nullptr);
         return;
     }
     auto onChange =
@@ -579,7 +563,7 @@ void SetOnScrollStopImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextPickerModelStatic::SetOnScrollStop(frameNode, nullptr);
         return;
     }
     auto onScrollStop = [arkCallback = CallbackHelper(*optValue)](const std::vector<std::string>& values,
@@ -603,7 +587,7 @@ void SetOnEnterSelectedAreaImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextPickerModelStatic::SetOnEnterSelectedArea(frameNode, nullptr);
         return;
     }
     auto onEnterSelectedArea = [arkCallback = CallbackHelper(*optValue)](const std::vector<std::string>& values,

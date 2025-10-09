@@ -85,6 +85,8 @@ void RichEditorAccessibilityTestNg::SetUp()
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->InitScrollablePattern();
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
 }
 
 void RichEditorAccessibilityTestNg::TearDown()
@@ -104,6 +106,8 @@ void RichEditorAccessibilityTestNg::SetSpanStringMode(bool isSpanStringMode)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     if (isSpanStringMode) {
         richEditorPattern->SetSpanStringMode(true);
+        richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+        richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
         richEditorPattern->SetRichEditorStyledStringController(
             AceType::MakeRefPtr<RichEditorStyledStringController>());
         richEditorPattern->GetRichEditorStyledStringController()->SetPattern(WeakPtr(richEditorPattern));
@@ -471,7 +475,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, ActActionSetText, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto changeReason = TextChangeReason::UNKNOWN;
     auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
@@ -499,7 +503,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, ActActionCut, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
 
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto changeReason = TextChangeReason::UNKNOWN;
     auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {

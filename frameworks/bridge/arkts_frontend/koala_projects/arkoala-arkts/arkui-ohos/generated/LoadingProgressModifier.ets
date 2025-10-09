@@ -32,11 +32,11 @@ export class LoadingProgressModifier extends CommonMethodModifier implements Loa
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: LoadingProgressAttribute): void { }
+    applyPressedAttribute(instance: LoadingProgressAttribute): void { }
+    applyFocusedAttribute(instance: LoadingProgressAttribute): void { }
+    applyDisabledAttribute(instance: LoadingProgressAttribute): void { }
+    applySelectedAttribute(instance: LoadingProgressAttribute): void { }
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _color_0_0value?: ResourceColor | undefined
     _enableLoading_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

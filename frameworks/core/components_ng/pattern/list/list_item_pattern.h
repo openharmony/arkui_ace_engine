@@ -57,6 +57,8 @@ public:
     {}
     ~ListItemPattern() override = default;
 
+    void SetShallowBuilder(const RefPtr<ShallowBuilder>&& shallowBuilder);
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -261,6 +263,8 @@ public:
     {
         return true;
     }
+
+    void SetDeleteArea();
 
 protected:
     void OnModifyDone() override;

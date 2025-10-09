@@ -108,6 +108,11 @@ void SetStyleImpl(Ark_NativePointer node,
             IndicatorModelStatic::SetShowIndicator(frameNode, true);
         },
         [frameNode]() {
+            SwiperParameters dotParam;
+            auto isCustomSize = SwiperAttributeModifierInternal::CheckSwiperParameters(dotParam);
+            IndicatorModelStatic::SetDotIndicatorStyle(frameNode, dotParam);
+            IndicatorModelStatic::SetIsIndicatorCustomSize(frameNode, isCustomSize);
+            IndicatorModelStatic::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
             IndicatorModelStatic::SetShowIndicator(frameNode, false);
         });
 }

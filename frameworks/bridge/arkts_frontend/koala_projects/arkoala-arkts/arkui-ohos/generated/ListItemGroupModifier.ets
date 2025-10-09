@@ -30,11 +30,11 @@ export class ListItemGroupModifier extends CommonMethodModifier implements ListI
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ListItemGroupAttribute): void { }
+    applyPressedAttribute(instance: ListItemGroupAttribute): void { }
+    applyFocusedAttribute(instance: ListItemGroupAttribute): void { }
+    applyDisabledAttribute(instance: ListItemGroupAttribute): void { }
+    applySelectedAttribute(instance: ListItemGroupAttribute): void { }
     _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _divider_0_0value?: ListDividerOptions | null | undefined
     _childrenMainSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

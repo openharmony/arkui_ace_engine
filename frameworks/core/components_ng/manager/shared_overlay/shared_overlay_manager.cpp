@@ -255,7 +255,7 @@ void SharedOverlayManager::PassengerAboard(
     passenger->GetRenderContext()->UpdateZIndex(effect->GetZIndex());
     passenger->GetRenderContext()->UpdatePosition(offset);
     passenger->GetRenderContext()->OnModifyDone();
-    passenger->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(false);
+    passenger->GetEventHub<EventHub>()->SetEnabledInternal(false);
 }
 
 bool SharedOverlayManager::AboardShuttle(const RefPtr<SharedTransitionEffect>& effect)
@@ -311,7 +311,7 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
         }
         // restore initialFrameOffset for static type sharedTransition, because it may not layout again
         ReplaceFrameNode(passengerHolder, passenger);
-        passenger->GetOrCreateEventHub<EventHub>()->RestoreEnabled();
+        passenger->GetEventHub<EventHub>()->RestoreEnabled();
         auto isPassengerCurrentFocused = effect->GetPassengerCurrentFocused();
         if (isPassengerCurrentFocused) {
             auto passengerFocusHub = passenger->GetFocusHub();

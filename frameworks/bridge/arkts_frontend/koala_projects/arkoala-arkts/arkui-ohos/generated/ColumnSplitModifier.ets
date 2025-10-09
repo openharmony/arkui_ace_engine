@@ -29,11 +29,11 @@ export class ColumnSplitModifier extends CommonMethodModifier implements ColumnS
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ColumnSplitAttribute): void { }
+    applyPressedAttribute(instance: ColumnSplitAttribute): void { }
+    applyFocusedAttribute(instance: ColumnSplitAttribute): void { }
+    applyDisabledAttribute(instance: ColumnSplitAttribute): void { }
+    applySelectedAttribute(instance: ColumnSplitAttribute): void { }
     _resizeable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _resizeable_0_0value?: boolean | undefined
     _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

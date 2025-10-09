@@ -238,6 +238,15 @@ public:
         tabBarType_.emplace(std::make_pair(tabBarItemId, type));
     }
 
+    void HandleTabBarItemType(int32_t tabBarItemId, TabBarParamType type)
+    {
+        auto iter = tabBarType_.find(tabBarItemId);
+        if (iter != tabBarType_.end()) {
+            tabBarType_.erase(iter);
+        }
+        AddTabBarItemType(tabBarItemId, type);
+    }
+
     bool IsContainsBuilder();
 
     void SetAnimationCurve(const RefPtr<Curve>& curve);

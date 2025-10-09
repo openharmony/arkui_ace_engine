@@ -141,7 +141,7 @@ private:
                 } else if (LessOrEqual(static_cast<size_t>(duration), 0)) {
                     duration = 0;
                 }
-                dragPreview->previewAsync_.previewAnimation.duration = static_cast<size_t>(duration);
+                dragPreview->previewAsync_.previewAnimation.duration = static_cast<int32_t>(duration);
             }
         }
         HILOGI("AceDrag, animation duration is %{public}d", dragPreview->previewAsync_.previewAnimation.duration);

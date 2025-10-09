@@ -13,25 +13,26 @@
  * limitations under the License.
  */
 
-import { FrameNode, FrameNodeUtils } from "arkui/FrameNode"
-import { ArkUIGeneratedNativeModule } from "#components"
-import { int32, int64 } from "@koalaui/common"
+import { FrameNode, FrameNodeUtils } from 'arkui/FrameNode';
+import { ArkUIGeneratedNativeModule } from '#components';
+import { int32, int64 } from '@koalaui/common';
 import { nullptr, KPointer, KSerializerBuffer, toPeerPtr, RuntimeType,
-    runtimeType, Finalizable, SerializerBase, DeserializerBase } from "@koalaui/interop"
-import { _animateTo } from "arkui/base/ArkAnimation"
-import { AnimateParam, KeyframeAnimateParam, KeyframeState } from 'arkui/framework'
-import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from "@ohos/animator"
+    runtimeType, Finalizable, SerializerBase, DeserializerBase } from '@koalaui/interop';
+import { _animateTo } from 'arkui/base/ArkAnimation';
+import { AnimateParam, KeyframeAnimateParam, KeyframeState } from 'arkui/framework';
+import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from '@ohos/animator';
 import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
-    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId }
-    from "@ohos/arkui/UIContext"
-import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry, memoEntry1,
-    IncrementalNode } from '@koalaui/runtime'
-import { Context, PointerStyle, PixelMap } from "#external"
-import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
-import { KeyEvent, PopupCommonOptions, MenuOptions } from "arkui/component/common"
-import { GlobalScope_ohos_font } from "#generated"
-import router from '@ohos/router'
+    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
+    KeyboardAvoidMode } from '@ohos/arkui/UIContext';
+import { StateManager, ComputableState, GlobalStateManager, memoEntry, memoEntry1,
+    IncrementalNode } from '@koalaui/runtime';
+import { StateContext } from 'arkui.incremental.runtime.state';
+import { Context, PointerStyle, PixelMap } from '#external';
+import { Nullable,  WidthBreakpoint, HeightBreakpoint } from 'arkui/component/enums';
+import { KeyEvent, PopupCommonOptions, MenuOptions } from 'arkui/component/common';
+import { GlobalScope_ohos_font } from '#generated';
+import router from '@ohos/router';
 import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
 import { ActionSheetOptions } from "arkui/component/actionSheet"
@@ -43,6 +44,8 @@ import { ArkUIAniModule } from "arkui.ani"
 import { default as font } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
 import { GlobalScope_ohos_measure_utils } from "#generated"
+import { GlobalScopeUicontextTextMenu } from "#generated"
+import { GlobalScopeUicontextFontScale } from "#generated"
 import { SizeOptions, ResourceColor } from "arkui/component/units"
 import { Frame } from "arkui/Graphics"
 import { TextMenuOptions } from "arkui/component/textCommon"
@@ -56,14 +59,15 @@ import { GlobalScope } from "#generated"
 import { default as mediaquery } from '@ohos/mediaquery'
 import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework'
 import { AsyncCallback } from 'arkui/base';
-import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from "arkui/ArkUIEntry"
-import { PeerNode, findPeerNode } from 'arkui/PeerNode'
-import { KBuffer } from "@koalaui/interop"
-import { deserializeAndCallCallback } from "arkui/framework/peers/CallbackDeserializeCall"
-import { InteropNativeModule } from "@koalaui/interop"
+import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
+import { PeerNode, findPeerNode } from 'arkui/PeerNode';
+import { KBuffer } from '@koalaui/interop';
+import { deserializeAndCallCallback } from 'arkui/framework/peers/CallbackDeserializeCall';
+import { InteropNativeModule } from '@koalaui/interop';
 import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
 import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender } from '../framework';
+
 export class ContextRecord {
     uiContext?: UIContext
 }
@@ -85,13 +89,12 @@ export class FontImpl extends Font {
         ArkUIAniModule._Common_Restore_InstanceId();
         return arrayResult_;
     }
-    // public getFontByName(fontName : string) : FontInfo {
-        
-    //     ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-    //     let fontInfo : FontInfo = GlobalScope_ohos_font.getFontByName(fontName);
-    //     ArkUIAniModule._Common_Restore_InstanceId();
-    //     return fontInfo;
-    // }
+    public getFontByName(fontName : string) : font.FontInfo {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let fontInfo : font.FontInfo = GlobalScope_ohos_font.getFontByName(fontName);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return fontInfo;
+    }
 }
 
 export class MediaQueryImpl extends MediaQuery {
@@ -133,11 +136,11 @@ export class TextMenuControllerImpl extends TextMenuController {
         super()
         this.instanceId_ = instanceId;
     }
-    // public setMenuOptions(options: TextMenuOptions) : void {
-    //     ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-    //     GlobalScopeUicontextTextMenu.setMenuOptions(options);
-    //     ArkUIAniModule._Common_Restore_InstanceId();
-    // }
+    public setMenuOptions(options: TextMenuOptions) : void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        GlobalScopeUicontextTextMenu.setMenuOptions(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
 }
 
 // export class AtomicServiceBarInternal implements AtomicServiceBar {
@@ -1173,6 +1176,7 @@ export class UIContextImpl extends UIContext {
     contextMenuController_: ContextMenuControllerImpl;
     overlayManager_: OverlayManagerImpl | null = null;
     promptAction_: PromptActionImpl | null = null;
+    keyboardAvoidMode_: KeyboardAvoidMode = KeyboardAvoidMode.OFFSET;
     cursorController_: CursorControllerImpl;
     font_: FontImpl;
     measureUtils_: MeasureUtilsImpl;
@@ -1247,12 +1251,16 @@ export class UIContextImpl extends UIContext {
         return this.textMenuController_;
     }
     public isFollowingSystemFontScale() : boolean {
-        throw new Error("no impl");
-        
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let follow = GlobalScopeUicontextFontScale.isFollowingSystemFontScale();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return follow;
     }
     public getMaxFontScale() : number {
-        throw new Error("no impl");
-        
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let fontScale = GlobalScopeUicontextFontScale.getMaxFontScale();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return fontScale;
     }
     public getFrameNodeById(id: string): FrameNode | null {
         const id_casted = id as (string);
@@ -1316,6 +1324,20 @@ export class UIContextImpl extends UIContext {
     }
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
+    }
+
+    setKeyboardAvoidMode(mode: KeyboardAvoidMode): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ArkUIAniModule._SetKeyboardAvoidMode(mode);
+        this.keyboardAvoidMode_ = mode;
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    getKeyboardAvoidMode(): KeyboardAvoidMode {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let mode:KeyboardAvoidMode = ArkUIAniModule._GetKeyboardAvoidMode();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return mode;
     }
 
     public getAtomicServiceBar(): Nullable<AtomicServiceBar> {
@@ -1400,8 +1422,7 @@ export class UIContextImpl extends UIContext {
         return
     }
       public getWindowName(): string | undefined {
-        return  this.getWindowName_serialize();
-
+        return ArkUIAniModule._Common_getWindowName(this.instanceId_);
     }
     public getWindowWidthBreakpoint(): WidthBreakpoint {
 
@@ -1429,12 +1450,6 @@ export class UIContextImpl extends UIContext {
     }
     public px2lpx(value: number): number {
          return ArkUIAniModule._Common_px2lpx(value, this.instanceId_);
-    }
-
-    private getWindowName_serialize(): string | undefined {
-        throw new Error("no impl");
-        
-        // return ArkUIGeneratedNativeModule._UIContext_getWindowName(this.instanceId_);
     }
     private getWindowWidthBreakpoint_serialize(): WidthBreakpoint {
         throw new Error("no impl");
@@ -1564,5 +1579,13 @@ export class UIContextImpl extends UIContext {
 
     public checkThread(id: int32) : boolean {
         return ArkUIAniModule._CheckIsUIThread(id) !== 0;
+    }
+
+    public setImageCacheCount(value: int): void {
+        ArkUIAniModule._Common_SetImageCacheCount(value, this.instanceId_);
+    }
+
+    public setImageRawDataCacheSize(value: int): void {
+        ArkUIAniModule._Common_SetImageRawDataCacheSize(value, this.instanceId_);
     }
 }

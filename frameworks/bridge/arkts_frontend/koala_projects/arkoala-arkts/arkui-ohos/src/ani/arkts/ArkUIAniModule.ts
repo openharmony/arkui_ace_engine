@@ -13,35 +13,39 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt, KSerializerBuffer  } from "@koalaui/interop"
-import { default as drawing } from "@ohos.graphics.drawing"
-import image from "@ohos.multimedia.image"
-import webview from "@ohos.web.webview"
-import common from "@ohos.app.ability.common"
-import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
+import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt, KSerializerBuffer  } from '@koalaui/interop';
+import { default as drawing } from '@ohos.graphics.drawing';
+import image from '@ohos.multimedia.image';
+import webview from '@ohos.web.webview';
+import common from '@ohos.app.ability.common';
+import unifiedDataChannel from '@ohos.data.unifiedDataChannel';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
-import { DrawContext } from "arkui.Graphics"
-import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from "#generated"
-import { ArkCustomComponent } from "arkui/ArkCustomComponent"
-import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from "#generated"
-import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "#generated"
-import { XComponentOptionsInternal, XComponentParametersInternal } from "#generated"
-import { HookDragInfo } from "arkui/handwritten"
-import { dragController } from "@ohos/arkui/dragController"
-import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
-import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
-import { default as uiObserver }  from "@ohos/arkui/observer"
-import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
+import { DrawContext } from 'arkui.Graphics';
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from '#generated';
+import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
+import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from '#generated';
+import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from '#generated';
+import { XComponentOptionsInternal, XComponentParametersInternal } from '#generated';
+import { HookDragInfo } from 'arkui/handwritten';
+import { dragController } from '@ohos/arkui/dragController';
+import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
+import { KeyboardAvoidMode } from '@ohos/arkui/UIContext';
+import { DrawableDescriptor } from '@ohos.arkui.drawableDescriptor';
+import { default as uiObserver }  from '@ohos/arkui/observer';
+import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
 import { NodeAdapter } from 'arkui.FrameNode'
-import { Scene } from "@ohos.graphics.scene"
-import { RectShape, CircleShape, EllipseShape, PathShape } from "@ohos.arkui.shape"
-import curves from "@ohos.curves"
-import matrix4 from "@ohos.matrix4"
-import uiEffect from "@ohos.graphics.uiEffect";
+import { Scene } from '@ohos.graphics.scene';
+import { RectShape, CircleShape, EllipseShape, PathShape } from '@ohos.arkui.shape';
+import curves from '@ohos.curves';
+import matrix4 from '@ohos.matrix4';
+import uiEffect from '@ohos.graphics.uiEffect';
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
     }
+    native static _Extractors_ToDrawableDescriptorPtr(value: DrawableDescriptor, type: int): KPointer;
+    native static _Extractors_ToDrawingColorFilterPtr(drawingColorFilter: drawing.ColorFilter): KPointer;
+    native static _Extractors_ToDrawingLatticePtr(drawingLattice: drawing.Lattice): KPointer;
     native static _Extractors_ToImagePixelMapPtr(pixelmap: image.PixelMap): KPointer;
     native static _Extractors_FromImagePixelMapPtr(ptr: KPointer): image.PixelMap;
     native static _Extractors_ToRectShapePtr(value: RectShape): KPointer;
@@ -58,14 +62,14 @@ export class ArkUIAniModule {
     native static _Extractors_ToUiEffectVisualEffectPtr(value: uiEffect.VisualEffect): KPointer;
     native static _Extractors_ToDrawContextPtr(value: DrawContext): KPointer;
     native static _Extractors_FromDrawContextPtr(ptr: KPointer): DrawContext;
+    native static _Extractors_ToWebviewWebviewControllerPtr(value: webview.WebviewController): KPointer;
+    native static _Extractors_FromWebviewWebviewControllerPtr(ptr: KPointer): webview.WebviewController;
     native static _Image_ColorFilter_TransferStatic(ptr: KPointer): KPointer
     native static _Image_ColorFilter_TransferDynamic(ptr: KPointer): KPointer
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
     native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
     native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
     native static _Image_DrawingColorFilter(ptr: KPointer, value: drawing.ColorFilter): void
-    native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
-    native static _Web_SetWebController_ControllerHandler(ptr: KPointer, webviewController: webview.WebviewController): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
     native static _Common_GetHostContext(key: KInt): common.Context
@@ -74,6 +78,8 @@ export class ArkUIAniModule {
     native static _Common_Restore_InstanceId(): void
     native static _Common_Get_Current_InstanceId(): KInt
     native static _Common_GetFocused_InstanceId(): KInt
+    native static _Common_SetImageCacheCount(value: KInt, instanceId: KInt): void
+    native static _Common_SetImageRawDataCacheSize(value: KInt, instanceId: KInt): void
     native static _GetNodePtrWithPeerPtr(ptr: KPointer): KLong
     native static _GetNodeIdWithNodePtr(ptr: KPointer): KInt
     native static _GetNodeIdWithPeerPtr(ptr: KPointer): KInt
@@ -81,6 +87,8 @@ export class ArkUIAniModule {
     native static _ToColorLong(color: KInt): KLong
     native static _ToColorInt(color: KLong): KInt
     native static _Common_GetSharedLocalStorage(): LocalStorage
+    native static _GetKeyboardAvoidMode(): KeyboardAvoidMode
+    native static _SetKeyboardAvoidMode(mode: KeyboardAvoidMode): void
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
     native static _CustomNode_RequestFrame(): void
     native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
@@ -225,8 +233,10 @@ export class ArkUIAniModule {
     native static _StyledString_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
     native static _StyledString_GetPixelMap(peerPtr: KPointer): image.PixelMap
 
-    // for search
-    native static _Search_SetSearchIcon_Symbol(ptr: KPointer, value: SymbolGlyphModifier): void
+    // for SymbolGlyph Modifier
+    native static _Extractors_ToSymbolGlyphModifierPtr(callBack: (node: KPointer) => void,
+        value: SymbolGlyphModifier): KPointer;
+    native static _Extractors_FromSymbolGlyphModifierPtr(ptr: KPointer): SymbolGlyphModifier;
 
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
@@ -248,11 +258,11 @@ export class ArkUIAniModule {
     native static _RichEditor_Transfer_PixelMap(pixelmap: image.PixelMap): KPointer;
 
     // for  stateMgmt
-    native static _PersistentStorage_Get(key: string, areaMode?: KInt): string
-    native static _PersistentStorage_Set(key: string, value: string, areaMode?: KInt): void
-    native static _PersistentStorage_Has(key: string, areaMode?: KInt): boolean
+    native static _PersistentStorage_Get(key: string, areaMode: KInt): string
+    native static _PersistentStorage_Set(key: string, value: string, areaMode: KInt): void
+    native static _PersistentStorage_Has(key: string, areaMode: KInt): boolean
     native static _PersistentStorage_Clear(): void
-    native static _PersistentStorage_Delete(key: string, areaMode?: KInt): void
+    native static _PersistentStorage_Delete(key: string, areaMode: KInt): void
     native static _Env_GetColorMode(): KInt
     native static _Env_GetFontScale(): KFloat
     native static _Env_GetFontWeightScale(): KFloat
@@ -288,6 +298,7 @@ export class ArkUIAniModule {
     native static _Common_px2fp(value:number, instanceId: KInt): number
     native static _Common_lpx2px(value:number, instanceId: KInt): number
     native static _Common_px2lpx(value:number, instanceId: KInt): number
+    native static _Common_getWindowName(instanceId: KInt): string
 
     // for transfer
     native static _createTouchEventAccessorWithPointer(input: KPointer): KPointer
@@ -302,7 +313,6 @@ export class ArkUIAniModule {
     native static _getHoverEventPointer(peer: KPointer): KPointer
     // for Canvas
     native static _CanvasRenderer_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
-    native static _CanvasRenderer_GetPixelMap(peerPtr: KPointer, sx: number, sy: number, sw: number, sh: number): image.PixelMap
     native static _CanvasRenderer_DrawPixelMap0(peerPtr: KPointer, pixelmap: image.PixelMap, dx: number, dy: number): void
     native static _CanvasRenderer_DrawPixelMap1(peerPtr: KPointer, pixelmap: image.PixelMap, dx: number, dy: number, dw: number, dh: number): void
     native static _CanvasRenderer_DrawPixelMap2(peerPtr: KPointer, pixelmap: image.PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void
@@ -316,6 +326,8 @@ export class ArkUIAniModule {
         dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): void
     native static _DrawingRenderingContext_GetCanvas(peerPtr: KPointer): drawing.Canvas
     native static _CanvasRenderingContext_GetCanvasId(peerPtr: KPointer): KInt
+    native static _Extractors_ToDrawingCanvasPtr(value: drawing.Canvas): KPointer
+    native static _Extractors_FromDrawingCanvasPtr(ptr: KPointer): drawing.Canvas
 
     native static _FrameNode_MarkDirtyNode(ptr: KPointer): void
     native static _TraceBegin(traceName: string): void
@@ -361,6 +373,7 @@ export class ArkUIAniModule {
     // for Component3D
     native static _Component3D_SetScene(ptr: KPointer, scene: Scene, modelType: KInt): void
     native static _Component3D_SetWidget(ptr: KPointer, scenePath: string, modelType: KInt): void
+    native static _Extractors_ToScenePtr(scene: Scene): KPointer;
     // for AppBar
     native static _XBar_Set_ComponentCreateFunc(value: (isTitlebar: KInt, instanceID: KInt) => KLong): void;
     native static _XBar_Set_JsFunc(ptr: KLong, component: Any): void

@@ -32,11 +32,11 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: VideoAttribute): void { }
+    applyPressedAttribute(instance: VideoAttribute): void { }
+    applyFocusedAttribute(instance: VideoAttribute): void { }
+    applyDisabledAttribute(instance: VideoAttribute): void { }
+    applySelectedAttribute(instance: VideoAttribute): void { }
     _muted_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _muted_0_0value?: boolean | undefined
     _autoPlay_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

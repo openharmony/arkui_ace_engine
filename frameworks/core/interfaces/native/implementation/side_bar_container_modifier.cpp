@@ -241,7 +241,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SideBarContainerModelStatic::SetOnChange(frameNode, nullptr);
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)](const bool param) {
@@ -259,8 +259,8 @@ void SetSideBarWidthImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(width);
     SideBarContainerModelStatic::SetSideBarWidth(frameNode, width);
 }
-void SetMinSideBarWidth0Impl(Ark_NativePointer node,
-                             const Opt_Number* value)
+void SetMinSideBarWidthImpl(Ark_NativePointer node,
+                             const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -270,14 +270,19 @@ void SetMinSideBarWidth0Impl(Ark_NativePointer node,
         SideBarContainerModelStatic::SetMinSideBarWidth(frameNode, def);
         return;
     }
-    auto width = Converter::Convert<Dimension>(value->value);
-    if (width.IsNegative()) {
-        width.SetValue(DEFAULT_MIN_SIDEBAR_WIDTH);
+    auto width = Converter::OptConvert<Dimension>(value->value);
+    if (!width.has_value()) {
+        Dimension def(DEFAULT_MIN_SIDEBAR_WIDTH, DimensionUnit::VP);
+        SideBarContainerModelStatic::SetMinSideBarWidth(frameNode, def);
+        return;
+    }
+    if (width->IsNegative()) {
+        width->SetValue(DEFAULT_MIN_SIDEBAR_WIDTH);
     }
     SideBarContainerModelStatic::SetMinSideBarWidth(frameNode, width);
 }
-void SetMaxSideBarWidth0Impl(Ark_NativePointer node,
-                             const Opt_Number* value)
+void SetMaxSideBarWidthImpl(Ark_NativePointer node,
+                             const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -287,28 +292,15 @@ void SetMaxSideBarWidth0Impl(Ark_NativePointer node,
         SideBarContainerModelStatic::SetMaxSideBarWidth(frameNode, def);
         return;
     }
-    auto width = Converter::Convert<Dimension>(value->value);
-    if (width.IsNegative()) {
-        width.SetValue(DEFAULT_MAX_SIDEBAR_WIDTH);
+    auto width = Converter::OptConvert<Dimension>(value->value);
+    if (!width.has_value()) {
+        Dimension def(DEFAULT_MIN_SIDEBAR_WIDTH, DimensionUnit::VP);
+        SideBarContainerModelStatic::SetMinSideBarWidth(frameNode, def);
+        return;
     }
-    SideBarContainerModelStatic::SetMaxSideBarWidth(frameNode, width);
-}
-void SetMinSideBarWidth1Impl(Ark_NativePointer node,
-                             const Opt_Length* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto width = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(width);
-    SideBarContainerModelStatic::SetMinSideBarWidth(frameNode, width);
-}
-void SetMaxSideBarWidth1Impl(Ark_NativePointer node,
-                             const Opt_Length* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto width = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(width);
+    if (width->IsNegative()) {
+        width->SetValue(DEFAULT_MAX_SIDEBAR_WIDTH);
+    }
     SideBarContainerModelStatic::SetMaxSideBarWidth(frameNode, width);
 }
 void SetAutoHideImpl(Ark_NativePointer node,
@@ -379,10 +371,8 @@ const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
         SideBarContainerAttributeModifier::SetShowControlButtonImpl,
         SideBarContainerAttributeModifier::SetOnChangeImpl,
         SideBarContainerAttributeModifier::SetSideBarWidthImpl,
-        SideBarContainerAttributeModifier::SetMinSideBarWidth0Impl,
-        SideBarContainerAttributeModifier::SetMaxSideBarWidth0Impl,
-        SideBarContainerAttributeModifier::SetMinSideBarWidth1Impl,
-        SideBarContainerAttributeModifier::SetMaxSideBarWidth1Impl,
+        SideBarContainerAttributeModifier::SetMinSideBarWidthImpl,
+        SideBarContainerAttributeModifier::SetMaxSideBarWidthImpl,
         SideBarContainerAttributeModifier::SetAutoHideImpl,
         SideBarContainerAttributeModifier::SetSideBarPositionImpl,
         SideBarContainerAttributeModifier::SetDividerImpl,

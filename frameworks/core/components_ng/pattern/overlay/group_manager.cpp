@@ -135,7 +135,7 @@ WeakPtr<GroupManager> GroupManager::GetGroupManager()
         CHECK_NULL_RETURN(stageManager, nullptr);
         auto pageNode = stageManager->GetLastPage();
         CHECK_NULL_RETURN(pageNode, nullptr);
-        auto pageEventHub = pageNode->GetOrCreateEventHub<NG::PageEventHub>();
+        auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
         CHECK_NULL_RETURN(pageEventHub, nullptr);
         groupManager = pageEventHub->GetGroupManager();
     }

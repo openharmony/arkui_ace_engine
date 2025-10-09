@@ -35,11 +35,11 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: NavigationAttribute): void { }
+    applyPressedAttribute(instance: NavigationAttribute): void { }
+    applyFocusedAttribute(instance: NavigationAttribute): void { }
+    applyDisabledAttribute(instance: NavigationAttribute): void { }
+    applySelectedAttribute(instance: NavigationAttribute): void { }
     _navBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _navBarWidth_0_0value?: Length | Bindable<Length> | undefined
     _navBarPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -50,8 +50,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
     _minContentWidth_0_0value?: Dimension | undefined
     _mode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _mode_0_0value?: NavigationMode | undefined
-    _backButtonIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _backButtonIcon_0_0value?: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined
     _hideNavBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hideNavBar_0_0value?: boolean | undefined
     _hideTitleBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -60,8 +58,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
     _hideBackButton_0_0value?: boolean | undefined
     _titleMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _titleMode_0_0value?: NavigationTitleMode | undefined
-    _menus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _menus_0_0value?: Array<NavigationMenuItem> | CustomBuilder | undefined
     _hideToolBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hideToolBar_0_0value?: boolean | undefined
     _enableToolBarAdaptation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -82,18 +78,18 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
     _enableDragBar_0_0value?: boolean | undefined
     _enableModeChangeAnimation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableModeChangeAnimation_0_0value?: boolean | undefined
-    _backButtonIcon_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _backButtonIcon_1_0value?: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined
-    _backButtonIcon_1_1value?: ResourceStr | undefined
+    _backButtonIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _backButtonIcon_0_0value?: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined
+    _backButtonIcon_0_1value?: ResourceStr | undefined
     _title_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _title_0_0value?: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined
     _title_0_1value?: NavigationTitleOptions | undefined
     _hideTitleBar_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hideTitleBar_1_0value?: boolean | undefined
     _hideTitleBar_1_1value?: boolean | undefined
-    _menus_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _menus_1_0value?: Array<NavigationMenuItem> | CustomBuilder | undefined
-    _menus_1_1value?: NavigationMenuOptions | undefined
+    _menus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _menus_0_0value?: Array<NavigationMenuItem> | CustomBuilder | undefined
+    _menus_0_1value?: NavigationMenuOptions | undefined
     _toolbarConfiguration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _toolbarConfiguration_0_0value?: Array<ToolbarItem> | CustomBuilder | undefined
     _toolbarConfiguration_0_1value?: NavigationToolbarOptions | undefined
@@ -196,24 +192,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 }
             }
         }
-        if (this._backButtonIcon_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._backButtonIcon_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackButtonIcon0Attribute((this._backButtonIcon_0_0value as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined));
-                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBackButtonIcon0Attribute((undefined as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined));
-                }
-            }
-        }
         if (this._hideNavBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._hideNavBar_0_flag) {
@@ -283,24 +261,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 default: {
                     this._titleMode_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setTitleModeAttribute((undefined as NavigationTitleMode | undefined));
-                }
-            }
-        }
-        if (this._menus_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._menus_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMenus0Attribute((this._menus_0_0value as Array<NavigationMenuItem> | CustomBuilder | undefined));
-                    this._menus_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._menus_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._menus_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMenus0Attribute((undefined as Array<NavigationMenuItem> | CustomBuilder | undefined));
                 }
             }
         }
@@ -484,21 +444,21 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 }
             }
         }
-        if (this._backButtonIcon_1_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._backButtonIcon_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._backButtonIcon_1_flag) {
+            switch (this._backButtonIcon_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackButtonIcon1Attribute((this._backButtonIcon_1_0value as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (this._backButtonIcon_1_1value as ResourceStr | undefined));
-                    this._backButtonIcon_1_flag = AttributeUpdaterFlag.RESET;
+                    peer.setBackButtonIconAttribute((this._backButtonIcon_0_0value as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (this._backButtonIcon_0_1value as ResourceStr | undefined));
+                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._backButtonIcon_1_flag = AttributeUpdaterFlag.RESET;
+                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._backButtonIcon_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBackButtonIcon1Attribute((undefined as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (undefined as ResourceStr | undefined | undefined));
+                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBackButtonIconAttribute((undefined as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (undefined as ResourceStr | undefined | undefined));
                 }
             }
         }
@@ -506,7 +466,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             switch (this._title_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTitleAttribute((this._title_0_0value as ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined), (this._title_0_1value as NavigationTitleOptions | undefined));
+                    peer.setTitleAttribute((this._title_0_0value as ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined), (this._title_0_1value as NavigationTitleOptions | undefined | undefined));
                     this._title_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -538,21 +498,21 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 }
             }
         }
-        if (this._menus_1_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._menus_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._menus_1_flag) {
+            switch (this._menus_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMenus1Attribute((this._menus_1_0value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus_1_1value as NavigationMenuOptions | undefined));
-                    this._menus_1_flag = AttributeUpdaterFlag.RESET;
+                    peer.setMenusAttribute((this._menus_0_0value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus_0_1value as NavigationMenuOptions | undefined));
+                    this._menus_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._menus_1_flag = AttributeUpdaterFlag.RESET;
+                    this._menus_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._menus_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMenus1Attribute((undefined as Array<NavigationMenuItem> | CustomBuilder | undefined), (undefined as NavigationMenuOptions | undefined | undefined));
+                    this._menus_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMenusAttribute((undefined as Array<NavigationMenuItem> | CustomBuilder | undefined), (undefined as NavigationMenuOptions | undefined | undefined));
                 }
             }
         }
@@ -560,7 +520,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             switch (this._toolbarConfiguration_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setToolbarConfigurationAttribute((this._toolbarConfiguration_0_0value as Array<ToolbarItem> | CustomBuilder | undefined), (this._toolbarConfiguration_0_1value as NavigationToolbarOptions | undefined));
+                    peer.setToolbarConfigurationAttribute((this._toolbarConfiguration_0_0value as Array<ToolbarItem> | CustomBuilder | undefined), (this._toolbarConfiguration_0_1value as NavigationToolbarOptions | undefined | undefined));
                     this._toolbarConfiguration_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -596,7 +556,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             switch (this._ignoreLayoutSafeArea_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setIgnoreLayoutSafeAreaAttribute((this._ignoreLayoutSafeArea_0_0value as Array<LayoutSafeAreaType> | undefined), (this._ignoreLayoutSafeArea_0_1value as Array<LayoutSafeAreaEdge> | undefined));
+                    peer.setIgnoreLayoutSafeAreaAttribute((this._ignoreLayoutSafeArea_0_0value as Array<LayoutSafeAreaType> | undefined | undefined), (this._ignoreLayoutSafeArea_0_1value as Array<LayoutSafeAreaEdge> | undefined | undefined));
                     this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -678,19 +638,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 }
             }
         }
-        if (modifier._backButtonIcon_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._backButtonIcon_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.backButtonIcon(modifier._backButtonIcon_0_0value);
-                    break;
-                }
-                default: {
-                    this.backButtonIcon((undefined as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined));
-                }
-            }
-        }
         if (modifier._hideNavBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._hideNavBar_0_flag) {
@@ -740,19 +687,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 }
                 default: {
                     this.titleMode((undefined as NavigationTitleMode | undefined));
-                }
-            }
-        }
-        if (modifier._menus_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._menus_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.menus(modifier._menus_0_0value);
-                    break;
-                }
-                default: {
-                    this.menus((undefined as Array<NavigationMenuItem> | CustomBuilder | undefined));
                 }
             }
         }
@@ -886,12 +820,12 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 }
             }
         }
-        if (modifier._backButtonIcon_1_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._backButtonIcon_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._backButtonIcon_1_flag) {
+            switch (modifier._backButtonIcon_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.backButtonIcon(modifier._backButtonIcon_1_0value, modifier._backButtonIcon_1_1value);
+                    this.backButtonIcon(modifier._backButtonIcon_0_0value, modifier._backButtonIcon_0_1value);
                     break;
                 }
                 default: {
@@ -925,12 +859,12 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 }
             }
         }
-        if (modifier._menus_1_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._menus_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._menus_1_flag) {
+            switch (modifier._menus_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.menus(modifier._menus_1_0value, modifier._menus_1_1value);
+                    this.menus(modifier._menus_0_0value, modifier._menus_0_1value);
                     break;
                 }
                 default: {
@@ -1033,17 +967,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         }
         return this
     }
-    backButtonIcon(value: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined): this {
-        if (((this._backButtonIcon_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._backButtonIcon_0_flag = AttributeUpdaterFlag.UPDATE
-            this._backButtonIcon_0_0value = value
-        } else
-        {
-            this._backButtonIcon_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
     hideNavBar(value: boolean | undefined): this {
         if (((this._hideNavBar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._hideNavBar_0_0value) !== (value)))
         {
@@ -1085,17 +1008,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         } else
         {
             this._titleMode_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this {
-        if (((this._menus_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._menus_0_flag = AttributeUpdaterFlag.UPDATE
-            this._menus_0_0value = value
-        } else
-        {
-            this._menus_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1210,14 +1122,14 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         return this
     }
     backButtonIcon(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
-        if (((this._backButtonIcon_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        if (((this._backButtonIcon_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
-            this._backButtonIcon_1_flag = AttributeUpdaterFlag.UPDATE
-            this._backButtonIcon_1_0value = icon
-            this._backButtonIcon_1_1value = accessibilityText
+            this._backButtonIcon_0_flag = AttributeUpdaterFlag.UPDATE
+            this._backButtonIcon_0_0value = icon
+            this._backButtonIcon_0_1value = accessibilityText
         } else
         {
-            this._backButtonIcon_1_flag = AttributeUpdaterFlag.SKIP
+            this._backButtonIcon_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1246,14 +1158,14 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         return this
     }
     menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
-        if (((this._menus_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        if (((this._menus_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
-            this._menus_1_flag = AttributeUpdaterFlag.UPDATE
-            this._menus_1_0value = items
-            this._menus_1_1value = options
+            this._menus_0_flag = AttributeUpdaterFlag.UPDATE
+            this._menus_0_0value = items
+            this._menus_0_1value = options
         } else
         {
-            this._menus_1_flag = AttributeUpdaterFlag.SKIP
+            this._menus_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

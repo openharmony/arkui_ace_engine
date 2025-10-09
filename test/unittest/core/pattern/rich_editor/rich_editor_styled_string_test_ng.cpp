@@ -47,7 +47,7 @@ HWTEST_F(RichEditorStyledStringTestNg, RichEditorModel001, TestSize.Level1)
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**
@@ -1332,7 +1332,7 @@ HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString003, TestSize.Le
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     auto host = richEditorPattern->GetHost();
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     TextSpanOptions options2;
     options2.value = INIT_VALUE_1;
@@ -1378,6 +1378,8 @@ HWTEST_F(RichEditorStyledStringTestNg, CreatePasteCallback001, TestSize.Level1)
      */
     richEditorPattern->spans_.clear();
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     pasteCallback(arrs, text, isMulitiTypeRecord);
     EXPECT_EQ(2, richEditorPattern->spans_.size());
 }

@@ -29,11 +29,11 @@ export class EffectComponentModifier extends CommonMethodModifier implements Eff
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: EffectComponentAttribute): void { }
+    applyPressedAttribute(instance: EffectComponentAttribute): void { }
+    applyFocusedAttribute(instance: EffectComponentAttribute): void { }
+    applyDisabledAttribute(instance: EffectComponentAttribute): void { }
+    applySelectedAttribute(instance: EffectComponentAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkEffectComponentPeer;

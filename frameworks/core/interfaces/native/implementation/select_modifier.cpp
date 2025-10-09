@@ -263,7 +263,9 @@ void SetSelectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convVal = ProcessBindableSelected(frameNode, value);
-    Validator::ValidateNonNegative(convVal);
+    if (convVal.has_value() && Negative(convVal.value())) {
+        convVal = -1;
+    }
     SelectModelStatic::SetSelected(frameNode, convVal);
 }
 void SetValueImpl(Ark_NativePointer node,
@@ -556,8 +558,7 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SelectModelNG::SetBackgroundColor(frameNode, convValue);
+    SelectModelStatic::SetBackgroundColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SetMenuAlignImpl(Ark_NativePointer node,
                       const Opt_MenuAlignType* alignType,

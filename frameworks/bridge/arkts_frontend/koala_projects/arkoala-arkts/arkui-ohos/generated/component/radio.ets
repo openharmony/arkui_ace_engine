@@ -340,7 +340,7 @@ export class RadioStyle_serializer {
             if (valueHolderForCheckedBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForCheckedBackgroundColorTmpValueForIdx0  = valueHolderForCheckedBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForCheckedBackgroundColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForCheckedBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForCheckedBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForCheckedBackgroundColorTmpValueForIdx1  = valueHolderForCheckedBackgroundColorTmpValue as number
@@ -364,7 +364,7 @@ export class RadioStyle_serializer {
             if (valueHolderForUncheckedBorderColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForUncheckedBorderColorTmpValueForIdx0  = valueHolderForUncheckedBorderColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForUncheckedBorderColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForUncheckedBorderColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForUncheckedBorderColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForUncheckedBorderColorTmpValueForIdx1  = valueHolderForUncheckedBorderColorTmpValue as number
@@ -388,7 +388,7 @@ export class RadioStyle_serializer {
             if (valueHolderForIndicatorColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForIndicatorColorTmpValueForIdx0  = valueHolderForIndicatorColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForIndicatorColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForIndicatorColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForIndicatorColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForIndicatorColorTmpValueForIdx1  = valueHolderForIndicatorColorTmpValue as number
@@ -414,7 +414,7 @@ export class RadioStyle_serializer {
             const checkedBackgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let checkedBackgroundColorTmpBuf_ : Color | number | string | Resource | undefined
             if (checkedBackgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                checkedBackgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                checkedBackgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (checkedBackgroundColorTmpBuf_UnionSelector == (1).toChar()) {
                 checkedBackgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (checkedBackgroundColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -433,7 +433,7 @@ export class RadioStyle_serializer {
             const uncheckedBorderColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let uncheckedBorderColorTmpBuf_ : Color | number | string | Resource | undefined
             if (uncheckedBorderColorTmpBuf_UnionSelector == (0).toChar()) {
-                uncheckedBorderColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                uncheckedBorderColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (uncheckedBorderColorTmpBuf_UnionSelector == (1).toChar()) {
                 uncheckedBorderColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (uncheckedBorderColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -452,7 +452,7 @@ export class RadioStyle_serializer {
             const indicatorColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let indicatorColorTmpBuf_ : Color | number | string | Resource | undefined
             if (indicatorColorTmpBuf_UnionSelector == (0).toChar()) {
-                indicatorColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                indicatorColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (indicatorColorTmpBuf_UnionSelector == (1).toChar()) {
                 indicatorColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (indicatorColorTmpBuf_UnionSelector == (2).toChar()) {

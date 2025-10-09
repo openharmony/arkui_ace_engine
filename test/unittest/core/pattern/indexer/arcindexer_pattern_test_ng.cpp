@@ -118,7 +118,7 @@ void ArcindexerPatternTestNg::GetInstance()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ArcIndexerPattern>();
-    eventHub_ = frameNode_->GetOrCreateEventHub<IndexerEventHub>();
+    eventHub_ = frameNode_->GetEventHub<IndexerEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<IndexerLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<IndexerPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
@@ -1407,6 +1407,58 @@ HWTEST_F(ArcindexerPatternTestNg, InitArrayValue001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitArrayValue002
+ * @tc.desc: Test ArcIndexerPattern::InitArrayValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, InitArrayValue002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat layoutProperty
+     * @tc.expected: step1. creat layoutProperty successfully
+     */
+    Create();
+    bool autoCollapseModeChanged = true;
+    auto layoutProperty = pattern_->GetHost()->GetLayoutProperty<ArcIndexerLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. set propSelect and selected
+     * @tc.expected: step2. selectChanged false
+     */
+    layoutProperty->UpdateSelected(5);
+    pattern_->selected_ = 10;
+    pattern_->InitArrayValue(autoCollapseModeChanged);
+    EXPECT_FALSE(pattern_->selectChanged_);
+
+    /**
+     * @tc.steps: step3. set propSelect and selected
+     * @tc.expected: step3. selectChanged false
+     */
+    layoutProperty->UpdateSelected(8);
+    pattern_->selected_ = 8;
+    pattern_->InitArrayValue(autoCollapseModeChanged);
+    EXPECT_FALSE(pattern_->selectChanged_);
+
+    /**
+     * @tc.steps: step4. set propSelect and selected
+     * @tc.expected: step4. selectChanged true
+     */
+    layoutProperty->UpdateSelected(0);
+    pattern_->selected_ = 10;
+    pattern_->InitArrayValue(autoCollapseModeChanged);
+    EXPECT_TRUE(pattern_->selectChanged_);
+
+    /**
+     * @tc.steps: step5. set propSelect and selected
+     * @tc.expected: step5. selectChanged true
+     */
+    layoutProperty->UpdateSelected(0);
+    pattern_->selected_ = 0;
+    pattern_->InitArrayValue(autoCollapseModeChanged);
+    EXPECT_TRUE(pattern_->selectChanged_);
+}
+
+/**
  * @tc.name: StartBubbleDisappearAnimation001
  * @tc.desc: Test ArcIndexerPattern::StartBubbleDisappearAnimation
  * @tc.type: FUNC
@@ -1569,5 +1621,63 @@ HWTEST_F(ArcindexerPatternTestNg, ArcExpandedAnimation001, TestSize.Level1)
     arcIndexerPattern->contentModifier_->sweepAngle_ = sweepAngle;
     arcIndexerPattern->ArcExpandedAnimation(0);
     EXPECT_EQ(arcIndexerPattern->contentModifier_->sweepAngle_->Get(), 360.0f);
+}
+
+/**
+ * @tc.name: onDraw001
+ * @tc.desc: Test ArcIndexerContentModifier::onDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, onDraw001, TestSize.Level1)
+{
+    Create();
+    RSCanvas canvas;
+    DrawingContext context { canvas, 0.0, 0.0 };
+    ArcIndexerContentModifier modifier;
+    modifier.sweepAngle_ = nullptr;
+    modifier.onDraw(context);
+    EXPECT_EQ(modifier.sweepAngle_, nullptr);
+    RefPtr<AnimatablePropertyFloat> sweepAngle = AceType::MakeRefPtr<AnimatablePropertyFloat>(-180.0f);
+    modifier.sweepAngle_ = sweepAngle;
+    modifier.onDraw(context);
+    EXPECT_EQ(modifier.sweepAngle_->Get(), -180);
+}
+
+
+/**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: Test ArcIndexerContentModifier::ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, ToJsonValue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. SetSelectedColor
+     * @tc.expected: step1. SetSelectedColor successfully
+     */
+    Create(
+        [](IndexerModelNG model) {
+            model.SetSelectedColor(Color(0x00000000));
+        },
+        CREATE_ARRAY, 0);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue
+     * @tc.expected: step2. filter.IsFastFilter() is false.
+     */
+    auto layoutProperty  = AceType::DynamicCast<ArcIndexerLayoutProperty>(layoutProperty_);
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("selectedColor"), "#00000000");
+
+    /**
+     * @tc.steps: step3. call ToJsonValue
+     * @tc.expected: step3. filter.IsFastFilter() is true.
+     */
+    auto jsonSecond = JsonUtil::Create(true);
+    filter.AddFilterAttr("id");
+    layoutProperty->ToJsonValue(jsonSecond, filter);
+    EXPECT_TRUE(filter.IsFastFilter());
 }
 } // namespace OHOS::Ace::NG

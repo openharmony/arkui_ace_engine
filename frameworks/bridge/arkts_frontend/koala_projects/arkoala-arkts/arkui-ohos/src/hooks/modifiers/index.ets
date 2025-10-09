@@ -339,7 +339,38 @@ export function hookCircleAttributeModifier(component: ArkCircleComponent, modif
 export function hookCommonMethodAttributeModifier(componenet: ArkCommonMethodComponent, value: AttributeModifier<CommonMethod> | undefined):void {}
 export function hookCommonShapeMethodAttributeModifier(componenet: ArkCommonShapeMethodComponent, value: AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookScrollableCommonMethodAttributeModifier(componenet: ArkScrollableCommonMethodComponent, value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookComponent3DAttributeModifier(componenet: ArkComponent3DComponent, value: AttributeModifier<Component3DAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookComponent3DAttributeModifier(component: ArkComponent3DComponent, modifier: AttributeModifier<Component3DAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): Component3DModifier => {
+        let isComponent3DModifier: boolean = modifier instanceof Component3DModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new Component3DModifier();
+        if (isComponent3DModifier) {
+            let component3DModifier = modifier as object as Component3DModifier;
+            initModifier.mergeModifier(component3DModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkComponent3DComponent => {
+        let componentNew: ArkComponent3DComponent = new ArkComponent3DComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<Component3DAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
 export function hookEffectComponentAttributeModifier(componenet: ArkEffectComponentComponent, value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookEllipseAttributeModifier(component: ArkEllipseComponent, modifier: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {
       if (modifier === undefined) {

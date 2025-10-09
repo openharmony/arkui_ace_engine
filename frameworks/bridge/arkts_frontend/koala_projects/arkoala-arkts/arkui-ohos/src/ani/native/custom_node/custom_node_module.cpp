@@ -136,6 +136,21 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         return AniUtils::ANIStringToStdString(env, aniStr);
     };
 
+    ani_method setActiveMethod;
+    env->Class_FindMethod(static_cast<ani_class>(type), "setActiveInternal", nullptr, &setActiveMethod);
+    auto setActive = [vm, weakRef, setActiveMethod](bool a, bool b) {
+        ani_env *env = nullptr;
+        vm->GetEnv(ANI_VERSION_1, &env);
+        ani_boolean released;
+        ani_ref localRef;
+        ani_boolean param1 = ani_boolean(a);
+        ani_boolean param2 = ani_boolean(b);
+        env->WeakReference_GetReference(*weakRef, &released, &localRef);
+        if (!released) {
+            env->Object_CallMethod_Void(static_cast<ani_object>(localRef), setActiveMethod, param1, param2);
+        }
+    };
+
     struct ArkUICustomNodeInfo customNodeInfo {
         .onPageShowFunc = std::move(onPageShow),
         .onPageHideFunc = std::move(onPageHide),
@@ -143,6 +158,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         .pageTransitionFunc = std::move(pageTransition),
         .onCleanupFunc = std::move(onCleanupFunc),
         .onDumpInspectorFunc = std::move(onDumpInspector),
+        .setActiveFunc = std::move(setActive),
     };
     
     ani_long customNode = modifier->getCustomNodeAniModifier()->constructCustomNode(id, std::move(customNodeInfo));

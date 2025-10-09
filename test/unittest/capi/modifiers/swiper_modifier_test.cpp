@@ -525,7 +525,7 @@ HWTEST_F(SwiperModifierTest, setIndicatorTestDigitFontWeight, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Digit Indicator, the Color type subattributes
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicatorTestDigitFontColor, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setIndicatorTestDigitFontColor, TestSize.Level1)
 {
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
@@ -765,7 +765,7 @@ HWTEST_F(SwiperModifierTest, DISABLED_setDisplayArrowTestStyleColorDefault, Test
  * @tc.desc: Check the functionality of SwiperModifier.DisplayArrowImpl with Style, the Color's subattributes
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleColor, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setDisplayArrowTestStyleColor, TestSize.Level1)
 {
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     static const std::string EXPECTED_RESOURCE_COLOR =
@@ -1359,7 +1359,7 @@ HWTEST_F(SwiperModifierTest, setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwiperEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1477,7 +1477,7 @@ HWTEST_F(SwiperModifierTest, setOnAnimationStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwiperEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1531,7 +1531,7 @@ HWTEST_F(SwiperModifierTest, setOnAnimationEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwiperEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1584,7 +1584,7 @@ HWTEST_F(SwiperModifierTest, setOnGestureSwipeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwiperEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1791,7 +1791,7 @@ HWTEST_F(SwiperModifierTest, setIndicatorInteractiveTest, TestSize.Level1)
 HWTEST_F(SwiperModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

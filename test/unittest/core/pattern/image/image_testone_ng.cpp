@@ -1617,7 +1617,7 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
         IMAGE_WIDTH_DEFAULT, IMAGE_HEIGHT_DEFAULT, IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, -1);
     auto onComplete = [&successEvent](const LoadImageSuccessEvent& info) { successEvent = info; };
     ImageModelNG::SetOnComplete(frameNode, std::move(onComplete));
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
     eventHub->FireCompleteEvent(loadImageSuccessEvent);
@@ -1640,7 +1640,7 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
 void ImageModelNGTest001_MixedProperties02(ImageModelNG &image)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto finishEventData = RADIUS_DEFAULT;
@@ -1838,7 +1838,7 @@ void ImageModelNGFailedTest001_Properties02(ImageModelNG &image)
     EXPECT_EQ(imageLayoutProperty->GetFitOriginalSize().has_value(), false);
 
     int testData = 0;
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     auto onError = [&testData](const LoadImageFailEvent& info) { testData = 1; };
     image.SetOnError(std::move(onError));
     eventHub->FireErrorEvent(LoadImageFailEvent(WIDTH, HEIGHT, "image load error!", {}));
@@ -2049,5 +2049,49 @@ HWTEST_F(ImageTestOneNg, ImageDynamicRangeMode001, TestSize.Level1)
     image.SetDynamicRangeMode(DynamicRangeMode::STANDARD);
     imagePattern->DumpRenderInfo();
     EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), DynamicRangeMode::STANDARD);
+}
+
+/**
+ * @tc.name: ParseImageModelStaticFillColor001
+ * @tc.desc: parse fill color
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, ParseImageModelStaticFillColor001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ImageModelStatic::SetImageFill(frameNode, std::nullopt);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(theme);
+    auto fillColor = theme->GetFillColor();
+    Color color;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ImageRenderProperty, SvgFillColor, color, frameNode, Color::RED);
+    ASSERT_EQ(fillColor, color);
+    ImageModelStatic::SetImageFill(frameNode, Color::BLACK);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ImageRenderProperty, SvgFillColor, color, frameNode, Color::RED);
+    ASSERT_EQ(Color::BLACK, color);
+}
+
+/**
+ * @tc.name: SetImageModelStaticSrc001
+ * @tc.desc: parse fill color
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticSrc001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ImageSourceInfo defaultInfo;
+    ImageSourceInfo info("pages/image.png");
+    ImageModelStatic::SetSrc(frameNode, info);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, ImageSourceInfo, defaultInfo, frameNode, ImageSourceInfo());
+    ASSERT_EQ(defaultInfo.GetSrc(), "pages/image.png");
+    ImageModelStatic::SetSrc(frameNode, std::nullopt);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, ImageSourceInfo, defaultInfo, frameNode, ImageSourceInfo());
+    ASSERT_EQ(defaultInfo.GetSrc(), "");
 }
 } // namespace OHOS::Ace::NG

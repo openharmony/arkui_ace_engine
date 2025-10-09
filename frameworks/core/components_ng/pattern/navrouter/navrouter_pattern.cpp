@@ -28,7 +28,7 @@ void NavRouterPattern::OnModifyDone()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto eventHub = pattern->GetOrCreateEventHub<NavRouterEventHub>();
+        auto eventHub = pattern->GetEventHub<NavRouterEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDestinationChangeEvent();
     };

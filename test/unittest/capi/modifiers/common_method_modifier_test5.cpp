@@ -29,7 +29,8 @@ namespace {
     const auto ATTRIBUTE_LINEAR_GRADIENT_BLUR_NAME = "linearGradientBlur";
     const auto ATTRIBUTE_LINEAR_GRADIENT_BLUR_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME = "systemBarEffect";
-    const auto ATTRIBUTE_SYSTEM_BAR_EFFECT_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_SYSTEM_BAR_EFFECT_DEFAULT_VALUE = "false";
+    const auto ATTRIBUTE_SYSTEM_BAR_EFFECT_TRUE_VALUE = "true";
     const auto ATTRIBUTE_BLEND_MODE_NAME = "blendMode";
     const auto ATTRIBUTE_BLEND_MODE_DEFAULT_VALUE = "0";
 
@@ -120,6 +121,7 @@ HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestInvalidValues, Test
  */
 HWTEST_F(CommonMethodModifierTest5, setSystemBarEffectTestDefaultValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setSystemBarEffect, nullptr);
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_SYSTEM_BAR_EFFECT_DEFAULT_VALUE);
 }
@@ -129,19 +131,15 @@ HWTEST_F(CommonMethodModifierTest5, setSystemBarEffectTestDefaultValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest5, DISABLED_setSystemBarEffectTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest5, setSystemBarEffectTestValidValues, TestSize.Level1)
 {
-    LOGE("The `SetSystemBarEffect` modifier not implemented.");
-}
+    ASSERT_NE(modifier_->setSystemBarEffect, nullptr);
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_SYSTEM_BAR_EFFECT_DEFAULT_VALUE);
 
-/*
- * @tc.name: setSystemBarEffectTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest5, DISABLED_setSystemBarEffectTestInvalidValues, TestSize.Level1)
-{
-    LOGE("The `SetSystemBarEffect` modifier not implemented.");
+    modifier_->setSystemBarEffect(node_);
+    strResult = GetStringAttribute(node_, ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_SYSTEM_BAR_EFFECT_TRUE_VALUE);
 }
 
 /*

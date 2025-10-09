@@ -92,6 +92,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetFocusedInstanceId)
         },
         ani_native_function {
+            "_Common_SetImageCacheCount",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetImageCacheCount)
+        },
+        ani_native_function {
+            "_Common_SetImageRawDataCacheSize",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetImageRawDataCacheSize)
+        },
+        ani_native_function {
             "_CustomNode_Construct",
             "iC{arkui.ArkCustomComponent.ArkCustomComponent}:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
@@ -335,6 +345,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Common_px2lpx",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::Px2lpx)
+        },
+        ani_native_function {
+            "_Common_getWindowName",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::getWindowName)
         },
         ani_native_function {
             "_SyntaxItem_Construct",

@@ -33,11 +33,11 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: TabContentAttribute): void { }
+    applyPressedAttribute(instance: TabContentAttribute): void { }
+    applyFocusedAttribute(instance: TabContentAttribute): void { }
+    applyDisabledAttribute(instance: TabContentAttribute): void { }
+    applySelectedAttribute(instance: TabContentAttribute): void { }
     _tabBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _tabBar_0_0value?: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined
     _onWillShow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

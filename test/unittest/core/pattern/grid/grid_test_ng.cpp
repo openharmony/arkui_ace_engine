@@ -109,7 +109,7 @@ void GridTestNg::GetGrid()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<GridPattern>();
-    eventHub_ = frameNode_->GetOrCreateEventHub<GridEventHub>();
+    eventHub_ = frameNode_->GetEventHub<GridEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<GridLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<GridAccessibilityProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();

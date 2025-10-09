@@ -184,7 +184,7 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     std::list<RefPtr<FrameNode>> children;
     host->GenerateOneDepthVisibleFrame(children);
     for (const auto& itemFrameNode : children) {
-        auto itemEvent = itemFrameNode->GetOrCreateEventHub<EventHub>();
+        auto itemEvent = itemFrameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(itemEvent);
         if (!itemEvent->IsEnabled()) {
             continue;
@@ -205,9 +205,9 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
         if (iter == itemToBeSelected_.end()) {
             auto result = itemToBeSelected_.emplace(itemFrameNode->GetId(), ItemSelectedStatus());
             iter = result.first;
-            iter->second.onSelected = itemPattern->GetOrCreateEventHub<GridItemEventHub>()->GetOnSelect();
+            iter->second.onSelected = itemPattern->GetEventHub<GridItemEventHub>()->GetOnSelect();
             iter->second.selectChangeEvent =
-                itemPattern->GetOrCreateEventHub<GridItemEventHub>()->GetSelectChangeEvent();
+                itemPattern->GetEventHub<GridItemEventHub>()->GetSelectChangeEvent();
         }
         auto startMainOffset = mouseStartOffset_.GetMainOffset(info_.axis_);
         if (info_.axis_ == Axis::VERTICAL) {
@@ -300,7 +300,7 @@ void GridPattern::FireOnScrollStart(bool withPerfMonitor)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<GridEventHub>();
+    auto hub = host->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollStart = hub->GetOnScrollStart();
     if (onScrollStart) {
@@ -515,7 +515,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
     const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
     if (!gridLayoutAlgorithm->MeasureInNextFrame()) {
-        auto eventhub = GetOrCreateEventHub<GridEventHub>();
+        auto eventhub = GetEventHub<GridEventHub>();
         CHECK_NULL_RETURN(eventhub, false);
         Dimension offset(0, DimensionUnit::VP);
         Dimension offsetPx(gridLayoutInfo.currentOffset_, DimensionUnit::PX);
@@ -611,7 +611,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto gridEventHub = host->GetOrCreateEventHub<GridEventHub>();
+    auto gridEventHub = host->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(gridEventHub);
     auto onScroll = gridEventHub->GetOnScroll();
     PrintOffsetLog(AceLogTag::ACE_GRID, host->GetId(), finalOffset);
@@ -1336,7 +1336,7 @@ void GridPattern::GetEventDumpInfo()
     ScrollablePattern::GetEventDumpInfo();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<GridEventHub>();
+    auto hub = host->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
@@ -1351,7 +1351,7 @@ void GridPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     ScrollablePattern::GetEventDumpInfo(json);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<GridEventHub>();
+    auto hub = host->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");

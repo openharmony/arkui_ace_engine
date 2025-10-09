@@ -72,6 +72,7 @@ ani_double Fp2px(ani_env* env, ani_object obj, ani_double value, ani_int instanc
 ani_double Px2fp(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
 ani_double Lpx2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
 ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
+ani_string getWindowName(ani_env* env, ani_object obj, ani_int instanceId);
 void* TransferKeyEventPointer(ani_env* env, ani_object obj, ani_long pointer);
 void* CreateKeyEventAccessorWithPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer);
 void* CreateEventTargetInfoAccessor(ani_env* env, [[maybe_unused]] ani_object obj);
@@ -106,6 +107,10 @@ void SetThemeScopeId(ani_env* env, ani_object aniClass, ani_int themeScopeId);
 void CreateAndBindTheme(ani_env* env, ani_object aniClass, ani_int themeScopeId, ani_int themeId, ani_long thisArray,
     ani_double thisLength, ani_int colorMode, ani_fn_object onThemeScopeDestroy);
 void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, ani_long parent);
+void SetImageCacheCount(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_int value, ani_int instanceId);
+void SetImageRawDataCacheSize(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_int value, ani_int instanceId);
 ani_status GetAniEnv(ani_vm* vm, ani_env** env);
 ani_long ExtractorsToDrawContextPtr(ani_env* env, ani_object aniClass, ani_object ptr);
 ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_long ptr);

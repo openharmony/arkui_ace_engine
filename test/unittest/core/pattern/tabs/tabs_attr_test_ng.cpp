@@ -520,7 +520,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelNg001, TestSize.Level1)
     model.SetOnGestureSwipe(std::move(onGestureSwipe));
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    auto eventHub = swiperNode_->GetOrCreateEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode_->GetEventHub<SwiperEventHub>();
     EXPECT_NE(eventHub->gestureSwipeEvent_, nullptr);
 }
 

@@ -116,24 +116,28 @@ RefPtr<ResourceWrapper> CreateResourceWrapper(const std::string& bundleName, con
     auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
     return resourceWrapper;
 }
-#ifdef WRONG_SDK
 Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
 {
     CalcDimension result;
     const auto errValue = Converter::ArkValue<Ark_LengthMetricsCustom>(result);
     CHECK_NULL_RETURN(res, errValue);
-    auto resId = Converter::Convert<int32_t>(res->id);
+    auto resId = Converter::Convert<int64_t>(res->id);
     auto bundleName = Converter::Convert<std::string>(res->bundleName);
     auto moduleName = Converter::Convert<std::string>(res->moduleName);
     auto resourceWrapper = CreateResourceWrapper(bundleName, moduleName);
     CHECK_NULL_RETURN(resourceWrapper, errValue);
     if (resId == -1) {
-        auto optParams = Converter::OptConvert<std::vector<std::string>>(res->params);
+        auto optParams = Converter::OptConvert<std::vector<Ark_Union_String_I32_I64_F64_Resource>>(res->params);
+        
         if (!optParams.has_value() || optParams->size() < 1) {
             return errValue;
         }
         auto params = optParams.value();
-        result = resourceWrapper->GetDimensionByName(params[0]);
+        if (params[0].selector != 0) {
+            return errValue;
+        }
+        auto params0 = Converter::Convert<std::string>(params[0].value0);
+        result = resourceWrapper->GetDimensionByName(params0);
         return Converter::ArkValue<Ark_LengthMetricsCustom>(result);
     }
     auto resType = Converter::OptConvert<int32_t>(res->type);
@@ -154,7 +158,6 @@ Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
     }
     return Converter::ArkValue<Ark_LengthMetricsCustom>(result);
 }
-#endif
 void ParseArrayNumber(Color& color, std::vector<uint32_t>& indexes, bool result)
 {
     indexes.clear();
@@ -180,6 +183,23 @@ Array_Number ColorMetricsResourceColorImpl(const Ark_Resource* color)
     ParseArrayNumber(*result, indexes, true);
     return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
 }
+Array_Number BlendColorByColorMetricsImpl(const Ark_Number* color,
+                                          const Ark_Number* overlayColor)
+{
+    Color resultErrColor;
+    std::vector<uint32_t> indexes;
+    ParseArrayNumber(resultErrColor, indexes, false);
+    Array_Number errValue = Converter::ArkValue<Array_Number>(indexes, Converter::FC);
+    CHECK_NULL_RETURN(color, errValue);
+    CHECK_NULL_RETURN(overlayColor, errValue);
+    auto colorInt = Converter::Convert<uint32_t>(*color);
+    auto overlayColorInt = Converter::Convert<uint32_t>(*overlayColor);
+    Color colorColor = Color(colorInt);
+    Color overlayColorColor = Color(overlayColorInt);
+    auto blendColor = colorColor.BlendColor(overlayColorColor);
+    ParseArrayNumber(blendColor, indexes, true);
+    return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
+}
 } // SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
@@ -192,6 +212,8 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
         SystemOpsAccessor::ResourceManagerResetImpl,
         SystemOpsAccessor::SetFrameCallbackImpl,
         SystemOpsAccessor::ColorMetricsResourceColorImpl,
+        SystemOpsAccessor::BlendColorByColorMetricsImpl,
+        SystemOpsAccessor::ResourceToLengthMetricsImpl,
     };
     return &SystemOpsAccessorImpl;
 }

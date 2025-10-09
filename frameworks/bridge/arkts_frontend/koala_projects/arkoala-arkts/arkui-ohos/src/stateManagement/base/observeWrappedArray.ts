@@ -157,7 +157,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public static $_invoke<T>(arrayLength?: number): WrappedArray<T> {
         if (arrayLength) {
-            return new WrappedArray<T>(new Array<T>(arrayLength));
+            return new WrappedArray<T>(new Array<T>(arrayLength.toInt()));
         } else {
             return new WrappedArray<T>(new Array<T>());
         }
@@ -288,22 +288,6 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     }
 
     overload push { push, pushOne, pushArray }
-
-    /**
-     * Adds the specified elements to the end of an array and returns the new length of the array.
-     *
-     * @returns new length
-     */
-    public override pushECMA(...val: T[]): int {
-        const ret = this.store_.pushECMA(...val);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
-
-        // exec all subscribing @Watch
-        this.executeOnSubscribingWatches('pushECMA');
-
-        return ret;
-    }
 
     /**
      * Changes the contents of an array by removing or replacing existing elements

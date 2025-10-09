@@ -377,7 +377,7 @@ void SetDrawModifier(
     if (drawModifier == nullptr) {
         // fnObj should not be nullptr;
         HILOGE("DrawModifier is undefined.");
-        abort();
+        return;
     }
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
@@ -903,6 +903,23 @@ ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instan
     }
     return modifier->getCommonAniModifier()->px2lpx(value, instanceId);
 }
+
+ani_string getWindowName(ani_env* env, ani_object obj, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    auto ret = modifier->getCommonAniModifier()->getWindowName(instanceId);
+    if (ret.has_value()) {
+        auto retValue = AniUtils::StdStringToANIString(env, ret.value());
+        if (retValue) {
+            return *retValue;
+        }
+    }
+    return nullptr;
+}
+
 void* TransferKeyEventPointer(ani_env* env, ani_object obj, ani_long pointer)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -1211,6 +1228,26 @@ void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, a
         return;
     }
     modifier->getCommonAniModifier()->applyParentThemeScopeId(env, self, parent);
+}
+
+void SetImageCacheCount(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_int value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setImageCacheCount(value, instanceId);
+}
+
+void SetImageRawDataCacheSize(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_int value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setImageRawDataCacheSize(value, instanceId);
 }
 
 ani_long ExtractorsToDrawContextPtr(ani_env* env, ani_object aniClass, ani_object ptr)

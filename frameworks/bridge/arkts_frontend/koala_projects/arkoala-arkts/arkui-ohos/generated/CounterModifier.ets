@@ -30,11 +30,11 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: CounterAttribute): void { }
+    applyPressedAttribute(instance: CounterAttribute): void { }
+    applyFocusedAttribute(instance: CounterAttribute): void { }
+    applyDisabledAttribute(instance: CounterAttribute): void { }
+    applySelectedAttribute(instance: CounterAttribute): void { }
     _onInc_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onInc_0_0value?: VoidCallback | undefined
     _onDec_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

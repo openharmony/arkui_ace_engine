@@ -32,11 +32,11 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: WebAttribute): void { }
+    applyPressedAttribute(instance: WebAttribute): void { }
+    applyFocusedAttribute(instance: WebAttribute): void { }
+    applyDisabledAttribute(instance: WebAttribute): void { }
+    applySelectedAttribute(instance: WebAttribute): void { }
     _javaScriptAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _javaScriptAccess_0_0value?: boolean | undefined
     _fileAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -2430,7 +2430,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             switch (this._bindSelectionMenu_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as WebElementType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as WebResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptionsExt | undefined));
+                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as WebElementType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as WebResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptionsExt | undefined | undefined));
                     this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

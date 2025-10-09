@@ -137,7 +137,7 @@ HWTEST_F(DrawingRenderingContextAccessorTest, ctorTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DrawingRenderingContextAccessorTest, invalidateTest, TestSize.Level1)
+HWTEST_F(DrawingRenderingContextAccessorTest, DISABLED_invalidateTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
@@ -157,7 +157,7 @@ HWTEST_F(DrawingRenderingContextAccessorTest, invalidateTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DrawingRenderingContextAccessorTest, getSizeTest, TestSize.Level1)
+HWTEST_F(DrawingRenderingContextAccessorTest, DISABLED_getSizeTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();

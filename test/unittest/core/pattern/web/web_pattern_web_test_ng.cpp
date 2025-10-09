@@ -1118,7 +1118,7 @@ HWTEST_F(WebPatternWebTest, HandleKeyEvent_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern, nullptr);
-    auto webEventhub = frameNode->GetOrCreateEventHub<WebEventHub>();
+    auto webEventhub = frameNode->GetEventHub<WebEventHub>();
     webEventhub->SetOnKeyEvent([](KeyEventInfo& keyEventInfo) { std::cout << "onkeyevent" << std::endl; });
     std::vector<KeyCode> code;
     code.push_back(KeyCode::KEY_HOME);
@@ -1150,7 +1150,7 @@ HWTEST_F(WebPatternWebTest, HandleKeyEvent_002, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern, nullptr);
-    auto webEventhub = frameNode->GetOrCreateEventHub<WebEventHub>();
+    auto webEventhub = frameNode->GetEventHub<WebEventHub>();
     webEventhub->SetOnPreKeyEvent([](KeyEventInfo& keyEventInfo) {
         std::cout << "onPrekeyevent" << std::endl;
         return true;
@@ -1185,7 +1185,7 @@ HWTEST_F(WebPatternWebTest, HandleKeyEvent_003, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern, nullptr);
-    auto webEventhub = frameNode->GetOrCreateEventHub<WebEventHub>();
+    auto webEventhub = frameNode->GetEventHub<WebEventHub>();
     webEventhub->SetOnPreKeyEvent([](KeyEventInfo& keyEventInfo) {
         std::cout << "onPrekeyevent" << std::endl;
         return false;
