@@ -343,7 +343,8 @@ bool FolderStackLayoutAlgorithm::IsIntoFolderStack(
         "folderStack state isFullWindow:%{public}d, isFoldable:%{public}d, "
         "foldStatus:%{public}d, isLandscape:%{public}d",
         isFullWindow, isFoldable, foldStatus, isLandscape);
-    return isFullWindow && foldStatus == FoldStatus::HALF_FOLD && ((isLandscape && isFoldable) || (isPortrait && isSmallFoldable));
+    return isFullWindow && foldStatus == FoldStatus::HALF_FOLD &&
+        ((isLandscape && isFoldable) || (isPortrait && isSmallFoldable));
 }
 
 void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrapper)
