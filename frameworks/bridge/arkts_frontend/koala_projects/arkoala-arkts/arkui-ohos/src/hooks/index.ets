@@ -44,7 +44,7 @@ import { TextModifier } from "../TextModifier";
 import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
 import { CommonMethod, StateStyles, ArkCommonMethodComponent, CustomProperty } from "#generated";
-
+import { CommonMethodModifier } from "../CommonMethodModifier"
 import { AnimateParam } from "#generated";
 import { GestureModifier } from "#generated";
 import { pointer } from "@koalaui/interop";
@@ -63,9 +63,40 @@ export function hookGestureModifier(
 ) {}
 
 export function hookStateStyleImpl(
-  receiver: CommonMethod,
+  receiver: ArkCommonMethodComponent,
   value: StateStyles | undefined
-) {}
+) {
+    let currentState = receiver.getPeer().getOrCreateStateStyleMutable();
+    if (currentState === undefined) {
+      return;
+    }
+    const UI_STATE_NORMAL = 0;
+    const UI_STATE_PRESSED = 1;
+    const UI_STATE_FOCUSED = 1 << 1;
+    const UI_STATE_DISABLED = 1 << 2;
+    const UI_STATE_SELECTED = 1 << 3;
+
+    let cm = new CommonMethodModifier();
+
+    if (currentState.value === UI_STATE_NORMAL) {
+        value?.normal?.(cm)
+    }
+    if (currentState.value & UI_STATE_PRESSED) {
+        value?.clicked?.(cm)
+        value?.pressed?.(cm)
+    }
+    if (currentState.value & UI_STATE_FOCUSED) {
+        value?.focused?.(cm)
+    }
+    if (currentState.value & UI_STATE_DISABLED) {
+        value?.disabled?.(cm)
+    }
+    if (currentState.value & UI_STATE_SELECTED) {
+        value?.selected?.(cm)
+    }
+
+    cm.applyModifierPatch(receiver.getPeer())
+}
 
 export class ElementIdToCustomProperties {
     constructor() { }

@@ -15,15 +15,30 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StateStylesOpsAccessor {
 void OnStateStyleChangeImpl(Ark_NativePointer node,
                             const Callback_StateStylesChange* stateStyleChange)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    auto frameNode = reinterpret_cast<OHOS::Ace::NG::FrameNode*>(node);
+     CHECK_NULL_VOID(frameNode);
+     auto weakNode = AceType::WeakClaim(frameNode);
+     auto onStateStyleChangeLambda = [arkCallback = CallbackHelper(*stateStyleChange), node = weakNode](uint64_t currentState) {
+         PipelineContext::SetCallBackNode(node);
+         int state = (int)currentState;
+         Ark_Int32 arkState = Converter::ArkValue<Ark_Int32>(state);
+         arkCallback.InvokeSync(arkState);
+     };
+     auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+     CHECK_NULL_VOID(eventHub);
+     uint64_t allState = UI_STATE_NORMAL | UI_STATE_PRESSED | UI_STATE_FOCUSED | UI_STATE_DISABLED | UI_STATE_SELECTED;
+     std::function<void(uint64_t)> onStateStyleChange = onStateStyleChangeLambda;
+     eventHub->AddSupportedUIStateWithCallback(allState, onStateStyleChange, false);
 }
 } // StateStylesOpsAccessor
 const GENERATED_ArkUIStateStylesOpsAccessor* GetStateStylesOpsAccessor()
