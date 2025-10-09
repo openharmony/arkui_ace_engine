@@ -187,14 +187,19 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             throw new Error('not an entry custom component');
         }
     }
+    isValidActiveCount(): boolean {
+        return this.instance.getActive() < 2;
+    }
     setActiveCount(active: boolean): void {
-        this.instance.isActive_ += active ? 1 : -1;
-        if (this.instance.isActive_ > 1) {
-            console.log(`activeCount_error: ${this.instance.isActive_}`);
+        let activeCount: number = this.instance.getActive();
+        activeCount += active ? 1 : -1;
+        this.instance.setActive(activeCount);
+        if (!this.isValidActiveCount()) {
+            console.log(`activeCount_error: ${this.instance.getActive()}`);
         }
     }
     isViewActive(): boolean {
-        return this.instance.isActive_ > 0;
+        return this.instance.getActive() > 0;
     }
     setActiveInternal(active: boolean, isReuse: boolean): void {
         this.setActiveCount(active);
