@@ -36,6 +36,7 @@ arkui_files = [
   "arkui-preprocessed/@ohos.router.ets",
   "arkui-preprocessed/arkui/AlphabetIndexerModifier.ets",
   "arkui-preprocessed/arkui/AnimatorModifier.ets",
+  "arkui-preprocessed/arkui/ApplyModifierToNode.ets",
   "arkui-preprocessed/arkui/ArkComponentRoot.ets",
   "arkui-preprocessed/arkui/ArkCustomComponent.ets",
   "arkui-preprocessed/arkui/ArkState.ets",

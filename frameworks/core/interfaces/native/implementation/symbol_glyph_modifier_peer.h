@@ -15,10 +15,14 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SYMBOL_GLYPH_MODIFIER_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SYMBOL_GLYPH_MODIFIER_PEER_IMPL_H
 
+#include "base/memory/referenced.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "frameworks/core/components_ng/base/symbol_modifier.h"
 
 struct SymbolGlyphModifierPeer : OHOS::Ace::SymbolModifier {
+    std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)> symbolApply;
+    void* symbolModifierAni;
 protected:
     SymbolGlyphModifierPeer() = default;
     friend OHOS::Ace::NG::PeerUtils;

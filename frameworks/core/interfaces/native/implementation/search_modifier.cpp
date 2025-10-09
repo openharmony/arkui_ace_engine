@@ -25,6 +25,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/implementation/search_controller_accessor_peer.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "base/utils/utils.h"
 
@@ -150,8 +151,9 @@ void SetSearchIconImpl(Ark_NativePointer node,
             auto options = Converter::OptConvert<NG::IconOptions>(src);
             SearchModelStatic::SetSearchImageIcon(frameNode, options);
         },
-        [](const Ark_SymbolGlyphModifier& src) {
-            LOGE("ARKOALA SearchAttributeModifier.SearchIcon -> handling CustomObject not implemented.");
+        [frameNode](const Ark_SymbolGlyphModifier& src) {
+            SearchModelStatic::SetSearchSymbolIcon(frameNode, src->symbolApply);
+            PeerUtils::DestroyPeer(src);
         },
         [frameNode]() {
             SearchModelStatic::SetSearchDefaultIcon(frameNode);
@@ -169,8 +171,14 @@ void SetCancelButtonImpl(Ark_NativePointer node,
             SearchModelStatic::SetCancelImageIcon(frameNode, iconOptions);
             SearchModelStatic::SetCancelButtonStyle(frameNode, cancelButtonStyle);
         },
-        [](const Ark_CancelButtonSymbolOptions& src) {
-            LOGE("ARKOALA SearchAttributeModifier.CancelButton -> handling OptCustomObject not implemented.");
+        [frameNode](const Ark_CancelButtonSymbolOptions& src) {
+            auto cancelButtonStyle = Converter::OptConvert<CancelButtonStyle>(src.style);
+            SearchModelStatic::SetCancelButtonStyle(frameNode, cancelButtonStyle);
+            auto symbolModifier = Converter::OptConvert<Ark_SymbolGlyphModifier>(src.icon);
+            if (symbolModifier && *symbolModifier) {
+                SearchModelStatic::SetCancelSymbolIcon(frameNode, (*symbolModifier)->symbolApply);
+                PeerUtils::DestroyPeer(*symbolModifier);
+            }
         },
         [frameNode]() {
             SearchModelStatic::SetCancelDefaultIcon(frameNode);

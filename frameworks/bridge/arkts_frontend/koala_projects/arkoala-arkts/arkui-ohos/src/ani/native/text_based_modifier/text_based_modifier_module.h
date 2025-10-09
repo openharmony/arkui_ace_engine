@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_SEARCH_MODULE_H
-#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_SEARCH_MODULE_H
+#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_TEXT_BASE_MODIFIER_MODULE_H
+#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_TEXT_BASE_MODIFIER_MODULE_H
 
 #include "ani.h"
 
 namespace OHOS::Ace::Ani {
-void SetSearchIconSymbol(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node,
-    ani_object symbolModifierAni);
+    ani_object ExtractorsFromSymbolGlyphModifierPtr(ani_env* env, [[maybe_unused]]ani_object aniClass,
+        ani_long pointer);
+    ani_long ExtractorsToSymbolGlyphModifierPtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_fn_object etsFunc,
+        ani_object symbolModifierAni);
 } // namespace OHOS::Ace::Ani
 
-#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_SEARCH_MODULE_H
+#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_TEXT_BASE_MODIFIER_MODULE_H

@@ -19,6 +19,7 @@
 #include "core/components/image/image_component.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/color_filter_peer.h"
+#include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -68,8 +69,10 @@ RefPtr<ImageSpan> Convert(const Ark_ImageAttachmentInterface& value)
                     imageStyle.colorFilterMatrix = filter->GetColorFilterMatrix();
                 }
             },
-            [](const Ark_drawing_ColorFilter& colorStrategy) {
-                LOGE("Arkoala: ImageAttachmentAccessor convert from DrawinColorFilter doesn't supported");
+            [&imageStyle](const Ark_drawing_ColorFilter& colorStrategy) {
+                CHECK_NULL_VOID(colorStrategy);
+                imageStyle.drawingColorFilter = colorStrategy->drawingColorFilter;
+                drawing_ColorFilterPeer::Destroy(colorStrategy);
             },
             []() {
             });
@@ -101,8 +104,10 @@ RefPtr<ImageSpan> Convert(const Ark_ResourceImageAttachmentOptions& value)
                     imageStyle.colorFilterMatrix = filter->GetColorFilterMatrix();
                 }
             },
-            [](const Ark_drawing_ColorFilter& colorStrategy) {
-                LOGE("Arkoala: ImageAttachmentAccessor convert from DrawinColorFilter doesn't supported");
+            [&imageStyle](const Ark_drawing_ColorFilter& colorStrategy) {
+                CHECK_NULL_VOID(colorStrategy);
+                imageStyle.drawingColorFilter = colorStrategy->drawingColorFilter;
+                drawing_ColorFilterPeer::Destroy(colorStrategy);
             },
             []() {
             });

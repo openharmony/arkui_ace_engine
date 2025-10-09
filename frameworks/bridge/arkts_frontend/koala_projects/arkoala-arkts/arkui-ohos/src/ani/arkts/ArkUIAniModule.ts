@@ -233,8 +233,10 @@ export class ArkUIAniModule {
     native static _StyledString_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
     native static _StyledString_GetPixelMap(peerPtr: KPointer): image.PixelMap
 
-    // for search
-    native static _Search_SetSearchIcon_Symbol(ptr: KPointer, value: SymbolGlyphModifier): void
+    // for SymbolGlyph Modifier
+    native static _Extractors_ToSymbolGlyphModifierPtr(callBack: (node: KPointer) => void,
+        value: SymbolGlyphModifier): KPointer;
+    native static _Extractors_FromSymbolGlyphModifierPtr(ptr: KPointer): SymbolGlyphModifier;
 
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void

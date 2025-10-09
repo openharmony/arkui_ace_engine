@@ -70,6 +70,7 @@ public:
     static void SetCancelDefaultIcon(FrameNode* frameNode);
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& onChangeEvent);
     static void SetSearchSymbolIcon(FrameNode *frameNode, std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
+    static void SetCancelSymbolIcon(FrameNode *frameNode, std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
 private:
 
 };

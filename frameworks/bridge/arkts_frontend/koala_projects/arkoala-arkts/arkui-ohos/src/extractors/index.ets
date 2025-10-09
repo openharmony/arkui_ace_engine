@@ -75,6 +75,7 @@ import { UIContextImpl } from 'arkui/base/UIContextImpl';
 import { int32 } from '@koalaui/common';
 import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
 import { toPeerPtr } from '@koalaui/interop';
+import { applySymbolGlyphModifierToNode } from "./../ApplyModifierToNode"
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -131,13 +132,15 @@ export namespace extractors {
   export function toSymbolGlyphModifierPtr(
     value: SymbolGlyphModifier
   ): KPointer {
-    return 123;
+    let callBack = (node: KPointer) => {
+      applySymbolGlyphModifierToNode(value, node);
+    };
+    return ArkUIAniModule._Extractors_ToSymbolGlyphModifierPtr(callBack, value);
   }
   export function fromSymbolGlyphModifierPtr(
     ptr: KPointer
   ): SymbolGlyphModifier {
-    const x: Object = {};
-    return x as SymbolGlyphModifier;
+    return ArkUIAniModule._Extractors_FromSymbolGlyphModifierPtr(ptr);
   }
 
   export function toTextModifierPtr(value: TextModifier): KPointer {
