@@ -168,7 +168,7 @@ HWTEST_F(MenuModelStaticTestNg, SetItemGroupDivider001, TestSize.Level1)
      * @tc.steps: step3. do assert
      * @tc.expected: step3. Menu GroupDividerMode is FLOATING_ABOVE_MENU
      */
-    EXPECT_EQ(menuProperty->GetItemDividerMode(), DividerMode::FLOATING_ABOVE_MENU);
+    EXPECT_EQ(menuProperty->GetItemGroupDividerMode(), DividerMode::FLOATING_ABOVE_MENU);
     EXPECT_EQ(menuProperty->GetItemGroupDivider(), ITEM_DIVIDER);
 }
 
