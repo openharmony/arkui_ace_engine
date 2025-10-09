@@ -222,7 +222,7 @@ void SetOnSubmitImpl(Ark_NativePointer node, const Opt_TextAreaSubmitCallback* v
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelNG::SetOnSubmit(frameNode, nullptr);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
