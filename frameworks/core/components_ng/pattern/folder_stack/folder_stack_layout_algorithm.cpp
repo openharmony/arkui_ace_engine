@@ -345,7 +345,7 @@ bool FolderStackLayoutAlgorithm::IsIntoFolderStack(
         isFullWindow, isFoldable, foldStatus, isLandscape);
     return isFullWindow && foldStatus == FoldStatus::HALF_FOLD && ((isLandscape && isFoldable) || (isPortrait && isSmallFoldable));
 }
- 
+
 void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrapper)
 {
     auto pattern = layoutWrapper->GetHostNode()->GetPattern<FolderStackPattern>();
