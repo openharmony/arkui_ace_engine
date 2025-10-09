@@ -7726,7 +7726,7 @@ typedef enum {
      * And the {@link ArkUI_CoastingAxisEvent} object can be obtained from the {@link ArkUI_UIInputEvent}
      * object through {@link OH_ArkUI_UIInputEvent_GetCoastingAxisEvent}. \n
      *
-     * @since 21
+     * @since 22
      */
     NODE_ON_COASTING_AXIS_EVENT = 31,
 

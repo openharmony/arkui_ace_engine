@@ -64,7 +64,7 @@ typedef struct ArkUI_UIInputEvent ArkUI_UIInputEvent;
  * It only can be received when user flings on the touchpad with two fingers and any components register
  * NODE_ON_COASTING_AXIS_EVENT through {@link registerNodeEvent} exist under the pointer location.
  *
- * @since 21
+ * @since 22
  */
 typedef struct ArkUI_CoastingAxisEvent ArkUI_CoastingAxisEvent;
 
@@ -315,7 +315,7 @@ typedef enum {
 /**
  * @brief Enumerates the coasting axis event phases.
  *
- * @since 21
+ * @since 22
  */
 typedef enum {
     /** Idle phase, indicating no-coasting phase. */
@@ -1344,7 +1344,7 @@ ArkUI_ErrorCode OH_ArkUI_UIInputEvent_GetLatestStatus();
  *
  * @param event Indicates the pointer to the UI input event.
  * @return Returns the pointer to the coasting axis event, return null if no any coasting axis event occurs.
- * @since 21
+ * @since 22
  */
 ArkUI_CoastingAxisEvent* OH_ArkUI_UIInputEvent_GetCoastingAxisEvent(ArkUI_UIInputEvent* event);
 
@@ -1354,7 +1354,7 @@ ArkUI_CoastingAxisEvent* OH_ArkUI_UIInputEvent_GetCoastingAxisEvent(ArkUI_UIInpu
  * @param event Indicates the pointer to the coasting axis event.
  * @return Returns the time when the UI input event occurs; returns <b>0</b> if any parameter error occurs.
  *
- * @since 21
+ * @since 22
  */
 int64_t OH_ArkUI_CoastingAxisEvent_GetEventTime(ArkUI_CoastingAxisEvent* event);
 
@@ -1365,7 +1365,7 @@ int64_t OH_ArkUI_CoastingAxisEvent_GetEventTime(ArkUI_CoastingAxisEvent* event);
  * @return Returns the event phase, see {@link ArkUI_CoastingAxisEventPhase};
  *     returns <b>ARKUI_COASTING_AXIS_EVENT_PHASE_NONE</b> if any parameter error occurs.
  *
- * @since 21
+ * @since 22
  */
 ArkUI_CoastingAxisEventPhase OH_ArkUI_CoastingAxisEvent_GetPhase(ArkUI_CoastingAxisEvent* event);
 
@@ -1375,7 +1375,7 @@ ArkUI_CoastingAxisEventPhase OH_ArkUI_CoastingAxisEvent_GetPhase(ArkUI_CoastingA
  * @param event Indicates the pointer to the coasting axis event.
  * @return Returns delta X value, count in PX; returns <b>0</b> if any parameter error occurs.
  *
- * @since 21
+ * @since 22
  */
 float OH_ArkUI_CoastingAxisEvent_GetDeltaX(ArkUI_CoastingAxisEvent* event);
 
@@ -1385,7 +1385,7 @@ float OH_ArkUI_CoastingAxisEvent_GetDeltaX(ArkUI_CoastingAxisEvent* event);
  * @param event Indicates the pointer to the coasting axis event.
  * @return Returns delta Y value, count in PX; returns <b>0</b> if any parameter error occurs.
  *
- * @since 21
+ * @since 22
  */
 float OH_ArkUI_CoastingAxisEvent_GetDeltaY(ArkUI_CoastingAxisEvent* event);
 
@@ -1397,7 +1397,7 @@ float OH_ArkUI_CoastingAxisEvent_GetDeltaY(ArkUI_CoastingAxisEvent* event);
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 21
+ * @since 22
  */
 int32_t OH_ArkUI_CoastingAxisEvent_SetPropagation(ArkUI_CoastingAxisEvent* event, bool propagation);
 
