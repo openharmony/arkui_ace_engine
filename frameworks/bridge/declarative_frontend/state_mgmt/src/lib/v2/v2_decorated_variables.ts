@@ -22,108 +22,108 @@
  * Helper class for handling V2 decorated variables
  */
 class VariableUtilV2 {
-  /**
-   * setReadOnlyAttr - helper function used to update @Param
-   * from parent @Component. Not allowed for @Param @Once .
-   * @param target  - the object, usually the ViewV2
-   * @param attrName - @param variable name
-   * @param newValue - update to new value
-   */
-  public static initParam<Z>(target: object, attrName: string, newValue: Z): void {
-    const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
-    VariableUtilV2.checkInvalidUsage(meta, attrName);
-    const storeProp = ObserveV2.OB_PREFIX + attrName;
-    stateMgmtConsole.propertyAccess(`initParam '@Param ${attrName}' - setting backing store`);
-    target[storeProp] = newValue;
-    ObserveV2.getObserve().addRef(target, attrName);
-  }
+    /**
+     * setReadOnlyAttr - helper function used to update @Param
+     * from parent @Component. Not allowed for @Param @Once .
+     * @param target  - the object, usually the ViewV2
+     * @param attrName - @param variable name
+     * @param newValue - update to new value
+     */
+    public static initParam<Z>(target: object, attrName: string, newValue: Z): void {
+      const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
+      VariableUtilV2.checkInvalidUsage(meta, attrName);
+      const storeProp = ObserveV2.OB_PREFIX + attrName;
+      stateMgmtConsole.propertyAccess(`initParam '@Param ${attrName}' - setting backing store`);
+      target[storeProp] = newValue;
+      ObserveV2.getObserve().addRef(target, attrName);
+      }
 
-  /**
-   * setReadOnlyAttr - helper function used to update @Param
-   * from parent @Component. Not allowed for @Param @Once .
-   * @param target  - the object, usually the ViewV2
-   * @param attrName - @param variable name
-   * @param newValue - update to new value
-   */
-  public static updateParam<Z>(target: object, attrName: string, newValue: Z): void {
-    // prevent update for @param @once
-    const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
-    VariableUtilV2.checkInvalidUsage(meta, attrName);
+    /**
+     * setReadOnlyAttr - helper function used to update @Param
+     * from parent @Component. Not allowed for @Param @Once .
+     * @param target  - the object, usually the ViewV2
+     * @param attrName - @param variable name
+     * @param newValue - update to new value
+     */
+    public static updateParam<Z>(target: object, attrName: string, newValue: Z): void {
+      // prevent update for @param @once
+      const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
+      VariableUtilV2.checkInvalidUsage(meta, attrName);
 
-    const storeProp = ObserveV2.OB_PREFIX + attrName;
-    // @Observed class and @Track attrName
-    if (newValue === target[storeProp]) {
-      stateMgmtConsole.propertyAccess(`updateParm '@Param ${attrName}' unchanged. Doing nothing.`);
-      return;
+      const storeProp = ObserveV2.OB_PREFIX + attrName;
+      // @Observed class and @Track attrName
+      if (newValue === target[storeProp]) {
+        stateMgmtConsole.propertyAccess(`updateParm '@Param ${attrName}' unchanged. Doing nothing.`);
+        return;
+      }
+      if (meta.deco2 === '@Once') {
+        // @param @once - init but no update
+        stateMgmtConsole.log(`updateParm: '@Param @Once ${attrName}' - Skip updating.`);
+      } else {
+        stateMgmtConsole.propertyAccess(`updateParm '@Param ${attrName}' - updating backing store and fireChange.`);
+        target[storeProp] = newValue;
+        ObserveV2.getObserve().fireChange(target, attrName);
+      }
     }
-    if (meta.deco2 === '@Once') {
-      // @param @once - init but no update
-      stateMgmtConsole.log(`updateParm: '@Param @Once ${attrName}' - Skip updating.`);
-    } else {
-      stateMgmtConsole.propertyAccess(`updateParm '@Param ${attrName}' - updating backing store and fireChange.`);
+
+    public static checkInvalidUsage(meta: { deco: string }, attrName: string): void {
+      if (!meta || meta.deco !== '@Param') {
+        const error = `Use initParam/updateParm/resetParam(${attrName}) only to init/update/reset @Param. Internal error!`;
+        stateMgmtConsole.error(error);
+        throw new Error(error);
+      }
+    }
+    // only used for reusableV2. called in resetStateVarsOnReuse, including reset @Param @Once variable
+    public static resetParam<Z>(target: object, attrName: string, newValue: Z): void {
+      const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
+      VariableUtilV2.checkInvalidUsage(meta, attrName);
+      const storeProp = ObserveV2.OB_PREFIX + attrName;
+      if (newValue === target[storeProp]) {
+        stateMgmtConsole.propertyAccess(`updateParm '@Param ${attrName}' unchanged. Doing nothing.`);
+        return;
+      }
       target[storeProp] = newValue;
       ObserveV2.getObserve().fireChange(target, attrName);
     }
   }
 
-  public static checkInvalidUsage(meta: { deco: string }, attrName: string): void {
-    if (!meta || meta.deco !== '@Param') {
-      const error = `Use initParam/updateParm/resetParam(${attrName}) only to init/update/reset @Param. Internal error!`;
-      stateMgmtConsole.error(error);
-      throw new Error(error);
+  class ProviderConsumerUtilV2 {
+    public static readonly ALIAS_PREFIX = '___pc_alias_';
+
+    /**
+     *  meta added to the ViewV2
+     *  varName: { deco: '@Provider' | '@Consumer', aliasName: ..... }
+     *  prefix_@Provider_aliasName: {'varName': ..., 'aliasName': ...., 'deco': '@Provider' | '@Consumer'
+     */
+    private static metaAliasKey(aliasName: string, deco: '@Provider' | '@Consumer') : string {
+      return `${ProviderConsumerUtilV2.ALIAS_PREFIX}_${deco}_${aliasName}`;
     }
-  }
-  // only used for reusableV2. called in resetStateVarsOnReuse, including reset @Param @Once variable
-  public static resetParam<Z>(target: object, attrName: string, newValue: Z): void {
-    const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
-    VariableUtilV2.checkInvalidUsage(meta, attrName);
-    const storeProp = ObserveV2.OB_PREFIX + attrName;
-    if (newValue === target[storeProp]) {
-      stateMgmtConsole.propertyAccess(`updateParm '@Param ${attrName}' unchanged. Doing nothing.`);
-      return;
+
+    /**
+     * Helper function to add meta data about @Provider and @Consumer decorators to ViewV2
+     * similar to @see addVariableDecoMeta, but adds the alias to allow search from @Consumer for @Provider counterpart
+     * @param proto prototype object of application class derived from ViewV2
+     * @param varName decorated variable
+     * @param deco '@Local', '@Event', etc
+     */
+    public static addProvideConsumeVariableDecoMeta(proto: Object, varName: string, aliasName: string, deco: '@Provider' | '@Consumer'): void {
+      // add decorator meta data to prototype
+      const meta = proto[ObserveV2.V2_DECO_META] ??= {};
+      // note: aliasName is the actual alias not the prefixed version
+      meta[varName] = { 'deco': deco, 'aliasName': aliasName };
+
+      // prefix to avoid name collisions with variable of same name as the alias!
+      const aliasProp = ProviderConsumerUtilV2.metaAliasKey(aliasName, deco);
+      meta[aliasProp] = { 'varName': varName, 'aliasName': aliasName, 'deco': deco };
     }
-    target[storeProp] = newValue;
-    ObserveV2.getObserve().fireChange(target, attrName);
-  }
-}
 
-class ProviderConsumerUtilV2 {
-  public static readonly ALIAS_PREFIX = '___pc_alias_';
-
-  /**
-   *  meta added to the ViewV2
-   *  varName: { deco: '@Provider' | '@Consumer', aliasName: ..... }
-   *  prefix_@Provider_aliasName: {'varName': ..., 'aliasName': ...., 'deco': '@Provider' | '@Consumer'
-   */
-  private static metaAliasKey(aliasName: string, deco: '@Provider' | '@Consumer') : string {
-    return `${ProviderConsumerUtilV2.ALIAS_PREFIX}_${deco}_${aliasName}`;
-  }
-
-  /**
-   * Helper function to add meta data about @Provider and @Consumer decorators to ViewV2
-   * similar to @see addVariableDecoMeta, but adds the alias to allow search from @Consumer for @Provider counterpart
-   * @param proto prototype object of application class derived from ViewV2
-   * @param varName decorated variable
-   * @param deco '@Local', '@Event', etc
-   */
-  public static addProvideConsumeVariableDecoMeta(proto: Object, varName: string, aliasName: string, deco: '@Provider' | '@Consumer'): void {
-    // add decorator meta data to prototype
-    const meta = proto[ObserveV2.V2_DECO_META] ??= {};
-    // note: aliasName is the actual alias not the prefixed version
-    meta[varName] = { 'deco': deco, 'aliasName': aliasName };
-
-    // prefix to avoid name collisions with variable of same name as the alias!
-    const aliasProp = ProviderConsumerUtilV2.metaAliasKey(aliasName, deco);
-    meta[aliasProp] = { 'varName': varName, 'aliasName': aliasName, 'deco': deco };
-  }
-
-  /**
-  * find a @Provider'ed variable from its nearest ancestor ViewV2.
-  * @param searchingAliasName The key name to search for.
-  * @returns A tuple containing the ViewPU instance where the provider is found
-  * and the provider name
-  * If root @Component reached without finding, returns undefined.
-  */
+    /**
+    * find a @Provider'ed variable from its nearest ancestor ViewV2.
+    * @param searchingAliasName The key name to search for.
+    * @returns A tuple containing the ViewPU instance where the provider is found
+    * and the provider name
+    * If root @Component reached without finding, returns undefined.
+    */
   public static findProvider(view: ViewV2, aliasName: string): [ViewV2, string] | undefined {
     let checkView : IView | undefined = view?.getParent();
     const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, '@Provider');
