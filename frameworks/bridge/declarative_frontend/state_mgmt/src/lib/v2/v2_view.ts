@@ -402,7 +402,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
           ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, consumerVal);
           ObserveV2.getObserve().fireChange(this, varName);
         }
-        stateMgmtConsole.debug(`resetConsumer value: ${consumerVal} for ${varName}`);
     }
 
     // Resets the consumer value when the component is reinitialized on reuse
