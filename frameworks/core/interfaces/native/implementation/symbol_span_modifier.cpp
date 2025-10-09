@@ -64,11 +64,12 @@ void SetFontColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optColorVec = Converter::OptConvert<std::vector<std::optional<Color>>>(*value);
+    std::vector<Color> colorVec;
     if (!optColorVec) {
         // Implement Reset value
+        SymbolSpanModelNG::SetFontColor(frameNode, colorVec);
         return;
     }
-    std::vector<Color> colorVec;
     for (std::optional<Color> color: *optColorVec) {
         if (color.has_value()) {
             colorVec.emplace_back(color.value());
