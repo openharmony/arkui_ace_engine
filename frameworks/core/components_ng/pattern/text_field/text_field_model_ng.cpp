@@ -1400,6 +1400,66 @@ void TextFieldModelNG::ResetMaxLength(FrameNode* frameNode)
     }
 }
 
+void TextFieldModelNG::SetSelectDetectEnable(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectEnable(value);
+}
+
+void TextFieldModelNG::SetSelectDetectEnable(FrameNode* frameNode, bool value)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectEnable(value);
+}
+
+bool TextFieldModelNG::GetSelectDetectEnable(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetSelectDetectEnable();
+}
+
+void TextFieldModelNG::ResetSelectDetectEnable(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectEnable();
+}
+
+void TextFieldModelNG::SetSelectDetectConfig(std::vector<TextDataDetectType>& types)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectConfig(types);
+}
+
+void TextFieldModelNG::SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectConfig(types);
+}
+
+std::vector<TextDataDetectType> TextFieldModelNG::GetSelectDetectConfig(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, std::vector<TextDataDetectType>());
+    return pattern->GetSelectDetectConfig();
+}
+
+void TextFieldModelNG::ResetSelectDetectConfig(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectConfig();
+}
+
 void TextFieldModelNG::SetCaretStyle(FrameNode* frameNode, const CaretStyle& value)
 {
     if (value.caretWidth.has_value()) {

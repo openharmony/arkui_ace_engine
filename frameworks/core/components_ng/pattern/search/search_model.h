@@ -125,6 +125,8 @@ public:
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
     virtual void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func);
     virtual void SetUserMargin() {};
+    virtual void SetSelectDetectEnable(bool value) = 0;
+    virtual void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) = 0;
 
 private:
     static std::unique_ptr<SearchModel> instance_;

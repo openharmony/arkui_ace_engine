@@ -1238,6 +1238,56 @@ void ResetTextDataDetectorConfig(ArkUINodeHandle node)
     TextModelNG::SetTextDetectConfig(frameNode, "");
 }
 
+void SetSelectDetectorEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetSelectDetectEnable(frameNode, static_cast<bool>(value));
+}
+
+ArkUI_Int32 GetSelectDetectorEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetSelectDetectEnable(frameNode));
+}
+
+void ResetSelectDetectorEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetSelectDetectEnable(frameNode);
+}
+
+void SetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<TextDataDetectType> typelists;
+    for (ArkUI_Int32 i = 0; i < size; ++i) {
+        typelists.push_back(static_cast<TextDataDetectType>(types[i]));
+    }
+    TextModelNG::SetSelectDetectConfig(frameNode, typelists);
+}
+
+ArkUI_Int32 GetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Int32 (*values)[32])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    std::vector<TextDataDetectType> types = TextModelNG::GetSelectDetectConfig(frameNode);
+    for (uint32_t i = 0; i < types.size(); i++) {
+        (*values)[i] = static_cast<ArkUI_Int32>(types[i]);
+    }
+    return types.size();
+}
+
+void ResetSelectDetectorConfig(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetSelectDetectConfig(frameNode);
+}
+
 ArkUI_CharPtr GetTextFontFeature(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2275,6 +2325,12 @@ const ArkUITextModifier* GetTextModifier()
         .setTextDataDetectorConfig = SetTextDataDetectorConfig,
         .getTextDataDetectorConfig = GetTextDataDetectorConfig,
         .resetTextDataDetectorConfig = ResetTextDataDetectorConfig,
+        .setSelectDetectorEnable = SetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
+        .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .setSelectDetectorConfig = SetSelectDetectorConfig,
+        .getSelectDetectorConfig = GetSelectDetectorConfig,
+        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextLineSpacing = SetTextLineSpacing,
         .getTextLineSpacing = GetTextLineSpacing,
         .resetTextLineSpacing = ResetTextLineSpacing,
@@ -2440,6 +2496,12 @@ const CJUITextModifier* GetCJUITextModifier()
         .setTextDataDetectorConfig = SetTextDataDetectorConfig,
         .getTextDataDetectorConfig = GetTextDataDetectorConfig,
         .resetTextDataDetectorConfig = ResetTextDataDetectorConfig,
+        .setSelectDetectorEnable = SetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
+        .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .setSelectDetectorConfig = SetSelectDetectorConfig,
+        .getSelectDetectorConfig = GetSelectDetectorConfig,
+        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextLineSpacing = SetTextLineSpacing,
         .getTextLineSpacing = GetTextLineSpacing,
         .resetTextLineSpacing = ResetTextLineSpacing,

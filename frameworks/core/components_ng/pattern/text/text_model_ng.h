@@ -65,6 +65,8 @@ public:
     void SetIsOnlyBetweenLines(bool isOnlyBetweenLines) override;
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
+    void SetSelectDetectEnable(bool value) override;
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetBaselineOffset(const Dimension& value) override;
     void SetWordBreak(WordBreak value) override;
@@ -150,6 +152,12 @@ public:
     static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
+    static void SetSelectDetectEnable(FrameNode* frameNode, bool value);
+    static bool GetSelectDetectEnable(FrameNode* frameNode);
+    static void ResetSelectDetectEnable(FrameNode* frameNode);
+    static void SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types);
+    static std::vector<TextDataDetectType> GetSelectDetectConfig(FrameNode* frameNode);
+    static void ResetSelectDetectConfig(FrameNode* frameNode);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptions& options);
     static void SetOnMarqueeStateChange(FrameNode* frameNode, std::function<void(int32_t)>&& func);

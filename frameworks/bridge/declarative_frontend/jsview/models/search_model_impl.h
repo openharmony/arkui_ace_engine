@@ -69,6 +69,8 @@ public:
     void SetFocusNode(bool isFocusNode) override;
     void SetHeight(const Dimension& value) override;
     void SetBackBorder() override;
+    void SetSelectDetectEnable(bool value) override;
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
     void SetOnSubmit(std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit) override {};
     void SetOnChange(std::function<void(const ChangeValueInfo&)>&& onChange) override {};

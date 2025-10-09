@@ -46,6 +46,8 @@ public:
     void SetLineBreakStrategy(LineBreakStrategy value) override;
     void SetCaretColor(const Color& value) override;
     void ResetCaretColor() override;
+    void SetSelectDetectEnable(bool value) override;
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void SetCaretStyle(const CaretStyle& value) override;
     void SetCaretPosition(const int32_t& value) override;
     void SetSelectedBackgroundColor(const Color& value) override;
@@ -185,6 +187,12 @@ public:
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);
+    static void SetSelectDetectEnable(FrameNode* frameNode, bool value);
+    static bool GetSelectDetectEnable(FrameNode* frameNode);
+    static void ResetSelectDetectEnable(FrameNode* frameNode);
+    static void SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types);
+    static std::vector<TextDataDetectType> GetSelectDetectConfig(FrameNode* frameNode);
+    static void ResetSelectDetectConfig(FrameNode* frameNode);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool contextMenuHidden);
     static bool GetSelectionMenuHidden(FrameNode* frameNode);
     static void SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules);

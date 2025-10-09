@@ -39,6 +39,7 @@ namespace OHOS::Ace {
 namespace NG {
 class TextPattern;
 class RichEditorPattern;
+class TextFieldPattern;
 }
 
 struct AISpan {
@@ -91,7 +92,7 @@ public:
     void SetTextDetectTypes(const std::string& types);
     void ParseAIResult(const TextDataDetectResult& result, int32_t startPos);
     void ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos);
-    void StartAITask(bool clearAISpanMap = true);
+    void StartAITask(bool clearAISpanMap = true, bool isSelectDetect = false);
     void CancelAITask()
     {
         if (aiDetectDelayTask_) {
@@ -113,9 +114,15 @@ public:
     void ResponseBestMatchItem(const AISpan& aiSpan);
     void GetAIEntityMenu();
     void MarkDirtyNode() const;
+    void SetParseSelectAIResCallBack(std::function<void()>&& task);
+    void ParseSelectAIResult();
+    void SetUpdateAISelectMenuCallBack(std::function<void()>&& task);
+    void UpdateAISelectMenu();
+    void SelectAIDetect(const std::u16string& targetDetectText);
 private:
     friend class NG::TextPattern;
     friend class NG::RichEditorPattern;
+    friend class NG::TextFieldPattern;
 
     std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap);
     std::function<void()> GetPreviewMenuOptionCallback(TextDataDetectType type, const std::string& content);
@@ -151,6 +158,8 @@ private:
     std::optional<Color> entityDecorationColor_;
     std::optional<TextDecorationStyle> entityDecorationStyle_;
     std::string textDetectConfigStr_;
+    std::function<void()> parseSelectAIResCallBack_ = nullptr;
+    std::function<void()> updateAISelectMenuCallBack_ = nullptr;
 };
 } // namespace OHOS::Ace
 

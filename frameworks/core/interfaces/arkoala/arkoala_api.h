@@ -3087,6 +3087,12 @@ struct ArkUITextModifier {
     void (*resetEllipsisMode)(ArkUINodeHandle node);
     void (*setEnableDataDetector)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetEnableDataDetector)(ArkUINodeHandle node);
+    void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
+    void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
+    void (*setSelectDetectorConfig)(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size);
+    void (*resetSelectDetectorConfig)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSelectDetectorConfig)(ArkUINodeHandle node, ArkUI_Int32 (*values)[32]);
     ArkUI_CharPtr (*getTextContent)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextLineHeight)(ArkUINodeHandle node);
     void (*getTextDecoration)(ArkUINodeHandle node, ArkUITextDecorationType* decoration);
@@ -4676,6 +4682,12 @@ struct ArkUINavDestinationModifier {
 };
 
 struct ArkUITextAreaModifier {
+    void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
+    void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
+    void (*setSelectDetectorConfig)(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size);
+    void (*resetSelectDetectorConfig)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSelectDetectorConfig)(ArkUINodeHandle node, ArkUI_Int32 (*values)[32]);
     void (*setTextAreaStyle)(ArkUINodeHandle node, ArkUI_Int32 style);
     void (*resetTextAreaStyle)(ArkUINodeHandle node);
     void (*setTextAreaSelectionMenuHidden)(ArkUINodeHandle node, ArkUI_Uint32 contextMenuHidden);
@@ -4881,6 +4893,12 @@ struct ArkUITextAreaModifier {
 };
 
 struct ArkUITextInputModifier {
+    void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
+    void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
+    void (*setSelectDetectorConfig)(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size);
+    void (*resetSelectDetectorConfig)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSelectDetectorConfig)(ArkUINodeHandle node, ArkUI_Int32 (*values)[32]);
     void (*setTextInputCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
     void (*resetTextInputCaretColor)(ArkUINodeHandle node);
     void (*setTextInputType)(ArkUINodeHandle node, ArkUI_Int32 value);
@@ -6051,6 +6069,12 @@ struct ArkUIRowSplitModifier {
 };
 
 struct ArkUISearchModifier {
+    void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
+    void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
+    void (*setSelectDetectorConfig)(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size);
+    void (*resetSelectDetectorConfig)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSelectDetectorConfig)(ArkUINodeHandle node, ArkUI_Int32 (*values)[32]);
     void (*setSearchPlaceholderColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetSearchPlaceholderColor)(ArkUINodeHandle node);
     void (*setSearchTextFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr);

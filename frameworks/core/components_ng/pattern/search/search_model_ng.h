@@ -58,6 +58,8 @@ public:
     void ResetPlaceholderColor() override;
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
+    void SetSelectDetectEnable(bool value) override;
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& color) override;
@@ -191,6 +193,12 @@ public:
     static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetShowCounter(FrameNode* frameNode, bool value);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
+    static void SetSelectDetectEnable(FrameNode* frameNode, bool value);
+    static bool GetSelectDetectEnable(FrameNode* frameNode);
+    static void ResetSelectDetectEnable(FrameNode* frameNode);
+    static void SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types);
+    static std::vector<TextDataDetectType> GetSelectDetectConfig(FrameNode* frameNode);
+    static void ResetSelectDetectConfig(FrameNode* frameNode);
     static void SetShowCounterBorder(FrameNode* frameNode, bool value);
     static RefPtr<TextFieldControllerBase> GetSearchController(FrameNode* frameNode);
     static void SetOnWillInsertValueEvent(FrameNode* frameNode, std::function<bool(const InsertValueInfo&)>&& func);

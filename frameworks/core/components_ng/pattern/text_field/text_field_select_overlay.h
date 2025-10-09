@@ -56,6 +56,9 @@ public:
     std::string GetSelectedText() override;
     bool IsStopBackPress() const override;
 
+    void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo) override;
+    void UpdateAISelectMenu();
+
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override;

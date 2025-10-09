@@ -815,6 +815,66 @@ void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& re
     }
 }
 
+void TextModelNG::SetSelectDetectEnable(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectEnable(value);
+}
+
+void TextModelNG::SetSelectDetectEnable(FrameNode* frameNode, bool value)
+{
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectEnable(value);
+}
+
+bool TextModelNG::GetSelectDetectEnable(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetSelectDetectEnable();
+}
+
+void TextModelNG::ResetSelectDetectEnable(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectEnable();
+}
+
+void TextModelNG::SetSelectDetectConfig(std::vector<TextDataDetectType>& types)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectConfig(types);
+}
+
+void TextModelNG::SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types)
+{
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectConfig(types);
+}
+
+std::vector<TextDataDetectType> TextModelNG::GetSelectDetectConfig(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, std::vector<TextDataDetectType>());
+    return pattern->GetSelectDetectConfig();
+}
+
+void TextModelNG::ResetSelectDetectConfig(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectConfig();
+}
+
 void TextModelNG::SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
