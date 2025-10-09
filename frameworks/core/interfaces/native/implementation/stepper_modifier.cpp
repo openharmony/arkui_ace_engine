@@ -22,19 +22,19 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Union_Number_Bindable& value)
+std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Union_I32_Bindable& value)
 {
     std::optional<int32_t> result;
     Converter::VisitUnion(value,
-        [&result](const Ark_Number& src) {
-            result = Converter::Convert<float>(src);
+        [&result](const Ark_Int32& src) {
+            result = Converter::Convert<int32_t>(src);
         },
-        [&result, frameNode](const Ark_Bindable_Number& src) {
+        [&result, frameNode](const Ark_Bindable_I32& src) {
             result = Converter::Convert<float>(src.value);
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
             auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](int32_t value) {
                 PipelineContext::SetCallBackNode(weakNode);
-                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+                arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(value));
             };
             StepperModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
@@ -95,7 +95,7 @@ void SetOnSkipImpl(Ark_NativePointer node,
     StepperModelStatic::SetOnSkip(frameNode, std::move(onSkip));
 }
 void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_Callback_Number_Number_Void* value)
+                     const Opt_Callback_I32_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -105,12 +105,12 @@ void SetOnChangeImpl(Ark_NativePointer node,
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](int32_t prevIndex, int32_t index) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(prevIndex), Converter::ArkValue<Ark_Number>(index));
+        arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(prevIndex), Converter::ArkValue<Ark_Int32>(index));
     };
     StepperModelStatic::SetOnChange(frameNode, std::move(onChange));
 }
 void SetOnNextImpl(Ark_NativePointer node,
-                   const Opt_Callback_Number_Number_Void* value)
+                   const Opt_Callback_I32_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -120,12 +120,12 @@ void SetOnNextImpl(Ark_NativePointer node,
         return;
     }
     auto onNext = [arkCallback = CallbackHelper(*optValue)](int32_t index, int32_t pendingIndex) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(index), Converter::ArkValue<Ark_Number>(pendingIndex));
+        arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(index), Converter::ArkValue<Ark_Int32>(pendingIndex));
     };
     StepperModelStatic::SetOnNext(frameNode, std::move(onNext));
 }
 void SetOnPreviousImpl(Ark_NativePointer node,
-                       const Opt_Callback_Number_Number_Void* value)
+                       const Opt_Callback_I32_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -135,7 +135,7 @@ void SetOnPreviousImpl(Ark_NativePointer node,
         return;
     }
     auto onPrevious = [arkCallback = CallbackHelper(*optValue)](int32_t index, int32_t pendingIndex) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(index), Converter::ArkValue<Ark_Number>(pendingIndex));
+        arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(index), Converter::ArkValue<Ark_Int32>(pendingIndex));
     };
     StepperModelStatic::SetOnPrevious(frameNode, std::move(onPrevious));
 }

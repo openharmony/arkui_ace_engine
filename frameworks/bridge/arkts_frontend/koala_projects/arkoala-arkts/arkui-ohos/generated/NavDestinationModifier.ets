@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkNavDestinationPeer, NavDestinationMode, NavDestinationContext, NavigationSystemTransitionType, NestedScrollInfo, NavDestinationActiveReason, NavDestinationTransitionDelegate, NavDestinationCommonTitle, NavDestinationCustomTitle, NavDestinationAttribute } from "./component/navDestination"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
@@ -111,8 +112,9 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
     _enableStatusBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableStatusBar_0_0value?: boolean | undefined
     _enableStatusBar_0_1value?: boolean | undefined
-    applyModifierPatch(peer: ArkNavDestinationPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkNavDestinationPeer;
         if (this._hideTitleBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._hideTitleBar_0_flag) {
@@ -567,8 +569,8 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             switch (this._backButtonIcon_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackButtonIconAttribute((this._backButtonIcon_0_0value as ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined), (this._backButtonIcon_0_1value as ResourceStr | undefined));
-                   this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
+                    peer.setBackButtonIconAttribute((this._backButtonIcon_0_0value as ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined), (this._backButtonIcon_0_1value as ResourceStr | undefined | undefined));
+                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
@@ -585,7 +587,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             switch (this._menus_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMenusAttribute((this._menus_0_0value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus_0_1value as NavigationMenuOptions | undefined));
+                    peer.setMenusAttribute((this._menus_0_0value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus_0_1value as NavigationMenuOptions | undefined | undefined));
                     this._menus_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

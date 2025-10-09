@@ -249,7 +249,7 @@ export class PathStackUtils {
         PathStackUtils.popPage(index_casted)
         NavExtender.popToIndex(pathStack, index_casted, animated_value)
     }
-    static popToName(pathStack: NavPathStack, name: string, result?: boolean | undefined | Object, animated?: boolean): number {
+    static popToName(pathStack: NavPathStack, name: string, result?: boolean | undefined | Object, animated?: boolean): int32 {
         if (result instanceof Object) {
             PathStackUtils.result = result as Object
         }

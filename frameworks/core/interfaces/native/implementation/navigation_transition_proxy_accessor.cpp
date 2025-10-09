@@ -128,7 +128,7 @@ void SetCancelTransitionImpl(Ark_NavigationTransitionProxy peer,
 Opt_UpdateTransitionCallback GetUpdateTransitionImpl(Ark_NavigationTransitionProxy peer)
 {
     auto callback = CallbackKeeper::RegisterReverseCallback<UpdateTransitionCallback,
-        std::function<void(Ark_Number)>>([peer](Ark_Number progress) {
+        std::function<void(Ark_Float64)>>([peer](Ark_Float64 progress) {
         CHECK_NULL_VOID(peer && peer->handler);
         if (peer->handler->GetInteractive()) {
             peer->FireUpdateProgress(Converter::Convert<float>(progress));
@@ -147,7 +147,7 @@ void SetUpdateTransitionImpl(Ark_NavigationTransitionProxy peer,
             CHECK_NULL_VOID(peer && peer->handler);
             if (peer->handler->GetInteractive()) {
                 peer->handler->UpdateTransition(progress);
-                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(progress));
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Float64>(progress));
             }
         };
     }

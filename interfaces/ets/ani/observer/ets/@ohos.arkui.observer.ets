@@ -112,8 +112,8 @@ import hilog from '@ohos.hilog'
         index: number;
         param?: Object;
         navDestinationId: string;
-        uniqueId: number;
-        mode: NavDestinationMode;
+        uniqueId?: number;
+        mode?: NavDestinationMode;
     }
 
     export class NavDestinationInfoImpl implements NavDestinationInfo {
@@ -123,8 +123,8 @@ import hilog from '@ohos.hilog'
         index: number;
         param?: Object;
         navDestinationId: string;
-        uniqueId: number;
-        mode: NavDestinationMode;
+        uniqueId?: number;
+        mode?: NavDestinationMode;
         static castToNavDestinationInfo(value: number): NavDestinationState {
             if (value === 0) {
                 return NavDestinationState.ON_SHOWN;

@@ -55,6 +55,7 @@ import { NavPathStack, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationCom
 import { PathStackUtils } from "../base/ArkNavPathStack"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
+import { int32 } from "@koalaui/common"
 
 export function hookId(component: object, value?: string) {}
 
@@ -157,13 +158,13 @@ export function hookReplacePathByNameMethod(pathStack: NavPathStack, name: strin
 export function hookPopMethod(pathStack: NavPathStack, result?: boolean | undefined | Object, animated?: boolean): NavPathInfo | undefined {
   return PathStackUtils.pop(pathStack, result, animated);
 }
-export function hookPopToNameMethod(pathStack: NavPathStack, name: string, result?: boolean | undefined | Object, animated?: boolean): number {
+export function hookPopToNameMethod(pathStack: NavPathStack, name: string, result?: boolean | undefined | Object, animated?: boolean): int32 {
   return PathStackUtils.popToName(pathStack, name, result, animated);
 }
-export function hookPopToIndexMethod(pathStack: NavPathStack, index: number, result?: boolean | undefined | Object, animated?: boolean) {
+export function hookPopToIndexMethod(pathStack: NavPathStack, index: int32, result?: boolean | undefined | Object, animated?: boolean) {
   PathStackUtils.popToIndex(pathStack, index, result, animated);
 }
-export function hookGetParamByIndexMethod(pathStack: NavPathStack, index: number): Object | undefined {
+export function hookGetParamByIndexMethod(pathStack: NavPathStack, index: int32): Object | undefined {
   return PathStackUtils.getParamByIndex(pathStack, index);
 }
 export function hookGetParamByNameMethod(pathStack: NavPathStack, name: string): Array<Object | null | undefined> {

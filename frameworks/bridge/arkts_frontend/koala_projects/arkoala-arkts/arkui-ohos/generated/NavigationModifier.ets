@@ -20,15 +20,15 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkNavigationPeer, NavBarPosition, NavigationMode, NavigationTitleMode, NavigationMenuItem, NavContentInfo, NavigationOperation, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions, NavigationAttribute } from "./component/navigation"
+import { ArkNavigationPeer, NavBarPosition, NavigationMode, NavigationTitleMode, NavContentInfo, NavigationOperation, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuItem, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions, NavigationAttribute } from "./component/navigation"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
 import { Length, Dimension, ResourceStr } from "./component/units"
 import { Resource } from "global.resource"
+import { PageMapBuilder, CustomBuilder } from "./component/builder"
+import { default as window } from "@ohos.window"
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
-import { CustomBuilder, PageMapBuilder } from "./component/builder"
-import { default as window } from "@ohos.window"
 export class NavigationModifier extends CommonMethodModifier implements NavigationAttribute,AttributeModifier<NavigationAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
@@ -448,7 +448,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             switch (this._backButtonIcon_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackButtonIconAttribute((this._backButtonIcon_0_0value as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (this._backButtonIcon_0_1value as ResourceStr | undefined));
+                    peer.setBackButtonIconAttribute((this._backButtonIcon_0_0value as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (this._backButtonIcon_0_1value as ResourceStr | undefined | undefined));
                     this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -502,7 +502,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             switch (this._menus_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMenusAttribute((this._menus_0_0value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus_0_1value as NavigationMenuOptions | undefined));
+                    peer.setMenusAttribute((this._menus_0_0value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus_0_1value as NavigationMenuOptions | undefined | undefined));
                     this._menus_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

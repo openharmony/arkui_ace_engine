@@ -210,29 +210,29 @@ void ReplacePathByNameImpl(Ark_NavPathStack peer,
                            const Opt_Boolean* animated)
 {
 }
-Ark_Number RemoveByIndexesImpl(Ark_NavPathStack peer,
-                               const Array_Number* indexes)
+Ark_Int32 RemoveByIndexesImpl(Ark_NavPathStack peer,
+                               const Array_Int32* indexes)
 {
-    auto invalidVal = Converter::ArkValue<Ark_Number>(0);
+    auto invalidVal = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer, invalidVal);
     CHECK_NULL_RETURN(indexes, invalidVal);
     auto removeIndexes = Converter::Convert<std::vector<int>>(*indexes);
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
     auto size = navStack->PathStack::RemoveByIndexes(removeIndexes);
-    return Converter::ArkValue<Ark_Number>(size);
+    return Converter::ArkValue<Ark_Int32>(size);
 }
-Ark_Number RemoveByNameImpl(Ark_NavPathStack peer,
-                            const Ark_String* name)
+Ark_Int32 RemoveByNameImpl(Ark_NavPathStack peer,
+                           const Ark_String* name)
 {
-    auto invalidVal = Converter::ArkValue<Ark_Number>(0);
+    auto invalidVal = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer, invalidVal);
     CHECK_NULL_RETURN(name, invalidVal);
     auto removeName = Converter::Convert<std::string>(*name);
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
     auto size = navStack->RemoveByName(removeName);
-    return Converter::ArkValue<Ark_Number>(size);
+    return Converter::ArkValue<Ark_Int32>(size);
 }
 Ark_Boolean RemoveByNavDestinationIdImpl(Ark_NavPathStack peer,
                                          const Ark_String* navDestinationId)
@@ -257,13 +257,13 @@ Opt_NavPathInfo Pop1Impl(Ark_NavPathStack peer,
 {
     return {};
 }
-Ark_Number PopToName0Impl(Ark_NavPathStack peer,
+Ark_Int32 PopToName0Impl(Ark_NavPathStack peer,
                           const Ark_String* name,
                           const Opt_Boolean* animated)
 {
     return {};
 }
-Ark_Number PopToName1Impl(Ark_NavPathStack peer,
+Ark_Int32 PopToName1Impl(Ark_NavPathStack peer,
                           const Ark_String* name,
                           const Ark_Object* result,
                           const Opt_Boolean* animated)
@@ -281,11 +281,11 @@ void PopToIndex1Impl(Ark_NavPathStack peer,
                      const Opt_Boolean* animated)
 {
 }
-Ark_Number MoveToTopImpl(Ark_NavPathStack peer,
+Ark_Int32 MoveToTopImpl(Ark_NavPathStack peer,
                          const Ark_String* name,
                          const Opt_Boolean* animated)
 {
-    auto invalidVal = Converter::ArkValue<Ark_Number>(0);
+    auto invalidVal = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer, invalidVal);
     CHECK_NULL_RETURN(name, invalidVal);
     auto navStack = peer->GetNavPathStack();
@@ -293,17 +293,17 @@ Ark_Number MoveToTopImpl(Ark_NavPathStack peer,
     auto pathName = Converter::Convert<std::string>(*name);
     bool isAnimated = Converter::OptConvertPtr<bool>(animated).value_or(true);
     auto index = navStack->NavigationContext::PathStack::MoveToTop(pathName, isAnimated);
-    return Converter::ArkValue<Ark_Number>(index);
+    return Converter::ArkValue<Ark_Int32>(index);
 }
 void MoveIndexToTopImpl(Ark_NavPathStack peer,
-                        const Ark_Number* index,
+                        Ark_Int32 index,
                         const Opt_Boolean* animated)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(index);
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_VOID(navStack);
-    auto indexNum = Converter::Convert<std::uint32_t>(*index);
+    auto indexNum = Converter::Convert<std::uint32_t>(index);
     bool isAnimated = Converter::OptConvertPtr<bool>(animated).value_or(true);
     navStack->NavigationContext::PathStack::MoveIndexToTop(indexNum, isAnimated);
 }
@@ -328,21 +328,7 @@ Array_String GetAllPathNameImpl(Ark_NavPathStack peer)
     Ark_Int32 len = values.length;
     return values;
 }
-Opt_Object GetParamByIndexImpl(Ark_NavPathStack peer,
-                               const Ark_Number* index)
-{
-    auto invalid = Converter::ArkValue<Opt_Object>();
-    CHECK_NULL_RETURN(peer, invalid);
-    auto navStack = peer->GetNavPathStack();
-    CHECK_NULL_RETURN(navStack, invalid);
-    return invalid;
-}
-Array_Opt_Object GetParamByNameImpl(Ark_NavPathStack peer,
-                                    const Ark_String* name)
-{
-    return {};
-}
-Array_Number GetIndexByNameImpl(Ark_NavPathStack peer,
+Array_Int32 GetIndexByNameImpl(Ark_NavPathStack peer,
                                 const Ark_String* name)
 {
     CHECK_NULL_RETURN(peer, {});
@@ -352,21 +338,21 @@ Array_Number GetIndexByNameImpl(Ark_NavPathStack peer,
     std::vector<size_t> allIndexes = pathStack->NavigationContext::PathStack::GetIndexByName(pathName);
     std::vector<uint32_t> indexes;
     indexes.assign(allIndexes.begin(), allIndexes.end());
-    Array_Number result = Converter::ArkValue<Array_Number>(indexes, Converter::FC);
+    Array_Int32 result = Converter::ArkValue<Array_Int32>(indexes, Converter::FC);
     return result;
 }
 Opt_NavPathStack GetParentImpl(Ark_NavPathStack peer)
 {
     return {};
 }
-Ark_Number SizeImpl(Ark_NavPathStack peer)
+Ark_Int32 SizeImpl(Ark_NavPathStack peer)
 {
-    auto invalidVal = Converter::ArkValue<Ark_Number>(0);
+    auto invalidVal = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer, invalidVal);
     auto pathStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(pathStack, invalidVal);
     auto size = static_cast<int32_t>(pathStack->NavigationContext::PathStack::Size());
-    return Converter::ArkValue<Ark_Number>(size);
+    return Converter::ArkValue<Ark_Int32>(size);
 }
 void DisableAnimationImpl(Ark_NavPathStack peer,
                           Ark_Boolean value)
