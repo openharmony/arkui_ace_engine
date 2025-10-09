@@ -221,13 +221,13 @@ void SetOnEditChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelNG::SetOnEditChange(frameNode, nullptr);
         return;
     }
     auto onEditChange = [arkCallback = CallbackHelper(*optValue)](const bool& boolValue) {
         arkCallback.InvokeSync(Converter::ArkValue<Ark_Boolean>(boolValue));
     };
-    TextFieldModelNG::SetOnEditChange(frameNode, onEditChange);
+    TextFieldModelNG::SetOnEditChange(frameNode, std::move(onEditChange));
 }
 void SetOnSubmitImpl(Ark_NativePointer node,
                      const Opt_OnSubmitCallback* value)
@@ -236,7 +236,7 @@ void SetOnSubmitImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelNG::SetOnSubmit(frameNode, nullptr);
         return;
     }
     auto onSubmit = [arkCallback = CallbackHelper(*optValue)](
@@ -273,7 +273,7 @@ void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelNG::SetOnTextSelectionChange(frameNode, nullptr);
         return;
     }
     auto onTextSelectionChange = [arkCallback = CallbackHelper(*optValue)](const int32_t& start, const int32_t& end) {
@@ -361,7 +361,7 @@ void SetOnCopyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelNG::SetOnCopy(frameNode, nullptr);
         return;
     }
     auto onCopy = [arkCallback = CallbackHelper(*optValue)](const std::u16string& copyStr) {
@@ -377,7 +377,7 @@ void SetOnCutImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelNG::SetOnCut(frameNode, nullptr);
         return;
     }
     auto onCut = [arkCallback = CallbackHelper(*optValue)](const std::u16string& cutStr) {
@@ -393,7 +393,7 @@ void SetOnPasteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelNG::SetOnPasteWithEvent(frameNode, nullptr);
         return;
     }
     auto onPaste = [arkCallback = CallbackHelper(*optValue)](const std::u16string& content,
@@ -451,9 +451,7 @@ void SetCaretStyleImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetCaretColor(frameNode, caretStyle.color);
     Validator::ValidateNonNegative(caretStyle.width);
     Validator::ValidateNonPercent(caretStyle.width);
-    CaretStyle caretStyleNative;
-    caretStyleNative.caretWidth = caretStyle.width;
-    TextFieldModelNG::SetCaretStyle(frameNode, caretStyleNative);
+    TextFieldModelStatic::SetCaretWidth(frameNode, caretStyle.width);
 }
 void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
                                     const Opt_ResourceColor* value)
@@ -585,11 +583,13 @@ void SetLineBreakStrategyImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<LineBreakStrategy>(value);
     TextFieldModelStatic::SetLineBreakStrategy(frameNode, convValue);
 }
-void CancelButton0Impl(FrameNode *frameNode,
-                       const Ark_CancelButtonOptions& src)
+void SetCancelButton0Impl(Ark_NativePointer node, const Opt_CancelButtonOptions* value)
 {
-    auto cleanButtonStyle = Converter::OptConvert<CleanNodeStyle>(src.style);
-    auto optIconOptions = Converter::OptConvert<Ark_IconOptions>(src.icon);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    auto cleanButtonStyle = optValue ? Converter::OptConvert<CleanNodeStyle>(optValue->style) : std::nullopt;
+    auto optIconOptions = optValue ? Converter::OptConvert<Ark_IconOptions>(optValue->icon) : std::nullopt;
     TextFieldModelStatic::SetCleanNodeStyle(frameNode, cleanButtonStyle);
     TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
     TextFieldModelNG::SetCancelButtonSymbol(frameNode, false);
@@ -621,8 +621,7 @@ void CancelButton0Impl(FrameNode *frameNode,
     }
     TextFieldModelStatic::SetCancelIconColor(frameNode, iconColor);
 }
-void CancelButton1Impl(Ark_NativePointer node,
-                       const Opt_CancelButtonSymbolOptions* value)
+void SetCancelButton1Impl(Ark_NativePointer node, const Opt_CancelButtonSymbolOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -637,22 +636,6 @@ void CancelButton1Impl(Ark_NativePointer node,
         TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
         LOGE("TextInputModifier::CancelButton1Impl need to know what data is in value->icon");
     }
-}
-void SetCancelButtonImpl(Ark_NativePointer node,
-                         const Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnionPtr(value,
-        [frameNode](const Ark_CancelButtonOptions& src) {
-            CancelButton0Impl(frameNode, src);
-        },
-        [frameNode](const Ark_CancelButtonSymbolOptions& src) {
-            LOGE("ARKOALA CancelButtonSymbolModifier not implemented.");
-        },
-        [frameNode] {
-            TextFieldModelStatic::SetDefaultCancelIcon(frameNode);
-        });
 }
 void SetSelectAllImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
@@ -770,6 +753,8 @@ void SetFontFeatureImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
+        FONT_FEATURES_LIST fontFeatures;
+        TextFieldModelNG::SetFontFeature(frameNode, fontFeatures);
         return;
     }
     TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(*convValue));
@@ -789,7 +774,7 @@ void SetOnSecurityStateChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelStatic::SetOnSecurityStateChange(frameNode, nullptr);
         return;
     }
     auto onSecurityStateChange = [arkCallback = CallbackHelper(*optValue)](const bool& boolValue) {
@@ -804,7 +789,7 @@ void SetOnWillInsertImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, nullptr);
         return;
     }
     auto onWillInsert = [callback = CallbackHelper(*optValue)](const InsertValueInfo& value) -> bool {
@@ -825,7 +810,7 @@ void SetOnDidInsertImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelNG::SetOnDidInsertValueEvent(frameNode, nullptr);
         return;
     }
     auto onDidInsert = [arkCallback = CallbackHelper(*optValue)](const InsertValueInfo& insertValueInfo) {
@@ -845,6 +830,7 @@ void SetOnWillDeleteImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         // Implement Reset value
+        TextFieldModelNG::SetOnWillDeleteEvent(frameNode, nullptr);
         return;
     }
     auto onWillDelete = [callback = CallbackHelper(*optValue)](const DeleteValueInfo& value) -> bool {
@@ -866,7 +852,7 @@ void SetOnDidDeleteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelNG::SetOnDidDeleteEvent(frameNode, nullptr);
         return;
     }
     auto onDidDelete = [arkCallback = CallbackHelper(*optValue)](const DeleteValueInfo& deleteValueInfo) {
@@ -886,7 +872,7 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelStatic::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
         return;
     }
     auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
@@ -959,6 +945,7 @@ void SetOnWillChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
+        TextFieldModelNG::SetOnWillChangeEvent(frameNode, nullptr);
         return;
     }
     auto onWillChange = [callback = CallbackHelper(*optValue)](const ChangeValueInfo& value) -> bool {
@@ -1008,7 +995,7 @@ void SetCustomKeyboardImpl(Ark_NativePointer node,
     bool supportAvoidance = convOptions.has_value() ? convOptions->supportAvoidance : false;
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelNG::SetCustomKeyboard(frameNode, nullptr, false);
         return;
     }
     CallbackHelper(*optValue).BuildAsync([frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
@@ -1025,8 +1012,13 @@ void SetShowCounterImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto counterOptions = Converter::OptConvertPtr<InputCounterOptions>(options);
     auto isShowCounter = Converter::OptConvertPtr<bool>(value);
+    const bool defaultShowCounter = false;
+    const int32_t defaultCounterType = -1;
+    const bool defaultCounterBorder = true;
     if (!isShowCounter) {
-        // Implement Reset value
+        TextFieldModelNG::SetShowCounter(frameNode, defaultShowCounter);
+        TextFieldModelStatic::SetCounterType(frameNode, defaultCounterType);
+        TextFieldModelStatic::SetShowCounterBorder(frameNode, defaultCounterBorder);
         return;
     }
     if (counterOptions && counterOptions->thresholdPercentage.has_value()) {
@@ -1086,7 +1078,8 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::SetMaxLinesImpl,
         TextInputAttributeModifier::SetWordBreakImpl,
         TextInputAttributeModifier::SetLineBreakStrategyImpl,
-        TextInputAttributeModifier::SetCancelButtonImpl,
+        TextInputAttributeModifier::SetCancelButton0Impl,
+        TextInputAttributeModifier::SetCancelButton1Impl,
         TextInputAttributeModifier::SetSelectAllImpl,
         TextInputAttributeModifier::SetMinFontSizeImpl,
         TextInputAttributeModifier::SetMaxFontSizeImpl,

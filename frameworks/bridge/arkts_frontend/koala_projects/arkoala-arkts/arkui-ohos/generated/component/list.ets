@@ -445,7 +445,8 @@ export enum StickyStyle {
     HEADER = 1,
     Header = 1,
     FOOTER = 2,
-    Footer = 2
+    Footer = 2,
+    BOTH = 3
 }
 export enum ChainEdgeEffect {
     DEFAULT = 0,
@@ -1264,7 +1265,7 @@ export class ListDividerOptions_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -1342,7 +1343,7 @@ export class ListDividerOptions_serializer {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let colorTmpBuf_ : Color | number | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {

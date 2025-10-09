@@ -30,11 +30,11 @@ export class StackModifier extends CommonMethodModifier implements StackAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: StackAttribute): void { }
+    applyPressedAttribute(instance: StackAttribute): void { }
+    applyFocusedAttribute(instance: StackAttribute): void { }
+    applyDisabledAttribute(instance: StackAttribute): void { }
+    applySelectedAttribute(instance: StackAttribute): void { }
     _alignContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignContent_0_0value?: Alignment | undefined
     applyModifierPatch(node: PeerNode): void {

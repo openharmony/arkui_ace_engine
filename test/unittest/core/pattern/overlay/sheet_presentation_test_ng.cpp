@@ -310,7 +310,7 @@ HWTEST_F(SheetPresentationTestNg, CheckBuilderChange001, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     SheetStyle sheetStyle;
     layoutProperty->propSheetStyle_ = sheetStyle;
-    auto eventHub = contentNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = contentNode->GetEventHub<EventHub>();
     RectF oldRect, rect;
     OffsetF oldOrigin, origin;
     sheetPattern->CheckBuilderChange();
@@ -343,7 +343,7 @@ HWTEST_F(SheetPresentationTestNg, OnAttachToFrameNode001, TestSize.Level1)
     auto targetNode = FrameNode::GetFrameNode(sheetPattern->targetTag_, sheetPattern->targetId_);
     ASSERT_NE(targetNode, nullptr);
     sheetPattern->OnAttachToFrameNode();
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto innerOnAreaChangeCallback = eventHub->onAreaChangedInnerCallbacks_[sheetNode->GetId()];
     ASSERT_NE(innerOnAreaChangeCallback, nullptr);

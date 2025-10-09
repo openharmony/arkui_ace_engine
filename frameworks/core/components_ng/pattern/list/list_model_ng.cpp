@@ -348,7 +348,7 @@ void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScroll(std::move(onScroll));
 }
@@ -357,7 +357,7 @@ void ListModelNG::SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollBegin(std::move(onScrollBegin));
 }
@@ -366,7 +366,7 @@ void ListModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameB
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
 }
@@ -375,7 +375,7 @@ void ListModelNG::SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStart(std::move(onScrollStart));
 }
@@ -384,7 +384,7 @@ void ListModelNG::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
@@ -393,7 +393,7 @@ void ListModelNG::SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
@@ -401,7 +401,7 @@ void ListModelNG::SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex)
 void ListModelNG::SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
@@ -410,7 +410,7 @@ void ListModelNG::SetOnScrollVisibleContentChange(OnScrollVisibleContentChangeEv
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollVisibleContentChange(std::move(onScrollVisibleContentChange));
 }
@@ -419,7 +419,7 @@ void ListModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachStart(std::move(onReachStart));
 }
@@ -427,7 +427,7 @@ void ListModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
 void ListModelNG::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachStart(std::move(onReachStart));
 }
@@ -436,7 +436,7 @@ void ListModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachEnd(std::move(onReachEnd));
 }
@@ -444,7 +444,7 @@ void ListModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 void ListModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachEnd(std::move(onReachEnd));
 }
@@ -453,7 +453,7 @@ void ListModelNG::SetOnItemMove(OnItemMoveEvent&& onItemMove)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemMove(std::move(onItemMove));
 
@@ -464,7 +464,7 @@ void ListModelNG::SetOnItemDragStart(OnItemDragStartFunc&& onItemDragStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragStart =
         [func = std::move(onItemDragStart)](const ItemDragInfo& dragInfo, int32_t index) -> RefPtr<AceType> {
@@ -486,7 +486,7 @@ void ListModelNG::SetOnItemDragEnter(OnItemDragEnterFunc&& onItemDragEnter)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragEnter(std::move(onItemDragEnter));
 
@@ -497,7 +497,7 @@ void ListModelNG::SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragLeave(std::move(onItemDragLeave));
 
@@ -508,7 +508,7 @@ void ListModelNG::SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragMove(std::move(onItemDragMove));
 
@@ -519,7 +519,7 @@ void ListModelNG::SetOnItemDrop(OnItemDropFunc&& onItemDrop)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDrop(std::move(onItemDrop));
 
@@ -993,7 +993,7 @@ void ListModelNG::SetHeader(const RefPtr<FrameNode>& headerNode)
 void ListModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidScroll(std::move(onScroll));
 }
@@ -1001,7 +1001,7 @@ void ListModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
 void ListModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
 }
@@ -1009,7 +1009,7 @@ void ListModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBegin
 void ListModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStart(std::move(onScrollStart));
 }
@@ -1017,7 +1017,7 @@ void ListModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& on
 void ListModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
@@ -1138,7 +1138,7 @@ void ListModelNG::SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase>
 void ListModelNG::SetOnScrollVisibleContentChange(FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollVisibleContentChange(std::move(onScrollVisibleContentChange));
 }
@@ -1146,7 +1146,7 @@ void ListModelNG::SetOnScrollVisibleContentChange(FrameNode* frameNode, OnScroll
 void ListModelNG::SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onItemMove)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemMove(std::move(onItemMove));
 
@@ -1156,7 +1156,7 @@ void ListModelNG::SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onItemMo
 void ListModelNG::SetOnItemDragStart(FrameNode* frameNode, OnItemDragStartFunc&& onItemDragStart)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragStart =
         [func = std::move(onItemDragStart)](const ItemDragInfo& dragInfo, int32_t index) -> RefPtr<AceType> {
@@ -1177,7 +1177,7 @@ void ListModelNG::SetOnItemDragStart(FrameNode* frameNode, OnItemDragStartFunc&&
 void ListModelNG::SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFunc&& onItemDragEnter)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragEnter(std::move(onItemDragEnter));
 
@@ -1187,7 +1187,7 @@ void ListModelNG::SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFunc&&
 void ListModelNG::SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&& onItemDragLeave)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragLeave(std::move(onItemDragLeave));
 
@@ -1197,7 +1197,7 @@ void ListModelNG::SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&&
 void ListModelNG::SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragMove(std::move(onItemDragMove));
 
@@ -1207,7 +1207,7 @@ void ListModelNG::SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& o
 void ListModelNG::SetOnItemDrop(FrameNode* frameNode, OnItemDropFunc&& onItemDrop)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDrop(std::move(onItemDrop));
 

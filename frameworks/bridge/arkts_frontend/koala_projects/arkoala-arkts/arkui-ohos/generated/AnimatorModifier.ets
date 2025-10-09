@@ -31,11 +31,11 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: AnimatorAttribute): void { }
+    applyPressedAttribute(instance: AnimatorAttribute): void { }
+    applyFocusedAttribute(instance: AnimatorAttribute): void { }
+    applyDisabledAttribute(instance: AnimatorAttribute): void { }
+    applySelectedAttribute(instance: AnimatorAttribute): void { }
     _state_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _state_0_0value?: AnimationStatus | undefined
     _duration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

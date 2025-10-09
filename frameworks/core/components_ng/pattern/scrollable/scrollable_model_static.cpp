@@ -77,7 +77,7 @@ void ScrollableModelStatic::SetFriction(FrameNode* frameNode, const std::optiona
 void ScrollableModelStatic::SetOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillScroll(std::move(event));
 }
@@ -85,7 +85,7 @@ void ScrollableModelStatic::SetOnWillScroll(FrameNode* frameNode, OnWillScrollEv
 void ScrollableModelStatic::SetOnDidScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidScroll(std::move(onScroll));
 }
@@ -93,7 +93,7 @@ void ScrollableModelStatic::SetOnDidScroll(FrameNode* frameNode, OnScrollEvent&&
 void ScrollableModelStatic::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachStart(std::move(onReachStart));
 }
@@ -101,7 +101,7 @@ void ScrollableModelStatic::SetOnReachStart(FrameNode* frameNode, OnReachEvent&&
 void ScrollableModelStatic::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachEnd(std::move(onReachEnd));
 }
@@ -109,7 +109,7 @@ void ScrollableModelStatic::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& o
 void ScrollableModelStatic::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStart(std::move(onScrollStart));
 }
@@ -117,7 +117,7 @@ void ScrollableModelStatic::SetOnScrollStart(FrameNode* frameNode, OnScrollStart
 void ScrollableModelStatic::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }

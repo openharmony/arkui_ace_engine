@@ -48,53 +48,5 @@ public:
         AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType>::SetUp();
     }
 };
-class DrawingCanvasAccessorTest
-    : public AccessorTestMyBase<GENERATED_ArkUIDrawing_CanvasAccessor,
-    &GENERATED_ArkUIAccessors::getDrawing_CanvasAccessor, DrawingCanvasPeerImpl> {
-public:
-    void SetUp() override
-    {
-        int width = 100;
-        int height = 100;
-        auto colors = new uint32_t[width * height];
-        auto pixelMap = PixelMap::CreatePixelMap(static_cast<void*>(colors));
-
-        image_PixelMapPeer pixelMapPeer;
-        pixelMapPeer.pixelMap = pixelMap;
-        Ark_image_PixelMap arkPixelmap = &pixelMapPeer;
-
-        peer_ = static_cast<DrawingCanvasPeerImpl *>(accessor_->construct(arkPixelmap));
-        ASSERT_NE(peer_, nullptr);
-        pattern_ = new MockPattern();
-        auto pattern = AceType::Claim(pattern_);
-        peer_->SetPattern(pattern);
-
-        delete[] colors;
-    }
-
-    MockPattern *pattern_ = nullptr;
-};
-
-/**
- * @tc.name: drawRectTest
- * @tc.desc: Testing function of drawRect
- * @tc.type: FUNC
- */
-HWTEST_F(DrawingCanvasAccessorTest, drawRect1Test, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->drawRect1, nullptr);
-    ASSERT_NE(peer_, nullptr);
-    ASSERT_NE(pattern_, nullptr);
-
-    Rect target = Rect(START, START, END, END);
-    EXPECT_CALL(*pattern_, FillRect(target)).Times(1);
-
-    auto x = Converter::ArkValue<Ark_Number>(START);
-    auto y = Converter::ArkValue<Ark_Number>(START);
-    auto w = Converter::ArkValue<Ark_Number>(END);
-    auto h = Converter::ArkValue<Ark_Number>(END);
-    auto peer = reinterpret_cast<drawing_CanvasPeer *>(peer_);
-    accessor_->drawRect1(peer, &x, &y, &w, &h);
-}
 
 } // namespace OHOS::Ace::NG

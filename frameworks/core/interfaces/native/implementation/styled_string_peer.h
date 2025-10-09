@@ -43,5 +43,10 @@ public:
         return OHOS::Ace::AceType::DynamicCast<OHOS::Ace::MutableSpanString>(spanString);
     }
 
+    OHOS::Ace::RefPtr<OHOS::Ace::SpanString> GetString()
+    {
+        return spanString;
+    }
+
     OHOS::Ace::RefPtr<OHOS::Ace::SpanString> spanString;
 };

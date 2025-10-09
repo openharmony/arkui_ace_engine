@@ -29,11 +29,11 @@ export class ScreenModifier extends CommonMethodModifier implements ScreenAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ScreenAttribute): void { }
+    applyPressedAttribute(instance: ScreenAttribute): void { }
+    applyFocusedAttribute(instance: ScreenAttribute): void { }
+    applyDisabledAttribute(instance: ScreenAttribute): void { }
+    applySelectedAttribute(instance: ScreenAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkScreenPeer;

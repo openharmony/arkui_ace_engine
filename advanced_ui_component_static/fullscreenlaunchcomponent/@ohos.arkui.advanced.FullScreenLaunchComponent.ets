@@ -15,12 +15,12 @@
 import hilog from '@ohos.hilog';
 import abilityManager from '@ohos.app.ability.abilityManager';
 import common from '@ohos.app.ability.common';
-import { ErrorCallback, Callback, BusinessError} from '@ohos.base';
+import { ErrorCallback, Callback, BusinessError, RecordData } from '@ohos.base';
 import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
 import commonEventManager from '@ohos.commonEventManager';
 import { State } from '@ohos.arkui.stateManagement'
 import { $$ } from '@kit.ArkUI';
-import { ReceiveCallback, RecordData, Column, Text, Row, UIExtensionComponent, Component, BuilderParam, TerminationInfo, Builder, FlexAlign, ClickEvent, AlertDialogParamWithConfirm, memo, CustomBuilder, ContentCoverOptions } from '@ohos.arkui.component'
+import { ReceiveCallback, Column, Text, Row, UIExtensionComponent, Component, BuilderParam, TerminationInfo, Builder, FlexAlign, ClickEvent, AlertDialogParamWithConfirm, memo, CustomBuilder, ContentCoverOptions } from '@ohos.arkui.component'
 import { bundleManager } from '@kit.AbilityKit';
 
 const errCodeAbnormal: number = 100014;

@@ -31,11 +31,11 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: Component3DAttribute): void { }
+    applyPressedAttribute(instance: Component3DAttribute): void { }
+    applyFocusedAttribute(instance: Component3DAttribute): void { }
+    applyDisabledAttribute(instance: Component3DAttribute): void { }
+    applySelectedAttribute(instance: Component3DAttribute): void { }
     _environment_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _environment_0_0value?: ResourceStr | undefined
     _shader_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

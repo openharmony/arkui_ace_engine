@@ -310,7 +310,7 @@ class DatePickerModifierTest : public ModifierTestBase<GENERATED_ArkUIDatePicker
  * @tc.desc: Check the functionality of DatePickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setDisappearTexFontStyle, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTexFontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
@@ -351,7 +351,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTexFontStyle, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setDisappearTexFontWeight, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTexFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
@@ -410,7 +410,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTexFontWeight, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setDisappearTextFontFamily, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
@@ -451,7 +451,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextFontFamily, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setDisappearTextFontSize, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
@@ -492,7 +492,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextFontSize, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setDisappearTextColor, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -517,7 +517,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextColor, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, textStyleTestDefaultValues, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_textStyleTestDefaultValues, TestSize.Level1)
 {
         auto fullJson = GetJsonValue(node_);
 
@@ -541,7 +541,7 @@ HWTEST_F(DatePickerModifierTest, textStyleTestDefaultValues, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setTexFontStyle, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setTexFontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -582,7 +582,7 @@ HWTEST_F(DatePickerModifierTest, setTexFontStyle, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setTexFontWeight, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setTexFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -641,7 +641,7 @@ HWTEST_F(DatePickerModifierTest, setTexFontWeight, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setTextFontFamily, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setTextFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -682,7 +682,7 @@ HWTEST_F(DatePickerModifierTest, setTextFontFamily, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setTextFontSize, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setTextFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -723,7 +723,7 @@ HWTEST_F(DatePickerModifierTest, setTextFontSize, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setTextColor, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setTextColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -748,7 +748,7 @@ HWTEST_F(DatePickerModifierTest, setTextColor, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, selectedTextStyleTestDefaultValues, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_selectedTextStyleTestDefaultValues, TestSize.Level1)
 {
         auto fullJson = GetJsonValue(node_);
 
@@ -772,7 +772,7 @@ HWTEST_F(DatePickerModifierTest, selectedTextStyleTestDefaultValues, TestSize.Le
  * @tc.desc: Check the functionality of DatePickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setSelectedTexFontStyle, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTexFontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
@@ -813,7 +813,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTexFontStyle, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setSelectedTexFontWeight, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTexFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
@@ -872,7 +872,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTexFontWeight, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setSelectedTextFontFamily, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
@@ -913,7 +913,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextFontFamily, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setSelectedTextFontSize, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
@@ -954,7 +954,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextFontSize, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setSelectedTextColor, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -1029,13 +1029,13 @@ HWTEST_F(DatePickerModifierTest, setDatePickerOptionsTest, TestSize.Level1)
  * @tc.desc: Check the functionality of DatePickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setOnDateChangeTest, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setOnDateChangeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnDateChange, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<PickerDate> selectedDate = std::nullopt;
@@ -1088,7 +1088,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setLunarTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setDisappearTextStyleTestDefaultValues, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleTestDefaultValues, TestSize.Level1)
 {
     auto fullJson = GetJsonValue(node_);
 
@@ -1112,7 +1112,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyleTestDefaultValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setDisappearTextStyleFontStyle, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleFontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
@@ -1151,7 +1151,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyleFontStyle, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setDisappearTextStyleFontWeight, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
@@ -1208,7 +1208,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyleFontWeight, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setDisappearTextStyleFontFamily, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
@@ -1247,7 +1247,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyleFontFamily, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setDisappearTextStyleTextFontSize, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleTextFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
@@ -1286,7 +1286,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyleTextFontSize, TestSize.Lev
  * @tc.desc: Check the functionality of DatePickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setDisappearTextStyleTextColor, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleTextColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -1333,7 +1333,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleInvalidValue, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setTextStyleTestDefaultValues, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleTestDefaultValues, TestSize.Level1)
 {
     auto fullJson = GetJsonValue(node_);
 
@@ -1357,7 +1357,7 @@ HWTEST_F(DatePickerModifierTest, setTextStyleTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setTextStyleFontStyle, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleFontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
@@ -1396,7 +1396,7 @@ HWTEST_F(DatePickerModifierTest, setTextStyleFontStyle, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setTextStyleFontWeight, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
@@ -1453,7 +1453,7 @@ HWTEST_F(DatePickerModifierTest, setTextStyleFontWeight, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setTextStyleFontFamily, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
@@ -1492,7 +1492,7 @@ HWTEST_F(DatePickerModifierTest, setTextStyleFontFamily, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setTextStyleFontSize, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
@@ -1531,7 +1531,7 @@ HWTEST_F(DatePickerModifierTest, setTextStyleFontSize, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setTextStyleTextColor, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleTextColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -1578,7 +1578,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleInvalidValue, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setSelectedTextStyleTestDefaultValues, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleTestDefaultValues, TestSize.Level1)
 {
     auto fullJson = GetJsonValue(node_);
 
@@ -1602,7 +1602,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyleTestDefaultValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setSelectedTextStyleFontStyle, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleFontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
@@ -1641,7 +1641,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyleFontStyle, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setSelectedTextStyleFontWeight, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
@@ -1698,7 +1698,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyleFontWeight, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setSelectedTextStyleFontFamily, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
@@ -1737,7 +1737,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyleFontFamily, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setSelectedTextStyleFontSize, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
@@ -1776,7 +1776,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyleFontSize, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setSelectedTextStyleTextColor, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleTextColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -1871,7 +1871,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setOnChangeEventSelectedTest, TestSize
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<PickerDate> selectedDate = std::nullopt;

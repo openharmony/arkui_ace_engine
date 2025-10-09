@@ -267,7 +267,7 @@ void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
         for (auto& day : obtainedMonth_.days) {
             day.focused = false;
         }
-        auto calendarEventHub = GetOrCreateEventHub<CalendarEventHub>();
+        auto calendarEventHub = GetEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
         if (selectedIndex >= 0 && selectedIndex < static_cast<int32_t>(obtainedMonth_.days.size())) {
             obtainedMonth_.days[selectedIndex].focused = true;
@@ -489,7 +489,7 @@ void CalendarMonthPattern::InitHoverEvent()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = GetOrCreateEventHub<CalendarEventHub>();
+    auto eventHub = GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -541,7 +541,7 @@ void CalendarMonthPattern::OnClick(Offset& localLocation, const ObtainedMonth& o
         for (auto& day : pattern->obtainedMonth_.days) {
             day.focused = false;
         }
-        auto calendarEventHub = GetOrCreateEventHub<CalendarEventHub>();
+        auto calendarEventHub = GetEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
         if (index >= 0 && index < static_cast<int32_t>(obtainedMonth.days.size())) {
             pattern->obtainedMonth_.days[index].focused = true;

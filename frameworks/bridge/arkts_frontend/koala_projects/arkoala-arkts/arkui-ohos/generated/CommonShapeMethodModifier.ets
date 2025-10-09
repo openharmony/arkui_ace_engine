@@ -31,11 +31,11 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: CommonShapeMethod): void { }
+    applyPressedAttribute(instance: CommonShapeMethod): void { }
+    applyFocusedAttribute(instance: CommonShapeMethod): void { }
+    applyDisabledAttribute(instance: CommonShapeMethod): void { }
+    applySelectedAttribute(instance: CommonShapeMethod): void { }
     _stroke_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stroke_0_0value?: ResourceColor | undefined
     _fill_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

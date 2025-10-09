@@ -22,7 +22,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from "./alertDialog"
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
 import { Resource_serializer } from "./../framework/resource"
 import { SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from "./units"
 import { Resource } from "global.resource"
@@ -41,13 +41,21 @@ import { SliderConfiguration } from "./slider"
 import { TextClockConfiguration } from "./textClock"
 import { TextTimerConfiguration } from "./textTimer"
 import { ToggleConfiguration } from "./toggle"
-import { Size_serializer, Frame_serializer, LengthMetrics_serializer } from "./../Graphics"
+import { Size_serializer, Frame_serializer, LengthMetrics_serializer, Vector2_serializer, Vector3_serializer,
+    Circle_serializer, RoundRect_serializer, CommandPath_serializer } from "./../Graphics"
 import { LayoutConstraint_serializer } from "./../FrameNode"
 import { FrameNode, LayoutConstraint } from "arkui.FrameNode"
-import { Size, Frame, LengthMetrics } from "arkui.Graphics"
+import { Size, Frame, LengthMetrics, Vector2, Vector3, Matrix4, Circle, RoundRect, CommandPath } from "arkui.Graphics"
+import { RenderNode } from "arkui.RenderNode"
+import { default as common2D } from "@ohos.graphics.common2D"
+import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask } from "./gesture"
 import { default as image } from "@ohos.multimedia.image"
+import { font_FontOptions_serializer, font_FontInfo_serializer } from "./../framework/ohos.font"
+import { font_UIFontConfig_serializer } from "./../framework/ohos.font.custom"
+import { default as font } from "@ohos.font"
 import { MeasureOptions_serializer } from "./../framework/ohos.measure"
 import { MeasureOptions } from "@ohos.measure"
+import { TextMenuOptions_serializer, TextMenuOptions } from "./textCommon"
 import { CustomBuilder } from "./builder"
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
 import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
@@ -68,6 +76,7 @@ import { CustomLayoutRootModifier } from "./../CustomLayoutRootModifier"
 import { GlobalScope } from "./../framework/GlobalScope"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { LevelOrder_serializer } from "./../framework/ohos.promptAction"
+import { common2D_Rect_serializer } from "./../framework/ohos.graphics.common2D"
 export class ActionSheet {
     static show_serialize(options: ActionSheetOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -119,6 +128,21 @@ export class AnimationExtender {
     static CloseImplicitAnimation_serialize(): void {
         ArkUIGeneratedNativeModule._AnimationExtender_CloseImplicitAnimation()
     }
+    static OpenImplicitAnimationForAnimation_serialize(node: KPointer, param: AnimateParam | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (param !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const paramTmpValue  = param!
+            AnimateParam_serializer.write(thisSerializer, paramTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._AnimationExtender_OpenImplicitAnimationForAnimation(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static CloseImplicitAnimationForAnimation_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._AnimationExtender_CloseImplicitAnimationForAnimation(node)
+    }
     static StartDoubleAnimation_serialize(node: KPointer, param: DoubleAnimationParam): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         DoubleAnimationParam_serializer.write(thisSerializer, param)
@@ -165,6 +189,17 @@ export class AnimationExtender {
     }
     public static CloseImplicitAnimation(): void {
         AnimationExtender.CloseImplicitAnimation_serialize()
+        return
+    }
+    public static OpenImplicitAnimationForAnimation(node: KPointer, param: AnimateParam | undefined): void {
+        const node_casted = node as (KPointer)
+        const param_casted = param as (AnimateParam | undefined)
+        AnimationExtender.OpenImplicitAnimationForAnimation_serialize(node_casted, param_casted)
+        return
+    }
+    public static CloseImplicitAnimationForAnimation(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        AnimationExtender.CloseImplicitAnimationForAnimation_serialize(node_casted)
         return
     }
     public static StartDoubleAnimation(node: KPointer, param: DoubleAnimationParam): void {
@@ -404,7 +439,7 @@ export class CommonShape implements MaterializedBase {
         if (color instanceof Color) {
             thisSerializer.writeInt8((0).toChar())
             const colorForIdx0  = color as Color
-            thisSerializer.writeInt32(colorForIdx0.valueOf())
+            thisSerializer.writeInt32(colorForIdx0.getOrdinal())
         } else if (color instanceof number) {
             thisSerializer.writeInt8((1).toChar())
             const colorForIdx1  = color as number
@@ -925,8 +960,9 @@ export class FrameNodeExtender {
     static disposeTree_serialize(peer: FrameNode): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_disposeTree(extractors.toFrameNodePtr(peer))
     }
-    static setCrossLanguageOptions_serialize(peer: FrameNode, options: boolean): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_setCrossLanguageOptions(extractors.toFrameNodePtr(peer), options ? 1 : 0)
+    static setCrossLanguageOptions_serialize(peer: FrameNode, options: boolean): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_setCrossLanguageOptions(extractors.toFrameNodePtr(peer), options ? 1 : 0)
+        return retval
     }
     static getCrossLanguageOptions_serialize(peer: FrameNode): boolean {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getCrossLanguageOptions(extractors.toFrameNodePtr(peer))
@@ -1041,6 +1077,10 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getCommonEvent(extractors.toFrameNodePtr(peer))
         const obj : UICommonEvent = UICommonEventInternal.fromPtr(retval)
         return obj
+    }
+    static getRenderNode_serialize(peer: KPointer): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getRenderNode(peer)
+        return retval
     }
     public static constructorFrameNode(): KPointer {
         return FrameNodeExtender.constructorFrameNode_serialize()
@@ -1170,11 +1210,10 @@ export class FrameNodeExtender {
         FrameNodeExtender.disposeTree_serialize(peer_casted)
         return
     }
-    public static setCrossLanguageOptions(peer: FrameNode, options: boolean): void {
+    public static setCrossLanguageOptions(peer: FrameNode, options: boolean): boolean {
         const peer_casted = peer as (FrameNode)
         const options_casted = options as (boolean)
-        FrameNodeExtender.setCrossLanguageOptions_serialize(peer_casted, options_casted)
-        return
+        return FrameNodeExtender.setCrossLanguageOptions_serialize(peer_casted, options_casted)
     }
     public static getCrossLanguageOptions(peer: FrameNode): boolean {
         const peer_casted = peer as (FrameNode)
@@ -1292,6 +1331,229 @@ export class FrameNodeExtender {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getCommonEvent_serialize(peer_casted)
     }
+    public static getRenderNode(peer: KPointer): KPointer {
+        const peer_casted = peer as (KPointer)
+        return FrameNodeExtender.getRenderNode_serialize(peer_casted)
+    }
+}
+export class GestureOps {
+    static createTapGesture_serialize(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: boolean): KPointer {
+        console.log("zcb createTapGesture_serialize");
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createTapGesture(fingers, count, distanceThreshold, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    static createLongPressGesture_serialize(fingers: number, repeat: boolean, duration: number, isFingerCountLimited: boolean): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createLongPressGesture(fingers, repeat ? 1 : 0, duration, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    static createPanGesture_serialize(fingers: number, direction: PanDirection, distance: number, isFingerCountLimited: boolean): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createPanGesture(fingers, direction.valueOf(), distance, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    static createPanGestureWithPanGestureOptions_serialize(panGestureOptions: KPointer): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createPanGestureWithPanGestureOptions(panGestureOptions)
+        return retval
+    }
+    static createPinchGesture_serialize(fingers: number, distance: number, isFingerCountLimited: boolean): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createPinchGesture(fingers, distance, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    static createRotationGesture_serialize(fingers: number, angle: number, isFingerCountLimited: boolean): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createRotationGesture(fingers, angle, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    static createSwipeGesture_serialize(fingers: number, direction: SwipeDirection, speed: number, isFingerCountLimited: boolean): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createSwipeGesture(fingers, direction.valueOf(), speed, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    static createGestureGroup_serialize(mode: GestureMode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createGestureGroup(mode.valueOf())
+        return retval
+    }
+    static setOnAction_serialize(gesture: KPointer, onAction: ((value0: GestureEvent) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onAction)
+        ArkUIGeneratedNativeModule._GestureOps_setOnAction(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOnActionStart_serialize(gesture: KPointer, onActionStart: ((value0: GestureEvent) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onActionStart)
+        ArkUIGeneratedNativeModule._GestureOps_setOnActionStart(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOnActionUpdate_serialize(gesture: KPointer, onActionUpdate: ((value0: GestureEvent) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onActionUpdate)
+        ArkUIGeneratedNativeModule._GestureOps_setOnActionUpdate(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOnActionEnd_serialize(gesture: KPointer, onActionEnd: ((value0: GestureEvent) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onActionEnd)
+        ArkUIGeneratedNativeModule._GestureOps_setOnActionEnd(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOnActionCancel_serialize(gesture: KPointer, onActionCancel: ((value0: GestureEvent) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onActionCancel)
+        ArkUIGeneratedNativeModule._GestureOps_setOnActionCancel(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOnCancel_serialize(gesture: KPointer, onCancel: (() => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onCancel)
+        ArkUIGeneratedNativeModule._GestureOps_setOnCancel(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setGestureTag_serialize(gesture: KPointer, tag: string): void {
+        ArkUIGeneratedNativeModule._GestureOps_setGestureTag(gesture, tag)
+    }
+    static setAllowedTypes_serialize(gesture: KPointer, types: Array<SourceTool>): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((types.length).toInt())
+        for (let typesCounterI = 0; typesCounterI < types.length; typesCounterI++) {
+            const typesTmpElement : SourceTool = types[typesCounterI]
+            thisSerializer.writeInt32(typesTmpElement.valueOf())
+        }
+        ArkUIGeneratedNativeModule._GestureOps_setAllowedTypes(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static addGestureToNode_serialize(node: KPointer, priority: number, mask: GestureMask, gesture: KPointer, isModifier: boolean): void {
+        ArkUIGeneratedNativeModule._GestureOps_addGestureToNode(node, priority, mask.valueOf(), gesture, isModifier ? 1 : 0)
+    }
+    static addGestureToGroup_serialize(group: KPointer, gesture: KPointer): void {
+        ArkUIGeneratedNativeModule._GestureOps_addGestureToGroup(group, gesture)
+    }
+    static removeGestureByTag_serialize(node: KPointer, tag: string): void {
+        ArkUIGeneratedNativeModule._GestureOps_removeGestureByTag(node, tag)
+    }
+    static clearGestures_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._GestureOps_clearGestures(node)
+    }
+    public static createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: boolean): KPointer {
+        const fingers_casted = fingers as (number)
+        const count_casted = count as (number)
+        const distanceThreshold_casted = distanceThreshold as (number)
+        const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
+        return GestureOps.createTapGesture_serialize(fingers_casted, count_casted, distanceThreshold_casted, isFingerCountLimited_casted)
+    }
+    public static createLongPressGesture(fingers: number, repeat: boolean, duration: number, isFingerCountLimited: boolean): KPointer {
+        const fingers_casted = fingers as (number)
+        const repeat_casted = repeat as (boolean)
+        const duration_casted = duration as (number)
+        const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
+        return GestureOps.createLongPressGesture_serialize(fingers_casted, repeat_casted, duration_casted, isFingerCountLimited_casted)
+    }
+    public static createPanGesture(fingers: number, direction: PanDirection, distance: number, isFingerCountLimited: boolean): KPointer {
+        const fingers_casted = fingers as (number)
+        const direction_casted = direction as (PanDirection)
+        const distance_casted = distance as (number)
+        const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
+        return GestureOps.createPanGesture_serialize(fingers_casted, direction_casted, distance_casted, isFingerCountLimited_casted)
+    }
+    public static createPanGestureWithPanGestureOptions(panGestureOptions: KPointer): KPointer {
+        const panGestureOptions_casted = panGestureOptions as (KPointer)
+        return GestureOps.createPanGestureWithPanGestureOptions_serialize(panGestureOptions_casted)
+    }
+    public static createPinchGesture(fingers: number, distance: number, isFingerCountLimited: boolean): KPointer {
+        const fingers_casted = fingers as (number)
+        const distance_casted = distance as (number)
+        const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
+        return GestureOps.createPinchGesture_serialize(fingers_casted, distance_casted, isFingerCountLimited_casted)
+    }
+    public static createRotationGesture(fingers: number, angle: number, isFingerCountLimited: boolean): KPointer {
+        const fingers_casted = fingers as (number)
+        const angle_casted = angle as (number)
+        const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
+        return GestureOps.createRotationGesture_serialize(fingers_casted, angle_casted, isFingerCountLimited_casted)
+    }
+    public static createSwipeGesture(fingers: number, direction: SwipeDirection, speed: number, isFingerCountLimited: boolean): KPointer {
+        const fingers_casted = fingers as (number)
+        const direction_casted = direction as (SwipeDirection)
+        const speed_casted = speed as (number)
+        const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
+        return GestureOps.createSwipeGesture_serialize(fingers_casted, direction_casted, speed_casted, isFingerCountLimited_casted)
+    }
+    public static createGestureGroup(mode: GestureMode): KPointer {
+        const mode_casted = mode as (GestureMode)
+        return GestureOps.createGestureGroup_serialize(mode_casted)
+    }
+    public static setOnAction(gesture: KPointer, onAction: ((value0: GestureEvent) => void)): void {
+        const gesture_casted = gesture as (KPointer)
+        const onAction_casted = onAction as (((value0: GestureEvent) => void))
+        GestureOps.setOnAction_serialize(gesture_casted, onAction_casted)
+        return
+    }
+    public static setOnActionStart(gesture: KPointer, onActionStart: ((value0: GestureEvent) => void)): void {
+        const gesture_casted = gesture as (KPointer)
+        const onActionStart_casted = onActionStart as (((value0: GestureEvent) => void))
+        GestureOps.setOnActionStart_serialize(gesture_casted, onActionStart_casted)
+        return
+    }
+    public static setOnActionUpdate(gesture: KPointer, onActionUpdate: ((value0: GestureEvent) => void)): void {
+        const gesture_casted = gesture as (KPointer)
+        const onActionUpdate_casted = onActionUpdate as (((value0: GestureEvent) => void))
+        GestureOps.setOnActionUpdate_serialize(gesture_casted, onActionUpdate_casted)
+        return
+    }
+    public static setOnActionEnd(gesture: KPointer, onActionEnd: ((value0: GestureEvent) => void)): void {
+        const gesture_casted = gesture as (KPointer)
+        const onActionEnd_casted = onActionEnd as (((value0: GestureEvent) => void))
+        GestureOps.setOnActionEnd_serialize(gesture_casted, onActionEnd_casted)
+        return
+    }
+    public static setOnActionCancel(gesture: KPointer, onActionCancel: ((value0: GestureEvent) => void)): void {
+        const gesture_casted = gesture as (KPointer)
+        const onActionCancel_casted = onActionCancel as (((value0: GestureEvent) => void))
+        GestureOps.setOnActionCancel_serialize(gesture_casted, onActionCancel_casted)
+        return
+    }
+    public static setOnCancel(gesture: KPointer, onCancel: (() => void)): void {
+        const gesture_casted = gesture as (KPointer)
+        const onCancel_casted = onCancel as ((() => void))
+        GestureOps.setOnCancel_serialize(gesture_casted, onCancel_casted)
+        return
+    }
+    public static setGestureTag(gesture: KPointer, tag: string): void {
+        const gesture_casted = gesture as (KPointer)
+        const tag_casted = tag as (string)
+        GestureOps.setGestureTag_serialize(gesture_casted, tag_casted)
+        return
+    }
+    public static setAllowedTypes(gesture: KPointer, types: Array<SourceTool>): void {
+        const gesture_casted = gesture as (KPointer)
+        const types_casted = types as (Array<SourceTool>)
+        GestureOps.setAllowedTypes_serialize(gesture_casted, types_casted)
+        return
+    }
+    public static addGestureToNode(node: KPointer, priority: number, mask: GestureMask, gesture: KPointer, isModifier: boolean): void {
+        console.log("zcb addGestureToNode");
+        const node_casted = node as (KPointer)
+        const priority_casted = priority as (number)
+        const mask_casted = mask as (GestureMask)
+        const gesture_casted = gesture as (KPointer)
+        const isModifier_casted = isModifier as (boolean)
+        GestureOps.addGestureToNode_serialize(node_casted, priority_casted, mask_casted, gesture_casted, isModifier_casted)
+        return
+    }
+    public static addGestureToGroup(group: KPointer, gesture: KPointer): void {
+        const group_casted = group as (KPointer)
+        const gesture_casted = gesture as (KPointer)
+        GestureOps.addGestureToGroup_serialize(group_casted, gesture_casted)
+        return
+    }
+    public static removeGestureByTag(node: KPointer, tag: string): void {
+        const node_casted = node as (KPointer)
+        const tag_casted = tag as (string)
+        GestureOps.removeGestureByTag_serialize(node_casted, tag_casted)
+        return
+    }
+    public static clearGestures(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        GestureOps.clearGestures_serialize(node_casted)
+        return
+    }
 }
 export class GlobalScope_ohos_arkui_componentSnapshot {
     static get_serialize(id: string, callback: ((result: image.PixelMap) => void), options?: SnapshotOptions): void {
@@ -1355,9 +1617,9 @@ export class GlobalScope_ohos_arkui_performanceMonitor {
     }
 }
 export class GlobalScope_ohos_font {
-    static registerFont_serialize(options: object): void {
+    static registerFont_serialize(options: font.FontOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.writeCustomObject('object', options)
+        font_FontOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._GlobalScope_ohos_font_registerFont(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -1372,21 +1634,32 @@ export class GlobalScope_ohos_font {
         const returnResult : Array<string> = buffer
         return returnResult
     }
-    static getFontByName_serialize(fontName: string): object {
+    static getFontByName_serialize(fontName: string): font.FontInfo {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getFontByName(fontName)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : font.FontInfo = font_FontInfo_serializer.read(retvalDeserializer)
+        return returnResult
     }
-    public static registerFont(options: object): void {
-        const options_casted = options as (object)
+    static getUIFontConfig_serialize(): font.UIFontConfig {
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getUIFontConfig()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : font.UIFontConfig = font_UIFontConfig_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    public static registerFont(options: font.FontOptions): void {
+        const options_casted = options as (font.FontOptions)
         GlobalScope_ohos_font.registerFont_serialize(options_casted)
         return
     }
     public static getSystemFontList(): Array<string> {
         return GlobalScope_ohos_font.getSystemFontList_serialize()
     }
-    public static getFontByName(fontName: string): object {
+    public static getFontByName(fontName: string): font.FontInfo {
         const fontName_casted = fontName as (string)
         return GlobalScope_ohos_font.getFontByName_serialize(fontName_casted)
+    }
+    public static getUIFontConfig(): font.UIFontConfig {
+        return GlobalScope_ohos_font.getUIFontConfig_serialize()
     }
 }
 export class GlobalScope_ohos_measure_utils {
@@ -1413,6 +1686,35 @@ export class GlobalScope_ohos_measure_utils {
     public static measureTextSize(options: MeasureOptions): SizeOptions {
         const options_casted = options as (MeasureOptions)
         return GlobalScope_ohos_measure_utils.measureTextSize_serialize(options_casted)
+    }
+}
+export class GlobalScopeUicontextFontScale {
+    static isFollowingSystemFontScale_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._GlobalScopeUicontextFontScale_isFollowingSystemFontScale()
+        return retval
+    }
+    static getMaxFontScale_serialize(): double {
+        const retval  = ArkUIGeneratedNativeModule._GlobalScopeUicontextFontScale_getMaxFontScale()
+        return retval
+    }
+    public static isFollowingSystemFontScale(): boolean {
+        return GlobalScopeUicontextFontScale.isFollowingSystemFontScale_serialize()
+    }
+    public static getMaxFontScale(): double {
+        return GlobalScopeUicontextFontScale.getMaxFontScale_serialize()
+    }
+}
+export class GlobalScopeUicontextTextMenu {
+    static setMenuOptions_serialize(options: TextMenuOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TextMenuOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._GlobalScopeUicontextTextMenu_setMenuOptions(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static setMenuOptions(options: TextMenuOptions): void {
+        const options_casted = options as (TextMenuOptions)
+        GlobalScopeUicontextTextMenu.setMenuOptions_serialize(options_casted)
+        return
     }
 }
 export class IUIContext {
@@ -1879,6 +2181,472 @@ export class PromptActionExtender {
     public static closeMenu(content: KPointer): Promise<void> {
         const content_casted = content as (KPointer)
         return PromptActionExtender.closeMenu_serialize(content_casted)
+    }
+}
+export class RenderNodeExtender {
+    static constructorRenderNode_serialize(nodeId: int32): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._RenderNodeExtender_constructorRenderNode(nodeId)
+        return retval
+    }
+    static getDestroy_serialize(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._RenderNodeExtender_getDestroy()
+        return retval
+    }
+    static destroyPeer_serialize(peer: RenderNode): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_destroyPeer(extractors.toRenderNodePtr(peer))
+    }
+    static setBackgroundColor_serialize(peer: RenderNode, backgroundColor: number): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setBackgroundColor(extractors.toRenderNodePtr(peer), backgroundColor)
+    }
+    static setClipToFrame_serialize(peer: RenderNode, clipToFrame: boolean): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setClipToFrame(extractors.toRenderNodePtr(peer), clipToFrame ? 1 : 0)
+    }
+    static setOpacity_serialize(peer: RenderNode, opacity: number): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setOpacity(extractors.toRenderNodePtr(peer), opacity)
+    }
+    static setSize_serialize(peer: RenderNode, size: Size, unitValue: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Size_serializer.write(thisSerializer, size)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setSize(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
+        thisSerializer.release()
+    }
+    static setPosition_serialize(peer: RenderNode, position: Vector2, unitValue: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector2_serializer.write(thisSerializer, position)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setPosition(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
+        thisSerializer.release()
+    }
+    static setPivot_serialize(peer: RenderNode, pivot: Vector2): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector2_serializer.write(thisSerializer, pivot)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setPivot(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setScale_serialize(peer: RenderNode, scale: Vector2): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector2_serializer.write(thisSerializer, scale)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setScale(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setTranslation_serialize(peer: RenderNode, translation: Vector2): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector2_serializer.write(thisSerializer, translation)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setTranslation(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setRotation_serialize(peer: RenderNode, rotation: Vector3, unitValue: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector3_serializer.write(thisSerializer, rotation)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setRotation(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
+        thisSerializer.release()
+    }
+    static setTransform_serialize(peer: RenderNode, transform: Matrix4): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const transform_0  = transform[0]
+        thisSerializer.writeNumber(transform_0)
+        const transform_1  = transform[1]
+        thisSerializer.writeNumber(transform_1)
+        const transform_2  = transform[2]
+        thisSerializer.writeNumber(transform_2)
+        const transform_3  = transform[3]
+        thisSerializer.writeNumber(transform_3)
+        const transform_4  = transform[4]
+        thisSerializer.writeNumber(transform_4)
+        const transform_5  = transform[5]
+        thisSerializer.writeNumber(transform_5)
+        const transform_6  = transform[6]
+        thisSerializer.writeNumber(transform_6)
+        const transform_7  = transform[7]
+        thisSerializer.writeNumber(transform_7)
+        const transform_8  = transform[8]
+        thisSerializer.writeNumber(transform_8)
+        const transform_9  = transform[9]
+        thisSerializer.writeNumber(transform_9)
+        const transform_10  = transform[10]
+        thisSerializer.writeNumber(transform_10)
+        const transform_11  = transform[11]
+        thisSerializer.writeNumber(transform_11)
+        const transform_12  = transform[12]
+        thisSerializer.writeNumber(transform_12)
+        const transform_13  = transform[13]
+        thisSerializer.writeNumber(transform_13)
+        const transform_14  = transform[14]
+        thisSerializer.writeNumber(transform_14)
+        const transform_15  = transform[15]
+        thisSerializer.writeNumber(transform_15)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setTransform(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setShadowColor_serialize(peer: RenderNode, shadowColor: number): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowColor(extractors.toRenderNodePtr(peer), shadowColor)
+    }
+    static setShadowOffset_serialize(peer: RenderNode, shadowOffset: Vector2, unitValue: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector2_serializer.write(thisSerializer, shadowOffset)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowOffset(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
+        thisSerializer.release()
+    }
+    static setLabel_serialize(peer: RenderNode, label: string): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setLabel(extractors.toRenderNodePtr(peer), label)
+    }
+    static setShadowAlpha_serialize(peer: RenderNode, shadowAlpha: number): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowAlpha(extractors.toRenderNodePtr(peer), shadowAlpha)
+    }
+    static setShadowElevation_serialize(peer: RenderNode, shadowElevation: number): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowElevation(extractors.toRenderNodePtr(peer), shadowElevation)
+    }
+    static setShadowRadius_serialize(peer: RenderNode, shadowRadius: number): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowRadius(extractors.toRenderNodePtr(peer), shadowRadius)
+    }
+    static setBorderStyle_serialize(peer: RenderNode, borderStyle: NodeEdgeStyles): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        NodeEdgeStyles_serializer.write(thisSerializer, borderStyle)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setBorderStyle(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setBorderWidth_serialize(peer: RenderNode, borderWidth: EdgeNumber, unitValue: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        EdgeNumber_serializer.write(thisSerializer, borderWidth)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setBorderWidth(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
+        thisSerializer.release()
+    }
+    static setBorderColor_serialize(peer: RenderNode, borderColor: EdgeNumber): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        EdgeNumber_serializer.write(thisSerializer, borderColor)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setBorderColor(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setBorderRadius_serialize(peer: RenderNode, borderRadius: BorderRadiuses_graphics, unitValue: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        BorderRadiuses_graphics_serializer.write(thisSerializer, borderRadius)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setBorderRadius(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
+        thisSerializer.release()
+    }
+    static setMarkNodeGroup_serialize(peer: RenderNode, markNodeGroup: boolean): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setMarkNodeGroup(extractors.toRenderNodePtr(peer), markNodeGroup ? 1 : 0)
+    }
+    static setRectMask_serialize(peer: RenderNode, rect: common2D.Rect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        common2D_Rect_serializer.write(thisSerializer, rect)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setRectMask(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    static setCircleMask_serialize(peer: RenderNode, circle: Circle, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Circle_serializer.write(thisSerializer, circle)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setCircleMask(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    static setRoundRectMask_serialize(peer: RenderNode, roundRect: RoundRect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        RoundRect_serializer.write(thisSerializer, roundRect)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setRoundRectMask(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    static setOvalMask_serialize(peer: RenderNode, rect: common2D.Rect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        common2D_Rect_serializer.write(thisSerializer, rect)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setOvalMask(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    static setPath_serialize(peer: RenderNode, path: CommandPath, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        CommandPath_serializer.write(thisSerializer, path)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setPath(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), fillColor, strokeColor, strokeWidth)
+        thisSerializer.release()
+    }
+    static setRectClip_serialize(peer: RenderNode, rect: common2D.Rect): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        common2D_Rect_serializer.write(thisSerializer, rect)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setRectClip(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setCircleClip_serialize(peer: RenderNode, circle: Circle): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Circle_serializer.write(thisSerializer, circle)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setCircleClip(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setRoundRectClip_serialize(peer: RenderNode, roundRect: RoundRect): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        RoundRect_serializer.write(thisSerializer, roundRect)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setRoundRectClip(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOvalClip_serialize(peer: RenderNode, rect: common2D.Rect): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        common2D_Rect_serializer.write(thisSerializer, rect)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setOvalClip(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setPathClip_serialize(peer: RenderNode, path: CommandPath): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        CommandPath_serializer.write(thisSerializer, path)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setPathClip(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static appendChild_serialize(peer: RenderNode, node: RenderNode): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_appendChild(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(node))
+    }
+    static insertChildAfter_serialize(peer: RenderNode, child: RenderNode, sibling: RenderNode): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_insertChildAfter(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(child), extractors.toRenderNodePtr(sibling))
+    }
+    static removeChild_serialize(peer: RenderNode, node: RenderNode): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_removeChild(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(node))
+    }
+    static clearChildren_serialize(peer: RenderNode): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_clearChildren(extractors.toRenderNodePtr(peer))
+    }
+    static invalidate_serialize(peer: RenderNode): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_invalidate(extractors.toRenderNodePtr(peer))
+    }
+    public static constructorRenderNode(nodeId: int32): KPointer {
+        const nodeId_casted = nodeId as (int32)
+        return RenderNodeExtender.constructorRenderNode_serialize(nodeId_casted)
+    }
+    public static getDestroy(): KPointer {
+        return RenderNodeExtender.getDestroy_serialize()
+    }
+    public static destroyPeer(peer: RenderNode): void {
+        const peer_casted = peer as (RenderNode)
+        RenderNodeExtender.destroyPeer_serialize(peer_casted)
+        return
+    }
+    public static setBackgroundColor(peer: RenderNode, backgroundColor: number): void {
+        const peer_casted = peer as (RenderNode)
+        const backgroundColor_casted = backgroundColor as (number)
+        RenderNodeExtender.setBackgroundColor_serialize(peer_casted, backgroundColor_casted)
+        return
+    }
+    public static setClipToFrame(peer: RenderNode, clipToFrame: boolean): void {
+        const peer_casted = peer as (RenderNode)
+        const clipToFrame_casted = clipToFrame as (boolean)
+        RenderNodeExtender.setClipToFrame_serialize(peer_casted, clipToFrame_casted)
+        return
+    }
+    public static setOpacity(peer: RenderNode, opacity: number): void {
+        const peer_casted = peer as (RenderNode)
+        const opacity_casted = opacity as (number)
+        RenderNodeExtender.setOpacity_serialize(peer_casted, opacity_casted)
+        return
+    }
+    public static setSize(peer: RenderNode, size: Size, unitValue: int32): void {
+        const peer_casted = peer as (RenderNode)
+        const size_casted = size as (Size)
+        const unitValue_casted = unitValue as (int32)
+        RenderNodeExtender.setSize_serialize(peer_casted, size_casted, unitValue_casted)
+        return
+    }
+    public static setPosition(peer: RenderNode, position: Vector2, unitValue: int32): void {
+        const peer_casted = peer as (RenderNode)
+        const position_casted = position as (Vector2)
+        const unitValue_casted = unitValue as (int32)
+        RenderNodeExtender.setPosition_serialize(peer_casted, position_casted, unitValue_casted)
+        return
+    }
+    public static setPivot(peer: RenderNode, pivot: Vector2): void {
+        const peer_casted = peer as (RenderNode)
+        const pivot_casted = pivot as (Vector2)
+        RenderNodeExtender.setPivot_serialize(peer_casted, pivot_casted)
+        return
+    }
+    public static setScale(peer: RenderNode, scale: Vector2): void {
+        const peer_casted = peer as (RenderNode)
+        const scale_casted = scale as (Vector2)
+        RenderNodeExtender.setScale_serialize(peer_casted, scale_casted)
+        return
+    }
+    public static setTranslation(peer: RenderNode, translation: Vector2): void {
+        const peer_casted = peer as (RenderNode)
+        const translation_casted = translation as (Vector2)
+        RenderNodeExtender.setTranslation_serialize(peer_casted, translation_casted)
+        return
+    }
+    public static setRotation(peer: RenderNode, rotation: Vector3, unitValue: int32): void {
+        const peer_casted = peer as (RenderNode)
+        const rotation_casted = rotation as (Vector3)
+        const unitValue_casted = unitValue as (int32)
+        RenderNodeExtender.setRotation_serialize(peer_casted, rotation_casted, unitValue_casted)
+        return
+    }
+    public static setTransform(peer: RenderNode, transform: Matrix4): void {
+        const peer_casted = peer as (RenderNode)
+        const transform_casted = transform as (Matrix4)
+        RenderNodeExtender.setTransform_serialize(peer_casted, transform_casted)
+        return
+    }
+    public static setShadowColor(peer: RenderNode, shadowColor: number): void {
+        const peer_casted = peer as (RenderNode)
+        const shadowColor_casted = shadowColor as (number)
+        RenderNodeExtender.setShadowColor_serialize(peer_casted, shadowColor_casted)
+        return
+    }
+    public static setShadowOffset(peer: RenderNode, shadowOffset: Vector2, unitValue: int32): void {
+        const peer_casted = peer as (RenderNode)
+        const shadowOffset_casted = shadowOffset as (Vector2)
+        const unitValue_casted = unitValue as (int32)
+        RenderNodeExtender.setShadowOffset_serialize(peer_casted, shadowOffset_casted, unitValue_casted)
+        return
+    }
+    public static setLabel(peer: RenderNode, label: string): void {
+        const peer_casted = peer as (RenderNode)
+        const label_casted = label as (string)
+        RenderNodeExtender.setLabel_serialize(peer_casted, label_casted)
+        return
+    }
+    public static setShadowAlpha(peer: RenderNode, shadowAlpha: number): void {
+        const peer_casted = peer as (RenderNode)
+        const shadowAlpha_casted = shadowAlpha as (number)
+        RenderNodeExtender.setShadowAlpha_serialize(peer_casted, shadowAlpha_casted)
+        return
+    }
+    public static setShadowElevation(peer: RenderNode, shadowElevation: number): void {
+        const peer_casted = peer as (RenderNode)
+        const shadowElevation_casted = shadowElevation as (number)
+        RenderNodeExtender.setShadowElevation_serialize(peer_casted, shadowElevation_casted)
+        return
+    }
+    public static setShadowRadius(peer: RenderNode, shadowRadius: number): void {
+        const peer_casted = peer as (RenderNode)
+        const shadowRadius_casted = shadowRadius as (number)
+        RenderNodeExtender.setShadowRadius_serialize(peer_casted, shadowRadius_casted)
+        return
+    }
+    public static setBorderStyle(peer: RenderNode, borderStyle: NodeEdgeStyles): void {
+        const peer_casted = peer as (RenderNode)
+        const borderStyle_casted = borderStyle as (NodeEdgeStyles)
+        RenderNodeExtender.setBorderStyle_serialize(peer_casted, borderStyle_casted)
+        return
+    }
+    public static setBorderWidth(peer: RenderNode, borderWidth: EdgeNumber, unitValue: int32): void {
+        const peer_casted = peer as (RenderNode)
+        const borderWidth_casted = borderWidth as (EdgeNumber)
+        const unitValue_casted = unitValue as (int32)
+        RenderNodeExtender.setBorderWidth_serialize(peer_casted, borderWidth_casted, unitValue_casted)
+        return
+    }
+    public static setBorderColor(peer: RenderNode, borderColor: EdgeNumber): void {
+        const peer_casted = peer as (RenderNode)
+        const borderColor_casted = borderColor as (EdgeNumber)
+        RenderNodeExtender.setBorderColor_serialize(peer_casted, borderColor_casted)
+        return
+    }
+    public static setBorderRadius(peer: RenderNode, borderRadius: BorderRadiuses_graphics, unitValue: int32): void {
+        const peer_casted = peer as (RenderNode)
+        const borderRadius_casted = borderRadius as (BorderRadiuses_graphics)
+        const unitValue_casted = unitValue as (int32)
+        RenderNodeExtender.setBorderRadius_serialize(peer_casted, borderRadius_casted, unitValue_casted)
+        return
+    }
+    public static setMarkNodeGroup(peer: RenderNode, markNodeGroup: boolean): void {
+        const peer_casted = peer as (RenderNode)
+        const markNodeGroup_casted = markNodeGroup as (boolean)
+        RenderNodeExtender.setMarkNodeGroup_serialize(peer_casted, markNodeGroup_casted)
+        return
+    }
+    public static setRectMask(peer: RenderNode, rect: common2D.Rect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const peer_casted = peer as (RenderNode)
+        const rect_casted = rect as (common2D.Rect)
+        const fillColor_casted = fillColor as (number)
+        const strokeColor_casted = strokeColor as (number)
+        const strokeWidth_casted = strokeWidth as (number)
+        RenderNodeExtender.setRectMask_serialize(peer_casted, rect_casted, fillColor_casted, strokeColor_casted, strokeWidth_casted)
+        return
+    }
+    public static setCircleMask(peer: RenderNode, circle: Circle, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const peer_casted = peer as (RenderNode)
+        const circle_casted = circle as (Circle)
+        const fillColor_casted = fillColor as (number)
+        const strokeColor_casted = strokeColor as (number)
+        const strokeWidth_casted = strokeWidth as (number)
+        RenderNodeExtender.setCircleMask_serialize(peer_casted, circle_casted, fillColor_casted, strokeColor_casted, strokeWidth_casted)
+        return
+    }
+    public static setRoundRectMask(peer: RenderNode, roundRect: RoundRect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const peer_casted = peer as (RenderNode)
+        const roundRect_casted = roundRect as (RoundRect)
+        const fillColor_casted = fillColor as (number)
+        const strokeColor_casted = strokeColor as (number)
+        const strokeWidth_casted = strokeWidth as (number)
+        RenderNodeExtender.setRoundRectMask_serialize(peer_casted, roundRect_casted, fillColor_casted, strokeColor_casted, strokeWidth_casted)
+        return
+    }
+    public static setOvalMask(peer: RenderNode, rect: common2D.Rect, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const peer_casted = peer as (RenderNode)
+        const rect_casted = rect as (common2D.Rect)
+        const fillColor_casted = fillColor as (number)
+        const strokeColor_casted = strokeColor as (number)
+        const strokeWidth_casted = strokeWidth as (number)
+        RenderNodeExtender.setOvalMask_serialize(peer_casted, rect_casted, fillColor_casted, strokeColor_casted, strokeWidth_casted)
+        return
+    }
+    public static setPath(peer: RenderNode, path: CommandPath, fillColor: number, strokeColor: number, strokeWidth: number): void {
+        const peer_casted = peer as (RenderNode)
+        const path_casted = path as (CommandPath)
+        const fillColor_casted = fillColor as (number)
+        const strokeColor_casted = strokeColor as (number)
+        const strokeWidth_casted = strokeWidth as (number)
+        RenderNodeExtender.setPath_serialize(peer_casted, path_casted, fillColor_casted, strokeColor_casted, strokeWidth_casted)
+        return
+    }
+    public static setRectClip(peer: RenderNode, rect: common2D.Rect): void {
+        const peer_casted = peer as (RenderNode)
+        const rect_casted = rect as (common2D.Rect)
+        RenderNodeExtender.setRectClip_serialize(peer_casted, rect_casted)
+        return
+    }
+    public static setCircleClip(peer: RenderNode, circle: Circle): void {
+        const peer_casted = peer as (RenderNode)
+        const circle_casted = circle as (Circle)
+        RenderNodeExtender.setCircleClip_serialize(peer_casted, circle_casted)
+        return
+    }
+    public static setRoundRectClip(peer: RenderNode, roundRect: RoundRect): void {
+        const peer_casted = peer as (RenderNode)
+        const roundRect_casted = roundRect as (RoundRect)
+        RenderNodeExtender.setRoundRectClip_serialize(peer_casted, roundRect_casted)
+        return
+    }
+    public static setOvalClip(peer: RenderNode, rect: common2D.Rect): void {
+        const peer_casted = peer as (RenderNode)
+        const rect_casted = rect as (common2D.Rect)
+        RenderNodeExtender.setOvalClip_serialize(peer_casted, rect_casted)
+        return
+    }
+    public static setPathClip(peer: RenderNode, path: CommandPath): void {
+        const peer_casted = peer as (RenderNode)
+        const path_casted = path as (CommandPath)
+        RenderNodeExtender.setPathClip_serialize(peer_casted, path_casted)
+        return
+    }
+    public static appendChild(peer: RenderNode, node: RenderNode): void {
+        const peer_casted = peer as (RenderNode)
+        const node_casted = node as (RenderNode)
+        RenderNodeExtender.appendChild_serialize(peer_casted, node_casted)
+        return
+    }
+    public static insertChildAfter(peer: RenderNode, child: RenderNode, sibling: RenderNode): void {
+        const peer_casted = peer as (RenderNode)
+        const child_casted = child as (RenderNode)
+        const sibling_casted = sibling as (RenderNode)
+        RenderNodeExtender.insertChildAfter_serialize(peer_casted, child_casted, sibling_casted)
+        return
+    }
+    public static removeChild(peer: RenderNode, node: RenderNode): void {
+        const peer_casted = peer as (RenderNode)
+        const node_casted = node as (RenderNode)
+        RenderNodeExtender.removeChild_serialize(peer_casted, node_casted)
+        return
+    }
+    public static clearChildren(peer: RenderNode): void {
+        const peer_casted = peer as (RenderNode)
+        RenderNodeExtender.clearChildren_serialize(peer_casted)
+        return
+    }
+    public static invalidate(peer: RenderNode): void {
+        const peer_casted = peer as (RenderNode)
+        RenderNodeExtender.invalidate_serialize(peer_casted)
+        return
     }
 }
 export class RenderServiceNode {
@@ -2522,13 +3290,24 @@ export class SystemOps {
         const returnResult : Array<number> = buffer
         return returnResult
     }
-    static resoureToLengthMetrics_serialize(res: Resource): LengthMetricsCustom {
+    static resourceToLengthMetrics_serialize(res: Resource): LengthMetricsCustom {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         Resource_serializer.write(thisSerializer, res)
-        const retval  = ArkUIGeneratedNativeModule._SystemOps_resoureToLengthMetrics(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._SystemOps_resourceToLengthMetrics(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : LengthMetricsCustom = LengthMetricsCustom_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static blendColorByColorMetrics_serialize(color: number, overlayColor: number): Array<number> {
+        const retval  = ArkUIGeneratedNativeModule._SystemOps_blendColorByColorMetrics(color, overlayColor)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<number> = new Array<number>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readNumber() as number)
+        }
+        const returnResult : Array<number> = buffer
         return returnResult
     }
     public static StartFrame(): KPointer {
@@ -2569,9 +3348,14 @@ export class SystemOps {
         const color_casted = color as (Resource)
         return SystemOps.colorMetricsResourceColor_serialize(color_casted)
     }
-    public static resoureToLengthMetrics(res: Resource): LengthMetricsCustom {
+    public static resourceToLengthMetrics(res: Resource): LengthMetricsCustom {
         const res_casted = res as (Resource)
-        return SystemOps.resoureToLengthMetrics_serialize(res_casted)
+        return SystemOps.resourceToLengthMetrics_serialize(res_casted)
+    }
+    public static blendColorByColorMetrics(color: number, overlayColor: number): Array<number> {
+        const color_casted = color as (number)
+        const overlayColor_casted = overlayColor as (number)
+        return SystemOps.blendColorByColorMetrics_serialize(color_casted, overlayColor_casted)
     }
 }
 export class UIContextAtomicServiceBar {
@@ -2893,6 +3677,24 @@ export interface IndicatorStyle {
 }
 export type CustomNodeBuilder = (parentNode: KPointer) => KPointer;
 export type NavExtender_OnUpdateStack = () => void;
+export interface BorderRadiuses_graphics {
+    topLeft: number;
+    topRight: number;
+    bottomLeft: number;
+    bottomRight: number;
+}
+export interface NodeEdgeStyles {
+    top: BorderStyle;
+    right: BorderStyle;
+    bottom: BorderStyle;
+    left: BorderStyle;
+}
+export interface EdgeNumber {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+}
 export interface Root {
     attributeModifier(value: AttributeModifier<Root> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
@@ -3079,6 +3881,28 @@ export class CustomDialogControllerExtender_serializer {
         return CustomDialogControllerExtenderInternal.fromPtr(ptr)
     }
 }
+export class NodeEdgeStyles_serializer {
+    public static write(buffer: SerializerBase, value: NodeEdgeStyles): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForTop  = value.top
+        valueSerializer.writeInt32(valueHolderForTop.valueOf())
+        const valueHolderForRight  = value.right
+        valueSerializer.writeInt32(valueHolderForRight.valueOf())
+        const valueHolderForBottom  = value.bottom
+        valueSerializer.writeInt32(valueHolderForBottom.valueOf())
+        const valueHolderForLeft  = value.left
+        valueSerializer.writeInt32(valueHolderForLeft.valueOf())
+    }
+    public static read(buffer: DeserializerBase): NodeEdgeStyles {
+        let valueDeserializer : DeserializerBase = buffer
+        const topTmpResult : BorderStyle = BorderStyle.fromValue(valueDeserializer.readInt32())
+        const rightTmpResult : BorderStyle = BorderStyle.fromValue(valueDeserializer.readInt32())
+        const bottomTmpResult : BorderStyle = BorderStyle.fromValue(valueDeserializer.readInt32())
+        const leftTmpResult : BorderStyle = BorderStyle.fromValue(valueDeserializer.readInt32())
+        let value : NodeEdgeStyles = ({top: topTmpResult, right: rightTmpResult, bottom: bottomTmpResult, left: leftTmpResult} as NodeEdgeStyles)
+        return value
+    }
+}
 export class Offset_componentutils_serializer {
     public static write(buffer: SerializerBase, value: Offset_componentutils): void {
         let valueSerializer : SerializerBase = buffer
@@ -3165,6 +3989,19 @@ export class TranslateResult_serializer {
         const zTmpResult : number = (valueDeserializer.readNumber() as number)
         let value : TranslateResult = ({x: xTmpResult, y: yTmpResult, z: zTmpResult} as TranslateResult)
         return value
+    }
+}
+export class BorderRadiuses_graphics_serializer {
+    public static write(buffer: SerializerBase, value: BorderRadiuses_graphics): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForTopLeft  = value.topLeft
+        valueSerializer.writeNumber(valueHolderForTopLeft)
+        const valueHolderForTopRight  = value.topRight
+        valueSerializer.writeNumber(valueHolderForTopRight)
+        const valueHolderForBottomLeft  = value.bottomLeft
+        valueSerializer.writeNumber(valueHolderForBottomLeft)
+        const valueHolderForBottomRight  = value.bottomRight
+        valueSerializer.writeNumber(valueHolderForBottomRight)
     }
 }
 export class BuilderNodeOptions_serializer {
@@ -3342,6 +4179,28 @@ export class DoubleAnimationParam_serializer {
         }
         const onFinishTmpResult : Callback_Extender_OnFinish | undefined = onFinishTmpBuf
         let value : DoubleAnimationParam = ({propertyName: propertyNameTmpResult, startValue: startValueTmpResult, endValue: endValueTmpResult, duration: durationTmpResult, delay: delayTmpResult, curve: curveTmpResult, onProgress: onProgressTmpResult, onFinish: onFinishTmpResult} as DoubleAnimationParam)
+        return value
+    }
+}
+export class EdgeNumber_serializer {
+    public static write(buffer: SerializerBase, value: EdgeNumber): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForTop  = value.top
+        valueSerializer.writeNumber(valueHolderForTop)
+        const valueHolderForRight  = value.right
+        valueSerializer.writeNumber(valueHolderForRight)
+        const valueHolderForBottom  = value.bottom
+        valueSerializer.writeNumber(valueHolderForBottom)
+        const valueHolderForLeft  = value.left
+        valueSerializer.writeNumber(valueHolderForLeft)
+    }
+    public static read(buffer: DeserializerBase): EdgeNumber {
+        let valueDeserializer : DeserializerBase = buffer
+        const topTmpResult : number = (valueDeserializer.readNumber() as number)
+        const rightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const bottomTmpResult : number = (valueDeserializer.readNumber() as number)
+        const leftTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : EdgeNumber = ({top: topTmpResult, right: rightTmpResult, bottom: bottomTmpResult, left: leftTmpResult} as EdgeNumber)
         return value
     }
 }
@@ -3702,7 +4561,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             if (valueHolderForMaskColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForMaskColorTmpValueForIdx0  = valueHolderForMaskColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForMaskColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForMaskColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForMaskColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForMaskColorTmpValueForIdx1  = valueHolderForMaskColorTmpValue as number
@@ -3758,7 +4617,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
@@ -3897,7 +4756,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 if (valueHolderForBorderColorTmpValueForIdx0 instanceof Color) {
                     valueSerializer.writeInt8((0).toChar())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
-                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.valueOf())
+                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
                     valueSerializer.writeInt8((1).toChar())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
@@ -4147,7 +5006,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             const maskColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let maskColorTmpBuf_ : Color | number | string | Resource | undefined
             if (maskColorTmpBuf_UnionSelector == (0).toChar()) {
-                maskColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                maskColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (maskColorTmpBuf_UnionSelector == (1).toChar()) {
                 maskColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (maskColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -4190,7 +5049,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -4322,7 +5181,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 const borderColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let borderColorTmpBuf_BufU : Color | number | string | Resource | undefined
                 if (borderColorTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    borderColorTmpBuf_BufU = Color.fromValue(valueDeserializer.readInt32())
+                    borderColorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (borderColorTmpBuf_BufUUnionSelector == (1).toChar()) {
                     borderColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
                 } else if (borderColorTmpBuf_BufUUnionSelector == (2).toChar()) {

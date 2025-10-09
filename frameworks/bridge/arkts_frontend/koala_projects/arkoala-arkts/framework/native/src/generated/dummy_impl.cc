@@ -3401,7 +3401,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetTransformImpl(Ark_NativePointer node,
-                          const Opt_Object* value)
+                          const Opt_matrix4_Matrix4Transit* value)
     {
         if (!needGroupedLog(1))
         {
@@ -9637,18 +9637,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetNavDestinationImpl(Ark_NativePointer node,
-                               const Opt_PageMapBuilder* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setNavDestination(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void SetCustomNavContentTransitionImpl(Ark_NativePointer node,
                                            const Opt_Type_NavigationAttribute_customNavContentTransition* value)
     {
@@ -12317,7 +12305,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnSubmitImpl(Ark_NativePointer node,
-                         const Opt_Union_Callback_String_Void_SearchSubmitCallback* value)
+                         const Opt_SearchSubmitCallback* value)
     {
         if (!needGroupedLog(1))
         {
@@ -14642,6 +14630,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetAutoPlay0Impl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setAutoPlay0(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetIntervalImpl(Ark_NativePointer node,
                          const Opt_Number* value)
     {
@@ -14918,15 +14918,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetAutoPlayImpl(Ark_NativePointer node,
-                         const Opt_Boolean* autoPlay,
-                         const Opt_AutoPlayOptions* options)
+    void SetAutoPlay1Impl(Ark_NativePointer node,
+                          const Opt_Boolean* autoPlay,
+                          const Opt_AutoPlayOptions* options)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setAutoPlay(");
+        string out("setAutoPlay1(");
         WriteToString(&out, autoPlay);
         out.append(", ");
         WriteToString(&out, options);
@@ -15102,6 +15102,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetSymbolEffect0Impl(Ark_NativePointer node,
+                              const Opt_SymbolEffect* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSymbolEffect0(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetMinFontScaleImpl(Ark_NativePointer node,
                              const Opt_Union_F64_Resource* value)
     {
@@ -15126,15 +15138,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetSymbolEffectImpl(Ark_NativePointer node,
-                             const Opt_SymbolEffect* symbolEffect,
-                             const Opt_Union_Boolean_I32* triggerValue)
+    void SetSymbolEffect1Impl(Ark_NativePointer node,
+                              const Opt_SymbolEffect* symbolEffect,
+                              const Opt_Boolean* isActive)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setSymbolEffect(");
+        string out("setSymbolEffect1(");
+        WriteToString(&out, symbolEffect);
+        out.append(", ");
+        WriteToString(&out, isActive);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetSymbolEffect2Impl(Ark_NativePointer node,
+                              const Opt_SymbolEffect* symbolEffect,
+                              const Opt_Int32* triggerValue)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSymbolEffect2(");
         WriteToString(&out, symbolEffect);
         out.append(", ");
         WriteToString(&out, triggerValue);
@@ -16456,7 +16483,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnSubmitImpl(Ark_NativePointer node,
-                         const Opt_Union_Callback_EnterKeyType_Void_TextAreaSubmitCallback* value)
+                         const Opt_TextAreaSubmitCallback* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17111,7 +17138,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_Number_FontWeight_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17409,7 +17436,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17684,14 +17711,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetCancelButtonImpl(Ark_NativePointer node,
-                             const Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
+    void SetCancelButton0Impl(Ark_NativePointer node,
+                              const Opt_CancelButtonOptions* value)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setCancelButton(");
+        string out("setCancelButton0(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetCancelButton1Impl(Ark_NativePointer node,
+                              const Opt_CancelButtonSymbolOptions* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setCancelButton1(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -21916,7 +21955,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavigationAttributeModifier::SetOnTitleModeChangeImpl,
             NavigationAttributeModifier::SetOnNavBarStateChangeImpl,
             NavigationAttributeModifier::SetOnNavigationModeChangeImpl,
-            NavigationAttributeModifier::SetNavDestinationImpl,
             NavigationAttributeModifier::SetCustomNavContentTransitionImpl,
             NavigationAttributeModifier::SetSystemBarStyleImpl,
             NavigationAttributeModifier::SetRecoverableImpl,
@@ -22558,6 +22596,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SwiperModifier::ConstructImpl,
             SwiperInterfaceModifier::SetSwiperOptionsImpl,
             SwiperAttributeModifier::SetIndexImpl,
+            SwiperAttributeModifier::SetAutoPlay0Impl,
             SwiperAttributeModifier::SetIntervalImpl,
             SwiperAttributeModifier::SetIndicatorImpl,
             SwiperAttributeModifier::SetLoopImpl,
@@ -22581,7 +22620,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SwiperAttributeModifier::SetIndicatorInteractiveImpl,
             SwiperAttributeModifier::SetPageFlipModeImpl,
             SwiperAttributeModifier::SetOnContentWillScrollImpl,
-            SwiperAttributeModifier::SetAutoPlayImpl,
+            SwiperAttributeModifier::SetAutoPlay1Impl,
             SwiperAttributeModifier::SetDisplayArrowImpl,
             SwiperAttributeModifier::SetCachedCount1Impl,
             SwiperAttributeModifier::SetDisplayCountImpl,
@@ -22601,9 +22640,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SymbolGlyphAttributeModifier::SetFontWeightImpl,
             SymbolGlyphAttributeModifier::SetEffectStrategyImpl,
             SymbolGlyphAttributeModifier::SetRenderingStrategyImpl,
+            SymbolGlyphAttributeModifier::SetSymbolEffect0Impl,
             SymbolGlyphAttributeModifier::SetMinFontScaleImpl,
             SymbolGlyphAttributeModifier::SetMaxFontScaleImpl,
-            SymbolGlyphAttributeModifier::SetSymbolEffectImpl,
+            SymbolGlyphAttributeModifier::SetSymbolEffect1Impl,
+            SymbolGlyphAttributeModifier::SetSymbolEffect2Impl,
         };
         return &ArkUISymbolGlyphModifierImpl;
     }
@@ -22856,7 +22897,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextInputAttributeModifier::SetMaxLinesImpl,
             TextInputAttributeModifier::SetWordBreakImpl,
             TextInputAttributeModifier::SetLineBreakStrategyImpl,
-            TextInputAttributeModifier::SetCancelButtonImpl,
+            TextInputAttributeModifier::SetCancelButton0Impl,
+            TextInputAttributeModifier::SetCancelButton1Impl,
             TextInputAttributeModifier::SetSelectAllImpl,
             TextInputAttributeModifier::SetMinFontSizeImpl,
             TextInputAttributeModifier::SetMaxFontSizeImpl,
@@ -25964,7 +26006,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Union_String_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
+    Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
     {
         if (!needGroupedLog(1))
         {
@@ -25977,7 +26019,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetFillStyleImpl(Ark_CanvasRenderer peer,
-                          const Ark_Union_String_I32_CanvasGradient_CanvasPattern* fillStyle)
+                          const Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern* fillStyle)
     {
         if (!needGroupedLog(1))
         {
@@ -25988,7 +26030,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Union_String_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
+    Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
     {
         if (!needGroupedLog(1))
         {
@@ -26001,7 +26043,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
-                            const Ark_Union_String_I32_CanvasGradient_CanvasPattern* strokeStyle)
+                            const Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern* strokeStyle)
     {
         if (!needGroupedLog(1))
         {
@@ -27864,51 +27906,51 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_CustomSpanMeasureInfo_CustomSpanMetrics GetOnMeasureImpl(Ark_CustomSpan peer)
+    Callback_CustomSpanMeasureInfo_CustomSpanMetrics GetOnMeasure_callbackImpl(Ark_CustomSpan peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
-        string out("getOnMeasure(");
+        string out("getOnMeasure_callback(");
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    void SetOnMeasureImpl(Ark_CustomSpan peer,
-                          const Callback_CustomSpanMeasureInfo_CustomSpanMetrics* onMeasure)
+    void SetOnMeasure_callbackImpl(Ark_CustomSpan peer,
+                                   const Callback_CustomSpanMeasureInfo_CustomSpanMetrics* onMeasure_callback)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setOnMeasure(");
-        WriteToString(&out, onMeasure);
+        string out("setOnMeasure_callback(");
+        WriteToString(&out, onMeasure_callback);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_DrawContext_CustomSpanDrawInfo_Void GetOnDrawImpl(Ark_CustomSpan peer)
+    Callback_DrawContext_CustomSpanDrawInfo_Void GetOnDraw_callbackImpl(Ark_CustomSpan peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
-        string out("getOnDraw(");
+        string out("getOnDraw_callback(");
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    void SetOnDrawImpl(Ark_CustomSpan peer,
-                       const Callback_DrawContext_CustomSpanDrawInfo_Void* onDraw)
+    void SetOnDraw_callbackImpl(Ark_CustomSpan peer,
+                                const Callback_DrawContext_CustomSpanDrawInfo_Void* onDraw_callback)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setOnDraw(");
-        WriteToString(&out, onDraw);
+        string out("setOnDraw_callback(");
+        WriteToString(&out, onDraw_callback);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -29556,19 +29598,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
-                                     Ark_Boolean options)
+    Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
+                                            Ark_Boolean options)
     {
         if (!needGroupedLog(1))
         {
-            return;
+            return 0;
         }
         string out("setCrossLanguageOptions(");
         WriteToString(&out, peer);
         out.append(", ");
         WriteToString(&out, options);
         out.append(") \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
+        return 0;
     }
     Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
     {
@@ -30706,7 +30750,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // GlobalScope_ohos_arkui_performanceMonitorAccessor
     namespace GlobalScope_ohos_fontAccessor {
-    void RegisterFontImpl(const Ark_CustomObject* options)
+    void RegisterFontImpl(const Ark_font_FontOptions* options)
     {
         if (!needGroupedLog(1))
         {
@@ -30729,7 +30773,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_CustomObject GetFontByNameImpl(const Ark_String* fontName)
+    Ark_font_FontInfo GetFontByNameImpl(const Ark_String* fontName)
     {
         if (!needGroupedLog(1))
         {
@@ -30737,6 +30781,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         string out("getFontByName(");
         WriteToString(&out, fontName);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_font_UIFontConfig GetUIFontConfigImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getUIFontConfig(");
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
@@ -30771,6 +30827,45 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // GlobalScope_ohos_measure_utilsAccessor
+    namespace GlobalScopeUicontextFontScaleAccessor {
+    Ark_Boolean IsFollowingSystemFontScaleImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("isFollowingSystemFontScale(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Float64 GetMaxFontScaleImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("getMaxFontScale(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    } // GlobalScopeUicontextFontScaleAccessor
+    namespace GlobalScopeUicontextTextMenuAccessor {
+    void SetMenuOptionsImpl(const Ark_TextMenuOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setMenuOptions(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // GlobalScopeUicontextTextMenuAccessor
     namespace HierarchicalSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_HierarchicalSymbolEffect peer)
     {
@@ -31170,7 +31265,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_ImageAttachment ConstructImpl(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value)
+    Ark_ImageAttachment ConstructImpl(const Opt_AttachmentType* value)
     {
         if (!needGroupedLog(1))
         {
@@ -39232,7 +39327,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void ChangeIndexImpl(Ark_SwiperController peer,
-                         const Ark_Number* index,
+                         const Opt_Number* index,
                          const Opt_Union_SwiperAnimationMode_Boolean* animationMode)
     {
         if (!needGroupedLog(1))
@@ -39476,13 +39571,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_LengthMetricsCustom ResoureToLengthMetricsImpl(const Ark_Resource* res)
+    Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
-        string out("resoureToLengthMetrics(");
+        string out("resourceToLengthMetrics(");
         WriteToString(&out, res);
         out.append(") \n");
         out.append("[return {}] \n");
@@ -43963,10 +44058,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CustomSpanAccessor::ConstructImpl,
             CustomSpanAccessor::GetFinalizerImpl,
             CustomSpanAccessor::InvalidateImpl,
-            CustomSpanAccessor::GetOnMeasureImpl,
-            CustomSpanAccessor::SetOnMeasureImpl,
-            CustomSpanAccessor::GetOnDrawImpl,
-            CustomSpanAccessor::SetOnDrawImpl,
+            CustomSpanAccessor::GetOnMeasure_callbackImpl,
+            CustomSpanAccessor::SetOnMeasure_callbackImpl,
+            CustomSpanAccessor::GetOnDraw_callbackImpl,
+            CustomSpanAccessor::SetOnDraw_callbackImpl,
         };
         return &CustomSpanAccessorImpl;
     }
@@ -44108,6 +44203,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DrawingRenderingContextAccessor::InvalidateImpl,
             DrawingRenderingContextAccessor::GetSizeImpl,
             DrawingRenderingContextAccessor::SetSizeImpl,
+            DrawingRenderingContextAccessor::GetCanvasImpl,
+            DrawingRenderingContextAccessor::SetCanvasImpl,
         };
         return &DrawingRenderingContextAccessorImpl;
     }
@@ -44476,6 +44573,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_fontAccessor::RegisterFontImpl,
             GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
             GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
+            GlobalScope_ohos_fontAccessor::GetUIFontConfigImpl,
         };
         return &GlobalScope_ohos_fontAccessorImpl;
     }
@@ -44487,6 +44585,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_measure_utilsAccessor::MeasureTextSizeImpl,
         };
         return &GlobalScope_ohos_measure_utilsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicontextFontScaleAccessor()
+    {
+        static const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor GlobalScopeUicontextFontScaleAccessorImpl {
+            GlobalScopeUicontextFontScaleAccessor::IsFollowingSystemFontScaleImpl,
+            GlobalScopeUicontextFontScaleAccessor::GetMaxFontScaleImpl,
+        };
+        return &GlobalScopeUicontextFontScaleAccessorImpl;
+    }
+
+    const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* GetGlobalScopeUicontextTextMenuAccessor()
+    {
+        static const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor GlobalScopeUicontextTextMenuAccessorImpl {
+            GlobalScopeUicontextTextMenuAccessor::SetMenuOptionsImpl,
+        };
+        return &GlobalScopeUicontextTextMenuAccessorImpl;
     }
 
     const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor()
@@ -45968,7 +46083,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SystemOpsAccessor::ResourceManagerResetImpl,
             SystemOpsAccessor::SetFrameCallbackImpl,
             SystemOpsAccessor::ColorMetricsResourceColorImpl,
-            SystemOpsAccessor::ResoureToLengthMetricsImpl,
+            SystemOpsAccessor::ResourceToLengthMetricsImpl,
         };
         return &SystemOpsAccessorImpl;
     }
@@ -46703,6 +46818,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
             GetGlobalScope_ohos_fontAccessor,
             GetGlobalScope_ohos_measure_utilsAccessor,
+            GetGlobalScopeUicontextFontScaleAccessor,
+            GetGlobalScopeUicontextTextMenuAccessor,
             GetHierarchicalSymbolEffectAccessor,
             GetHoverEventAccessor,
             GetHttpAuthHandlerAccessor,

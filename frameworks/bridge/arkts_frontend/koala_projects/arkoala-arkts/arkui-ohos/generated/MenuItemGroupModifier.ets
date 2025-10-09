@@ -29,11 +29,11 @@ export class MenuItemGroupModifier extends CommonMethodModifier implements MenuI
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: MenuItemGroupAttribute): void { }
+    applyPressedAttribute(instance: MenuItemGroupAttribute): void { }
+    applyFocusedAttribute(instance: MenuItemGroupAttribute): void { }
+    applyDisabledAttribute(instance: MenuItemGroupAttribute): void { }
+    applySelectedAttribute(instance: MenuItemGroupAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkMenuItemGroupPeer;

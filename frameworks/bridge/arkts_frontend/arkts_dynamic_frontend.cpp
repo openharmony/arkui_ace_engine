@@ -47,8 +47,8 @@ struct AppInfo {
 const AppInfo KOALA_APP_INFO = {
     "arkui.ArkUIEntry.Application",
     "createApplication",
-    "C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}C{arkui.UserView.EntryPoint}"
-    ":C{arkui.ArkUIEntry.Application}",
+    "C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}"
+    "C{arkui.component.customComponent.EntryPoint}:C{arkui.ArkUIEntry.Application}",
     "start",
     ":l",
     "enter",

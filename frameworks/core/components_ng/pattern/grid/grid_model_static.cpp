@@ -61,7 +61,7 @@ void GridModelStatic::SetRowsTemplate(FrameNode* frameNode, const std::string& r
 void GridModelStatic::SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollBarUpdate(std::move(value));
 }
@@ -69,7 +69,7 @@ void GridModelStatic::SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdate
 void GridModelStatic::SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
@@ -224,7 +224,7 @@ void GridModelStatic::SetOnItemDragStart(
     FrameNode* frameNode, std::function<void(const ItemDragInfo&, int32_t)>&& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragStart = [func = std::move(value)](const ItemDragInfo& dragInfo, int32_t index) -> RefPtr<UINode> {
         ScopedViewStackProcessor builderViewStackProcessor;
@@ -245,7 +245,7 @@ void GridModelStatic::SetOnItemDragStart(
 void GridModelStatic::SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragEnter(std::move(value));
 
@@ -255,7 +255,7 @@ void GridModelStatic::SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc
 void GridModelStatic::SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragMove(std::move(value));
 
@@ -265,7 +265,7 @@ void GridModelStatic::SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&&
 void GridModelStatic::SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragLeave(std::move(value));
 
@@ -275,7 +275,7 @@ void GridModelStatic::SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc
 void GridModelStatic::SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDrop(std::move(value));
 
@@ -311,7 +311,7 @@ void GridModelStatic::AddDragFrameNodeToManagerMultiThread(FrameNode* frameNode)
 void GridModelStatic::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
 }
@@ -319,7 +319,7 @@ void GridModelStatic::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameB
 void GridModelStatic::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachStart(std::move(onReachStart));
 }
@@ -327,7 +327,7 @@ void GridModelStatic::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onRea
 void GridModelStatic::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachEnd(std::move(onReachEnd));
 }
@@ -335,7 +335,7 @@ void GridModelStatic::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReach
 void GridModelStatic::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStart(std::move(onScrollStart));
 }
@@ -343,7 +343,7 @@ void GridModelStatic::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&
 void GridModelStatic::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
@@ -390,7 +390,7 @@ RefPtr<ScrollProxy> GridModelStatic::GetOrCreateScrollBarProxy(FrameNode* frameN
 void GridModelStatic::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScroll(std::move(onScroll));
 }

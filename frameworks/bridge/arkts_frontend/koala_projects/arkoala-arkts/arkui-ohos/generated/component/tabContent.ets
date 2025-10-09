@@ -430,7 +430,7 @@ export class TabBarIconStyle_serializer {
             if (valueHolderForSelectedColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForSelectedColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as number
@@ -454,7 +454,7 @@ export class TabBarIconStyle_serializer {
             if (valueHolderForUnselectedColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
@@ -480,7 +480,7 @@ export class TabBarIconStyle_serializer {
             const selectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let selectedColorTmpBuf_ : Color | number | string | Resource | undefined
             if (selectedColorTmpBuf_UnionSelector == (0).toChar()) {
-                selectedColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                selectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (selectedColorTmpBuf_UnionSelector == (1).toChar()) {
                 selectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (selectedColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -499,7 +499,7 @@ export class TabBarIconStyle_serializer {
             const unselectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let unselectedColorTmpBuf_ : Color | number | string | Resource | undefined
             if (unselectedColorTmpBuf_UnionSelector == (0).toChar()) {
-                unselectedColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                unselectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (unselectedColorTmpBuf_UnionSelector == (1).toChar()) {
                 unselectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (unselectedColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -645,7 +645,7 @@ export class SubTabBarIndicatorStyle_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -751,7 +751,7 @@ export class SubTabBarIndicatorStyle_serializer {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let colorTmpBuf_ : Color | number | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
@@ -926,7 +926,7 @@ export class TabBarLabelStyle_serializer {
             if (valueHolderForSelectedColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForSelectedColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as number
@@ -950,7 +950,7 @@ export class TabBarLabelStyle_serializer {
             if (valueHolderForUnselectedColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
@@ -1048,7 +1048,7 @@ export class TabBarLabelStyle_serializer {
             const selectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let selectedColorTmpBuf_ : Color | number | string | Resource | undefined
             if (selectedColorTmpBuf_UnionSelector == (0).toChar()) {
-                selectedColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                selectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (selectedColorTmpBuf_UnionSelector == (1).toChar()) {
                 selectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (selectedColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -1067,7 +1067,7 @@ export class TabBarLabelStyle_serializer {
             const unselectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let unselectedColorTmpBuf_ : Color | number | string | Resource | undefined
             if (unselectedColorTmpBuf_UnionSelector == (0).toChar()) {
-                unselectedColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                unselectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (unselectedColorTmpBuf_UnionSelector == (1).toChar()) {
                 unselectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (unselectedColorTmpBuf_UnionSelector == (2).toChar()) {

@@ -19,10 +19,10 @@ import {
     MutableState,
     rememberDisposable,
     StateManagerImpl,
-    StateContext,
     GlobalStateManager,
     StateToScopes,
 } from '@koalaui/runtime';
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { MemoState } from './memorize/state';
 
 export class CascadeMemoState<Value> implements MemoState<Value> {
@@ -59,7 +59,7 @@ export function memorizeUpdatedState<T>(factory: () => T): MemoState<T> {
     return memoize<CascadeMemoState<T>>(() => {
         const receiver = rememberDisposable<CascadeMemoState<T>>(
             () => {
-                return new CascadeMemoState<T>(__context());
+                return new CascadeMemoState<T>(__context() as StateContext);
             },
             (state: CascadeMemoState<T> | undefined) => {
                 state?.dispose();

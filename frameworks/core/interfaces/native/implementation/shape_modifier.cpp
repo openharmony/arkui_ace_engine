@@ -28,6 +28,21 @@
 
 static const double STROKE_MITER_LIMIT_MIN_VALUE = 1.0;
 
+namespace {
+OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> ConvertPixelMap(const Opt_image_PixelMap* value)
+{
+    CHECK_NULL_RETURN(value, nullptr);
+    CHECK_EQUAL_RETURN(value->tag, InteropTag::INTEROP_TAG_UNDEFINED, nullptr);
+    auto arkPixelMap = value->value;
+    CHECK_NULL_RETURN(arkPixelMap, nullptr);
+#if defined(PIXEL_MAP_SUPPORTED)
+    return arkPixelMap->pixelMap;
+#else
+    return nullptr;
+#endif
+}
+} // namespace
+
 namespace OHOS::Ace::NG {
 struct ShapeOptions {
     std::optional<Dimension> x;
@@ -68,8 +83,7 @@ void SetShapeOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetFocusable(frameNode, true);
-    RefPtr<PixelMap> pixelMap;
-    ShapeModelStatic::InitBox(frameNode, pixelMap);
+    ShapeModelStatic::InitBox(frameNode, ConvertPixelMap(value));
 }
 } // ShapeInterfaceModifier
 namespace ShapeAttributeModifier {
@@ -94,7 +108,7 @@ void SetFillImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ShapeModelStatic::SetFill(frameNode, Converter::OptConvertPtr<Color>(value));
+    ShapeModelStatic::SetFill(frameNode, Converter::OptConvertPtr<Color>(value).value_or(Color::BLACK));
 }
 void SetStrokeDashOffsetImpl(Ark_NativePointer node,
                              const Opt_Union_F64_String* value)
@@ -190,7 +204,7 @@ void SetAntiAliasImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        ShapeModelNG::SetAntiAlias(frameNode, false);
+        ShapeModelNG::SetAntiAlias(frameNode, true);
         return;
     }
     ShapeModelNG::SetAntiAlias(frameNode, *convValue);
@@ -207,7 +221,7 @@ void SetMeshImpl(Ark_NativePointer node,
     auto columnValue = Converter::OptConvertPtr<int32_t>(column).value_or(0);
     auto rowValue = Converter::OptConvertPtr<int32_t>(row).value_or(0);
     auto meshSize = mesh->size();
-    auto tempMeshSize = static_cast<int64_t>(columnValue + 1) * (rowValue + 1) * 2;
+    auto tempMeshSize = static_cast<size_t>(columnValue + 1) * static_cast<size_t>(rowValue + 1) * 2;
     if (tempMeshSize != meshSize) {
         ShapeModelNG::SetBitmapMesh(frameNode, std::move(*mesh), 0, 0);
         return;

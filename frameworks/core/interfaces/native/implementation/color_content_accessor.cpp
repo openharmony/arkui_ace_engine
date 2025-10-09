@@ -17,14 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+#include "core/interfaces/native/implementation/color_content_peer.h"
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColorContentAccessor {
 void DestroyPeerImpl(Ark_ColorContent peer)
 {
+    if (peer) {
+        delete peer;
+        peer = nullptr;
+    }
 }
 Ark_ColorContent ConstructImpl()
 {
-    return {};
+    return new ColorContentPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,7 +38,9 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_ColorContent GetORIGINImpl()
 {
-    return {};
+    auto peer = ConstructImpl();
+    peer->content = "ORIGIN";
+    return peer;
 }
 } // ColorContentAccessor
 const GENERATED_ArkUIColorContentAccessor* GetColorContentAccessor()

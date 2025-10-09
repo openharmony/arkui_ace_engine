@@ -87,7 +87,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
             currentTextRectOffsetX += textFieldOffset.GetX();
             currentTextRectOffsetY += textFieldOffset.GetY();
         }
-        auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
+        auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
         eventHub->FireOnScrollChangeEvent(currentTextRectOffsetX, currentTextRectOffsetY);
     }
     textFieldContentModifier_->SetContentOffset(contentOffset);

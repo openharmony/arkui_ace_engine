@@ -400,19 +400,26 @@ void DisposeTreeImpl(Ark_FrameNode peer)
         parent->RemoveChild(frameNode);
     }
 }
-void SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
-                                 Ark_Boolean options)
+Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer, Ark_Boolean options)
 {
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
-    CHECK_NULL_VOID(frameNode);
-    static const std::vector<const char*> nodeTypeArray = {
-        OHOS::Ace::V2::SCROLL_ETS_TAG,
-    };
+    CHECK_NULL_RETURN(frameNode, false);
+    static const std::vector<const char*> nodeTypeArray = { OHOS::Ace::V2::SCROLL_ETS_TAG,
+        OHOS::Ace::V2::SWIPER_ETS_TAG, OHOS::Ace::V2::LIST_ETS_TAG, OHOS::Ace::V2::LIST_ITEM_ETS_TAG,
+        OHOS::Ace::V2::LIST_ITEM_GROUP_ETS_TAG, OHOS::Ace::V2::WATERFLOW_ETS_TAG, OHOS::Ace::V2::FLOW_ITEM_ETS_TAG,
+        OHOS::Ace::V2::GRID_ETS_TAG, OHOS::Ace::V2::GRID_ITEM_ETS_TAG, OHOS::Ace::V2::TEXT_ETS_TAG,
+        OHOS::Ace::V2::TEXTINPUT_ETS_TAG, OHOS::Ace::V2::TEXTAREA_ETS_TAG, OHOS::Ace::V2::COLUMN_ETS_TAG,
+        OHOS::Ace::V2::ROW_ETS_TAG, OHOS::Ace::V2::STACK_ETS_TAG, OHOS::Ace::V2::FLEX_ETS_TAG,
+        OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG, OHOS::Ace::V2::PROGRESS_ETS_TAG,
+        OHOS::Ace::V2::LOADING_PROGRESS_ETS_TAG, OHOS::Ace::V2::IMAGE_ETS_TAG, OHOS::Ace::V2::BUTTON_ETS_TAG,
+        OHOS::Ace::V2::CHECKBOX_ETS_TAG, OHOS::Ace::V2::RADIO_ETS_TAG, OHOS::Ace::V2::SLIDER_ETS_TAG,
+        OHOS::Ace::V2::TOGGLE_ETS_TAG, OHOS::Ace::V2::XCOMPONENT_ETS_TAG };
     auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), frameNode->GetTag());
     if (pos == nodeTypeArray.end()) {
-        return;
+        return false;
     }
     frameNode->SetIsCrossLanguageAttributeSetting(options);
+    return true;
 }
 Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
 {
@@ -437,10 +444,6 @@ void SetLayoutPositionImpl(Ark_FrameNode peer,
     CHECK_NULL_VOID(position);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
-    // auto xValue = Converter::Convert<OHOS::Ace::Dimension>(position->x.value);
-    // auto yValue = Converter::Convert<OHOS::Ace::Dimension>(position->y.value);
-    // peerNode->GetGeometryNode()->SetMarginFrameOffsetX(xValue.Value());
-    // peerNode->GetGeometryNode()->SetMarginFrameOffsetY(yValue.Value());
 }
 void MeasureImpl(Ark_FrameNode peer,
                  const Ark_LayoutConstraint* constraint)
@@ -487,11 +490,6 @@ void LayoutImpl(Ark_FrameNode peer,
     CHECK_NULL_VOID(position);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
-    // auto xValue = Converter::Convert<Dimension>(position->x.value);
-    // auto yValue = Converter::Convert<Dimension>(position->y.value);
-    // peerNode->SetActive(true);
-    // peerNode->GetGeometryNode()->SetMarginFrameOffsetX(xValue.Value());
-    // peerNode->GetGeometryNode()->SetMarginFrameOffsetY(yValue.Value());
     peerNode->Layout();
 }
 void SetNeedsLayoutImpl(Ark_FrameNode peer)
@@ -783,6 +781,13 @@ Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
     ret->node = peer->node;
     return ret;
 }
+Ark_NativePointer GetRenderNodeImpl(Ark_NativePointer peer)
+{
+    auto nodePeer = reinterpret_cast<FrameNodePeer*>(peer);
+    // auto currentNode = FrameNodePeer::GetFrameNodeByPeer(nodePeer);
+    // CHECK_NULL_RETURN(currentNode, nullptr);
+    return nodePeer->GetRenderNodePeer();
+}
 } // FrameNodeExtenderAccessor
 const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
 {
@@ -842,6 +847,7 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::CreateByRawPtrImpl,
         FrameNodeExtenderAccessor::UnWrapRawPtrImpl,
         FrameNodeExtenderAccessor::GetCommonEventImpl,
+        FrameNodeExtenderAccessor::GetRenderNodeImpl,
     };
     return &FrameNodeExtenderAccessorImpl;
 }

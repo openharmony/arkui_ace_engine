@@ -44,7 +44,8 @@ OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
     Converter::VisitUnion(src.leadingMargin,
         [&ret](const Ark_LengthMetrics& metrics) {
             LeadingMargin margin;
-            margin.size = LeadingMarginSize(metrics->value, metrics->value);
+            margin.size = LeadingMarginSize(OptConvert<Dimension>(metrics).value_or(Dimension()),
+                OptConvert<Dimension>(metrics).value_or(Dimension()));
             ret.leadingMargin = margin;
         },
         [&ret](const Ark_LeadingMarginPlaceholder& inMargin) {

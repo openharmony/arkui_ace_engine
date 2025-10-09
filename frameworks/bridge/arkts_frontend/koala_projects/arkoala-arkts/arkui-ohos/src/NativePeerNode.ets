@@ -18,6 +18,7 @@ import { pointer } from "@koalaui/interop"
 import { Finalizable } from "@koalaui/interop"
 import { ArkUINativeModule } from "#components"
 import { PeerNode } from "./PeerNode"
+import { ArkUIAniModule } from "arkui.ani"
 
 export class NativePeerNode extends Finalizable {
     constructor(peer: PeerNode, ptr: pointer) {
@@ -25,6 +26,7 @@ export class NativePeerNode extends Finalizable {
     }
 
     static create(peer: PeerNode, peerPtr: pointer, flags: int32): NativePeerNode {
+        ArkUIAniModule._UINode_SetStatic(peerPtr)
         return new NativePeerNode(peer, peerPtr)
     }
 

@@ -23,6 +23,13 @@
 #include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
 
 namespace OHOS::Ace::NG {
+void ListItemModelStatic::SetShallowBuilder(FrameNode* frameNode, const RefPtr<ShallowBuilder>& shallowBuilder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto frameNodePattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetShallowBuilder(std::move(shallowBuilder));
+}
 
 void ListItemModelStatic::SetSticky(FrameNode* frameNode, const std::optional<V2::StickyMode>& stickyMode)
 {
@@ -33,21 +40,29 @@ void ListItemModelStatic::SetSticky(FrameNode* frameNode, const std::optional<V2
     }
 }
 
-RefPtr<FrameNode> ListItemModelStatic::CreateFrameNode(int32_t nodeId, bool isCreateArc)
+RefPtr<FrameNode> ListItemModelStatic::CreateFrameNode(int32_t nodeId, bool isCreateArc, bool isDelayedDeepRenderFunc)
 {
-    if (isCreateArc) {
-        return FrameNode::CreateFrameNode(V2::ARC_LIST_ITEM_ETS_TAG, nodeId,
-            AceType::MakeRefPtr<ArcListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+    RefPtr<FrameNode> frameNode = nullptr;
+    if (isDelayedDeepRenderFunc) {
+        const char* tag = isCreateArc ? V2::ARC_LIST_ITEM_ETS_TAG : V2::LIST_ITEM_ETS_TAG;
+        if (!isCreateArc) {
+            frameNode = ScrollableItemPool::GetInstance().Allocate(tag, nodeId,
+                []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+        } else {
+            frameNode = ScrollableItemPool::GetInstance().Allocate(tag, nodeId,
+                []() { return AceType::MakeRefPtr<ArcListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+        }
+    } else {
+        frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+            []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
     }
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::LIST_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
     return frameNode;
 }
 
 void ListItemModelStatic::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(selectCallback));
 }
@@ -55,7 +70,7 @@ void ListItemModelStatic::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&&
 void ListItemModelStatic::SetSelectChangeEvent(FrameNode* frameNode, OnSelectFunc&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetSelectChangeEvent(std::move(changeEvent));
 }
@@ -88,7 +103,7 @@ void ListItemModelStatic::SetSelected(FrameNode* frameNode, bool selected)
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(selected);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
@@ -98,7 +113,7 @@ void ListItemModelStatic::SetDeleteArea(FrameNode* frameNode, UINode* buildNode,
     OnStateChangedEvent&& onStateChange, const std::optional<Dimension>& length, bool isStartArea)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -129,6 +144,7 @@ void ListItemModelStatic::SetDeleteArea(FrameNode* frameNode, UINode* buildNode,
             ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, frameNode);
         }
     }
+    pattern->SetDeleteArea();
 }
 
 void ListItemModelStatic::SetSwiperAction(FrameNode* frameNode, std::function<void()>&& startAction,

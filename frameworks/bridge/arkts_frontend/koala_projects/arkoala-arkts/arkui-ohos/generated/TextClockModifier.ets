@@ -33,11 +33,11 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: TextClockAttribute): void { }
+    applyPressedAttribute(instance: TextClockAttribute): void { }
+    applyFocusedAttribute(instance: TextClockAttribute): void { }
+    applyDisabledAttribute(instance: TextClockAttribute): void { }
+    applySelectedAttribute(instance: TextClockAttribute): void { }
     _format_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _format_0_0value?: ResourceStr | undefined
     _onDateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

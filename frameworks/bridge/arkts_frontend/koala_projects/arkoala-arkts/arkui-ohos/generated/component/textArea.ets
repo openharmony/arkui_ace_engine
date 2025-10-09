@@ -71,7 +71,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -135,7 +135,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -163,7 +163,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -319,7 +319,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -339,20 +339,12 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setSelectedBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnSubmitAttribute(value: ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined): void {
+    setOnSubmitAttribute(value: TextAreaSubmitCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof ((enterKey: EnterKeyType) => void)) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as ((enterKey: EnterKeyType) => void)
-                thisSerializer.holdAndWriteCallback(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof TextAreaSubmitCallback) {
-                thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as TextAreaSubmitCallback
-                thisSerializer.holdAndWriteCallback(valueTmpValueForIdx1)
-            }
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1053,7 +1045,7 @@ export interface TextAreaAttribute extends CommonMethod {
     selectedBackgroundColor(value: ResourceColor | undefined): this {
         throw new Error("Unimplemented method selectedBackgroundColor")
     }
-    onSubmit(value: ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined): this {
+    onSubmit(value: TextAreaSubmitCallback | undefined): this {
         throw new Error("Unimplemented method onSubmit")
     }
     onChange(value: EditableTextOnChangeCallback | undefined): this {
@@ -1210,7 +1202,7 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     textIndent_value?: Dimension | undefined
     caretStyle_value?: CaretStyle | undefined
     selectedBackgroundColor_value?: ResourceColor | undefined
-    onSubmit_value?: ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined
+    onSubmit_value?: TextAreaSubmitCallback | undefined
     onChange_value?: EditableTextOnChangeCallback | undefined
     onTextSelectionChange_value?: ((selectionStart: int32,selectionEnd: int32) => void) | undefined
     onContentScroll_value?: ((totalOffsetX: double,totalOffsetY: double) => void) | undefined
@@ -1299,7 +1291,7 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     selectedBackgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    onSubmit(value: ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined): this {
+    onSubmit(value: TextAreaSubmitCallback | undefined): this {
         return this
     }
     onChange(value: EditableTextOnChangeCallback | undefined): this {
@@ -1569,9 +1561,9 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
-    public onSubmit(value: ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined): this {
+    public onSubmit(value: TextAreaSubmitCallback | undefined): this {
         if (this.checkPriority("onSubmit")) {
-            const value_casted = value as (((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined)
+            const value_casted = value as (TextAreaSubmitCallback | undefined)
             this.getPeer()?.setOnSubmitAttribute(value_casted)
             return this
         }

@@ -131,7 +131,7 @@ HWTEST_F(RichEditorStyledStringControllerAccessorTest, DISABLED_onContentChanged
 
     peer_->SetPattern(weakPattern);
 
-    auto eventHub = frameNodeRaw->GetOrCreateEventHub<NG::RichEditorEventHub>();
+    auto eventHub = frameNodeRaw->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto onWillChangeCallback = [](const Ark_Int32 resourceId,

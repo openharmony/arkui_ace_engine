@@ -23,7 +23,7 @@ import { ContextRecord } from 'arkui/base/UIContextImpl';
 import { ExtendableComponent, IExtendableComponent } from './extendableComponent';
 import { GeometryInfo, Layoutable, Measurable, SizeResult } from './common';
 import { Theme } from '@ohos.arkui.theme';
-import { LocalStorage } from '@ohos.arkui.stateManagement';
+import { LocalStorage, StateUpdateLoop } from '@ohos.arkui.stateManagement';
 import { PeerNode } from '../PeerNode';
 import { UIContext } from '@ohos/arkui/UIContext';
 import promptAction from '@ohos/promptAction';
@@ -91,7 +91,7 @@ export interface PageLifeCycle {
     onNewParam(param: object | undefined | null): void {}
 }
 
-export interface LayoutCallback {
+export interface LayoutCallbacks {
     onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {}
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
         return {width: 0, height: 0} as SizeResult
@@ -112,7 +112,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     get isCustomLayout(): boolean {
-        return this.instance instanceof LayoutCallback;
+        return this.instance instanceof LayoutCallbacks;
     }
 
     __removeChildWhenDispose__IExtendableComponent_Internal(): void {
@@ -187,6 +187,26 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             throw new Error('not an entry custom component');
         }
     }
+    setActiveCount(active: boolean): void {
+        this.instance.isActive_ += active ? 1 : -1;
+        if (this.instance.isActive_ > 1) {
+            console.log(`activeCount_error: ${this.instance.isActive_}`);
+        }
+    }
+    isViewActive(): boolean {
+        return this.instance.isActive_ > 0;
+    }
+    setActiveInternal(active: boolean, isReuse: boolean): void {
+        this.setActiveCount(active);
+        if (this.isViewActive()) {
+            StateUpdateLoop.consumeFreezeTasks(this.getUniqueId());
+        }
+        const peer = this.getPeerNode() as PeerNode | undefined;
+        if (peer) {
+            peer.disabledStateUpdates = !this.isViewActive();
+        }
+        this.instance.propagateToChild(active, isReuse);
+    }
     pageTransition(): void {
         if (this.instance instanceof PageLifeCycle) {
             const page = this.instance as PageLifeCycle;
@@ -238,16 +258,16 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
 
     // Custom layout
     onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {
-        if (this.instance instanceof LayoutCallback) {
-            const layout = this.instance as LayoutCallback;
+        if (this.instance instanceof LayoutCallbacks) {
+            const layout = this.instance as LayoutCallbacks;
             layout.onPlaceChildren(selfLayoutInfo, children, constraint);
         } else {
             throw new Error('not a custom layout component');
         }
     }
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
-        if (this.instance instanceof LayoutCallback) {
-            const layout = this.instance as LayoutCallback;
+        if (this.instance instanceof LayoutCallbacks) {
+            const layout = this.instance as LayoutCallbacks;
             return layout.onMeasureSize(selfLayoutInfo, children, constraint);
         } else {
             throw new Error('not a custom layout component');
@@ -410,4 +430,23 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
     }
 
     aboutToReuse(): void {}
+}
+
+export class EntryPoint {
+    constructor() {}
+    /** @memo */
+    entry(): void {
+    }
+
+    public static RegisterNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface) {
+        
+    }
+}
+
+export interface NavInterface {
+    bundleName: string;
+    moduleName: string;
+    pagePath: string;
+    pageFullPath: string;
+    integratedHsp: string;
 }

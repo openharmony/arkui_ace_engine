@@ -15,7 +15,7 @@
 
 import { ArkBaseNode } from "./ArkBaseNode";
 import { ListItemGroupAttribute, ArkListItemGroupPeer, ListItemGroupOptions, ListDividerOptions,
-    ChildrenMainSize } from "../framework";
+    ChildrenMainSize, AttributeModifier, CommonMethod } from "../framework";
 export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -52,5 +52,8 @@ export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAt
         this.getPeer()?.setChildrenMainSizeAttribute(value_casted);
         this.markDirty()
         return this
+    }
+    attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
     }
 }

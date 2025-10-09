@@ -31,11 +31,11 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ScrollableCommonMethod): void { }
+    applyPressedAttribute(instance: ScrollableCommonMethod): void { }
+    applyFocusedAttribute(instance: ScrollableCommonMethod): void { }
+    applyDisabledAttribute(instance: ScrollableCommonMethod): void { }
+    applySelectedAttribute(instance: ScrollableCommonMethod): void { }
     _scrollBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBar_0_0value?: BarState | undefined
     _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -329,7 +329,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             switch (this._edgeEffect_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined), (this._edgeEffect_0_1value as EdgeEffectOptions | undefined));
+                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined), (this._edgeEffect_0_1value as EdgeEffectOptions | undefined | undefined));
                     this._edgeEffect_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -347,7 +347,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             switch (this._fadingEdge_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined), (this._fadingEdge_0_1value as FadingEdgeOptions | undefined));
+                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined), (this._fadingEdge_0_1value as FadingEdgeOptions | undefined | undefined));
                     this._fadingEdge_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

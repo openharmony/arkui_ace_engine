@@ -30,11 +30,11 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: CanvasAttribute): void { }
+    applyPressedAttribute(instance: CanvasAttribute): void { }
+    applyFocusedAttribute(instance: CanvasAttribute): void { }
+    applyDisabledAttribute(instance: CanvasAttribute): void { }
+    applySelectedAttribute(instance: CanvasAttribute): void { }
     _onReady_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onReady_0_0value?: VoidCallback | undefined
     _enableAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

@@ -91,9 +91,12 @@ public:
     template <typename... Params>
     void InvokeSync(Params&&... args) const
     {
-        APP_LOGE("InvokeSync %{public}p", callback_.callSync);
         if (callback_.callSync) {
-            (*callback_.callSync)(GetVMContext(), callback_.resource.resourceId, std::forward<Params>(args)...);
+            Ark_VMContext vmContext = GetVMContext();
+            if (vmContext == nullptr) {
+                LOGF_ABORT("InvokeSync %{public}p. VMContext is null.", callback_.callSync);
+            }
+            (*callback_.callSync)(vmContext, callback_.resource.resourceId, std::forward<Params>(args)...);
         }
     }
 

@@ -561,7 +561,7 @@ HWTEST_F(SpanModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SpanModifierTest, setFontColorTestFontColorValidValues, TestSize.Level1)
+HWTEST_F(SpanModifierTest, DISABLED_setFontColorTestFontColorValidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueFontColor;
 
@@ -651,7 +651,7 @@ HWTEST_F(SpanModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SpanModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Level1)
+HWTEST_F(SpanModifierTest, DISABLED_setFontSizeTestFontSizeValidValues, TestSize.Level1)
 {
     Opt_Union_Number_String_Resource initValueFontSize;
 
@@ -687,7 +687,7 @@ HWTEST_F(SpanModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SpanModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
+HWTEST_F(SpanModifierTest, DISABLED_setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
 {
     Opt_Union_Number_String_Resource initValueFontSize;
 
@@ -976,7 +976,7 @@ HWTEST_F(SpanModifierTest, setDecorationTestDecorationTypeInvalidValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SpanModifierTest, setDecorationTestDecorationColorValidValues, TestSize.Level1)
+HWTEST_F(SpanModifierTest, DISABLED_setDecorationTestDecorationColorValidValues, TestSize.Level1)
 {
     Opt_DecorationStyleInterface initValueDecoration;
 

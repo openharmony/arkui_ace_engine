@@ -166,55 +166,6 @@ void SetModeImpl(Ark_NativePointer node,
     auto navigationMode = static_cast<NavigationMode>(*optValue);
     NavigationModelStatic::SetUsrNavigationMode(frameNode, navigationMode);
 }
-void SetBackButtonIcon0Impl(Ark_NativePointer node,
-                            const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    std::string src;
-    std::string bundleName;
-    std::string moduleName;
-    std::vector<std::string> nameList;
-    NG::ImageOption imageOption;
-    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
-    RefPtr<PixelMap> pixMap = nullptr;
-    bool isValidImage = false;
-    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto valueType = Converter::Convert<int32_t>(value->value.selector);
-        const int32_t stringType = 0;
-        const int32_t pixelType = 1;
-        const int32_t resourceType = 2;
-        const int32_t symbolType = 3;
-        switch (valueType) {
-            case stringType: {
-                src = Converter::Convert<std::string>(value->value.value0);
-                imageOption.noPixMap = true;
-                imageOption.isValidImage = true;
-                break;
-            }
-            case pixelType: {
-                pixMap = Converter::OptConvert<RefPtr<PixelMap>>(value->value.value1).value_or(nullptr);
-                break;
-            }
-            case resourceType: {
-                Converter::ResourceConverter converter(value->value.value2);
-                src = converter.ToString().value_or("");
-                imageOption.noPixMap = true;
-                imageOption.isValidImage = true;
-                break;
-            }
-            case symbolType: {
-                break;
-            }
-            default:
-                break;
-        }
-    }
-    nameList.emplace_back(bundleName);
-    nameList.emplace_back(moduleName);
-    NavigationModelStatic::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap, nameList);
-}
 void SetHideNavBarImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
 {
@@ -250,26 +201,6 @@ void SetTitleModeImpl(Ark_NativePointer node,
         titleMode = static_cast<NavigationTitleMode>(value->value);
     }
     NavigationModelStatic::SetTitleMode(frameNode, titleMode);
-}
-void SetMenus0Impl(Ark_NativePointer node,
-                   const Opt_Union_Array_NavigationMenuItem_CustomBuilder* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    NG::NavigationMenuOptions options;
-    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto typeValue = value->value.selector;
-        if (typeValue == 0) {
-            auto menuItemArray = Converter::Convert<std::vector<NG::BarItem>>(value->value.value0);
-            NavigationModelStatic::SetMenuItems(frameNode, std::move(menuItemArray));
-        } else if (typeValue == 1) {
-            CallbackHelper(value->value.value1).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-                NavigationModelStatic::SetCustomMenu(frameNode, std::move(uiNode));
-            }, node);
-        }
-    }
-    NavigationModelStatic::SetMenuOptions(frameNode, std::move(options));
 }
 void SetHideToolBar0Impl(Ark_NativePointer node,
                          const Opt_Boolean* value)
@@ -321,16 +252,16 @@ void SetOnNavBarStateChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
+    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
     if (!optValue) {
-        // Implement Reset value
+        eventHub->SetOnNavBarStateChange(nullptr);
         return;
     }
     auto stateCallback = [changeCallback = CallbackHelper(*optValue)](bool isVisible) {
         auto visible = Converter::ArkValue<Ark_Boolean>(isVisible);
         changeCallback.Invoke(visible);
     };
-    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
-    CHECK_NULL_VOID(eventHub);
     eventHub->SetOnNavBarStateChange(stateCallback);
 }
 void SetOnNavigationModeChangeImpl(Ark_NativePointer node,
@@ -414,7 +345,7 @@ void SetEnableModeChangeAnimationImpl(Ark_NativePointer node,
     NavigationModelStatic::SetEnableModeChangeAnimation(frameNode,
         Converter::OptConvertPtr<bool>(value).value_or(true));
 }
-void SetBackButtonIcon1Impl(Ark_NativePointer node,
+void SetBackButtonIconImpl(Ark_NativePointer node,
                             const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* icon,
                             const Opt_ResourceStr* accessibilityText)
 {
@@ -564,7 +495,7 @@ void SetHideTitleBar1Impl(Ark_NativePointer node,
     auto isAnimated = Converter::OptConvertPtr<bool>(animated).value_or(false);
     NavigationModelStatic::SetHideTitleBar(frameNode, isHide, isAnimated);
 }
-void SetMenus1Impl(Ark_NativePointer node,
+void SetMenusImpl(Ark_NativePointer node,
                    const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
                    const Opt_NavigationMenuOptions* options)
 {
@@ -600,6 +531,12 @@ void SetToolbarConfigurationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     CHECK_NULL_VOID(options);
+    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto isHideItemText = Converter::OptConvert<bool>(options->value.hideItemValue).value_or(false);
+        NavigationModelStatic::SetHideItemText(frameNode, isHideItemText);
+    } else {
+        NavigationModelStatic::SetHideItemText(frameNode, false);
+    }
     NG::NavigationToolbarOptions toolbarOptions;
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         auto typeValue = value->value.selector;
@@ -621,12 +558,12 @@ void SetToolbarConfigurationImpl(Ark_NativePointer node,
                         const RefPtr<UINode>& uiNode) { NavigationModelStatic::SetCustomToolBar(frameNode, uiNode); },
                     node);
         }
+    } else {
+        NavigationModelStatic::SetToolbarMorebuttonOptions(frameNode, NG::MoreButtonOptions());
+        NavigationModelStatic::SetToolbarConfiguration(frameNode, std::vector<NG::BarItem>());
+        NavigationModelStatic::SetCustomToolBar(frameNode, nullptr);
     }
 
-    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto isHideItemText = Converter::OptConvert<bool>(options->value.hideItemValue).value_or(false);
-        NavigationModelStatic::SetHideItemText(frameNode, isHideItemText);
-    }
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         NG::NavigationBackgroundOptions bgOptions =
             Converter::Convert<NG::NavigationBackgroundOptions>(options->value);
@@ -697,27 +634,24 @@ const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
         NavigationAttributeModifier::SetNavBarWidthRangeImpl,
         NavigationAttributeModifier::SetMinContentWidthImpl,
         NavigationAttributeModifier::SetModeImpl,
-        NavigationAttributeModifier::SetBackButtonIcon0Impl,
         NavigationAttributeModifier::SetHideNavBarImpl,
         NavigationAttributeModifier::SetHideTitleBar0Impl,
         NavigationAttributeModifier::SetHideBackButtonImpl,
         NavigationAttributeModifier::SetTitleModeImpl,
-        NavigationAttributeModifier::SetMenus0Impl,
         NavigationAttributeModifier::SetHideToolBar0Impl,
         NavigationAttributeModifier::SetEnableToolBarAdaptationImpl,
         NavigationAttributeModifier::SetOnTitleModeChangeImpl,
         NavigationAttributeModifier::SetOnNavBarStateChangeImpl,
         NavigationAttributeModifier::SetOnNavigationModeChangeImpl,
-        NavigationAttributeModifier::SetNavDestinationImpl,
         NavigationAttributeModifier::SetCustomNavContentTransitionImpl,
         NavigationAttributeModifier::SetSystemBarStyleImpl,
         NavigationAttributeModifier::SetRecoverableImpl,
         NavigationAttributeModifier::SetEnableDragBarImpl,
         NavigationAttributeModifier::SetEnableModeChangeAnimationImpl,
-        NavigationAttributeModifier::SetBackButtonIcon1Impl,
+        NavigationAttributeModifier::SetBackButtonIconImpl,
         NavigationAttributeModifier::SetTitleImpl,
         NavigationAttributeModifier::SetHideTitleBar1Impl,
-        NavigationAttributeModifier::SetMenus1Impl,
+        NavigationAttributeModifier::SetMenusImpl,
         NavigationAttributeModifier::SetToolbarConfigurationImpl,
         NavigationAttributeModifier::SetHideToolBar1Impl,
         NavigationAttributeModifier::SetIgnoreLayoutSafeAreaImpl,

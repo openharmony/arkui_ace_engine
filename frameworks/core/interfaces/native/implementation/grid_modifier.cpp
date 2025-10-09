@@ -205,24 +205,26 @@ void SetScrollBarWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridModelNG::SetScrollBarWidth(frameNode, convValue);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
+    ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
                            const Opt_Union_Color_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridModelNG::SetScrollBarColor(frameNode, convValue);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
+    ScrollableModelStatic::SetScrollBarColor(frameNode, convValue);
 }
 void SetScrollBarImpl(Ark_NativePointer node,
                       const Opt_BarState* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridModelNG::SetScrollBar(frameNode, convValue);
+    auto convValue = Converter::OptConvertPtr<DisplayMode>(value);
+    ScrollableModelStatic::SetScrollBarMode(frameNode, convValue);
 }
 void SetOnScrollBarUpdateImpl(Ark_NativePointer node,
                               const Opt_Callback_Number_Number_ComputedBarAttribute* value)
@@ -367,15 +369,15 @@ void SetOnItemDragStartImpl(Ark_NativePointer node,
         return;
     }
     auto onItemDragStart = [callback = CallbackHelper(*optValue), frameNode, node](
-        const ItemDragInfo& dragInfo, int32_t itemIndex
-    ) {
+                               const ItemDragInfo& dragInfo, int32_t itemIndex) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
-        auto builder =
-            callback.InvokeWithObtainCallback<CustomNodeBuilder, Callback_Opt_CustomBuilder_Void>(
-                arkDragInfo, arkItemIndex);
-        auto uiNode = builder->BuildSync(node);
-        ViewStackProcessor::GetInstance()->Push(uiNode);
+        auto builderOpt = callback.InvokeWithOptConvertResult<CustomNodeBuilder, Opt_CustomNodeBuilder,
+            Callback_Opt_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
+        if (builderOpt.has_value()) {
+            auto uiNode = CallbackHelper(builderOpt.value()).BuildSync(node);
+            ViewStackProcessor::GetInstance()->Push(uiNode);
+        }
     };
     GridModelStatic::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
 }
@@ -463,24 +465,35 @@ void SetNestedScrollImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridModelNG::SetNestedScroll(frameNode, convValue);
+    auto convValue = Converter::GetOptPtr(value);
+    if (!convValue) {
+        // Implement Reset value
+        return;
+    }
+    auto forward = Converter::OptConvert<NestedScrollMode>(convValue->scrollForward);
+    auto backward = Converter::OptConvert<NestedScrollMode>(convValue->scrollBackward);
+    ScrollableModelStatic::SetNestedScroll(frameNode, forward, backward);
 }
 void SetEnableScrollInteractionImpl(Ark_NativePointer node,
                                     const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridModelNG::SetEnableScrollInteraction(frameNode, convValue);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    if (!convValue) {
+        // Implement Reset value
+        return;
+    }
+    auto scrollEnabled = *convValue;
+    GridModelStatic::SetScrollEnabled(frameNode, scrollEnabled);
 }
 void SetFrictionImpl(Ark_NativePointer node,
                      const Opt_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridModelNG::SetFriction(frameNode, convValue);
+    auto convValue = Converter::OptConvertPtr<float>(value);
+    ScrollableModelStatic::SetFriction(frameNode, convValue);
 }
 void SetAlignItemsImpl(Ark_NativePointer node,
                        const Opt_GridItemAlignment* value)
@@ -548,15 +561,23 @@ void SetCachedCount1Impl(Ark_NativePointer node,
     auto showValue = Converter::OptConvertPtr<bool>(show).value_or(false);
     GridModelStatic::SetShowCached(frameNode, showValue);
 }
-void SetEdgeEffectImpl(Ark_NativePointer node,
-                       const Opt_EdgeEffect* value,
-                       const Opt_EdgeEffectOptions* options)
+void SetEdgeEffectImpl(Ark_NativePointer node, const Opt_EdgeEffect* value, const Opt_EdgeEffectOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //GridModelNG::SetEdgeEffect(frameNode, convValue);
+    auto convEdgeEffect = Converter::OptConvert<EdgeEffect>(*value);
+
+    bool alwaysEnabled = false;
+    EffectEdge edge = EffectEdge::ALL;
+    auto edgeEffectOptions = options ? Converter::GetOpt(*options) : std::nullopt;
+    if (edgeEffectOptions) {
+        alwaysEnabled = Converter::Convert<bool>(edgeEffectOptions.value().alwaysEnabled);
+        auto value = Converter::OptConvert<int32_t>(edgeEffectOptions.value().effectEdge);
+        if (value.has_value()) {
+            edge = static_cast<EffectEdge>(value.value());
+        }
+    }
+    ScrollableModelStatic::SetEdgeEffect(frameNode, convEdgeEffect, alwaysEnabled, edge);
 }
 } // GridAttributeModifier
 const GENERATED_ArkUIGridModifier* GetGridModifier()

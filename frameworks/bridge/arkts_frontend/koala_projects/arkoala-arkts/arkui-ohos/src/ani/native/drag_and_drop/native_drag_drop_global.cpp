@@ -551,6 +551,10 @@ void SetPropertyValueByName(ani_env* env, ani_object obj, std::string name, bool
 void ParseDragInteractionOptions(ani_env* env, ArkUIDragPreviewOption& previewOptions,
     ani_object dragInteractionOptions)
 {
+    CHECK_NULL_VOID(env);
+    if (AniUtils::IsUndefined(env, dragInteractionOptions)) {
+        return;
+    }
     SetPropertyValueByName(env, dragInteractionOptions, "isMultiSelectionEnabled",
         previewOptions.isMultiSelectionEnabled);
     SetPropertyValueByName(env, dragInteractionOptions, "defaultAnimationBeforeLifting",

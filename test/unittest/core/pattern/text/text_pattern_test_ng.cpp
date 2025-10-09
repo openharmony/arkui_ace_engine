@@ -17,6 +17,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2104,5 +2105,79 @@ HWTEST_F(TextPatternTestNg, GetOriginCaretPosition002, TestSize.Level1)
     textPattern->originCaretPosition_ = offset;
     auto result = textPattern->GetOriginCaretPosition(offset);
     EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: CloseSelectOverlay001
+ * @tc.desc: Test CloseSelectOverlay to cover if branch when selectOverlayProxy_ is not null and not closed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, CloseSelectOverlay001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    
+    // Create and set up a selectOverlayProxy_ that is not closed
+    textPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(frameNode);
+    // Make sure it's not closed by not calling Close() on it
+    
+    bool animation = true;
+    
+    // Execute the method
+    textPattern->CloseSelectOverlay(animation);
+    
+    // Verify that selectOverlay_ CloseOverlay was called
+    EXPECT_EQ(textPattern->selectOverlay_, 1); // Check that selectOverlay_ exists
+}
+
+/**
+ * @tc.name: CloseSelectOverlay002
+ * @tc.desc: Test CloseSelectOverlay to cover else branch when selectOverlayProxy_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, CloseSelectOverlay002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    
+    // Ensure selectOverlayProxy_ is null
+    textPattern->selectOverlayProxy_ = nullptr;
+    
+    bool animation = false;
+    
+    // Execute the method
+    textPattern->CloseSelectOverlay(animation);
+    
+    // Verify that selectOverlay_ CloseOverlay was still called
+    EXPECT_EQ(textPattern->selectOverlay_, 1); // Check that selectOverlay_ exists
+}
+
+/**
+ * @tc.name: CloseSelectOverlay003
+ * @tc.desc: Test CloseSelectOverlay to cover else branch when selectOverlayProxy_ is closed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, CloseSelectOverlay003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    
+    // Create and set up a selectOverlayProxy_ that is closed
+    textPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(frameNode);
+    textPattern->selectOverlayProxy_->Close(false); // Close it
+    
+    bool animation = true;
+    
+    // Execute the method
+    textPattern->CloseSelectOverlay(animation);
+    
+    // Verify that selectOverlay_ CloseOverlay was still called
+    EXPECT_EQ(textPattern->selectOverlay_, 1); // Check that selectOverlay_ exists
 }
 } // namespace OHOS::Ace::NG

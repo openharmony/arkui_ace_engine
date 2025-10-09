@@ -87,7 +87,7 @@ export class ArkSymbolSpanPeer extends ArkCommonMethodPeer {
                 if (valueTmpValueTmpElement instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as Color
-                    thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0.valueOf())
+                    thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0.getOrdinal())
                 } else if (valueTmpValueTmpElement instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
                     const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as number

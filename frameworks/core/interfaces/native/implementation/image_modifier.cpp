@@ -18,14 +18,18 @@
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/image/image_model_static.h"
 #include "core/interfaces/native/implementation/image_common_methods.h"
-#include "core/interfaces/native/implementation/matrix4_transit_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
+#include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
+#include "core/interfaces/native/implementation/drawing_lattice_peer.h"
+#include "core/interfaces/native/implementation/drawable_descriptor_peer.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t UNION_ONE = 1;
+constexpr int32_t UNION_TWO = 2;
 // similar as in the js_image.cpp
 constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
 constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
@@ -99,12 +103,18 @@ void SetImageOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
     CHECK_NULL_VOID(imageAIOptions);
+    if (src->selector == UNION_TWO) {
+        auto drawable = src->value2;
+        CHECK_NULL_VOID(drawable);
+        ImageModelStatic::SetDrawableDescriptor(frameNode, drawable->data, drawable->type);
+        DrawableDescriptorPeer::Destroy(drawable);
+        return;
+    }
     auto info = Converter::OptConvert<ImageSourceInfo>(*src);
     // Note.
     // This function should skip InitImage invocation if info's optional is empty.
     if (info) {
-        std::string source = info->GetSrc();
-        ImageModelNG::InitImage(frameNode, source);
+        ImageModelStatic::SetSrc(frameNode, info);
     } else {
         ImageModelNG::ResetImageSrc(frameNode);
     }
@@ -130,7 +140,7 @@ void SetMatchTextDirectionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        ImageModelNG::SetMatchTextDirection(frameNode, false);
         return;
     }
     ImageModelNG::SetMatchTextDirection(frameNode, *convValue);
@@ -142,7 +152,7 @@ void SetFitOriginalSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        ImageModelNG::SetFitOriginSize(frameNode, false);
         return;
     }
     ImageModelNG::SetFitOriginSize(frameNode, *convValue);
@@ -152,6 +162,10 @@ void SetFillColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (value->value.selector == UNION_ONE) {
+        ImageModelNG::ResetImageFill(frameNode);
+        return;
+    }
     ImageModelStatic::SetImageFill(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SetObjectFitImpl(Ark_NativePointer node,
@@ -167,14 +181,8 @@ void SetImageMatrixImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto peerOpt = Converter::GetOptPtr(value);
-    std::optional<Matrix4> matrix;
-    if (peerOpt.has_value()) {
-        auto* peer = peerOpt.value();
-        CHECK_NULL_VOID(peer);
-        matrix = peer->matrix;
-    }
-    ImageModelStatic::SetImageMatrix(frameNode, matrix);
+    auto matrixOpt = Converter::OptConvertPtr<Matrix4>(value);
+    ImageModelStatic::SetImageMatrix(frameNode, matrixOpt);
 }
 void SetObjectRepeatImpl(Ark_NativePointer node,
                          const Opt_ImageRepeat* value)
@@ -190,7 +198,7 @@ void SetAutoResizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        ImageModelNG::ResetAutoResize(frameNode);
         return;
     }
     ImageModelNG::SetAutoResize(frameNode, *convValue);
@@ -222,7 +230,9 @@ void SetSourceSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto sourceSize = Converter::OptConvert<std::pair<CalcDimension, CalcDimension>>(*value);
-    ImageModelStatic::SetImageSourceSize(frameNode, sourceSize);
+    std::pair<CalcDimension, CalcDimension> defaultSize =
+        std::make_pair(CalcDimension(0.0, DimensionUnit::VP), CalcDimension(0.0, DimensionUnit::VP));
+    ImageModelStatic::SetImageSourceSize(frameNode, sourceSize.value_or(defaultSize));
 }
 void SetSyncLoadImpl(Ark_NativePointer node,
                      const Opt_Boolean* value)
@@ -231,7 +241,7 @@ void SetSyncLoadImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        ImageModelNG::SetSyncMode(frameNode, false);
         return;
     }
     ImageModelNG::SetSyncMode(frameNode, *convValue);
@@ -255,7 +265,7 @@ void SetDraggableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        ImageModelNG::SetDraggable(frameNode, false);
         return;
     }
     ImageModelNG::SetDraggable(frameNode, *convValue);
@@ -312,7 +322,7 @@ void SetOnCompleteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ImageModelNG::SetOnComplete(frameNode, nullptr);
         return;
     }
     auto onEvent = [callback = CallbackHelper(*optValue)](const LoadImageSuccessEvent& info) {
@@ -338,7 +348,7 @@ void SetOnErrorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ImageModelNG::SetOnError(frameNode, nullptr);
         return;
     }
     auto onError = [arkCallback = CallbackHelper(*optValue)](const LoadImageFailEvent& info) {
@@ -354,7 +364,7 @@ void SetOnFinishImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
         return;
     }
     auto onFinish = [arkCallback = CallbackHelper(*optValue)]() {
@@ -369,7 +379,7 @@ void SetEnableAnalyzerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        ImageModelNG::EnableAnalyzer(frameNode, false);
         return;
     }
     ImageModelNG::EnableAnalyzer(frameNode, *convValue);
@@ -403,8 +413,10 @@ void SetResizableImpl(Ark_NativePointer node,
     } else {
         ImageModelNG::SetResizableSlice(frameNode, defSliceValue);
     }
-    // lattice .. This parameter will need to be implemented when Ark_DrawingLattice is supported.
-    LOGE("Arkoala: Image.ResizableImpl - method not implemented");
+    if (optValue->lattice.value) {
+        ImageModelStatic::SetResizableLattice(frameNode, optValue->lattice.value->drawingLattice);
+        drawing_LatticePeer::Destroy(optValue->lattice.value);
+    }
 }
 void SetPrivacySensitiveImpl(Ark_NativePointer node,
                              const Opt_Boolean* value)

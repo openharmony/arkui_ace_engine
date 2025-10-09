@@ -18,6 +18,10 @@ import { KPointer } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
 import { CustomBuilder } from "./component/builder"
 import { CustomNodeBuilder, ArkComponentRootPeer } from "#generated"
+import { UIContextUtil } from './base/UIContextUtil';
+import { UIContextImpl } from './base/UIContextImpl';
+import { ObserveSingleton } from './stateManagement/base/observeSingleton';
+import { ExtendableComponent } from './component/extendableComponent';
 
 // Improve: need invert dependency: createUiDetachedRoot should be imported from @koalaui/arkoala same as in TS
 export type UIDetachedRootCreator = (
@@ -45,9 +49,21 @@ function componentRootPeerFactory(): PeerNode {
 
 export class CallbackTransformer {
     static transformFromCustomBuilder(value: CustomBuilder): CustomNodeBuilder {
+        const context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
+        const currentExtendableComponent = ExtendableComponent.current;
         return (parentNodeId: KPointer): KPointer => {
-            const peer = createUiDetachedRoot(componentRootPeerFactory, value)
-            return peer.peer.ptr
+            const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
+            const lastExtendableComponent = ExtendableComponent.current;
+            ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
+            ExtendableComponent.current = currentExtendableComponent;
+            try {
+                const peer = createUiDetachedRoot(componentRootPeerFactory, value)
+                return peer.peer.ptr;
+            } finally {
+                ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
+                ExtendableComponent.current = lastExtendableComponent;
+            }
         }
     }
     static transformToCustomBuilder(value: CustomNodeBuilder): CustomBuilder {

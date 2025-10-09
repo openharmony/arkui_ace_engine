@@ -32,11 +32,11 @@ export class BlankModifier extends CommonMethodModifier implements BlankAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: BlankAttribute): void { }
+    applyPressedAttribute(instance: BlankAttribute): void { }
+    applyFocusedAttribute(instance: BlankAttribute): void { }
+    applyDisabledAttribute(instance: BlankAttribute): void { }
+    applySelectedAttribute(instance: BlankAttribute): void { }
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _color_0_0value?: ResourceColor | undefined
     applyModifierPatch(node: PeerNode): void {

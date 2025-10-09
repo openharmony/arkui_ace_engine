@@ -86,7 +86,7 @@ NG::InspectorFilter GetInspectorFilter(ani_env *env, const ani_array& filters, b
 {
     NG::InspectorFilter inspectorFilter;
     ani_size size;
-    if (filters != nullptr && ANI_OK == env->Array_GetLength(filters, &size)) {
+    if (filters != nullptr && !IsUndefinedRef(env, filters) && ANI_OK == env->Array_GetLength(filters, &size)) {
         for (ani_size i = 0; i < size; i++) {
             ani_ref string_ref;
             if (ANI_OK != env->Array_Get(filters, i, &string_ref)) {
@@ -106,5 +106,14 @@ NG::InspectorFilter GetInspectorFilter(ani_env *env, const ani_array& filters, b
         }
     }
     return inspectorFilter;
+}
+
+bool IsUndefinedRef(ani_env *env, ani_ref object_ref)
+{
+    ani_boolean isUndefined;
+    if (ANI_OK != env->Reference_IsUndefined(object_ref, &isUndefined)) {
+        return false;
+    }
+    return isUndefined == ANI_TRUE;
 }
 } // namespace OHOS::Ace

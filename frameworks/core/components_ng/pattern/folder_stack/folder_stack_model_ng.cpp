@@ -116,7 +116,7 @@ void FolderStackModelNG::SetOnFolderStateChange(
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FolderStackEventHub>();
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFolderStateChange(std::move(onChange));
 }
@@ -144,7 +144,7 @@ void FolderStackModelNG::SetOnHoverStatusChange(
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FolderStackEventHub>();
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnHoverStatusChange(std::move(onChange));
 }

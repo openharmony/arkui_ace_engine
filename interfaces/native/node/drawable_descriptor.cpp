@@ -57,10 +57,9 @@ ArkUI_DrawableDescriptor* OH_ArkUI_DrawableDescriptor_CreateFromAnimatedPixelMap
 
 void OH_ArkUI_DrawableDescriptor_Dispose(ArkUI_DrawableDescriptor* drawableDescriptor)
 {
-    auto decreaseRefApi = reinterpret_cast<void (*)(void*)>(OHOS::Ace::NodeModel::DecreaseRefDrawable());
-    if (decreaseRefApi && drawableDescriptor->newDrawableDescriptor) {
-        decreaseRefApi(drawableDescriptor->newDrawableDescriptor);
-        return;
+    CHECK_NULL_VOID(drawableDescriptor);
+    if (drawableDescriptor->newDrawableDescriptor) {
+        OHOS::Ace::NodeModel::DecreaseRefDrawable(drawableDescriptor->newDrawableDescriptor);
     }
     delete drawableDescriptor;
 }

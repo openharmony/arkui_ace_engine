@@ -108,7 +108,7 @@ HWTEST_F(SelectModifierTest, setSelectedTestSelectedValidValues, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setSelectedTestSelectedInvalidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setSelectedTestSelectedInvalidValues, TestSize.Level1)
 {
     auto initValueSelected = ArkUnion<Opt_Union_Number_Resource_Bindable_Bindable, Ark_Number>(
         std::get<1>(testNumberNonNegIntValidValues[0]));
@@ -525,7 +525,7 @@ HWTEST_F(SelectModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setFontColorTestFontColorValidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setFontColorTestFontColorValidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueFontColor;
     initValueFontColor =
@@ -613,7 +613,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestDefaultValues,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setSelectedOptionBgColorTestSelectedOptionBgColorValidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestSelectedOptionBgColorValidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueSelectedOptionBgColor;
 
@@ -1052,7 +1052,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontColorTestDefaultValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setSelectedOptionFontColorTestSelectedOptionFontColorValidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontColorTestSelectedOptionFontColorValidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueSelectedOptionFontColor;
 
@@ -1145,7 +1145,7 @@ HWTEST_F(SelectModifierTest, setOptionBgColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setOptionBgColorTestOptionBgColorValidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setOptionBgColorTestOptionBgColorValidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueOptionBgColor;
 

@@ -160,7 +160,7 @@ HWTEST_F(NavigationActiveTestNg, NavigationTransitionLifecycle001, TestSize.Leve
         static_cast<int32_t>(NavDestinationActiveReason::TRANSITION));
     auto destination = AceType::DynamicCast<NavDestinationGroupNode>(mockNavPathStack->Get());
     EXPECT_FALSE(destination == nullptr);
-    auto eventHub = destination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(eventHub == nullptr);
     EXPECT_TRUE(eventHub->state_ == NavDestinationState::ON_INACTIVE);
 }
@@ -212,7 +212,7 @@ HWTEST_F(NavigationActiveTestNg, NavigationTransitionLifecycle002, TestSize.Leve
      */
     auto destination = AceType::DynamicCast<NavDestinationGroupNode>(mockNavPathStack->Get());
     EXPECT_FALSE(destination == nullptr);
-    auto eventHub = destination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(eventHub == nullptr);
     EXPECT_TRUE(eventHub->state_ == NavDestinationState::ON_ACTIVE);
 }
@@ -264,7 +264,7 @@ HWTEST_F(NavigationActiveTestNg, NavigationTransitionLifecycle003, TestSize.Leve
      */
     auto destination = AceType::DynamicCast<NavDestinationGroupNode>(mockNavPathStack->Get());
     EXPECT_FALSE(destination == nullptr);
-    auto eventHub = destination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(eventHub == nullptr);
     eventHub->SetOnActive([](int32_t reason) {
         int32_t targetReason = static_cast<int32_t>(NavDestinationActiveReason::APP_STATE_CHANGE);
@@ -322,7 +322,7 @@ HWTEST_F(NavigationActiveTestNg, NavigationTransitionLifecycle004, TestSize.Leve
      */
     auto destination = AceType::DynamicCast<NavDestinationGroupNode>(mockNavPathStack->Get());
     EXPECT_FALSE(destination == nullptr);
-    auto eventHub = destination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(eventHub == nullptr);
     eventHub->SetOnActive([](int32_t reason) {
         int32_t targetReason = static_cast<int32_t>(NavDestinationActiveReason::APP_STATE_CHANGE);

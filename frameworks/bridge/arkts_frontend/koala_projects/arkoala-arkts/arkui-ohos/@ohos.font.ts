@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { int32 } from "@koalaui/common"
 import { Resource } from "global.resource"
 import { GlobalScope_ohos_font } from 'arkui/framework'
 
@@ -29,8 +30,8 @@ export interface FontInfo {
     fullName: string;
     family: string;
     subfamily: string;
-    weight: number;
-    width: number;
+    weight: int32;
+    width: int32;
     italic: boolean;
     monoSpace: boolean;
     symbolic: boolean;
@@ -43,12 +44,12 @@ export interface UIFontFallbackInfo {
 
 export interface UIFontAliasInfo {
     name: string;
-    weight: number;
+    weight: double;
 }
 
 export interface UIFontAdjustInfo {
-    weight: number;
-    to: number;
+    weight: double;
+    to: int32;
 }
 
 export interface UIFontGenericInfo {
@@ -69,7 +70,7 @@ export interface UIFontConfig {
 }
 
 function getUIFontConfig() : UIFontConfig {
-    throw new Error("TBD")
+    return GlobalScope_ohos_font.getUIFontConfig();
 }
 }
 export default font;

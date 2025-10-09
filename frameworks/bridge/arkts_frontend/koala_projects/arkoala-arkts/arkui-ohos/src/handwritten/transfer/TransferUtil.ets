@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, Edges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from '../../Graphics'
+import { Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, NodeEdges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from '../../Graphics'
 import { KPointer } from '@koalaui/interop'
 import { BorderStyle } from '../../component/enums'
 import { ArkUIAniModule } from 'arkui.ani'
@@ -159,7 +159,7 @@ export class TransferUtil {
         return {x: x, y: y, z: z} as Vector3;
     }
 
-    static getPropBorderStyle(inVal: ESValue, name: string): Edges<BorderStyle> | undefined {
+    static getPropBorderStyle(inVal: ESValue, name: string): NodeEdges<BorderStyle> | undefined {
         const borderVal = inVal.getProperty(name);
         if (borderVal.isUndefined() || borderVal.isNull()) {
             return undefined;
@@ -175,11 +175,11 @@ export class TransferUtil {
             top: getStyle('top'),
             right: getStyle('right'),
             bottom: getStyle('bottom')
-        } as Edges<BorderStyle>;
+        } as NodeEdges<BorderStyle>;
     }
 
     // borderWidthValue: 1.1 -> 1.2(int)
-    static getPropBorderNoExcept(inVal: ESValue, name: string): Edges<number> | undefined {
+    static getPropBorderNoExcept(inVal: ESValue, name: string): NodeEdges<number> | undefined {
         let borderVal = inVal.getProperty(name);
         if (borderVal.isUndefined() || borderVal.isNull()) {
             return undefined;
@@ -188,12 +188,12 @@ export class TransferUtil {
         let top = TransferUtil.getPropNumberNoExcept(borderVal, 'top');
         let right = TransferUtil.getPropNumberNoExcept(borderVal, 'right');
         let bottom = TransferUtil.getPropNumberNoExcept(borderVal, 'bottom');
-        let egVal = {left: left, top: top, right: right, bottom: bottom} as Edges<number>;
+        let egVal = {left: left, top: top, right: right, bottom: bottom} as NodeEdges<number>;
         return egVal;
     }
 
     // number color: 1.1(long) -> 1.2(int)
-    static getPropEdgesColor(inVal: ESValue, name: string): Edges<number> | undefined {
+    static getPropEdgesColor(inVal: ESValue, name: string): NodeEdges<number> | undefined {
         let borderVal = inVal.getProperty(name);
         if (borderVal.isUndefined() || borderVal.isNull()) {
             return undefined;
@@ -202,7 +202,7 @@ export class TransferUtil {
         let top = TransferUtil.getPropColorInt(borderVal, 'top');
         let right = TransferUtil.getPropColorInt(borderVal, 'right');
         let bottom = TransferUtil.getPropColorInt(borderVal, 'bottom');
-        let egVal = {left: left, top: top, right: right, bottom: bottom} as Edges<number>;
+        let egVal = {left: left, top: top, right: right, bottom: bottom} as NodeEdges<number>;
         return egVal;
     }
 
@@ -300,7 +300,7 @@ export class TransferUtil {
         outJs.setProperty(name, inVal);
     }
 
-    static setPropEdges(name: string, inVal: Edges<number>, outJs: ESValue) {
+    static setPropEdges(name: string, inVal: NodeEdges<number>, outJs: ESValue) {
         let propVal: ESValue = ESValue.instantiateEmptyObject();
         propVal.setProperty('left', inVal.left);
         propVal.setProperty('top', inVal.top);
@@ -310,7 +310,7 @@ export class TransferUtil {
     }
 
     // number color: int(1.2) -> long(1.1)
-    static setPropEdgesColor(name: string, inVal: Edges<number>, outJs: ESValue) {
+    static setPropEdgesColor(name: string, inVal: NodeEdges<number>, outJs: ESValue) {
         let propVal: ESValue = ESValue.instantiateEmptyObject();
         TransferUtil.setPropColorLong('left', inVal.left, propVal);
         TransferUtil.setPropColorLong('top', inVal.top, propVal);
@@ -319,7 +319,7 @@ export class TransferUtil {
         outJs.setProperty(name, propVal);
     }
 
-    static setPropEdgeStyle(name: string, inVal: Edges<BorderStyle>, outJs: ESValue) {
+    static setPropEdgeStyle(name: string, inVal: NodeEdges<BorderStyle>, outJs: ESValue) {
         const propVal: ESValue = ESValue.instantiateEmptyObject();
         const setEdgeProperty = (propertyName: string, value: BorderStyle | undefined) => {
             if (value !== undefined) {

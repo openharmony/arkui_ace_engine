@@ -166,6 +166,10 @@ void SetAutoResetImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
+    if (!convValue) {
+        PatternLockModelStatic::SetAutoReset(frameNode, true);
+        return;
+    }
     PatternLockModelStatic::SetAutoReset(frameNode, convValue);
 }
 void SetOnDotConnectImpl(Ark_NativePointer node,
@@ -196,8 +200,13 @@ void SetActivateCircleStyleImpl(Ark_NativePointer node,
         PatternLockModelStatic::SetEnableWaveEffect(frameNode, convValue->enableWaveEffect);
         PatternLockModelStatic::SetActiveCircleRadius(frameNode, convValue->radius);
         if (convValue->enableForeground) {
-            PatternLockModelNG::SetEnableForeground(frameNode, convValue->enableForeground.value());
+            PatternLockModelStatic::SetEnableForeground(frameNode, convValue->enableForeground.value());
         }
+    } else {
+        PatternLockModelStatic::SetActiveCircleColor(frameNode, std::nullopt);
+        PatternLockModelStatic::SetEnableWaveEffect(frameNode, std::nullopt);
+        PatternLockModelStatic::SetActiveCircleRadius(frameNode, std::nullopt);
+        PatternLockModelStatic::SetEnableForeground(frameNode, std::nullopt);
     }
 }
 void SetSkipUnselectedPointImpl(Ark_NativePointer node,
@@ -206,10 +215,6 @@ void SetSkipUnselectedPointImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
     PatternLockModelNG::SetSkipUnselectedPoint(frameNode, *convValue);
 }
 } // PatternLockAttributeModifier

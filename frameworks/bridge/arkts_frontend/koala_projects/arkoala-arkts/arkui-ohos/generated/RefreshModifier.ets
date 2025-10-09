@@ -29,11 +29,11 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: RefreshAttribute): void { }
+    applyPressedAttribute(instance: RefreshAttribute): void { }
+    applyFocusedAttribute(instance: RefreshAttribute): void { }
+    applyDisabledAttribute(instance: RefreshAttribute): void { }
+    applySelectedAttribute(instance: RefreshAttribute): void { }
     _onStateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onStateChange_0_0value?: ((state: RefreshStatus) => void) | undefined
     _onRefreshing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

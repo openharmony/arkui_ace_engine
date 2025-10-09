@@ -41,11 +41,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: TextAttribute): void { }
+    applyPressedAttribute(instance: TextAttribute): void { }
+    applyFocusedAttribute(instance: TextAttribute): void { }
+    applyDisabledAttribute(instance: TextAttribute): void { }
+    applySelectedAttribute(instance: TextAttribute): void { }
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontColor_0_0value?: ResourceColor | undefined
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -847,7 +847,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._font_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontAttribute((this._font_0_0value as Font | undefined), (this._font_0_1value as FontSettingOptions | undefined));
+                    peer.setFontAttribute((this._font_0_0value as Font | undefined), (this._font_0_1value as FontSettingOptions | undefined | undefined));
                     this._font_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -865,7 +865,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined), (this._fontWeight_0_1value as FontSettingOptions | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined), (this._fontWeight_0_1value as FontSettingOptions | undefined | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -901,7 +901,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._bindSelectionMenu_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as TextSpanType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as TextResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptions | undefined));
+                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as TextSpanType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as TextResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptions | undefined | undefined));
                     this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

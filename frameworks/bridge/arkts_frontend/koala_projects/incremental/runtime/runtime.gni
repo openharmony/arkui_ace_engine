@@ -54,6 +54,7 @@ koalaui_runtime_path_keys = [
   "@koalaui/compat",
   "@koalaui/runtime/annotations",
   "arkui.stateManagement.runtime",
+  "arkui.incremental.runtime.state"
 ]
 
 koalaui_runtime_path_values = [
@@ -61,4 +62,5 @@ koalaui_runtime_path_values = [
   "../compat/src/arkts",
   "annotations",
   "stateMgmt.ts",
+  "../public/src/state.ets"
 ]

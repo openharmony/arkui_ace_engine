@@ -30,11 +30,11 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: DatePickerAttribute): void { }
+    applyPressedAttribute(instance: DatePickerAttribute): void { }
+    applyFocusedAttribute(instance: DatePickerAttribute): void { }
+    applyDisabledAttribute(instance: DatePickerAttribute): void { }
+    applySelectedAttribute(instance: DatePickerAttribute): void { }
     _lunar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _lunar_0_0value?: boolean | undefined
     _disappearTextStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

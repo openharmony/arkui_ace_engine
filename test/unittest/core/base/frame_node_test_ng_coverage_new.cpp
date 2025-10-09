@@ -208,11 +208,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAddJudgeToTargetComponent02, TestSize.Level1)
     /**
      * @tc.steps: step2. call the function AddJudgeToTargetComponent.
      */
-    frameNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_ = nullptr;
+    frameNode->GetEventHub<EventHub>()->gestureEventHub_ = nullptr;
     RefPtr<TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     frameNode->AddJudgeToTargetComponent(targetComponent);
     EXPECT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_, nullptr);
+    EXPECT_EQ(frameNode->GetEventHub<EventHub>()->gestureEventHub_, nullptr);
 }
 
 /**
@@ -226,7 +226,7 @@ HWTEST_F(FrameNodeTestNg, TriggerShouldParallelInnerWithTest01, TestSize.Level1)
      * @tc.steps: step1. create frameNode.
      */
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
-    auto gestureHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto gestureHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
     ShouldBuiltInRecognizerParallelWithFunc shouldBuiltInRecognizerParallelWithFunc =
         [](RefPtr<NGGestureRecognizer> target, std::vector<RefPtr<NGGestureRecognizer>> targets) {
             return RefPtr<NGGestureRecognizer>();
@@ -384,7 +384,7 @@ HWTEST_F(FrameNodeTestNg, TriggerOnTouchInterceptTest, TestSize.Level1)
     /**
      * @tc.steps: step2. call the function AddTouchEventAllFingersInfoTest.
      */
-    auto gestureHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto gestureHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
     TouchInterceptFunc touchInterceptFunc = [](TouchEventInfo& touchEventInfo) { return HitTestMode::HTMBLOCK; };
     gestureHub->SetOnTouchIntercept(std::move(touchInterceptFunc));
     TouchEventInfo touchEventInfo("touch");
@@ -809,7 +809,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest008, TestSize.Level1)
      * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
      */
     FRAME_NODE_PARENT->isActive_ = true;
-    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    auto parentEventHub = FRAME_NODE_PARENT->GetEventHub<EventHub>();
     parentEventHub->SetEnabled(true);
     auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
     parentGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_HIERARCHY);
@@ -861,7 +861,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest009, TestSize.Level1)
      * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
      */
     FRAME_NODE_PARENT->isActive_ = true;
-    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    auto parentEventHub = FRAME_NODE_PARENT->GetEventHub<EventHub>();
     parentEventHub->SetEnabled(true);
     auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
     parentGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_HIERARCHY);
@@ -914,7 +914,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest010, TestSize.Level1)
      * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
      */
     FRAME_NODE_PARENT->isActive_ = true;
-    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    auto parentEventHub = FRAME_NODE_PARENT->GetEventHub<EventHub>();
     parentEventHub->SetEnabled(true);
     auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
     parentGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_DESCENDANTS);
@@ -970,7 +970,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest011, TestSize.Level1)
      * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
      */
     FRAME_NODE_PARENT->isActive_ = true;
-    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    auto parentEventHub = FRAME_NODE_PARENT->GetEventHub<EventHub>();
     parentEventHub->SetEnabled(true);
     auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
     parentGestureEventHub->SetHitTestMode(HitTestMode::HTMDEFAULT);
@@ -997,7 +997,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest011, TestSize.Level1)
     childNode->SetActive(true);
     auto childGestureEventHub = childNode->GetOrCreateGestureEventHub();
     childGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_HIERARCHY);
-    const auto& childInputEventHub = childNode->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
+    const auto& childInputEventHub = childNode->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
     childInputEventHub->SetAxisEvent([](AxisInfo& info) {});
 
     /**
@@ -1051,7 +1051,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback04, TestSize.Level
     auto pattern = frameNode->GetPattern<PagePattern>();
     pattern->isOnShow_ = true;
     OnSizeChangedFunc onSizeChanged = [](const RectF& oldRect, const RectF& rect) {};
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
     // auto
     frameNode->lastFrameNodeRect_ =
@@ -1110,7 +1110,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeHitTestMode001, TestSize.Level1)
      * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
      */
     FRAME_NODE_PARENT->isActive_ = true;
-    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    auto parentEventHub = FRAME_NODE_PARENT->GetEventHub<EventHub>();
     parentEventHub->SetEnabled(true);
     auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
     parentGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_HIERARCHY);
@@ -1164,7 +1164,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeHitTestMode002, TestSize.Level1)
      * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
      */
     FRAME_NODE_PARENT->isActive_ = true;
-    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    auto parentEventHub = FRAME_NODE_PARENT->GetEventHub<EventHub>();
     parentEventHub->SetEnabled(true);
     auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
     parentGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_HIERARCHY);
@@ -1219,7 +1219,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeHitTestMode003, TestSize.Level1)
      * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
      */
     FRAME_NODE_PARENT->isActive_ = true;
-    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    auto parentEventHub = FRAME_NODE_PARENT->GetEventHub<EventHub>();
     parentEventHub->SetEnabled(true);
     auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
     parentGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_DESCENDANTS);
@@ -1277,7 +1277,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeHitTestMode004, TestSize.Level1)
      * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
      */
     FRAME_NODE_PARENT->isActive_ = true;
-    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    auto parentEventHub = FRAME_NODE_PARENT->GetEventHub<EventHub>();
     parentEventHub->SetEnabled(true);
     auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
     parentGestureEventHub->SetHitTestMode(HitTestMode::HTMDEFAULT);
@@ -1340,7 +1340,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeHitTestMode005, TestSize.Level1)
      * @tc.steps: step2. create parent node and set onTouchIntercept and onChildTouchTestFunc.
      */
     FRAME_NODE_PARENT->isActive_ = true;
-    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    auto parentEventHub = FRAME_NODE_PARENT->GetEventHub<EventHub>();
     parentEventHub->SetEnabled(true);
     auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
     parentGestureEventHub->SetHitTestMode(HitTestMode::HTMDEFAULT);

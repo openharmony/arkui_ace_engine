@@ -481,6 +481,8 @@ HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset002, TestSize.Level1)
         .testParagraphRects = { paragraphRect } };
     AddParagraph(paragraphItem);
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     auto childNode1 = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<RichEditorPattern>(), true);
     host->AddChild(childNode1);
     childNode1->SetParent(host);
@@ -1399,7 +1401,7 @@ HWTEST_F(RichEditorEditTestNg, BeforeChangeText001, TestSize.Level1)
     RichEditorChangeValue changeValue;
     RichEditorPattern::OperationRecord operationRecord;
     OHOS::Ace::NG::RecordType recodrType = OHOS::Ace::NG::RecordType::DEL_BACKWARD;
-    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
     eventHub->SetOnDidChange([](const RichEditorChangeValue& value) -> bool { return false; });
     auto ret = richEditorPattern->BeforeChangeText(changeValue, operationRecord, recodrType, 100);
     EXPECT_TRUE(ret);
@@ -1420,7 +1422,7 @@ HWTEST_F(RichEditorEditTestNg, BeforeChangeText002, TestSize.Level1)
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     richEditorPattern->spans_.emplace_back(spanItem);
     options.offset = -1;
-    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
     eventHub->SetOnDidChange([](const RichEditorChangeValue& value) -> bool { return false; });
     auto ret = richEditorPattern->BeforeChangeText(changeValue, options);
     EXPECT_FALSE(richEditorPattern->spans_.empty());

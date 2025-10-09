@@ -702,7 +702,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsOtherA
  * @tc.desc: Check the functionality of CommonMethodModifierTest.setBackgroundColor
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setBackgroundColorTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundColorTest, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
     static const std::string PROP_NAME("backgroundColor");

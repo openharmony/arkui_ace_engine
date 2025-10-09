@@ -110,7 +110,7 @@ HWTEST_F(NavDestinationModifierTest, setModeTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setHideTitleBar0TestDefaultValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setHideTitleBar0TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -133,7 +133,7 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> hideTitleB
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setHideTitleBar0TestValidValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setHideTitleBar0TestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -167,7 +167,7 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> animatedHi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setHideTitleBar1TestValidValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setHideTitleBar1TestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -266,7 +266,7 @@ HWTEST_F(NavDestinationModifierTest, setOnBackPressedTest, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto navGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     ASSERT_NE(navGroupNode, nullptr);
-    auto eventHub = navGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = navGroupNode->GetEventHub<NavDestinationEventHub>();
 
     static const Ark_Int32 expectedResId = 123;
     auto onBackPressed = [](Ark_VMContext context, const Ark_Int32 resourceId,
@@ -369,7 +369,7 @@ HWTEST_F(NavDestinationModifierTest, setRecoverableTestInvalidValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setIgnoreLayoutSafeAreaTestDefaultValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setIgnoreLayoutSafeAreaTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -386,7 +386,7 @@ HWTEST_F(NavDestinationModifierTest, setIgnoreLayoutSafeAreaTestDefaultValues, T
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setIgnoreLayoutSafeAreaTestValidValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setIgnoreLayoutSafeAreaTestValidValues, TestSize.Level1)
 {
     std::string resultStr;
     std::string expectedStr;

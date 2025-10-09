@@ -28,12 +28,13 @@ import {
     memoEntry,
     scheduleCallback,
     GlobalStateManager,
-    StateContext,
     ComputableState,
     IncrementalNode
 } from "@koalaui/runtime"
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { KPointer, runtimeType, RuntimeType } from "@koalaui/interop"
-import { UserViewBuilder, UserView, EntryPoint } from "../UserView"
+import { UserViewBuilder, UserView } from "../UserView"
+import { EntryPoint } from '../component/customComponent';
 import { ArkUINativeModule } from "#components"
 import { CommonMethod, CustomBuilder, Dimension, LayoutSafeAreaEdge, LayoutSafeAreaType, Length, NavBarPosition, NavContentInfo, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavigationMenuItem, NavigationMode, NavigationOperation, NavigationTitleMode, NavigationTitleOptions, NavigationToolbarOptions, PixelMap, Resource, ResourceStr, SystemBarStyle, ToolbarItem } from "#generated"
 import { RouteType } from "#generated"

@@ -59,7 +59,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -211,7 +211,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
 export interface MarqueeOptions {
     start: boolean;
     step?: double;
-    loop?: number;
+    loop?: int32;
     fromStart?: boolean;
     src: string;
 }
@@ -428,7 +428,7 @@ export class MarqueeOptions_serializer {
         if (valueHolderForLoop !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLoopTmpValue  = valueHolderForLoop!
-            valueSerializer.writeNumber(valueHolderForLoopTmpValue)
+            valueSerializer.writeInt32(valueHolderForLoopTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -453,11 +453,11 @@ export class MarqueeOptions_serializer {
         }
         const stepTmpResult : double | undefined = stepTmpBuf
         const loopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let loopTmpBuf : number | undefined = undefined
+        let loopTmpBuf : int32 | undefined = undefined
         if ((loopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            loopTmpBuf = (valueDeserializer.readNumber() as number)
+            loopTmpBuf = valueDeserializer.readInt32()
         }
-        const loopTmpResult : number | undefined = loopTmpBuf
+        const loopTmpResult : int32 | undefined = loopTmpBuf
         const fromStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fromStartTmpBuf : boolean | undefined = undefined
         if ((fromStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

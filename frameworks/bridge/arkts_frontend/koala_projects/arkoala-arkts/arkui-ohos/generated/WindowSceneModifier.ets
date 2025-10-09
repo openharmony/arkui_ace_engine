@@ -30,11 +30,11 @@ export class WindowSceneModifier extends CommonMethodModifier implements WindowS
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: WindowSceneAttribute): void { }
+    applyPressedAttribute(instance: WindowSceneAttribute): void { }
+    applyFocusedAttribute(instance: WindowSceneAttribute): void { }
+    applyDisabledAttribute(instance: WindowSceneAttribute): void { }
+    applySelectedAttribute(instance: WindowSceneAttribute): void { }
     _attractionEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _attractionEffect_0_0value?: Position | undefined
     _attractionEffect_0_1value?: number | undefined

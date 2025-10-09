@@ -234,7 +234,7 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setOnReachStartTest, TestSize.Level
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto onReachStart = eventHub->GetOnReachStart();
@@ -265,7 +265,7 @@ HWTEST_F(ScrollableCommonMethodModifierTest, DISABLED_setOnReachEndTest, TestSiz
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto onReachEnd = eventHub->GetOnReachEnd();
@@ -295,7 +295,7 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setOnScrollStartTest, TestSize.Leve
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto onReachStart = eventHub->GetOnScrollStart();
@@ -326,7 +326,7 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setOnScrollStopTest, TestSize.Level
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto onReachStart = eventHub->GetOnScrollStop();

@@ -1225,7 +1225,7 @@ void ViewAbstractModelStatic::SetBackgroundColor(FrameNode *frameNode, const std
     if (color) {
         ViewAbstract::SetBackgroundColor(frameNode, color.value());
     } else {
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
+        ViewAbstract::SetBackgroundColor(frameNode, Color::TRANSPARENT);
     }
 }
 
@@ -1635,6 +1635,11 @@ void ViewAbstractModelStatic::SetBackgroundImageRepeat(FrameNode* frameNode,
     } else {
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImageRepeat, frameNode);
     }
+}
+
+void ViewAbstractModelStatic::SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(SystemBarEffect, systemBarEffect, frameNode);
 }
 
 int32_t ViewAbstractModelStatic::GetMenuParam(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& node)

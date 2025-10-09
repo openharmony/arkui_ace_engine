@@ -150,7 +150,7 @@ void FormPattern::OnAttachToFrameNode()
     static RenderContext::ContextParam param = { RenderContext::ContextType::EXTERNAL, std::nullopt };
     externalRenderContext_->InitContext(false, param);
     InitFormManagerDelegate();
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCache([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -1797,7 +1797,7 @@ void FormPattern::FireOnErrorEvent(const std::string& code, const std::string& m
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     json->Put("errcode", code.c_str());
@@ -1809,7 +1809,7 @@ void FormPattern::FireOnUninstallEvent(int64_t id) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     int64_t uninstallFormId = id < MAX_NUMBER_OF_JS ? id : -1;
     auto json = JsonUtil::Create(true);
@@ -1823,7 +1823,7 @@ void FormPattern::FireOnAcquiredEvent(int64_t id) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     int64_t onAcquireFormId = id < MAX_NUMBER_OF_JS ? id : -1;
     auto json = JsonUtil::Create(true);
@@ -1840,7 +1840,7 @@ void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     json->Put("action", action);
@@ -1851,7 +1851,7 @@ void FormPattern::FireOnLoadEvent() const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnLoad("");
 }
@@ -1975,7 +1975,7 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
 void FormPattern::RemoveSubContainer()
 {
     auto host = GetHost();
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     if (eventHub) {
         eventHub->FireOnCache();
     }
@@ -2003,7 +2003,7 @@ void FormPattern::EnableDrag()
         info.extraInfo = "card drag";
         return info;
     };
-    auto eventHub = GetHost()->GetOrCreateEventHub<EventHub>();
+    auto eventHub = GetHost()->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDefaultOnDragStart(std::move(dragStart));
 }
@@ -2778,7 +2778,7 @@ void FormPattern::FireOnUpdateFormDone(int64_t id) const
     TAG_LOGD(AceLogTag::ACE_FORM, "fire form update done:%{public}" PRId64, id);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     int64_t onUpdateFormId = id < MAX_NUMBER_OF_JS ? id : -1;
     auto json = JsonUtil::Create(true);

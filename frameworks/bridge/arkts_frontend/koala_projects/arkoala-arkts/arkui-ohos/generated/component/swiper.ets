@@ -29,7 +29,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { EdgeEffect, PageFlipMode, Color } from "./enums"
 import { default as curves } from "@ohos.curves"
-import { extractors, hookSwiperAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookSwiperAttributeModifier, AttributeUpdater } from "#handwritten"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -956,6 +956,7 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     indicatorInteractive_value?: boolean | undefined
     pageFlipMode_value?: PageFlipMode | undefined
     onContentWillScroll_value?: ContentWillScrollCallback | undefined
+    attributeModifier_value?: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined
     setSwiperOptions(controller?: SwiperController): this {
         return this
     }
@@ -1369,7 +1370,7 @@ export class Indicator {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
-    _bottom?: Length | undefined
+    _bottom?: Length | undefined | LengthMetrics | Length | undefined | undefined
     _start?: LengthMetrics | undefined
     _end?: LengthMetrics | undefined
     constructor() {
@@ -1380,27 +1381,27 @@ export class Indicator {
     static digit(): DigitIndicator {
         return new DigitIndicator()
     }
-    left(value: Length): this {
+    left(value: Length | undefined): this {
         this._left = value
         return this
     }
-    top(value: Length): this {
+    top(value: Length | undefined): this {
         this._top = value
         return this
     }
-    right(value: Length): this {
+    right(value: Length | undefined): this {
         this._right = value
         return this
     }
-    bottom(value: Length): this {
-        this._bottom = value
+    public bottom(bottom: Length | undefined | LengthMetrics | Length | undefined, ignoreSize?: boolean): this {
+        this._bottom = bottom
         return this
     }
-    start(value: LengthMetrics): this {
+    start(value: LengthMetrics | undefined): this {
         this._start = value
         return this
     }
-    end(value: LengthMetrics): this {
+    end(value: LengthMetrics | undefined): this {
         this._end = value
         return this
     }
@@ -1409,7 +1410,7 @@ export class DotIndicator {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
-    _bottom?: Length | undefined
+    _bottom?: Length | undefined | LengthMetrics | Length | undefined | undefined
     _start?: LengthMetrics | undefined
     _end?: LengthMetrics | undefined
     _itemWidth?: Length | undefined
@@ -1429,63 +1430,63 @@ export class DotIndicator {
     static digit(): DigitIndicator {
         return new DigitIndicator()
     }
-    left(value: Length): this {
+    left(value: Length | undefined): this {
         this._left = value
         return this
     }
-    top(value: Length): this {
+    top(value: Length | undefined): this {
         this._top = value
         return this
     }
-    right(value: Length): this {
+    right(value: Length | undefined): this {
         this._right = value
         return this
     }
-    bottom(value: Length): this {
-        this._bottom = value
+    public bottom(bottom: Length | undefined | LengthMetrics | Length | undefined, ignoreSize?: boolean): this {
+        this._bottom = bottom
         return this
     }
-    start(value: LengthMetrics): this {
+    start(value: LengthMetrics | undefined): this {
         this._start = value
         return this
     }
-    end(value: LengthMetrics): this {
+    end(value: LengthMetrics | undefined): this {
         this._end = value
         return this
     }
-    itemWidth(value: Length): this {
+    itemWidth(value: Length | undefined): this {
         this._itemWidth = value
         return this
     }
-    itemHeight(value: Length): this {
+    itemHeight(value: Length | undefined): this {
         this._itemHeight = value
         return this
     }
-    selectedItemWidth(value: Length): this {
+    selectedItemWidth(value: Length | undefined): this {
         this._selectedItemWidth = value
         return this
     }
-    selectedItemHeight(value: Length): this {
+    selectedItemHeight(value: Length | undefined): this {
         this._selectedItemHeight = value
         return this
     }
-    mask(value: boolean): this {
+    mask(value: boolean | undefined): this {
         this._mask = value
         return this
     }
-    color(value: ResourceColor): this {
+    color(value: ResourceColor | undefined): this {
         this._color = value
         return this
     }
-    selectedColor(value: ResourceColor): this {
+    selectedColor(value: ResourceColor | undefined): this {
         this._selectedColor = value
         return this
     }
-    maxDisplayCount(maxDisplayCount: number): this {
+    maxDisplayCount(maxDisplayCount: number | undefined): this {
         this._maxDisplayCount = maxDisplayCount
         return this
     }
-    space(space: LengthMetrics): this {
+    space(space: LengthMetrics | undefined): this {
         this._space = space
         return this
     }
@@ -1494,7 +1495,7 @@ export class DigitIndicator {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
-    _bottom?: Length | undefined
+    _bottom?: Length | undefined | LengthMetrics | Length | undefined | undefined
     _start?: LengthMetrics | undefined
     _end?: LengthMetrics | undefined
     _fontColor?: ResourceColor | undefined
@@ -1509,43 +1510,43 @@ export class DigitIndicator {
     static digit(): DigitIndicator {
         return new DigitIndicator()
     }
-    left(value: Length): this {
+    left(value: Length | undefined): this {
         this._left = value
         return this
     }
-    top(value: Length): this {
+    top(value: Length | undefined): this {
         this._top = value
         return this
     }
-    right(value: Length): this {
+    right(value: Length | undefined): this {
         this._right = value
         return this
     }
-    bottom(value: Length): this {
-        this._bottom = value
+    public bottom(bottom: Length | undefined | LengthMetrics | Length | undefined, ignoreSize?: boolean): this {
+        this._bottom = bottom
         return this
     }
-    start(value: LengthMetrics): this {
+    start(value: LengthMetrics | undefined): this {
         this._start = value
         return this
     }
-    end(value: LengthMetrics): this {
+    end(value: LengthMetrics | undefined): this {
         this._end = value
         return this
     }
-    fontColor(value: ResourceColor): this {
+    fontColor(value: ResourceColor | undefined): this {
         this._fontColor = value
         return this
     }
-    selectedFontColor(value: ResourceColor): this {
+    selectedFontColor(value: ResourceColor | undefined): this {
         this._selectedFontColor = value
         return this
     }
-    digitFont(value: Font): this {
+    digitFont(value: Font | undefined): this {
         this._digitFont = value
         return this
     }
-    selectedDigitFont(value: Font): this {
+    selectedDigitFont(value: Font | undefined): this {
         this._selectedDigitFont = value
         return this
     }
@@ -1738,7 +1739,7 @@ export class ArrowStyle_serializer {
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
@@ -1782,7 +1783,7 @@ export class ArrowStyle_serializer {
             if (valueHolderForArrowColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForArrowColorTmpValueForIdx0  = valueHolderForArrowColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForArrowColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForArrowColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForArrowColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForArrowColorTmpValueForIdx1  = valueHolderForArrowColorTmpValue as number
@@ -1837,7 +1838,7 @@ export class ArrowStyle_serializer {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -1873,7 +1874,7 @@ export class ArrowStyle_serializer {
             const arrowColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let arrowColorTmpBuf_ : Color | number | string | Resource | undefined
             if (arrowColorTmpBuf_UnionSelector == (0).toChar()) {
-                arrowColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                arrowColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (arrowColorTmpBuf_UnionSelector == (1).toChar()) {
                 arrowColorTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (arrowColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -2084,7 +2085,7 @@ export class DotIndicator_serializer {
             if (valueHolderFor_colorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderFor_colorTmpValueForIdx0  = valueHolderFor_colorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderFor_colorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderFor_colorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderFor_colorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderFor_colorTmpValueForIdx1  = valueHolderFor_colorTmpValue as number
@@ -2108,7 +2109,7 @@ export class DotIndicator_serializer {
             if (valueHolderFor_selectedColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderFor_selectedColorTmpValueForIdx0  = valueHolderFor_selectedColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderFor_selectedColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderFor_selectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderFor_selectedColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderFor_selectedColorTmpValueForIdx1  = valueHolderFor_selectedColorTmpValue as number
@@ -2252,7 +2253,7 @@ export class DigitIndicator_serializer {
             if (valueHolderFor_fontColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderFor_fontColorTmpValueForIdx0  = valueHolderFor_fontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderFor_fontColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderFor_fontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderFor_fontColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderFor_fontColorTmpValueForIdx1  = valueHolderFor_fontColorTmpValue as number
@@ -2276,7 +2277,7 @@ export class DigitIndicator_serializer {
             if (valueHolderFor_selectedFontColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderFor_selectedFontColorTmpValueForIdx0  = valueHolderFor_selectedFontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderFor_selectedFontColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderFor_selectedFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderFor_selectedFontColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderFor_selectedFontColorTmpValueForIdx1  = valueHolderFor_selectedFontColorTmpValue as number

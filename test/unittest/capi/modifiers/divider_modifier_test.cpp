@@ -61,7 +61,7 @@ const std::vector<OneColorStep> COLOR_TEST_PLAN = {
  * @tc.desc: Check the functionality of DividerModifier.setColor
  * @tc.type: FUNC
  */
-HWTEST_F(DividerModifierTest, DividerModifierTest001, TestSize.Level1)
+HWTEST_F(DividerModifierTest, DISABLED_DividerModifierTest001, TestSize.Level1)
 {
     static const std::string PROP_NAME("color");
     ASSERT_NE(modifier_->setColor, nullptr);

@@ -509,7 +509,7 @@ HWTEST_F(RichEditorDeleteTestNg, DoDeleteActions001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto aboutToDeleteFunc = [](const RichEditorDeleteValue&) { return false; };
     eventHub->SetAboutToDelete(std::move(aboutToDeleteFunc));
@@ -733,7 +733,7 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteSpans001, TestSize.Level1)
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     richEditorPattern->spans_.push_back(spanItem);
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
-    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
     eventHub->SetOnWillChange([](const RichEditorChangeValue& value) -> bool { return false; });
     richEditorPattern->redoOperationRecords_.emplace_back();
     richEditorPattern->DeleteSpans(options);
@@ -839,6 +839,8 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteRange004, TestSize.Level1)
     int32_t start = 0;
     int32_t end = 2;
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->styledString_->text_ = u"test";
     auto styleString = richEditorPattern->styledString_;
     richEditorPattern->previewLongPress_ = true;
@@ -913,7 +915,7 @@ HWTEST_F(RichEditorDeleteTestNg, InsertOrDeleteSpace002, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto changeReason = TextChangeReason::UNKNOWN;
     auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
@@ -943,7 +945,7 @@ HWTEST_F(RichEditorDeleteTestNg, InsertOrDeleteSpace003, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto changeReason = TextChangeReason::UNKNOWN;
     auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {

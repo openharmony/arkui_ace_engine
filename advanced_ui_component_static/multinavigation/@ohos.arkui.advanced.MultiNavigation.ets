@@ -15,7 +15,7 @@
 
 import deviceInfo from '@ohos.deviceInfo';
 import { Entry, Text, BuilderParam, LaunchMode, Builder,PopInfo,NavigationInterception,Callback,Component, NavPathStack, TouchType, Navigation,NavPathInfo, NavDestination, NavigationMode, NavigationOptions, AttributeModifier, NavigationAttribute, Percentage} from '@ohos.arkui.component'  // TextAttribute should be insert by ui-plugins
-import { State, MutableState, stateOf, observableProxy, Observed, ObjectLink, Link } from '@ohos.arkui.stateManagement' // should be insert by ui-plugins
+import { State, Observed, ObjectLink, Link } from '@ohos.arkui.stateManagement' // should be insert by ui-plugins
 import hilog from '@ohos.hilog'
 import mediaquery from '@ohos.mediaquery';
 import display from '@ohos.display';
@@ -297,7 +297,7 @@ export struct SubNavigation {
         })
       }
       .mode(this.getMode())
-      .onNavigationModeChange(this?.onNavigationModeChange)
+      .onNavigationModeChange(this.onNavigationModeChange)
       .hideBackButton(true)
       .hideTitleBar(true, true)
       .navDestination(this.SubNavDestination)
@@ -569,7 +569,7 @@ export struct MultiNavigation {
         secondaryStack: (param as SubNavigationStack).secondaryStack,
         needRenderLeftClickCount: this.multiStack.needRenderLeftClickCount,
         navWidthRangeModifier: this.multiStack.navWidthRangeModifier,
-        onNavigationModeChange: this?.callback,
+        onNavigationModeChange: this.callback,
         needRenderDisplayMode: this.multiStack.needRenderDisplayMode,
       });
     } else {
@@ -590,7 +590,7 @@ export struct MultiNavigation {
     that = this;
     console.log('MultiNavigation aboutToAppear');
     try {
-      display.on('foldStatusChange', this.foldStatusCallback);
+      display.onFoldStatusChange(this.foldStatusCallback);
     } catch (exception) {
       console.error('Failed to register callback. Code: ' + JSON.stringify(exception));
     }
@@ -620,7 +620,7 @@ export struct MultiNavigation {
 
   aboutToDisappear(): void {
     try {
-      display.off('foldStatusChange');
+      display.offFoldStatusChange();
     } catch (exception) {
       console.error('Failed to unregister callback. Code: ' + JSON.stringify(exception));
     }

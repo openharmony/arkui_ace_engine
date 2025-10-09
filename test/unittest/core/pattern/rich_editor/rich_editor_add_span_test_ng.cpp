@@ -578,6 +578,8 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpanByPasteData002, TestSize.Level1)
     ASSERT_NE(spanString, nullptr);
 
     richEditorPattern->SetSpanStringMode(true);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->AddSpanByPasteData(spanString);
     richEditorPattern->SetSpanStringMode(false);
 

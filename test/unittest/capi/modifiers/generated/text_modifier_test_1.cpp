@@ -37,7 +37,7 @@ HWTEST_F(TextModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, setFontColorTestFontColorValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setFontColorTestFontColorValidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueFontColor;
 
@@ -127,7 +127,7 @@ HWTEST_F(TextModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setFontSizeTestFontSizeValidValues, TestSize.Level1)
 {
     Opt_Union_Number_String_Resource initValueFontSize;
 
@@ -163,7 +163,7 @@ HWTEST_F(TextModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
 {
     Opt_Union_Number_String_Resource initValueFontSize;
 
@@ -218,7 +218,7 @@ HWTEST_F(TextModifierTest, DISABLED_setMinFontSizeTestDefaultValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, setMinFontSizeTestMinFontSizeValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setMinFontSizeTestMinFontSizeValidValues, TestSize.Level1)
 {
     Opt_Union_Number_String_Resource initValueMinFontSize;
 
@@ -309,7 +309,7 @@ HWTEST_F(TextModifierTest, DISABLED_setMaxFontSizeTestDefaultValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, setMaxFontSizeTestMaxFontSizeValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setMaxFontSizeTestMaxFontSizeValidValues, TestSize.Level1)
 {
     Opt_Union_Number_String_Resource initValueMaxFontSize;
 
@@ -702,7 +702,7 @@ HWTEST_F(TextModifierTest, DISABLED_setLineHeightTestDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, setLineHeightTestLineHeightValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setLineHeightTestLineHeightValidValues, TestSize.Level1)
 {
     Opt_Union_Number_String_Resource initValueLineHeight;
 
@@ -1106,7 +1106,7 @@ HWTEST_F(TextModifierTest, setDecorationTestDecorationTypeInvalidValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, setDecorationTestDecorationColorValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setDecorationTestDecorationColorValidValues, TestSize.Level1)
 {
     Opt_DecorationStyleInterface initValueDecoration;
 

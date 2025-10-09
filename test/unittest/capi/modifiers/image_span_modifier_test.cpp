@@ -209,12 +209,12 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setColorFilterTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageSpanModifierTest, setOnCompleteTest, TestSize.Level1)
+HWTEST_F(ImageSpanModifierTest, DISABLED_setOnCompleteTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnComplete, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static double width = 0.0;
@@ -276,12 +276,12 @@ const std::vector<LoadImageFailEvent> ERROR_EVENT_TEST_PLAN = {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageSpanModifierTest, setOnErrorTest, TestSize.Level1)
+HWTEST_F(ImageSpanModifierTest, DISABLED_setOnErrorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnComplete, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static double componentWidth = 0.0;

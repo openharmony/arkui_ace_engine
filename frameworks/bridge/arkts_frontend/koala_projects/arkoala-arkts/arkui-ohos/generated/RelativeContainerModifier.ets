@@ -29,11 +29,11 @@ export class RelativeContainerModifier extends CommonMethodModifier implements R
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: RelativeContainerAttribute): void { }
+    applyPressedAttribute(instance: RelativeContainerAttribute): void { }
+    applyFocusedAttribute(instance: RelativeContainerAttribute): void { }
+    applyDisabledAttribute(instance: RelativeContainerAttribute): void { }
+    applySelectedAttribute(instance: RelativeContainerAttribute): void { }
     _guideLine_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _guideLine_0_0value?: Array<GuideLineStyle> | undefined
     _barrier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

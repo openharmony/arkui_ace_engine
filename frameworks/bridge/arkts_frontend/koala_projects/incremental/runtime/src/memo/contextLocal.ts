@@ -14,7 +14,8 @@
  */
 
 import { __context, __id } from "../internals"
-import { State } from "../states/State"
+import { State } from 'arkui.incremental.runtime.state';
+import { StateContext, InternalScope } from '../states/State';
 
 /**
  * @param name - a name of a context state
@@ -22,7 +23,7 @@ import { State } from "../states/State"
  */
 /** @memo:intrinsic */
 export function contextLocal<Value>(name: string): State<Value> | undefined {
-    return __context().stateBy<Value>(name)
+    return (__context() as StateContext).stateBy<Value>(name)
 }
 
 /**
@@ -32,7 +33,7 @@ export function contextLocal<Value>(name: string): State<Value> | undefined {
  */
 /** @memo:intrinsic */
 export function contextLocalValue<Value>(name: string): Value {
-    return __context().valueBy<Value>(name)
+    return (__context() as StateContext).valueBy<Value>(name)
 }
 
 /**
@@ -51,8 +52,8 @@ export function contextLocalScope<Value>(
     /** @memo */
     content: () => void
 ) {
-    const scope = __context().scope<void>(__id(), 1)
-    scope.paramEx<Value>(0, value, undefined, name, true) // can be found by name
+    const scope = __context().scope<void>(__id(), 1);
+    (scope as InternalScope<void>).paramEx<Value>(0, value, undefined, name, true); // can be found by name
     if (scope.unchanged) {
         scope.cached
     } else {

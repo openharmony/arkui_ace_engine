@@ -504,7 +504,7 @@ void ImageModelNG::SetOnComplete(std::function<void(const LoadImageSuccessEvent&
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnComplete(std::move(callback));
 }
@@ -513,7 +513,7 @@ void ImageModelNG::SetOnError(std::function<void(const LoadImageFailEvent& info)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(callback));
 }
@@ -522,7 +522,7 @@ void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFinish(std::move(callback));
 }
@@ -996,7 +996,7 @@ void ImageModelNG::SetOnComplete(
     FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnComplete(std::move(callback));
 }
@@ -1004,7 +1004,7 @@ void ImageModelNG::SetOnComplete(
 void ImageModelNG::SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(callback));
 }
@@ -1012,7 +1012,7 @@ void ImageModelNG::SetOnError(FrameNode* frameNode, std::function<void(const Loa
 void ImageModelNG::SetOnSvgPlayFinish(FrameNode* frameNode, std::function<void()>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFinish(std::move(callback));
 }

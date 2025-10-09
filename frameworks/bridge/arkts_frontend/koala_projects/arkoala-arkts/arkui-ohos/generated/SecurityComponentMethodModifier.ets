@@ -31,11 +31,11 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: SecurityComponentMethod): void { }
+    applyPressedAttribute(instance: SecurityComponentMethod): void { }
+    applyFocusedAttribute(instance: SecurityComponentMethod): void { }
+    applyDisabledAttribute(instance: SecurityComponentMethod): void { }
+    applySelectedAttribute(instance: SecurityComponentMethod): void { }
     _iconSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _iconSize_0_0value?: Dimension | undefined
     _layoutDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

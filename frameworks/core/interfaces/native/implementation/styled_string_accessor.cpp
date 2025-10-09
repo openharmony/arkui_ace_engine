@@ -108,9 +108,6 @@ RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
             result = AceType::MakeRefPtr<ExtSpan>(start, end);  // Ark_UserDataSpan is temporarily ignored.
             LOGE("Converter::Convert(Ark_StyleOptions) the Ark_UserDataSpan is not implemented.");
         },
-        [](const Ark_ImageAttachment& style) {
-            LOGE("Converter::Convert(Ark_StyleOptions) the Ark_ImageAttachment is not implemented.");
-        },
         [](const Ark_CustomSpan& style) {
             LOGE("Converter::Convert(Ark_StyleOptions) the Ark_CustomSpan is not implemented.");
         },
@@ -183,7 +180,8 @@ Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan
             [&peer](const Ark_CustomSpan& arkCustomSpan) {
                 CustomSpanPeer* peerCustomSpan = arkCustomSpan;
                 CHECK_NULL_VOID(peerCustomSpan && peerCustomSpan->span);
-                peer->spanString = AceType::MakeRefPtr<SpanString>(peerCustomSpan->span);
+                auto customSpan = AceType::DynamicCast<CustomSpan>(peerCustomSpan->span);
+                peer->spanString = AceType::MakeRefPtr<SpanString>(customSpan);
             },
             []() {}
         );

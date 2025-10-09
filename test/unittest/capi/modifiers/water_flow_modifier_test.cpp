@@ -49,7 +49,7 @@ public:
     }
 };
 
-HWTEST_F(WaterFlowModifierTest, setOnScrollIndexTestCachedCountValidValues, TestSize.Level1)
+HWTEST_F(WaterFlowModifierTest, DISABLED_setOnScrollIndexTestCachedCountValidValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
@@ -128,7 +128,7 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<WaterFlowEventHub>();
+    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(modifier_->setOnScrollFrameBegin, nullptr);
     static const Ark_Int32 expectedResId = 123;

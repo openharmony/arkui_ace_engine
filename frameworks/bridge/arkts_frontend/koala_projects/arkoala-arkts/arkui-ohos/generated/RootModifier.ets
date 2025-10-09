@@ -27,11 +27,11 @@ export class RootModifier implements Root,AttributeModifier<Root> {
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: Root): void { }
+    applyPressedAttribute(instance: Root): void { }
+    applyFocusedAttribute(instance: Root): void { }
+    applyDisabledAttribute(instance: Root): void { }
+    applySelectedAttribute(instance: Root): void { }
     applyModifierPatch(node: PeerNode): void {
         const peer = node as ArkRootPeer;
     }

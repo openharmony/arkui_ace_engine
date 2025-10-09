@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ImageModelStatic {
 public:
+    static void SetSrc(FrameNode* frameNode, const std::optional<ImageSourceInfo>& info);
     static void SetPixelMap(FrameNode* frameNode, const RefPtr<PixelMap>& pixelMap);
     static void SetDrawableDescriptor(FrameNode* frameNode, void* drawable, int type);
     static void SetSmoothEdge(FrameNode* frameNode, const std::optional<float>& value);

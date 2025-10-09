@@ -382,7 +382,7 @@ void PatternLockPattern::UpdateDotConnectEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<PatternLockEventHub>();
+    auto eventHub = host->GetEventHub<PatternLockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateDotConnectEvent(choosePoint_.back().GetCode());
 }
@@ -535,7 +535,7 @@ void PatternLockPattern::AddPointEnd()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<PatternLockEventHub>();
+    auto eventHub = host->GetEventHub<PatternLockEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto patternCompleteEvent = V2::PatternCompleteEvent(chooseCellVec);
@@ -763,7 +763,7 @@ void PatternLockPattern::InitMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputEventHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputEventHub);

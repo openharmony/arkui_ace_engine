@@ -1416,7 +1416,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     CHECK_NULL_VOID(menu);
     auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuNode);
-    auto eventHub = menuNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = menuNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabledInternal(true);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
@@ -1480,7 +1480,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
 
     auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuNode);
-    auto eventHub = menuNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = menuNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabledInternal(false);
 
@@ -1630,7 +1630,7 @@ bool OverlayManager::IsContextMenuBindedOnOrigNode()
     CHECK_NULL_RETURN(dragDropManager, false);
     auto draggingNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
     CHECK_NULL_RETURN(draggingNode, false);
-    auto eventHub = draggingNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = draggingNode->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto frameNode = eventHub->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
@@ -2267,7 +2267,7 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     }
 
     // attach popupNode before entering animation
-    popupNode->GetOrCreateEventHub<BubbleEventHub>()->FireChangeEvent(true);
+    popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     popupMap_[targetId].isCurrentOnShow = true;
 
@@ -2410,7 +2410,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
         auto popupPattern = popupNode->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(popupPattern);
         popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
-        popupNode->GetOrCreateEventHub<BubbleEventHub>()->FireChangeEvent(false);
+        popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         popupNode->GetRenderContext()->UpdateChainedTransition(nullptr);
         auto accessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
@@ -2531,7 +2531,7 @@ void OverlayManager::HideCustomPopups()
             auto paintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
             CHECK_NULL_VOID(paintProperty);
             auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
-            popupNode->GetOrCreateEventHub<BubbleEventHub>()->FireChangeEvent(false);
+            popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
             // if use popup with option, skip
             if (isTypeWithOption) {
                 continue;
@@ -2585,7 +2585,7 @@ void OverlayManager::HideAllPopupsWithoutAnimation()
         CHECK_NULL_CONTINUE(popupPattern);
         popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
         popupPattern->CallDoubleBindCallback("false");
-        popupNode->GetOrCreateEventHub<BubbleEventHub>()->FireChangeEvent(false);
+        popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         popupNode->GetRenderContext()->UpdateChainedTransition(nullptr);
         ErasePopup(targetId);
     }
@@ -3068,7 +3068,7 @@ void OverlayManager::CleanPopupInSubWindow(bool isForceClear)
             SetDismissPopupId(target);
             bubblePattern->CallOnWillDismiss(static_cast<int32_t>(DismissReason::TOUCH_OUTSIDE));
         } else {
-            auto bubbleEventHub = removeNode->GetOrCreateEventHub<BubbleEventHub>();
+            auto bubbleEventHub = removeNode->GetEventHub<BubbleEventHub>();
             CHECK_NULL_VOID(bubbleEventHub);
             bubbleEventHub->FireChangeEvent(false);
             popupMap_[target].isCurrentOnShow = false;
@@ -3804,7 +3804,7 @@ void OverlayManager::PopModalDialog(int32_t maskId)
     for (auto it = DialogMap.begin(); it != DialogMap.end(); it++) {
         auto dialogProp = DynamicCast<DialogLayoutProperty>(it->second->GetLayoutProperty());
         if (dialogId == it->first) {
-            auto hub = it->second->GetOrCreateEventHub<DialogEventHub>();
+            auto hub = it->second->GetEventHub<DialogEventHub>();
             if (hub) {
                 hub->FireCancelEvent();
             }
@@ -4024,7 +4024,7 @@ bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackP
     if (FireBackPressEvent()) {
         return true;
     }
-    auto hub = overlay->GetOrCreateEventHub<DialogEventHub>();
+    auto hub = overlay->GetEventHub<DialogEventHub>();
     if (!isPageRouter && hub) {
         hub->FireCancelEvent();
     }
@@ -4046,7 +4046,7 @@ bool OverlayManager::RemoveDialogWithContent(
     if (FireBackPressEvent()) {
         return true;
     }
-    auto hub = overlay->GetOrCreateEventHub<DialogEventHub>();
+    auto hub = overlay->GetEventHub<DialogEventHub>();
     if (!isPageRouter && hub) {
         hub->FireCancelEvent();
     }
@@ -4767,7 +4767,7 @@ bool OverlayManager::RemovePopupInSubwindow(const RefPtr<Pattern>& pattern, cons
         return true;
     }
     auto popupPattern = DynamicCast<BubblePattern>(pattern);
-    overlay->GetOrCreateEventHub<BubbleEventHub>()->FireChangeEvent(false);
+    overlay->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
     CHECK_NULL_RETURN(container, false);
@@ -5345,7 +5345,7 @@ void OverlayManager::UpdateSheetMaskBackgroundColor(
     if (sheetStyle.maskColor.has_value()) {
         maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value());
     } else {
-        maskNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+        maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
             HitTestMode::HTMTRANSPARENT);
         maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     }
@@ -5362,7 +5362,7 @@ void OverlayManager::InitSheetMask(
     CHECK_NULL_VOID(sheetTheme);
     auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(sheetLayoutProps);
-    maskNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         UpdateSheetMaskBackgroundColor(maskNode, maskRenderContext, sheetStyle);
     } else {
@@ -5386,14 +5386,14 @@ void OverlayManager::InitSheetMask(
         SheetManager::SetMaskInteractive(maskNode, true);
         if (!sheetStyle.interactive.has_value()) {
             if (sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType() == SheetType::SHEET_POPUP) {
-                maskNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+                maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                     HitTestMode::HTMTRANSPARENT);
                 eventConfirmHub->RemoveClickEvent(sheetMaskClickEvent);
                 sheetMaskClickEventMap_.erase(maskNodeId);
                 SheetManager::SetMaskInteractive(maskNode, false);
             }
         } else if (sheetStyle.interactive == true) {
-            maskNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+            maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                 HitTestMode::HTMTRANSPARENT);
             eventConfirmHub->RemoveClickEvent(sheetMaskClickEvent);
             sheetMaskClickEventMap_.erase(maskNodeId);
@@ -6068,7 +6068,7 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
     CHECK_NULL_VOID(sheetTheme);
     auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(sheetLayoutProps);
-    maskNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
 
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         UpdateSheetMaskBackgroundColor(maskNode, maskRenderContext, sheetStyle);
@@ -6104,7 +6104,7 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
         if ((!sheetStyle.interactive.has_value() && !isPartialUpdate &&
                 sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType() == SheetType::SHEET_POPUP) ||
             sheetStyle.interactive.value_or(false)) {
-            maskNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+            maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                 HitTestMode::HTMTRANSPARENT);
             maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
             eventConfirmHub->RemoveClickEvent(iter->second);
@@ -6188,7 +6188,7 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode,
             CHECK_NULL_VOID(eventConfirmHub);
             eventConfirmHub->RemoveClickEvent(iter->second);
         }
-        maskNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()
+        maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()
             ->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
         context->UpdateBackgroundColor(backgroundColor);
         AnimationUtils::Animate(

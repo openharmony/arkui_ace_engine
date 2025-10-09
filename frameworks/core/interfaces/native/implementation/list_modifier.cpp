@@ -422,14 +422,15 @@ void SetOnItemDragStartImpl(Ark_NativePointer node,
         return;
     }
     auto onItemDragStart = [callback = CallbackHelper(*optValue), frameNode, node](
-        const ItemDragInfo& dragInfo, int32_t itemIndex
-    ) -> RefPtr<AceType> {
+                               const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<AceType> {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
-        auto builder =
-            callback.InvokeWithObtainCallback<CustomNodeBuilder, Callback_Opt_CustomBuilder_Void>(
-                arkDragInfo, arkItemIndex);
-        return builder->BuildSync(node);
+        auto builderOpt = callback.InvokeWithOptConvertResult<CustomNodeBuilder, Opt_CustomNodeBuilder,
+            Callback_Opt_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
+        if (!builderOpt.has_value()) {
+            return nullptr;
+        }
+        return CallbackHelper(builderOpt.value()).BuildSync(node);
     };
     ListModelStatic::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
 }

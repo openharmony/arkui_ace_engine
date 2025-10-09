@@ -29,11 +29,11 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: GridColAttribute): void { }
+    applyPressedAttribute(instance: GridColAttribute): void { }
+    applyFocusedAttribute(instance: GridColAttribute): void { }
+    applyDisabledAttribute(instance: GridColAttribute): void { }
+    applySelectedAttribute(instance: GridColAttribute): void { }
     _span_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _span_0_0value?: number | GridColColumnOption | undefined
     _gridColOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

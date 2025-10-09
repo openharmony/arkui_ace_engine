@@ -53,7 +53,7 @@ RefPtr<NodePaintMethod> CheckBoxPattern::CreateNodePaintMethod()
     paintMethod_->SetUseContentModifier(UseContentModifier());
     paintMethod_->SetHasBuilder(builder_.has_value());
     host->SetCheckboxFlag(true);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     paintMethod_->SetEnabled(enabled);
@@ -102,7 +102,7 @@ void CheckBoxPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto checkBoxEventHub = host->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxEventHub>();
     auto name = checkBoxEventHub ? checkBoxEventHub->GetName() : "";
     auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
     json->PutExtAttr("name", name.c_str(), filter);
@@ -270,7 +270,7 @@ void CheckBoxPattern::MarkIsSelected(bool isSelected)
         return;
     }
     lastSelect_ = isSelected;
-    auto eventHub = GetOrCreateEventHub<CheckBoxEventHub>();
+    auto eventHub = GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateChangeEvent(isSelected);
     auto host = GetHost();
@@ -292,7 +292,7 @@ void CheckBoxPattern::OnAfterModifyDone()
     if (inspectorId.empty()) {
         return;
     }
-    auto eventHub = host->GetOrCreateEventHub<CheckBoxEventHub>();
+    auto eventHub = host->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, eventHub->GetName(), lastSelect_);
 }
@@ -351,7 +351,7 @@ void CheckBoxPattern::InitMouseEvent()
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto eventHub = host->GetOrCreateEventHub<CheckBoxEventHub>();
+    auto eventHub = host->GetEventHub<CheckBoxEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
@@ -536,7 +536,7 @@ void CheckBoxPattern::UpdateGroupStatus(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto group = eventHub->GetGroupName() + currentNavId_.value_or(groupManager->GetLastNavId());
     groupManager->RemoveCheckBoxFromGroup(group, frameNode->GetId());
@@ -577,7 +577,7 @@ void CheckBoxPattern::CheckPageNode()
     auto pageNode = stageManager->GetPageById(host->GetPageId());
     CHECK_NULL_VOID(pageNode);
     if (pageNode->GetId() != prePageId) {
-        auto pageEventHub = pageNode->GetOrCreateEventHub<NG::PageEventHub>();
+        auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
         CHECK_NULL_VOID(pageEventHub);
         auto groupManager = pageEventHub->GetGroupManager();
         CHECK_NULL_VOID(groupManager);
@@ -642,7 +642,7 @@ void CheckBoxPattern::ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProper
         if (lastSelect_ != isSelected) {
             UpdateUIStatus(isSelected);
             SetLastSelect(isSelected);
-            auto checkboxEventHub = GetOrCreateEventHub<CheckBoxEventHub>();
+            auto checkboxEventHub = GetEventHub<CheckBoxEventHub>();
             CHECK_NULL_VOID(checkboxEventHub);
             TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox node %{public}d update change event %{public}d",
                 host->GetId(), isSelected);
@@ -666,7 +666,7 @@ void CheckBoxPattern::StartEnterAnimation()
     const auto& layoutProperty = builderNode_->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    const auto& eventHub = builderNode_->GetOrCreateEventHub<EventHub>();
+    const auto& eventHub = builderNode_->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(true);
     }
@@ -694,7 +694,7 @@ void CheckBoxPattern::StartExitAnimation()
             renderContext->UpdateOpacity(0);
         },
         nullptr);
-    const auto& eventHub = builderNode_->GetOrCreateEventHub<EventHub>();
+    const auto& eventHub = builderNode_->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(false);
     }
@@ -744,7 +744,7 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatus(
         auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
         if (paintProperty->GetCheckBoxSelectValue(false)) {
-            auto eventHub = node->GetOrCreateEventHub<CheckBoxEventHub>();
+            auto eventHub = node->GetEventHub<CheckBoxEventHub>();
             CHECK_NULL_VOID(eventHub);
             vec.push_back(eventHub->GetName());
             haveCheckBoxSelected = true;
@@ -783,7 +783,7 @@ void CheckBoxPattern::ChangeGroupStatusAndNotify(const RefPtr<FrameNode>& checkB
         pattern->SetSkipFlag(true);
     }
     CheckboxGroupResult groupResult(vec, int(status));
-    auto eventHub = checkBoxGroupNode->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = checkBoxGroupNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "update checkboxgroup result %d", groupResult.GetStatus());
     eventHub->UpdateChangeEvent(&groupResult);
@@ -993,7 +993,7 @@ void CheckBoxPattern::SetCheckBoxSelect(bool select)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -1035,7 +1035,7 @@ RefPtr<FrameNode> CheckBoxPattern::BuildContentModifierNode()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetOrCreateEventHub<CheckBoxEventHub>();
+    auto eventHub = host->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto name = eventHub->GetName();
     auto enabled = eventHub->IsEnabled();
@@ -1108,7 +1108,7 @@ bool CheckBoxPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 
 void CheckBoxPattern::DumpInfo()
 {
-    auto eventHub = GetOrCreateEventHub<CheckBoxEventHub>();
+    auto eventHub = GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     DumpLog::GetInstance().AddDesc("Name: " + eventHub->GetName());
     DumpLog::GetInstance().AddDesc("GroupName: " + eventHub->GetGroupName());
@@ -1187,7 +1187,7 @@ std::string CheckBoxPattern::GetGroupNameWithNavId()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, "");
-    auto eventHub = host->GetOrCreateEventHub<CheckBoxEventHub>();
+    auto eventHub = host->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_RETURN(eventHub, "");
     if (currentNavId_.has_value()) {
         return eventHub->GetGroupName() + currentNavId_.value();

@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -49,26 +50,19 @@
 #include "core/interfaces/native/implementation/dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/focus_axis_event_peer.h"
-#include "core/interfaces/native/implementation/gesture_group_interface_peer.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 #include "core/interfaces/native/implementation/long_press_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/long_press_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/long_press_recognizer_peer.h"
 #include "core/interfaces/native/implementation/pan_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/pan_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/pan_recognizer_peer.h"
 #include "core/interfaces/native/implementation/pinch_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/pinch_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/pinch_recognizer_peer.h"
 #include "core/interfaces/native/implementation/progress_mask_peer.h"
 #include "core/interfaces/native/implementation/rotation_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/rotation_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/rotation_recognizer_peer.h"
 #include "core/interfaces/native/implementation/swipe_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/swipe_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/tap_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/tap_recognizer_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
@@ -398,6 +392,7 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
     popupParam->SetEnableArrow(OptConvert<bool>(src.enableArrow).value_or(popupParam->EnableArrow()));
     auto popupTransitionEffectsOpt = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(src.transition);
     if (popupTransitionEffectsOpt.has_value()) {
+        popupParam->SetHasTransition(true);
         popupParam->SetTransitionEffects(popupTransitionEffectsOpt.value());
     }
 };
@@ -438,6 +433,25 @@ auto g_bindMenuOptionsParamCallbacks = [](
     }
 };
 
+auto g_parseLayoutRegionMargin = [](const auto& menuOptions, MenuParam& menuParam) {
+    auto layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
+    if (layoutRegionMargin->left.has_value() && !layoutRegionMargin->left.value().IsValid()) {
+        layoutRegionMargin->left = std::nullopt;
+    }
+    if (layoutRegionMargin->right.has_value() && !layoutRegionMargin->right.value().IsValid()) {
+        layoutRegionMargin->right = std::nullopt;
+    }
+    if (layoutRegionMargin->top.has_value() && !layoutRegionMargin->top.value().IsValid()) {
+        layoutRegionMargin->top = std::nullopt;
+    }
+    if (layoutRegionMargin->bottom.has_value() && !layoutRegionMargin->bottom.value().IsValid()) {
+        layoutRegionMargin->bottom = std::nullopt;
+    }
+    layoutRegionMargin->start = layoutRegionMargin->left;
+    layoutRegionMargin->end = layoutRegionMargin->right;
+    menuParam.layoutRegionMargin = layoutRegionMargin;
+};
+
 auto g_bindMenuOptionsParam = [](
     const auto& menuOptions, MenuParam& menuParam, WeakPtr<FrameNode> weakNode) {
     auto offsetVal =
@@ -476,9 +490,7 @@ auto g_bindMenuOptionsParam = [](
         menuParam.borderRadius = borderRadius;
     }
     menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
-    menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
-    menuParam.layoutRegionMargin->start = menuParam.layoutRegionMargin->left;
-    menuParam.layoutRegionMargin->end = menuParam.layoutRegionMargin->right;
+    g_parseLayoutRegionMargin(menuOptions, menuParam);
     menuParam.hapticFeedbackMode =
         OptConvert<HapticFeedbackMode>(menuOptions.hapticFeedbackMode).value_or(menuParam.hapticFeedbackMode);
     menuParam.outlineColor = OptConvert<BorderColorProperty>(menuOptions.outlineColor);
@@ -594,9 +606,11 @@ SetFocusData Convert(const Ark_FocusMovement& src)
 template<>
 MenuPreviewAnimationOptions Convert(const Ark_AnimationNumberRange& options)
 {
+    auto scaleFrom = Convert<float>(options.value0);
+    auto scaleTo = Convert<float>(options.value1);
     return {
-        .scaleFrom = Convert<float>(options.value0),
-        .scaleTo = Convert<float>(options.value1)
+        .scaleFrom = LessOrEqual(scaleFrom, 0.0) ? -1.0f : scaleFrom,
+        .scaleTo = LessOrEqual(scaleTo, 0.0) ? -1.0f : scaleTo
     };
 }
 
@@ -1058,6 +1072,18 @@ void AssignCast(std::optional<VerticalAlign>& dst, const Ark_VerticalAlign& src)
 }
 
 template<>
+AlignRule Convert(const Ark_HorizontalAlignParam& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<HorizontalAlign>(src.align);
+    if (align.has_value()) {
+        rule.horizontal = align.value();
+    }
+    return rule;
+}
+
+template<>
 AlignRule Convert(const Ark_LocalizedHorizontalAlignParam& src)
 {
     AlignRule rule;
@@ -1065,6 +1091,18 @@ AlignRule Convert(const Ark_LocalizedHorizontalAlignParam& src)
     auto align = OptConvert<HorizontalAlign>(src.align);
     if (align.has_value()) {
         rule.horizontal = align.value();
+    }
+    return rule;
+}
+
+template<>
+AlignRule Convert(const Ark_VerticalAlignParam& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<VerticalAlign>(src.align);
+    if (align.has_value()) {
+        rule.vertical = align.value();
     }
     return rule;
 }
@@ -1084,9 +1122,7 @@ AlignRule Convert(const Ark_LocalizedVerticalAlignParam& src)
 template<>
 std::map<AlignDirection, AlignRule> Convert(const Ark_AlignRuleOption& src)
 {
-    LOGE("Ark_AlignRuleOption is stubbed");
     std::map<AlignDirection, AlignRule> rulesMap;
-#ifdef WRONG_GEN
     auto rule = OptConvert<AlignRule>(src.left);
     if (rule.has_value()) {
         rulesMap[AlignDirection::LEFT] = rule.value();
@@ -1111,7 +1147,6 @@ std::map<AlignDirection, AlignRule> Convert(const Ark_AlignRuleOption& src)
     if (rule.has_value()) {
         rulesMap[AlignDirection::CENTER] = rule.value();
     }
-#endif
     return rulesMap;
 }
 
@@ -2534,14 +2569,26 @@ void SetOnClick0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        ViewAbstract::DisableOnClick(frameNode);
+        if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
+            SpanModelNG::ClearOnClick(frameNode);
+        } else if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+            TextModelNG::ClearOnClick(frameNode);
+        }  else {
+            ViewAbstract::DisableOnClick(frameNode);
+        }
         return;
     }
     auto onClick = [callback = CallbackHelper(*optValue)](GestureEvent& info) {
         const auto event = Converter::ArkClickEventSync(info);
         callback.InvokeSync(event.ArkValue());
     };
-    ViewAbstract::SetOnClick(frameNode, std::move(onClick));
+    if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
+        SpanModelNG::SetOnClick(frameNode, std::move(onClick));
+    } else if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+        TextModelNG::SetOnClick(frameNode, std::move(onClick));
+    }  else {
+        ViewAbstract::SetOnClick(frameNode, std::move(onClick));
+    }
 }
 void SetOnHoverImpl(Ark_NativePointer node,
                     const Opt_Callback_Boolean_HoverEvent_Void* value)
@@ -2551,6 +2598,9 @@ void SetOnHoverImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         // Implement Reset value
+        if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
+            SpanModelNG::ResetOnHover(frameNode);
+        }
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
@@ -2560,7 +2610,11 @@ void SetOnHoverImpl(Ark_NativePointer node,
         const auto event = Converter::ArkHoverEventSync(hoverInfo);
         arkCallback.InvokeSync(arkIsHover, event.ArkValue());
     };
-    ViewAbstract::SetOnHover(frameNode, std::move(onHover));
+    if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
+        SpanModelNG::SetOnHover(frameNode, std::move(onHover));
+    }  else {
+        ViewAbstract::SetOnHover(frameNode, std::move(onHover));
+    }
 }
 void SetOnHoverMoveImpl(Ark_NativePointer node,
                         const Opt_Callback_HoverEvent_Void* value)
@@ -3510,8 +3564,6 @@ void SetEnabledImpl(Ark_NativePointer node,
 void SetAlignRulesWithAlignRuleOptionTypedValueImpl(Ark_NativePointer node,
                                                     const Opt_AlignRuleOption* value)
 {
-    LOGE("Ark_AlignRuleOption is stubbed");
-#ifdef WRONG_GEN
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convMapValue = Converter::OptConvertPtr<std::map<AlignDirection, AlignRule>>(value);
@@ -3523,7 +3575,6 @@ void SetAlignRulesWithAlignRuleOptionTypedValueImpl(Ark_NativePointer node,
     } else {
         ViewAbstractModelStatic::SetBias(frameNode, std::nullopt);
     }
-#endif
 }
 void SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl(Ark_NativePointer node,
                                                               const Opt_LocalizedAlignRuleOptions* value)
@@ -4561,31 +4612,6 @@ void SetFocusScopePriorityImpl(Ark_NativePointer node,
     auto optPriority = Converter::OptConvertPtr<uint32_t>(priority);
     ViewAbstractModelStatic::SetFocusScopePriority(frameNode, *convIdValue, optPriority);
 }
-void GestureImplInternal(Ark_NativePointer node, const Opt_GestureType* gesture, const Opt_GestureMask* mask,
-    GesturePriority priority)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::optional<RefPtr<Gesture>> aceGestureOpt;
-#ifdef WRONG_GEN1
-    Converter::VisitUnionPtr(gesture,
-        [&aceGestureOpt](const auto& gestureType) {
-            aceGestureOpt = gestureType->GetGesture();
-        },
-        [](const Ark_CustomObject& src) {
-        },
-        []() {}
-    );
-#endif
-    CHECK_NULL_VOID(aceGestureOpt);
-    auto aceGesture = aceGestureOpt.value();
-    auto gestureMask = (Converter::OptConvertPtr<GestureMask>(mask)).value_or(GestureMask::Normal);
-    aceGesture->SetGestureMask(gestureMask);
-    aceGesture->SetPriority(priority);
-    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureEventHub);
-    gestureEventHub->AddGesture(aceGesture);
-}
 void SetTransition1Impl(Ark_NativePointer node,
                         const Opt_TransitionEffect* effect,
                         const Opt_TransitionFinishCallback* onFinish)
@@ -4611,24 +4637,6 @@ void SetTransition1Impl(Ark_NativePointer node,
     } else {
         // ViewAbstract::CleanTransition(frameNode);
     }
-}
-void SetGestureImpl(Ark_NativePointer node,
-                    const Opt_GestureType* gesture,
-                    const Opt_GestureMask* mask)
-{
-    GestureImplInternal(node, gesture, mask, GesturePriority::Low);
-}
-void SetPriorityGestureImpl(Ark_NativePointer node,
-                            const Opt_GestureType* gesture,
-                            const Opt_GestureMask* mask)
-{
-    GestureImplInternal(node, gesture, mask, GesturePriority::High);
-}
-void SetParallelGestureImpl(Ark_NativePointer node,
-                            const Opt_GestureType* gesture,
-                            const Opt_GestureMask* mask)
-{
-    GestureImplInternal(node, gesture, mask, GesturePriority::Parallel);
 }
 void SetBlurImpl(Ark_NativePointer node,
                  const Opt_Number* blurRadius,
@@ -4660,7 +4668,7 @@ void SetSystemBarEffectImpl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("The `ViewAbstract::SetSystemBarEffect(frameNode, enable)` function must take two parameters");
+    ViewAbstractModelStatic::SetSystemBarEffect(frameNode, true);
 }
 void SetUseEffect1Impl(Ark_NativePointer node,
                        const Opt_Boolean* useEffect,
@@ -5607,9 +5615,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetFocusScopeIdImpl,
         CommonMethodModifier::SetFocusScopePriorityImpl,
         CommonMethodModifier::SetTransition1Impl,
-        CommonMethodModifier::SetGestureImpl,
-        CommonMethodModifier::SetPriorityGestureImpl,
-        CommonMethodModifier::SetParallelGestureImpl,
         CommonMethodModifier::SetBlurImpl,
         CommonMethodModifier::SetLinearGradientBlurImpl,
         CommonMethodModifier::SetSystemBarEffectImpl,

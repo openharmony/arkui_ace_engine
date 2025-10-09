@@ -32,11 +32,11 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: TextPickerAttribute): void { }
+    applyPressedAttribute(instance: TextPickerAttribute): void { }
+    applyFocusedAttribute(instance: TextPickerAttribute): void { }
+    applyDisabledAttribute(instance: TextPickerAttribute): void { }
+    applySelectedAttribute(instance: TextPickerAttribute): void { }
     _defaultPickerItemHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _defaultPickerItemHeight_0_0value?: number | string | undefined
     _canLoop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

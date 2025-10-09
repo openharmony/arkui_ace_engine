@@ -29,11 +29,11 @@ export class StepperItemModifier extends CommonMethodModifier implements Stepper
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: StepperItemAttribute): void { }
+    applyPressedAttribute(instance: StepperItemAttribute): void { }
+    applyFocusedAttribute(instance: StepperItemAttribute): void { }
+    applyDisabledAttribute(instance: StepperItemAttribute): void { }
+    applySelectedAttribute(instance: StepperItemAttribute): void { }
     _prevLabel_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _prevLabel_0_0value?: string | undefined
     _nextLabel_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

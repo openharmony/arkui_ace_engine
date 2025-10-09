@@ -80,7 +80,7 @@ public:
         std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>&& onRemoteReady)
     {
         CHECK_NULL_VOID(frameNode);
-        auto eventHub = frameNode->GetOrCreateEventHub<UIExtensionHub>();
+        auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnRemoteReadyCallback(std::move(onRemoteReady));
         return;
@@ -90,7 +90,7 @@ public:
         std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated)
     {
         CHECK_NULL_VOID(frameNode);
-        auto eventHub = frameNode->GetOrCreateEventHub<UIExtensionHub>();
+        auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnTerminatedCallback(std::move(onTerminated));
     }
@@ -99,7 +99,7 @@ public:
         std::function<void(const AAFwk::WantParams&)>&& onReceive)
     {
         CHECK_NULL_VOID(frameNode);
-        auto eventHub = frameNode->GetOrCreateEventHub<UIExtensionHub>();
+        auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnReceiveCallback(std::move(onReceive));
     }

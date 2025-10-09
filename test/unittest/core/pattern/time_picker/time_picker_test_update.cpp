@@ -2221,7 +2221,7 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest013, TestSize.Level1)
     CHECK_NULL_VOID(timePickerModelNG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto changeEvent = [](const BaseEventInfo* info) {};
     timePickerModelNG->SetOnChange(changeEvent);
@@ -2242,7 +2242,7 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest014, TestSize.Level1)
     CHECK_NULL_VOID(timePickerModelNG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto changeEvent = [](const BaseEventInfo* info) {};
     TimePickerModelNG::SetOnChange(frameNode, changeEvent);
@@ -2263,7 +2263,7 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest015, TestSize.Level1)
     CHECK_NULL_VOID(timePickerModelNG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto selectedAreaEvent = [](const BaseEventInfo* info) {};
     timePickerModelNG->SetOnEnterSelectedArea(selectedAreaEvent);
@@ -2284,7 +2284,7 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest016, TestSize.Level1)
     CHECK_NULL_VOID(timePickerModelNG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto selectedTimeChangeEvent = [](const BaseEventInfo* info) {};
     timePickerModelNG->SetChangeEvent(selectedTimeChangeEvent);

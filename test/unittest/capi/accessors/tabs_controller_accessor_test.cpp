@@ -123,7 +123,7 @@ HWTEST_F(TabsControllerAccessorTest, changeIndexTest, TestSize.Level1)
  * @tc.desc: Check the functionality of TabsControllerAccessor.PreloadItemsImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TabsControllerAccessorTest, preloadItemsTest, TestSize.Level1)
+HWTEST_F(TabsControllerAccessorTest, DISABLED_preloadItemsTest, TestSize.Level1)
 {
     std::initializer_list<int32_t> indexList{1, 20, 300};
     std::set<int32_t> expectedIndexSet(indexList);

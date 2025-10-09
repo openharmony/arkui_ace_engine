@@ -282,7 +282,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
         return;
     }
 
-    auto hub = host->GetOrCreateEventHub<DialogEventHub>();
+    auto hub = host->GetEventHub<DialogEventHub>();
     if (buttonIdx != -1) {
         hub->FireSuccessEvent(buttonIdx, host);
         RecordEvent(buttonIdx);
@@ -1794,7 +1794,7 @@ void DialogPattern::UpdateFontScale()
 void DialogPattern::SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled)
 {
     // set Enabled and Focusable
-    auto buttonButtonEvent = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonButtonEvent = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonButtonEvent);
     buttonButtonEvent->SetEnabled(enabled);
     buttonNode->GetOrCreateFocusHub()->SetFocusable(enabled);

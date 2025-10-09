@@ -23,7 +23,6 @@
 using TabContentTransitionProxyRefPtr = OHOS::Ace::WeakPtr<OHOS::Ace::TabContentTransitionProxy>;
 
 struct TabContentTransitionProxyPeer {
-    virtual ~TabContentTransitionProxyPeer() {}
     TabContentTransitionProxyRefPtr handler;
     void SetHandler(const TabContentTransitionProxyRefPtr& handlerIn)
     {

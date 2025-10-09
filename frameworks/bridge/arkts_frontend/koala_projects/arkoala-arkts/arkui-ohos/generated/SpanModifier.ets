@@ -16,29 +16,30 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { CommonMethod, ShadowOptions } from "./component/common"
+import { TextBackgroundStyle, BaseSpan, ArkSpanPeer, SpanAttribute } from "./component/span"
+import { extractors, AttributeModifier } from "#handwritten"
+import { LengthMetrics } from "arkui.Graphics"
 import { BaseSpanModifier } from "./BaseSpanModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkSpanPeer, BaseSpan, SpanAttribute } from "./component/span"
 import { int32 } from "@koalaui/common"
 import { Font, ResourceColor, Length } from "./component/units"
 import { Color, FontStyle, FontWeight, TextCase } from "./component/enums"
 import { Resource } from "global.resource"
 import { DecorationStyleInterface } from "./component/styledString"
-import { ShadowOptions, CommonMethod } from "./component/common"
-export class SpanModifier extends BaseSpanModifier implements SpanAttribute,AttributeModifier<SpanAttribute> {
+export class SpanModifier extends CommonMethodModifier implements SpanAttribute,AttributeModifier<SpanAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: SpanAttribute): void { }
+    applyPressedAttribute(instance: SpanAttribute): void { }
+    applyFocusedAttribute(instance: SpanAttribute): void { }
+    applyDisabledAttribute(instance: SpanAttribute): void { }
+    applySelectedAttribute(instance: SpanAttribute): void { }
     _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _font_0_0value?: Font | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -61,6 +62,10 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
     _lineHeight_0_0value?: Length | undefined
     _textShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textShadow_0_0value?: ShadowOptions | Array<ShadowOptions> | undefined
+    _textBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
+    _baselineOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _baselineOffset_0_0value?: LengthMetrics | undefined
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkSpanPeer;
@@ -262,6 +267,42 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
                 }
             }
         }
+        if (this._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textBackgroundStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextBackgroundStyleAttribute((this._textBackgroundStyle_0_0value as TextBackgroundStyle | undefined));
+                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextBackgroundStyleAttribute((undefined as TextBackgroundStyle | undefined));
+                }
+            }
+        }
+        if (this._baselineOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._baselineOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBaselineOffsetAttribute((this._baselineOffset_0_0value as LengthMetrics | undefined));
+                    this._baselineOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._baselineOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._baselineOffset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBaselineOffsetAttribute((undefined as LengthMetrics | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: SpanModifier): void {
         super.mergeModifier(modifier)
@@ -408,6 +449,32 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
                 }
             }
         }
+        if (modifier._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textBackgroundStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textBackgroundStyle(modifier._textBackgroundStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.textBackgroundStyle((undefined as TextBackgroundStyle | undefined));
+                }
+            }
+        }
+        if (modifier._baselineOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._baselineOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.baselineOffset(modifier._baselineOffset_0_0value);
+                    break;
+                }
+                default: {
+                    this.baselineOffset((undefined as LengthMetrics | undefined));
+                }
+            }
+        }
     }
     font(value: Font | undefined): this {
         if (((this._font_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -527,6 +594,28 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
         } else
         {
             this._textShadow_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
+        if (((this._textBackgroundStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textBackgroundStyle_0_0value = value
+        } else
+        {
+            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    baselineOffset(value: LengthMetrics | undefined): this {
+        if (((this._baselineOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._baselineOffset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._baselineOffset_0_0value = value
+        } else
+        {
+            this._baselineOffset_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

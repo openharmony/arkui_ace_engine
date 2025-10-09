@@ -29,6 +29,20 @@
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
+RefPtr<FrameNode> FormModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    if (stack == nullptr) {
+        LOGE("stack is nullptr");
+        return nullptr;
+    }
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::FORM_ETS_TAG, nodeId);
+    auto frameNode =
+        FormNode::GetOrCreateFormNode(V2::FORM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FormPattern>(); });
+    stack->Push(frameNode);
+    return frameNode;
+}
+
 void FormModelNG::Create(const RequestFormInfo& formInfo)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -138,7 +152,7 @@ void FormModelNG::SetOnAcquired(std::function<void(const std::string&)>&& onAcqu
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnAcquired(std::move(onAcquired));
 }
@@ -147,7 +161,7 @@ void FormModelNG::SetOnError(std::function<void(const std::string&)>&& onError)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(onError));
 }
@@ -156,7 +170,7 @@ void FormModelNG::SetOnUninstall(std::function<void(const std::string&)>&& onUni
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnUninstall(std::move(onUninstall));
 }
@@ -165,7 +179,7 @@ void FormModelNG::SetOnRouter(std::function<void(const std::string&)>&& onRouter
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRouter(std::move(onRouter));
 }
@@ -174,7 +188,7 @@ void FormModelNG::SetOnLoad(std::function<void(const std::string&)>&& onLoad)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnLoad(std::move(onLoad));
 }
@@ -183,66 +197,9 @@ void FormModelNG::SetOnUpdate(std::function<void(const std::string&)>&& onUpdate
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnUpdate(std::move(onUpdate));
 }
 
-void FormModelNG::SetVisibility(FrameNode* frameNode, VisibleType visible)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto formPattern = frameNode->GetPattern<FormPattern>();
-    CHECK_NULL_VOID(formPattern);
-    auto isLoaded = formPattern->GetIsLoaded();
-    auto layoutProperty = frameNode->GetLayoutProperty<FormLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (isLoaded || visible != VisibleType::VISIBLE) {
-        layoutProperty->UpdateVisibility(visible, true);
-    } else {
-        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-    }
-
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FormLayoutProperty, VisibleType, visible, frameNode);
-}
-
-void FormModelNG::AllowUpdate(FrameNode* frameNode, bool allowUpdate)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
-    CHECK_NULL_VOID(property);
-    if (!property->HasRequestFormInfo()) {
-        return;
-    }
-    auto formInfo = property->GetRequestFormInfoValue();
-    formInfo.allowUpdate = allowUpdate;
-    property->UpdateRequestFormInfo(formInfo);
-}
-
-void FormModelNG::SetDimension(FrameNode* frameNode, int32_t dimension)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
-    CHECK_NULL_VOID(property);
-    if (!property->HasRequestFormInfo()) {
-        return;
-    }
-    auto formInfo = property->GetRequestFormInfoValue();
-    formInfo.dimension = dimension;
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FormLayoutProperty, RequestFormInfo, formInfo, frameNode);
-}
-
-void FormModelNG::SetModuleName(FrameNode* frameNode, const std::string& moduleName)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
-    CHECK_NULL_VOID(property);
-    if (!property->HasRequestFormInfo()) {
-        return;
-    }
-    auto formInfo = property->GetRequestFormInfoValue();
-    formInfo.moduleName = moduleName;
-    property->UpdateRequestFormInfo(formInfo);
-}
-
-// void FormModelNG::SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height) {}
 } // namespace OHOS::Ace::NG

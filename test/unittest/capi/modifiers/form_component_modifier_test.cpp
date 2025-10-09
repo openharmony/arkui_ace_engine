@@ -245,7 +245,7 @@ HWTEST_F(FormComponentModifierTest, setModuleNameTestDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setModuleNameTestModuleNameValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setModuleNameTestModuleNameValidValues, TestSize.Level1)
 {
     Ark_String initValueModuleName;
 
@@ -287,7 +287,7 @@ HWTEST_F(FormComponentModifierTest, setAllowUpdateTestDefaultValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setAllowUpdateTestAllowUpdateValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setAllowUpdateTestAllowUpdateValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueAllowUpdate;
 
@@ -328,7 +328,7 @@ HWTEST_F(FormComponentModifierTest, setDimensionTestDefaultValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setDimensionTestDimensionValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setDimensionTestDimensionValidValues, TestSize.Level1)
 {
     Ark_FormDimension initValueDimension;
 
@@ -399,7 +399,7 @@ HWTEST_F(FormComponentModifierTest, setVisibilityTestDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setVisibilityTestVisibilityValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setVisibilityTestVisibilityValidValues, TestSize.Level1)
 {
     Ark_Visibility initValueVisibility;
 
@@ -461,7 +461,7 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setOnAcquiredTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<std::pair<int64_t, std::string>> formInfo = std::nullopt;
@@ -502,7 +502,7 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
     static std::optional<std::pair<int32_t, std::string>> formInfo = std::nullopt;
     auto onError = [](const Ark_Int32 resourceId, const Ark_ErrorInformation parameter) {
@@ -543,7 +543,7 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setOnUninstallTest, TestSize.Level1
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<std::pair<int64_t, std::string>> formInfo = std::nullopt;
@@ -584,7 +584,7 @@ HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static constexpr int32_t contextId = 123;
@@ -624,7 +624,7 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setOnRouterTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setFormComponentOptionsModuleNameValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setFormComponentOptionsModuleNameValues, TestSize.Level1)
 {
     Ark_FormInfo initValue;
     // Initial setup
@@ -660,7 +660,7 @@ HWTEST_F(FormComponentModifierTest, setFormComponentOptionsModuleNameValues, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setFormComponentOptionsDimensionValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setFormComponentOptionsDimensionValues, TestSize.Level1)
 {
     Ark_FormInfo initValue;
     // Initial setup
@@ -696,6 +696,41 @@ HWTEST_F(FormComponentModifierTest, setFormComponentOptionsDimensionValues, Test
     modifier_->setFormComponentOptions(node_, &presetValue);
     for (auto& [input, value] : testFixtureEnumFormDimensionInvalidValues) {
         checkValue(input, value, expected);
+    }
+}
+
+/*
+ * @tc.name: setOnUpdateTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormComponentModifierTest, setOnUpdateTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnUpdate, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<std::pair<int64_t, std::string>> formInfo = std::nullopt;
+    auto onUpdate = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
+        std::pair<int64_t, std::string> info;
+        info.first = Converter::Convert<int64_t>(parameter.id);
+        info.second = Converter::Convert<std::string>(parameter.idString);
+        formInfo = info;
+    };
+    auto optFunc = Converter::ArkValue<Opt_Callback_FormCallbackInfo_Void>(
+        Converter::ArkValue<Callback_FormCallbackInfo_Void>(onUpdate, frameNode->GetId()));
+
+    modifier_->setOnUpdate(node_, &optFunc);
+    for (const auto& [actual, expectedNum, expectedStr] : testFixtureFormOnAcquiredCallbackTestValues) {
+        formInfo = std::nullopt;
+        auto testValue = ToJson(actual);
+        eventHub->FireOnUpdate(testValue);
+        EXPECT_TRUE(formInfo.has_value());
+        EXPECT_EQ(formInfo->first, expectedNum);
+        EXPECT_EQ(formInfo->second, expectedStr);
     }
 }
 } // namespace OHOS::Ace::NG

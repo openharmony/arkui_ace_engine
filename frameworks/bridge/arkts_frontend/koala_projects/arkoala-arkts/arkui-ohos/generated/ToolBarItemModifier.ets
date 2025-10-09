@@ -27,11 +27,11 @@ export class ToolBarItemModifier implements ToolBarItemAttribute,AttributeModifi
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ToolBarItemAttribute): void { }
+    applyPressedAttribute(instance: ToolBarItemAttribute): void { }
+    applyFocusedAttribute(instance: ToolBarItemAttribute): void { }
+    applyDisabledAttribute(instance: ToolBarItemAttribute): void { }
+    applySelectedAttribute(instance: ToolBarItemAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
         const peer = node as ArkToolBarItemPeer;
     }

@@ -1,4 +1,0 @@
-[
-    ["construct(\\.*)", "CONSTRUCT($1)"],
-    ["onClick(\\.*)", "ON_CLICK($1)"]
-]

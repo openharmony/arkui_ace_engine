@@ -181,7 +181,7 @@ HWTEST_F(
 HWTEST_F(PluginComponentModifierTest, setOnCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<PluginEventHub>();
+    auto eventHub = frameNode->GetEventHub<PluginEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -214,7 +214,7 @@ HWTEST_F(PluginComponentModifierTest, setOnCompleteTest, TestSize.Level1)
 HWTEST_F(PluginComponentModifierTest, setOnErrorTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<PluginEventHub>();
+    auto eventHub = frameNode->GetEventHub<PluginEventHub>();
 
     constexpr auto errCode = "404";
     constexpr auto msg = "not found";

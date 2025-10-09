@@ -16,7 +16,8 @@
 import { RuntimeType, runtimeType } from "@koalaui/interop";
 import { ArkScrollableNode } from "./ArkScrollableNode";
 import { WaterFlowAttribute, ArkWaterFlowPeer, WaterFlowOptions, ConstraintSizeOptions, Length, FlexDirection, NestedScrollOptions,
-    OnScrollFrameBeginCallback, OnWillScrollCallback, OnScrollCallback } from "../framework";
+    OnScrollFrameBeginCallback, OnWillScrollCallback, OnScrollCallback, AttributeModifier, ScrollableCommonMethod, CommonMethod
+} from "../framework";
 import { Resource } from "global.resource"
 export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttribute {
     constructParam(...param: Object[]): this {
@@ -160,5 +161,8 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
         this.getPeer()?.setOnDidScrollAttribute(value_casted)
         this.markDirty()
         return this
+    }
+    attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
     }
 }

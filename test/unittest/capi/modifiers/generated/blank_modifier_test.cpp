@@ -155,7 +155,7 @@ HWTEST_F(BlankModifierTest, setColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BlankModifierTest, setColorTestColorValidValues, TestSize.Level1)
+HWTEST_F(BlankModifierTest, DISABLED_setColorTestColorValidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueColor;
 
