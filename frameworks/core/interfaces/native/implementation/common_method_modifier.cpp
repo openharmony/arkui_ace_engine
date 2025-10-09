@@ -2221,7 +2221,7 @@ void SetForegroundFilterImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto ptrOpt = Converter::OptConvertPtr<OHOS::Rosen::Filter*>(value);
     if (!ptrOpt || !(ptrOpt.value())) {
-        ViewAbstractModelStatic::SetBackgroundFilter(frameNode, nullptr);
+        ViewAbstractModelStatic::SetForegroundFilter(frameNode, nullptr);
         return;
     }
     ViewAbstractModelStatic::SetForegroundFilter(frameNode, ptrOpt.value());
