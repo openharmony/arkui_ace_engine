@@ -84,7 +84,7 @@
  * 长按进入悬停状态后将暂停自动播放功能，拖拽可正常翻页。
  * 鼠标悬停不会暂停自动播放，可以正常跳页。
  */
-class MyDataSource implements IDataSource {
+class IndicatorDataSource implements IDataSource {
   private list: number[] = [];
 
 
@@ -130,7 +130,7 @@ struct Index {
   }
 
   private swiperController: SwiperController = new SwiperController();
-  private data: MyDataSource = new MyDataSource([]);
+  private data: IndicatorDataSource = new IndicatorDataSource([]);
   @State previousMargin: number = 0
   @State previousIgnoreBlank: boolean = false
   @State nextMargin: number = 0
@@ -147,7 +147,7 @@ struct Index {
     for (let i = 0; i < 10; i++) {
       list.push(i);
     }
-    this.data = new MyDataSource(list);
+    this.data = new IndicatorDataSource(list);
   }
 
 

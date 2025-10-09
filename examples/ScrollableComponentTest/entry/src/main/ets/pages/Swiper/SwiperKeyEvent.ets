@@ -124,7 +124,7 @@
  * 5-1：翻页过程中焦点锁定符合逻辑，翻页动画正常。
  * 5-2：翻页过程中焦点锁定符合逻辑，翻页动画正常。
  */
-class MyDataSource implements IDataSource {
+class SwiperDataSource implements IDataSource {
   private list: number[] = [];
 
 
@@ -180,7 +180,7 @@ class MyDataSource2 implements IDataSource {
 
 @Entry
 @Component
-struct Index {
+struct SwiperIndex {
   UpdateFocus(): MyDataSource2 {
     switch(this.focusFlag){
       case 0:
@@ -194,7 +194,7 @@ struct Index {
     }
   }
   private swiperController: SwiperController = new SwiperController();
-  private data: MyDataSource = new MyDataSource([]);
+  private data: SwiperDataSource = new SwiperDataSource([]);
   private focus1: MyDataSource2 = new MyDataSource2([]);
   private focus2: MyDataSource2 = new MyDataSource2([]);
   private focus3: MyDataSource2 = new MyDataSource2([]);
@@ -228,7 +228,7 @@ struct Index {
         list4.push(true)
       }
     }
-    this.data = new MyDataSource(list1);
+    this.data = new SwiperDataSource(list1);
     this.focus1 = new MyDataSource2(list2)
     this.focus2 = new MyDataSource2(list3)
     this.focus3 = new MyDataSource2(list4)
