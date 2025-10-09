@@ -8942,6 +8942,7 @@ HWTEST_F(NativeNodeTest, NativeNodeOverlayTest001, TestSize.Level1)
     item4.string = "";
     item4.object = overlayNode;
     item4.size = 4;
+
     nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
     auto overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
     EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_TOP_START));

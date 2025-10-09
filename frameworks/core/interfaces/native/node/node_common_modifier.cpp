@@ -7955,7 +7955,7 @@ void ResetBias(ArkUINodeHandle node)
 }
 void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
     std::vector<double> ratioList(values, values + size);
@@ -10965,7 +10965,7 @@ void SetOnBlur(ArkUINodeHandle node, void* extraParam)
 
 void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
     auto onAreaChanged = [nodeId, node = AceType::WeakClaim(frameNode), extraParam](
@@ -11975,14 +11975,14 @@ void ResetOnBlur(ArkUINodeHandle node)
 
 void ResetOnAreaChange(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ResetAreaChanged(frameNode);
 }
 
 void ResetOnVisibleAreaChange(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ResetVisibleChange(frameNode);
 }
