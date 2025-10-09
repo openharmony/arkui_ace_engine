@@ -28,7 +28,8 @@ void OnStateStyleChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<OHOS::Ace::NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto onStateStyleChangeLambda = [arkCallback = CallbackHelper(*stateStyleChange), node = weakNode](uint64_t currentState) {
+    auto onStateStyleChangeLambda = [arkCallback = CallbackHelper(*stateStyleChange), node = weakNode](
+        uint64_t currentState) {
         PipelineContext::SetCallBackNode(node);
         int state = (int)currentState;
         Ark_Int32 arkState = Converter::ArkValue<Ark_Int32>(state);
