@@ -21,6 +21,7 @@ import { markableQueue } from "../common/MarkableQueue"
 import { RuntimeProfiler } from "../common/RuntimeProfiler"
 import { IncrementalNode } from "../tree/IncrementalNode"
 import { ReadonlyTreeNode } from "../tree/ReadonlyTreeNode"
+import { GlobalStateManager } from "./GlobalStateManager"
 
 export const CONTEXT_ROOT_SCOPE = "ohos.koala.context.root.scope"
 export const CONTEXT_ROOT_NODE = "ohos.koala.context.root.node"
@@ -49,6 +50,7 @@ export interface StateManager extends StateContext {
     readonly currentScopeId: KoalaCallsiteKey | undefined
     contextData: object | undefined
     isDebugMode: boolean
+    _isNeedCreate: boolean
     setThreadChecker(callback: () => boolean): void
 
     syncChanges(): void
@@ -160,6 +162,9 @@ export interface StateContext {
         reuseKey?: string
     ): InternalScope<Value>
     controlledScope(id: KoalaCallsiteKey, invalidate: () => void): ControlledScope
+    fork(builder: (manager: StateContext) => void, complete: () => void): StateContext
+    merge<Value>(main: StateContext, rootNode: ComputableState<Value>, compute: () => void): void
+    terminate<Value>(rootScope: ComputableState<Value>): void
 }
 
 /**
@@ -245,6 +250,7 @@ interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
     ): ScopeImpl<Value>
     increment(count: uint32, skip: boolean): void
     invalidateRecursively(predicate?: (scope: ManagedScope) => boolean): void
+    getCascadeParent(): ManagedScope | undefined
 }
 
 export class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> {
@@ -291,6 +297,7 @@ export class StateImpl<Value> implements Observable, ManagedState, MutableState<
     get value(): Value {
         this.onAccess()
         const manager = this.manager
+        this.checkUIThreadAccess()
         return manager === undefined || manager.frozen ? this.snapshot : this.current(manager.journal)
     }
 
@@ -402,6 +409,16 @@ export class StateImpl<Value> implements Observable, ManagedState, MutableState<
         if (this.myModified) str += ",modified"
         if (this.manager?.frozen == true) str += ",frozen"
         return str + "=" + this.value
+    }
+
+    checkUIThreadAccess(): void {
+        const manager = this.manager
+        if (manager && manager.isDebugMode) {
+            const local = GlobalStateManager.GetLocalManager();
+            if (manager !== local) {
+                throw new Error('Used a state variable that was created externally');
+            }
+        }
     }
 }
 
@@ -575,6 +592,9 @@ export class StateManagerImpl implements StateManager {
     contextData: object | undefined = undefined
     isDebugMode: boolean = false
     private threadCheckerCallback?: () => boolean
+    private childManager: Array<StateManagerImpl> = new Array<StateManagerImpl>()
+    private parentManager: StateManagerImpl | undefined = undefined
+    _isNeedCreate: boolean
 
     get currentScopeId(): KoalaCallsiteKey | undefined {
         return this.current?.id
@@ -602,6 +622,9 @@ export class StateManagerImpl implements StateManager {
     }
 
     syncChanges(): void {
+        this.childManager.forEach((manager: StateManagerImpl) => {
+            manager.syncChanges()
+        })
         this.journal.setMarker()
     }
 
@@ -610,6 +633,9 @@ export class StateManagerImpl implements StateManager {
     }
 
     updateSnapshot(): uint32 {
+        this.childManager.forEach((manager: StateManagerImpl) => {
+            manager.updateSnapshot()
+        })
         RuntimeProfiler.instance?.updateSnapshotEnter()
         this.checkForStateComputing()
         // optimization: all states are valid and not modified
@@ -848,6 +874,70 @@ export class StateManagerImpl implements StateManager {
             }
         }
     }
+
+    addChild(child: StateManagerImpl) {
+        this.childManager.push(child)
+    }
+
+    removeChild(child: StateManagerImpl) {
+        this.childManager = this.childManager.filter(item => item !== child)
+    }
+
+    fork(builder: (manager: StateContext) => void, complete: () => void): StateContext {
+        let context = new StateManagerImpl();
+        context.parentManager = this
+        context.contextData = this.contextData
+        const task = () => {
+            RuntimeProfiler.startTrace(`Do parallel task`);
+            const old = GlobalStateManager.GetLocalManager();
+            GlobalStateManager.SetLocalManager(context);
+            builder(context);
+            GlobalStateManager.SetLocalManager(old);
+            context.current = undefined
+            if (complete) {
+                complete();
+            }
+            RuntimeProfiler.endTrace();
+            return undefined
+        }
+        //@ts-ignore
+        taskpool.execute(task).then(() => { }).catch((err: Error) => {
+            console.error('parallel run in taskpool error :', err);
+            console.error(err.stack);
+        })
+        return context;
+    }
+
+    merge<Value>(main: StateContext, rootScope: ComputableState<Value>, compute: () => void): void {
+        const mainContext = main as StateManagerImpl
+        RuntimeProfiler.startTrace(`merge`)
+        mainContext.childManager.push(this)
+        const current = rootScope as ScopeImpl<Value>
+        const scope = main!.scope<void>(0, 1, () => {
+            return current.nodeRef!
+        }) as ScopeImpl<void>
+        compute()
+        if (scope.unchanged) {
+            scope.cached
+            RuntimeProfiler.endTrace()
+            return
+        }
+        current.cascadeParent = scope
+        scope.recache()
+        RuntimeProfiler.endTrace()
+    }
+
+    terminate<Value>(rootScope: ComputableState<Value>): void {
+        RuntimeProfiler.startTrace(`sub manager terminate`)
+        const root = rootScope as ScopeImpl<Value>
+        const cascadeScope = root.cascadeParent as ScopeImpl<void>
+        cascadeScope.node = undefined
+        cascadeScope.nodeRef = undefined
+        root.dispose();
+        this.parentManager?.removeChild(this);
+        this.parentManager = undefined;
+        RuntimeProfiler.endTrace()
+    }
 }
 
 class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, ComputableState<Value> {
@@ -879,6 +969,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
     private _nodeRef: IncrementalNode | undefined = undefined
     private _reuseKey?: string  /** need to store on Scope because not obtainable in every @method recache */
     nodeCount: uint32 = 0
+    cascadeParent: ManagedScope | undefined = undefined
 
     // Constructor with (compute?: () => Value, cleanup?: (value: Value | undefined) => void)
     // signature causes es2panda recheck crash, so I have introduced a create
@@ -1124,7 +1215,10 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         const current = this.manager?.current // parameters can update snapshot during recomposition
         let scope: ManagedScope = this
         while (true) {
-            if (scope === current) break // parameters should not invalidate whole hierarchy
+            if (scope === current) {
+                scope.getCascadeParent()?.states?.invalidate();
+                break // parameters should not invalidate whole hierarchy
+            }
             if (!scope.recomputeNeeded) RuntimeProfiler.instance?.invalidation()
             else if (current === undefined) break // all parent scopes were already invalidated
             scope.recomputeNeeded = true
@@ -1135,6 +1229,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
                 // if (this.myRecomputeNeeded && !parent.myRecomputeNeeded) console.log("parent of invalid scope is valid unexpectedly")
                 scope = parent
             } else {
+                scope.getCascadeParent()?.states?.invalidate();
                 // mark top-level computable state as dirty if it has dependencies.
                 // they will be recomputed during the snapshot updating.
                 // we do not recompute other computable states and updatable nodes.
@@ -1144,6 +1239,10 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
                 break
             }
         }
+    }
+
+    getCascadeParent(): ManagedScope | undefined {
+        return this.cascadeParent
     }
 
     private recycleOrDispose(child: ManagedScope): void {
