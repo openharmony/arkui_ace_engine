@@ -126,7 +126,7 @@ RefPtr<ResourceObject> AniThemeModule::ConvertToResObj(const Ark_ResourceColor& 
         return nullptr;
     }
     auto resource = color.value3;
-    auto id = Converter::Convert<int32_t>(resource.id);
+    auto id = resource.id;
     auto type = Converter::OptConvert<int32_t>(resource.type).value_or(0);
     auto bundleName = Converter::Convert<std::string>(resource.bundleName);
     auto moduleName = Converter::Convert<std::string>(resource.moduleName);
@@ -134,9 +134,24 @@ RefPtr<ResourceObject> AniThemeModule::ConvertToResObj(const Ark_ResourceColor& 
     std::vector<ResourceObjectParams> params;
     if (resource.params.tag != INTEROP_TAG_UNDEFINED) {
         for (int i = 0; i < resource.params.value.length; i++) {
-            ResourceObjectParams param { .value = std::make_optional(resource.params.value.array[i].chars),
-                .type = ResourceObjectParamType::STRING };
-            params.emplace_back(param);
+            auto paramObj = resource.params.value.array[i];
+            if (paramObj.selector == 0) {
+                ResourceObjectParams param { .value = std::make_optional(paramObj.value0.chars),
+                    .type = ResourceObjectParamType::STRING };
+                params.emplace_back(param);
+            } else if (paramObj.selector == 1) {
+                ResourceObjectParams param { .value = std::to_string(paramObj.value1),
+                    .type = ResourceObjectParamType::INT };
+                params.emplace_back(param);
+            } else if (paramObj.selector == 2) {
+                ResourceObjectParams param { .value = std::to_string(paramObj.value2),
+                    .type = ResourceObjectParamType::INT };
+                params.emplace_back(param);
+            } else if (paramObj.selector == 3) {
+                ResourceObjectParams param { .value = std::to_string(paramObj.value3),
+                    .type = ResourceObjectParamType::FLOAT };
+                params.emplace_back(param);
+            }
         }
     }
 

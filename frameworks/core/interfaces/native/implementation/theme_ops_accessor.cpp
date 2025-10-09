@@ -60,8 +60,9 @@ void SetDefaultThemeImpl(const Array_ResourceColor* colorArray, Ark_Boolean isDa
     }
     auto isDarkValue = static_cast<bool>(isDark);
     std::vector<uint32_t> colors;
-    AniThemeModule::ConvertToColorArray(colorArrayVec, colors);
-    NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue);
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    AniThemeModule::ConvertToColorArray(colorArrayVec, colors, resObjs);
+    NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue, static_cast<void*>(&resObjs));
 #endif
 }
 void CreateAndBindThemeImpl(Ark_Int32 themeScopeId, Ark_Int32 themeId, const Array_ResourceColor* colorArray,
@@ -78,10 +79,11 @@ void CreateAndBindThemeImpl(Ark_Int32 themeScopeId, Ark_Int32 themeId, const Arr
 
     std::vector<uint32_t> colors;
     std::vector<RefPtr<ResourceObject>> resObjs;
-    AniThemeModule::ConvertToColorArray(colorArrayVec, colors);
+    AniThemeModule::ConvertToColorArray(colorArrayVec, colors, resObjs);
 
     auto themeModifier = NodeModifier::GetThemeModifier();
-    auto theme = themeModifier->createTheme(themeId, colors.data(), colorModeValue, static_cast<void*>(&resObjs));
+    auto theme = themeModifier->createTheme(themeId, colors.data(), colors.data(), colorModeValue,
+        static_cast<void*>(&resObjs), static_cast<void*>(&resObjs));
     CHECK_NULL_VOID(theme);
     ArkUINodeHandle node = themeModifier->getWithThemeNode(themeScopeId);
     if (!node) {
@@ -90,11 +92,12 @@ void CreateAndBindThemeImpl(Ark_Int32 themeScopeId, Ark_Int32 themeId, const Arr
     themeModifier->createThemeScope(node, theme);
 
     CHECK_NULL_VOID(onThemeScopeDestroy);
-    auto func = [callback = CallbackHelper(*onThemeScopeDestroy), instanceId = Container::CurrentIdSafely()]() -> void {
+    std::function<void()> func = [callback = CallbackHelper(*onThemeScopeDestroy),
+                                     instanceId = Container::CurrentIdSafely()]() -> void {
         ContainerScope scope(instanceId);
         callback.InvokeSync();
     };
-    themeModifier->setOnThemeScopeDestroy(node, &func);
+    themeModifier->setOnThemeScopeDestroy(node, reinterpret_cast<void*>(&func));
 #endif
 }
 void ApplyThemeScopeIdToNodeImpl(Ark_NativePointer ptr,

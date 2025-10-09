@@ -847,7 +847,8 @@ void CreateAndBindTheme(ani_env* env, ani_int themeScopeId, ani_int themeId,
         return;
     }
     auto themeModifier = NodeModifier::GetThemeModifier();
-    auto theme = themeModifier->createTheme(themeId, colors.data(), colorModeValue, static_cast<void*>(&resObjs));
+    auto theme = themeModifier->createTheme(themeId, colors.data(), colors.data(), colorModeValue,
+        static_cast<void*>(&resObjs), static_cast<void*>(&resObjs));
     CHECK_NULL_VOID(theme);
     ArkUINodeHandle node = themeModifier->getWithThemeNode(themeScopeId);
     if (!node) {
