@@ -623,13 +623,14 @@ HWTEST_F(TabBarTestNg, TabBarPatternChangeMask001, TestSize.Level1)
     tabBarPattern_->ChangeMask(TEST_TAB_BAR_INDEX, 1.0f, tabBarOffset, 0.99f, TEST_MASK_MIDDLE_RADIUS_RATIO, false);
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
 
-    auto selectedmaskPosition = tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT;
-    auto selectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(selectedmaskPosition));
+    auto selectedMaskPosition = tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    auto selectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(selectedMaskPosition));
     auto selectedImageNode = AceType::DynamicCast<FrameNode>(selectedMaskNode->GetChildren().front());
     auto selectedImageRenderContext = selectedImageNode->GetRenderContext();
     EXPECT_DOUBLE_EQ(selectedImageRenderContext->GetOpacity().value(), 1.0f);
-    auto unselectedmaskPosition = tabBarNode_->GetChildren().size() - TEST_UNSELECTED_MASK_COUNT;
-    auto unselectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(unselectedmaskPosition));
+    auto unselectedMaskPosition =
+        tabBarNode_->GetChildren().size() - TEST_UNSELECTED_MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    auto unselectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(unselectedMaskPosition));
     auto unSelectedImageNode = AceType::DynamicCast<FrameNode>(unselectedMaskNode->GetChildren().front());
     auto unSelectedImageRenderContext = unSelectedImageNode->GetRenderContext();
     EXPECT_DOUBLE_EQ(unSelectedImageRenderContext->GetOpacity().value(), 0.99f);

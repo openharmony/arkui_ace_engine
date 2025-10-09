@@ -158,6 +158,15 @@ RefPtr<OHOS::Ace::NG::FrameNode> InitEffectNode(RefPtr<TabsNode> tabsNode)
     return effectNode;
 }
 
+void TabsModelNG::InitImageIndicatorNode(const RefPtr<FrameNode>& indicatorNode)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto pattern = indicatorNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    indicatorNode->SetDraggable(false);
+    pattern->SetNeedLoadAlt(false);
+}
+
 void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController)
 {
     bool hasSwiperNode = tabsNode->HasSwiperNode();
@@ -165,6 +174,7 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
     bool hasDividerNode = tabsNode->HasDividerNode();
     bool hasSelectedMaskNode = tabsNode->HasSelectedMaskNode();
     bool hasUnselectedMaskNode = tabsNode->HasUnselectedMaskNode();
+    bool hasIndicatorNode = tabsNode->HasIndicatorNode();
 
     // Create Swiper node to contain TabContent.
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
@@ -191,6 +201,9 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
     auto unselectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetUnselectedMaskId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
 
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, tabsNode->GetIndicatorId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+
     if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);
     }
@@ -207,6 +220,11 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
     if (!hasUnselectedMaskNode) {
         unselectedMaskNode->MountToParent(tabBarNode);
         InitUnselectedMaskNode(unselectedMaskNode);
+    }
+
+    if (!hasIndicatorNode) {
+        indicatorNode->MountToParent(tabBarNode);
+        InitImageIndicatorNode(indicatorNode);
     }
 }
 
