@@ -798,6 +798,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest016, TestSize.Level1)
     auto size = CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT)
                     .ConvertToSizeT();
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
-    ASSERT_NE(layoutAlgorithm->IsIntoFolderStack(size, layoutProperty, AccessibilityManager::RawPtr(layoutWrapper)), true);
+    ASSERT_NE(layoutAlgorithm->IsIntoFolderStack(size, layoutProperty,
+        AccessibilityManager::RawPtr(layoutWrapper)), true);
 }
 } // namespace OHOS::Ace::NG
