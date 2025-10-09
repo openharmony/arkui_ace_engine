@@ -2478,6 +2478,7 @@ void TextFieldModelNG::SetOnWillInsertValueEvent(FrameNode* frameNode,
     std::function<bool(const InsertValueInfo&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetOnWillInsertValueEvent, frameNode, std::move(func));
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillInsertValueEvent(std::move(func));

@@ -28,6 +28,7 @@ public:
     TextComponentDecorator(const RefPtr<FrameNode>& decoratedNode);
     ~TextComponentDecorator();
     void BuildDecorator();
+    void BuildDecoratorMultiThread();
     void CleanDecorator();
     virtual void UpdateTextFieldMargin() = 0;
     virtual float MeasureDecorator(float contentWidth, const std::u16string& textContent, bool showPlaceHolder) = 0;

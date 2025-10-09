@@ -507,6 +507,7 @@ public:
     bool CloseKeyboard(bool forceClose, bool isStopTwinkling);
 
     FocusPattern GetFocusPattern() const override;
+    FocusPattern GetFocusPatternMultiThread() const;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void UpdateInputFilterErrorText(const std::u16string& errorText) override;
@@ -1249,6 +1250,8 @@ public:
     void EditingValueFilterChange();
 
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder);
+    void SetCustomKeyboardMultiThread(const std::function<void()>&& keyboardBuilder);
+    void SetCustomKeyboardMultiThreadAction(const std::function<void()>&& keyboardBuilder);
 
     void SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder);
     void SetCustomKeyboardWithNodeMultiThread(const RefPtr<UINode>& keyboardBuilder);
@@ -2316,6 +2319,8 @@ private:
     bool setSelectionFlagMultiThread_ = false;
     bool setCustomKeyboardWithNodeMultiThread_ = false;
     RefPtr<UINode> setCustomKeyboardWithNodeMultiThreadValue_;
+    bool setCustomKeyboardMultiThread_ = false;
+    std::function<void()> setCustomKeyboardMultiThreadValue_;
     bool moveCaretToContentRectMultiThread_ = false;
     MoveCaretToContentRectData moveCaretToContentRectMultiThreadValue_;
     // ----- multi thread state variables end -----

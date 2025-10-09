@@ -239,6 +239,7 @@ private:
     static void TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode);
     static void TextFieldUpdateContextMultiThread(const RefPtr<FrameNode>& frameNode);
     static void CreateDivider(const RefPtr<SearchNode>& parentNode, bool hasDividerNode);
+    static void CreateDividerMultiThread(const RefPtr<SearchNode>& parentNode, bool hasDividerNode);
 };
 
 } // namespace OHOS::Ace::NG

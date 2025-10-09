@@ -8697,8 +8697,7 @@ void TextFieldPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
-        auto host = GetHost();
-        fontManager->AddFontNodeNG(host);
+        fontManager->AddFontNodeNG(frameNode);
     }
     auto onTextSelectorChange = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -8707,6 +8706,7 @@ void TextFieldPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(frameNode);
         frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
     };
+    CHECK_NULL_VOID(selectController_);
     selectController_->SetOnAccessibility(std::move(onTextSelectorChange));
 }
 
@@ -10885,9 +10885,10 @@ SelectionInfo TextFieldPattern::GetSelection()
 
 FocusPattern TextFieldPattern::GetFocusPattern() const
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, GetFocusPattern);
     FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
     focusPattern.SetIsFocusActiveWhenFocused(true);
-    auto host = GetHost();
     CHECK_NULL_RETURN(host, focusPattern);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, focusPattern);
@@ -11388,6 +11389,9 @@ void TextFieldPattern::SetUnitNode(const RefPtr<NG::UINode>& unitNode)
 
 void TextFieldPattern::SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, SetCustomKeyboard,
+        std::move(keyboardBuilder));  // call SetCustomKeyboardWithNodeMultiThread() by multi thread
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
         // close customKeyboard and request system keyboard
         CloseCustomKeyboard();

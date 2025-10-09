@@ -3052,4 +3052,34 @@ HWTEST_F(TextFieldPatternTest, AdjustAutoScrollOffset, TestSize.Level1)
     offset = pattern_->AdjustAutoScrollOffset(Offset(50.0f, 110.0f));
     EXPECT_EQ(offset, Offset(50.0f, 99.0f));
 }
+
+/**
+ * @tc.name: TextFieldPatternTestMultiThread
+ * @tc.desc: Test OnAttachToFrameNodeMultiThread.
+ */
+HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread, TestSize.Level1)
+{
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachToFrameNodeMultiThread();
+}
+
+/**
+ * @tc.name: TextFieldPatternTestMultiThread2
+ * @tc.desc: Test OnAttachToFrameNodeMultiThread.
+ */
+HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread2, TestSize.Level1)
+{
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachToMainTreeMultiThread();
+}
 } // namespace OHOS::Ace::NG

@@ -280,22 +280,9 @@ public:
         CHECK_NULL_VOID(host);
         host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
     }
-    void SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
-    {
-        CHECK_NULL_VOID(GetDataDetectorAdapter());
-        dataDetectorAdapter_->SetTextDetectTypes(textDetectConfig.types);
-        dataDetectorAdapter_->onResult_ = std::move(textDetectConfig.onResult);
-        dataDetectorAdapter_->entityColor_ = textDetectConfig.entityColor;
-        dataDetectorAdapter_->entityDecorationType_ = textDetectConfig.entityDecorationType;
-        dataDetectorAdapter_->entityDecorationColor_ = textDetectConfig.entityDecorationColor;
-        dataDetectorAdapter_->entityDecorationStyle_ = textDetectConfig.entityDecorationStyle;
-        auto textDetectConfigCache = dataDetectorAdapter_->textDetectConfigStr_;
-        dataDetectorAdapter_->enablePreviewMenu_ = textDetectConfig.enablePreviewMenu;
-        dataDetectorAdapter_->textDetectConfigStr_ = textDetectConfig.ToString();
-        if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
-            MarkAISpanStyleChanged();
-        }
-    }
+    void SetTextDetectConfig(const TextDetectConfig& textDetectConfig);
+    void SetTextDetectConfigMultiThread(const TextDetectConfig& textDetectConfig);
+
     void ModifyAISpanStyle(TextStyle& aiSpanStyle)
     {
         CHECK_NULL_VOID(GetDataDetectorAdapter());
@@ -1277,6 +1264,8 @@ private:
     bool setTextSelectionMultiThread_ = true;
     int32_t setTextSelectionMultiThreadValue0_ = -1;
     int32_t setTextSelectionMultiThreadValue1_ = -1;
+    bool textDetectConfigMultiThread_ = false;
+    TextDetectConfig textDetectConfigMultiThreadValue_;
     // ----- multi thread state variables end -----
 };
 } // namespace OHOS::Ace::NG

@@ -41,4 +41,18 @@ void TextFieldModelNG::ProcessDefaultStyleAndBehaviorsMultiThread(const RefPtr<F
     CHECK_NULL_VOID(pattern);
     pattern->ProcessDefaultStyleAndBehaviors();
 }
+
+void TextFieldModelNG::SetOnWillInsertValueEventMultiThread(FrameNode* frameNode,
+    std::function<bool(const InsertValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weakPtr = AceType::WeakClaim(frameNode),
+        func = std::move(func)]() mutable {
+        auto frameNode = weakPtr.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnWillInsertValueEvent(std::move(func));
+    });
+}
 } // namespace OHOS::Ace::NG

@@ -6889,7 +6889,9 @@ void OverlayManager::CloseKeyboard(int32_t targetId)
     auto pattern = customKeyboard->GetPattern<KeyboardPattern>();
     CHECK_NULL_VOID(pattern);
     customKeyboardMap_.erase(pattern->GetTargetId());
-    customKeyboard->MarkRemoving();
+    if (!customKeyboard->IsFree()) {
+        customKeyboard->MarkRemoving();
+    }
     PlayKeyboardTransition(customKeyboard, false);
     Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, 0.0f);
     auto safeAreaManager = pipeline->GetSafeAreaManager();

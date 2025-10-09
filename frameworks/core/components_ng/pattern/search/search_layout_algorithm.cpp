@@ -208,6 +208,7 @@ float SearchLayoutAlgorithm::CalculateTextFieldWidth(
     }
 
     auto searchWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
+    CHECK_NULL_RETURN(searchWrapper, 0.0f);
     auto searchButtonNode = searchWrapper->GetHostNode();
     auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
     auto searchButtonLayoutProperty = searchButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
