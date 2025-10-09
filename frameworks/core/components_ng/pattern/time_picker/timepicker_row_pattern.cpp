@@ -17,6 +17,7 @@
 #include <cstdint>
 
 #include "base/geometry/ng/size_t.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -2115,6 +2116,7 @@ bool TimePickerRowPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         (!pickerProperty->HasSelectedColor())) {
         result = true;
     }
+    FREE_NODE_CHECK(host, OnThemeScopeUpdate);
     OnModifyDone();
     return result;
 }
