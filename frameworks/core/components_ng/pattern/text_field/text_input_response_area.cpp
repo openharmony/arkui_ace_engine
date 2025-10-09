@@ -1308,7 +1308,7 @@ void PlaceholderResponseArea::InitResponseArea()
     placeholderNode_ = textNode;
 }
 
-void PlaceholderResponseArea::PlacehodlerMountToParent()
+void PlaceholderResponseArea::PlaceholderMountToParent()
 {
     CHECK_NULL_VOID(placeholderNode_);
     auto pattern = hostPattern_.Upgrade();

@@ -773,7 +773,7 @@ public:
         return connection_;
 #endif
     }
-    float PreferredLineHeight(bool isAlgorithmMeasure = false, bool isStyelPlaceholder = false);
+    float PreferredLineHeight(bool isAlgorithmMeasure = false, bool isStyledPlaceholder = false);
 
     void SearchRequestKeyboard();
 
