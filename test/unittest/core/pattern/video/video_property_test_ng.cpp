@@ -1110,13 +1110,15 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest025, TestSize.Level1)
     auto mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
     videoPattern->mediaPlayer_ = mockMediaPlayer;
     EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
-        .WillOnce(Return(true))
         .WillOnce(Return(false))
-        .WillOnce(Return(false));
+        .WillOnce(Return(true));
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), InitSurface()).Times(1);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetSurface())
         .WillOnce(Return(-1))
         .WillOnce(Return(-1));
-    videoPattern->PrepareSurface();
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)),
+        SetRenderContext(videoPattern->renderContextForMediaPlayer_))
+        .Times(1);
     videoPattern->PrepareSurface();
     SystemProperties::SetExtSurfaceEnabled(false);
     videoPattern->PrepareSurface();

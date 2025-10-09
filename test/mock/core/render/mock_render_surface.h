@@ -26,6 +26,8 @@ class MockRenderSurface : public RenderSurface {
 public:
     ~MockRenderSurface() override = default;
     MOCK_CONST_METHOD0(IsSurfaceValid, bool());
+    MOCK_METHOD0(InitSurface, void());
+    MOCK_METHOD1(SetRenderContext, void(const RefPtr<RenderContext>& renderContext));
     MOCK_METHOD2(AdjustNativeWindowSize, void(uint32_t, uint32_t));
     MOCK_METHOD2(ConfigSurface, void(uint32_t, uint32_t));
     MOCK_METHOD4(SetExtSurfaceBounds, void(int32_t, int32_t, int32_t, int32_t));
