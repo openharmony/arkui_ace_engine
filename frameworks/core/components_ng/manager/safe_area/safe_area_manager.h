@@ -181,6 +181,11 @@ public:
         return keyboardInset_;
     }
 
+    SafeAreaInsets::Inset GetKeyboardInsetWithoutProcess() const
+    {
+        return keyboardInset_;
+    }
+
     SafeAreaInsets::Inset GetKeyboardWebInset() const
     {
         if (keyboardAvoidMode_ == KeyBoardAvoidMode::NONE) {
@@ -359,7 +364,7 @@ public:
 
     SafeAreaInsets::Inset GetKeyboardInsetImpl()
     {
-        return getKeyboardInset ? getKeyboardInset(this) : GetKeyboardInset();
+        return getKeyboardInset ? getKeyboardInset(this) : GetKeyboardInsetWithoutProcess();
     }
 
     void SetKeyboardInsetImpl(std::function<SafeAreaInsets::Inset(SafeAreaManager*)> method)

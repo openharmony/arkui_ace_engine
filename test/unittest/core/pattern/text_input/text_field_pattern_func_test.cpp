@@ -2797,4 +2797,21 @@ HWTEST_F(TextFieldPatternFuncTest, CheckIfInterruptProcessing, TestSize.Level1)
     pattern->selectOverlay_->ProcessOverlayAfterLayout({});
     EXPECT_TRUE(pattern->selectOverlay_->enableHandleLevel_);
 }
+
+/**
+ * @tc.name: SelectOverlay Menu avoid keyboard.
+ * @tc.desc: test GetKeyboardInsetImpl.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, GetKeyboardInsetImpl, TestSize.Level1)
+{
+    RefPtr<SafeAreaManager> safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    ASSERT_NE(safeAreaManager, nullptr);
+    safeAreaManager->keyboardAvoidMode_ = KeyBoardAvoidMode::NONE;
+    SafeAreaInsets::Inset inset = { .start = 1000, .end = 2000 };
+    safeAreaManager->keyboardInset_ = inset;
+
+    EXPECT_EQ(safeAreaManager->GetKeyboardInset().Length(), 0);
+    EXPECT_EQ(safeAreaManager->GetKeyboardInsetImpl().Length(), 1000);
+}
 } // namespace OHOS::Ace
