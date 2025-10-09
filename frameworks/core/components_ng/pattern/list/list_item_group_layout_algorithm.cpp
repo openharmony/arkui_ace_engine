@@ -576,7 +576,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         } else {
             endIndex = jumpIndex;
         }
-        prevItemPosCount_ = prevMeasureBreak_ ? itemPosition_.size() : 0;
+        prevItemPosCount_ = prevMeasureBreak_ ? static_cast<int32_t>(itemPosition_.size()) : 0;
         itemPosition_.clear();
         cachedItemPosition_.clear();
         jumpIndex_.reset();
@@ -602,7 +602,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         } else {
             ModifyReferencePos(GetLanesCeil(endIndex), endPos);
         }
-        prevItemPosCount_ = prevMeasureBreak_ ? itemPosition_.size() : 0;
+        prevItemPosCount_ = prevMeasureBreak_ ? static_cast<int32_t>(itemPosition_.size()) : 0;
         itemPosition_.clear();
     } else if (!NeedMeasureItem(layoutWrapper)) {
         itemPosition_.clear();

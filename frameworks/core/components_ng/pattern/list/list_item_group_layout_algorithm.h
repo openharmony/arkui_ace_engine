@@ -390,7 +390,7 @@ public:
 
     bool ReachResponseDeadline(LayoutWrapper* layoutWrapper) const
     {
-        return (itemPosition_.size() > prevItemPosCount_) && !isNeedSyncLoad_ &&
+        return (static_cast<int32_t>(itemPosition_.size()) > prevItemPosCount_) && !isNeedSyncLoad_ &&
             layoutWrapper->ReachResponseDeadline();
     }
 
