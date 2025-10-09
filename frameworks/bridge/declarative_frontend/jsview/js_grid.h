@@ -27,7 +27,7 @@ public:
 
     static void PopGrid();
     static void UseProxy(const JSCallbackInfo& args);
-    static void SetColumnsTemplate(const std::string& value);
+    static void SetColumnsTemplate(const JSCallbackInfo& info);
     static void SetRowsTemplate(const std::string& value);
     static void SetColumnsGap(const JSCallbackInfo& info);
     static void SetRowsGap(const JSCallbackInfo& info);

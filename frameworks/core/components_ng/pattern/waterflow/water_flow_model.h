@@ -48,6 +48,7 @@ public:
     virtual void SetItemMinHeight(const Dimension& minHeight) = 0;
     virtual void SetItemMaxWidth(const Dimension& maxWidth) = 0;
     virtual void SetItemMaxHeight(const Dimension& maxHeight) = 0;
+    virtual void SetItemFillPolicy(PresetFillType policy) = 0;
 
     virtual void SetColumnsGap(const Dimension& value) = 0;
     virtual void SetRowsGap(const Dimension& value) = 0;

@@ -16,6 +16,7 @@
 
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/node/waterflow_section_option.h"
+#include "ui/base/utils/utils.h"
 
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
@@ -45,6 +46,40 @@ void SetColumnsTemplate(ArkUINodeHandle node, ArkUI_CharPtr value)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetColumnsTemplate(frameNode, value);
+}
+
+ArkUI_Int32 GetItemFillPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<ArkUI_Int32>(WaterFlowModelNG::GetItemFillPolicy(frameNode));
+}
+
+void ResetItemFillPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string column = "1fr";
+    WaterFlowModelNG::ResetItemFillPolicy(frameNode);
+    WaterFlowModelNG::SetColumnsTemplate(frameNode, column);
+}
+
+void SetItemFillPolicy(ArkUINodeHandle node, int32_t itemFillPolicy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto fillPolicy = PresetFillType::BREAKPOINT_DEFAULT;
+    switch (itemFillPolicy) {
+        case INDEX_1:
+            fillPolicy = PresetFillType::BREAKPOINT_SM1MD2LG3;
+            break;
+        case INDEX_2:
+            fillPolicy = PresetFillType::BREAKPOINT_SM2MD3LG5;
+            break;
+        default:
+            break;
+    }
+    WaterFlowModelNG::SetItemFillPolicy(frameNode, fillPolicy);
 }
 
 void ResetRowsTemplate(ArkUINodeHandle node)
@@ -719,6 +754,9 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
     static const ArkUIWaterFlowModifier modifier = {
         .resetColumnsTemplate = ResetColumnsTemplate,
         .setColumnsTemplate = SetColumnsTemplate,
+        .getItemFillPolicy = GetItemFillPolicy,
+        .resetItemFillPolicy = ResetItemFillPolicy,
+        .setItemFillPolicy = SetItemFillPolicy,
         .resetRowsTemplate = ResetRowsTemplate,
         .setRowsTemplate = SetRowsTemplate,
         .resetWaterFlowEnableScrollInteraction = ResetWaterFlowEnableScrollInteraction,

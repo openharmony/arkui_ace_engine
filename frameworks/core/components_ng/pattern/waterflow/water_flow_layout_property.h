@@ -88,6 +88,11 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowCachedItems, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ItemFillPolicy, PresetFillType);
+    void OnItemFillPolicyUpdate(const PresetFillType& /* ItemFillPolicy */) const
+    {
+        ResetWaterflowLayoutInfoAndMeasure();
+    }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(WaterflowDirection, FlexDirection);
     void OnWaterflowDirectionUpdate(FlexDirection /* WaterflowDirection */) const
@@ -138,6 +143,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SyncLoad, bool, PROPERTY_UPDATE_NORMAL);
+    std::optional<std::string> GetFinalColumnsTemplate(double width);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
@@ -155,11 +161,12 @@ protected:
         if (itemLayoutConstraint_) {
             value->itemLayoutConstraint_ = std::make_unique<MeasureProperty>(*itemLayoutConstraint_);
         }
+        value->propItemFillPolicy_ = CloneItemFillPolicy();
     }
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowLayoutProperty);
-
+    std::string GetItemFillPolicyString() const;
     void ResetWaterflowLayoutInfoAndMeasure() const;
     std::string GetWaterflowDirectionStr() const;
     std::unique_ptr<MeasureProperty> itemLayoutConstraint_;

@@ -323,6 +323,15 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
     auto contentConstraint = contentConstraintOps.value();
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis);
     int32_t lanes = layoutProperty->GetLanes().value_or(1);
+    if (layoutProperty->GetItemFillPolicy().has_value()) {
+        auto fillType = layoutProperty->GetItemFillPolicy();
+        const auto& padding = listLayoutProperty_->CreatePaddingAndBorder();
+        auto leftPadding = axis == Axis::HORIZONTAL ? padding.top.value_or(0) : padding.left.value_or(0);
+        auto rightPadding = axis == Axis::HORIZONTAL ? padding.bottom.value_or(0) : padding.right.value_or(0);
+        WidthBreakpoint point = GetCommonWidthBreakpoint(
+            (crossSizeOptional.value_or(0.0) + leftPadding + rightPadding), contentConstraint.scaleProperty.vpScale);
+        lanes = GetListLanesByFillType(fillType.value(), point);
+    }
     lanes = lanes > 1 ? lanes : 1;
     if (layoutProperty->GetLaneMinLength().has_value()) {
         minLaneLength_ =

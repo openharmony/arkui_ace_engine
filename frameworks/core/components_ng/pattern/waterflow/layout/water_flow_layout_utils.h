@@ -44,6 +44,7 @@ public:
      * @return [idealSize given by parent, whether measure is successful (need to adapt to children size if not)].
      */
     static std::pair<SizeF, bool> PreMeasureSelf(LayoutWrapper* wrapper, Axis axis);
+    static double GetOriginalWidth();
 
     /**
      * @brief Helper to measure the footer node.
@@ -63,6 +64,8 @@ public:
     static float GetUserDefHeight(const RefPtr<WaterFlowSections>& sections, int32_t seg, int32_t idx);
     static void UpdateItemIdealSize(const RefPtr<LayoutWrapper>& item, Axis axis, float userHeight);
     static AdjustOffset GetAdjustOffset(const RefPtr<LayoutWrapper>& item);
+    private:
+    static double originalWidth_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_UTILS_H

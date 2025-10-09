@@ -43,6 +43,7 @@ public:
     virtual void Pop() = 0;
     virtual void SetLayoutOptions(GridLayoutOptions options) = 0;
     virtual void SetColumnsTemplate(const std::string& value) = 0;
+    virtual void SetItemFillPolicy(PresetFillType policy) {};
     virtual void SetRowsTemplate(const std::string& value) = 0;
     virtual void SetColumnsGap(const Dimension& value) = 0;
     virtual void SetRowsGap(const Dimension& value) = 0;

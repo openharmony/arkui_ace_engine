@@ -78,6 +78,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     syncLoad_ = gridLayoutProperty->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
                 info_.targetIndex_.has_value() || !NearEqual(info_.currentOffset_, info_.prevOffset_);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize_);
+    double originalWidth = frameSize_.Width();
     MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), frameSize_);
     info_.contentEndPadding_ = ScrollableUtils::CheckHeightExpansion(gridLayoutProperty, axis);
     frameSize_.AddHeight(info_.contentEndPadding_);
@@ -104,7 +105,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
-    InitialItemsCrossSize(gridLayoutProperty, frameSize_, info_.GetChildrenCount());
+    InitialItemsCrossSize(gridLayoutProperty, frameSize_, info_.GetChildrenCount(), originalWidth);
 
     // Step2: Measure children that can be displayed in viewport of Grid
     float mainSize = GetMainAxisSize(frameSize_, axis);
@@ -435,12 +436,12 @@ void GridScrollLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper)
     host->ForceSyncGeometryNode();
 }
 
-void GridScrollLayoutAlgorithm::InitialItemsCrossSize(
-    const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize, int32_t childrenCount)
+void GridScrollLayoutAlgorithm::InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty,
+    const SizeF& frameSize, int32_t childrenCount, double originalWidth)
 {
     itemsCrossSize_.clear();
     auto rowsTemplate = layoutProperty->GetRowsTemplate().value_or("");
-    auto columnsTemplate = layoutProperty->GetColumnsTemplate().value_or("");
+    auto columnsTemplate = layoutProperty->GetFinalColumnsTemplate(originalWidth).value_or("");
     axis_ = columnsTemplate.empty() ? Axis::HORIZONTAL : Axis::VERTICAL;
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
     auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);

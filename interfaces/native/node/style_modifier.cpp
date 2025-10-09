@@ -7383,6 +7383,43 @@ const ArkUI_AttributeItem* GetListLanes(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetListItemFillPolicy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < NUM_0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Int32 fillType = -1;
+    ArkUIDimensionType gutterType;
+    gutterType.value = 0.0f;
+    gutterType.units = UNIT_VP;
+    if ((item->size > 0) && GreatOrEqual(item->value[NUM_0].u32, ZERO_F) &&
+        LessOrEqual(item->value[NUM_0].u32, NUM_2)) {
+        fillType = item->value[NUM_0].u32;
+    }
+    if ((item->size > NUM_1) && GreatOrEqual(item->value[NUM_1].f32, ZERO_F)) {
+        gutterType.value = item->value[NUM_1].f32;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getListModifier()->setListItemFillPolicy(
+        node->uiNodeHandle, fillType, &gutterType);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetListItemFillPolicy(ArkUI_NodeHandle node)
+{
+    auto listModifier = GetFullImpl()->getNodeModifiers()->getListModifier();
+    listModifier->resetListItemFillPolicy(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetListItemFillPolicy(ArkUI_NodeHandle node)
+{
+    auto listModifier = GetFullImpl()->getNodeModifiers()->getListModifier();
+    g_numberValues[NUM_0].i32 = static_cast<int32_t>(listModifier->getListItemFillPolicy(node->uiNodeHandle));
+    g_numberValues[NUM_1].f32 = listModifier->getListLaneGutter(node->uiNodeHandle);
+    return &g_attributeItem;
+}
+
 int32_t SetListScrollSnapAlign(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
@@ -16236,6 +16273,33 @@ void ResetWaterFlowSyncLoad(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetSyncLoad(node->uiNodeHandle);
 }
 
+const ArkUI_AttributeItem* GetColumnsTemplateItemFillPolicy(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto itemFillPolicy = fullImpl->getNodeModifiers()->getWaterFlowModifier()->getItemFillPolicy(node->uiNodeHandle);
+    g_numberValues[0].i32 = itemFillPolicy;
+    return &g_attributeItem;
+}
+
+int32_t SetColumnsTemplateItemFillPolicy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size != NUM_1 ||
+        (item->value[NUM_0].i32 < 0 || item->value[NUM_0].i32 > static_cast<int32_t>(ARKUI_ITEMFILLPOLICY_SM2MD3LG5))) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->setItemFillPolicy(node->uiNodeHandle, item->value[NUM_0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetColumnsTemplateItemFillPolicy(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetItemFillPolicy(node->uiNodeHandle);
+}
+
 const ArkUI_AttributeItem* GetWaterFlowSyncLoad(ArkUI_NodeHandle node)
 {
     ArkUI_Bool syncLoad = GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getSyncLoad(node->uiNodeHandle);
@@ -17051,6 +17115,32 @@ void ResetGridLayoutOptions(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetGridLayoutOptions(ArkUI_NodeHandle node)
 {
     g_attributeItem.object = node->gridLayoutOptions;
+    return &g_attributeItem;
+}
+
+int32_t SetGridColumnTemplateItemFillPolicy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    ArkUI_Int32 itemFillPolicy = static_cast<ArkUI_Int32>(PresetFillType::BREAKPOINT_DEFAULT);
+    if (item == nullptr || item->size < NUM_1 || !InRegion(NUM_0, NUM_2, item->value[NUM_0].i32)) {
+        GetFullImpl()->getNodeModifiers()->getGridModifier()->setItemFillPolicy(node->uiNodeHandle, itemFillPolicy);
+        return ERROR_CODE_PARAM_INVALID;
+    } else {
+        itemFillPolicy = item->value[0].i32;
+        GetFullImpl()->getNodeModifiers()->getGridModifier()->setItemFillPolicy(node->uiNodeHandle, itemFillPolicy);
+        return ERROR_CODE_NO_ERROR;
+    }
+}
+
+void ResetGridColumnTemplateItemFillPolicy(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getGridModifier()->resetItemFillPolicy(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetGridColumnTemplateItemFillPolicy(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getGridModifier()->getItemFillPolicy(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
     return &g_attributeItem;
 }
 
@@ -18725,7 +18815,8 @@ int32_t SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
     static Setter* setters[] = { SetListDirection, SetListSticky, SetListSpace, SetListNodeAdapter, SetListCachedCount,
         SetListScrollToIndex, SetListAlignListItem, SetListChildrenMainSize, SetListInitialIndex, SetListDivider,
         SetListScrollToItemInGroup, SetListLanes, SetListScrollSnapAlign, SetListMaintainVisibleContentPosition,
-        SetListStackFromEnd, SetListFocusWrapMode, SetListSyncLoad, SetListScrollAnimationSpeed };
+        SetListStackFromEnd, SetListFocusWrapMode, SetListSyncLoad, SetListScrollAnimationSpeed,
+        SetListItemFillPolicy };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -18738,7 +18829,7 @@ const ArkUI_AttributeItem* GetListAttribute(ArkUI_NodeHandle node, int32_t subTy
     static Getter* getters[] = { GetListDirection, GetListSticky, GetListSpace, GetListNodeAdapter, GetListCachedCount,
         nullptr, GetListAlignListItem, nullptr, GetListInitialIndex, GetListDivider, nullptr, GetListLanes,
         GetListScrollSnapAlign, GetListMaintainVisibleContentPosition, GetListStackFromEnd, GetListFocusWrapMode,
-        GetListSyncLoad, GetListScrollAnimationSpeed };
+        GetListSyncLoad, GetListScrollAnimationSpeed, GetListItemFillPolicy };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -18751,7 +18842,8 @@ void ResetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     static Resetter* resetters[] = { ResetListDirection, ResetListSticky, ResetListSpace, ResetListNodeAdapter,
         ResetListCachedCount, nullptr, ResetListAlignListItem, ResetListChildrenMainSize, ResetListInitialIndex,
         ResetListDivider, nullptr, ResetListLanes, ResetListScrollSnapAlign, ResetListMaintainVisibleContentPosition,
-        ResetListStackFromEnd, ResetListFocusWrapMode, ResetListSyncLoad, ResetListScrollAnimationSpeed };
+        ResetListStackFromEnd, ResetListFocusWrapMode, ResetListSyncLoad, ResetListScrollAnimationSpeed,
+        ResetListItemFillPolicy };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -18953,7 +19045,7 @@ int32_t SetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
     static Setter* setters[] = { SetLayoutDirection, SetColumnsTemplate, SetRowsTemplate, SetWaterFlowColumnsGap,
         SetWaterFlowRowsGap, SetWaterFlowSectionOption, SetWaterFlowNodeAdapter, SetWaterFlowCachedCount,
         SetWaterFlowFooter, SetWaterFlowScrollToIndex, SetItemConstraintSize, SetWaterFlowLayoutMode,
-        SetWaterFlowSyncLoad };
+        SetWaterFlowSyncLoad, SetColumnsTemplateItemFillPolicy };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -18966,7 +19058,7 @@ void ResetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     static Resetter* resetters[] = { ResetLayoutDirection, ResetColumnsTemplate, ResetRowsTemplate,
         ResetWaterFlowColumnsGap, ResetWaterFlowRowsGap, ResetWaterFlowSectionOption, ResetWaterFlowNodeAdapter,
         ResetWaterFlowCachedCount, ResetWaterFlowFooter, nullptr, ResetItemConstraintSize, ResetWaterFlowLayoutMode,
-        ResetWaterFlowSyncLoad };
+        ResetWaterFlowSyncLoad, ResetColumnsTemplateItemFillPolicy };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -18978,7 +19070,7 @@ const ArkUI_AttributeItem* GetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t 
 {
     static Getter* getters[] = { GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate, GetWaterFlowColumnsGap,
         GetWaterFlowRowsGap, GetWaterFlowSectionOption, GetWaterFlowNodeAdapter, GetWaterFlowCachedCount, nullptr,
-        nullptr, GetItemConstraintSize, GetWaterFlowLayoutMode, GetWaterFlowSyncLoad };
+        nullptr, GetItemConstraintSize, GetWaterFlowLayoutMode, GetWaterFlowSyncLoad, GetColumnsTemplateItemFillPolicy };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -19011,7 +19103,7 @@ int32_t SetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
 {
     static Setter* setters[] = { SetGridColumnsTemplate, SetGridRowsTemplate, SetGridColumnsGap, SetGridRowsGap,
         SetGridNodeAdapter, SetGridCachedCount, SetGridFocusWrapMode, SetGridSyncLoad, SetGridAlignItems,
-        SetGridLayoutOptions };
+        SetGridLayoutOptions, SetGridColumnTemplateItemFillPolicy };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -19043,7 +19135,7 @@ void ResetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetGridColumnsTemplate, ResetGridRowsTemplate, ResetGridColumnsGap,
         ResetGridRowsGap, ResetGridNodeAdapter, ResetGridCachedCount, ResetGridFocusWrapMode, ResetGridSyncLoad,
-        ResetGridAlignItems, ResetGridLayoutOptions };
+        ResetGridAlignItems, ResetGridLayoutOptions, ResetGridColumnTemplateItemFillPolicy };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -19077,7 +19169,7 @@ const ArkUI_AttributeItem* GetGridAttribute(ArkUI_NodeHandle node, int32_t subTy
 {
     static Getter* getters[] = { GetGridColumnsTemplate, GetGridRowsTemplate, GetGridColumnsGap, GetGridRowsGap,
         GetGridNodeAdapter, GetGridCachedCount, GetGridFocusWrapMode, GetGridSyncLoad, GetGridAlignItems,
-        GetGridLayoutOptions };
+        GetGridLayoutOptions, GetGridColumnTemplateItemFillPolicy };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;

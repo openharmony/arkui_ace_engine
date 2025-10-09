@@ -256,9 +256,22 @@ void JSGrid::UseProxy(const JSCallbackInfo& args)
 #endif
 }
 
-void JSGrid::SetColumnsTemplate(const std::string& value)
+void JSGrid::SetColumnsTemplate(const JSCallbackInfo& info)
 {
-    GridModel::GetInstance()->SetColumnsTemplate(value);
+    auto jsValue = info[0];
+    if (jsValue->IsObject()) {
+        GridModel::GetInstance()->SetItemFillPolicy(PresetFillType::BREAKPOINT_DEFAULT);
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        auto fillTypeParam = jsObj->GetProperty("fillType");
+        if (!fillTypeParam->IsNull()) {
+            auto type = JSScrollable::ParsePresetFillType(fillTypeParam);
+            if (type.has_value()) {
+                GridModel::GetInstance()->SetItemFillPolicy(type.value());
+            }
+        }
+    } else {
+        GridModel::GetInstance()->SetColumnsTemplate(jsValue->ToString());
+    }
 }
 
 void JSGrid::SetRowsTemplate(const std::string& value)

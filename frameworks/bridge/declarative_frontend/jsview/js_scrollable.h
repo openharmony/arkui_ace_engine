@@ -28,8 +28,8 @@ public:
     static DisplayMode ParseDisplayMode(const JSCallbackInfo& info, DisplayMode defaultValue);
     static std::string ParseBarColor(const JSCallbackInfo& info, RefPtr<ResourceObject>& resObj);
     static std::string ParseBarWidth(const JSCallbackInfo& info);
-
     static void JsClip(const JSCallbackInfo& info);
+    static std::optional<PresetFillType> ParsePresetFillType(const JSRef<JSVal>& jsValue);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLLABLE_H

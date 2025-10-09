@@ -6257,6 +6257,24 @@ typedef enum {
     NODE_LIST_SCROLL_SNAP_ANIMATION_SPEED = 1003017,
 
     /**
+     * @brief Specifies the responsive column layout policy for the <b>List</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: number of columns at different breakpoint specifications.
+     * The data type is {@link ArkUI_ItemFillPolicy}. \n
+     * .value[1]?.f32: column spacing. Default value: <b>0</b>, unit: vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: number of columns at different breakpoint specifications.
+     * The data type is {@link ArkUI_ItemFillPolicy}. \n
+     * .value[1].f32: column spacing. Default value: <b>0</b>, unit: vp. \n
+     *
+     * @since 22
+     */
+    NODE_LIST_LANES_ITEMFILLPOLICY = 1003018,
+
+    /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
      * as required through APIs.
      *
@@ -7075,6 +7093,22 @@ typedef enum {
     NODE_WATER_FLOW_SYNC_LOAD = 1010012,
 
     /**
+     * @brief Specifies the responsive column layout policy for the <b>WaterFlow</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: number of columns at different breakpoint specifications.
+     * The data type is {@link ArkUI_ItemFillPolicy}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: number of columns at different breakpoint specifications.
+     * The data type is {@link ArkUI_ItemFillPolicy}. \n
+     *
+     * @since 22
+     */
+    NODE_WATER_FLOW_COLUMN_TEMPLATE_ITEMFILLPOLICY = 1010013,
+
+    /**
      * @brief Sets the number of columns in the water flow layout. If this parameter is not set, one column is used by
      * default. This attribute can be set, reset, and obtained as required through APIs.
      * For example, <b>'1fr 1fr 2fr'</b> indicates three columns, with the first column taking up 1/4 of the parent
@@ -7218,6 +7252,22 @@ typedef enum {
      * @since 21
      */
     NODE_GRID_LAYOUT_OPTIONS = 1013009,
+
+    /**
+     * @brief Specifies the responsive column layout policy for the <b>Grid</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: number of columns at different breakpoint specifications.
+     * The data type is {@link ArkUI_ItemFillPolicy}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: number of columns at different breakpoint specifications.
+     * The data type is {@link ArkUI_ItemFillPolicy}. \n
+     *
+     * @since 22
+     */
+    NODE_GRID_COLUMN_TEMPLATE_ITEMFILLPOLICY = 1013010,
 
     /**
      * @brief Sets the style of the <b>GridItem</b> component.

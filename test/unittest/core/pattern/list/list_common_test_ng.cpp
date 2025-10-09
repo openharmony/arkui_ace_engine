@@ -1285,6 +1285,22 @@ HWTEST_F(ListCommonTestNg, FocusWrapMode014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ItemFillPolicy001
+ * @tc.desc: Test specify the number of columns for different responsive breakpoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ItemFillPolicy001, TestSize.Level1)
+{
+    const int32_t lanes = 2;
+    ListModelNG model = CreateList();
+    model.SetLanes(lanes);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), ITEM_MAIN_SIZE);
+}
+
+/**
  * @tc.name: KeyEvent001
  * @tc.desc: Test list_pattern OnKeyEvent function
  * @tc.type: FUNC

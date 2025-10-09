@@ -3441,6 +3441,9 @@ struct ArkUIListModifier {
         const struct ArkUIDimensionType* maxLength, const struct ArkUIDimensionType* gutter);
     void (*resetListLanes)(ArkUINodeHandle node);
     void (*resetlistLaneMinAndMaxLength)(ArkUINodeHandle node);
+    void (*setListItemFillPolicy)(ArkUINodeHandle node, ArkUI_Int32 fillType, const struct ArkUIDimensionType* gutter);
+    void (*resetListItemFillPolicy)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getListItemFillPolicy)(ArkUINodeHandle node);
     ArkUI_Int32 (*getListLanes)(ArkUINodeHandle node);
     ArkUI_Float32 (*getlistLaneMinLength)(ArkUINodeHandle node);
     ArkUI_Float32 (*getListLaneMaxLength)(ArkUINodeHandle node);
@@ -4007,6 +4010,10 @@ struct ArkUIGridModifier {
 
     void (*resetGridLayoutOptions)(ArkUINodeHandle node);
     void (*setGridLayoutOptions)(ArkUINodeHandle node, ArkUIGridLayoutOptions option);
+
+    void (*resetItemFillPolicy)(ArkUINodeHandle node);
+    void (*setItemFillPolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
+    ArkUI_Int32 (*getItemFillPolicy)(ArkUINodeHandle node);
 };
 
 struct ArkUIGridItemModifier {
@@ -5550,6 +5557,9 @@ struct ArkUIMenuModifier {
 struct ArkUIWaterFlowModifier {
     void (*resetColumnsTemplate)(ArkUINodeHandle node);
     void (*setColumnsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    ArkUI_Int32 (*getItemFillPolicy)(ArkUINodeHandle node);
+    void (*resetItemFillPolicy)(ArkUINodeHandle node);
+    void (*setItemFillPolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetRowsTemplate)(ArkUINodeHandle node);
     void (*setRowsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetWaterFlowEnableScrollInteraction)(ArkUINodeHandle node);

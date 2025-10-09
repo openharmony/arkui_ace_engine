@@ -331,9 +331,23 @@ void JSWaterFlow::SetLayoutDirection(const JSCallbackInfo& info)
     }
 }
 
-void JSWaterFlow::SetColumnsTemplate(const std::string& value)
+void JSWaterFlow::SetColumnsTemplate(const JSCallbackInfo& info)
 {
-    WaterFlowModel::GetInstance()->SetColumnsTemplate(value);
+    auto jsValue = info[0];
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        auto fillTypeParam = jsObj->GetProperty("fillType");
+        if (!fillTypeParam->IsNull()) {
+            auto type = JSScrollable::ParsePresetFillType(fillTypeParam);
+            if (type.has_value()) {
+                WaterFlowModel::GetInstance()->SetItemFillPolicy(type.value());
+            } else {
+                WaterFlowModel::GetInstance()->SetColumnsTemplate("");
+            }
+        }
+    } else {
+        WaterFlowModel::GetInstance()->SetColumnsTemplate(jsValue->ToString());
+    }
 }
 
 void JSWaterFlow::SetItemConstraintSize(const JSCallbackInfo& info)

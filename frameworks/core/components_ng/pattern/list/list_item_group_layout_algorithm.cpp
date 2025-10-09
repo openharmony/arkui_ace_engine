@@ -15,12 +15,14 @@
 
 #include "base/log/event_report.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_layout_algorithm.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -1430,6 +1432,15 @@ void ListItemGroupLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutPropert
     const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis)
 {
     int32_t lanes = layoutProperty->GetLanes().value_or(1);
+    if (layoutProperty->GetItemFillPolicy().has_value()) {
+        auto fillType = layoutProperty->GetItemFillPolicy();
+        const auto& padding = layoutProperty->CreatePaddingAndBorder();
+        auto leftPadding = axis == Axis::HORIZONTAL ? padding.top.value_or(0) : padding.left.value_or(0);
+        auto rightPadding = axis == Axis::HORIZONTAL ? padding.bottom.value_or(0) : padding.right.value_or(0);
+        WidthBreakpoint point = GetCommonWidthBreakpoint(
+            (crossSizeOptional.value_or(0.0) + leftPadding + rightPadding), layoutConstraint.scaleProperty.vpScale);
+        lanes = ListLayoutAlgorithm::GetListLanesByFillType(fillType.value(), point);
+    }
     lanes = lanes > 1 ? lanes : 1;
     if (crossSizeOptional.has_value()) {
         if (layoutProperty->GetLaneMinLength().has_value()) {

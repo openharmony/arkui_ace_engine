@@ -201,6 +201,16 @@ void ListModelNG::SetLanes(int32_t lanes)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Lanes, lanes);
 }
 
+void ListModelNG::SetItemFillPolicy(PresetFillType fillType)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ItemFillPolicy, fillType);
+}
+
+void ListModelNG::ResetItemFillPolicy()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, ItemFillPolicy, PROPERTY_UPDATE_MEASURE);
+}
+
 void ListModelNG::SetLaneConstrain(const Dimension& laneMinLength, const Dimension& laneMaxLength)
 {
     SetLaneMinLength(laneMinLength);
@@ -548,6 +558,7 @@ void ListModelNG::SetOnItemDrop(OnItemDropFunc&& onItemDrop)
     AddDragFrameNodeToManager();
 }
 
+
 void ListModelNG::AddDragFrameNodeToManager() const
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -877,6 +888,25 @@ int32_t ListModelNG::GetLanes(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
     return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetLanes().value_or(1));
+}
+
+void ListModelNG::SetItemFillPolicy(FrameNode* frameNode, PresetFillType fillType)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ItemFillPolicy, fillType, frameNode);
+}
+
+void ListModelNG::ResetItemFillPolicy(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, ItemFillPolicy, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
+int32_t ListModelNG::GetItemFillPolicy(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    if (frameNode->GetLayoutProperty<ListLayoutProperty>()->GetItemFillPolicy().has_value()) {
+        return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetItemFillPolicy().value());
+    }
+    return -1;
 }
 
 void ListModelNG::SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMinLength, const Dimension& laneMaxLength)

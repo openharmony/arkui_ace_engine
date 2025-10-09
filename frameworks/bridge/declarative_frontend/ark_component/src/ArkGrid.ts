@@ -16,7 +16,6 @@
 /// <reference path='./import.ts' />
 
 import { ArkScrollable } from "./ArkScrollable";
-
 class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -36,7 +35,7 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
       modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, undefined);
     }
   }
-  columnsTemplate(value: string): this {
+  columnsTemplate(value: string | ItemFillPolicy): this {
     modifierWithKey(this._modifiersWithKeys, GridColumnsTemplateModifier.identity, GridColumnsTemplateModifier, value);
     return this;
   }
@@ -233,8 +232,8 @@ class GridLayoutOptionsModifier extends ModifierWithKey<GridLayoutOptions> {
   }
 }
 
-class GridColumnsTemplateModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class GridColumnsTemplateModifier extends ModifierWithKey<string | ItemFillPolicy> {
+  constructor(value: string | ItemFillPolicy) {
     super(value);
   }
   static identity: Symbol = Symbol('gridColumnsTemplate');

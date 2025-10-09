@@ -38,13 +38,13 @@ float WaterFlowLayoutAlgorithm::ComputeCrossPosition(int32_t crossIndex) const
     return position;
 }
 
-void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(
-    const RefPtr<WaterFlowLayoutProperty>& layoutProperty, const SizeF& frameSize, int32_t childrenCount)
+void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(const RefPtr<WaterFlowLayoutProperty>& layoutProperty,
+    const SizeF& frameSize, int32_t childrenCount, double originalWidth)
 {
     itemsCrossSize_.clear();
     itemsCrossPosition_.clear();
     auto rowsTemplate = layoutProperty->GetRowsTemplate().value_or("1fr");
-    auto columnsTemplate = layoutProperty->GetColumnsTemplate().value_or("1fr");
+    auto columnsTemplate = layoutProperty->GetFinalColumnsTemplate(originalWidth).value_or("");
     axis_ = layoutProperty->GetAxis();
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
     auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
@@ -85,6 +85,8 @@ void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(
 
 void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
+    layoutWrapper_ = layoutWrapper;
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto host = layoutWrapper->GetHostNode();
@@ -125,6 +127,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const float prevOffset = pattern->GetPrevOffset();
     syncLoad_ = layoutProperty->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
                 layoutInfo_->targetIndex_.has_value() || !NearEqual(layoutInfo_->currentOffset_, prevOffset);
+    double originalWidth = idealSize.Width();
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
     GetExpandArea(layoutProperty, layoutInfo_);
@@ -140,7 +143,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     pattern->GetRepeatCountInfo(
         host, layoutInfo_->repeatDifference_, layoutInfo_->firstRepeatCount_, layoutInfo_->childrenCount_);
 
-    InitialItemsCrossSize(layoutProperty, idealSize, layoutInfo_->GetChildrenCount());
+    InitialItemsCrossSize(layoutProperty, idealSize, layoutInfo_->GetChildrenCount(), originalWidth);
     mainSize_ = GetMainAxisSize(idealSize, axis);
     CalcContentOffset(layoutWrapper, layoutInfo_, mainSize_);
     if (layoutInfo_->jumpIndex_ >= 0 && layoutInfo_->jumpIndex_ < layoutInfo_->GetChildrenCount()) {

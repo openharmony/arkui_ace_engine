@@ -2349,6 +2349,29 @@ void ListLayoutAlgorithm::ExpandWithSafeAreaPadding(const RefPtr<LayoutWrapper>&
     }
 }
 
+int32_t ListLayoutAlgorithm::GetListLanesByFillType(PresetFillType fillType, WidthBreakpoint point)
+{
+    int32_t lanes = 1;
+    if (fillType == PresetFillType::BREAKPOINT_SM2MD3LG5) {
+        if (static_cast<int32_t>(point) <= static_cast<int32_t>(WidthBreakpoint::WIDTH_SM)) {
+            lanes = 2; // 2:two columns
+        } else if (static_cast<int32_t>(point) == static_cast<int32_t>(WidthBreakpoint::WIDTH_MD)) {
+            lanes = 3; // 3:three columns
+        } else if (static_cast<int32_t>(point) >= static_cast<int32_t>(WidthBreakpoint::WIDTH_LG)) {
+            lanes = 5; // 5:five columns
+        }
+    } else {
+        if (static_cast<int32_t>(point) <= static_cast<int32_t>(WidthBreakpoint::WIDTH_SM)) {
+            lanes = 1; // 1:one column
+        } else if (static_cast<int32_t>(point) == static_cast<int32_t>(WidthBreakpoint::WIDTH_MD)) {
+            lanes = 2; // 2:two columns
+        } else if (static_cast<int32_t>(point) >= static_cast<int32_t>(WidthBreakpoint::WIDTH_LG)) {
+            lanes = 3; // 3:three columns
+        }
+    }
+    return lanes;
+}
+
 std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCachedItemInEdgeGroup(
     LayoutWrapper* layoutWrapper, int32_t cacheCount, std::list<PredictLayoutItem>& predictList)
 {
