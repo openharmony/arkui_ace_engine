@@ -13074,7 +13074,7 @@ typedef struct Opt_GaugeConfiguration {
 } Opt_GaugeConfiguration;
 typedef struct Ark_GaugeOptions {
     /* kind: Interface */
-    Ark_Number value;
+    Opt_Number value;
     Opt_Number min;
     Opt_Number max;
 } Ark_GaugeOptions;
