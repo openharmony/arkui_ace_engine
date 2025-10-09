@@ -130,7 +130,7 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level0)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH)).Times(Exactly(2));
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT)).Times(Exactly(2));
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormViewScale(FORM_WIDTH, FORM_HEIGHT,
-        FORM_LAYOUT_WIDTH, FORM_LAYOUT_HEIGHT)).WillOnce(Return());
+        FORM_LAYOUT_WIDTH, FORM_LAYOUT_HEIGHT)).Times(Exactly(2));
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormSharedImage(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormData(_)).WillOnce(Return());
 

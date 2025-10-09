@@ -43,7 +43,7 @@ const std::unordered_map<TouchType, int32_t> TOUCH_TYPE_MAP = {
 };
 
 std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, const TouchEvent& point,
-    const WeakPtr<FrameNode>& node)
+    const WeakPtr<FrameNode>& node, const float viewScale)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     if (pointerEvent == nullptr) {
@@ -64,10 +64,10 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
     OHOS::MMI::PointerEvent::PointerItem item;
     PointF transformPoint(point.x, point.y);
     NGGestureRecognizer::Transform(transformPoint, node);
-    item.SetWindowX(static_cast<int32_t>(transformPoint.GetX()));
-    item.SetWindowY(static_cast<int32_t>(transformPoint.GetY()));
-    item.SetWindowXPos(transformPoint.GetX());
-    item.SetWindowYPos(transformPoint.GetY());
+    item.SetWindowX(static_cast<int32_t>(transformPoint.GetX() * viewScale));
+    item.SetWindowY(static_cast<int32_t>(transformPoint.GetY() * viewScale));
+    item.SetWindowXPos(transformPoint.GetX() * viewScale);
+    item.SetWindowYPos(transformPoint.GetY() * viewScale);
     item.SetDisplayX(static_cast<int32_t>(point.screenX));
     item.SetDisplayY(static_cast<int32_t>(point.screenY));
     item.SetPointerId(point.id);
@@ -91,7 +91,7 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
 }
 
 std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, const AxisEvent& point,
-    const WeakPtr<FrameNode>& node)
+    const WeakPtr<FrameNode>& node, const float viewScale)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     if (pointerEvent == nullptr) {
@@ -107,10 +107,10 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
     OHOS::MMI::PointerEvent::PointerItem item;
     PointF transformPoint(point.x, point.y);
     NGGestureRecognizer::Transform(transformPoint, node);
-    item.SetWindowX(static_cast<int32_t>(transformPoint.GetX()));
-    item.SetWindowY(static_cast<int32_t>(transformPoint.GetY()));
-    item.SetWindowXPos(transformPoint.GetX());
-    item.SetWindowYPos(transformPoint.GetY());
+    item.SetWindowX(static_cast<int32_t>(transformPoint.GetX() * viewScale));
+    item.SetWindowY(static_cast<int32_t>(transformPoint.GetY() * viewScale));
+    item.SetWindowXPos(transformPoint.GetX() * viewScale);
+    item.SetWindowYPos(transformPoint.GetY() * viewScale);
     item.SetDisplayX(static_cast<int32_t>(point.screenX));
     item.SetDisplayY(static_cast<int32_t>(point.screenY));
     item.SetPointerId(point.id);
@@ -295,7 +295,8 @@ void FormNode::DispatchPointerEvent(const TouchEvent& touchEvent,
     auto pattern = GetPattern<FormPattern>();
     CHECK_NULL_VOID(pattern);
     auto selfGlobalOffset = GetFormOffset();
-    auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, touchEvent, WeakClaim(this));
+    auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, touchEvent, WeakClaim(this),
+        pattern->GetFormViewScale());
     pattern->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
 
@@ -306,7 +307,8 @@ void FormNode::DispatchPointerEvent(const AxisEvent& axisEvent,
     CHECK_NULL_VOID(pattern);
 
     auto selfGlobalOffset = GetFormOffset();
-    auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, axisEvent, WeakClaim(this));
+    auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, axisEvent, WeakClaim(this),
+        pattern->GetFormViewScale());
     pattern->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
 
