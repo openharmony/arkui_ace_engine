@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/gauge/gauge_model_static.h"
+#include "core/components_ng/pattern/gauge/gauge_pattern.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -26,6 +27,8 @@ constexpr double DEFAULT_GAUGE_VALUE = 0;
 constexpr double DEFAULT_GAUGE_MIN = 0;
 constexpr double DEFAULT_GAUGE_MAX = 100;
 constexpr Color ERROR_COLOR = Color(0xFFE84026);
+constexpr double DEFAULT_GAUGE_STARTANGLE = 0;
+constexpr double DEFAULT_GAUGE_ENDANGLE = 360;
 void SortColorStopOffset(std::vector<ColorStopArray>& colors)
 {
     for (auto& colorStopArray : colors) {
@@ -186,7 +189,7 @@ void SetStartAngleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
-        // Implement Reset value
+        GaugeModelNG::SetStartAngle(frameNode, DEFAULT_GAUGE_STARTANGLE);
         return;
     }
     GaugeModelNG::SetStartAngle(frameNode, *convValue);
@@ -198,7 +201,7 @@ void SetEndAngleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
-        // Implement Reset value
+        GaugeModelNG::SetEndAngle(frameNode, DEFAULT_GAUGE_ENDANGLE);
         return;
     }
     GaugeModelNG::SetEndAngle(frameNode, *convValue);
@@ -242,7 +245,6 @@ void SetColorsImpl(Ark_NativePointer node,
             }
         },
         []() {
-            // Implement Reset value
         });
     if (gaugeColors.has_value()) {
         SortColorStopOffset(gaugeColors->gradient);
@@ -268,7 +270,8 @@ void SetDescriptionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowDescription, false, frameNode);
+        frameNode->MarkModifyDone();
         return;
     }
     CallbackHelper(*optValue).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {

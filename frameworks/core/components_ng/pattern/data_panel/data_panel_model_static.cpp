@@ -49,7 +49,7 @@ void DataPanelModelStatic::SetTrackBackground(FrameNode* frameNode, const std::o
 
 void DataPanelModelStatic::SetStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& strokeWidth)
 {
-    if (strokeWidth.has_value()) {
+    if (strokeWidth) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, strokeWidth.value(), frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, frameNode);

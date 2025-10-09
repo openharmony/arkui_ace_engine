@@ -26,7 +26,11 @@ public:
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<int32_t>& valueOpt);
     static void SetChangeEvent(FrameNode* frameNode, TimeChangeEvent&& onChange);
     static void SetSelectedTime(FrameNode* frameNode, const int64_t& value);
+    static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
+    static void SetOnEnterSelectedArea(FrameNode* frameNode, TimeChangeEvent&& onEnterSelectedArea);
+    static void SetEnableCascade(FrameNode* frameNode, const std::optional<bool>& isEnableCascade);
+    static void SetLoop(FrameNode* frameNode, const std::optional<bool>& loop);
+    static void SetUseMilitaryTime(FrameNode* frameNode, const std::optional<bool>& isUseMilitaryTime);
 };
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TIME_PICKER_MODEL_STATIC_H
