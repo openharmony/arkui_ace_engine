@@ -32,17 +32,12 @@ struct XComponentControllerPeerImpl : public Referenced {
     void SetOnSurfaceCreatedEvent(const Callback_String_Void& callback);
     void SetOnSurfaceChangedEvent(const Callback_String_SurfaceRect_Void& callback);
     void SetOnSurfaceDestroyedEvent(const Callback_String_Void& callback);
-    SurfaceCreatedEvent GetOnSurfaceCreatedEvent();
-    SurfaceChangedEvent GetOnSurfaceChangedEvent();
-    SurfaceDestroyedEvent GetOnSurfaceDestroyedEvent();
     Callback_String_Void arkOnSurfaceCreated = {};
     Callback_String_SurfaceRect_Void arkOnSurfaceChanged = {};
     Callback_String_Void arkOnSurfaceDestroyed = {};
-
-private:
-    SurfaceCreatedEvent onSurfaceCreatedEvent_ = nullptr;
-    SurfaceChangedEvent onSurfaceChangedEvent_ = nullptr;
-    SurfaceDestroyedEvent onSurfaceDestroyedEvent_ = nullptr;
+    SurfaceCreatedEvent onSurfaceCreatedEvent = nullptr;
+    SurfaceChangedEvent onSurfaceChangedEvent = nullptr;
+    SurfaceDestroyedEvent onSurfaceDestroyedEvent = nullptr;
     bool isImageAnalyzing_ = false;
     ImageAnalyzerConfig config_;
 #endif // XCOMPONENT_SUPPORTED

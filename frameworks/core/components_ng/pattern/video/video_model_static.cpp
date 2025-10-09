@@ -20,10 +20,67 @@
 #include "core/components_ng/pattern/video/video_node.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+std::string VideoObjectFitToString(ImageFit fit)
+{
+    static const std::string objectFitStyles[] = {
+        "ImageFit.Fill", "ImageFit.Contain", "ImageFit.Cover",
+        "ImageFit.FitWidth", "ImageFit.FitHeight", "ImageFit.None",
+        "ImageFit.ScaleDown", "ImageFit.TopLeft", "ImageFit.Top",
+        "ImageFit.TopEnd", "ImageFit.Start", "ImageFit.Center",
+        "ImageFit.End", "ImageFit.BottomStart", "ImageFit.Bottom",
+        "ImageFit.BottomEnd", "ImageFit.CoverTopLeft", "ImageFit.Matrix" };
+    return objectFitStyles[static_cast<int>(fit)];
+}
+
+// Hooked video pattern for language with static typing.
+class VideoStaticPattern : public VideoPattern {
+    DECLARE_ACE_TYPE(VideoStaticPattern, VideoPattern);
+public:
+    VideoStaticPattern() = delete;
+    explicit VideoStaticPattern(const RefPtr<VideoControllerV2>& videoController) : VideoPattern(videoController) {}
+    ~VideoStaticPattern() override = default;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void EnableAnalyzer(bool enable);
+protected:
+    bool enableAnalyer_ = false;
+};
+
+void VideoStaticPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    CHECK_NULL_VOID(json);
+    CHECK_EQUAL_VOID(filter.IsFastFilter(), true);
+    json->PutExtAttr("enableAnalyzer", enableAnalyer_ ? "true" : "false", filter);
+    json->PutExtAttr("currentProgressRate", GetProgressRate(), filter);
+    json->PutExtAttr("surfaceBackgroundColor",
+        renderContextForMediaPlayer_
+            ? renderContextForMediaPlayer_->GetBackgroundColorValue(Color::BLACK).ColorToString().c_str()
+            : "",
+        filter);
+    json->PutExtAttr("enableShortcutKey", GetShortcutKeyEnabled() ? "true" : "false", filter);
+    json->PutExtAttr("autoPlay", GetAutoPlay() ? "true" : "false", filter);
+    json->PutExtAttr("muted", GetMuted() ? "true" : "false", filter);
+    json->PutExtAttr("loop", GetLoop() ? "true" : "false", filter);
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    json->PutExtAttr("controls", layoutProperty->GetControls().value_or(true) ? "true" : "false", filter);
+    json->PutExtAttr("objectFit",
+        VideoObjectFitToString(layoutProperty->GetObjectFit().value_or(ImageFit::COVER)).c_str(), filter);
+}
+
+void VideoStaticPattern::EnableAnalyzer(bool enable)
+{
+    enableAnalyer_ = enable;
+    VideoPattern::EnableAnalyzer(enable);
+}
+} // namespace
+
 RefPtr<FrameNode> VideoModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto videoNode = VideoNode::GetOrCreateVideoNode(
-        V2::VIDEO_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<VideoPattern>(nullptr); });
+        V2::VIDEO_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<VideoStaticPattern>(nullptr); });
     auto videoFocusHub = videoNode->GetFocusHub();
     if (videoFocusHub) {
         videoFocusHub->SetIsFocusUnit(true);

@@ -25,7 +25,7 @@ import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemIn
 import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
 import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from '#generated';
 import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from '#generated';
-import { XComponentOptionsInternal, XComponentParametersInternal } from '#generated';
+import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
@@ -271,9 +271,7 @@ export class ArkUIAniModule {
     native static _Env_GetLanguageCode(): string
 
     // for XComponent
-    native static _XComponent_SetXComponentOptions(ptr: KPointer, options: XComponentOptionsInternal): void;
-    native static _XComponent_SetXComponentParameters(ptr: KPointer, params: XComponentParametersInternal): void;
-    native static _XComponent_SetNativeXComponentParameters(ptr: KPointer, params: KInt): void;
+    native static _XComponent_SetXComponentControllerCallback(ptr: KPointer, options: XComponentOptionsInternal): void;
     // for ComponentContent
     native static _RemoveComponent_FromFrameNode(ptr: KPointer, content: KPointer): void
     native static _AddComponent_ToFrameNode(ptr: KPointer, content: KPointer): void
