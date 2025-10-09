@@ -103,20 +103,20 @@ namespace OHOS::Ace::NG::Converter {
         if (x.has_value()) {
             auto valueX = x.value();
             toValue.xXs = valueX.xs.has_value() ? valueX.xs.value() : dimDefault;
-            toValue.xSm = valueX.sm.has_value() ?  valueX.sm.value() : dimDefault;
-            toValue.xMd = valueX.md.has_value() ?  valueX.md.value() : dimDefault;
-            toValue.xLg = valueX.lg.has_value() ?  valueX.lg.value() : dimDefault;
-            toValue.xXl = valueX.xl.has_value() ?  valueX.xl.value() : dimDefault;
-            toValue.xXXl = valueX.xxl.has_value() ?  valueX.xxl.value() : dimDefault;
+            toValue.xSm = valueX.sm.has_value() ? valueX.sm.value() : toValue.xXs;
+            toValue.xMd = valueX.md.has_value() ? valueX.md.value() : toValue.xSm;
+            toValue.xLg = valueX.lg.has_value() ? valueX.lg.value() : toValue.xMd;
+            toValue.xXl = valueX.xl.has_value() ? valueX.xl.value() : toValue.xLg;
+            toValue.xXXl = valueX.xxl.has_value() ? valueX.xxl.value() : toValue.xXl;
         }
         if (y.has_value()) {
             auto valueY = y.value();
-            toValue.yXs = valueY.xs.has_value() ?  valueY.xs.value() : dimDefault;
-            toValue.ySm = valueY.sm.has_value() ?  valueY.sm.value() : dimDefault;
-            toValue.yMd = valueY.md.has_value() ?  valueY.md.value() : dimDefault;
-            toValue.yLg = valueY.lg.has_value() ?  valueY.lg.value() : dimDefault;
-            toValue.yXl = valueY.xl.has_value() ?  valueY.xl.value() : dimDefault;
-            toValue.yXXl = valueY.xxl.has_value() ?  valueY.xxl.value() : dimDefault;
+            toValue.yXs = valueY.xs.has_value() ? valueY.xs.value() : dimDefault;
+            toValue.ySm = valueY.sm.has_value() ? valueY.sm.value() : toValue.yXs;
+            toValue.yMd = valueY.md.has_value() ? valueY.md.value() : toValue.ySm;
+            toValue.yLg = valueY.lg.has_value() ? valueY.lg.value() : toValue.yMd;
+            toValue.yXl = valueY.xl.has_value() ? valueY.xl.value() : toValue.yLg;
+            toValue.yXXl = valueY.xxl.has_value() ? valueY.xxl.value() : toValue.yXl;
         }
         return toValue;
     }
@@ -153,8 +153,18 @@ namespace OHOS::Ace::NG::Converter {
         if (optReference.has_value()) {
             toValue.reference = optReference.value();
         }
-        if (optBreakpoints.has_value()) {
-            toValue.breakpoints = optBreakpoints.value();
+        if (!optBreakpoints.has_value()) {
+            return toValue;
+        }
+        toValue.breakpoints.clear();
+        double width = -1.0;
+        for (const auto &threshold : optBreakpoints.value()) {
+            CalcDimension valueDimension = StringUtils::StringToCalcDimension(threshold, false, DimensionUnit::VP);
+            if (GreatNotEqual(width, valueDimension.Value())) {
+                break;
+            }
+            width = valueDimension.Value();
+            toValue.breakpoints.emplace_back(threshold);
         }
         return toValue;
     }
