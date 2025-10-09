@@ -1307,6 +1307,61 @@ HWTEST_F(MenuExpandTestNg, HideMenu001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HideMenu002
+ * @tc.desc: Test HideMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, HideMenu002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create wrapper and child context menu
+     * @tc.expected: wrapper pattern not null
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, V2::BUTTON_ETS_TAG, MenuType::CONTEXT_MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(wrapperNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetIsSelectMenu(true);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProps, nullptr);
+    menuLayoutProps->UpdateShowInSubWindow(false);
+    /**
+     * @tc.steps: step2. configure the mock theme manager
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(pipeline->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
+
+    /**
+     * @tc.steps: step3. call HideMenu that expandDisplay_ is true
+     * @tc.expected: result as expected
+     */
+    menuPattern->HideMenu();
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), false);
+    menuPattern->SetIsSelectMenu(false);
+    menuLayoutProps->UpdateShowInSubWindow(true);
+
+    /**
+     * @tc.steps: step4. call HideMenu that isSelectMenu is false
+     * @tc.expected: result as expected
+     */
+    menuPattern->HideMenu();
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), true);
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
  * @tc.name: HideMenuSelectOverlayEtsTag002
  * @tc.desc: Test MenuPattern::HideMenu with SELECT_OVERLAY_ETS_TAG early return branch
  * @tc.type: FUNC
