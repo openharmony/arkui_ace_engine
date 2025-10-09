@@ -703,6 +703,10 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest038, TestSize.Level1)
     auto layeredDrawableDescriptor2 = Napi::LayeredDrawableDescriptor(
         std::move(jsonBuf1), len, std::move(resourceMgr), path, iconType, density, true);
     EXPECT_TRUE(layeredDrawableDescriptor2.foregroundOverBackground_);
+
+    auto layeredDrawableDescriptor3 = Napi::LayeredDrawableDescriptor(
+        std::move(jsonBuf1), len, std::move(resourceMgr), path, iconType, density, false);
+    EXPECT_FALSE(layeredDrawableDescriptor3.foregroundOverBackground_);
 }
 
 /**
