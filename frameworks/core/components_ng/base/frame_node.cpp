@@ -1111,6 +1111,22 @@ void FrameNode::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
     }
 }
 
+void FrameNode::MergeAttributesIntoJson(std::shared_ptr<JsonValue>& json, const std::shared_ptr<JsonValue>& child)
+{
+    if (json->Contains("$attrs") && json->GetValue("$attrs")->IsObject()) {
+        auto attrs = json->GetObject("$attrs");
+        JsonValue& attrsRef = *attrs;
+        auto childObj = child->GetChild();
+        while (childObj && childObj->IsValid()) {
+            auto key = childObj->GetKey();
+            attrsRef.Put(key.c_str(), child->GetValue(key));
+            childObj = childObj->GetNext();
+        }
+    } else {
+        json->Put("$attrs", std::move(child));
+    }
+}
+
 void FrameNode::DumpSimplifyInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
 {
     CHECK_NULL_VOID(json);
@@ -1118,6 +1134,7 @@ void FrameNode::DumpSimplifyInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& j
     if (pattern_) {
         auto child = JsonUtil::CreateSharedPtrJson();
         pattern_->DumpSimplifyInfoOnlyForParamConfig(child, config);
+        MergeAttributesIntoJson(json, child);
     }
 }
 
