@@ -47,7 +47,7 @@ declare class NativeViewPartialUpdate {
   queryNavDestinationInfo(isInner: boolean | undefined): object;
   queryNavigationInfo(): object;
   queryRouterPageInfo(): object;
-  getUIContext(): object;
+  getUIContext(): UIContext;
   getUniqueId(): number;
   getDialogController(): object;
 }

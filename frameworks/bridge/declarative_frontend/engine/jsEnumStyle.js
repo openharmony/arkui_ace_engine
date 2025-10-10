@@ -4608,3 +4608,8 @@ let PresetFillType;
   PresetFillType[PresetFillType.BREAKPOINT_SM1MD2LG3 = 1] = 'BREAKPOINT_SM1MD2LG3';
   PresetFillType[PresetFillType.BREAKPOINT_SM2MD3LG5 = 2] = 'BREAKPOINT_SM2MD3LG5';
 })(PresetFillType || (PresetFillType = {}));
+
+let SystemProperties;
+(function (SystemProperties) {
+  SystemProperties.BREAK_POINT = 'system.arkui.breakpoint';
+})(SystemProperties || (SystemProperties = {}));

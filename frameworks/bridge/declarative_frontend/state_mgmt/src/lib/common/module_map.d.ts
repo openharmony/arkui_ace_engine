@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+interface InternalModuleMap {
+  util: ArkTsUtil;
+}
+
 /**
  * The util module provided by ArkTs
  */
@@ -20,5 +24,10 @@ declare interface ArkTsUtil {
     getHash(object: object): number;
 }
 
-// Require and local module.
-declare function requireInternal(moduleName: string): ArkTsUtil;
+declare class UIContext {}
+
+declare function requireInternal<K extends keyof InternalModuleMap>(
+  moduleName: K
+): InternalModuleMap[K];
+
+declare function requireNapi(key : string): any;

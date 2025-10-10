@@ -1457,6 +1457,7 @@ void JsiDeclarativeEngine::Destroy()
 #ifdef USE_ARK_ENGINE
     JSLocalStorage::RemoveStorage(instanceId_);
     JsiContextModule::RemoveContext(instanceId_);
+    JsUnregisterInstanceId();
 #endif
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
@@ -3360,6 +3361,31 @@ void JsiDeclarativeEngine::JsSetAceDebugMode()
     const auto func = JSRef<JSFunc>::Cast(setAceDebugMode);
     ContainerScope scope(instanceId_);
     func->Call(globalObject);
+#endif
+}
+
+void JsiDeclarativeEngine::JsUnregisterInstanceId()
+{
+#if defined(PREVIEW)
+    return;
+#else
+    CHECK_NULL_VOID(runtime_);
+    auto engine = reinterpret_cast<NativeEngine*>(runtime_);
+    CHECK_NULL_VOID(engine);
+    auto vm = engine->GetEcmaVm();
+    CHECK_NULL_VOID(vm);
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+    const JSRef<JSVal> unregisterInstanceIdFun = globalObject->GetProperty("unregisterInstanceIdForEnv");
+    if (!unregisterInstanceIdFun->IsFunction()) {
+        return;
+    }
+    const auto func = JSRef<JSFunc>::Cast(unregisterInstanceIdFun);
+    ContainerScope scope(instanceId_);
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(instanceId_) };
+    JSRef<JSVal> param = JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, instanceId_));
+    func->Call(globalObject, 1, &param);
 #endif
 }
 
