@@ -29,23 +29,23 @@ export default namespace componentSnapshot {
     };
     
     export interface LocalizedSnapshotRegion {
-        start: number
-        top: number
-        end: number
-        bottom: number
+        start: double
+        top: double
+        end: double
+        bottom: double
     }
 
     export interface SnapshotRegion {
-        left: number
-        right: number
-        top: number
-        bottom: number
+        left: double
+        right: double
+        top: double
+        bottom: double
     }
 
     export type SnapshotRegionType = SnapshotRegion | LocalizedSnapshotRegion;
 
     export interface SnapshotOptions {
-        scale?: number
+        scale?: double
         waitUntilRenderFinished?: boolean
         region?: SnapshotRegionType
     }
