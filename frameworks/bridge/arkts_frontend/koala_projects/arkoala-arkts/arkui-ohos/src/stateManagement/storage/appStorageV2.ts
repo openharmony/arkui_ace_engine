@@ -26,11 +26,11 @@ export class AppStorageV2 {
         key: string,
         defaultCreator?: StorageDefaultCreator<T>
     ): T | undefined {
-        return InteropAppStorageV2.instance().connect(ttype, key, defaultCreator);
+        return InteropAppStorageV2.instance().connect<T>(ttype, key, defaultCreator);
     }
 
     public static connect<T extends object>(ttype: Type, defaultCreator?: StorageDefaultCreator<T>): T | undefined {
-        return InteropAppStorageV2.instance().connect(ttype, defaultCreator);
+        return InteropAppStorageV2.instance().connect<T>(ttype, defaultCreator);
     }
 
     public static remove(keyOrType: string | Type): void {
@@ -89,7 +89,7 @@ export class AppStorageV2Impl {
     }
 
     public connect<T extends object>(ttype: Type, defaultCreator?: StorageDefaultCreator<T>): T | undefined {
-        return this.connect(ttype, transferTypeName(ttype.getName()), defaultCreator);
+        return this.connect<T>(ttype, transferTypeName(ttype.getName()), defaultCreator);
     }
 
     public remove(keyOrType: string | Type): void {
