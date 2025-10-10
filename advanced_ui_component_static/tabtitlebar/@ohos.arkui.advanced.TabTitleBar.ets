@@ -93,6 +93,7 @@ export struct TabTitleBar {
   };
   @State tabWidth: number = 0;
   @State currentIndex: number = 0;
+  @State swiperCurrentIndex: int = 0;
   @State fontSize: number = 1;
 
   static readonly totalHeight: number = 56;
@@ -232,16 +233,16 @@ export struct TabTitleBar {
         Swiper(this.swiperController as SwiperController) {
           this.swiperContent();
         }
-        .index(this.currentIndex)
+        .index(this.swiperCurrentIndex)
         .itemSpace(0)
         .indicator(false)
         .width('100%')
         .height('100%')
         .curve(Curve.Friction)
-        .onChange((index: number) => {
+        .onChange((index: int) => {
           if(index < this.tabOffsets.length) {
-            const offset = this.tabOffsets[Double.toInt(index)] + TabTitleBar.correctionOffset;
-            this.currentIndex = index;
+            const offset = this.tabOffsets[index] + TabTitleBar.correctionOffset;
+            this.swiperCurrentIndex = index;
             this.scroller.scrollTo({
               xOffset: offset > 0 ? offset : 0,
               yOffset: 0,
@@ -251,7 +252,7 @@ export struct TabTitleBar {
               } as ScrollAnimationOptions
             } as ScrollOptions)
           }
-        } as Callback<number>)
+        } as Callback<int>)
         .onAppear(() => {
           this.scroller.scrollToIndex(this.currentIndex);
           this.scroller.scrollBy(TabTitleBar.correctionOffset, 0);

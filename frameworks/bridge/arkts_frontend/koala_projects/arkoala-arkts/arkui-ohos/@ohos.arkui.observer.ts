@@ -3,6 +3,7 @@ import { NavPathStack } from 'arkui/framework'
 import { UIContext } from '@ohos/arkui/UIContext';
 import UIAbilityContext from 'application.UIAbilityContext';
 import { NavDestinationMode } from 'arkui/framework'
+import { int32 } from "@koalaui/common"
 
 declare namespace uiObserver {
     export class DensityInfo {
@@ -43,7 +44,7 @@ declare namespace uiObserver {
 
     export class RouterPageInfo {
         context: UIAbilityContext | UIContext;
-        index: number;
+        index: int32;
         name: string;
         path: string;
         state: RouterPageState;
@@ -54,10 +55,10 @@ declare namespace uiObserver {
         navigationId: ResourceStr;
         name: ResourceStr;
         state: NavDestinationState;
-        index: number;
+        index: int32;
         param?: Object;
         navDestinationId: string;
-        uniqueId: number;
+        uniqueId?: int32;
         mode?: NavDestinationMode;
     }
 

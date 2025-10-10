@@ -40,25 +40,25 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
     applyDisabledAttribute(instance: SwiperAttribute): void { }
     applySelectedAttribute(instance: SwiperAttribute): void { }
     _index_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _index_0_0value?: number | Bindable<number> | undefined
+    _index_0_0value?: int32 | Bindable<int32> | undefined
     _autoPlay_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _autoPlay_0_0value?: boolean | undefined
     _interval_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _interval_0_0value?: number | undefined
+    _interval_0_0value?: int32 | undefined
     _indicator_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _indicator_0_0value?: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined
     _loop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _loop_0_0value?: boolean | undefined
     _duration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _duration_0_0value?: number | undefined
+    _duration_0_0value?: int32 | undefined
     _vertical_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _vertical_0_0value?: boolean | undefined
     _itemSpace_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _itemSpace_0_0value?: number | string | undefined
+    _itemSpace_0_0value?: double | string | undefined
     _displayMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _displayMode_0_0value?: SwiperDisplayMode | undefined
     _cachedCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cachedCount_0_0value?: number | undefined
+    _cachedCount_0_0value?: int32 | undefined
     _effectMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _effectMode_0_0value?: EdgeEffect | undefined
     _disableSwipe_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -66,11 +66,11 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
     _curve_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _curve_0_0value?: curves.Curve | string | curves.ICurve | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onChange_0_0value?: ((value0: number) => void) | undefined
+    _onChange_0_0value?: ((value0: int32) => void) | undefined
     _onSelected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSelected_0_0value?: ((value0: number) => void) | undefined
+    _onSelected_0_0value?: ((value0: int32) => void) | undefined
     _onUnselected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onUnselected_0_0value?: ((value0: number) => void) | undefined
+    _onUnselected_0_0value?: ((value0: int32) => void) | undefined
     _onAnimationStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onAnimationStart_0_0value?: OnSwiperAnimationStartCallback | undefined
     _onAnimationEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -96,10 +96,10 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
     _displayArrow_0_0value?: ArrowStyle | boolean | undefined
     _displayArrow_0_1value?: boolean | undefined
     _cachedCount_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cachedCount_1_0value?: number | undefined
+    _cachedCount_1_0value?: int32 | undefined
     _cachedCount_1_1value?: boolean | undefined
     _displayCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _displayCount_0_0value?: number | string | SwiperAutoFill | undefined
+    _displayCount_0_0value?: int32 | string | SwiperAutoFill | undefined
     _displayCount_0_1value?: boolean | undefined
     _prevMargin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _prevMargin_0_0value?: Length | undefined
@@ -114,7 +114,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._index_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setIndexAttribute((this._index_0_0value as number | Bindable<number> | undefined));
+                    peer.setIndexAttribute((this._index_0_0value as int32 | Bindable<int32> | undefined));
                     this._index_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -124,7 +124,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     this._index_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setIndexAttribute((undefined as number | Bindable<number> | undefined));
+                    peer.setIndexAttribute((undefined as int32 | Bindable<int32> | undefined));
                 }
             }
         }
@@ -150,7 +150,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._interval_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setIntervalAttribute((this._interval_0_0value as number | undefined));
+                    peer.setIntervalAttribute((this._interval_0_0value as int32 | undefined));
                     this._interval_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -160,7 +160,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     this._interval_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setIntervalAttribute((undefined as number | undefined));
+                    peer.setIntervalAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -204,7 +204,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._duration_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDurationAttribute((this._duration_0_0value as number | undefined));
+                    peer.setDurationAttribute((this._duration_0_0value as int32 | undefined));
                     this._duration_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -214,7 +214,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     this._duration_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDurationAttribute((undefined as number | undefined));
+                    peer.setDurationAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -240,7 +240,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._itemSpace_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setItemSpaceAttribute((this._itemSpace_0_0value as number | string | undefined));
+                    peer.setItemSpaceAttribute((this._itemSpace_0_0value as double | string | undefined));
                     this._itemSpace_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -250,7 +250,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     this._itemSpace_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setItemSpaceAttribute((undefined as number | string | undefined));
+                    peer.setItemSpaceAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -276,7 +276,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._cachedCount_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCachedCount0Attribute((this._cachedCount_0_0value as number | undefined));
+                    peer.setCachedCount0Attribute((this._cachedCount_0_0value as int32 | undefined));
                     this._cachedCount_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -286,7 +286,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     this._cachedCount_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCachedCount0Attribute((undefined as number | undefined));
+                    peer.setCachedCount0Attribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -348,7 +348,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._onChange_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value0: number) => void) | undefined));
+                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value0: int32) => void) | undefined));
                     this._onChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -358,7 +358,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnChangeAttribute((undefined as ((value0: number) => void) | undefined));
+                    peer.setOnChangeAttribute((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -366,7 +366,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._onSelected_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnSelectedAttribute((this._onSelected_0_0value as ((value0: number) => void) | undefined));
+                    peer.setOnSelectedAttribute((this._onSelected_0_0value as ((value0: int32) => void) | undefined));
                     this._onSelected_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -376,7 +376,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     this._onSelected_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnSelectedAttribute((undefined as ((value0: number) => void) | undefined));
+                    peer.setOnSelectedAttribute((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -384,7 +384,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._onUnselected_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnUnselectedAttribute((this._onUnselected_0_0value as ((value0: number) => void) | undefined));
+                    peer.setOnUnselectedAttribute((this._onUnselected_0_0value as ((value0: int32) => void) | undefined));
                     this._onUnselected_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -394,7 +394,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     this._onUnselected_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnUnselectedAttribute((undefined as ((value0: number) => void) | undefined));
+                    peer.setOnUnselectedAttribute((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -600,7 +600,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._cachedCount_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCachedCount1Attribute((this._cachedCount_1_0value as number | undefined), (this._cachedCount_1_1value as boolean | undefined));
+                    peer.setCachedCount1Attribute((this._cachedCount_1_0value as int32 | undefined), (this._cachedCount_1_1value as boolean | undefined));
                     this._cachedCount_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -610,7 +610,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     this._cachedCount_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCachedCount1Attribute((undefined as number | undefined), (undefined as boolean | undefined));
+                    peer.setCachedCount1Attribute((undefined as int32 | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -618,7 +618,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._displayCount_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDisplayCountAttribute((this._displayCount_0_0value as number | string | SwiperAutoFill | undefined), (this._displayCount_0_1value as boolean | undefined | undefined));
+                    peer.setDisplayCountAttribute((this._displayCount_0_0value as int32 | string | SwiperAutoFill | undefined), (this._displayCount_0_1value as boolean | undefined | undefined));
                     this._displayCount_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -628,7 +628,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     this._displayCount_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDisplayCountAttribute((undefined as number | string | SwiperAutoFill | undefined), (undefined as boolean | undefined | undefined));
+                    peer.setDisplayCountAttribute((undefined as int32 | string | SwiperAutoFill | undefined), (undefined as boolean | undefined | undefined));
                 }
             }
         }
@@ -680,7 +680,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                     break;
                 }
                 default: {
-                    this.index((undefined as number | Bindable<number> | undefined));
+                    this.index((undefined as int32 | Bindable<int32> | undefined));
                 }
             }
         }
@@ -706,7 +706,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                     break;
                 }
                 default: {
-                    this.interval((undefined as number | undefined));
+                    this.interval((undefined as int32 | undefined));
                 }
             }
         }
@@ -745,7 +745,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                     break;
                 }
                 default: {
-                    this.duration((undefined as number | undefined));
+                    this.duration((undefined as int32 | undefined));
                 }
             }
         }
@@ -771,7 +771,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                     break;
                 }
                 default: {
-                    this.itemSpace((undefined as number | string | undefined));
+                    this.itemSpace((undefined as double | string | undefined));
                 }
             }
         }
@@ -797,7 +797,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                     break;
                 }
                 default: {
-                    this.cachedCount((undefined as number | undefined));
+                    this.cachedCount((undefined as int32 | undefined));
                 }
             }
         }
@@ -849,7 +849,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                     break;
                 }
                 default: {
-                    this.onChange((undefined as ((value0: number) => void) | undefined));
+                    this.onChange((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -862,7 +862,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                     break;
                 }
                 default: {
-                    this.onSelected((undefined as ((value0: number) => void) | undefined));
+                    this.onSelected((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -875,7 +875,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                     break;
                 }
                 default: {
-                    this.onUnselected((undefined as ((value0: number) => void) | undefined));
+                    this.onUnselected((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -1031,7 +1031,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                     break;
                 }
                 default: {
-                    this.cachedCount((undefined as number | undefined), (undefined as boolean | undefined));
+                    this.cachedCount((undefined as int32 | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -1044,7 +1044,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                     break;
                 }
                 default: {
-                    this.displayCount((undefined as number | string | SwiperAutoFill | undefined), (undefined as boolean | undefined | undefined));
+                    this.displayCount((undefined as int32 | string | SwiperAutoFill | undefined), (undefined as boolean | undefined | undefined));
                 }
             }
         }
@@ -1075,7 +1075,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
             }
         }
     }
-    index(value: number | Bindable<number> | undefined): this {
+    index(value: int32 | Bindable<int32> | undefined): this {
         if (((this._index_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._index_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1097,7 +1097,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         }
         return this
     }
-    interval(value: number | undefined): this {
+    interval(value: int32 | undefined): this {
         if (((this._interval_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._interval_0_0value) !== (value)))
         {
             this._interval_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1130,7 +1130,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         }
         return this
     }
-    duration(value: number | undefined): this {
+    duration(value: int32 | undefined): this {
         if (((this._duration_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._duration_0_0value) !== (value)))
         {
             this._duration_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1152,7 +1152,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         }
         return this
     }
-    itemSpace(value: number | string | undefined): this {
+    itemSpace(value: double | string | undefined): this {
         if (((this._itemSpace_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._itemSpace_0_0value) !== (value)))
         {
             this._itemSpace_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1174,7 +1174,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         }
         return this
     }
-    cachedCount(value: number | undefined): this {
+    cachedCount(value: int32 | undefined): this {
         if (((this._cachedCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_0_0value) !== (value)))
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1218,7 +1218,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         }
         return this
     }
-    onChange(value: ((value0: number) => void) | undefined): this {
+    onChange(value: ((value0: int32) => void) | undefined): this {
         if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1229,7 +1229,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         }
         return this
     }
-    onSelected(value: ((value0: number) => void) | undefined): this {
+    onSelected(value: ((value0: int32) => void) | undefined): this {
         if (((this._onSelected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onSelected_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1240,7 +1240,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         }
         return this
     }
-    onUnselected(value: ((value0: number) => void) | undefined): this {
+    onUnselected(value: ((value0: int32) => void) | undefined): this {
         if (((this._onUnselected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onUnselected_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1374,7 +1374,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         }
         return this
     }
-    cachedCount(count: number | undefined, isShown: boolean | undefined): this {
+    cachedCount(count: int32 | undefined, isShown: boolean | undefined): this {
         if (((this._cachedCount_1_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_1_0value) !== (count)) || ((this._cachedCount_1_1value) !== (isShown)))
         {
             this._cachedCount_1_flag = AttributeUpdaterFlag.UPDATE
@@ -1386,7 +1386,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         }
         return this
     }
-    displayCount(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
+    displayCount(value: int32 | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
         if (((this._displayCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._displayCount_0_1value) !== (swipeByGroup)))
         {
             this._displayCount_0_flag = AttributeUpdaterFlag.UPDATE
