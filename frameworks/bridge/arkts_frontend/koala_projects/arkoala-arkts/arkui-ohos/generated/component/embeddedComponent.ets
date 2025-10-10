@@ -32,7 +32,8 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { EmbeddedComponentModifier } from "./../EmbeddedComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
-export class ArkEmbeddedComponentPeer extends ArkCommonMethodPeer {
+import { ArkUIExtensionComponentPeerBase } from "./uiExtensionComponent"
+export class ArkEmbeddedComponentPeer extends ArkUIExtensionComponentPeerBase {
     attributeSet?: EmbeddedComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -43,42 +44,6 @@ export class ArkEmbeddedComponentPeer extends ArkCommonMethodPeer {
         const _peer  = new ArkEmbeddedComponentPeer(_peerPtr, peerId, 'EmbeddedComponent', flags)
         component?.setPeer(_peer)
         return _peer
-    }
-    setEmbeddedComponentOptionsAttribute(loader: Want, type?: EmbeddedType): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (type !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const typeTmpValue  = (type as EmbeddedType)
-            thisSerializer.writeInt32(typeTmpValue.valueOf())
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._EmbeddedComponentInterface_setEmbeddedComponentOptions(this.peer.ptr, extractors.toWantPtr(loader), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOnTerminatedAttribute(value: ((value0: TerminationInfo) => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._EmbeddedComponentAttribute_setOnTerminated(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOnErrorAttribute(value: ErrorCallback<BusinessError> | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._EmbeddedComponentAttribute_setOnError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
 }
 export interface EmbeddedComponentAttribute extends CommonMethod {

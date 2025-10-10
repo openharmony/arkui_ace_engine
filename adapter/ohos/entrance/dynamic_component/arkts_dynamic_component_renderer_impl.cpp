@@ -457,7 +457,7 @@ void ArktsDynamicComponentRendererImpl::AttachRenderContextInDynamicComponent()
     CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetHostTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostSyncTask([weak = host_, hostInstanceId = hostInstanceId_,
+    taskExecutor->PostTask([weak = host_, hostInstanceId = hostInstanceId_,
         instanceId = uiContent_->GetInstanceId(), aceLogTag = aceLogTag_,
         backgroundTransparent = GetBackgroundTransparent()]() {
             ContainerScope scope(hostInstanceId);
