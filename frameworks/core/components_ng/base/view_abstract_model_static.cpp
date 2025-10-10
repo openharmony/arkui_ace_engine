@@ -944,7 +944,7 @@ void ViewAbstractModelStatic::SetMargin(FrameNode* frameNode, const std::optiona
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
-        ViewAbstract::SetMargin(frameNode, value.value());
+        ViewAbstract::SetMargin(frameNode, ConstraintPaddingPropertyNonNegative(value.value()));
     } else {
         // ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, frameNode);
     }
