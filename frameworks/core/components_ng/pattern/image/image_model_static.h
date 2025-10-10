@@ -21,6 +21,7 @@
 #include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components/image/image_event.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/drawable/drawable_descriptor.h"
 
 namespace OHOS::Ace::NG {
 // ImageModel is essentially the same class as ImageView
@@ -30,7 +31,7 @@ class ACE_EXPORT ImageModelStatic {
 public:
     static void SetSrc(FrameNode* frameNode, const std::optional<ImageSourceInfo>& info);
     static void SetPixelMap(FrameNode* frameNode, const RefPtr<PixelMap>& pixelMap);
-    static void SetDrawableDescriptor(FrameNode* frameNode, void* drawable, int type);
+    static void SetDrawableDescriptor(FrameNode* frameNode, DrawableDescriptor* drawable);
     static void SetSmoothEdge(FrameNode* frameNode, const std::optional<float>& value);
     static void SetCopyOption(FrameNode* frameNode, const std::optional<CopyOptions>& copyOption);
     static void SetImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);

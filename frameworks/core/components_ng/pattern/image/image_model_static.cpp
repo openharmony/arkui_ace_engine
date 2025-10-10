@@ -28,18 +28,10 @@
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/drawable/animated_drawable_descriptor.h"
-#include "core/drawable/layered_drawable_descriptor.h"
-#include "core/drawable/pixel_map_drawable_descriptor.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr int32_t LAYERED_TYPE = 1;
-constexpr int32_t ANIMATED_TYPE = 2;
-constexpr int32_t PIXELMAP_TYPE = 3;
-} // namespace
-
 void ImageModelStatic::SetSrc(FrameNode* frameNode, const std::optional<ImageSourceInfo>& info)
 {
     CHECK_NULL_VOID(frameNode);
@@ -200,29 +192,21 @@ void ImageModelStatic::SetPixelMap(FrameNode* frameNode, const RefPtr<PixelMap>&
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
 }
 
-void ImageModelStatic::SetDrawableDescriptor(FrameNode* frameNode, void* drawable, int type)
+void ImageModelStatic::SetDrawableDescriptor(FrameNode* frameNode, DrawableDescriptor* drawable)
 {
     CHECK_NULL_VOID(frameNode);
-    if (type == LAYERED_TYPE) {
-        // layered
-        auto layeredDrawable = reinterpret_cast<LayeredDrawableDescriptor*>(drawable);
-        CHECK_NULL_VOID(layeredDrawable);
-        auto pixelMap = layeredDrawable->GetPixelMap();
+    CHECK_NULL_VOID(drawable);
+    auto drawableType = drawable->GetDrawableType();
+    if (drawableType != DrawableType::ANIMATED) {
+        auto pixelMap = drawable->GetPixelMap();
         SetPixelMap(frameNode, pixelMap);
-    } else if (type == ANIMATED_TYPE) {
-        // animated
-        auto animatedDrawable = reinterpret_cast<AnimatedDrawableDescriptor*>(drawable);
+    } else {
+        auto animatedDrawable = static_cast<AnimatedDrawableDescriptor*>(drawable);
         CHECK_NULL_VOID(animatedDrawable);
         auto pixelMaps = animatedDrawable->GetPixelMapList();
         auto duration = animatedDrawable->GetTotalDuration();
         auto iterations = animatedDrawable->GetIterations();
         SetPixelMapList(frameNode, pixelMaps, duration, iterations);
-    } else if (type == PIXELMAP_TYPE) {
-        // pixelmap
-        auto pixelmapDrawable = reinterpret_cast<PixelMapDrawableDescriptor*>(drawable);
-        CHECK_NULL_VOID(pixelmapDrawable);
-        auto pixelMap = pixelmapDrawable->GetPixelMap();
-        SetPixelMap(frameNode, pixelMap);
     }
 }
 

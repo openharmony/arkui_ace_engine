@@ -70,18 +70,23 @@ void SetMediaCachedImageOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
-    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
-    // Note.
-    // This function should skip InitImage invocation if info's optional is empty.
-    if (info) {
-        if (info->GetPixmap()) {
-            auto pixelMap = info->GetPixmap(); // GetPixmap return const RefPtr
-            ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
-        } else {
-            ImageModelNG::SetInitialSrc(frameNode, info->GetSrc(), info->GetBundleName(),
-                info->GetModuleName(), info->GetIsUriPureNumber());
-        }
-    }
+    Converter::VisitUnion(*src,
+        [frameNode](const Ark_DrawableDescriptor& value) {
+            LOGE("ARKOALA: MediaCachedImage doesn't support DrawableDescriptor");
+        },
+        [frameNode](const auto& value) {
+            auto info = Converter::OptConvert<ImageSourceInfo>(value);
+            // Note.
+            // This function should skip InitImage invocation if info's optional is empty.
+            CHECK_NULL_VOID(info);
+            if (auto pixelMap = info->GetPixmap(); pixelMap) {
+                ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
+            } else {
+                ImageModelNG::SetInitialSrc(frameNode, info->GetSrc(), info->GetBundleName(),
+                    info->GetModuleName(), info->GetIsUriPureNumber());
+            }
+        },
+        []() {});
 }
 } // MediaCachedImageInterfaceModifier
 const GENERATED_ArkUIMediaCachedImageModifier* GetMediaCachedImageModifier()
