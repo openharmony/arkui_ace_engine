@@ -100,10 +100,26 @@ public:
         mockRequestId = requestId;
     }
 
+    void SetFocusMoveSearchWithConditionResult(const std::list<AccessibilityElementInfo> &info,
+        const FocusMoveResult &result, const int32_t requestId) override
+    {
+        mockInfos_ = info;
+        mockResult_ = result;
+        mockRequestId = requestId;
+    }
+
+    void SetDetectElementInfoFocusableThroughAncestorResult(bool isFocusable, const int32_t requestId) override
+    {
+        mockFocusable_ = isFocusable;
+        mockRequestId = requestId;
+    }
+
     std::list<Accessibility::AccessibilityElementInfo> mockInfos_;
     Accessibility::AccessibilityElementInfo mockInfo_;
+    Accessibility::FocusMoveResult mockResult_;
     int32_t mockRequestId = 0;
     bool mockSucceeded_ = false;
+    bool mockFocusable_ = false;
     int32_t mockCursorPosition_ = 0;
 };
 } // namespace OHOS::Ace
