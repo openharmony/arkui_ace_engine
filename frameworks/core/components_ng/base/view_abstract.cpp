@@ -5104,6 +5104,11 @@ void ViewAbstract::SetClipEdge(bool isClip)
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetClipShape().has_value()) {
+            if (SystemProperties::ConfigChangePerform()) {
+                auto pattern = frameNode->GetPattern();
+                CHECK_NULL_VOID(pattern);
+                pattern->RemoveResObj("clipShape");
+            }
             target->ResetClipShape();
             target->OnClipShapeUpdate(nullptr);
         }
@@ -5117,6 +5122,11 @@ void ViewAbstract::SetClipEdge(FrameNode* frameNode, bool isClip)
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetClipShape().has_value()) {
+            if (SystemProperties::ConfigChangePerform()) {
+                auto pattern = frameNode->GetPattern();
+                CHECK_NULL_VOID(pattern);
+                pattern->RemoveResObj("clipShape");
+            }
             target->ResetClipShape();
             target->OnClipShapeUpdate(nullptr);
         }
