@@ -746,4 +746,59 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgMatchParent002, TestSize.Level1)
     EXPECT_EQ(folder1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f))
         << folder1->GetGeometryNode()->GetFrameRect().ToString();
 }
+
+/**
+ * @tc.name: FolderStackTestNgTest016
+ * @tc.desc: Test folderStack IsIntoFolderStack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+ 
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(12);
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
+ 
+    RefPtr<FrameNode> folder;
+    RefPtr<FrameNode> folder1;
+ 
+    auto stack = CreateStack([this, &folder, &folder1](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength("100%"));
+        ViewAbstract::SetHeight(CalcLength("100%"));
+ 
+        folder = CreateFolder([this, &folder1](FolderStackModelNG model) {
+            folder1 = CreateFolder([this, &folder1](FolderStackModelNG model) {});
+        });
+    });
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto folderStackPattern = folder->GetPattern<FolderStackPattern>();
+    ASSERT_NE(folderStackPattern, nullptr);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<FolderStackLayoutAlgorithm>(folderStackPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    ASSERT_NE(folder, nullptr);
+    auto layoutProperty = folder->GetLayoutProperty<FolderStackLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    displayInfo->SetRotation(Rotation::ROTATION_0);
+    container->SetOrientation(Orientation::VERTICAL);
+    folderStackPattern->SetAutoRotate();
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    RefPtr<GeometryNode> geometryNode = folder->GetGeometryNode();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(folder, geometryNode, folder->GetLayoutProperty());
+    auto size = CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT)
+                    .ConvertToSizeT();
+    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    ASSERT_NE(layoutAlgorithm->IsIntoFolderStack(size, layoutProperty,
+        AccessibilityManager::RawPtr(layoutWrapper)), true);
+}
 } // namespace OHOS::Ace::NG
