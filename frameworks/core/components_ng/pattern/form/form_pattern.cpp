@@ -2299,9 +2299,7 @@ void FormPattern::UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, do
         CHECK_NULL_VOID(childNode);
         auto renderContext = DynamicCast<NG::RosenRenderContext>(childNode->GetRenderContext());
         CHECK_NULL_VOID(renderContext);
-        auto rsNode = renderContext->GetRSNode();
-        CHECK_NULL_VOID(rsNode);
-        rsNode->SetAlpha(opacity);
+        renderContext->OnOpacityUpdate(opacity);
     }
 }
 
