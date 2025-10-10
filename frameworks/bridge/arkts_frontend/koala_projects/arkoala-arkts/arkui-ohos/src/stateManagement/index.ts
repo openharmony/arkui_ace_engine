@@ -31,5 +31,4 @@ export * from './decoratorImpl/decoratorInteropWatch';
 export * from './decorator';
 export * from './tools/stateMgmtDFX';
 export * from './utils';
-export * from './remember';
 export * from './base/uiUtilsImpl';
