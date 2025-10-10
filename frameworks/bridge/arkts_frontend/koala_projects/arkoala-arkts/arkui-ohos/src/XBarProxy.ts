@@ -39,7 +39,7 @@ const DEFAULT_BUTTOEN_BAR_CLASS: string = "@ohos.window.titlebar.component.defal
 export class XBarProxy {
     // static titleBarComponentMap: Map<KLong, CustomComponent> = new Map();
     static initializeXBarProxy(): void {
-        InteropNativeModule._NativeLog(`[createXBarCustomComponent]initializeXBarProxy`)
+        console.log(`[createXBarCustomComponent]initializeXBarProxy`)
         ArkUIAniModule._XBar_Set_ComponentCreateFunc(createXBarCustomComponent)
     }
 
@@ -49,10 +49,10 @@ export class XBarProxy {
 }
 
 export function createXBarCustomComponent<T extends CustomComponent<T, T_Options>, T_Options>(xbarType: int32, instanceID: int32): KLong {
-    InteropNativeModule._NativeLog(`[createXBarCustomComponent]start createXBarCustomComponent`)
+    console.log(`[createXBarCustomComponent]start createXBarCustomComponent`)
     let componentInstance: T | undefined = undefined
     const factory = (): T => {
-        InteropNativeModule._NativeLog(`[createXBarCustomComponent]createXBarCustomComponent in factory`)
+        console.log(`[createXBarCustomComponent]createXBarCustomComponent in factory`)
         let reflectTargetName: string = "";
         switch (xbarType) {
             case 0:
@@ -66,7 +66,7 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
         }
         let reflectedType: Type | undefined = Type.resolve(reflectTargetName)
         if (reflectedType === undefined) {
-            InteropNativeModule._NativeLog(`[createXBarCustomComponent]${reflectTargetName} is undefined, load default`)
+            console.log(`[createXBarCustomComponent]${reflectTargetName} is undefined, load default`)
             switch (xbarType) {
                 case 0:
                     reflectTargetName = DEFAULT_TITLE_BAR_CLASS;
@@ -79,7 +79,7 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
             }
             reflectedType = Type.resolve(reflectTargetName)
             if (reflectedType === undefined) {
-                InteropNativeModule._NativeLog(`[createXBarCustomComponent]${reflectTargetName} is undefined`)
+                console.log(`[createXBarCustomComponent]${reflectTargetName} is undefined`)
                 // return undefined
                 throw new Error(`[createXBarCustomComponent]reflectedType is undefined`)
             }
@@ -87,30 +87,30 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
         try {
             let type: ClassType = reflectedType as ClassType
             componentInstance = type.make() as T
-            InteropNativeModule._NativeLog(`[createXBarCustomComponent]createXBarCustomComponent end factory`)
+            console.log(`[createXBarCustomComponent]createXBarCustomComponent end factory`)
             return componentInstance! as T
         } catch (e) {
-            InteropNativeModule._NativeLog("[createXBarCustomComponent]make instance error!")
+            console.log("[createXBarCustomComponent]make instance error!")
             if (e instanceof Error) {
-                InteropNativeModule._NativeLog(`[createXBarCustomComponent]make instance error name: ${e.name} message: ${e.message}`);
+                console.log(`[createXBarCustomComponent]make instance error name: ${e.name} message: ${e.message}`);
                 const stack = e.stack
                 if (stack) {
-                    InteropNativeModule._NativeLog("[createXBarCustomComponent]make instance stack trace: " + stack)
+                    console.log("[createXBarCustomComponent]make instance stack trace: " + stack)
                 }
             }
             throw new Error(`[createXBarCustomComponent]make instance error!`)
         }
     }
-    InteropNativeModule._NativeLog(`[createXBarCustomComponent]instantiateImpl11`)
+    console.log(`[createXBarCustomComponent]instantiateImpl11`)
     const instantiateImpl = /** @memo */ () => {
         T._instantiateImpl(undefined, factory, undefined, undefined, undefined);
     };
-    InteropNativeModule._NativeLog(`[createXBarCustomComponent]start getUIContextById ${instanceID}`)
+    console.log(`[createXBarCustomComponent]start getUIContextById ${instanceID}`)
     const uiContext = UIContextUtil.getOrCreateUIContextById(instanceID) as UIContextImpl;
-    InteropNativeModule._NativeLog(`[createXBarCustomComponent]getUIContextById`)
+    console.log(`[createXBarCustomComponent]getUIContextById`)
     let manager = uiContext.stateMgr;
     if (manager === undefined) {
-        InteropNativeModule._NativeLog(`[createXBarCustomComponent]manager is undefined`)
+        console.log(`[createXBarCustomComponent]manager is undefined`)
         manager = GlobalStateManager.instance;
     }
     const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {
@@ -126,17 +126,17 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
         ArkUIAniModule._Common_Restore_InstanceId();
         manager.frozen = frozen;
     });
-    InteropNativeModule._NativeLog(`[createXBarCustomComponent]updatableNode`)
+    console.log(`[createXBarCustomComponent]updatableNode`)
     const inc = node.value;
     const peerNode = findPeerNode(inc);
     if (peerNode === undefined) {
-        InteropNativeModule._NativeLog(`[createXBarCustomComponent]peerNode is undefined`)
+        console.log(`[createXBarCustomComponent]peerNode is undefined`)
         node.dispose();
         return 0;
     }
     uiContext.getDetachedRootEntryManager().detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node));
     const nodePointer = peerNode.getPeerPtr() as KLong;
     ArkUIAniModule._XBar_Set_JsFunc(nodePointer, componentInstance!)
-    InteropNativeModule._NativeLog(`[createXBarCustomComponent]end createXBarCustomComponent`)
+    console.log(`[createXBarCustomComponent]end createXBarCustomComponent`)
     return nodePointer;
 }

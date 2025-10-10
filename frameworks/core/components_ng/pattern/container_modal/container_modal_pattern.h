@@ -72,9 +72,9 @@ public:
 
     virtual void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false);
 
-    void SetAppTitle(const std::string& title);
+    virtual void SetAppTitle(const std::string& title);
 
-    void SetAppIcon(const RefPtr<PixelMap>& icon);
+    virtual void SetAppIcon(const RefPtr<PixelMap>& icon);
 
     virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose);
 

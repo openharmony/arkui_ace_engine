@@ -95,6 +95,9 @@ build_component_ng("pattern_ng") {
     "container_modal/container_modal_view.cpp",
     "container_modal/enhance/container_modal_pattern_enhance.cpp",
     "container_modal/enhance/container_modal_view_enhance.cpp",
+    "container_modal/static/container_modal_static_bridge.cpp",
+    "container_modal/static/container_modal_static_pattern.cpp",
+    "container_modal/static/container_modal_static_view.cpp",
     "container_picker/container_picker_layout_algorithm.cpp",
     "container_picker/container_picker_model.cpp",
     "container_picker/container_picker_paint_method.cpp",
@@ -766,6 +769,11 @@ build_component_ng("pattern_ng") {
     "app_bar/interfaces:custom_app_bar",
     "container_modal/interfaces:customtitle",
   ]
+
+  if (!build_ohos_sdk) {
+    # arkts 1.2
+    deps += [ "container_modal/static/source:WindowTitlebarComponent" ]
+  }
 
   if (defined(vendor_configs.ace_engine_advanced)) {
     sources += vendor_configs.ace_engine_advanced_pattern

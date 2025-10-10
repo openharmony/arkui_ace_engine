@@ -168,13 +168,13 @@ template("ace_core_interfaces_native_node") {
         "ani/search_ani_modifier.cpp",
         "ani/shape_ani_modifier.cpp",
         "ani/stateMgmt_ani_modifier.cpp",
+        "ani/xbar_ani_modifier.cpp",
         "ani/styled_string_ani_modifier.cpp",
         "ani/trace_ani_modifier.cpp",
         "ani/uinode_ani_modifier.cpp",
         "ani/video_ani_modifier.cpp",
         "ani/waterflow_ani_modifier.cpp",
         "ani/web_ani_modifier.cpp",
-        "ani/xbar_ani_modifier.cpp",
         "ani/xcomponent_ani_modifier.cpp",
       ]
       if (build_ohos_sdk) {

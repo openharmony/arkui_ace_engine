@@ -574,6 +574,27 @@ void ArktsFrontend::NotifyArkoalaConfigurationChange(bool isNeedUpdate)
     }
 }
 
+void ArktsFrontend::InitXBarProxy()
+{
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
+    CHECK_NULL_VOID(env);
+    ani_class appClass;
+    if (env->FindClass("C{arkui.XBarProxy.XBarProxy}", &appClass) != ANI_OK) {
+        LOGE("Cannot load main class arkui.XBarProxy.XBarProxy");
+        return;
+    }
+    ani_static_method create;
+    if (env->Class_FindStaticMethod(appClass, "initializeXBarProxy", ":", &create) != ANI_OK) {
+        LOGE("Cannot find create methodinitializeXBarProxy");
+        return;
+    }
+
+    ani_ref result;
+    if (env->Class_CallStaticMethod_Void(appClass, create, &result) != ANI_OK) {
+        LOGE("initializeXBarProxy returned null");
+    }
+}
+
 void* ArktsFrontend::preloadArkTSRuntime = nullptr;
 void ArktsFrontend::PreloadAceModule(void* aniEnv)
 {
