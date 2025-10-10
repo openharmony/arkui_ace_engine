@@ -23,6 +23,11 @@ import { ObserveWrappedBase } from './observeWrappedBase';
 import { Binding, MutableBinding } from '../utils';
 import { getRawObject, isDynamicObject } from '#generated';
 
+const ArrayTypeName = Type.from<Array<Any>>().getName();
+const SetTypeName = Type.from<Set<Any>>().getName();
+const MapTypeName = Type.from<Map<Any, Any>>().getName();
+const DateTypeName = Type.from<Date>().getName();
+
 export class UIUtilsImpl {
     private static observedMap: WeakMap<Object, Object> = new WeakMap<Object, Object>();
     private static deepObservedMap: WeakMap<Object, Object> = new WeakMap<Object, Object>();
@@ -122,16 +127,16 @@ export class UIUtilsImpl {
         if (value instanceof ObserveWrappedBase) {
             return value as T;
         }
-        if (value instanceof Array && Type.of(value).getName() === 'escompat.Array') {
+        if (value instanceof Array && Type.of(value).getName() === ArrayTypeName) {
             return UIUtilsImpl.makeObservedArray(value, allowDeep, isAPI) as T;
         }
-        if (value instanceof Date && Type.of(value).getName() === 'escompat.Date') {
+        if (value instanceof Date && Type.of(value).getName() === DateTypeName) {
             return UIUtilsImpl.makeObservedDate(value, allowDeep, isAPI) as T;
         }
-        if (value instanceof Map && Type.of(value).getName() === 'escompat.Map') {
+        if (value instanceof Map && Type.of(value).getName() === MapTypeName) {
             return UIUtilsImpl.makeObservedMap(value, allowDeep, isAPI) as T;
         }
-        if (value instanceof Set && Type.of(value).getName() === 'escompat.Set') {
+        if (value instanceof Set && Type.of(value).getName() === SetTypeName) {
             return UIUtilsImpl.makeObservedSet(value, allowDeep, isAPI) as T;
         }
         if (value && StateMgmtTool.isObjectLiteral(value)) {
