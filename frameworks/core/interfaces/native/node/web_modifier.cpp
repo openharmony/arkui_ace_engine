@@ -1668,8 +1668,18 @@ void SetOnDetectedBlankScreen(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     if (extraParam) {
         auto* onDetectedBlankScreenCallBackPtr =
-            reinterpret_cast<std::function<void(const BaseEventInfo* info)>*>(extraParam);
-        WebModelNG::SetOnDetectedBlankScreen(frameNode, std::move(*onDetectedBlankScreenCallBackPtr));
+            reinterpret_cast<std::function<void(const DetectedBlankScreenEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(onDetectedBlankScreenCallBackPtr);
+        auto onDetectedBlankScreenCallBack = *onDetectedBlankScreenCallBackPtr;
+        auto callback = [onDetectedBlankScreenCallBack](const BaseEventInfo* event) {
+            CHECK_NULL_VOID(event);
+            auto detectedBlankScreenEvent = static_cast<const DetectedBlankScreenEvent*>(event);
+            if (detectedBlankScreenEvent) {
+                auto& nonConstEvent = const_cast<DetectedBlankScreenEvent&>(*detectedBlankScreenEvent);
+                onDetectedBlankScreenCallBack(nonConstEvent);
+            }
+        };
+        WebModelNG::SetOnDetectedBlankScreen(frameNode, std::move(callback));
     } else {
         WebModelNG::SetOnDetectedBlankScreen(frameNode, nullptr);
     }
