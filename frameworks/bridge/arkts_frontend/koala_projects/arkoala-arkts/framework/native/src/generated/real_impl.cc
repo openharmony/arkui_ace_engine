@@ -1571,10 +1571,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Opt_Union_Length_LayoutPolicy* value)
     {
     }
-    void SetDrawModifierImpl(Ark_NativePointer node,
-                             const Opt_DrawModifier* value)
-    {
-    }
     void SetResponseRegionImpl(Ark_NativePointer node,
                                const Opt_Union_Array_Rectangle_Rectangle* value)
     {
@@ -2109,6 +2105,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetOnAccessibilityFocusImpl(Ark_NativePointer node,
                                      const Opt_AccessibilityFocusCallback* value)
+    {
+    }
+    void SetOnAccessibilityActionInterceptImpl(Ark_NativePointer node,
+                                               const Opt_AccessibilityActionInterceptCallback* value)
     {
     }
     void SetAccessibilityTextHintImpl(Ark_NativePointer node,
@@ -4162,7 +4162,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // PasteButtonModifier
     namespace PasteButtonInterfaceModifier {
-    void SetPasteButtonOptionsImpl(Ark_NativePointer node)
+    void SetPasteButtonOptionsImpl(Ark_NativePointer node,
+                                   const Opt_PasteButtonOptions* options)
     {
     }
     } // PasteButtonInterfaceModifier
@@ -4784,7 +4785,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // SaveButtonModifier
     namespace SaveButtonInterfaceModifier {
-    void SetSaveButtonOptionsImpl(Ark_NativePointer node)
+    void SetSaveButtonOptionsImpl(Ark_NativePointer node,
+                                  const Opt_SaveButtonOptions* options)
     {
     }
     } // SaveButtonInterfaceModifier
@@ -8238,7 +8240,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::ConstructImpl,
             CommonMethodModifier::SetWidthImpl,
             CommonMethodModifier::SetHeightImpl,
-            CommonMethodModifier::SetDrawModifierImpl,
             CommonMethodModifier::SetResponseRegionImpl,
             CommonMethodModifier::SetMouseResponseRegionImpl,
             CommonMethodModifier::SetSizeImpl,
@@ -8373,6 +8374,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetAccessibilityTextOfResourceTypeImpl,
             CommonMethodModifier::SetAccessibilityRoleImpl,
             CommonMethodModifier::SetOnAccessibilityFocusImpl,
+            CommonMethodModifier::SetOnAccessibilityActionInterceptImpl,
             CommonMethodModifier::SetAccessibilityTextHintImpl,
             CommonMethodModifier::SetAccessibilityDescriptionOfStringTypeImpl,
             CommonMethodModifier::SetAccessibilityDescriptionOfResourceTypeImpl,
@@ -12463,42 +12465,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // DrawingRenderingContextAccessor
-    namespace DrawModifierAccessor {
-    void DestroyPeerImpl(Ark_DrawModifier peer)
-    {
-        auto peerImpl = reinterpret_cast<DrawModifierPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_DrawModifier ConstructImpl()
-    {
-        return {};
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
-    void InvalidateImpl(Ark_DrawModifier peer)
-    {
-    }
-    Callback_DrawContext_Void GetDrawBehind_callbackImpl(Ark_DrawModifier peer)
-    {
-        return {};
-    }
-    void SetDrawBehind_callbackImpl(Ark_DrawModifier peer,
-                                    const Callback_DrawContext_Void* drawBehind_callback)
-    {
-    }
-    Callback_DrawContext_Void GetDrawContent_callbackImpl(Ark_DrawModifier peer)
-    {
-        return {};
-    }
-    void SetDrawContent_callbackImpl(Ark_DrawModifier peer,
-                                     const Callback_DrawContext_Void* drawContent_callback)
-    {
-    }
-    } // DrawModifierAccessor
     namespace EnvironmentBackendAccessor {
     Ark_Boolean IsAccessibilityEnabledImpl()
     {
@@ -14929,6 +14895,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         CHECK_NULL_VOID(frameNode);
     }
     } // NodeContainerOpsAccessor
+    namespace NodeContentExtenderAccessor {
+    Ark_NativePointer ConstructorNodeContentImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetDestroyImpl()
+    {
+        return {};
+    }
+    Ark_Boolean AddFrameNodeImpl(Ark_NativePointer content,
+                                 Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        return {};
+    }
+    Ark_Boolean RemoveFrameNodeImpl(Ark_NativePointer content,
+                                    Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        return {};
+    }
+    } // NodeContentExtenderAccessor
     namespace OffscreenCanvasAccessor {
     void DestroyPeerImpl(Ark_OffscreenCanvas peer)
     {
@@ -18859,24 +18849,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DrawingRenderingContextPeer {
         virtual ~DrawingRenderingContextPeer() = default;
     };
-    const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
-    {
-        static const GENERATED_ArkUIDrawModifierAccessor DrawModifierAccessorImpl {
-            DrawModifierAccessor::DestroyPeerImpl,
-            DrawModifierAccessor::ConstructImpl,
-            DrawModifierAccessor::GetFinalizerImpl,
-            DrawModifierAccessor::InvalidateImpl,
-            DrawModifierAccessor::GetDrawBehind_callbackImpl,
-            DrawModifierAccessor::SetDrawBehind_callbackImpl,
-            DrawModifierAccessor::GetDrawContent_callbackImpl,
-            DrawModifierAccessor::SetDrawContent_callbackImpl,
-        };
-        return &DrawModifierAccessorImpl;
-    }
-
-    struct DrawModifierPeer {
-        virtual ~DrawModifierPeer() = default;
-    };
     const GENERATED_ArkUIEnvironmentBackendAccessor* GetEnvironmentBackendAccessor()
     {
         static const GENERATED_ArkUIEnvironmentBackendAccessor EnvironmentBackendAccessorImpl {
@@ -19920,6 +19892,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NodeContainerOpsAccessor::SetOnTouchEventImpl,
         };
         return &NodeContainerOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUINodeContentExtenderAccessor* GetNodeContentExtenderAccessor()
+    {
+        static const GENERATED_ArkUINodeContentExtenderAccessor NodeContentExtenderAccessorImpl {
+            NodeContentExtenderAccessor::ConstructorNodeContentImpl,
+            NodeContentExtenderAccessor::GetDestroyImpl,
+            NodeContentExtenderAccessor::AddFrameNodeImpl,
+            NodeContentExtenderAccessor::RemoveFrameNodeImpl,
+        };
+        return &NodeContentExtenderAccessorImpl;
     }
 
     const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor()
@@ -21443,7 +21426,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetDismissPopupActionAccessor,
             GetDragEventAccessor,
             GetDrawingRenderingContextAccessor,
-            GetDrawModifierAccessor,
             GetEnvironmentBackendAccessor,
             GetEventEmulatorAccessor,
             GetEventResultAccessor,
@@ -21502,6 +21484,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetNavPathInfoAccessor,
             GetNavPathStackAccessor,
             GetNodeContainerOpsAccessor,
+            GetNodeContentExtenderAccessor,
             GetOffscreenCanvasAccessor,
             GetOffscreenCanvasRenderingContext2DAccessor,
             GetPanGestureEventAccessor,

@@ -623,6 +623,13 @@ export class UIContext {
     public setUIStates(callback: () => void): void {
         throw Error("setUIStates not implemented in UIContext!")
     }
+    public getFilteredInspectorTree(filters?: Array<string>): string {
+        throw Error("getFilteredInspectorTree not implemented in UIContext!")
+    }
+ 
+    public getFilteredInspectorTreeById(id: string, depth: int, filters?: Array<string>): string {
+        throw Error("getFilteredInspectorTreeById not implemented in UIContext!")
+    }
     public setImageCacheCount(value: int): void {
         throw Error("setImageCacheCount not implemented in UIContext!")
     }

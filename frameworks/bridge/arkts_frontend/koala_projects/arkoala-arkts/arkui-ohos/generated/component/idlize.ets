@@ -2075,6 +2075,40 @@ export class NodeContainerOps {
         return
     }
 }
+export class NodeContentExtender {
+    static constructorNodeContent_serialize(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._NodeContentExtender_constructorNodeContent()
+        return retval
+    }
+    static getDestroy_serialize(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._NodeContentExtender_getDestroy()
+        return retval
+    }
+    static addFrameNode_serialize(content: KPointer, node: KPointer): boolean {
+        const retval  = ArkUIGeneratedNativeModule._NodeContentExtender_addFrameNode(content, node)
+        return retval
+    }
+    static removeFrameNode_serialize(content: KPointer, node: KPointer): boolean {
+        const retval  = ArkUIGeneratedNativeModule._NodeContentExtender_removeFrameNode(content, node)
+        return retval
+    }
+    public static constructorNodeContent(): KPointer {
+        return NodeContentExtender.constructorNodeContent_serialize()
+    }
+    public static getDestroy(): KPointer {
+        return NodeContentExtender.getDestroy_serialize()
+    }
+    public static addFrameNode(content: KPointer, node: KPointer): boolean {
+        const content_casted = content as (KPointer)
+        const node_casted = node as (KPointer)
+        return NodeContentExtender.addFrameNode_serialize(content_casted, node_casted)
+    }
+    public static removeFrameNode(content: KPointer, node: KPointer): boolean {
+        const content_casted = content as (KPointer)
+        const node_casted = node as (KPointer)
+        return NodeContentExtender.removeFrameNode_serialize(content_casted, node_casted)
+    }
+}
 export class PromptActionExtender {
     static openPopup_serialize(content: KPointer, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()

@@ -47,8 +47,8 @@ export function updateLazyItems() {
 /** @memo:intrinsic */
 export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     /** @memo */
-    itemGenerator: (item: T, index: number) => void,
-    keyGenerator?: (item: T, index: number) => string,
+    itemGenerator: (item: T, index: int32) => void,
+    keyGenerator?: (item: T, index: int32) => string,
     isRepeat: boolean = false,
     onMove?: OnMoveHandler,
     itemDragEvent?: ItemDragEventHandler,
@@ -175,7 +175,7 @@ class LazyItemPool implements Disposable {
         index: int32,
         data: T,
         /** @memo */
-        itemGenerator: (item: T, index: number) => void,
+        itemGenerator: (item: T, index: int32) => void,
     ): pointer {
         if (this._activeItems.has(index)) {
             const node = this._activeItems.get(index)!
@@ -186,7 +186,7 @@ class LazyItemPool implements Disposable {
         const node = manager.updatableNode<LazyItemNode>(new LazyItemNode(this._parent),
             (context: StateContext) => {
                 let scope = new LazyItemCompositionContext(this._componentRoot)
-                memoEntry2<T, number, void>(
+                memoEntry2<T, int32, void>(
                     context,
                     0,
                     itemGenerator,

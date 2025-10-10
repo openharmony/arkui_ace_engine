@@ -25,6 +25,8 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable, DividerStyle } from "./component/common"
 import { Length, Dimension } from "./component/units"
 import { Resource } from "global.resource"
+import { PeerNode } from "./PeerNode"
+
 export class SideBarContainerModifier extends CommonMethodModifier implements SideBarContainerAttribute,AttributeModifier<SideBarContainerAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {

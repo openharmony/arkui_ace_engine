@@ -82,7 +82,12 @@ void DeleteTextImpl(Ark_TextContentControllerBase peer,
     CHECK_NULL_VOID(peer && peer->controller_);
     auto rangeConv = Converter::OptConvertPtr<TextRange>(range);
     if (rangeConv.has_value()) {
-        peer->controller_->DeleteText(rangeConv.value().start, rangeConv.value().end);
+        auto startIndex = rangeConv.value().start;
+        auto endIndex = rangeConv.value().end;
+        peer->controller_->DeleteText(
+            startIndex < 0 ? 0 : startIndex, endIndex < 0 ? -1 : endIndex);
+    } else {
+        peer->controller_->DeleteText(-1, -1);
     }
 }
 Ark_TextRange GetSelectionImpl(Ark_TextContentControllerBase peer)
