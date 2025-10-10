@@ -1384,6 +1384,35 @@ HWTEST_F(WebPatternTouchTestNg, HandleDragStart001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleDragStart002
+ * @tc.desc: HandleDragStart.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, HandleDragStart002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    webPattern->isDragStartFromWeb_ = false;
+    webPattern->isMouseEvent_ = false;
+    webPattern->HandleDragStart(1, 1);
+    EXPECT_FALSE(webPattern->isDragging_);
+    webPattern->previewImageNodeId_ = 1;
+    webPattern->HandleDragStart(1, 1);
+    EXPECT_FALSE(webPattern->curContextMenuResult_);
+#endif
+}
+
+/**
  * @tc.name: HandleOnDragEnter001
  * @tc.desc: HandleOnDragEnter.
  * @tc.type: FUNC
