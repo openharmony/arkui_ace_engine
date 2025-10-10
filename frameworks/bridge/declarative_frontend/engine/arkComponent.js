@@ -31966,6 +31966,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedGestureEventModifier.identity, WebOnNativeEmbedGestureEventModifier, event);
     return this;
   }
+  onNativeEmbedObjectParamChange(event) {
+    modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedObjectParamChangeModifier.identity, WebOnNativeEmbedObjectParamChangeModifier, event);
+    return this;
+  }
   registerNativeEmbedRule(tag,type) {
     let arkRegisterNativeEmbedRule = new ArkRegisterNativeEmbedRule();
     if (!isUndefined(tag) && !isNull(tag)) {
@@ -32700,6 +32704,20 @@ class WebOnNativeEmbedGestureEventModifier extends ModifierWithKey {
   }
 }
 WebOnNativeEmbedGestureEventModifier.identity = Symbol('webOnNativeEmbedGestureEventModifier');
+
+class WebOnNativeEmbedObjectParamChangeModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnNativeEmbedObjectParamChange(node);
+    } else {
+      getUINativeModule().web.setOnNativeEmbedObjectParamChange(node, this.value);
+    }
+  }
+}
+WebOnNativeEmbedObjectParamChangeModifier.identity = Symbol('webOnNativeEmbedObjectParamChangeModifier');
 
 class WebRegisterNativeEmbedRuleModifier extends ModifierWithKey {
   constructor(value) {
