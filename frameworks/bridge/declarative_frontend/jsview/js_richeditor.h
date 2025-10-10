@@ -59,6 +59,7 @@ public:
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnShare(const JSCallbackInfo& info);
+    static void SetOnWillAttachIME(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
     static JSRef<JSVal> CreateJSSelection(const SelectionInfo& selectInfo);

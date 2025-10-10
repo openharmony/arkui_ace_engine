@@ -49,6 +49,7 @@ public:
     void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) override;
+    void SetOnWillAttachIME(IMEAttachCallback&& func) override;
     void SetSelectionMenuOptions(const OnCreateMenuCallback&& onCreateMenuCallback,
         const OnMenuItemClickCallback&& onMenuItemClick,
         const OnPrepareMenuCallback&& onPrepareMenuCallback) override;
