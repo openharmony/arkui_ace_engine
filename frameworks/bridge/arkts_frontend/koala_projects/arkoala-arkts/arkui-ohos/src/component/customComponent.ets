@@ -283,9 +283,8 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         return this.instance.onDumpInspector();
     }
 
-    // Theme
     onWillApplyTheme(theme: Theme): void {
-        // TODO: this.instance.onWillApplyTheme(theme);
+        this.instance.onWillApplyTheme(theme);
     }
 
     protected __initializeStruct(
@@ -331,6 +330,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
 
     onCleanup(): void {
         this.aboutToDisappear();
+    }
+
+    onGlobalThemeChanged(theme: Theme): void {
+        this.onWillApplyTheme(theme);
     }
 }
 

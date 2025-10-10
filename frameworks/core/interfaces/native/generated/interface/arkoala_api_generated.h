@@ -26083,6 +26083,20 @@ typedef struct GENERATED_ArkUITextTimerControllerAccessor {
     void (*reset)(Ark_TextTimerController peer);
 } GENERATED_ArkUITextTimerControllerAccessor;
 
+typedef struct GENERATED_ArkUIThemeOpsAccessor {
+    void (*sendThemeToNative)(const Array_ResourceColor* colorArray,
+                              Ark_Int32 elmtId);
+    void (*setDefaultTheme)(const Array_ResourceColor* colorArray,
+                            Ark_Boolean isDark);
+    void (*createAndBindTheme)(Ark_Int32 themeScopeId,
+                               Ark_Int32 themeId,
+                               const Array_ResourceColor* colorArray,
+                               Ark_ThemeColorMode colorMode,
+                               const Callback_Void* onThemeScopeDestroy);
+    void (*applyThemeScopeIdToNode)(Ark_NativePointer ptr,
+                                    Ark_Int32 themeScopeId);
+} GENERATED_ArkUIThemeOpsAccessor;
+
 typedef struct GENERATED_ArkUITimePickerDialogAccessor {
     void (*destroyPeer)(Ark_TimePickerDialog peer);
     Ark_TimePickerDialog (*construct)();
@@ -26671,6 +26685,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUITextShadowStyleAccessor* (*getTextShadowStyleAccessor)();
     const GENERATED_ArkUITextStyleAccessor* (*getTextStyleAccessor)();
     const GENERATED_ArkUITextTimerControllerAccessor* (*getTextTimerControllerAccessor)();
+    const GENERATED_ArkUIThemeOpsAccessor* (*getThemeOpsAccessor)();
     const GENERATED_ArkUITimePickerDialogAccessor* (*getTimePickerDialogAccessor)();
     const GENERATED_ArkUITouchEventAccessor* (*getTouchEventAccessor)();
     const GENERATED_ArkUITransitionEffectAccessor* (*getTransitionEffectAccessor)();

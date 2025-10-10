@@ -27,10 +27,12 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CustomTheme } from "@ohos.arkui.theme"
 import { ThemeColorMode } from "./common"
-import { hookWithThemeAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { hookWithThemeAttributeModifier, AttributeModifier, AttributeUpdater, hookWithThemeOptions } from "#handwritten"
 import { WithThemeModifier } from "./../WithThemeModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { CustomTheme_serializer } from "./../framework/ohos.arkui.theme"
+import { ArkThemeScopeManager } from 'arkui/theme/ArkThemeScopeManager';
+import { GlobalStateManager } from '@koalaui/runtime';
 export class ArkWithThemePeer extends PeerNode {
     attributeSet?: WithThemeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -80,8 +82,7 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
     }
     public setWithThemeOptions(options: WithThemeOptions): this {
         if (this.checkPriority("setWithThemeOptions")) {
-            const options_casted = options as (WithThemeOptions)
-            this.getPeer()?.setWithThemeOptionsAttribute(options_casted)
+            hookWithThemeOptions(this, options);
             return this
         }
         return this
@@ -108,9 +109,23 @@ export function WithThemeImpl(
     })
     NodeAttach<ArkWithThemePeer>((): ArkWithThemePeer => ArkWithThemePeer.create(receiver), (peer: ArkWithThemePeer): void => {
         receiver.setPeer(peer)
+
+        const withThemeId = receiver.getPeer()?.getId() ?? 0;
+        ArkThemeScopeManager.getInstance().onComponentCreateEnter("WithTheme", receiver.getPeer()?.getId(), receiver.isFirstRender)
         style?.(receiver)
+        ArkThemeScopeManager.getInstance().onComponentCreateExit(receiver.getPeer()?.getId())
         receiver.setPeer(undefined)
+
+        GlobalStateManager.instance.namedState<int32>("themeScopeId", () => withThemeId);
+        const themeOptions = ArkThemeScopeManager.getInstance().getThemeOptionsById(withThemeId);
+        ArkThemeScopeManager.getInstance().updateColorMode(themeOptions?.colorMode ?? ThemeColorMode.SYSTEM);
+
         content_?.()
+
+        ArkThemeScopeManager.getInstance().restoreColorMode();
+        ArkThemeScopeManager.getInstance().onScopeExit();
+
+        receiver.isFirstRender = false;
     })
 }
 
