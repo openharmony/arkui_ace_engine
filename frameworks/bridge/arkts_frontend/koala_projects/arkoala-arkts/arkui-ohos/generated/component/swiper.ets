@@ -1836,11 +1836,11 @@ export class ArrowStyle_serializer {
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                backgroundColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1848,7 +1848,7 @@ export class ArrowStyle_serializer {
             } else {
                 throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
         const arrowSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1872,11 +1872,11 @@ export class ArrowStyle_serializer {
         let arrowColorTmpBuf : ResourceColor | undefined = undefined
         if ((arrowColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const arrowColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let arrowColorTmpBuf_ : Color | number | string | Resource | undefined
+            let arrowColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (arrowColorTmpBuf_UnionSelector == (0).toChar()) {
                 arrowColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (arrowColorTmpBuf_UnionSelector == (1).toChar()) {
-                arrowColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                arrowColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (arrowColorTmpBuf_UnionSelector == (2).toChar()) {
                 arrowColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (arrowColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1884,7 +1884,7 @@ export class ArrowStyle_serializer {
             } else {
                 throw new Error("One of the branches for arrowColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            arrowColorTmpBuf = (arrowColorTmpBuf_ as Color | number | string | Resource)
+            arrowColorTmpBuf = (arrowColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const arrowColorTmpResult : ResourceColor | undefined = arrowColorTmpBuf
         let value : ArrowStyle = ({showBackground: showBackgroundTmpResult, isSidebarMiddle: isSidebarMiddleTmpResult, backgroundSize: backgroundSizeTmpResult, backgroundColor: backgroundColorTmpResult, arrowSize: arrowSizeTmpResult, arrowColor: arrowColorTmpResult} as ArrowStyle)

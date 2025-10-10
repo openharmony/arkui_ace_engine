@@ -323,7 +323,7 @@ export class FrameNode implements MaterializedBase {
         }
         return node;
     }
-    public getChild(index: number, expandMode?: ExpandMode | undefined): FrameNode | null {
+    public getChild(index: int32, expandMode?: ExpandMode | undefined): FrameNode | null {
         const index_casted = index as (number);
         let expand_casted: number = 1;
         if (expandMode !== undefined && expandMode !== null) {
@@ -408,7 +408,7 @@ export class FrameNode implements MaterializedBase {
         }
         return null;
     }
-    public getChildrenCount(): number {
+    public getChildrenCount(): int32 {
         return FrameNodeExtender.getChildrenCount(this);
     }
     public dispose(): void {
@@ -423,7 +423,7 @@ export class FrameNode implements MaterializedBase {
             this.peer?.close();
         }
     }
-    public getOpacity(): number {
+    public getOpacity(): double {
         return FrameNodeExtender.getOpacity(this);
     }
     public getPositionToWindowWithTransform(): NodePosition {
@@ -483,8 +483,8 @@ export class FrameNode implements MaterializedBase {
     public getId(): string {
         return FrameNodeExtender.getId(this);
     }
-    public getUniqueId(): number {
-        return FrameNodeExtender.getUniqueId(this);
+    public getUniqueId(): long {
+        return FrameNodeExtender.getUniqueId(this) as long;
     }
     public isVisible(): boolean {
         return FrameNodeExtender.isVisible(this);
@@ -585,7 +585,7 @@ export class FrameNode implements MaterializedBase {
         const node_casted = node as (FrameNode);
         return FrameNodeExtender.getIdByFrameNode(toPeerPtr(node_casted));
     }
-    public moveTo(targetParent: FrameNode, index?: number): void {
+    public moveTo(targetParent: FrameNode, index?: int32): void {
         if (targetParent === undefined || targetParent === null) {
             return;
         }
@@ -603,11 +603,11 @@ export class FrameNode implements MaterializedBase {
         return;
     }
 
-    public getFirstChildIndexWithoutExpand(): number {
-        return FrameNodeExtender.getFirstChildIndexWithoutExpand(this);
+    public getFirstChildIndexWithoutExpand(): int32 {
+        return FrameNodeExtender.getFirstChildIndexWithoutExpand(this) as int32;
     }
-    public getLastChildIndexWithoutExpand(): number {
-        return FrameNodeExtender.getLastChildIndexWithoutExpand(this);
+    public getLastChildIndexWithoutExpand(): int32 {
+        return FrameNodeExtender.getLastChildIndexWithoutExpand(this) as int32;
     }
     public reuse(): void {
         FrameNodeExtender.reuse(this)
@@ -1775,7 +1775,7 @@ class NodeAdapterFinalizable extends Finalizable {
 export class NodeAdapter implements MaterializedBase {
     private peer?: Finalizable | undefined = undefined;
     private attachedNodeRef_?: WeakRef<FrameNode>;
-    private count_: number = 0;
+    private count_: int = 0;
     private nodeRefs_: Array<FrameNode> = new Array<FrameNode>();
 
     onDisposeChild(index: number, node: FrameNode) {
@@ -1786,7 +1786,7 @@ export class NodeAdapter implements MaterializedBase {
 
     }
 
-    onCreateChild(index: number): FrameNode {
+    onCreateChild(index: int): FrameNode {
         return new FrameNode(undefined);
     }
 
@@ -1808,7 +1808,7 @@ export class NodeAdapter implements MaterializedBase {
         }
     }
 
-    set totalNodeCount(count: number) {
+    set totalNodeCount(count: int32) {
         if (count < 0) {
             return;
         }
@@ -1823,25 +1823,25 @@ export class NodeAdapter implements MaterializedBase {
     reloadAllItems() {
         ArkUIAniModule._NodeAdapter_NotifyItemReloaded(this.peer!.ptr!);
     }
-    reloadItem(start: number, count: number) {
+    reloadItem(start: int32, count: int32) {
         if (start < 0 || count < 0) {
             return;
         }
         ArkUIAniModule._NodeAdapter_NotifyItemChanged(this.peer!.ptr!, start, count);
     }
-    removeItem(start: number, count: number) {
+    removeItem(start: int32, count: int32) {
         if (start < 0 || count < 0) {
             return;
         }
         ArkUIAniModule._NodeAdapter_NotifyItemRemoved(this.peer!.ptr!, start, count);
     }
-    insertItem(start: number, count: number) {
+    insertItem(start: int32, count: int32) {
         if (start < 0 || count < 0) {
             return;
         }
         ArkUIAniModule._NodeAdapter_NotifyItemInserted(this.peer!.ptr!, start, count);
     }
-    moveItem(from: number, to: number) {
+    moveItem(from: int32, to: int32) {
         if (from < 0 || to < 0) {
             return;
         }
@@ -1894,7 +1894,7 @@ export class NodeAdapter implements MaterializedBase {
     }
     onCreateNewNodePtr(index: number): pointer {
         if (this.onCreateChild !== undefined) {
-            let frameNode = this.onCreateChild(index);
+            let frameNode = this.onCreateChild((index as int32));
             if (!this.nodeRefs_.find((node) => {
                 return node === frameNode;
             })) {
