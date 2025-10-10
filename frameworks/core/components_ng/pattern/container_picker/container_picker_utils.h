@@ -82,15 +82,14 @@ public:
             if (LessOrEqual(startPos, middlePos) && GreatOrEqual(endPos, middlePos)) {
                 return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
             }
-            if (LessOrEqual(startPos, middlePos) && LessOrEqual(endPos, middlePos) && !isLoop &&
-                index == totalItemCount - 1) {
+            if (LessOrEqual(endPos, middlePos) && !isLoop && index == totalItemCount - 1) {
                 return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
             }
-            if (GreatOrEqual(startPos, middlePos) && GreatOrEqual(endPos, middlePos) && !isLoop && index == 0) {
+            if (GreatOrEqual(startPos, middlePos) && !isLoop && index == 0) {
                 return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
             }
         }
-        return std::make_pair(itemPosition.begin()->first,
+        return std::make_pair(GetLoopIndex(itemPosition.begin()->first, totalItemCount),
             PickerItemInfo { itemPosition.begin()->second.startPos, itemPosition.begin()->second.endPos });
     }
 };

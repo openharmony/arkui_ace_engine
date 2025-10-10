@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/container_picker/container_picker_layout_algorithm.h"
+
 #include <cstdint>
 #include <iterator>
 
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/container_picker/container_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -55,7 +56,6 @@ void ContainerPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     const auto& padding = pickerLayoutProperty->CreatePaddingAndBorder();
-    topPadding_ = padding.top.value_or(0.0);
     AddPaddingToSize(padding, contentIdealSize);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     if (geometryNode) {
@@ -118,34 +118,46 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
 {
     auto pickerLayoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto contentConstraint = pickerLayoutProperty->GetContentLayoutConstraint().value();
-    auto isWidthDefined = false;
-    float width = GetCrossAxisSize(contentConstraint.selfIdealSize, axis_).value_or(UNDEFINED_SIZE);
-    if (NonNegative(width)) {
-        isWidthDefined = true;
-    }
+    float width;
 
     auto isCrossWrap = widthLayoutPolicy == LayoutCalPolicy::WRAP_CONTENT;
+    auto isCrossMatchParent = widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT;
     auto isCrossFix = widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
 
     // measure width
-    if (!isWidthDefined) {
-        if (isCrossWrap) {
-            auto parentCrossSize =
-                CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_CROSS_AXIS)
-                    .CrossSize(axis_);
-            auto childCrossSize_ = GetChildMaxWidth(layoutWrapper);
-            if (!parentCrossSize.has_value()) {
-                width = childCrossSize_;
-            } else {
-                width = std::min(childCrossSize_, parentCrossSize.value());
-            }
-        } else if (isCrossFix) {
+    auto crossSize = contentIdealSize.CrossSize(axis_);
+    // when matchParent, idealSize'crossSize Keep the original value
+    if (!isCrossMatchParent) {
+        if ((crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) || !crossSize.has_value()) {
             width = GetChildMaxWidth(layoutWrapper);
+            contentIdealSize.SetCrossSize(width, axis_);
+            crossMatchChild_ = true;
         } else {
-            auto parentMaxWidth = GetCrossAxisSize(contentConstraint.maxSize, axis_);
-            width = std::min(parentMaxWidth, PICKER_DEFAULT_WIDTH);
+            width = NonNegative(crossSize.value()) ? crossSize.value() : PICKER_DEFAULT_WIDTH;
         }
+    } else {
+        width = NonNegative(crossSize.value()) ? crossSize.value() : PICKER_DEFAULT_WIDTH;
     }
+
+    if (isCrossWrap) {
+        auto parentCrossSize =
+            CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_CROSS_AXIS)
+                .CrossSize(axis_);
+        width = GetChildMaxWidth(layoutWrapper);
+        if (!parentCrossSize.has_value()) {
+            contentIdealSize.SetCrossSize(width, axis_);
+        } else {
+            contentIdealSize.SetCrossSize(std::min(width, parentCrossSize.value()), axis_);
+            width = std::min(width, parentCrossSize.value());
+        }
+        crossMatchChild_ = true;
+    }
+
+    if (isCrossFix) {
+        width = GetChildMaxWidth(layoutWrapper);
+        crossMatchChild_ = true;
+    }
+
     contentIdealSize.SetCrossSize(width, axis_);
 }
 
@@ -204,6 +216,38 @@ void ContainerPickerLayoutAlgorithm::MeasurePickerItems(
 
     MeasureBelow(layoutWrapper, layoutConstraint, middleIndexInVisibleWindow, startPos);
     MeasureAbove(layoutWrapper, layoutConstraint, middleIndexInVisibleWindow - 1, GetStartPosition());
+
+    std::vector<int32_t> prevItemsIndex;
+    std::vector<int32_t> curItemsIndex;
+    for (const auto& pair : prevItemPosition_)
+        prevItemsIndex.push_back(ContainerPickerUtils::GetLoopIndex(pair.first, totalItemCount_));
+    for (const auto& pair : itemPosition_)
+        curItemsIndex.push_back(ContainerPickerUtils::GetLoopIndex(pair.first, totalItemCount_));
+    std::sort(prevItemsIndex.begin(), prevItemsIndex.end());
+    std::sort(curItemsIndex.begin(), curItemsIndex.end());
+    std::set_difference(prevItemsIndex.begin(), prevItemsIndex.end(), curItemsIndex.begin(), curItemsIndex.end(),
+        std::back_inserter(offScreenItemsIndex_));
+
+    for (int32_t index : offScreenItemsIndex_) {
+        ResetOffscreenItemPosition(layoutWrapper, index);
+    }
+}
+
+void ContainerPickerLayoutAlgorithm::ResetOffscreenItemPosition(LayoutWrapper* layoutWrapper, int32_t index) const
+{
+    auto swiperGeometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(swiperGeometryNode);
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(childWrapper);
+
+    auto childGeometryNode = childWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(childGeometryNode);
+
+    OffsetF offset(0.0f, 0.0f);
+    offset.SetY(-PICKER_ITEM_DEFAULT_HEIGHT);
+
+    childGeometryNode->SetMarginFrameOffset(offset);
+    childWrapper->Layout();
 }
 
 void ContainerPickerLayoutAlgorithm::MeasureBelow(LayoutWrapper* layoutWrapper,
@@ -220,9 +264,10 @@ void ContainerPickerLayoutAlgorithm::MeasureBelow(LayoutWrapper* layoutWrapper,
         if (!result) {
             break;
         }
+        LOGE("lslsls currentIndex %{public}d currentStartPos %{public}f", currentIndex, currentStartPos);
     } while (NeedMeasureBelow(currentIndex, currentStartPos, endMainPos, cachedLayout));
 
-    if (overScrollFeature_) {
+    if (overScrollFeature_ || isLoop_) {
         return;
     }
 
@@ -245,9 +290,10 @@ void ContainerPickerLayoutAlgorithm::MeasureAbove(LayoutWrapper* layoutWrapper,
         if (!result) {
             break;
         }
+        LOGE("lslsls currentIndex %{public}d currentEndPos %{public}f", currentIndex, currentEndPos);
     } while (NeedMeasureAbove(currentIndex, currentEndPos, startMainPos, cachedLayout));
 
-    if (overScrollFeature_) {
+    if (overScrollFeature_ || isLoop_) {
         return;
     }
 
@@ -284,9 +330,7 @@ bool ContainerPickerLayoutAlgorithm::MeasureAboveItem(LayoutWrapper* layoutWrapp
 {
     auto pickerLayoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(pickerLayoutProperty, false);
-    int32_t displayCount = 7;
-    bool itemPositionIsFull = static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_ + displayCount - 1;
-    if ((currentIndex - 1 < 0 && !isLoop_)) {
+    if (currentIndex - 1 < 0 && !isLoop_) {
         return false;
     }
 
@@ -298,10 +342,12 @@ bool ContainerPickerLayoutAlgorithm::MeasureAboveItem(LayoutWrapper* layoutWrapp
 
     float mainAxisSize = GetChildMainAxisSize(wrapper);
     startPos = endPos - mainAxisSize;
-    if (!itemPositionIsFull) {
-        itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };
-    }
-    return true;
+    itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };
+    itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };
+}
+itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };
+}
+return true;
 }
 
 bool ContainerPickerLayoutAlgorithm::NeedMeasureBelow(
@@ -367,12 +413,15 @@ void ContainerPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     axis_ = Axis::VERTICAL;
     auto size = geometryNode->GetFrameSize();
+    CalcMainAndMiddlePos();
     auto padding = pickerLayoutProperty->CreatePaddingAndBorder();
+    topPadding_ = padding.top.value_or(0.0);
     MinusPaddingToSize(padding, size);
     auto paddingOffset = padding.Offset();
 
     // layout items.
     for (auto& pos : itemPosition_) {
+        LOGE("lslsls pos %{public}d pos.second.startPos %{public}f", pos.first, pos.second.startPos);
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
         LayoutItem(layoutWrapper, paddingOffset, pos);
