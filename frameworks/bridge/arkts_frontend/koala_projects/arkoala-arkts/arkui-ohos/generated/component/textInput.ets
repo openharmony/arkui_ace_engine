@@ -2653,11 +2653,11 @@ export class UnderlineColor_serializer {
         let typingTmpBuf : ResourceColor | undefined = undefined
         if ((typingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const typingTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let typingTmpBuf_ : Color | number | string | Resource | undefined
+            let typingTmpBuf_ : Color | int32 | string | Resource | undefined
             if (typingTmpBuf_UnionSelector == (0).toChar()) {
                 typingTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (typingTmpBuf_UnionSelector == (1).toChar()) {
-                typingTmpBuf_ = (valueDeserializer.readNumber() as number)
+                typingTmpBuf_ = (valueDeserializer.readInt32())
             } else if (typingTmpBuf_UnionSelector == (2).toChar()) {
                 typingTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (typingTmpBuf_UnionSelector == (3).toChar()) {
@@ -2665,18 +2665,18 @@ export class UnderlineColor_serializer {
             } else {
                 throw new Error("One of the branches for typingTmpBuf_ has to be chosen through deserialisation.")
             }
-            typingTmpBuf = (typingTmpBuf_ as Color | number | string | Resource)
+            typingTmpBuf = (typingTmpBuf_ as Color | int32 | string | Resource)
         }
         const typingTmpResult : ResourceColor | undefined = typingTmpBuf
         const normalTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let normalTmpBuf : ResourceColor | undefined = undefined
         if ((normalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const normalTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let normalTmpBuf_ : Color | number | string | Resource | undefined
+            let normalTmpBuf_ : Color | int32 | string | Resource | undefined
             if (normalTmpBuf_UnionSelector == (0).toChar()) {
                 normalTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (normalTmpBuf_UnionSelector == (1).toChar()) {
-                normalTmpBuf_ = (valueDeserializer.readNumber() as number)
+                normalTmpBuf_ = (valueDeserializer.readInt32())
             } else if (normalTmpBuf_UnionSelector == (2).toChar()) {
                 normalTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (normalTmpBuf_UnionSelector == (3).toChar()) {
@@ -2684,18 +2684,18 @@ export class UnderlineColor_serializer {
             } else {
                 throw new Error("One of the branches for normalTmpBuf_ has to be chosen through deserialisation.")
             }
-            normalTmpBuf = (normalTmpBuf_ as Color | number | string | Resource)
+            normalTmpBuf = (normalTmpBuf_ as Color | int32 | string | Resource)
         }
         const normalTmpResult : ResourceColor | undefined = normalTmpBuf
         const errorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let errorTmpBuf : ResourceColor | undefined = undefined
         if ((errorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const errorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let errorTmpBuf_ : Color | number | string | Resource | undefined
+            let errorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (errorTmpBuf_UnionSelector == (0).toChar()) {
                 errorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (errorTmpBuf_UnionSelector == (1).toChar()) {
-                errorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                errorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (errorTmpBuf_UnionSelector == (2).toChar()) {
                 errorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (errorTmpBuf_UnionSelector == (3).toChar()) {
@@ -2703,18 +2703,18 @@ export class UnderlineColor_serializer {
             } else {
                 throw new Error("One of the branches for errorTmpBuf_ has to be chosen through deserialisation.")
             }
-            errorTmpBuf = (errorTmpBuf_ as Color | number | string | Resource)
+            errorTmpBuf = (errorTmpBuf_ as Color | int32 | string | Resource)
         }
         const errorTmpResult : ResourceColor | undefined = errorTmpBuf
         const disableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let disableTmpBuf : ResourceColor | undefined = undefined
         if ((disableTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const disableTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let disableTmpBuf_ : Color | number | string | Resource | undefined
+            let disableTmpBuf_ : Color | int32 | string | Resource | undefined
             if (disableTmpBuf_UnionSelector == (0).toChar()) {
                 disableTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (disableTmpBuf_UnionSelector == (1).toChar()) {
-                disableTmpBuf_ = (valueDeserializer.readNumber() as number)
+                disableTmpBuf_ = (valueDeserializer.readInt32())
             } else if (disableTmpBuf_UnionSelector == (2).toChar()) {
                 disableTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (disableTmpBuf_UnionSelector == (3).toChar()) {
@@ -2722,7 +2722,7 @@ export class UnderlineColor_serializer {
             } else {
                 throw new Error("One of the branches for disableTmpBuf_ has to be chosen through deserialisation.")
             }
-            disableTmpBuf = (disableTmpBuf_ as Color | number | string | Resource)
+            disableTmpBuf = (disableTmpBuf_ as Color | int32 | string | Resource)
         }
         const disableTmpResult : ResourceColor | undefined = disableTmpBuf
         let value : UnderlineColor = ({typing: typingTmpResult, normal: normalTmpResult, error: errorTmpResult, disable: disableTmpResult} as UnderlineColor)

@@ -21,8 +21,8 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { PeerNode } from "../PeerNode"
 import { ComponentBase } from "./../ComponentBase"
-import { Content } from "../Content"
-import { NodeContent } from "../NodeContent"
+import { Content } from "arkui.Content"
+import { NodeContent } from "arkui.NodeContent"
 import { ArkUIAniModule } from "arkui.ani"
 
 export class ArkContentSlotPeer extends PeerNode {

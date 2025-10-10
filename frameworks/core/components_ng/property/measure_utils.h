@@ -104,6 +104,8 @@ ACE_FORCE_EXPORT PaddingProperty ConvertToCalcPaddingProperty(const std::optiona
     const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
     const std::optional<CalcDimension>& right);
 
+PaddingProperty ConstraintPaddingPropertyNonNegative(PaddingProperty padding);
+
 /**
  * @brief Create node IdealSize.
  *

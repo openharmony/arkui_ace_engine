@@ -6,7 +6,7 @@ import { NavDestinationMode } from 'arkui/framework'
 
 declare namespace uiObserver {
     export class DensityInfo {
-        density: number;
+        density: double;
     }
     type Callback<T,V = void> = (data: T) => V
       

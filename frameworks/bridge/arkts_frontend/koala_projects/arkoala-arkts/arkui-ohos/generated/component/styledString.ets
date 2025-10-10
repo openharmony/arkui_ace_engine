@@ -250,11 +250,11 @@ export class DecorationStyle implements MaterializedBase {
         let buffer : ResourceColor | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : Color | number | string | Resource | undefined
+            let buffer_ : Color | int32 | string | Resource | undefined
             if (buffer_UnionSelector == (0).toChar()) {
                 buffer_ = Color.values()[retvalDeserializer.readInt32()]
             } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = (retvalDeserializer.readNumber() as number)
+                buffer_ = (retvalDeserializer.readInt32())
             } else if (buffer_UnionSelector == (2).toChar()) {
                 buffer_ = (retvalDeserializer.readString() as string)
             } else if (buffer_UnionSelector == (3).toChar()) {
@@ -262,7 +262,7 @@ export class DecorationStyle implements MaterializedBase {
             } else {
                 throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
             }
-            buffer = (buffer_ as Color | number | string | Resource)
+            buffer = (buffer_ as Color | int32 | string | Resource)
         }
         const returnResult : ResourceColor | undefined = buffer
         return returnResult
@@ -981,11 +981,11 @@ export class TextStyle implements MaterializedBase {
         let buffer : ResourceColor | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : Color | number | string | Resource | undefined
+            let buffer_ : Color | int32 | string | Resource | undefined
             if (buffer_UnionSelector == (0).toChar()) {
                 buffer_ = Color.values()[retvalDeserializer.readInt32()]
             } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = (retvalDeserializer.readNumber() as number)
+                buffer_ = (retvalDeserializer.readInt32())
             } else if (buffer_UnionSelector == (2).toChar()) {
                 buffer_ = (retvalDeserializer.readString() as string)
             } else if (buffer_UnionSelector == (3).toChar()) {
@@ -993,7 +993,7 @@ export class TextStyle implements MaterializedBase {
             } else {
                 throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
             }
-            buffer = (buffer_ as Color | number | string | Resource)
+            buffer = (buffer_ as Color | int32 | string | Resource)
         }
         const returnResult : ResourceColor | undefined = buffer
         return returnResult
@@ -1483,11 +1483,11 @@ export class DecorationStyleInterface_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1495,7 +1495,7 @@ export class DecorationStyleInterface_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1605,11 +1605,11 @@ export class TextStyleInterface_serializer {
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
                 fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1617,7 +1617,7 @@ export class TextStyleInterface_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         const fontFamilyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

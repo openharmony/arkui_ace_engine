@@ -21,8 +21,8 @@
 #include "base/error/error_code.h"
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/syntax/node_content_peer.h"
 #include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
-#include "frameworks/core/interfaces/native/ani/node_content_peer.h"
 
 namespace {
 constexpr char NAV_PATH_STACK_CLASS[] = "arkui.component.navigation.NavPathStack";

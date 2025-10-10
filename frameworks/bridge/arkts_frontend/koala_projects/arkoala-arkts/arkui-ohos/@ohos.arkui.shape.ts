@@ -39,7 +39,7 @@ export declare class RectShape extends BaseShape<RectShape> {
     public constructor(options?: RectShapeOptions | RoundRectShapeOptions);
     public radiusWidth(rWidth: number | string): RectShape;
     public radiusHeight(rHeight: number | string): RectShape;
-    public radius(radius: number | string | Array<number | string>): RectShape;
+    public radius(radius: double | string | Array<double | string>): RectShape;
     public width(width: Length): RectShape;
     public height(width: Length): RectShape;
     public size(width: Length): RectShape;

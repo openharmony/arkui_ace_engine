@@ -114,7 +114,7 @@ export struct ComposeTitleBar {
   menuItems?: Array<ComposeTitleBarMenuItem> = [] as Array<ComposeTitleBarMenuItem>;
   @State titleMaxWidth: number = 0;
   @State fontSize: number = 1;
-  @Provide uniqueId?: number = -1;
+  @Provide uniqueId?: long = -1;
 
   build() {
     Flex({
@@ -324,12 +324,12 @@ struct CollapsibleMenuSection {
       Row() {
         if (this.menuItems) {
           if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-            ForEach(this.menuItems, (item: ComposeTitleBarMenuItem, index: number) => {
+            ForEach(this.menuItems, (item: ComposeTitleBarMenuItem, index: int) => {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1, itemIndex: index })
             })
           } else {
             ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
-              (item: ComposeTitleBarMenuItem, index: number) => {
+              (item: ComposeTitleBarMenuItem, index: int) => {
                 ImageMenuItem({ item: item, index: this.index * 1000 + index + 1, itemIndex: index })
               })
 
@@ -432,7 +432,7 @@ struct CollapsibleMenuSection {
       if (this.menuItems) {
         ForEach(this.menuItems!.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
           this.menuItems!.length),
-          (item: ComposeTitleBarMenuItem, index: number) => {
+          (item: ComposeTitleBarMenuItem, index: int) => {
             ImageMenuItem({
               item: item, index: this.index * 1000 +
               CollapsibleMenuSection.maxCountOfVisibleItems + index, isPopup: false

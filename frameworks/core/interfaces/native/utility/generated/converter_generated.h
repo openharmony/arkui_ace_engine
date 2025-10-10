@@ -334,6 +334,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_ImageAnalyzerController_Object& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Number_FontWeight_String& src)
 {
     switch (src.selector) {
@@ -3171,8 +3186,11 @@ void WithOptional(const name& src, T call) { \
     } \
 }
 ASSIGN_OPT(Opt_Int32)
+ASSIGN_OPT(Opt_AccessibilityActionInterceptCallback)
 ASSIGN_OPT(Opt_AccessibilityCallback)
 ASSIGN_OPT(Opt_AccessibilityFocusCallback)
+ASSIGN_OPT(Opt_AccessibilityAction)
+ASSIGN_OPT(Opt_AccessibilityActionInterceptResult)
 ASSIGN_OPT(Opt_AccessibilityHoverType)
 ASSIGN_OPT(Opt_AccessibilityRoleType)
 ASSIGN_OPT(Opt_AccessibilitySamePageMode)
@@ -3670,6 +3688,7 @@ ASSIGN_OPT(Opt_Union_I32_TextAlign)
 ASSIGN_OPT(Opt_Union_I32_TextCase)
 ASSIGN_OPT(Opt_Union_I32_TextOverflow)
 ASSIGN_OPT(Opt_Union_I64_String)
+ASSIGN_OPT(Opt_Union_ImageAnalyzerController_Object)
 ASSIGN_OPT(Opt_Union_Number_FontWeight_String)
 ASSIGN_OPT(Opt_Union_Number_String)
 ASSIGN_OPT(Opt_Union_PixelMap_String)
@@ -3808,6 +3827,7 @@ ASSIGN_OPT(Opt_Array_Union_String_I32_I64_F64_Resource)
 ASSIGN_OPT(Opt_AsyncCallback_image_PixelMap_Void)
 ASSIGN_OPT(Opt_ButtonModifierBuilder)
 ASSIGN_OPT(Opt_ButtonTriggerClickCallback)
+ASSIGN_OPT(Opt_Callback_AccessibilityActionInterceptResult_Void)
 ASSIGN_OPT(Opt_Callback_Area_Area_Void)
 ASSIGN_OPT(Opt_Callback_Array_Number_Void)
 ASSIGN_OPT(Opt_Callback_Array_String_Void)
@@ -4308,6 +4328,7 @@ ASSIGN_OPT(Opt_OnTouchIconUrlReceivedEvent)
 ASSIGN_OPT(Opt_OnWindowNewEvent)
 ASSIGN_OPT(Opt_OverlayOffset)
 ASSIGN_OPT(Opt_PanGestureHandlerOptions)
+ASSIGN_OPT(Opt_PasteButtonOptions)
 ASSIGN_OPT(Opt_PathOptions)
 ASSIGN_OPT(Opt_PixelRoundPolicy)
 ASSIGN_OPT(Opt_PluginComponentTemplate)
@@ -4345,6 +4366,7 @@ ASSIGN_OPT(Opt_router_RouterOptions)
 ASSIGN_OPT(Opt_router_RouterState)
 ASSIGN_OPT(Opt_RouterItem)
 ASSIGN_OPT(Opt_RowOptions)
+ASSIGN_OPT(Opt_SaveButtonOptions)
 ASSIGN_OPT(Opt_ScaleOptions)
 ASSIGN_OPT(Opt_ScaleSymbolEffect)
 ASSIGN_OPT(Opt_Scene)
