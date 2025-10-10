@@ -719,6 +719,16 @@ public:
 
     void AddBuildDividerTask();
 
+    void SetOriginOffset(OffsetF offset)
+    {
+        this.originOffset_ = offset;
+    }
+
+    OffsetF GetOriginOffset() const
+    {
+        return this->originOffset_;
+    }
+
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -868,6 +878,7 @@ private:
     float originPreviewYForStack_ = 0.0f;
     bool isDisableMenuBgColorByUser_ = false;
     bool buildDividerTaskAdded_ = false;
+    OffSetF originOffset_ = OffsetF();
 
     // only used for Side sub menu
     int32_t subMenuDepth_ = 0;

@@ -1699,6 +1699,9 @@ void MenuPattern::ShowStackSubMenuAnimation(const RefPtr<FrameNode>& mainMenu, c
         menuItemContext->UpdateOpacity(0.0f);
     }
     auto [originOffset, endOffset] = GetMenuOffset(mainMenu, subMenuNode);
+    auto subMenuPattern = subMenuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
+    subMenuPattern->SetOriginOffset(originOffset);
     if (originOffset ==  OffsetF()) {
         TAG_LOGW(AceLogTag::ACE_MENU, "not found parent MenuItem when show stack sub menu");
     }
@@ -2071,7 +2074,9 @@ void MenuPattern::ShowStackSubMenuDisappearAnimation(const RefPtr<FrameNode>& me
 
     ShowArrowReverseRotateAnimation();
 
-    auto [originOffset, endOffset] = GetMenuOffset(menuNode, subMenuNode, true);
+    auto subMenuPattern = subMenuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
+    auto originOffset = subMenuPattern->GetOriginOffset();
     auto subMenuPos = subMenuNode->GetPaintRectOffset(false, true);
     auto menuPosition = OffsetF(subMenuPos.GetX(), originOffset.GetY());
     auto subMenuContext = subMenuNode->GetRenderContext();
@@ -2096,7 +2101,10 @@ void MenuPattern::ShowStackSubMenuDisappearAnimation(const RefPtr<FrameNode>& me
 void MenuPattern::ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode,
     const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const
 {
-    auto [originOffset, endOffset] = GetMenuOffset(menuNode, subMenuNode, true);
+    CHECK_NULL_VOID(subMenuNode);
+    auto subMenuPattern = subMenuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
+    auto originOffset = subMenuPattern->GetOriginOffset();
     auto subMenuPos = subMenuNode->GetPaintRectOffset(false, true);
     auto menuPosition = OffsetF(subMenuPos.GetX(), originOffset.GetY());
 
