@@ -4031,7 +4031,8 @@ HWTEST_F(SearchTestTwoNg, SearchOnWillAttachIME, TestSize.Level1)
     /**
      * @tc.steps: step3. fire OnWillAttachIME event.
      */
-    textFieldPattern->FireOnWillAttachIME();
+    IMEClient client;
+    textFieldPattern->FireOnWillAttachIME(client);
     EXPECT_EQ(fireOnWillAttachIME, true);
 }
 } // namespace OHOS::Ace::NG

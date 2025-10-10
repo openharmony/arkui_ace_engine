@@ -11875,6 +11875,19 @@ class SearchSelectDetectorConfigModifier extends ModifierWithKey {
   }
 }
 SearchSelectDetectorConfigModifier.identity = Symbol('searchSelectDetectorConfig');
+class SearchOnWillAttachIMEModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetOnWillAttachIME(node);
+    } else {
+      getUINativeModule().search.setOnWillAttachIME(node, this.value);
+    }
+  }
+}
+SearchOnWillAttachIMEModifier.identity = Symbol('searchOnWillAttachIME');
 
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -12172,6 +12185,11 @@ class ArkSearchComponent extends ArkComponent {
     else {
       modifierWithKey(this._modifiersWithKeys, SearchMarginModifier.identity, SearchMarginModifier, undefined);
     }
+    return this;
+  }
+  onWillAttachIME(callback) {
+    modifierWithKey(this._modifiersWithKeys, SearchOnWillAttachIMEModifier.identity,
+      SearchOnWillAttachIMEModifier, callback);
     return this;
   }
 }
@@ -16342,6 +16360,19 @@ class TextAreaSelectDetectorConfigModifier extends ModifierWithKey {
   }
 }
 TextAreaSelectDetectorConfigModifier.identity = Symbol('textAreaSelectDetectorConfig');
+class TextAreaOnWillAttachIMEModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillAttachIME(node);
+    } else {
+      getUINativeModule().textArea.setOnWillAttachIME(node, this.value);
+    }
+  }
+}
+TextAreaOnWillAttachIMEModifier.identity = Symbol('textAreaOnWillAttachIME');
 
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -16741,6 +16772,11 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   scrollBarColor(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaScrollBarColorModifier.identity, TextAreaScrollBarColorModifier, value);
+    return this;
+  }
+  onWillAttachIME(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillAttachIMEModifier.identity,
+      TextAreaOnWillAttachIMEModifier, callback);
     return this;
   }
 }
@@ -18367,6 +18403,20 @@ class TextInputSelectDetectorConfigModifier extends ModifierWithKey {
 }
 TextInputSelectDetectorConfigModifier.identity = Symbol('textInputSelectDetectorConfig');
 
+class TextInputOnWillAttachIMEModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillAttachIME(node);
+    } else {
+      getUINativeModule().textInput.setOnWillAttachIME(node, this.value);
+    }
+  }
+}
+TextInputOnWillAttachIMEModifier.identity = Symbol('textInputOnWillAttachIME');
+
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -18815,6 +18865,11 @@ class ArkTextInputComponent extends ArkComponent {
   onSecurityStateChange(callback) {
     modifierWithKey(this._modifiersWithKeys, TextInputOnSecurityStateChangeModifier.identity,
       TextInputOnSecurityStateChangeModifier, callback);
+    return this;
+  }
+  onWillAttachIME(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillAttachIMEModifier.identity,
+      TextInputOnWillAttachIMEModifier, callback);
     return this;
   }
 }
@@ -19623,14 +19678,6 @@ class BlankScreenDetectionConfig {
     return (this.enable === another.enable) && (this.detectionTiming === another.detectionTiming) &&
     (this.detectionMethods === another.detectionMethods) &&
     (this.contentfulNodesCountThreshold === another.contentfulNodesCountThreshold);
-  }
-}
-class BlankScreenDetectionMethod {
-  constructor() {
-    this.DETECTION_CONTENTFUL_NODES_SEVENTEEN = undefined;
-  }
-  isEqual(another) {
-    return (this.DETECTION_CONTENTFUL_NODES_SEVENTEEN === another.DETECTION_CONTENTFUL_NODES_SEVENTEEN);
   }
 }
 class ArkOnVisibleAreaChange {

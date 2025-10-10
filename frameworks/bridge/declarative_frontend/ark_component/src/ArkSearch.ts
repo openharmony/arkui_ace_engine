@@ -878,6 +878,20 @@ interface SearchParam {
   controller?: SearchController
 }
 
+class SearchOnWillAttachIMEModifier extends ModifierWithKey<(client: IMEClient) => void> {
+  constructor(value: (client: IMEClient) => void) {
+    super(value);
+  }
+  static identity = Symbol('searchOnWillAttachIME');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnWillAttachIME(node);
+    } else {
+      getUINativeModule().search.setOnWillAttachIME(node, this.value);
+    }
+  }
+}
+
 class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1131,6 +1145,11 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   enableAutoSpacing(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, SearchEnableAutoSpacingModifier.identity, SearchEnableAutoSpacingModifier, value);
+    return this;
+  }
+  onWillAttachIME(callback: Callback<IMEClient>): this {
+    modifierWithKey(this._modifiersWithKeys, SearchOnWillAttachIMEModifier.identity,
+      SearchOnWillAttachIMEModifier, callback);
     return this;
   }
 }

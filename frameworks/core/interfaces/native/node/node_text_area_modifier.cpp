@@ -2566,6 +2566,24 @@ void ResetTextAreaCustomKeyboard(ArkUINodeHandle node)
     TextFieldModelNG::SetCustomKeyboardWithNode(frameNode, nullptr);
 }
 
+void SetTextAreaOnWillAttachIME(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillAttachIMECallback = reinterpret_cast<IMEAttachCallback*>(callback);
+        TextFieldModelNG::SetOnWillAttachIME(frameNode, std::move(*onWillAttachIMECallback));
+    } else {
+        TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnWillAttachIME(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2767,6 +2785,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .getTextAreaCustomKeyboard = GetTextAreaCustomKeyboard,
         .getTextAreaCustomKeyboardOption = GetTextAreaCustomKeyboardOption,
         .resetTextAreaCustomKeyboard = ResetTextAreaCustomKeyboard,
+        .setTextAreaOnWillAttachIME = SetTextAreaOnWillAttachIME,
+        .resetTextAreaOnWillAttachIME = ResetTextAreaOnWillAttachIME
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

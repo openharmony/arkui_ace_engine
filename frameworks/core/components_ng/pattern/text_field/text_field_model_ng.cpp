@@ -2732,9 +2732,17 @@ void TextFieldModelNG::SetOnSecurityStateChange(FrameNode* frameNode, std::funct
     eventHub->SetOnSecurityStateChange(std::move(func));
 }
 
-void TextFieldModelNG::SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func)
+void TextFieldModelNG::SetOnWillAttachIME(IMEAttachCallback&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillAttachIME(std::move(func));
+}
+
+void TextFieldModelNG::SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillAttachIME(std::move(func));
 }

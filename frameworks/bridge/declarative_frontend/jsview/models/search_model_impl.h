@@ -99,7 +99,7 @@ public:
     void SetEnableHapticFeedback(bool state) override {};
     void SetKeyboardAppearance(KeyboardAppearance value) override {};
     void SetEnableAutoSpacing(bool enabled) override {};
-    void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) override {};
+    void SetOnWillAttachIME(IMEAttachCallback&& func) override {};
 
 private:
     void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

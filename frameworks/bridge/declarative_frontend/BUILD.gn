@@ -760,6 +760,10 @@ template("declarative_js_engine") {
         }
       }
     }
+
+    if (defined(config.enable_standard_input) && config.enable_standard_input) {
+      external_deps += [ "imf:extra_config_napi" ]
+    }
   }
 }
 
@@ -1210,6 +1214,10 @@ template("declarative_js_engine_ng") {
         "image_framework:image",
         "image_framework:image_native",
       ]
+    }
+
+    if (defined(config.enable_standard_input) && config.enable_standard_input) {
+      external_deps += [ "imf:extra_config_napi" ]
     }
   }
 }
