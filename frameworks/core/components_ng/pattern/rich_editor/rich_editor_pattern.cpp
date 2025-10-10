@@ -11555,7 +11555,8 @@ void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info, int textIn
         info.SetOffsetInSpan(0);
         return;
     }
-    if ((*it)->content.back() == '\n' && (*it)->position == textIndex) { // next line/span begin
+    // next line/span begin
+    if (!(*it)->content.empty() && (*it)->content.back() == '\n' && (*it)->position == textIndex) {
         info.SetSpanIndex(std::distance(spans_.begin(), it) + 1);
         info.SetOffsetInSpan(0);
     } else {
