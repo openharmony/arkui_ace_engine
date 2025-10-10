@@ -139,16 +139,42 @@ void ScrollModelStatic::SetScrollBarColor(FrameNode* frameNode, const std::optio
     if (color) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ScrollablePaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER, frameNode);
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto scrollBarTheme = context->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(scrollBarTheme);
+        auto defaultScrollBarColor = scrollBarTheme->GetForegroundColor();
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollableScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        scrollBar->SetForegroundColor(defaultScrollBarColor);
     }
 }
 
 void ScrollModelStatic::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& dimension)
 {
     if (dimension) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth,  dimension.value(), frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ScrollablePaintProperty, ScrollBarWidth, PROPERTY_UPDATE_RENDER, frameNode);
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto scrollBarTheme = context->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(scrollBarTheme);
+        auto defaultScrollBarWidth = scrollBarTheme->GetNormalWidth();
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollableScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        scrollBar->SetActiveWidth(defaultScrollBarWidth);
+        scrollBar->SetTouchWidth(defaultScrollBarWidth);
+        scrollBar->SetInactiveWidth(defaultScrollBarWidth);
+        scrollBar->SetNormalWidth(defaultScrollBarWidth);
+        scrollBar->SetIsUserNormalWidth(false);
     }
 }
 

@@ -152,10 +152,11 @@ void ListModelStatic::SetInitialIndex(FrameNode* frameNode, const std::optional<
     }
 }
 
-void ListModelStatic::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
+void ListModelStatic::SetCachedCount(FrameNode* frameNode, const std::optional<int32_t>& cachedCount)
 {
-    if (cachedCount >= 0) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount, frameNode);
+    if (cachedCount.has_value()) {
+        int32_t count = cachedCount.value() < 0 ? 1 : cachedCount.value();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, frameNode);
     }
@@ -164,8 +165,9 @@ void ListModelStatic::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 void ListModelStatic::SetCachedCount(
         FrameNode* frameNode, const std::optional<int32_t>& count, const std::optional<bool>& show)
 {
-    if (count.has_value() && count.value() >= 0) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count.value(), frameNode);
+    if (count.has_value()) {
+        int32_t value = count.value() < 0 ? 1 : count.value();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, value, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, frameNode);
     }
@@ -447,6 +449,13 @@ void ListModelStatic::SetLanes(FrameNode* frameNode, int32_t lanes)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Lanes, lanes, frameNode);
 }
 
+void ListModelStatic::ResetLanes(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, Lanes, PROPERTY_UPDATE_MEASURE, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMinLength, PROPERTY_UPDATE_MEASURE, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMaxLength, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
 void ListModelStatic::SetLaneConstrain(
     FrameNode* frameNode, const Dimension& laneMinLength, const Dimension& laneMaxLength)
 {
@@ -510,7 +519,7 @@ void ListModelStatic::SetStackFromEnd(FrameNode* frameNode, const std::optional<
     if (isStackFromEnd.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, isStackFromEnd.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, StackFromEnd, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 } // namespace OHOS::Ace::NG
