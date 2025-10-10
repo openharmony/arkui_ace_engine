@@ -1363,7 +1363,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createListNode(context: UIContext, type: 'List'): ListFrameNode {
+    export function createListNode(context: UIContext): ListFrameNode {
         return new ListFrameNode(context, 'List', (node: FrameNode, type: ModifierType): ArkListNode => {
             let arknode = new ArkListNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1374,7 +1374,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createListItemNode(context: UIContext, type: 'ListItem'): ListItemFrameNode {
+    export function createListItemNode(context: UIContext): ListItemFrameNode {
         return new ListItemFrameNode(context, 'ListItem', (node: FrameNode, type: ModifierType): ArkListItemNode => {
             let arknode = new ArkListItemNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1385,7 +1385,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createListItemGroupNode(context: UIContext, type: 'ListItemGroup'): ListItemGroupFrameNode {
+    export function createListItemGroupNode(context: UIContext): ListItemGroupFrameNode {
         return new ListItemGroupFrameNode(context, 'ListItemGroup', (node: FrameNode, type: ModifierType): ArkListItemGroupNode => {
             let arknode = new ArkListItemGroupNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1396,7 +1396,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createScrollNode(context: UIContext, type: 'Scroll'): ScrollFrameNode {
+    export function createScrollNode(context: UIContext): ScrollFrameNode {
         return new ScrollFrameNode(context, 'Scroll', (node: FrameNode, type: ModifierType): ArkScrollNode => {
             let arknode = new ArkScrollNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1407,7 +1407,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createGridNode(context: UIContext, type: 'Grid'): GridFrameNode {
+    export function createGridNode(context: UIContext): GridFrameNode {
         return new GridFrameNode(context, 'Grid', (node: FrameNode, type: ModifierType): ArkGridNode => {
             let arknode = new ArkGridNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1418,7 +1418,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createGridItemNode(context: UIContext, type: 'GridItem'): GridItemFrameNode {
+    export function createGridItemNode(context: UIContext): GridItemFrameNode {
         return new GridItemFrameNode(context, 'GridItem', (node: FrameNode, type: ModifierType): ArkGridItemNode => {
             let arknode = new ArkGridItemNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1429,7 +1429,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createWaterFlowNode(context: UIContext, type: 'WaterFlow'): WaterFlowFrameNode {
+    export function createWaterFlowNode(context: UIContext): WaterFlowFrameNode {
         return new WaterFlowFrameNode(context, 'WaterFlow', (node: FrameNode, type: ModifierType): ArkWaterFlowNode => {
             let arknode = new ArkWaterFlowNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1440,7 +1440,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createFlowItemNode(context: UIContext, type: 'FlowItem'): FlowItemFrameNode {
+    export function createFlowItemNode(context: UIContext): FlowItemFrameNode {
         return new FlowItemFrameNode(context, 'FlowItem', (node: FrameNode, type: ModifierType): ArkFlowItemNode => {
             let arknode = new ArkFlowItemNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);

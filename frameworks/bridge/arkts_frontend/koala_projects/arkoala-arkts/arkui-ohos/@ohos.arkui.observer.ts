@@ -16,6 +16,11 @@ declare namespace uiObserver {
         
         on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
+
+        onScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        offScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        onScrollEvent(callback: Callback<ScrollEventInfo>): void;
+        offScrollEvent(callback: Callback<ScrollEventInfo>): void;
     }
     export function createUIObserver(id: number): UIObserver;
 
@@ -65,6 +70,19 @@ declare namespace uiObserver {
     }
     export interface NavDestinationSwitchObserverOptions {
         navigationId: ResourceStr;
+    }
+    export interface ObserverOptions {
+      id: string
+    }
+    export interface ScrollEventInfo {
+        id: string;
+        uniqueId: number;
+        scrollEvent: ScrollEventType;
+        offset: number;
+    }
+    export enum ScrollEventType {
+      SCROLL_START = 0,
+      SCROLL_STOP = 1
     }
 }
 
