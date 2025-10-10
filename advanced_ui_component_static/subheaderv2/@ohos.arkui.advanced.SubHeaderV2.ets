@@ -787,7 +787,7 @@ export struct SubHeaderV2 {
       Stack() {
         Button({ type: ButtonType.Normal, stateEffect: false } as ButtonOptions) {
           TextArrowLayout() {
-            ForEach([INDEX_ZERO, INDEX_ONE], (item: Int, index: number) => {
+            ForEach([INDEX_ZERO, INDEX_ONE], (item: Int, index: int) => {
               if (index === INDEX_ZERO) {
                 this.TextStyle();
               } else {
@@ -873,7 +873,7 @@ export struct SubHeaderV2 {
   @Builder
   IconGroupStyle(): void {
     Row() {
-      ForEach(this.operationItems as SubHeaderV2OperationItem[], (item: SubHeaderV2OperationItem, index: number) => {
+      ForEach(this.operationItems as SubHeaderV2OperationItem[], (item: SubHeaderV2OperationItem, index: int) => {
         if (index <= INDEX_TWO) {
           SingleIconStyle({
             iconOptions: this.operationItems?.[index.toInt()].content,
@@ -887,7 +887,7 @@ export struct SubHeaderV2 {
         } else {
           // 最大支持3个ICON,此场景不支持
         }
-      }, (item: SubHeaderV2OperationItem, index: number) => {
+      }, (item: SubHeaderV2OperationItem, index: int) => {
         return `${index}`;
       })
     }

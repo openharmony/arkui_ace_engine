@@ -557,7 +557,7 @@ export struct ToolBar {
         .height(1)
         .attributeModifier(this.dividerModifier)
       Row() {
-        ForEach(this.toolBarList as ToolBarOption[], (item: ToolBarOption, index: number) => {
+        ForEach(this.toolBarList as ToolBarOption[], (item: ToolBarOption, index: int) => {
           if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH || index < this.moreIndex) {
             Row() {
               this.TabBuilder(index);
@@ -565,7 +565,7 @@ export struct ToolBar {
             .height('100%')
             .flexShrink(1)
           }
-        }, (item: ToolBarOption, index: number) => {
+        }, (item: ToolBarOption, index: int) => {
           return `${this.getUniqueId()}__${index}}`;
         })
         if (this.isRefreshData && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
