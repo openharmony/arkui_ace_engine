@@ -1177,7 +1177,11 @@ uint32_t ResourceAdapterImplV2::GetResId(const std::string &resTypeName) const
     uint32_t resId = -1;
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, -1);
-    manager->GetResId(resTypeName, resId);
+    auto state = manager->GetResId(resTypeName, resId);
+    if (state != Global::Resource::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get resId by name error, name=%s, errorCode=%{public}d",
+            resTypeName.c_str(), state);
+    }
     return resId;
 }
 } // namespace OHOS::Ace
