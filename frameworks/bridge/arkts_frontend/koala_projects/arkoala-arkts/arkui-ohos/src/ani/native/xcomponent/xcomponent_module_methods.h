@@ -19,9 +19,8 @@
 #include "ani.h"
 
 namespace OHOS::Ace::Ani {
-void SetXComponentOptions(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node, ani_object options);
-void SetNativeXComponentParameters(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node, ani_int type);
-void SetXComponentParameters(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node, ani_object params);
+void SetXComponentControllerCallback(
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peer, ani_object options);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_XCOMPONENT_MODULE_METHODS_H

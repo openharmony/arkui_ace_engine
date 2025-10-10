@@ -203,7 +203,7 @@ void SetControlButtonImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<LocalControlButtonStyle>(value);
     if (!convValue) {
-        // Implement Reset value
+        SideBarContainerModelStatic::ResetControlButtonIconInfo(frameNode);
         return;
     }
     auto style = *convValue;
@@ -310,7 +310,7 @@ void SetAutoHideImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        SideBarContainerModelStatic::SetAutoHide(frameNode, true);
         return;
     }
     SideBarContainerModelStatic::SetAutoHide(frameNode, *convValue);
@@ -357,6 +357,8 @@ void SetMinContentWidthImpl(Ark_NativePointer node,
     auto width = Converter::OptConvertPtr<Dimension>(value);
     if (width.has_value() && width->IsNegative()) {
         width->SetValue(DEFAULT_MIN_CONTENT_LENGTH);
+    } else if (!width.has_value()) {
+        width = Dimension(DEFAULT_MIN_CONTENT_LENGTH, DimensionUnit::VP);
     }
     SideBarContainerModelStatic::SetMinContentWidth(frameNode, width);
 }
