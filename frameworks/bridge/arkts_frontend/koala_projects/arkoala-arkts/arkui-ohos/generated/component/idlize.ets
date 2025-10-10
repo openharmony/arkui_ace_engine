@@ -2651,7 +2651,7 @@ export class ThemeOps {
             if (colorArrayTmpElement instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const colorArrayTmpElementForIdx0  = colorArrayTmpElement as Color
-                thisSerializer.writeInt32(colorArrayTmpElementForIdx0.valueOf())
+                thisSerializer.writeInt32(colorArrayTmpElementForIdx0.getOrdinal())
             } else if (colorArrayTmpElement instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const colorArrayTmpElementForIdx1  = colorArrayTmpElement as number

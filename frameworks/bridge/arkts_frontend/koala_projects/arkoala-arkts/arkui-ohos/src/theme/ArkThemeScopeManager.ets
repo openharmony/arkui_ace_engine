@@ -432,8 +432,6 @@ export class ArkThemeScopeManager {
         const currentThemeScopeId = scope?.getWithThemeId() ?? 0;
         if (currentThemeScopeId !== this.lastThemeScopeId) {
             this.lastThemeScopeId = currentThemeScopeId;
-            // @ts-ignore
-            // WithTheme.setThemeScopeId(currentThemeScopeId);
             ArkUIAniModule._SetThemeScopeId(currentThemeScopeId);
         }
     }
@@ -467,12 +465,7 @@ export class ArkThemeScopeManager {
      */
     private notifyScopeThemeChanged(item: ArkThemeScopeItem, themeWillApply: Theme, isColorModeChanged: boolean) {
         if (item.owner) {
-            const listener = item.owner;
-            if (isColorModeChanged) {
-                // we need to redraw all nodes if developer set new local colorMode
-                // listener.forceRerenderNode(item.elmtId);
-            } else {
-                // take whitelist info from cache item
+            if (!isColorModeChanged) {
                 let isInWhiteList = item.isInWhiteList;
                 if (isInWhiteList === undefined) {
                     // if whitelist info is undefined we have check whitelist directly
@@ -480,15 +473,7 @@ export class ArkThemeScopeManager {
                     // keep result in cache item for the next checks
                     item.isInWhiteList = isInWhiteList;
                 }
-                if (isInWhiteList === true) {
-                    // redraw node only if component within whitelist
-                    // listener.forceRerenderNode(item.elmtId);
-                }
             }
-        }
-        if (item.listener) {
-            const listener = item.listener as ArkCustomComponent;
-            // listener.onWillApplyTheme(themeWillApply);
         }
     }
 
