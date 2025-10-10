@@ -203,7 +203,8 @@ void TabsPattern::FireTabChangeCallback(int32_t preIndex, int32_t nextIndex)
     CHECK_NULL_VOID(swiperNode);
     std::string id = tabsNode->GetInspectorId().value_or("");
     int32_t uniqueId = tabsNode->GetId();
-    auto preTabContent = AceType::DynamicCast<TabContentNode>(swiperNode->GetChildByIndex(preIndex));
+    auto preTabContent = (preIndex < 0) ? nullptr :
+        AceType::DynamicCast<TabContentNode>(swiperNode->GetChildByIndex(static_cast<uint32_t>(preIndex)));
     // The first event cannot be hide state.
     if (preTabContent && lastTabChangeInfo_.has_value() && IsValidFireTabChange(lastTabChangeInfo_, preIndex, false)) {
         std::string preTabContentId = preTabContent->GetInspectorId().value_or("");
@@ -217,7 +218,8 @@ void TabsPattern::FireTabChangeCallback(int32_t preIndex, int32_t nextIndex)
         lastTabChangeInfo_->index = preIndex;
         lastTabChangeInfo_->isShow = false;
     }
-    auto nextTabContent = AceType::DynamicCast<TabContentNode>(swiperNode->GetChildByIndex(nextIndex));
+    auto nextTabContent = (nextIndex < 0) ? nullptr :
+        AceType::DynamicCast<TabContentNode>(swiperNode->GetChildByIndex(static_cast<uint32_t>(nextIndex)));
     if (nextTabContent && IsValidFireTabChange(lastTabChangeInfo_, nextIndex, true)) {
         std::string nextTabContentId = nextTabContent->GetInspectorId().value_or("");
         int32_t nextTabContentUniqueId = nextTabContent->GetId();

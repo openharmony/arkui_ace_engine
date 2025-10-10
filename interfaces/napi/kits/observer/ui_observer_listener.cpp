@@ -764,7 +764,12 @@ void UIObserverListener::OnTabChange(const NG::TabContentInfo& tabContentInfo)
         param1, param2, param3, param4, param5, param6, param7,
     };
     const int32_t paramSize = tabContentInfo.lastIndex.has_value() ? PARAM_SIZE_SEVEN : PARAM_SIZE_SIX;
-    napi_create_object_with_named_properties(env_, &objValue, paramSize, keys, values);
+    status = napi_create_object_with_named_properties(env_, &objValue, paramSize, keys, values);
+    if (status != napi_ok) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER, "Failed to create object with named properties, status: %d", status);
+        napi_close_handle_scope(env_, scope);
+        return;
+    }
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
     napi_close_handle_scope(env_, scope);
