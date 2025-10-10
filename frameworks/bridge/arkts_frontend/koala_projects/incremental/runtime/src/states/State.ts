@@ -86,8 +86,8 @@ export interface ArrayState<Item> extends State<ReadonlyArray<Item>> {
     at(index: int): Item
     get(index: int): Item
     set(index: int, item: Item): void
-    copyWithin(target: number, start: number, end?: number): Array<Item>
-    fill(value: Item, start?: number, end?: number): Array<Item>
+    copyWithin(target: int, start: int, end?: int): Array<Item>
+    fill(value: Item, start?: int, end?: int): Array<Item>
     pop(): Item | undefined
     push(...items: Item[]): int
     reverse(): Array<Item>
@@ -428,11 +428,11 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
         this.mutable[index] = item
     }
 
-    copyWithin(target: number, start: number, end?: number): Array<Item> {
+    copyWithin(target: int, start: int, end?: int): Array<Item> {
         return this.mutable.copyWithin(target, start, end)
     }
 
-    fill(value: Item, start?: number, end?: number): Array<Item> {
+    fill(value: Item, start?: int, end?: int): Array<Item> {
         return this.mutable.fill(value, start, end)
     }
 

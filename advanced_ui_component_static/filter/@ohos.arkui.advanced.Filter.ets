@@ -732,7 +732,7 @@ struct MultiFilterRow {
       Row() {
         Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap }) {
           ForEach((this.filterRow?.options as Array<ResourceStr>)
-            .slice(0, this.twoLineModeItemNumRow.value + 1),
+            .slice(0, this.twoLineModeItemNumRow.value.toInt() + 1),
             (option: ResourceStr, colIndex: int) => {
               if (colIndex > 0) {
                 Text(option)

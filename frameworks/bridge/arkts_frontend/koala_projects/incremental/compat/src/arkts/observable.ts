@@ -313,7 +313,7 @@ class ObservableArray<T> extends Array<T> {
         super.length = length
     }
 
-    override at(index: int): T | undefined {
+    override at(index: int): T {
         this.handler?.onAccess()
         return super.at(index)
     }
@@ -333,13 +333,13 @@ class ObservableArray<T> extends Array<T> {
         super.$_set(index, value)
     }
 
-    override copyWithin(target: int, start: int, end: int): this {
+    override copyWithin(target: int, start: int, end?: int): this {
         this.handler?.onModify()
         super.copyWithin(target, start, end)
         return this
     }
 
-    override fill(value: T, start: int, end: int): this {
+    override fill(value: T, start?: int, end?: int): this {
         const handler = this.handler
         if (handler) {
             handler.onModify()
@@ -493,7 +493,7 @@ class ObservableArray<T> extends Array<T> {
         super.forEach(callbackfn)
     }
 
-    override slice(start: int, end: int): Array<T> {
+    override slice(start?: int, end?: int): Array<T> {
         this.handler?.onAccess()
         return super.slice(start, end)
     }
@@ -518,7 +518,7 @@ class ObservableArray<T> extends Array<T> {
         return super.toSpliced(start, delete, ...items)
     }
 
-    override includes(val: T, fromIndex?: Number): boolean {
+    override includes(val: T, fromIndex?: int): boolean {
         this.handler?.onAccess()
         return super.includes(val, fromIndex)
     }
