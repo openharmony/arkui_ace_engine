@@ -11550,11 +11550,19 @@ Ark_NativePointer impl_PasteButton_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getPasteButtonModifier()->construct(id, flags);
 }
 KOALA_INTEROP_DIRECT_2(PasteButton_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
-void impl_PasteButtonInterface_setPasteButtonOptions(Ark_NativePointer thisPtr) {
+void impl_PasteButtonInterface_setPasteButtonOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        GetNodeModifiers()->getPasteButtonModifier()->setPasteButtonOptions(self);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_PasteButtonOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = PasteButtonOptions_serializer::read(thisDeserializer);
+        }
+        Opt_PasteButtonOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        GetNodeModifiers()->getPasteButtonModifier()->setPasteButtonOptions(self, static_cast<Opt_PasteButtonOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V1(PasteButtonInterface_setPasteButtonOptions, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_V3(PasteButtonInterface_setPasteButtonOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_PasteButtonAttribute_setOnClick(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -13440,11 +13448,19 @@ Ark_NativePointer impl_SaveButton_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getSaveButtonModifier()->construct(id, flags);
 }
 KOALA_INTEROP_DIRECT_2(SaveButton_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
-void impl_SaveButtonInterface_setSaveButtonOptions(Ark_NativePointer thisPtr) {
+void impl_SaveButtonInterface_setSaveButtonOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        GetNodeModifiers()->getSaveButtonModifier()->setSaveButtonOptions(self);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_SaveButtonOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = SaveButtonOptions_serializer::read(thisDeserializer);
+        }
+        Opt_SaveButtonOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        GetNodeModifiers()->getSaveButtonModifier()->setSaveButtonOptions(self, static_cast<Opt_SaveButtonOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V1(SaveButtonInterface_setSaveButtonOptions, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_V3(SaveButtonInterface_setSaveButtonOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SaveButtonAttribute_setOnClick(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

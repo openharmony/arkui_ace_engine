@@ -2555,6 +2555,10 @@ typedef struct Ark_OverlayOptions Ark_OverlayOptions;
 typedef struct Opt_OverlayOptions Opt_OverlayOptions;
 typedef struct Ark_PasswordIcon Ark_PasswordIcon;
 typedef struct Opt_PasswordIcon Opt_PasswordIcon;
+typedef struct Ark_PasteButtonOptions Ark_PasteButtonOptions;
+typedef struct Opt_PasteButtonOptions Opt_PasteButtonOptions;
+typedef struct Ark_SaveButtonOptions Ark_SaveButtonOptions;
+typedef struct Opt_SaveButtonOptions Opt_SaveButtonOptions;
 typedef struct Ark_PasteEvent Ark_PasteEvent;
 typedef struct Opt_PasteEvent Opt_PasteEvent;
 typedef struct Ark_PluginComponentOptions Ark_PluginComponentOptions;
@@ -16398,6 +16402,24 @@ typedef struct Opt_PasswordIcon {
     Ark_Tag tag;
     Ark_PasswordIcon value;
 } Opt_PasswordIcon;
+typedef struct Ark_PasteButtonOptions {
+    Opt_PasteIconStyle icon;
+    Opt_PasteDescription text;
+    Opt_ButtonType buttonType;
+} Ark_PasteButtonOptions;
+typedef struct Opt_PasteButtonOptions {
+    Ark_Tag tag;
+    Ark_PasteButtonOptions value;
+} Opt_PasteButtonOptions;
+typedef struct Ark_SaveButtonOptions {
+    Opt_SaveIconStyle icon;
+    Opt_SaveDescription text;
+    Opt_ButtonType buttonType;
+} Ark_SaveButtonOptions;
+typedef struct Opt_SaveButtonOptions {
+    Ark_Tag tag;
+    Ark_SaveButtonOptions value;
+} Opt_SaveButtonOptions;
 typedef struct Ark_PasteEvent {
     /* kind: Interface */
     Opt_VoidCallback preventDefault;
@@ -21478,7 +21500,8 @@ typedef struct GENERATED_ArkUINodeContainerModifier {
 typedef struct GENERATED_ArkUIPasteButtonModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
-    void (*setPasteButtonOptions)(Ark_NativePointer node);
+    void (*setPasteButtonOptions)(Ark_NativePointer node,
+                                  const Opt_PasteButtonOptions* value);
     void (*setOnClick)(Ark_NativePointer node,
                        const Opt_PasteButtonCallback* value);
 } GENERATED_ArkUIPasteButtonModifier;
@@ -21784,7 +21807,8 @@ typedef struct GENERATED_ArkUIRowSplitModifier {
 typedef struct GENERATED_ArkUISaveButtonModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
-    void (*setSaveButtonOptions)(Ark_NativePointer node);
+    void (*setSaveButtonOptions)(Ark_NativePointer node,
+                                 const Opt_SaveButtonOptions* value);
     void (*setOnClick)(Ark_NativePointer node,
                        const Opt_SaveButtonCallback* value);
     void (*setSetIcon)(Ark_NativePointer node,
