@@ -961,6 +961,8 @@ typedef struct Array_RichEditorSpan Array_RichEditorSpan;
 typedef struct Opt_Array_RichEditorSpan Opt_Array_RichEditorSpan;
 typedef struct Array_RichEditorTextSpanResult Array_RichEditorTextSpanResult;
 typedef struct Opt_Array_RichEditorTextSpanResult Opt_Array_RichEditorTextSpanResult;
+typedef struct Array_router_RouterState Array_router_RouterState;
+typedef struct Opt_Array_router_RouterState Opt_Array_router_RouterState;
 typedef struct Array_RouterItem Array_RouterItem;
 typedef struct Opt_Array_RouterItem Opt_Array_RouterItem;
 typedef struct Array_SafeAreaEdge Array_SafeAreaEdge;
@@ -1023,6 +1025,8 @@ typedef struct Array_Union_String_I32_I64_F64_Resource Array_Union_String_I32_I6
 typedef struct Opt_Array_Union_String_I32_I64_F64_Resource Opt_Array_Union_String_I32_I64_F64_Resource;
 typedef struct AsyncCallback_image_PixelMap_Void AsyncCallback_image_PixelMap_Void;
 typedef struct Opt_AsyncCallback_image_PixelMap_Void Opt_AsyncCallback_image_PixelMap_Void;
+typedef struct AsyncCallback_Void AsyncCallback_Void;
+typedef struct Opt_AsyncCallback_Void Opt_AsyncCallback_Void;
 typedef struct ButtonModifierBuilder ButtonModifierBuilder;
 typedef struct Opt_ButtonModifierBuilder Opt_ButtonModifierBuilder;
 typedef struct ButtonTriggerClickCallback ButtonTriggerClickCallback;
@@ -2127,6 +2131,10 @@ typedef struct Ark_RoundedRectOptions Ark_RoundedRectOptions;
 typedef struct Opt_RoundedRectOptions Opt_RoundedRectOptions;
 typedef struct Ark_RouteMapConfig Ark_RouteMapConfig;
 typedef struct Opt_RouteMapConfig Opt_RouteMapConfig;
+typedef struct Ark_router_RouterOptions Ark_router_RouterOptions;
+typedef struct Opt_router_RouterOptions Opt_router_RouterOptions;
+typedef struct Ark_router_RouterState Ark_router_RouterState;
+typedef struct Opt_router_RouterState Opt_router_RouterState;
 typedef struct RouterItemPeer RouterItemPeer;
 typedef struct RouterItemPeer* Ark_RouterItem;
 typedef struct Opt_RouterItem Opt_RouterItem;
@@ -2409,6 +2417,8 @@ typedef struct Opt_WorkerOptions Opt_WorkerOptions;
 typedef struct XComponentControllerPeer XComponentControllerPeer;
 typedef struct XComponentControllerPeer* Ark_XComponentController;
 typedef struct Opt_XComponentController Opt_XComponentController;
+typedef struct Ark_Void Ark_Void;
+typedef struct Opt_void Opt_void;
 typedef struct Ark_ActionSheetButtonOptions Ark_ActionSheetButtonOptions;
 typedef struct Opt_ActionSheetButtonOptions Opt_ActionSheetButtonOptions;
 typedef struct Ark_ActionSheetOffset Ark_ActionSheetOffset;
@@ -2553,6 +2563,8 @@ typedef struct Ark_Offset Ark_Offset;
 typedef struct Opt_Offset Opt_Offset;
 typedef struct Ark_OverlayOptions Ark_OverlayOptions;
 typedef struct Opt_OverlayOptions Opt_OverlayOptions;
+typedef struct Ark_PageRouterOptions Ark_PageRouterOptions;
+typedef struct Opt_PageRouterOptions Opt_PageRouterOptions;
 typedef struct Ark_PasswordIcon Ark_PasswordIcon;
 typedef struct Opt_PasswordIcon Opt_PasswordIcon;
 typedef struct Ark_PasteEvent Ark_PasteEvent;
@@ -5634,6 +5646,14 @@ typedef struct Opt_RichEditorSpanType {
     Ark_Tag tag;
     Ark_RichEditorSpanType value;
 } Opt_RichEditorSpanType;
+typedef enum Ark_router_RouterMode {
+    ARK_ROUTER_ROUTER_MODE_STANDARD = 0,
+    ARK_ROUTER_ROUTER_MODE_SINGLE = 1,
+} Ark_router_RouterMode;
+typedef struct Opt_router_RouterMode {
+    Ark_Tag tag;
+    Ark_router_RouterMode value;
+} Opt_router_RouterMode;
 typedef enum Ark_RouteType {
     ARK_ROUTE_TYPE_NONE = 0,
     ARK_ROUTE_TYPE_PUSH = 1,
@@ -8753,6 +8773,15 @@ typedef struct Opt_Array_RichEditorTextSpanResult {
     Ark_Tag tag;
     Array_RichEditorTextSpanResult value;
 } Opt_Array_RichEditorTextSpanResult;
+typedef struct Array_router_RouterState {
+    /* kind: ContainerType */
+    Ark_router_RouterState* array;
+    Ark_Int32 length;
+} Array_router_RouterState;
+typedef struct Opt_Array_router_RouterState {
+    Ark_Tag tag;
+    Array_router_RouterState value;
+} Opt_Array_router_RouterState;
 typedef struct Array_RouterItem {
     /* kind: ContainerType */
     Ark_RouterItem* array;
@@ -9033,6 +9062,16 @@ typedef struct Opt_AsyncCallback_image_PixelMap_Void {
     Ark_Tag tag;
     AsyncCallback_image_PixelMap_Void value;
 } Opt_AsyncCallback_image_PixelMap_Void;
+typedef struct AsyncCallback_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Opt_BusinessError err, const Opt_void data);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_BusinessError err, const Opt_void data);
+} AsyncCallback_Void;
+typedef struct Opt_AsyncCallback_Void {
+    Ark_Tag tag;
+    AsyncCallback_Void value;
+} Opt_AsyncCallback_Void;
 typedef struct ButtonModifierBuilder {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14170,6 +14209,27 @@ typedef struct Opt_RouteMapConfig {
     Ark_Tag tag;
     Ark_RouteMapConfig value;
 } Opt_RouteMapConfig;
+typedef struct Ark_router_RouterOptions {
+    /* kind: Interface */
+    Ark_String url;
+    Opt_Object params;
+    Opt_Boolean recoverable;
+} Ark_router_RouterOptions;
+typedef struct Opt_router_RouterOptions {
+    Ark_Tag tag;
+    Ark_router_RouterOptions value;
+} Opt_router_RouterOptions;
+typedef struct Ark_router_RouterState {
+    /* kind: Interface */
+    Ark_Number index;
+    Ark_String name;
+    Ark_String path;
+    Ark_Object params;
+} Ark_router_RouterState;
+typedef struct Opt_router_RouterState {
+    Ark_Tag tag;
+    Ark_router_RouterState value;
+} Opt_router_RouterState;
 typedef struct Opt_RouterItem {
     Ark_Tag tag;
     Ark_RouterItem value;
@@ -15673,6 +15733,13 @@ typedef struct Opt_XComponentController {
     Ark_Tag tag;
     Ark_XComponentController value;
 } Opt_XComponentController;
+typedef struct Ark_Void {
+    void* value;
+} Ark_Void;
+typedef struct Opt_void {
+    Ark_Tag tag;
+    Ark_Void value;
+} Opt_void;
 typedef struct Ark_ActionSheetButtonOptions {
     /* kind: Interface */
     Opt_Boolean enabled;
@@ -16389,6 +16456,15 @@ typedef struct Opt_OverlayOptions {
     Ark_Tag tag;
     Ark_OverlayOptions value;
 } Opt_OverlayOptions;
+typedef struct Ark_PageRouterOptions {
+    /* kind: Interface */
+    Ark_router_RouterOptions options;
+    Opt_router_RouterMode mode;
+} Ark_PageRouterOptions;
+typedef struct Opt_PageRouterOptions {
+    Ark_Tag tag;
+    Ark_PageRouterOptions value;
+} Opt_PageRouterOptions;
 typedef struct Ark_PasswordIcon {
     /* kind: Interface */
     Opt_Union_String_Resource onIconSrc;
@@ -25569,6 +25645,26 @@ typedef struct GENERATED_ArkUIRouterExtenderAccessor {
     void (*clear)();
     void (*showAlertBeforeBackPage)(const Ark_String* message);
     void (*hideAlertBeforeBackPage)();
+    void (*pushNamedRoute0)(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
+                            Ark_NativePointer jsView,
+                            const Ark_PageRouterOptions* options,
+                            const Opt_RouterFinishCallback* finishCallback,
+                            const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*pushNamedRoute1)(Ark_NativePointer jsView,
+                            const Ark_PageRouterOptions* options,
+                            const Opt_RouterFinishCallback* finishCallback,
+                            const Opt_AsyncCallback_Void* callback_);
+    void (*replaceNamedRoute0)(Ark_VMContext vmContext,
+                               Ark_AsyncWorkerPtr asyncWorker,
+                               Ark_NativePointer jsView,
+                               const Ark_PageRouterOptions* options,
+                               const Opt_RouterFinishCallback* finishCallback,
+                               const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*replaceNamedRoute1)(Ark_NativePointer jsView,
+                               const Ark_PageRouterOptions* options,
+                               const Opt_RouterFinishCallback* finishCallback,
+                               const Opt_AsyncCallback_Void* callback_);
 } GENERATED_ArkUIRouterExtenderAccessor;
 
 typedef struct GENERATED_ArkUIScaleSymbolEffectAccessor {

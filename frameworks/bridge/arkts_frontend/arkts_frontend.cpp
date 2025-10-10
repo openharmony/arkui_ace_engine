@@ -384,6 +384,20 @@ void* ArktsFrontend::PushExtender(const std::string& url, const std::string& par
     return pageNode.GetRawPtr();
 }
 
+void ArktsFrontend::PushNamedRouteExtender(
+    const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = options.url;
+    routerPageInfo.params = options.params;
+    routerPageInfo.recoverable = options.recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(options.routerMode);
+    routerPageInfo.errorCallback = options.errorCallback;
+    routerPageInfo.isNamedRouterMode = options.isNamedRouterMode;
+    pageRouterManager_->PushNamedRouteExtender(routerPageInfo, std::move(finishCallback), jsNode);
+}
+
 void* ArktsFrontend::ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
     std::function<void()>&& enterFinishCallback, void* jsNode)
 {
@@ -394,6 +408,20 @@ void* ArktsFrontend::ReplaceExtender(const std::string& url, const std::string& 
     routerPageInfo.recoverable = recoverable;
     auto pageNode = pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(enterFinishCallback), jsNode);
     return pageNode.GetRawPtr();
+}
+
+void ArktsFrontend::ReplaceNamedRouteExtender(
+    const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = options.url;
+    routerPageInfo.params = options.params;
+    routerPageInfo.recoverable = options.recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(options.routerMode);
+    routerPageInfo.errorCallback = options.errorCallback;
+    routerPageInfo.isNamedRouterMode = options.isNamedRouterMode;
+    pageRouterManager_->ReplaceNamedRouteExtender(routerPageInfo, std::move(finishCallback), jsNode);
 }
 
 void* ArktsFrontend::RunPageExtender(const std::string& url, const std::string& params, bool recoverable,

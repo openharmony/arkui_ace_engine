@@ -33,14 +33,17 @@ import {
     IncrementalNode
 } from "@koalaui/runtime"
 import { KPointer, runtimeType, RuntimeType } from "@koalaui/interop"
-import { UserViewBuilder, UserView, EntryPoint } from "../UserView"
+import { UserViewBuilder, UserView, EntryPoint, NavInterface } from "../UserView"
 import { ArkUINativeModule } from "#components"
 import { CommonMethod, CustomBuilder, Dimension, LayoutSafeAreaEdge, LayoutSafeAreaType, Length, NavBarPosition, NavContentInfo, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavigationMenuItem, NavigationMode, NavigationOperation, NavigationTitleMode, NavigationTitleOptions, NavigationToolbarOptions, PixelMap, Resource, ResourceStr, SystemBarStyle, ToolbarItem } from "#generated"
 import { RouteType } from "#generated"
 import { findPeerNode, PeerNode } from "arkui/PeerNode"
 import router from "@ohos/router"
 import { InteropNativeModule, nullptr } from "@koalaui/interop"
-import { RouterExtender } from "#generated"
+import { RouterExtender, PageRouterOptions } from "#generated"
+import { UIContextUtil } from "arkui/base/UIContextUtil"
+import { UIContextImpl } from "arkui/base/UIContextImpl"
+import { AsyncCallback } from "@ohos.base"
 /**
  * THEORY OF OPERATIONS
  *
@@ -169,9 +172,15 @@ export type PageClassNameResolver = (page:string) => string | undefined
 export interface Router {
     push(options: router.RouterOptions): void
 
+    pushNamedRoute(options: router.NamedRouterOptions, mode?: router.RouterMode): Promise<void>
+
+    // pushNamedRoute(options: router.NamedRouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void
+
     replace(options: router.RouterOptions): void
 
-    pushUrl(options: router.RouterOptions): Promise<void>
+    replaceNamedRoute(options: router.NamedRouterOptions, mode?: router.RouterMode): Promise<void>
+
+    // replaceNamedRoute(options: router.NamedRouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void
 
     back(options?: router.RouterOptions): void
 
@@ -193,6 +202,8 @@ export interface Router {
 
     getPreState(): ComputableState<IncrementalNode> | undefined;
 
+    registerNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface): void;
+
     runStartPage(options: router.RouterOptions, builder: UserViewBuilder): void
 
     showAlertBeforeBackPage(options: router.EnableAlertOptions): void
@@ -205,11 +216,17 @@ const CURRENT_ROUTER_TRANSITION = "ohos.arkoala.router.transition"
 
 class RouterImpl implements Router {
     private readonly moduleName: string
+    // list of jsViewNode
     private peerNodeList = new Array<KPointer>
+    // infos of pages in stack
     public readonly visiblePages = arrayState<VisiblePage>()
     private showingPageIndex : int = 0
+    // entry page
     private entryPage: VisiblePage | undefined = undefined;
+    // list of container node to contain jsViewNode
     private rootState: Array<ComputableState<IncrementalNode>> = new Array<ComputableState<IncrementalNode>>()
+    // map of namedRouter
+    private namedRouter: Map<string, EntryPoint> = new Map<string, EntryPoint>
 
     constructor(moduleName: string) {
         this.moduleName = moduleName
@@ -221,8 +238,21 @@ class RouterImpl implements Router {
     }
 
     private getPathInfo(url: string): string {
-        let pathInfo = this.moduleName + "/src/main/ets/" + url + ".js"
-        return pathInfo
+        let index = url.lastIndexOf('/');
+        let result: string = '';
+        if (index !== -1) {
+            result = url.slice(0, index + 1);
+        }
+        return result;
+    }
+
+    private getFileInfo(url: string): string {
+        let index = url.lastIndexOf('/');
+        let result: string = '';
+        if (index !== -1) {
+            result = url.slice(index + 1);
+        }
+        return result;
     }
 
     private RunPage(url: string): EntryPoint | undefined {
@@ -245,6 +275,29 @@ class RouterImpl implements Router {
         return undefined
     }
 
+    private findPageInStack(url: string, isReplace: boolean = false): boolean {
+        let index = this.visiblePages.value.findLastIndex(page => (page.path + page.url) === url);
+        if (index === -1) {
+            return false;
+        }
+        const element = this.visiblePages.splice(index as Int, 1);
+        const stateNode = this.rootState.splice(index, 1);
+        const peerNode = this.peerNodeList.splice(index, 1);
+        if (isReplace) {
+            this.visiblePages.pop();
+            this.rootState.pop();
+            this.peerNodeList.pop();
+        }
+        this.visiblePages.push(element.at(0)!);
+        this.rootState.push(stateNode[0]);
+        this.peerNodeList.push(peerNode[0]);
+        return true;
+    }
+
+    registerNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface): void {
+        this.namedRouter.set(routerName, instance)
+    }
+
     UpdateVisiblePagePeerNode(node: PeerNode, index: int = -1): void {
         InteropNativeModule._NativeLog("AceRouter: router UpdateVisiblePagePeerNode, index: " + index)
         if (index == -1) {
@@ -254,15 +307,11 @@ class RouterImpl implements Router {
             InteropNativeModule._NativeLog("AceRouter: router page size is incorrect")
             return;
         }
-        if (this.visiblePages.length > index && this.peerNodeList.length > index) {
-            this.visiblePages.value[index].updatePeerNode(node)
-            RouterExtender.moveCommonUnderPageNode(node.peer.ptr, this.peerNodeList[index])
-        }
     }
 
     push(options: router.RouterOptions): void {
         if (options.url === '/') {
-            options.url = this.entryPage?.url!;
+            options.url = this.entryPage?.path! + this.entryPage?.url!;
         }
         let className = this.getClassName(options.url);
         let entryObject = this.RunPage(className);
@@ -276,41 +325,198 @@ class RouterImpl implements Router {
                 })
                 manager.frozen = frozen
             })
-            const incNode = stateNode.value
-            const peerNode = findPeerNode(incNode);
+            let peerNode: PeerNode | undefined = undefined;
+            try {
+                const incNode = stateNode.value;
+                peerNode = findPeerNode(incNode);
+            } catch (e: Error) {
+                console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
+                console.log(e.stack);
+            }
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
                 return;
             }
             const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
-            let pagePushTransitionCallback = () => {
-                this.peerNodeList.pop();
-                this.visiblePages.pop();
-                let node = this.rootState.pop();
-                node?.dispose();
-                this.showingPageIndex = this.showingPageIndex - 1;
+            this.peerNodeList.push(jsViewNodePtr);
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
+            let pagePushTransitionCallback = (jsNode: KPointer) => {
+                let index = this.peerNodeList.indexOf(jsNode);
+                if (index !== -1) {
+                    this.peerNodeList.splice(index, 1);
+                    this.visiblePages.splice(index, 1);
+                    this.rootState.splice(index, 1);
+                    this.showingPageIndex = this.showingPageIndex - 1;
+                }
             };
-            let newPage = new VisiblePage(entryObject.entry, options.url, this.getPathInfo(options.url), options.params);
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.url), this.getPathInfo(options.url), options.params);
             this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
             this.showingPageIndex += 1;
-            let pageNode = RouterExtender.push(jsViewNodePtr, options.url, options.recoverable, pagePushTransitionCallback);
-            if (pageNode === nullptr) {
-                InteropNativeModule._NativeLog("AceRouter:push page failed")
-                this.visiblePages.pop();
-                this.rootState.pop()
-                this.showingPageIndex -= 1;
-                return
-            }
-            this.peerNodeList.splice(this.peerNodeList.length, 0, pageNode)
+            RouterExtender.push(jsViewNodePtr, options.url, options.recoverable, pagePushTransitionCallback);
+        }
+    }
 
-            
+    pushNamedRoute(options: router.NamedRouterOptions, mode?: router.RouterMode): Promise<void> {
+        console.log("sxy:: enter pushNamedRoute, routerName: " + options.name);
+        if (mode !== undefined && mode === router.RouterMode.Single && this.findPageInStack(options.name)) {
+            let pagePushTransitionCallback = (jsNode: KPointer) => {
+                let index = this.peerNodeList.indexOf(jsNode);
+                if (index !== -1) {
+                    this.peerNodeList.splice(index, 1);
+                    this.visiblePages.splice(index, 1);
+                    this.rootState.splice(index, 1);
+                    this.showingPageIndex = this.showingPageIndex - 1;
+                }
+            };
+            let pageOptions: PageRouterOptions = { options: {
+                    url: options.name,
+                    params: options.params,
+                    recoverable: options.recoverable
+                },
+                mode: mode
+            };
+            const jsViewNodePtr = this.peerNodeList.at(-1);
+            return RouterExtender.pushNamedRoute(jsViewNodePtr!, pageOptions, pagePushTransitionCallback);
+        }
+        let className = options.name;
+        let entryObject = this.namedRouter.get(className);
+        if (entryObject) {
+            let manager = GlobalStateManager.instance
+            let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
+                const frozen = manager.frozen
+                manager.frozen = true
+                memoEntry<void>(context, 0, () => {
+                    entryObject!.entry()
+                })
+                manager.frozen = frozen
+            })
+            let peerNode: PeerNode | undefined = undefined;
+            try {
+                const incNode = stateNode.value;
+                peerNode = findPeerNode(incNode);
+            }
+            //@ts-ignore
+            catch (e: Error) {
+                console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
+                console.log(e.stack);
+            }
+            if (peerNode === undefined) {
+                InteropNativeModule._NativeLog("AceRouter:create jsView failed");
+                return Promise.reject({
+                    code: 100002,
+                    message: "The uri of router is not exist."});
+            }
+            const jsViewNodePtr = peerNode!.peer.ptr;
+            this.rootState.push(stateNode)
+            this.peerNodeList.push(jsViewNodePtr);
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
+            let pagePushTransitionCallback = (jsNode: KPointer) => {
+                let index = this.peerNodeList.indexOf(jsNode);
+                if (index !== -1) {
+                    this.peerNodeList.splice(index, 1);
+                    this.visiblePages.splice(index, 1);
+                    this.rootState.splice(index, 1);
+                    this.showingPageIndex = this.showingPageIndex - 1;
+                }
+            };
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
+            this.showingPageIndex += 1;
+            let pageOptions: PageRouterOptions = { options: {
+                    url: options.name,
+                    params: options.params,
+                    recoverable: options.recoverable
+                }
+            };
+            return RouterExtender.pushNamedRoute(jsViewNodePtr, pageOptions, pagePushTransitionCallback);
+        }
+        console.log("sxy:: exit pushNamedRoute, routerName: " + options.name);
+        return Promise.reject({
+            code: 100002,
+            message: "The uri of router is not exist."});
+    }
+
+    pushNamedRoute(options: router.NamedRouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void {
+        if (mode !== undefined && mode === router.RouterMode.Single && this.findPageInStack(options.name)) {
+            let pagePushTransitionCallback = (jsNode: KPointer) => {
+                let index = this.peerNodeList.indexOf(jsNode);
+                if (index !== -1) {
+                    this.peerNodeList.splice(index, 1);
+                    this.visiblePages.splice(index, 1);
+                    this.rootState.splice(index, 1);
+                    this.showingPageIndex = this.showingPageIndex - 1;
+                }
+            };
+            let pageOptions: PageRouterOptions = { options: {
+                    url: options.name,
+                    params: options.params,
+                    recoverable: options.recoverable
+                },
+                mode: mode
+            };
+            const jsViewNodePtr = this.peerNodeList.at(-1);
+            RouterExtender.pushNamedRoute(jsViewNodePtr!, pageOptions, pagePushTransitionCallback, callback);
+            return;
+        }
+        let className = options.name;
+        let entryObject = this.namedRouter.get(className);
+        if (entryObject) {
+            let manager = GlobalStateManager.instance
+            let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
+                const frozen = manager.frozen
+                manager.frozen = true
+                memoEntry<void>(context, 0, () => {
+                    entryObject!.entry()
+                })
+                manager.frozen = frozen
+            })
+            let peerNode: PeerNode | undefined = undefined;
+            try {
+                const incNode = stateNode.value;
+                peerNode = findPeerNode(incNode);
+            }
+            //@ts-ignore
+            catch (e: Error) {
+                console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
+                console.log(e.stack);
+            }
+            if (peerNode === undefined) {
+                InteropNativeModule._NativeLog("AceRouter:create jsView failed");
+                return;
+            }
+            const jsViewNodePtr = peerNode!.peer.ptr;
+            this.rootState.push(stateNode)
+            this.peerNodeList.push(jsViewNodePtr);
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
+            let pagePushTransitionCallback = (jsNode: KPointer) => {
+                let index = this.peerNodeList.indexOf(jsNode);
+                if (index !== -1) {
+                    this.peerNodeList.splice(index, 1);
+                    this.visiblePages.splice(index, 1);
+                    this.rootState.splice(index, 1);
+                    this.showingPageIndex = this.showingPageIndex - 1;
+                }
+            };
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
+            this.showingPageIndex += 1;
+            let pageOptions: PageRouterOptions = { options: {
+                    url: options.name,
+                    params: options.params,
+                    recoverable: options.recoverable
+                }
+            };
+            RouterExtender.pushNamedRoute(jsViewNodePtr, pageOptions, pagePushTransitionCallback, callback);
         }
     }
 
     replace(options: router.RouterOptions): void {
         if (options.url === '/') {
-            options.url = this.entryPage?.url!;
+            options.url = this.entryPage?.path! + this.entryPage?.url!;
         }
         let className = this.getClassName(options.url);
         let entryObject = this.RunPage(className);
@@ -325,33 +531,198 @@ class RouterImpl implements Router {
                 manager.frozen = frozen
             })
             
-            const incNode = stateNode.value
-            const peerNode = findPeerNode(incNode);
+            let peerNode: PeerNode | undefined = undefined;
+            try {
+                const incNode = stateNode.value;
+                peerNode = findPeerNode(incNode);
+            } catch (e: Error) {
+                console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
+                console.log(e.stack);
+            }
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
                 return;
             }
             const jsViewNodePtr = peerNode!.peer.ptr
             this.rootState.push(stateNode);
-            let pageEnterTransitionCallback = () => {
-                this.peerNodeList.pop();
-                this.visiblePages.pop();
-                let node = this.rootState.pop();
-                node?.dispose();
-                this.showingPageIndex = this.showingPageIndex - 1;
+            this.peerNodeList.push(jsViewNodePtr)
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
+            let pageEnterTransitionCallback = (jsNode: KPointer) => {
+                let index = this.peerNodeList.indexOf(jsNode);
+                if (index !== -1) {
+                    this.peerNodeList.splice(index, 1);
+                    this.visiblePages.splice(index, 1);
+                    this.rootState.splice(index, 1);
+                    this.showingPageIndex = this.showingPageIndex - 1;
+                }
             };
-            let newPage = new VisiblePage(entryObject.entry, options.url, this.getPathInfo(options.url), options.params)
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.url), this.getPathInfo(options.url), options.params);
             this.visiblePages.push(newPage)
             this.showingPageIndex += 1
-            let pageNode = RouterExtender.replace(jsViewNodePtr, options.url, options.recoverable, pageEnterTransitionCallback)
-            if (pageNode === nullptr) {
-                InteropNativeModule._NativeLog("AceRouter:replace page failed")
-                this.visiblePages.pop();
-                this.rootState.pop()
-                this.showingPageIndex -= 1;
-                return
+            RouterExtender.replace(jsViewNodePtr, options.url, options.recoverable, pageEnterTransitionCallback)
+        }
+    }
+
+    replaceNamedRoute(options: router.NamedRouterOptions, mode?: router.RouterMode): Promise<void> {
+        if (mode !== undefined && mode === router.RouterMode.Single && this.findPageInStack(options.name, true)) {
+            let pagePushTransitionCallback = (jsNode: KPointer) => {
+                let index = this.peerNodeList.indexOf(jsNode);
+                if (index !== -1) {
+                    this.peerNodeList.splice(index, 1);
+                    this.visiblePages.splice(index, 1);
+                    this.rootState.splice(index, 1);
+                    this.showingPageIndex = this.showingPageIndex - 1;
+                }
+            };
+            let pageOptions: PageRouterOptions = { options: {
+                    url: options.name,
+                    params: options.params,
+                    recoverable: options.recoverable
+                },
+                mode: mode
+            };
+            const jsViewNodePtr = this.peerNodeList.at(-1);
+            return RouterExtender.replaceNamedRoute(jsViewNodePtr!, pageOptions, pagePushTransitionCallback);
+        }
+        let className = options.name;
+        let entryObject = this.namedRouter.get(className);
+        if (entryObject) {
+            let manager = GlobalStateManager.instance
+            let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
+                const frozen = manager.frozen
+                manager.frozen = true
+                memoEntry<void>(context, 0, () => {
+                    entryObject!.entry()
+                })
+                manager.frozen = frozen
+            })
+            
+            let peerNode: PeerNode | undefined = undefined;
+            try {
+                const incNode = stateNode.value;
+                peerNode = findPeerNode(incNode);
             }
-            this.peerNodeList.push(pageNode)
+            //@ts-ignore
+            catch (e: Error) {
+                console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
+                console.log(e.stack);
+            }
+            if (peerNode === undefined) {
+                InteropNativeModule._NativeLog("AceRouter:create jsView failed");
+                return Promise.reject({
+                    code: 100002,
+                    message: "The uri of router is not exist."});
+            }
+            const jsViewNodePtr = peerNode!.peer.ptr
+            this.rootState.push(stateNode);
+            this.peerNodeList.push(jsViewNodePtr)
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
+            let pageEnterTransitionCallback = (jsNode: KPointer) => {
+                let index = this.peerNodeList.indexOf(jsNode);
+                if (index !== -1) {
+                    this.peerNodeList.splice(index, 1);
+                    this.visiblePages.splice(index, 1);
+                    this.rootState.splice(index, 1);
+                    this.showingPageIndex = this.showingPageIndex - 1;
+                }
+            };
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            this.visiblePages.push(newPage)
+            this.showingPageIndex += 1
+            let pageOptions: PageRouterOptions = { options: {
+                    url: options.name,
+                    params: options.params,
+                    recoverable: options.recoverable
+                }
+            };
+            if (mode != undefined) {
+                pageOptions.mode = mode;
+            }
+            return RouterExtender.replaceNamedRoute(jsViewNodePtr, pageOptions, pageEnterTransitionCallback)
+        }
+        return Promise.reject({
+            code: 100002,
+            message: "The uri of router is not exist."});
+    }
+
+    replaceNamedRoute(options: router.NamedRouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void {
+        if (mode !== undefined && mode === router.RouterMode.Single && this.findPageInStack(options.name, true)) {
+            let pagePushTransitionCallback = (jsNode: KPointer) => {
+                let index = this.peerNodeList.indexOf(jsNode);
+                if (index !== -1) {
+                    this.peerNodeList.splice(index, 1);
+                    this.visiblePages.splice(index, 1);
+                    this.rootState.splice(index, 1);
+                    this.showingPageIndex = this.showingPageIndex - 1;
+                }
+            };
+            let pageOptions: PageRouterOptions = { options: {
+                    url: options.name,
+                    params: options.params,
+                    recoverable: options.recoverable
+                },
+                mode: mode
+            };
+            const jsViewNodePtr = this.peerNodeList.at(-1);
+            RouterExtender.replaceNamedRoute(jsViewNodePtr!, pageOptions, pagePushTransitionCallback, callback);
+            return;
+        }
+        let className = options.name;
+        let entryObject = this.namedRouter.get(className);
+        if (entryObject) {
+            let manager = GlobalStateManager.instance
+            let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
+                const frozen = manager.frozen
+                manager.frozen = true
+                memoEntry<void>(context, 0, () => {
+                    entryObject!.entry()
+                })
+                manager.frozen = frozen
+            })
+            
+            let peerNode: PeerNode | undefined = undefined;
+            try {
+                const incNode = stateNode.value;
+                peerNode = findPeerNode(incNode);
+            }
+            //@ts-ignore
+            catch (e: Error) {
+                console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
+                console.log(e.stack);
+            }
+            if (peerNode === undefined) {
+                InteropNativeModule._NativeLog("AceRouter:create jsView failed");
+                return;
+            }
+            const jsViewNodePtr = peerNode!.peer.ptr
+            this.rootState.push(stateNode);
+            this.peerNodeList.push(jsViewNodePtr)
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
+            let pageEnterTransitionCallback = (jsNode: KPointer) => {
+                let index = this.peerNodeList.indexOf(jsNode);
+                if (index !== -1) {
+                    this.peerNodeList.splice(index, 1);
+                    this.visiblePages.splice(index, 1);
+                    this.rootState.splice(index, 1);
+                    this.showingPageIndex = this.showingPageIndex - 1;
+                }
+            };
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            this.visiblePages.push(newPage)
+            this.showingPageIndex += 1
+            let pageOptions: PageRouterOptions = { options: {
+                    url: options.name,
+                    params: options.params,
+                    recoverable: options.recoverable
+                }
+            };
+            if (mode != undefined) {
+                pageOptions.mode = mode;
+            }
+            RouterExtender.replaceNamedRoute(jsViewNodePtr, pageOptions, pageEnterTransitionCallback, callback)
         }
     }
 
@@ -360,35 +731,7 @@ class RouterImpl implements Router {
     }
 
     back(options?: router.RouterOptions): void {
-        RouterExtender.back()
-        // if (this.peerNodeList.length <= 1) {
-        //     RouterExtender.back()
-        //     return;
-        // }
-        // if (options === undefined) {
-        //     RouterExtender.back()
-        // } else {
-        //     let url = options.url
-        //     if (url === '/') {
-        //         return;
-        //     }
-        //     let removePages = 1;
-        //     let findPage = false;
-        //     for (let i = this.visiblePages.value.length - 2; i >= 0; i--) {
-        //         if (this.visiblePages.value[i].url === url) {
-        //             findPage = true;
-        //             break;
-        //         }
-        //         removePages++;
-        //     }
-        //     if (findPage) {
-        //         this.showingPageIndex = this.showingPageIndex - removePages
-        //         this.peerNodeList.splice(this.showingPageIndex + 1, removePages)
-        //         RouterExtender.back(options)
-        //         this.visiblePages.splice(this.showingPageIndex + 1, removePages)
-        //         this.rootState.splice(this.showingPageIndex + 1, removePages)
-        //     }
-        // }
+        RouterExtender.back();
     }
 
     clear(): void {
@@ -397,11 +740,7 @@ class RouterImpl implements Router {
             RouterExtender.clear();
             return;
         }
-        this.peerNodeList.splice(0, this.showingPageIndex)
-        this.visiblePages.splice(0, this.showingPageIndex)
-        this.rootState.splice(0, this.showingPageIndex)
         RouterExtender.clear();
-        this.showingPageIndex = 0
     }
 
     getParams(): Object {
@@ -480,22 +819,35 @@ class RouterImpl implements Router {
             manager.frozen = frozen
         })
 
-        const incNode = stateNode.value
-        const peerNode = findPeerNode(incNode);
+        let peerNode: PeerNode | undefined = undefined;
+        try {
+            const incNode = stateNode.value;
+            peerNode = findPeerNode(incNode);
+        }
+        //@ts-ignore
+        catch (e: Error) {
+            console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
+            console.log(e.stack);
+        }
         if (peerNode === undefined) {
             InteropNativeModule._NativeLog("AceRouter:create jsView failed");
             return;
         }
         const jsViewNodePtr = peerNode!.peer.ptr
         this.rootState.push(stateNode)
-        let pagePushTransitionCallback = () => {
-            this.peerNodeList.pop();
-            this.visiblePages.pop();
-            let node = this.rootState.pop();
-            node?.dispose();
-            this.showingPageIndex = this.showingPageIndex - 1;
+        this.peerNodeList.push(jsViewNodePtr);
+        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
+        let pagePushTransitionCallback = (jsNode: KPointer) => {
+            let index = this.peerNodeList.indexOf(jsNode);
+            if (index !== -1) {
+                this.peerNodeList.splice(index, 1);
+                this.visiblePages.splice(index, 1);
+                this.rootState.splice(index, 1);
+                this.showingPageIndex = this.showingPageIndex - 1;
+            }
         };
-        let newPage = new VisiblePage(builder, options.url, this.getPathInfo(options.url), options.params)
+        let newPage = new VisiblePage(builder, this.getFileInfo(options.url), this.getPathInfo(options.url), options.params)
         this.entryPage = newPage;
         this.visiblePages.splice(0, 0, newPage)
         let pageNode = RouterExtender.runPage(jsViewNodePtr, options.url, options.recoverable, pagePushTransitionCallback)

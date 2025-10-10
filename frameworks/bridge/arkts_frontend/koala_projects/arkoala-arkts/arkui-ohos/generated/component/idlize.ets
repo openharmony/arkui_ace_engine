@@ -52,6 +52,9 @@ import { CustomBuilder } from "./builder"
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
 import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
 import { TargetInfo } from "@ohos.arkui.UIContext"
+import { router_RouterOptions_serializer, router_RouterState_serializer } from "./../framework/ohos.router"
+import { AsyncCallback, BusinessError } from "@ohos.base"
+import { default as router } from "@ohos.router"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
@@ -2397,6 +2400,76 @@ export class RouterExtender {
     static hideAlertBeforeBackPage_serialize(): void {
         ArkUIGeneratedNativeModule._RouterExtender_hideAlertBeforeBackPage()
     }
+    static pushNamedRoute0_serialize(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        PageRouterOptions_serializer.write(thisSerializer, options)
+        if (finishCallback !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const finishCallbackTmpValue  = finishCallback!
+            thisSerializer.holdAndWriteCallback(finishCallbackTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._RouterExtender_pushNamedRoute0(jsView, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static pushNamedRoute1_serialize(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: AsyncCallback<void>): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        PageRouterOptions_serializer.write(thisSerializer, options)
+        if (finishCallback !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const finishCallbackTmpValue  = finishCallback!
+            thisSerializer.holdAndWriteCallback(finishCallbackTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RouterExtender_pushNamedRoute1(jsView, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static replaceNamedRoute0_serialize(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        PageRouterOptions_serializer.write(thisSerializer, options)
+        if (finishCallback !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const finishCallbackTmpValue  = finishCallback!
+            thisSerializer.holdAndWriteCallback(finishCallbackTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._RouterExtender_replaceNamedRoute0(jsView, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static replaceNamedRoute1_serialize(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: AsyncCallback<void>): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        PageRouterOptions_serializer.write(thisSerializer, options)
+        if (finishCallback !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const finishCallbackTmpValue  = finishCallback!
+            thisSerializer.holdAndWriteCallback(finishCallbackTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RouterExtender_replaceNamedRoute1(jsView, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     public static push(jsView: KPointer, url: string, recover?: boolean, finishCallback?: RouterFinishCallback): KPointer {
         const jsView_casted = jsView as (KPointer)
         const url_casted = url as (string)
@@ -2445,6 +2518,34 @@ export class RouterExtender {
     }
     public static hideAlertBeforeBackPage(): void {
         RouterExtender.hideAlertBeforeBackPage_serialize()
+        return
+    }
+    public static pushNamedRoute(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback): Promise<void> {
+        const jsView_casted = jsView as (KPointer)
+        const options_casted = options as (PageRouterOptions)
+        const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
+        return RouterExtender.pushNamedRoute0_serialize(jsView_casted, options_casted, finishCallback_casted)
+    }
+    public static pushNamedRoute(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: AsyncCallback<void>): void {
+        const jsView_casted = jsView as (KPointer)
+        const options_casted = options as (PageRouterOptions)
+        const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
+        const callback__casted = callback_ as (AsyncCallback<void> | undefined)
+        RouterExtender.pushNamedRoute1_serialize(jsView_casted, options_casted, finishCallback_casted, callback__casted)
+        return
+    }
+    public static replaceNamedRoute(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback): Promise<void> {
+        const jsView_casted = jsView as (KPointer)
+        const options_casted = options as (PageRouterOptions)
+        const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
+        return RouterExtender.replaceNamedRoute0_serialize(jsView_casted, options_casted, finishCallback_casted)
+    }
+    public static replaceNamedRoute(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: AsyncCallback<void>): void {
+        const jsView_casted = jsView as (KPointer)
+        const options_casted = options as (PageRouterOptions)
+        const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
+        const callback__casted = callback_ as (AsyncCallback<void> | undefined)
+        RouterExtender.replaceNamedRoute1_serialize(jsView_casted, options_casted, finishCallback_casted, callback__casted)
         return
     }
 }
@@ -2666,6 +2767,10 @@ export class ArkCustomLayoutRootPeer extends PeerNode {
     }
 }
 export type RouterFinishCallback = (value: KPointer) => void;
+export interface PageRouterOptions {
+    options: router.RouterOptions;
+    mode?: router.RouterMode;
+}
 export type Callback_Extender_OnProgress = (value: float) => void;
 export type Callback_Extender_OnFinish = () => void;
 export interface DoubleAnimationParam {
@@ -3644,6 +3749,33 @@ export class ComponentInfo_serializer {
         const transformTmpBufValue15 : number = (valueDeserializer.readNumber() as number)
         const transformTmpResult : Matrix4Result = ([transformTmpBufValue0, transformTmpBufValue1, transformTmpBufValue2, transformTmpBufValue3, transformTmpBufValue4, transformTmpBufValue5, transformTmpBufValue6, transformTmpBufValue7, transformTmpBufValue8, transformTmpBufValue9, transformTmpBufValue10, transformTmpBufValue11, transformTmpBufValue12, transformTmpBufValue13, transformTmpBufValue14, transformTmpBufValue15] as Matrix4Result)
         let value : ComponentInfo = ({size: sizeTmpResult, localOffset: localOffsetTmpResult, windowOffset: windowOffsetTmpResult, screenOffset: screenOffsetTmpResult, translate: translateTmpResult, scale: scaleTmpResult, rotate: rotateTmpResult, transform: transformTmpResult} as ComponentInfo)
+        return value
+    }
+}
+export class PageRouterOptions_serializer {
+    public static write(buffer: SerializerBase, value: PageRouterOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForOptions  = value.options
+        router_RouterOptions_serializer.write(valueSerializer, valueHolderForOptions)
+        const valueHolderForMode  = value.mode
+        if (valueHolderForMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForModeTmpValue  = (valueHolderForMode as router.RouterMode)
+            valueSerializer.writeInt32(valueHolderForModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): PageRouterOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const optionsTmpResult : router.RouterOptions = router_RouterOptions_serializer.read(valueDeserializer)
+        const modeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let modeTmpBuf : router.RouterMode | undefined = undefined
+        if ((modeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            modeTmpBuf = router.RouterMode.fromValue(valueDeserializer.readInt32())
+        }
+        const modeTmpResult : router.RouterMode | undefined = modeTmpBuf
+        let value : PageRouterOptions = ({options: optionsTmpResult, mode: modeTmpResult} as PageRouterOptions)
         return value
     }
 }
