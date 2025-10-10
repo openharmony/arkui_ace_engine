@@ -304,8 +304,11 @@ protected:
     WeakPtr<RenderContext> renderContextForMediaPlayerWeakPtr_;
 #endif
 
+    void OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& host);
+
 private:
     void OnAttachToFrameNode() override;
+    void OnAttachToMainTree() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromMainTree() override;
     void OnModifyDone() override;
