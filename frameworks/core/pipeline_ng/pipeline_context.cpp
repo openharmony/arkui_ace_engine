@@ -65,6 +65,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
 #endif
@@ -4934,6 +4935,9 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
             if (overlay) {
                 overlay->ReloadBuilderNodeConfig();
             }
+        }
+        if (fullUpdate && configurationChange.colorModeUpdate) {
+            TokenThemeStorage::GetInstance()->CacheClear();
         }
         if (fullUpdate && configurationChange.IsNeedUpdate()) {
             CHECK_NULL_VOID(pipeline->stageManager_);
