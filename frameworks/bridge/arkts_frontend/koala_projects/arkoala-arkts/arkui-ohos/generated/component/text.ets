@@ -100,7 +100,9 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setTextOptionsAttribute(content?: string | Resource, value?: TextOptions): void {
+        // instructive change begin
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
+        // instructive change end
 
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (content !== undefined) {
