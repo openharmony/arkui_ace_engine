@@ -23,6 +23,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/common/layout/constants.h"
@@ -407,7 +408,15 @@ void TabBarPattern::OnAttachToFrameNode()
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
             SafeAreaExpandOpts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
     }
+    FREE_NODE_CHECK(host, OnAttachToFrameNode);
     InitSurfaceChangedCallback();
+}
+
+void TabBarPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
 void TabBarPattern::SetTabBarFinishCallback()
@@ -476,12 +485,20 @@ void TabBarPattern::InitSurfaceChangedCallback()
 void TabBarPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CHECK_NULL_VOID(node);
+    FREE_NODE_CHECK(node, OnDetachFromFrameNode, node);
     auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
     }
     pipeline->RemoveWindowStateChangedCallback(node->GetId());
+}
+
+void TabBarPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
 void TabBarPattern::BeforeCreateLayoutWrapper()

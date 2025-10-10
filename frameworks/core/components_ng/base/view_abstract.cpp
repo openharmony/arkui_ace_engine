@@ -265,10 +265,12 @@ void ViewAbstract::SetClickEffectLevel(const ClickEffectLevel& level, float scal
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    FREE_NODE_CHECK(frameNode, SetClickEffectLevel, frameNode, level, scaleValue);
     ClickEffectInfo clickEffectInfo;
     clickEffectInfo.level = level;
     clickEffectInfo.scaleNumber = scaleValue;
-    ACE_UPDATE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
 }
 
 void ViewAbstract::ClearWidthOrHeight(bool isWidth)
@@ -6689,6 +6691,7 @@ void ViewAbstract::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
 void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetUseEffect, frameNode, useEffect, effectType);
     auto* pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (useEffect && effectType == EffectType::WINDOW_EFFECT) {
@@ -7742,6 +7745,7 @@ void ViewAbstract::SetBackgroundEffect(
     FrameNode* frameNode, const EffectOption& effectOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetBackgroundEffect, frameNode, effectOption, sysOptions);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -7908,6 +7912,7 @@ void ViewAbstract::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEff
 
 void ViewAbstract::SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue)
 {
+    FREE_NODE_CHECK(frameNode, SetClickEffectLevel, frameNode, level, scaleValue);
     ClickEffectInfo clickEffectInfo;
     clickEffectInfo.level = level;
     clickEffectInfo.scaleNumber = scaleValue;

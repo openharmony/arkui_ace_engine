@@ -622,6 +622,13 @@ public:
     void ResetOnForceMeasure(int32_t index);
     void OnColorModeChange(uint32_t colorMode) override;
 
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
+
     bool NeedShowImageIndicator(int32_t index) const
     {
         auto isImageIndicator = GetDrawableIndicatorFlagByIndex(index);
