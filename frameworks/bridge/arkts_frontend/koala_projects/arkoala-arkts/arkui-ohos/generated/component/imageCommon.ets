@@ -70,7 +70,7 @@ export interface ImageAnalyzerConfig {
 }
 export interface ImageAIOptions {
     types?: Array<ImageAnalyzerType>;
-    aiController?: ImageAnalyzerController;
+    aiController?: ImageAnalyzerController | ESValue;
 }
 export class ImageAnalyzerController_serializer {
     public static write(buffer: SerializerBase, value: ImageAnalyzerController): void {
@@ -102,7 +102,15 @@ export class ImageAIOptions_serializer {
         if (valueHolderForAiController !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForAiControllerTmpValue  = valueHolderForAiController!
-            ImageAnalyzerController_serializer.write(valueSerializer, valueHolderForAiControllerTmpValue)
+            if (valueHolderForAiControllerTmpValue instanceof ImageAnalyzerController) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForAiControllerTmpValueForIdx0  = valueHolderForAiControllerTmpValue as ImageAnalyzerController
+                ImageAnalyzerController_serializer.write(valueSerializer, valueHolderForAiControllerTmpValueForIdx0)
+            } else if (valueHolderForAiControllerTmpValue instanceof object) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForAiControllerTmpValueForIdx1  = valueHolderForAiControllerTmpValue as object
+                valueSerializer.holdAndWriteObject(valueHolderForAiControllerTmpValueForIdx1)
+            }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -121,11 +129,20 @@ export class ImageAIOptions_serializer {
         }
         const typesTmpResult : Array<ImageAnalyzerType> | undefined = typesTmpBuf
         const aiControllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let aiControllerTmpBuf : ImageAnalyzerController | undefined = undefined
+        let aiControllerTmpBuf : ImageAnalyzerController | ESValue | undefined = undefined
         if ((aiControllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            aiControllerTmpBuf = (ImageAnalyzerController_serializer.read(valueDeserializer) as ImageAnalyzerController)
+            const aiControllerTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let aiControllerTmpBuf_ : ImageAnalyzerController | ESValue | undefined
+            if (aiControllerTmpBuf_UnionSelector == (0).toChar()) {
+                aiControllerTmpBuf_ = (ImageAnalyzerController_serializer.read(valueDeserializer) as ImageAnalyzerController)
+            } else if (aiControllerTmpBuf_UnionSelector == (1).toChar()) {
+                aiControllerTmpBuf_ = (valueDeserializer.readObject() as ESValue)
+            } else {
+                throw new Error("One of the branches for aiControllerTmpBuf_ has to be chosen through deserialisation.")
+            }
+            aiControllerTmpBuf = (aiControllerTmpBuf_ as ImageAnalyzerController | ESValue)
         }
-        const aiControllerTmpResult : ImageAnalyzerController | undefined = aiControllerTmpBuf
+        const aiControllerTmpResult : ImageAnalyzerController | ESValue | undefined = aiControllerTmpBuf
         let value : ImageAIOptions = ({types: typesTmpResult, aiController: aiControllerTmpResult} as ImageAIOptions)
         return value
     }
