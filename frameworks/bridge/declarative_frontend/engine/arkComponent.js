@@ -19680,14 +19680,6 @@ class BlankScreenDetectionConfig {
     (this.contentfulNodesCountThreshold === another.contentfulNodesCountThreshold);
   }
 }
-class BlankScreenDetectionMethod {
-  constructor() {
-    this.DETECTION_CONTENTFUL_NODES_SEVENTEEN = undefined;
-  }
-  isEqual(another) {
-    return (this.DETECTION_CONTENTFUL_NODES_SEVENTEEN === another.DETECTION_CONTENTFUL_NODES_SEVENTEEN);
-  }
-}
 class ArkOnVisibleAreaChange {
   constructor(ratios, event) {
     this.ratios = ratios;
