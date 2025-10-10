@@ -30,7 +30,6 @@ public:
     static ArkUINativeModuleValue GetNumberValue(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ClearCache(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetResourceManagerCacheMaxCountForHSP(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue GetResourceId(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

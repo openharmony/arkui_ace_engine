@@ -266,8 +266,6 @@ public:
         return JsiObject(that.GetHandle());
     }
 
-    bool HasGetter(int32_t propertyIndex) const;
-
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiObject)
 };
 
