@@ -637,13 +637,15 @@ class TextAreaShowCounterModifier extends ModifierWithKey<ArkTextFieldShowCounte
     if (reset) {
       getUINativeModule().textArea.resetShowCounter(node);
     } else {
-      getUINativeModule().textArea.setShowCounter(node, this.value.value!, this.value.highlightBorder, this.value.thresholdPercentage);
+      getUINativeModule().textArea.setShowCounter(node, this.value.value!, this.value.highlightBorder, this.value.thresholdPercentage, this.value.counterTextColor, this.value.counterTextOverflowColor);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
       !isBaseOrResourceEqual(this.stageValue.highlightBorder, this.value.highlightBorder) ||
-      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage);
+      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage) ||
+      !isBaseOrResourceEqual(this.stageValue.counterTextColor, this.value.counterTextColor) ||
+      !isBaseOrResourceEqual(this.stageValue.counterTextOverflowColor, this.value.counterTextOverflowColor);
   }
 }
 
@@ -770,8 +772,8 @@ class TextAreaEnterKeyTypeModifier extends ModifierWithKey<number> {
   }
 }
 
-class TextAreaInputFilterModifier extends ModifierWithKey<ArkTextInputFilter> {
-  constructor(value: ArkTextInputFilter) {
+class TextAreaInputFilterModifier extends ModifierWithKey<ArkTextAreaFilter> {
+  constructor(value: ArkTextAreaFilter) {
     super(value);
   }
   static identity = Symbol('textAreaInputFilter');
@@ -888,6 +890,20 @@ class TextAreaTypeModifier extends ModifierWithKey<TextAreaType> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaCustomKeyboardModifier extends ModifierWithKey<ArkCustomKeyboard> {
+  constructor(value: ArkCustomKeyboard) {
+    super(value);
+  }
+  static identity = Symbol('textAreaCustomKeyboard');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetCustomKeyboard(node);
+    } else {
+      getUINativeModule().textArea.setCustomKeyboard(node, this.value.value, this.value.supportAvoidance);
+    }
   }
 }
 
@@ -1445,6 +1461,20 @@ class TextAreaEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextAreaOnWillAttachIMEModifier extends ModifierWithKey<(client: IMEClient) => void> {
+  constructor(value: (client: IMEClient) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnWillAttachIME');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillAttachIME(node);
+    } else {
+      getUINativeModule().textArea.setOnWillAttachIME(node, this.value);
+    }
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1560,6 +1590,8 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     arkValue.value = value;
     arkValue.highlightBorder = options?.highlightBorder;
     arkValue.thresholdPercentage = options?.thresholdPercentage;
+    arkValue.counterTextColor = options?.counterTextColor;
+    arkValue.counterTextOverflowColor = options?.counterTextOverflowColor;
     modifierWithKey(this._modifiersWithKeys, TextAreaShowCounterModifier.identity, TextAreaShowCounterModifier, arkValue);
     return this;
   }
@@ -1590,8 +1622,13 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaFontFeatureModifier.identity, TextAreaFontFeatureModifier, value);
     return this;
   }
-  customKeyboard(value: CustomBuilder): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+  customKeyboard(value: ComponentContent, options?: { supportAvoidance?: boolean }): TextAreaAttribute {
+    let arkValue: ArkCustomKeyboard = new ArkCustomKeyboard();
+    arkValue.value = value;
+    arkValue.supportAvoidance = options?.supportAvoidance;
+    modifierWithKey(this._modifiersWithKeys, TextAreaCustomKeyboardModifier.identity,
+      TextAreaCustomKeyboardModifier, arkValue);
+    return this;
   }
   decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaDecorationModifier.identity, TextAreaDecorationModifier, value);
@@ -1820,6 +1857,11 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   scrollBarColor(value: ColorMetrics): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaScrollBarColorModifier.identity, TextAreaScrollBarColorModifier, value);
+    return this;
+  }
+  onWillAttachIME(callback: Callback<IMEClient>): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillAttachIMEModifier.identity,
+      TextAreaOnWillAttachIMEModifier, callback);
     return this;
   }
 }

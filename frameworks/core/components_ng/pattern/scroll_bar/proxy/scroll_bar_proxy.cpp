@@ -240,8 +240,8 @@ bool ScrollBarProxy::NotifySnapScroll(
         .animationVelocity = -velocity,
         .dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance),
         .snapDirection = SnapDirection::NONE,
-        .fromScrollBar = true,
         .source = SCROLL_FROM_BAR,
+        .fromScrollBar = true,
     };
     return scorllableNode_.startSnapAnimationCallback(snapAnimationOptions);
 }

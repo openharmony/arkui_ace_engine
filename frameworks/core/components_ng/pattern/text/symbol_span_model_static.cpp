@@ -76,4 +76,31 @@ void SymbolSpanModelStatic::SetSymbolEffect(FrameNode* frameNode, const std::opt
     ACE_RESET_NODE_SPAN_PROPERTY(SymbolEffectStrategy, frameNode);
 }
 
+void SymbolSpanModelStatic::SetSymbolType(FrameNode* frameNode, const std::optional<SymbolType>& optValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolType, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_SPAN_PROPERTY(SymbolType, frameNode);
+    }
+}
+
+void SymbolSpanModelStatic::SetFontFamilies(FrameNode* frameNode,
+    const std::optional<std::vector<std::string>>& optValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(FontFamily, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_SPAN_PROPERTY(FontFamily, frameNode);
+    }
+}
+
+void SymbolSpanModelStatic::InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(Content, unicode, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

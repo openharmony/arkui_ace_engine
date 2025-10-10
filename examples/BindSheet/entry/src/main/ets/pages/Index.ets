@@ -35,7 +35,10 @@ struct Index {
           .width('100%').fontSize('20vp')
           .margin({ bottom: 15})
           .onClick(()=>{ router.pushUrl({url: 'pages/showInSubwindow/Index'}) })
-
+        Button('popup sheet avoid keyboard')
+          .width('100%').fontSize('20vp')
+          .margin({ bottom: 15})
+          .onClick(()=>{ router.pushUrl({url: 'pages/popupAvoidKeyboard/Index'}) })
       }
       .width('100%')
     }

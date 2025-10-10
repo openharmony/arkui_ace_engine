@@ -1,0 +1,681 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { ArkUIAniModule } from 'arkui.ani'
+import { KPointer } from '@koalaui/interop';
+import { PeerNode, findPeerNode } from '../PeerNode';
+import { int32 } from '@koalaui/common';
+import { __context, __id, GlobalStateManager, IncrementalNode, memoEntry, memoEntry1, mutableState, MutableState, NodeAttach, StateContext } from '@koalaui/runtime';
+import { ExtendableComponent } from './extendableComponent';
+import { 
+    StateDecoratedVariable, 
+    ProvideDecoratedVariable, 
+    PropDecoratedVariable,
+    LinkDecoratedVariable, 
+    ConsumeDecoratedVariable, 
+    InteropWatchFunc,
+    uiUtils,
+    IObservedObject,
+    OBSERVE,
+    ObserveSingleton,
+    IProvideDecoratedVariable
+} from '../stateManagement';
+import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
+import { UIContextUtil } from 'arkui/base/UIContextUtil';
+import { DetachedRootEntryImpl, UIContextImpl } from 'arkui/base/UIContextImpl';
+import { CustomComponent, CustomDelegate } from './customComponent';
+import { setNeedCreate } from '../ArkComponentRoot';
+import { StateMgmtTool } from '#stateMgmtTool';
+import { ArkContentSlotPeer } from './contentSlot';
+import { ArkCustomComponentRootPeer } from "#generated";
+
+export class CompatiblePeerNode extends PeerNode {
+    protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
+        super(peerPtr, id, name, flags);
+        this.view = view;
+    }
+    public view: ESValue;
+    public static create(_peerPtr: KPointer, view: ESValue, flags: int32 = 0): CompatiblePeerNode {
+        const peerId = PeerNode.nextId();
+        const _peer = new CompatiblePeerNode(_peerPtr, peerId, view, 'ComponentRoot', flags);
+        return _peer;
+    }
+} 
+
+export interface CompatibleComponentInfo {
+    name: string,
+    component: ESValue
+}
+
+
+/** @memo */
+export function compatibleComponent(
+    init: () => CompatibleComponentInfo,
+    update: (instance: ESValue) => void,
+    component?: ExtendableComponent
+): void {
+    NodeAttach<CompatiblePeerNode>((): CompatiblePeerNode => {
+        let global = ESValue.getGlobal();
+        let staticComponent = component;
+        const ptr = ArkUIAniModule._CreateViewStackProcessor();
+        if (staticComponent === undefined) {
+            staticComponent = (ExtendableComponent.current) as (ExtendableComponent | undefined);
+        }
+        if (staticComponent !== undefined) {
+            bindCompatibleProvideCallback(staticComponent!);
+            bindCompatibleLocalStorageCallback(staticComponent!);
+        }
+        const result = init();
+        const dynamicComponent = result.component;
+        if (staticComponent !== undefined) {
+            if (dynamicComponent !== undefined) {
+                bindCompatibleProvideCallback(staticComponent!, dynamicComponent!);
+                bindCompatibleLocalStorageCallback(staticComponent!, dynamicComponent!);
+            }
+            let resetViewPUFindProvideInterop = global.getProperty('resetViewPUFindProvideInterop');
+            resetViewPUFindProvideInterop.invoke();
+            let resetViewPUInterop = global.getProperty('resetViewPUFindLocalStorageInterop');
+            resetViewPUInterop.invoke();
+        }
+        const nodePtr = ArkUIAniModule._PopViewStackProcessor();
+        ArkUIAniModule._DeleteViewStackProcessor(ptr);
+        return CompatiblePeerNode.create(nodePtr, dynamicComponent);
+    }, (node: CompatiblePeerNode) => {
+        update(node.view);
+    });
+}
+
+export function compatibleStaticComponent<T extends CustomComponent<T, T_Options>, T_Options>(
+    factory: () => T,
+    options?: () => T_Options,
+    content?: () => void
+): [() => void, number] {
+    const instantiateImpl = /** @memo */ (): void => {
+        T._instantiateImpl(undefined, factory, options ? options() : undefined, undefined, content);
+    };
+
+    const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+    let manager = uiContext.stateMgr;
+    if (manager === undefined) {
+        manager = GlobalStateManager.instance;
+    }
+
+    const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {
+        const frozen = manager.frozen;
+        manager.frozen = true;
+        ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
+        let r = OBSERVE.renderingComponent;
+        OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
+        const needCreate = setNeedCreate(true);
+        memoEntry<void>(context, 0, instantiateImpl);
+        setNeedCreate(needCreate);
+        OBSERVE.renderingComponent = r;
+        ArkUIAniModule._Common_Restore_InstanceId();
+        manager.frozen = frozen;
+    });
+
+    const inc = node.value;
+    const peerNode = findPeerNode(inc);
+    if (peerNode === undefined) {
+        node.dispose();
+        return [() => {}, 0];
+    }
+    const staticComponent = (peerNode as ArkCustomComponentRootPeer).getComponent();
+    uiContext.getDetachedRootEntryManager().detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node));
+    return [() => {(staticComponent as CustomDelegate<T, T_Options>).__updateStruct(options ? options() : undefined);}, peerNode.getPeerPtr() as number];
+}
+
+function openInterop(): void {
+    const global = ESValue.getGlobal();
+    if (!global) {
+        throw Error('cannot find ArkTS1.1 global.');
+    }
+    const openInterop = global.getProperty('openInterop');
+    openInterop.invoke();
+    registerCreateWatchFuncCallback();
+    registerCreateStaticObservedCallback();
+    registerCompatibleStaticComponentCallback();
+    registerMakeBuilderParameterStaticProxy();
+    registerUpdateInteropExtendableComponent();
+    registerResetInteropExtendableComponent();
+    registerTransferCompatibleBuilderCallback();
+    registertransferCompatibleDynamicBuilderCallback();
+}
+
+function closeInterop(): void {
+    const global = ESValue.getGlobal();
+    const closeInterop = global.getProperty('closeInterop');
+    closeInterop.invoke();
+}
+
+
+export type CompatibleStateChangeCallback<T> = (value: T) => void;
+
+type StateUnion<T> = StateDecoratedVariable<T> | ProvideDecoratedVariable<T> | PropDecoratedVariable<T>
+
+export function bindCompatibleProvideCallback(staticComponent: ExtendableComponent, component?: ESValue): void {
+    const global = ESValue.getGlobal();
+    const createState = global.getProperty('createStateVariable');
+    const setFindProvideInterop = global.getProperty('setFindProvideInterop');
+    const callback = (providedPropName: string): Object | null => {
+        let provide = staticComponent.findProvide<Object>(providedPropName);
+        if ((provide === null)) {
+            return provide;
+        }
+        let state = provide as ProvideDecoratedVariable<Object>;
+        if (state.getProxy() === undefined) {
+            const setSource = ((value: Object): void => {
+                state.set(value);
+            });
+            const fireChange = (): void => {
+                state.fireChange();
+            }
+            const proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
+            state.setProxy(proxy);
+            const setProxyValue = ((value: Object): void => {
+                proxy.invokeMethod('set', ESValue.wrap(value));
+            });
+            state.setProxyValue = setProxyValue;
+            const notifyProxy = (): void => {
+                proxy.invokeMethod('syncPeerHasChanged');
+            };
+            state.addWatch(notifyProxy);
+        }
+        return state.getProxy()!.unwrap()! as Object;
+    }
+    setFindProvideInterop.invoke(callback, component);
+    return;
+}
+
+
+export function bindCompatibleLocalStorageCallback(staticComponent: ExtendableComponent,
+    component?: ESValue): void {
+    const callback = (): Object | null => {
+        let storage = staticComponent.localStorage_;
+        if ((storage === null)) {
+            return storage;
+        }
+        return storage.getProxy()!.unwrap()! as Object;
+    }
+    const global = ESValue.getGlobal();
+    const setFindLocalStorageInterop = global.getProperty('setFindLocalStorageInterop');
+    setFindLocalStorageInterop.invoke(callback, component);
+    return;
+}
+
+
+export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESValue {
+    const global = ESValue.getGlobal();
+    const createState = global.getProperty('createStateVariable');
+    let source = staticState;
+
+    const isLink = staticState instanceof LinkDecoratedVariable;
+    const isConsume = staticState instanceof ConsumeDecoratedVariable;
+
+    if (isLink) {
+        source = (staticState as LinkDecoratedVariable<T>).getSource();
+    } else if (isConsume) {
+        source = (staticState as ConsumeDecoratedVariable<T>).getSource();
+    }
+
+    const isState = source instanceof StateDecoratedVariable;
+    const isProvide = source instanceof ProvideDecoratedVariable;
+    const isProp = source instanceof PropDecoratedVariable;
+
+    if (isState) {
+        let state = source as StateDecoratedVariable<T>;
+        if (state.getProxy() === undefined) {
+            const setSource = ((value: T): void => {
+                state.set(value);
+            });
+            const fireChange = (): void => {
+                state.fireChange();
+            }
+            const proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
+            state.setProxy(proxy);
+            const setProxyValue = ((value: T): void => {
+                proxy.invokeMethod('set', ESValue.wrap(value));
+            });
+            state.setProxyValue = setProxyValue;
+            const notifyProxy = (): void => {
+                proxy.invokeMethod('syncPeerHasChanged');
+            };
+            state.addWatch(notifyProxy);
+        }
+        return state.getProxy()!;
+    } else if (isProvide) {
+        let state = source as ProvideDecoratedVariable<T>;
+        if (state.getProxy() === undefined) {
+            const setSource = ((value: T): void => {
+                state.set(value);
+            });
+            const fireChange = (): void => {
+                state.fireChange();
+            }
+            const proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
+            state.setProxy(proxy);
+            const setProxyValue = ((value: T): void => {
+                proxy.invokeMethod('set', ESValue.wrap(value));
+            });
+            state.setProxyValue = setProxyValue;
+            const notifyProxy = (): void => {
+                proxy.invokeMethod('syncPeerHasChanged');
+            };
+            state.addWatch(notifyProxy);
+        }
+        return state.getProxy()!;
+    } else if (isProp) {
+        let state = source as PropDecoratedVariable<T>;
+        if (state.getProxy() === undefined) {
+            const setSource = ((value: T): void => {
+                state.set(value);
+            });
+            const fireChange = (): void => {
+                state.fireChange();
+            }
+            const proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
+            state.setProxy(proxy);
+            const setProxyValue = ((value: T): void => {
+                proxy.invokeMethod('set', ESValue.wrap(value));
+            });
+            state.setProxyValue = setProxyValue;
+            const notifyProxy = (): void => {
+                proxy.invokeMethod('syncPeerHasChanged');
+            };
+            state.addWatch(notifyProxy);
+        }
+        return state.getProxy()!;
+    }
+    throw Error('Error getStateProxy.');
+}
+
+export function isDynamicObject<T>(value: T): boolean {
+    if (value instanceof ESValue) {
+        return false;
+    }
+    return ESValue.wrap(value).isECMAObject();
+}
+
+export function getRawObject<T>(value: T): T {
+    const global = ESValue.getGlobal();
+    const getRawObjectForInterop = global.getProperty('getRawObjectForInterop');
+    return getRawObjectForInterop.invoke(ESValue.wrap(value)).unwrap()! as Object as T;
+}
+
+export function getObservedObject<T>(value: T, staticState: StateUnion<T>): T {
+    const callback = (): void => {
+        staticState.fireChange();
+    };
+    const global = ESValue.getGlobal();
+    const staticStateBindObservedObject = global.getProperty('staticStateBindObservedObject');
+    return staticStateBindObservedObject.invoke(ESValue.wrap(value), ESValue.wrap(callback)).unwrap()! as Object as T;
+}
+
+export function registerCreateWatchFuncCallback(): void {
+    const createWatchFuncCallback = (callback: WatchFuncType, value: Object): InteropWatchFunc => {
+        const watchFunc = new InteropWatchFunc(callback);
+        const watchFuncId = watchFunc.id();
+        (value as IObservedObject).addWatchSubscriber(watchFuncId);
+        return watchFunc;
+    }
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerCallbackForCreateWatchID');
+    registerCallback.invoke(createWatchFuncCallback);
+}
+
+export function registerCreateStaticObservedCallback(): void {
+    const makeObservedcallback = (value: Object): Object => {
+        return uiUtils.makeObserved(value) as Object;
+    }
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerCallbackForMakeObserved');
+    registerCallback.invoke(makeObservedcallback);
+}
+
+export function registerCompatibleStaticComponentCallback(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerCompatibleStaticComponentCallback');
+    registerCallback.invoke(compatibleStaticComponent);
+}
+
+export function registerMakeBuilderParameterStaticProxy(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerMakeBuilderParameterStaticProxy');
+    registerCallback.invoke(makeBuilderParameterStaticProxy);
+}
+
+export function registerTransferCompatibleBuilderCallback(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerTransferCompatibleBuilderCallback');
+    const callback = (builder: Any) => { return transferCompatibleBuilder(builder).unwrap()!};
+    registerCallback.invoke(callback);
+}
+
+type ESValueOrUndefined  = ESValue | undefined;
+
+/** @memo */
+export function compatibleWrappedBuilder(builder: Any, ...args: FixedArray<ESValue>): void {
+    compatibleWrappedBuilderInternal(builder, ...args);
+}
+
+/** @memo */
+export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArray<ESValueOrUndefined>): void {
+    compatibleComponent((() => {
+        const global = ESValue.getGlobal();
+        const viewStackProcessor = global.getProperty('ViewStackProcessor');
+        const createId = viewStackProcessor.getProperty('AllocateNewElmetIdForNextComponent');
+        const elmtId = createId.invoke();
+
+        let component: ESValue;
+        let createCompatibleNode: ESValue;
+        switch (args.length) {
+            case 0:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFuncVoid');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId);
+                break;
+            case 1:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0]);
+                break;
+            case 2:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc2');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], args[1]);
+                break;
+            case 3:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc3');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                    args[1], args[2]);
+                break;
+            case 4:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc4');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                    args[1], args[2], args[3]);
+                break;
+            case 5:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc5');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                    args[1], args[2], args[3], args[4]);
+                break;
+            case 6:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc6');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5]);
+                break;
+            case 7:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc7');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6]);
+                break;
+            case 8:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc8');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+                break;
+            case 9:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc9');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
+                break;
+            case 10:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc10');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+                break;
+            default:
+                throw Error('Error arguments in Legacy Builder Function');
+        }
+        const viewPUCreate = global.getProperty('viewPUCreate');
+        viewPUCreate.invoke(component);
+        return {
+            component: component,
+            name: 'compatibleWrappedBuilder',
+        };
+    }), ((instance: ESValue) => {
+        if (args.length !== 1) {
+            return;
+        }
+        const param = args[0] as ESValue;
+        if (param.typeOf() !== 'object') {
+            return;
+        }
+        let it = param.keys();
+        const stateParam = instance.getProperty('arg1') as ESValue;
+        while (true) {
+            const result = it.next()
+            if (result.done) {
+                break;
+            }
+            stateParam.setProperty(result.value as ESValue, param.getProperty(result.value as ESValue));
+        }
+        const global = ESValue.getGlobal();
+        const runPendingJobs = global.getProperty('runPendingJobs');
+        runPendingJobs.invoke();
+    }));
+}
+
+export function transferCompatibleBuilder<T extends Function>(
+    /** @memo */
+    builder: T
+): ESValue {
+    const staticBuilderFunc = (...params: FixedArray<Any>): number => {
+        /** @memo */
+        const func = () => {
+            builder.unsafeCall(...[__context(), __id(), ...params]);
+        };
+
+        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let manager = uiContext.stateMgr;
+        if (manager === undefined) {
+            manager = GlobalStateManager.instance;
+        }
+        const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
+            const frozen = manager.frozen;
+            manager.frozen = true;
+            ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
+            let r = OBSERVE.renderingComponent;
+            OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
+            memoEntry<void>(context, 0, func);
+            OBSERVE.renderingComponent = r;
+            ArkUIAniModule._Common_Restore_InstanceId();
+            manager.frozen = frozen;
+        });
+
+        const ptr = node.value.peer.ptr;
+        uiContext.getDetachedRootEntryManager().detachedRoots_.set(ptr, new DetachedRootEntryImpl<PeerNode>(node));
+        return ptr as number;
+    }
+    const createDynamicBuilder = ESValue.getGlobal().getProperty('createDynamicBuilder');
+    const dynamicBuilder = createDynamicBuilder.invoke(ESValue.wrap(staticBuilderFunc));
+    return dynamicBuilder;
+}
+
+
+export function transferCompatibleUpdatableBuilder<T extends Object>(
+    /** @memo */
+    builder: (args: T) => void
+): ESValue {
+    const staticBuilderFunc = (args: T): [number, ()=>void] => {
+        let state: MutableState<int32> | undefined;
+        if (isDynamicObject(args)) {
+            state = updateDynamicObjectForInterop(args);
+        } else {
+            const objType = Type.of(args);
+            let handler = objType instanceof ClassType && (objType as ClassType).getName().endsWith('@Proxy')
+            ? (proxy.Proxy.tryGetHandler(args) as InteropBuilderLiteralProxyHandler<T>) // a very slow call so need to judge proxy first
+            : undefined;
+            if (handler) {
+                state = handler!.state;
+            }
+        }
+        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let manager = uiContext.stateMgr;
+        if (manager === undefined) {
+            manager = GlobalStateManager.instance;
+        }
+        const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
+            const frozen = manager.frozen;
+            manager.frozen = true;
+            ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
+            let r = OBSERVE.renderingComponent;
+            OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
+            memoEntry1<T, void>(context, 0, builder, args);
+            OBSERVE.renderingComponent = r;
+            ArkUIAniModule._Common_Restore_InstanceId();
+            manager.frozen = frozen;
+        });
+        const ptr = node.value.peer.ptr;
+        uiContext.getDetachedRootEntryManager().detachedRoots_.set(ptr, new DetachedRootEntryImpl<PeerNode>(node));
+        return [ptr as number, ()=>{ if (state) { state.value++; } }];
+    }
+    const createDynamicUpdatableBuilder = ESValue.getGlobal().getProperty('createDynamicUpdatableBuilder');
+    const dynamicBuilder = createDynamicUpdatableBuilder.invoke(ESValue.wrap(staticBuilderFunc));
+    return dynamicBuilder;
+}
+
+/**
+ * Creates a proxy for static object literal in the ArkTS 1.1 context
+ * to intercept property getter operations.
+ */
+function makeBuilderParameterStaticProxy<T extends Object>(name: string, value: T, sourceGetter: Any): T {
+    const result = proxy.Proxy.create(value, new InteropBuilderLiteralProxyHandler<T>(sourceGetter));
+    return result;
+}
+
+/**
+ * Empowers the proxy object of a dynamic object with ArkTS 1.2's dependency addition capability
+ * through hook functions, thereby enabling it to refresh the 1.2 UI.
+ */
+function updateDynamicObjectForInterop(args: Any): MutableState<int32> | undefined {
+    let state: MutableState<int32> = StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+    const startHookFunc = ESValue.getGlobal().getProperty('startStaticHook');
+    const result = startHookFunc.invoke(ESValue.wrap(args), ESValue.wrap(()=>{ state.value })).unwrap();
+    if (result === undefined) {
+        return undefined;
+    }
+    return state;
+}
+
+class InteropBuilderLiteralProxyHandler<T extends Object> extends proxy.DefaultProxyHandler<T> {
+    source: ESValue;
+    state: MutableState<int32>;
+    constructor(source: Any) {
+        this.source = ESValue.wrap(source)
+        this.state = StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+    }
+
+    override get(target: T, name: string): Any {
+        const propertyGetter: ESValue = this.source.getPropertySafe(name);
+        if (propertyGetter === ESValue.Undefined) {
+            return super.get(target, name);
+        }
+        this.state.value;
+        return propertyGetter.invoke().unwrap();
+    }
+}
+
+export class InteropExtendableComponent extends ExtendableComponent {
+    dynamicComponent: ESValue;
+    originComponent?: WeakRef<ExtendableComponent>;
+    constructor(dynamicComponent: ESValue) {
+        super();
+        this.dynamicComponent = dynamicComponent;
+        const prev = ExtendableComponent.current;
+        if (prev) {
+            this.originComponent = new WeakRef<ExtendableComponent>(prev! as ExtendableComponent);
+        }
+    }
+
+    /** @memo */ build(): void {}
+
+    override findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | null {
+        const value = this.dynamicComponent.invokeMethod('findProvidePU', ESValue.wrap(providedPropName));
+        if (value.unwrap() == undefined) {
+            return null;
+        }
+        const getProxy = value.invokeMethod('getProxy').unwrap();
+        if (getProxy === undefined && ExtendableComponent.current) {
+            const provideVar = new ProvideDecoratedVariable<T>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, uiUtils.makeObserved(value.invokeMethod('get').unwrap()) as T, false);
+            value.invokeMethod('setProxy', ESValue.wrap(provideVar));
+            const setProxyValue = ((newVal: T): void => {
+                value.invokeMethod('set', ESValue.wrap(newVal));
+            });
+            provideVar.setProxyValue = setProxyValue;
+            const global = ESValue.getGlobal();
+            const setSource = ((newVal: T): void => {
+                provideVar.set(newVal);
+            });
+            const fireChange = (): void => {
+                provideVar.fireChange();
+            }
+            global.getProperty('updateNotifyCallback').invoke(value, ESValue.wrap(fireChange));
+            const notifyProxy = (): void => {
+                value.invokeMethod('syncPeerHasChanged');
+            };
+            provideVar.addWatch(notifyProxy);
+            global.getProperty('updateSetValueCallback').invoke(value, ESValue.wrap(setSource));
+            return provideVar;
+        }
+        else {
+            return getProxy as IProvideDecoratedVariable<T>;
+        }
+    }
+
+    override addProvidedVar<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean | undefined): void {}
+}
+
+export function updateInteropExtendableComponent(dynamicComponent: Object): void {
+    ExtendableComponent.current = new InteropExtendableComponent(ESValue.wrap(dynamicComponent));
+}
+
+export function resetInteropExtendableComponent(): void {
+    const dynamicComponent = ExtendableComponent.current;
+    ExtendableComponent.current = (dynamicComponent as InteropExtendableComponent).originComponent?.deref();
+}
+
+export function registerUpdateInteropExtendableComponent(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerUpdateInteropExtendableComponent');
+    registerCallback.invoke(updateInteropExtendableComponent);
+}
+
+export function registerResetInteropExtendableComponent(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerResetInteropExtendableComponent');
+    registerCallback.invoke(resetInteropExtendableComponent);
+}
+
+function registertransferCompatibleDynamicBuilderCallback(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerTransferCompatibleDynamicBuilderCallback');
+    registerCallback.invoke(transferCompatibleDynamicBuilder);
+}
+
+function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) => void):
+/** @memo */
+(...args: FixedArray<Any>) => void {
+    return (
+        /** @memo */
+        (...args: FixedArray<Any>) => {
+            let argsESValue: FixedArray<ESValueOrUndefined> = new ESValueOrUndefined[args.length]; 
+            for (let i = 0; i < args.length; i++) {
+                if (args[i] instanceof ESValue) {
+                    argsESValue[i] = args[i] as ESValue;
+                }
+                argsESValue[i] = ESValue.wrap(args[i]);
+            }
+            compatibleWrappedBuilderInternal(builder, ...argsESValue);
+        }
+    )
+}

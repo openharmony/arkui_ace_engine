@@ -395,6 +395,93 @@ void ResetTextLineHeight(ArkUINodeHandle node)
     }
 }
 
+void SetTextLineHeightMultiply(
+    ArkUINodeHandle node, ArkUI_Float32 number, void* lineHeightMultiplyRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetLineHeightMultiply(frameNode, number);
+    NodeModifier::ProcessResourceObj<double>(
+        frameNode, "LineHeightMultiply", number, lineHeightMultiplyRawPtr);
+}
+
+double GetTextLineHeightMultiply(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetTextLineHeightMultiply(frameNode);
+}
+
+void ResetTextLineHeightMultiply(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetLineHeightMultiply(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("LineHeightMultiply");
+    }
+}
+
+void SetTextMinimumLineHeight(
+    ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* minimumlineHeightRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMinimumLineHeight(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+    NodeModifier::ProcessResourceObj<CalcDimension>(
+        frameNode, "MinimumLineHeight", Dimension(number, static_cast<DimensionUnit>(unit)), minimumlineHeightRawPtr);
+}
+
+float GetTextMinimumLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetTextMinimumLineHeight(frameNode);
+}
+
+void ResetTextMinimumLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetMinimumLineHeight(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("MinimumLineHeight");
+    }
+}
+
+void SetTextMaximumLineHeight(
+    ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* maximumlineHeightRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMaximumLineHeight(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+    NodeModifier::ProcessResourceObj<CalcDimension>(
+        frameNode, "MaximumLineHeight", Dimension(number, static_cast<DimensionUnit>(unit)), maximumlineHeightRawPtr);
+}
+
+float GetTextMaximumLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetTextMaximumLineHeight(frameNode);
+}
+
+void ResetTextMaximumLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetMaximumLineHeight(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("MaximumLineHeight");
+    }
+}
+
 void SetTextTextOverflow(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1149,6 +1236,56 @@ void ResetTextDataDetectorConfig(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetTextDetectConfig(frameNode, "");
+}
+
+void SetSelectDetectorEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetSelectDetectEnable(frameNode, static_cast<bool>(value));
+}
+
+ArkUI_Int32 GetSelectDetectorEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetSelectDetectEnable(frameNode));
+}
+
+void ResetSelectDetectorEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetSelectDetectEnable(frameNode);
+}
+
+void SetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<TextDataDetectType> typelists;
+    for (ArkUI_Int32 i = 0; i < size; ++i) {
+        typelists.push_back(static_cast<TextDataDetectType>(types[i]));
+    }
+    TextModelNG::SetSelectDetectConfig(frameNode, typelists);
+}
+
+ArkUI_Int32 GetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Int32 (*values)[32])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    std::vector<TextDataDetectType> types = TextModelNG::GetSelectDetectConfig(frameNode);
+    for (uint32_t i = 0; i < types.size(); i++) {
+        (*values)[i] = static_cast<ArkUI_Int32>(types[i]);
+    }
+    return types.size();
+}
+
+void ResetSelectDetectorConfig(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetSelectDetectConfig(frameNode);
 }
 
 ArkUI_CharPtr GetTextFontFeature(ArkUINodeHandle node)
@@ -2104,6 +2241,15 @@ const ArkUITextModifier* GetTextModifier()
         .resetFontSize = ResetFontSize,
         .setTextLineHeight = SetTextLineHeight,
         .resetTextLineHeight = ResetTextLineHeight,
+        .setTextLineHeightMultiply = SetTextLineHeightMultiply,
+        .getTextLineHeightMultiply = GetTextLineHeightMultiply,
+        .resetTextLineHeightMultiply = ResetTextLineHeightMultiply,
+        .setTextMinimumLineHeight = SetTextMinimumLineHeight,
+        .getTextMinimumLineHeight = GetTextMinimumLineHeight,
+        .resetTextMinimumLineHeight = ResetTextMinimumLineHeight,
+        .setTextMaximumLineHeight = SetTextMaximumLineHeight,
+        .getTextMaximumLineHeight = GetTextMaximumLineHeight,
+        .resetTextMaximumLineHeight = ResetTextMaximumLineHeight,
         .setTextOverflow = SetTextTextOverflow,
         .resetTextOverflow = ResetTextTextOverflow,
         .setTextDecoration = SetTextDecoration,
@@ -2179,6 +2325,12 @@ const ArkUITextModifier* GetTextModifier()
         .setTextDataDetectorConfig = SetTextDataDetectorConfig,
         .getTextDataDetectorConfig = GetTextDataDetectorConfig,
         .resetTextDataDetectorConfig = ResetTextDataDetectorConfig,
+        .setSelectDetectorEnable = SetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
+        .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .setSelectDetectorConfig = SetSelectDetectorConfig,
+        .getSelectDetectorConfig = GetSelectDetectorConfig,
+        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextLineSpacing = SetTextLineSpacing,
         .getTextLineSpacing = GetTextLineSpacing,
         .resetTextLineSpacing = ResetTextLineSpacing,
@@ -2265,6 +2417,15 @@ const CJUITextModifier* GetCJUITextModifier()
         .resetFontSize = ResetFontSize,
         .setTextLineHeight = SetTextLineHeight,
         .resetTextLineHeight = ResetTextLineHeight,
+        .setTextLineHeightMultiply = SetTextLineHeightMultiply,
+        .getTextLineHeightMultiply = GetTextLineHeightMultiply,
+        .resetTextLineHeightMultiply = ResetTextLineHeightMultiply,
+        .setTextMinimumLineHeight = SetTextMinimumLineHeight,
+        .getTextMinimumLineHeight = GetTextMinimumLineHeight,
+        .resetTextMinimumLineHeight = ResetTextMinimumLineHeight,
+        .setTextMaximumLineHeight = SetTextMaximumLineHeight,
+        .getTextMaximumLineHeight = GetTextMaximumLineHeight,
+        .resetTextMaximumLineHeight = ResetTextMaximumLineHeight,
         .setTextOverflow = SetTextTextOverflow,
         .resetTextOverflow = ResetTextTextOverflow,
         .setTextDecoration = SetTextDecoration,
@@ -2335,6 +2496,12 @@ const CJUITextModifier* GetCJUITextModifier()
         .setTextDataDetectorConfig = SetTextDataDetectorConfig,
         .getTextDataDetectorConfig = GetTextDataDetectorConfig,
         .resetTextDataDetectorConfig = ResetTextDataDetectorConfig,
+        .setSelectDetectorEnable = SetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
+        .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .setSelectDetectorConfig = SetSelectDetectorConfig,
+        .getSelectDetectorConfig = GetSelectDetectorConfig,
+        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextLineSpacing = SetTextLineSpacing,
         .getTextLineSpacing = GetTextLineSpacing,
         .resetTextLineSpacing = ResetTextLineSpacing,

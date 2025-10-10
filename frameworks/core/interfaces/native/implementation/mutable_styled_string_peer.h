@@ -18,11 +18,8 @@
 #include "styled_string_peer.h"
 
 struct MutableStyledStringPeer : public StyledStringPeer {
+protected:
     ~MutableStyledStringPeer() override = default;
-    static MutableStyledStringPeer *Create(const OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase>& src = nullptr)
-    {
-        auto ret = new MutableStyledStringPeer;
-        ret->spanString = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::MutableSpanString>(src);
-        return ret;
-    }
+    MutableStyledStringPeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

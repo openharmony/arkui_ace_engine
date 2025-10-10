@@ -769,6 +769,16 @@ void TextFieldModelNG::SetShowCounter(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
 }
 
+void TextFieldModelNG::ResetCounterTextColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextColor);
+}
+
+void TextFieldModelNG::ResetCounterTextOverflowColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextOverflowColor);
+}
+
 void TextFieldModelNG::SetCounterType(int32_t value)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
@@ -944,6 +954,17 @@ void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc
     }
 }
 
+void TextFieldModelNG::SetCustomKeyboard(
+    FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    if (pattern) {
+        pattern->SetCustomKeyboard(std::move(buildFunc));
+        pattern->SetCustomKeyboardOption(supportAvoidance);
+    }
+}
+
 void TextFieldModelNG::SetPasswordRules(const std::string& passwordRules)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, passwordRules);
@@ -1090,6 +1111,16 @@ void TextFieldModelNG::SetTextDecorationColor(const Color& value)
 void TextFieldModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, value);
+}
+
+void TextFieldModelNG::SetCounterTextColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextColor, value);
+}
+
+void TextFieldModelNG::SetCounterTextOverflowColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextOverflowColor, value);
 }
 
 void TextFieldModelNG::SetBackBorderRadius()
@@ -1369,6 +1400,66 @@ void TextFieldModelNG::ResetMaxLength(FrameNode* frameNode)
     }
 }
 
+void TextFieldModelNG::SetSelectDetectEnable(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectEnable(value);
+}
+
+void TextFieldModelNG::SetSelectDetectEnable(FrameNode* frameNode, bool value)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectEnable(value);
+}
+
+bool TextFieldModelNG::GetSelectDetectEnable(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetSelectDetectEnable();
+}
+
+void TextFieldModelNG::ResetSelectDetectEnable(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectEnable();
+}
+
+void TextFieldModelNG::SetSelectDetectConfig(std::vector<TextDataDetectType>& types)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectConfig(types);
+}
+
+void TextFieldModelNG::SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectConfig(types);
+}
+
+std::vector<TextDataDetectType> TextFieldModelNG::GetSelectDetectConfig(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, std::vector<TextDataDetectType>());
+    return pattern->GetSelectDetectConfig();
+}
+
+void TextFieldModelNG::ResetSelectDetectConfig(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectConfig();
+}
+
 void TextFieldModelNG::SetCaretStyle(FrameNode* frameNode, const CaretStyle& value)
 {
     if (value.caretWidth.has_value()) {
@@ -1518,6 +1609,30 @@ void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value, frameNode);
+}
+
+void TextFieldModelNG::SetCounterTextColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextColor, value, frameNode);
+}
+
+void TextFieldModelNG::SetCounterTextOverflowColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextOverflowColor, value, frameNode);
+}
+
+void TextFieldModelNG::ResetCounterTextColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextColor, frameNode);
+}
+
+void TextFieldModelNG::ResetCounterTextOverflowColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextOverflowColor, frameNode);
 }
 
 void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::u16string& errorText, bool visible)
@@ -1855,6 +1970,21 @@ bool TextFieldModelNG::GetShowCounter(FrameNode* frameNode)
     return static_cast<int>(value);
 }
 
+Color TextFieldModelNG::GetCounterTextColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, CounterTextColor, value, frameNode, value);
+    return value;
+}
+
+Color TextFieldModelNG::GetCounterTextOverflowColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, CounterTextOverflowColor, value, frameNode, value);
+    return value;
+}
+
 uint32_t TextFieldModelNG::GetMinLines(FrameNode* frameNode)
 {
     uint32_t value = false;
@@ -2054,7 +2184,18 @@ void TextFieldModelNG::SetOnEditChanged(FrameNode* frameNode, std::function<void
     eventHub->SetOnEditChanged(std::move(func));
 }
 
-void TextFieldModelNG::SetCustomKeyboard(FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance)
+void TextFieldModelNG::SetCustomKeyboardWithNode(FrameNode* customKeyboard, bool supportAvoidance)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    if (pattern) {
+        pattern->SetCustomKeyboardWithNode(AceType::Claim<UINode>(customKeyboard));
+        pattern->SetCustomKeyboardOption(supportAvoidance);
+    }
+}
+
+void TextFieldModelNG::SetCustomKeyboardWithNode(FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
@@ -2396,6 +2537,7 @@ void TextFieldModelNG::SetOnWillInsertValueEvent(FrameNode* frameNode,
     std::function<bool(const InsertValueInfo&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetOnWillInsertValueEvent, frameNode, std::move(func));
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillInsertValueEvent(std::move(func));
@@ -2590,9 +2732,17 @@ void TextFieldModelNG::SetOnSecurityStateChange(FrameNode* frameNode, std::funct
     eventHub->SetOnSecurityStateChange(std::move(func));
 }
 
-void TextFieldModelNG::SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func)
+void TextFieldModelNG::SetOnWillAttachIME(IMEAttachCallback&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillAttachIME(std::move(func));
+}
+
+void TextFieldModelNG::SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillAttachIME(std::move(func));
 }

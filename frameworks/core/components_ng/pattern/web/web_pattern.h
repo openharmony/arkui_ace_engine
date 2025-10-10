@@ -63,6 +63,7 @@
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ime/text_input_client.h"
+#include "core/event/statusbar/statusbar_click_listener.h"
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
@@ -134,6 +135,7 @@ using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS:
 class WebPattern : public NestableScrollContainer,
                    public TextBase,
                    public Magnifier,
+                   public virtual StatusBarClickListener,
                    public Recorder::WebEventRecorder {
     DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase, Magnifier, Recorder::WebEventRecorder);
 
@@ -517,6 +519,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ImageAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MixedMode, MixedModeContent);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ZoomAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ZoomControlAccess, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GeolocationAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, UserAgent, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CacheMode, WebCacheMode);
@@ -576,6 +579,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GestureFocusMode, GestureFocusMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, RotateRenderEffect, WebRotateEffect);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceEnableZoom, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackToTop, bool);
 
     bool IsFocus() const
     {
@@ -940,6 +944,8 @@ public:
     void GetHandleInfo(SelectOverlayInfo& infoHandle);
     void HandleOnAIWrite();
     void WindowMaximize(WebWindowMaximizeReason reason);
+    void OnStatusBarClick() override;
+    void OnBackToTopUpdate(bool isBackToTop);
 
 protected:
     void ModifyWebSrc(const std::string& webSrc)
@@ -1010,6 +1016,7 @@ private:
     void OnImageAccessEnabledUpdate(bool value);
     void OnMixedModeUpdate(MixedModeContent value);
     void OnZoomAccessEnabledUpdate(bool value);
+    void OnZoomControlAccessUpdate(bool zoomControlAccess);
     void OnGeolocationAccessEnabledUpdate(bool value);
     void OnUserAgentUpdate(const std::string& value);
     void OnCacheModeUpdate(WebCacheMode value);
@@ -1285,6 +1292,8 @@ private:
     OnWebNativeMessageConnectCallback onWebNativeMessageConnectCallback_ = nullptr;
     OnWebNativeMessageDisConnectCallback onWebNativeMessageDisConnectCallback_ = nullptr;
     RenderMode renderMode_;
+    bool backToTop_ = true;
+    bool isBackToTopRunning_ = false;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;

@@ -32,14 +32,14 @@ class TextList {
 struct IndexPage {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(1, 'ScrollableMainPage', 'pages/scrollable/ScrollableMainPage'),
-    new TextList(2, 'TabsMainPage', 'pages/Tabs/TabsMainPage'),
-    new TextList(3, 'WaterFlowMainPage', 'pages/waterflow/WaterFlowMainPage'),
-    new TextList(4, 'SwiperMainPage', 'pages/Swiper/SwiperMainPage'),
-    new TextList(5, 'ListMainPage', 'pages/List/ListMainPage'),
+    new TextList(1, 'Scrollable', 'pages/scrollable/ScrollableMainPage'),
+    new TextList(2, 'Tabs', 'pages/Tabs/TabsMainPage'),
+    new TextList(3, 'WaterFlow', 'pages/waterflow/WaterFlowMainPage'),
+    new TextList(4, 'Swiper', 'pages/Swiper/SwiperMainPage'),
+    new TextList(5, 'List', 'pages/List/ListMainPage'),
     new TextList(6, 'AlphabetIndexer', 'pages/alphabetIndexer/AlphabetIndexerMainPage'),
     new TextList(7, 'Refresh', 'pages/refresh/RefreshMainPage'),
-    new TextList(8, 'GridMainPage', 'pages/grid/GridMainPage'),
+    new TextList(8, 'Grid', 'pages/grid/GridMainPage'),
     new TextList(9, 'Scroll', 'pages/Scroll/ScrollMainPage'),
     new TextList(10, 'LazyVGridLayout', 'pages/LazyVGridLayout/LazyVGridLayoutMainPage'),
   ]

@@ -296,8 +296,8 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_slider_bridge.cpp",
       "nativeModule/arkts_native_span_bridge.cpp",
       "nativeModule/arkts_native_stack_bridge.cpp",
-      "nativeModule/arkts_native_stepper_item_bridge.cpp",
       "nativeModule/arkts_native_stepper_bridge.cpp",
+      "nativeModule/arkts_native_stepper_item_bridge.cpp",
       "nativeModule/arkts_native_swiper_bridge.cpp",
       "nativeModule/arkts_native_symbol_glyph_bridge.cpp",
       "nativeModule/arkts_native_symbol_span_bridge.cpp",
@@ -321,9 +321,9 @@ template("declarative_js_engine_ark") {
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      sources += ["nativeModule/arkts_native_web_bridge.cpp",]
+      sources += [ "nativeModule/arkts_native_web_bridge.cpp" ]
     }
-    
+
     if (!ace_engine_feature_wearable) {
       sources += [ "nativeModule/arkts_native_folder_stack_bridge.cpp" ]
     }
@@ -340,7 +340,7 @@ template("declarative_js_engine_ark") {
     if (!build_ohos_sdk && !is_arkui_x) {
       external_deps += [
         "ets_utils:console",
-        "ets_utils:timer"
+        "ets_utils:timer",
       ]
     }
     if (use_hilog) {
@@ -376,8 +376,8 @@ template("declarative_js_engine_ark") {
       if (is_ohos_standard_system) {
         defines += [ "OHOS_STANDARD_FORM_SUPPORT" ]
         external_deps += [
-          "ability_base:want",
           "ability_base:extractortool",
+          "ability_base:want",
           "ability_runtime:app_manager",
           "bundle_framework:appexecfwk_core",
           "form_fwk:fmskit_native",
@@ -409,8 +409,7 @@ template("declarative_js_engine_ark") {
       }
     }
 
-    if (defined(config.window_scene_support) &&
-        config.window_scene_support) {
+    if (defined(config.window_scene_support) && config.window_scene_support) {
       sources += [ "nativeModule/arkts_native_embedded_component_bridge.cpp" ]
     }
 

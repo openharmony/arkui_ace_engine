@@ -57,7 +57,7 @@ constexpr uint64_t MIN_DIFF_VSYNC = 1000 * 1000; // min is 1ms
 constexpr float DEFAULT_THRESHOLD = 0.75f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
 constexpr float DEFAULT_SPRING_DAMP = 0.99f;
-constexpr float SLOW_SPRING_RESPONSE = 0.5f;
+constexpr float SLOW_SPRING_RESPONSE = 0.7f;
 constexpr float SLOW_SPRING_DAMP = 2.5f;
 constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; // max 100 ms
 constexpr float START_FRICTION_VELOCITY_THRESHOLD = 240.0f;
@@ -800,7 +800,7 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar)
                          "lastSnapDirection:%d, id:%d, tag:%s",
             snapDelta, snapDirection, snapDirection_, nodeId_, nodeTag_.c_str());
         SnapAnimationOptions snapAnimationOptions = { .snapDelta = snapDelta, .animationVelocity = currentVelocity_,
-            .snapDirection = snapDirection, .fromScrollBar = fromScrollBar, .source = SCROLL_FROM_AXIS };
+            .snapDirection = snapDirection, .source = SCROLL_FROM_AXIS, .fromScrollBar = fromScrollBar };
         startSnapAnimationCallback_(snapAnimationOptions);
         auto isNeedAdjustDirection = (snapType == SnapType::SCROLL_SNAP && snapDirection == SnapDirection::NONE);
         if (isNeedAdjustDirection) {
@@ -1709,7 +1709,13 @@ void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
         MarkNeedFlushAnimationStartTime();
         AnimationOption option;
         option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
-        auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
+        float response = DEFAULT_SPRING_RESPONSE;
+        float damp = DEFAULT_SPRING_DAMP;
+        if (GetSnapType() == SnapType::LIST_SNAP && listSnapSpeed_ == ScrollSnapAnimationSpeed::SLOW) {
+            response = SLOW_SPRING_RESPONSE;
+            damp = SLOW_SPRING_DAMP;
+        }
+        auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, damp, 0.0f);
         option.SetCurve(curve);
         if (!snapOffsetProperty_) {
             GetSnapProperty();

@@ -307,6 +307,13 @@ typedef struct ArkUI_PositionEdges ArkUI_PositionEdges;
 typedef struct ArkUI_PixelRoundPolicy ArkUI_PixelRoundPolicy;
 
 /**
+ * @brief Defines the textField's counter configuration.
+ *
+ * @since 22
+ */
+typedef struct ArkUI_ShowCounterConfig ArkUI_ShowCounterConfig;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -361,6 +368,13 @@ typedef enum {
     /** The image is repeatedly drawn along both axes. */
     ARKUI_IMAGE_REPEAT_XY,
 } ArkUI_ImageRepeat;
+
+/**
+ * @brief Defines the selected text recognition configuration.
+ *
+ * @since 22
+ */
+typedef struct ArkUI_SelectedDataDetectorConfig ArkUI_SelectedDataDetectorConfig;
 
 /**
  * @brief Enumerates the font styles.
@@ -5716,6 +5730,107 @@ void OH_ArkUI_PixelRoundPolicy_SetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_Pixe
  * @since 21
  */
 int32_t OH_ArkUI_PixelRoundPolicy_GetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value);
+
+/**
+ * @brief Creates a configuration object for textField's counter.
+ *
+ * @return A pointer to the configuration object.
+ * @since 22
+ */
+ArkUI_ShowCounterConfig* OH_ArkUI_ShowCounterConfig_Create();
+
+/**
+ * @brief Disposes a configuration object for textField's counter.
+ *
+ * @param config Pointer to the configuration object to be disposed.
+ * @since 22
+ */
+void OH_ArkUI_ShowCounterConfig_Dispose(ArkUI_ShowCounterConfig* config);
+
+/**
+ * @brief Sets the color of counter when textField hasn't wanted to exceed the maximum character count.
+ *
+ * @param config Pointer to the configuration object to be modified.
+ * @param color The color of the counter when textField hasn't wanted to exceed
+ * the maximum character count, in 0xARGB format.
+ * @since 22
+ */
+void OH_ArkUI_ShowCounterConfig_SetCounterTextColor(ArkUI_ShowCounterConfig* config, uint32_t color);
+
+/**
+ * @brief Sets the color of counter when textField wants to exceed the maximum character count.
+ *
+ * @param config Pointer to the configuration object to be modified.
+ * @param color The color of the counter when textField wants to exceed
+ * the maximum character count, in 0xARGB format.
+ * @since 22
+ */
+void OH_ArkUI_ShowCounterConfig_SetCounterTextOverflowColor(ArkUI_ShowCounterConfig* config, uint32_t color);
+
+/**
+ * @brief Gets the color of counter when textField hasn't wanted to exceed the maximum character count.
+ *
+ * @param config Pointer to the configuration object.
+ * @return Returns the color of the counter when textField hasn't wanted to exceed
+ * the maximum character count, in 0xARGB format.
+ * @since 22
+ */
+uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextColor(ArkUI_ShowCounterConfig* config);
+
+/**
+ * @brief Gets the color of counter when textField wants to exceed the maximum character count.
+ *
+ * @param config Pointer to the configuration object.
+ * @return Returns the color of the counter when textField wants to exceed
+ * the maximum character count, in 0xARGB format.
+ * @since 22
+ */
+uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(ArkUI_ShowCounterConfig* config);
+
+/**
+ * @brief Creates a configuration object for selected text recognition.
+ *
+ * @return A pointer to the configuration object.
+ * @since 22
+ */
+ArkUI_SelectedDataDetectorConfig* OH_ArkUI_SelectedDataDetectorConfig_Create();
+
+/**
+ * @brief Disposes a configuration object for selected text recognition.
+ *
+ * @param config Pointer to the configuration object to be disposed.
+ * @since 22
+ */
+void OH_ArkUI_SelectedDataDetectorConfig_Dispose(ArkUI_SelectedDataDetectorConfig* config);
+
+/**
+ * @brief Sets the recognition types of a configuration object for selected text recognition.
+ *
+ * @param config Pointer to the configuration object to be modified.
+ * @param types Array of entity types, parameter type is {@link ArkUI_TextDataDetectorType}.
+ * @param length Length of the types array.
+ * @since 22
+ */
+void OH_ArkUI_SelectedDataDetectorConfig_SetTypes(
+    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length);
+
+/**
+ * @brief Gets the recognition types of a configuration object for selected text recognition.
+ *
+ * @param config Pointer to the configuration object.
+ * @param types Array of entity types to take the result, parameter type is {@link ArkUI_TextDataDetectorType}.
+ * @param length Length of the types array.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
+ *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the provided buffer size is insufficient.
+ *         If an error code is returned, it may be due to a failure in parameter validation;
+ *         the parameter must not be null.
+ * @since 22
+ */
+int32_t OH_ArkUI_SelectedDataDetectorConfig_GetTypes(
+    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length);
+
 #ifdef __cplusplus
 };
 #endif

@@ -20,8 +20,32 @@
 #include "load.h"
 #include "log/log.h"
 #include "pixel_map_taihe_ani.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 
 namespace OHOS::Ace::Ani {
+
+ani_object ExtractorsFromImagePixelMapPtr(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_long pointer)
+{
+    auto* pixelMapPeer = reinterpret_cast<image_PixelMapPeer*>(pointer);
+    CHECK_NULL_RETURN(pixelMapPeer, nullptr);
+    CHECK_NULL_RETURN(pixelMapPeer->pixelMap, nullptr);
+    auto mediaPixelMap = pixelMapPeer->pixelMap->GetPixelMapSharedPtr();
+    CHECK_NULL_RETURN(mediaPixelMap, nullptr);
+    return Media::PixelMapTaiheAni::CreateEtsPixelMap(env, mediaPixelMap);
+}
+
+ani_long ExtractorsToImagePixelMapPtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object pixelMapObj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return 0;
+    }
+    auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapObj);
+    auto pixelMapPtr = reinterpret_cast<void*>(&pixelMap);
+    auto imagePixelMapPeer = modifier->getImageAniModifier()->getPixelMapPeer(pixelMapPtr);
+    return reinterpret_cast<ani_long>(imagePixelMapPeer);
+}
+
 void ImageResizableOptions(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object latticeAni)
 {
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
@@ -103,5 +127,29 @@ void ImageDrawingColorFilter(ani_env* env, [[maybe_unused]] ani_object obj, ani_
         return;
     }
     modifier->getImageAniModifier()->setDrawingColorFilter(arkNode, &drawingColorFilter);
+}
+
+ani_long Image_ColorFilter_TransferStatic(ani_env* env, [[maybe_unused]] ani_object obj, ani_long colorFilter)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (modifier == nullptr || colorFilter == 0) {
+        return 0;
+    }
+    auto colorFilterPeer = modifier->getImageAniModifier()->createColorFilterPeer(colorFilter);
+    if (colorFilterPeer == 0) {
+        return 0;
+    }
+    auto pointer = reinterpret_cast<ani_long>(colorFilterPeer);
+    return pointer;
+}
+
+ani_long Image_ColorFilter_TransferDynamic(ani_env* env, [[maybe_unused]] ani_object obj, ani_long colorFilterPeer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (modifier == nullptr || colorFilterPeer == 0) {
+        return 0;
+    }
+    auto pointer = modifier->getImageAniModifier()->getColorFilter(colorFilterPeer);
+    return pointer;
 }
 } // namespace OHOS::Ace::Ani

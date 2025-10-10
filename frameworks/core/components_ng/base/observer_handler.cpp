@@ -473,6 +473,13 @@ void UIObserverHandler::NotifyTextChangeEvent(const TextChangeEventInfo& info)
     textChangeEventHandleFunc_(info);
 }
 
+void UIObserverHandler::NotifyWinSizeLayoutBreakpointChangeFunc(
+    int32_t instanceId, const WindowSizeBreakpoint& breakpoint)
+{
+    CHECK_NULL_VOID(winSizeLayoutBreakpointHandleFunc_);
+    winSizeLayoutBreakpointHandleFunc_(instanceId, breakpoint);
+}
+
 void UIObserverHandler::SetHandleNavigationChangeFunc(NavigationHandleFunc func)
 {
     navigationHandleFunc_ = func;
@@ -501,6 +508,11 @@ void UIObserverHandler::SetHandleRouterPageChangeFuncForAni(RouterPageHandleFunc
 void UIObserverHandler::SetHandleDensityChangeFunc(DensityHandleFunc func)
 {
     densityHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetWinSizeLayoutBreakpointChangeFunc(WinSizeLayoutBreakpointHandleFunc func)
+{
+    winSizeLayoutBreakpointHandleFunc_ = std::move(func);
 }
 
 void UIObserverHandler::SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func)

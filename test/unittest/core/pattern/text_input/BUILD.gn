@@ -18,6 +18,7 @@ ace_unittest("TextInputTest") {
   module_output = ""
   type = "new"
   sources = [
+    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
     "text_area_base.cpp",
     "text_area_decoration_test.cpp",
     "text_area_menu_test.cpp",
@@ -59,7 +60,6 @@ ace_unittest("TextInputTest") {
     "text_input_update_test.cpp",
     "text_input_wordbreak_test.cpp",
     "text_select_controller_test.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
   ]
   cflags = [ "-fno-access-control" ]
 

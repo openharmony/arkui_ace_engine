@@ -63,6 +63,7 @@ public:
     static void ImageAccessEnabled(bool isImageAccessEnabled);
     static void MixedMode(int32_t MixedModeNum);
     static void ZoomAccessEnabled(bool isZoomAccessEnabled);
+    static void ZoomControlAccess(bool zoomControlAccess);
     static void GeolocationAccessEnabled(bool isGeolocationAccessEnabled);
     static void JavaScriptProxy(const JSCallbackInfo& args);
     static void UserAgent(const std::string& userAgent);
@@ -163,6 +164,7 @@ public:
     static void RunJavaScriptOnHeadEnd(const JSCallbackInfo& args);
     static void SetCallbackFromController(const JSRef<JSObject> controller);
     static void SetForceEnableZoom(const JSCallbackInfo& args);
+    static void JSBackToTop(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
     static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
     static JSRef<JSVal> CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo);

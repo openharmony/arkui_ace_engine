@@ -901,6 +901,9 @@ public:
     ACE_DEFINE_TEXT_DIMENSION_STYLE(WordSpacing, TextStyleAttribute::WORD_SPACING);
     ACE_DEFINE_TEXT_DIMENSION_STYLE_WITH_DEFAULT_VALUE(
         TextIndent, Dimension(0.0f, DimensionUnit::PX), 0.0f, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(LineHeightMultiply, double, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(MinimumLineHeight, Dimension, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(MaximumLineHeight, Dimension, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_DIMENSION_STYLE(LetterSpacing, TextStyleAttribute::LETTER_SPACING);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(MaxLines, uint32_t, UINT32_MAX, ParagraphStyleAttribute::MAXLINES);
     // Must use with SetAdaptMinFontSize and SetAdaptMaxFontSize.

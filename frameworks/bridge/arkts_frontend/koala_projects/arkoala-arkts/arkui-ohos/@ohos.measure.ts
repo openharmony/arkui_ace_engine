@@ -13,31 +13,32 @@
  * limitations under the License.
  */
 
-import { SizeOptions } from "arkui/component/units"
-import { GlobalScope_ohos_measure_utils } from "arkui/component/arkui-external"
+import { int32 } from "@koalaui/common"
+import { SizeOptions } from 'arkui/framework'
+import { GlobalScope_ohos_measure_utils } from 'arkui/framework'
 import { Resource } from "global.resource"
-import { FontStyle, FontWeight, TextAlign, TextOverflow, TextCase, WordBreak } from "arkui/component/enums"
+import { FontStyle, FontWeight, TextAlign, TextOverflow, TextCase, WordBreak } from 'arkui/framework'
 
 export interface MeasureOptions {
     textContent: string | Resource;
-    constraintWidth?: number | string | Resource;
-    fontSize?: number | string | Resource;
-    fontStyle?: number | FontStyle;
-    fontWeight?: number | string | FontWeight;
+    constraintWidth?: double | string | Resource;
+    fontSize?: double | string | Resource;
+    fontStyle?: int32 | FontStyle;
+    fontWeight?: int32 | string | FontWeight;
     fontFamily?: string | Resource;
-    letterSpacing?: number | string;
-    textAlign?: number | TextAlign;
-    overflow?: number | TextOverflow;
-    maxLines?: number;
-    lineHeight?: number | string | Resource;
-    baselineOffset?: number | string;
-    textCase?: number | TextCase;
-    textIndent?: number | string;
+    letterSpacing?: double | string;
+    textAlign?: int32 | TextAlign;
+    overflow?: int32 | TextOverflow;
+    maxLines?: int32;
+    lineHeight?: double | string | Resource;
+    baselineOffset?: double | string;
+    textCase?: int32 | TextCase;
+    textIndent?: double | string;
     wordBreak?: WordBreak;
 }
 
 export class MeasureText {
-    public static measureText(options: MeasureOptions) : number {
+    public static measureText(options: MeasureOptions) : double {
         return GlobalScope_ohos_measure_utils.measureText(options);
     }
     public static measureTextSize(options: MeasureOptions) : SizeOptions {

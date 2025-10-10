@@ -16,6 +16,8 @@
 #include "common_module.h"
 
 #if !defined(PREVIEW)
+#define OHOS_AAFWK_HILOG_TAG_WRAPPER_H
+#include "ani_base_context.h"
 #include "canvas_ani/ani_canvas.h"
 #endif
 
@@ -26,12 +28,13 @@
 
 #include "ani.h"
 #include "load.h"
-#include "log/log.h"
 
 #include "base/utils/utils.h"
 #include "core/interfaces/ani/ani_api.h"
-#include "arkoala/framework/native/src/resource_color_helper.h"
+#include "arkoala-arkts/framework/native/src/resource_color_helper.h"
+#ifndef __linux__
 #include "pixel_map_taihe_ani.h"
+#endif
 #include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
@@ -51,41 +54,38 @@ ani_status GetAniEnv(ani_vm* vm, ani_env** env)
     return status;
 }
 
-class CommonModuleCallbackAni {
-public:
-    CommonModuleCallbackAni(ani_env* env, ani_ref func)
-    {
-        CHECK_NULL_VOID(env);
-        env->GetVM(&vm_);
-        env->GlobalReference_Create(func, &func_);
+CommonModuleCallbackAni::CommonModuleCallbackAni(ani_env* env, ani_ref func)
+{
+    CHECK_NULL_VOID(env);
+    env->GetVM(&vm_);
+    env->GlobalReference_Create(func, &func_);
+}
+
+CommonModuleCallbackAni::~CommonModuleCallbackAni()
+{
+    CHECK_NULL_VOID(vm_);
+    CHECK_NULL_VOID(func_);
+    ani_env* env = nullptr;
+    auto attachCurrentThreadStatus = GetAniEnv(vm_, &env);
+    if (attachCurrentThreadStatus == ANI_OK && env != nullptr) {
+        env->GlobalReference_Delete(func_);
+        vm_->DetachCurrentThread();
     }
-    ~CommonModuleCallbackAni()
-    {
-        CHECK_NULL_VOID(vm_);
-        CHECK_NULL_VOID(func_);
-        ani_env* env = nullptr;
-        auto attachCurrentThreadStatus = GetAniEnv(vm_, &env);
-        if (attachCurrentThreadStatus == ANI_OK && env != nullptr) {
-            env->GlobalReference_Delete(func_);
-            vm_->DetachCurrentThread();
-        }
-    }
-    void Call(ani_env* env, ani_size argc, ani_ref* argv, ani_ref* result)
-    {
-        CHECK_NULL_VOID(env);
-        env->FunctionalObject_Call(static_cast<ani_fn_object>(func_), argc, argv, result);
-    }
-private:
-    ani_vm* vm_ = nullptr;
-    ani_ref func_ = nullptr;
-};
-ani_object GetHostContext([[maybe_unused]] ani_env* env)
+}
+
+void CommonModuleCallbackAni::Call(ani_env* env, ani_size argc, ani_ref* argv, ani_ref* result)
+{
+    CHECK_NULL_VOID(env);
+    env->FunctionalObject_Call(static_cast<ani_fn_object>(func_), argc, argv, result);
+}
+
+ani_object GetHostContext([[maybe_unused]] ani_env* env, ani_object obj, ani_int key)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
         return nullptr;
     }
-    ani_ref* context = modifier->getCommonAniModifier()->getHostContext();
+    ani_ref* context = modifier->getCommonAniModifier()->getHostContext(key);
     if (context) {
         ani_object context_object = reinterpret_cast<ani_object>(*context);
         return context_object;
@@ -142,12 +142,12 @@ ani_object CreateSizeObject(ani_env* env, const NG::DrawingContext& context)
 {
     ani_status status;
     ani_class sizeClass;
-    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.SizeInternal", &sizeClass)) != ANI_OK) {
         HILOGE("FindClass Size failed, %{public}d", status);
         return nullptr;
     }
     ani_method sizeCtor;
-    if ((status = env->Class_FindMethod(sizeClass, "<ctor>", "DD:V", &sizeCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(sizeClass, "<ctor>", "dd:", &sizeCtor)) != ANI_OK) {
         HILOGE("Class_FindMethod sizeClass ctor failed, %{public}d", status);
         return nullptr;
     }
@@ -156,8 +156,8 @@ ani_object CreateSizeObject(ani_env* env, const NG::DrawingContext& context)
         return nullptr;
     }
     ani_object sizeObject;
-    ani_float width = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.height);
-    ani_float height = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.width);
+    ani_float width = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.width);
+    ani_float height = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.height);
     if ((status = env->Object_New(sizeClass, sizeCtor, &sizeObject, width, height)) != ANI_OK) {
         HILOGE("New Size object failed, %{public}d", status);
         return nullptr;
@@ -169,12 +169,12 @@ ani_object CreateSizeInPixelObject(ani_env* env, const NG::DrawingContext& conte
 {
     ani_status status;
     ani_class sizeInPixelClass;
-    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeInPixelClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.SizeInternal", &sizeInPixelClass)) != ANI_OK) {
         HILOGE("FindClass Size failed, %{public}d", status);
         return nullptr;
     }
     ani_method sizeInPixelCtor;
-    if ((status = env->Class_FindMethod(sizeInPixelClass, "<ctor>", "DD:V", &sizeInPixelCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(sizeInPixelClass, "<ctor>", "dd:", &sizeInPixelCtor)) != ANI_OK) {
         HILOGE("Class_FindMethod sizeInPixelClass ctor failed, %{public}d", status);
         return nullptr;
     }
@@ -196,12 +196,12 @@ ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
 
     // DrawContext object
     ani_class drawContextClass;
-    if ((status = env->FindClass("Larkui/Graphics/DrawContext;", &drawContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.DrawContext", &drawContextClass)) != ANI_OK) {
         HILOGE("FindClass DrawContext failed, %{public}d", status);
         return nullptr;
     }
     ani_method drawContextCtor;
-    if ((status = env->Class_FindMethod(drawContextClass, "<ctor>", ":V", &drawContextCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(drawContextClass, "<ctor>", ":", &drawContextCtor)) != ANI_OK) {
         HILOGE("Class_FindMethod drawContextClass ctor failed, %{public}d", status);
         return nullptr;
     }
@@ -272,6 +272,25 @@ void SetDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn_object f
     modifier->getCommonAniModifier()->setDrawCallback(env, ptr, fnDrawCallbackFun);
 }
 
+void SetFrameNodeDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn_object fnObj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    void* fnDrawCallbackFun = nullptr;
+    std::function<void(NG::DrawingContext& drawingContext)> drawCallbackFun = nullptr;
+    ani_ref fnObjGlobalRef = static_cast<ani_ref>(fnObj);
+    auto fndDrawCallbackAni = std::make_shared<CommonModuleCallbackAni>(env, fnObjGlobalRef);
+    drawCallbackFun = ConvertFnObjDrawCallbackFun(vm, fndDrawCallbackAni);
+    if (drawCallbackFun != nullptr) {
+        fnDrawCallbackFun = &drawCallbackFun;
+    }
+    modifier->getCommonAniModifier()->setFrameNodeDrawCallback(env, ptr, fnDrawCallbackFun);
+}
+
 std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawBehindFun(ani_vm* vm,
     const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
 {
@@ -287,7 +306,7 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawBehindFu
                 return;
             }
             env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawBehind",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
+                "C{arkui.Graphics.DrawContext}:", drawingContext);
             std::vector<ani_ref> params = {};
             ani_ref ret = nullptr;
             callbackAni->Call(env, params.size(), params.data(), &ret);
@@ -312,7 +331,7 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawContentF
                 return;
             }
             env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawContent",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
+                "C{arkui.Graphics.DrawContext}:", drawingContext);
             std::vector<ani_ref> params = {};
             ani_ref ret = nullptr;
             callbackAni->Call(env, params.size(), params.data(), &ret);
@@ -338,7 +357,7 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawFrontFun
             }
             env->Object_CallMethodByName_Void(
                 reinterpret_cast<ani_fn_object>(object), "drawFront",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
+                "C{arkui.Graphics.DrawContext}:", drawingContext);
             std::vector<ani_ref> params = {};
             ani_ref ret = nullptr;
             callbackAni->Call(env, params.size(), params.data(), &ret);
@@ -349,7 +368,7 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawFrontFun
 }
 
 void SetDrawModifier(
-    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_int flag, ani_object drawModifier)
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, uint32_t flag, ani_object drawModifier)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier || !modifier->getArkUIAniDrawModifier() || !env) {
@@ -450,6 +469,7 @@ ani_object GetSharedLocalStorage([[maybe_unused]] ani_env* env)
 void SetBackgroundImagePixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node,
     ani_object pixelMap, ani_int repeat)
 {
+#ifndef __linux__
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
     auto pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMap);
     if (!pixelMapValue) {
@@ -462,8 +482,8 @@ void SetBackgroundImagePixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] 
     }
     modifier->getCommonAniModifier()->setBackgroundImagePixelMap(
         env, arkNode, reinterpret_cast<ani_ref>(pixelMapPtr), repeat);
+#endif
 }
-
 std::function<void(NG::LayoutConstraintF & layoutConstraint)> ConvertFnObjMeasureFun(ani_vm* vm,
     const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
 {
@@ -607,6 +627,29 @@ ani_int ToColorInt(ani_env* env, ani_object obj, ani_long color)
     return clr;
 }
 
+ani_int CreateWindowFreeContainer(ani_env *env, [[maybe_unused]]ani_object object, ani_object context)
+{
+#if !defined(PREVIEW)
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return -1;
+    }
+    auto nativeContext = OHOS::AbilityRuntime::GetStageModeContext(env, context);
+    return modifier->getCommonAniModifier()->createWindowFreeContainer(env, nativeContext);
+#else
+    return -1;
+#endif
+}
+
+void DestroyWindowFreeContainer([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object object, ani_int id)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->destroyWindowFreeContainer(id);
+}
+
 ani_int CheckIsUIThread([[maybe_unused]] ani_env* env, ani_object obj, ani_int id)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -743,7 +786,7 @@ ani_string GetCustomProperty(
 void GetAlignmentEnum(ani_env* env, ani_object align, AniOverlayOptions& opt)
 {
     ani_enum enumType;
-    if (ANI_OK != env->FindEnum("Larkui/component/enums/Alignment;", &enumType)) {
+    if (ANI_OK != env->FindEnum("arkui.component.enums.Alignment", &enumType)) {
         return;
     }
 
@@ -785,13 +828,13 @@ void ParseOverlayOptions(ani_env* env, ani_object options, AniOverlayOptions& op
         ani_ref x;
         if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "x", &x)) {
             ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "unboxed", ":D", &param_value);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "unboxed", ":d", &param_value);
             opt.x = static_cast<float>(param_value);
         }
         ani_ref y;
         if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "y", &y)) {
             ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "unboxed", ":D", &param_value);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "unboxed", ":d", &param_value);
             opt.y = static_cast<float>(param_value);
         }
     }
@@ -927,16 +970,16 @@ void* TransferScrollableTargetInfoPointer(ani_env* env, ani_object obj, ani_long
     }
     return modifier->getCommonAniModifier()->transferScrollableTargetInfoPointer(pointer);
 }
-ani_long CreateDragEventAccessorWithPointer(ani_env* env, ani_object obj, ani_long pointer)
+void* CreateDragEventAccessorWithPointer(ani_env* env, ani_object obj, ani_long pointer)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier || !modifier->getCommonAniModifier() || !env) {
         return 0;
     }
-    return modifier->getCommonAniModifier()->transferDragEventPointer(pointer);
+    return modifier->getCommonAniModifier()->createDragEventAccessor(pointer);
 }
 
-ani_long GetDragEventPointer(ani_env* env, ani_object obj, ani_long pointer)
+void* GetDragEventPointer(ani_env* env, ani_object obj, ani_long pointer)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier || !modifier->getCommonAniModifier() || !env) {
@@ -1032,6 +1075,15 @@ void* GetHoverEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_lo
         return nullptr;
     }
     return modifier->getCommonAniModifier()->getMouseEventPointer(hoverEventPeer);
+}
+
+void FrameNodeMarkDirtyNode(ani_env* env, ani_object obj, ani_long ptr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->frameNodeMarkDirtyNode(env, ptr);
 }
 
 ani_int GetStringColorValue(ani_env* env, ani_object aniClass, ani_string src)
@@ -1160,12 +1212,35 @@ void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, a
     }
     modifier->getCommonAniModifier()->applyParentThemeScopeId(env, self, parent);
 }
-void FrameNodeMarkDirtyNode(ani_env* env, ani_object obj, ani_long ptr)
+
+void SetImageCacheCount(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_int value, ani_int instanceId)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+    if (!modifier) {
         return;
     }
-    modifier->getCommonAniModifier()->frameNodeMarkDirtyNode(env, ptr);
+    modifier->getCommonAniModifier()->setImageCacheCount(value, instanceId);
+}
+
+void SetImageRawDataCacheSize(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_int value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setImageRawDataCacheSize(value, instanceId);
+}
+
+ani_long ExtractorsToDrawContextPtr(ani_env* env, ani_object aniClass, ani_object ptr)
+{
+    return {};
+}
+ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_long ptr)
+{
+    auto contextPtr = reinterpret_cast<NG::DrawingContext *>(ptr);
+    CHECK_NULL_RETURN(contextPtr, {});
+    return CreateDrawingContext(env, *contextPtr);
 }
 } // namespace OHOS::Ace::Ani

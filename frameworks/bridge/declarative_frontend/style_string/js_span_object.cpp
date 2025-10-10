@@ -1639,6 +1639,23 @@ RefPtr<SpanBase> JSParagraphStyleSpan::GetSubSpan(int32_t start, int32_t end)
     return spanBase;
 }
 
+bool JSParagraphStyleSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto paragraphSpan = DynamicCast<ParagraphStyleSpan>(other);
+    CHECK_NULL_RETURN(paragraphSpan, false);
+    CHECK_NULL_RETURN(GetParagraphStyle().Equal(paragraphSpan->GetParagraphStyle()), false);
+
+    auto jsParagraphStyleSpan = DynamicCast<JSParagraphStyleSpan>(other);
+    CHECK_NULL_RETURN(jsParagraphStyleSpan, false);
+
+    const auto& thisObj = leadingMarginSpanObj_;
+    const auto& otherObj = jsParagraphStyleSpan->leadingMarginSpanObj_;
+    if (!thisObj->IsEmpty() && !otherObj->IsEmpty()) {
+        return thisObj->GetLocalHandle()->IsStrictEquals(thisObj->GetEcmaVM(), otherObj->GetLocalHandle());
+    }
+    return thisObj->IsEmpty() && otherObj->IsEmpty();
+}
+
 SpanParagraphStyle JSParagraphStyleSpan::ParseJsParagraphStyleSpan(const JSRef<JSObject>& obj,
     const JSCallbackInfo& args, RefPtr<JSParagraphStyleSpan>& paragraphSpan)
 {

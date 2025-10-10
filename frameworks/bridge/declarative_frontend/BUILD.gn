@@ -54,9 +54,7 @@ template("declarative_frontend") {
     }
 
     if (ace_engine_feature_enable_split_mode) {
-      sources += [
-        "ng/force_split/parallel_page_router_manager.cpp",
-      ]
+      sources += [ "ng/force_split/parallel_page_router_manager.cpp" ]
     }
 
     deps = []
@@ -341,9 +339,11 @@ template("declarative_js_engine") {
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
+      "jsview/js_list_children_main_size.cpp",
       "jsview/js_loading_progress.cpp",
       "jsview/js_local_storage.cpp",
       "jsview/js_location_button.cpp",
+      "jsview/js_magnifier_controller.cpp",
       "jsview/js_marquee.cpp",
       "jsview/js_menu.cpp",
       "jsview/js_menu_item.cpp",
@@ -640,9 +640,7 @@ template("declarative_js_engine") {
           "jsview/models/web_model_impl.cpp",
         ]
       }
-      external_deps += [
-        "webview:libarkweb_utils",
-      ]
+      external_deps += [ "webview:libarkweb_utils" ]
     }
 
     if (defined(config.form_components_support) &&
@@ -761,6 +759,10 @@ template("declarative_js_engine") {
           ]
         }
       }
+    }
+
+    if (defined(config.enable_standard_input) && config.enable_standard_input) {
+      external_deps += [ "imf:extra_config_napi" ]
     }
   }
 }
@@ -933,8 +935,10 @@ template("declarative_js_engine_ng") {
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
+      "jsview/js_list_children_main_size.cpp",
       "jsview/js_loading_progress.cpp",
       "jsview/js_location_button.cpp",
+      "jsview/js_magnifier_controller.cpp",
       "jsview/js_marquee.cpp",
       "jsview/js_menu.cpp",
       "jsview/js_menu_item.cpp",
@@ -1037,7 +1041,10 @@ template("declarative_js_engine_ng") {
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]
 
-    external_deps = ["graphic_2d:drawing_napi_impl", "graphic_2d:text_napi_impl"]
+    external_deps = [
+      "graphic_2d:drawing_napi_impl",
+      "graphic_2d:text_napi_impl",
+    ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
@@ -1118,9 +1125,7 @@ template("declarative_js_engine_ng") {
         "jsview/js_web.cpp",
         "jsview/js_web_controller.cpp",
       ]
-      external_deps += [
-        "webview:libarkweb_utils",
-      ]
+      external_deps += [ "webview:libarkweb_utils" ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
@@ -1209,6 +1214,10 @@ template("declarative_js_engine_ng") {
         "image_framework:image",
         "image_framework:image_native",
       ]
+    }
+
+    if (defined(config.enable_standard_input) && config.enable_standard_input) {
+      external_deps += [ "imf:extra_config_napi" ]
     }
   }
 }

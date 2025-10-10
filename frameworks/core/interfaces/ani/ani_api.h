@@ -42,6 +42,8 @@ struct _ArkUINodeContent;
 struct _ArkUICanvasRenderer;
 struct _ArkUIImageData;
 struct _ArkUIImageBitmap;
+struct _ArkUIDrawingRenderingContext;
+struct _ArkUICanvasRenderingContext;
 typedef class __ani_ref* ani_ref;
 typedef class __ani_object* ani_object;
 typedef struct __ani_env ani_env;
@@ -67,17 +69,42 @@ typedef _ArkUIStyledString* ArkUIStyledString;
 typedef _ArkUICanvasRenderer* ArkUICanvasRenderer;
 typedef _ArkUIImageData* ArkUIImageData;
 typedef _ArkUIImageBitmap* ArkUIImageBitmap;
+typedef _ArkUIDrawingRenderingContext* ArkUIDrawingRenderingContext;
+typedef _ArkUICanvasRenderingContext* ArkUICanvasRenderingContext;
+typedef void* ArkUIAniICurve;
+typedef int32_t ArkUIAniCurve;
+typedef const char* ArkUIAniString;
 struct Array_ResourceColor;
 struct Ark_ResourceColor;
-typedef struct WebviewControllerInfo {
+typedef struct webview_WebviewControllerPeer {
     std::function<int32_t()> getWebIdFunc = nullptr;
     std::function<void(int32_t)> completeWindowNewFunc = nullptr;
     std::function<long()> getNativePtrFunc = nullptr;
     std::function<void()> releaseRefFunc = nullptr;
     std::function<void(int32_t)> setWebIdFunc = nullptr;
     std::function<void(const std::string&)> setHapPathFunc = nullptr;
-    std::function<void(int32_t)> setWebDetachFunc = nullptr;
-} WebviewControllerInfo;
+} WebviewControllerPeer;
+
+typedef struct NodeAdapterInfo {
+    std::function<void(ani_double)> onAttachToNode = nullptr;
+    std::function<void(void)> onDetachFromNode = nullptr;
+    std::function<int32_t(ani_double)> onGetId = nullptr;
+    std::function<ani_long(ani_double)> onCreateChild = nullptr;
+    std::function<void(ani_double, ani_double)> onDisposeChild = nullptr;
+    std::function<void(ani_double, ani_double)> onUpdateChild = nullptr;
+} NodeAdapterInfo;
+
+typedef struct AniDoubleArray {
+    std::unique_ptr<ani_double[]> data;
+    ani_size size = 0;
+} AniDoubleArray;
+
+typedef ani_object (*ArkUIAniArithmeticAddFunction)(ani_env*, ani_object, ani_object);
+typedef ani_object (*ArkUIAniArithmeticMinusFunction)(ani_env*, ani_object, ani_object);
+typedef ani_object (*ArkUIAniArithmeticMultiplyFunction)(ani_env*, ani_object, float);
+typedef bool (*ArkUIAniArithmeticEqualFunction)(ani_env*, ani_object, ani_object);
+typedef ani_object (*ArkUIAniCreateObjectFunction)(ani_env*, ani_object);
+typedef void (*ArkUIAniDeleteObjectFunction)(ani_env*, ani_object);
 
 class SharedPointerWrapper {
 public:
@@ -98,8 +125,13 @@ private:
     std::shared_ptr<void> ptr_;
 };
 
+namespace OHOS::AbilityRuntime {
+class Context;
+}
+
 namespace OHOS::Ace::Ani {
 class DragAction;
+class AniGlobalReference;
 }
 enum class ArkUIDragStatus { STARTED, ENDED };
 enum class ArkUIDragResult { DRAG_SUCCESS, DRAG_FAIL, DRAG_CANCEL };
@@ -109,6 +141,8 @@ enum ArkUISnapshotRegionMode {
     LOCALIZED,
     NO_REGION
 };
+enum class ArkUIAniRouteType { NONE, PUSH, POP };
+enum class ArkUIAniSlideEffect { NONE, LEFT, RIGHT, TOP, BOTTOM, START, END };
 
 enum class ArkUIPreviewType {
     FOREGROUND_COLOR = 0,
@@ -116,6 +150,14 @@ enum class ArkUIPreviewType {
     RADIUS = 2,
     SCALE = 3
 };
+
+typedef struct ArkUIAniNumberString {
+    int32_t selector = -1;
+    union {
+        double value0;
+        const char* value1;
+    };
+} ArkUIAniNumberString;
 
 struct ArkUIDragInfo {
     void* pixelMap;
@@ -270,15 +312,127 @@ struct ArkUIComponentSnapshotAsync {
     std::function<void(std::shared_ptr<ArkUIComponentSnapshotAsync>)> callBackJsFunction;
 };
 
+typedef struct ArkUIAniTranslateOptions {
+    ArkUIAniNumberString x;
+    ArkUIAniNumberString y;
+    ArkUIAniNumberString z;
+} ArkUIAniTranslateOptions;
+
+typedef struct ArkUIAniScaleOptions {
+    double x = 1.0;
+    double y = 1.0;
+    double z = 1.0;
+    ArkUIAniNumberString centerX;
+    ArkUIAniNumberString centerY;
+} ArkUIAniScaleOptions;
+
+typedef struct ArkUIAniAnimatableArithmeticObject {
+    ani_env* env = nullptr;
+    ani_object property = nullptr;
+} ArkUIAniAnimatableArithmeticObject;
+
+typedef struct ArkUIAniAnimatableArithmeticFuncs {
+    ArkUIAniArithmeticAddFunction addFunc;
+    ArkUIAniArithmeticMinusFunction minusFunc;
+    ArkUIAniArithmeticMultiplyFunction multiplyFunc;
+    ArkUIAniArithmeticEqualFunction equalFunc;
+    ArkUIAniCreateObjectFunction createFunc;
+    ArkUIAniDeleteObjectFunction deleteFunc;
+} ArkUIAniAnimatableArithmeticFuncs;
+
+typedef struct ArkUIAniUnionCurveStringICurve {
+    int32_t selector = -1;
+    union {
+        ArkUIAniCurve value0;
+        ArkUIAniString value1;
+        ArkUIAniICurve value2;
+    };
+} ArkUIAniUnionCurveStringICurve;
+
+typedef struct ArkUIAniPageTransitionOption {
+    ArkUIAniRouteType routeType = ArkUIAniRouteType::NONE;
+    int32_t duration = 0;
+    int32_t delay = 0;
+    ArkUIAniUnionCurveStringICurve curve;
+} ArkUIAniPageTransitionOption;
+
+struct ArkUIXComponentParams {
+    std::string id;
+    ArkUI_Int32 type;
+    void* controller = nullptr;
+    std::function<void(void*)> nativeHandler = nullptr;
+    std::function<void(const std::string&)> onSurfaceCreated = nullptr;
+    std::function<void(const std::string&, float, float, float, float)> onSurfaceChanged = nullptr;
+    std::function<void(const std::string&)> onSurfaceDestroyed = nullptr;
+};
+
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setDrawableDescriptor)(ArkUINodeHandle node, void* drawablem, int type);
     void (*setResizableLattice)(ArkUINodeHandle node, void* lattice);
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
+    void* (*getPixelMapPeer)(void* pixelMap);
+    ani_long (*createColorFilterPeer)(ani_long colorFilter);
+    ani_long (*getColorFilter)(ani_long colorFilterPeer);
+};
+
+struct ArkUIWaterFlowSectionGap {
+    int32_t unit = 1;
+    float value = 0.0f;
+};
+
+struct ArkUIWaterFlowSectionPadding {
+    ArkUIWaterFlowSectionGap top;
+    ArkUIWaterFlowSectionGap right;
+    ArkUIWaterFlowSectionGap bottom;
+    ArkUIWaterFlowSectionGap left;
+};
+
+struct ArkUIWaterFlowSection {
+    int32_t itemsCount = 0;
+    int32_t crossCount = 1;
+    ArkUIWaterFlowSectionGap columnsGap;
+    ArkUIWaterFlowSectionGap rowsGap;
+    ArkUIWaterFlowSectionPadding margin;
+    std::function<float(int32_t)> onGetItemMainSizeByIndex;
 };
 struct ArkUIAniWebModifier {
-    void (*setWebOptions)(ArkUINodeHandle node, const WebviewControllerInfo& controllerInfo);
-    void (*setWebControllerControllerHandler)(void* controllerHandler, const WebviewControllerInfo& controllerInfo);
+    bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
+    bool (*transferJsGeolocationToStatic)(void* peer, void* nativePtr);
+    bool (*transferJsResultToStatic)(void* peer, void* nativePtr);
+    bool (*transferEventResultToStatic)(void* peer, void* nativePtr);
+    bool (*transferFileSelectorResultToStatic)(void* peer, void* nativePtr);
+    bool (*transferFileSelectorParamToStatic)(void* peer, void* nativePtr);
+    bool (*transferWebContextMenuResultToStatic)(void* peer, void* nativePtr);
+    bool (*transferWebContextMenuParamToStatic)(void* peer, void* nativePtr);
+    bool (*transferHttpAuthHandlerToStatic)(void* peer, void* nativePtr);
+    bool (*transferWebResourceReponseToStatic)(void* peer, void* nativePtr);
+    bool (*transferWebResourceRequestToStatic)(void* peer, void* nativePtr);
+    bool (*transferConsoleMessageToStatic)(void* peer, void* nativePtr);
+    bool (*transferDataResubmissionHandlerToStatic)(void* peer, void* nativePtr);
+    bool (*transferClientAuthenticationHandlerToStatic)(void* peer, void* nativePtr);
+    bool (*transferSslErrorHandlerToStatic)(void* peer, void* nativePtr);
+    bool (*transferPermissionRequestToStatic)(void* peer, void* nativePtr);
+    bool (*transferControllerHandlerToStatic)(void* peer, void* nativePtr);
+    bool (*transferWebKeyboardControllerToStatic)(void* peer, void* nativePtr);
+    napi_value (*transferScreenCaptureHandlerToDynamic)(napi_env env, void* peer);
+    napi_value (*transferJsGeolocationToDynamic)(napi_env env, void* peer);
+    napi_value (*transferJsResultToDynamic)(napi_env env, void* peer);
+    napi_value (*transferEventResultToDynamic)(napi_env env, void* peer);
+    napi_value (*transferFileSelectorResultToDynamic)(napi_env env, void* peer);
+    napi_value (*transferFileSelectorParamToDynamic)(napi_env env, void* peer);
+    napi_value (*transferWebContextMenuResultToDynamic)(napi_env env, void* peer);
+    napi_value (*transferWebContextMenuParamToDynamic)(napi_env env, void* peer);
+    napi_value (*transferHttpAuthHandlerToDynamic)(napi_env env, void* peer);
+    napi_value (*transferWebResourceReponseToDynamic)(napi_env env, void* peer);
+    napi_value (*transferWebResourceRequestToDynamic)(napi_env env, void* peer);
+    napi_value (*transferConsoleMessageToDynamic)(napi_env env, void* peer);
+    napi_value (*transferDataResubmissionHandlerToDynamic)(napi_env env, void* peer);
+    napi_value (*transferClientAuthenticationHandlerToDynamic)(napi_env env, void* peer);
+    napi_value (*transferSslErrorHandlerToDynamic)(napi_env env, void* peer);
+    napi_value (*transferControllerHandlerToDynamic)(napi_env env, void* peer);
+    napi_value (*transferPermissionRequestToDynamic)(napi_env env, void* peer);
+    napi_value (*transferWebKeyboardControllerToDynamic)(napi_env env, void* peer);
 };
 struct ArkUIAniDragModifier {
     void (*setDragData)(ani_ref event, ani_ref data);
@@ -293,12 +447,22 @@ struct ArkUIAniDragModifier {
     void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUIDragPreviewOption options);
     const char* (*getUdKey)(ani_ref event);
 };
+struct ArkUIAniXBarModifier {
+    void (*setComponentCreateFunc)(std::function<int64_t(const int32_t&, const int32_t&)>&& fn);
+    void (*setOnWindowFocusedFunc)(int64_t ptr, std::function<void()>&& fn);
+    void (*setOnWindowUnFocusedFunc)(int64_t ptr, std::function<void()>&& fn);
+    void (*setSetAppTitleFunc)(int64_t ptr, std::function<void(const std::string&)>&& fn);
+    void (*setSetAppIconFunc)(int64_t ptr, std::function<void(void*)>&& fn);
+    void (*setSetCustomCallbackFunc)(int64_t ptr, std::function<void(const std::string&, const std::string&)>&& fn);
+    void (*callNative)(const int32_t& xBarType, const std::string callType, const std::string message);
+};
 struct ArkUIAniCommonModifier {
-    ani_ref* (*getHostContext)();
+    ani_ref* (*getHostContext)(ArkUI_Int32 key);
     void (*setFrameRateRange)(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_Int32 type);
     void (*syncInstanceId)(ArkUI_Int32 id);
     void (*restoreInstanceId)();
     void (*setDrawCallback)(ani_env* env, ani_long ptr, void* fnDrawCallbackFun);
+    void (*setFrameNodeDrawCallback)(ani_env* env, ani_long ptr, void* fnDrawCallbackFun);
     ArkUI_Int32 (*getCurrentInstanceId)();
     ArkUI_Int32 (*getFocusedInstanceId)();
     ani_long (*builderProxyNodeConstruct)(ArkUI_Int32 id);
@@ -310,6 +474,8 @@ struct ArkUIAniCommonModifier {
     ani_int (*getNodeIdWithNodePtr)(ani_long ptr);
     ani_int (*getNodeIdWithPeerPtr)(ani_long ptr);
     ani_long (*createRenderNodePeerWithNodePtr)(ani_long ptr);
+    ani_int (*createWindowFreeContainer)(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::Context> context);
+    void (*destroyWindowFreeContainer)(ani_int id);
     ani_boolean (*checkIsUIThread)(ArkUI_Int32 id);
     ani_boolean (*isDebugMode)(ArkUI_Int32 id);
     void (*onMeasureInnerMeasure)(ani_long ptr);
@@ -334,8 +500,8 @@ struct ArkUIAniCommonModifier {
     void (*scrollableTargetInfoAccessorWithId)(ani_env* env, ani_long input, const std::string& id);
     void (*scrollableTargetInfoAccessorWithPointer)(ani_long input, ani_long nativePtr);
     void* (*transferScrollableTargetInfoPointer)(ani_long nativePtr);
-    ani_long (*transferDragEventPointer)(ani_long ptr);
-    ani_long (*getDragEventPointer)(ani_long ptr);
+    void* (*createDragEventAccessor)(ani_long ptr);
+    void* (*getDragEventPointer)(ani_long ptr);
     void* (*transferTouchEventPointer)(ani_long nativePtr);
     void* (*transferMouseEventPointer)(ani_long nativePtr);
     void* (*transferAxisEventPointer)(ani_long nativePtr);
@@ -346,6 +512,7 @@ struct ArkUIAniCommonModifier {
     void* (*getAxisEventPointer)(ani_long peer);
     void* (*getClickEventPointer)(ani_long peer);
     void* (*getHoverEventPointer)(ani_long peer);
+    void (*frameNodeMarkDirtyNode)(ani_env* env, ani_long ptr);
     ArkUI_Uint32 (*getColorValueByString)(const std::string& src);
     ArkUI_Uint32 (*getColorValueByNumber)(ArkUI_Uint32 src);
     void (*sendThemeToNative)(ani_env* env, const std::vector<Ark_ResourceColor>& colors, ani_int id);
@@ -357,8 +524,9 @@ struct ArkUIAniCommonModifier {
     void (*createAndBindTheme)(ani_env* env, ani_int themeScopeId, ani_int themeId,
         const std::vector<Ark_ResourceColor>& colors, ani_int colorMode, void* func);
     void (*applyParentThemeScopeId)(ani_env* env, ani_long self, ani_long parent);
-    void (*frameNodeMarkDirtyNode)(ani_env* env, ani_long ptr);
     float (*getPx2VpWithCurrentDensity)(float px);
+    void (*setImageCacheCount)(ani_int value, ani_int instanceId);
+    void (*setImageRawDataCacheSize)(ani_int value, ani_int instanceId);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
@@ -367,6 +535,7 @@ struct  ArkUICustomNodeInfo {
     std::function<void()> pageTransitionFunc;
     std::function<void()> onCleanupFunc;
     std::function<std::string()> onDumpInspectorFunc;
+    std::function<void(bool, bool)> setActiveFunc;
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int id, ArkUICustomNodeInfo&& customNodeInfo);
@@ -375,9 +544,11 @@ struct ArkUIAniCustomNodeModifier {
     void (*queryNavDestinationInfo)(ani_long node, ArkUINavDestinationInfo& info);
     void (*queryNavDestinationInfo0)(ani_long node, ArkUINavDestinationInfo& info, ani_int isInner);
     void (*queryRouterPageInfo)(ani_long node, ArkUIRouterPageInfo& info);
+    bool (*queryNavDestinationInfo1)(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& info);
+    bool (*queryRouterPageInfo1)(ArkUI_Int32 uniqueId, ArkUIRouterPageInfo& info);
 };
 struct ArkUIAniDrawModifier {
-    void (*setDrawModifier)(ani_long ptr, ani_int flag,
+    void (*setDrawModifier)(ani_long ptr, uint32_t flag,
         void* fnDrawBehindFun, void* fnDrawContentFun, void* fnDrawFrontFun);
     void (*invalidate)(ani_env* env, ani_long ptr);
 };
@@ -386,13 +557,23 @@ struct ArkUIAniContentSlotModifier {
     void (*setContentSlotOptions)(ArkUIContentSlot node, ArkUINodeContent value);
 };
 struct ArkUIAniLazyForEachNodeModifier {
-    ani_long (*constructLazyForEachNode)(ani_int);
+    ani_long (*constructLazyForEachNode)(ani_int, ani_boolean);
 };
 struct ArkUIAniWaterFlowModifier {
-    void (*setWaterFlowOptions)(ani_env* env, ani_long ptr, ani_object fnObj);
+    void (*setWaterFlowSection)(
+        ArkUINodeHandle node, int32_t start, int32_t deleteCount, void* section, ArkUI_Int32 size);
+    void (*setWaterFlowFooterContent)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
+    void (*setWaterFlowFooter)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
+    void (*setWaterFlowScroller)(ArkUINodeHandle node, void* scroller);
+    void (*setWaterFlowLayoutMode)(ArkUINodeHandle node, int32_t mode);
 };
 struct ArkUIAniListModifier {
-    void (*setListChildrenMainSize)(ani_env* env, ani_long ptr, ani_object obj);
+    bool (*updateDefaultSizeAndGetNeedSync)(ArkUINodeHandle node, double defaultSize);
+    void (*syncChildrenSize)(ArkUINodeHandle node, double size);
+    void (*notifyChange)(ArkUINodeHandle node, ArkUI_Int32 start,
+        ArkUI_Int32 deleteCount, std::vector<float>& newSizeArr);
+    void (*resizeChildrenSize)(ArkUINodeHandle node, int32_t size);
+    void (*syncChildrenSizeOver)(ArkUINodeHandle node);
 };
 struct ArkUIAniComponentSnapshotModifier {
     void (*createFromBuilder)(
@@ -401,19 +582,22 @@ struct ArkUIAniComponentSnapshotModifier {
         ArkUINodeHandle node, const ArkUIComponentSnapshotAsync& asyncCtx, const ArkUISnapshotParam& param);
 };
 struct ArkUIAniAnimationModifier {
-    bool (*hasAnimatableProperty)(ani_env* env, ArkUINodeHandle node, ani_string name);
-    void (*updateAnimatableProperty)(
-        ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property);
-    void (*createAnimatableProperty)(
-        ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property, ani_fn_object callback);
-    void (*createPageTransitionEnter)(ani_env* env, ani_object options);
-    void (*pageTransitionSetOnEnter)(ani_env* env, ani_fn_object callback);
-    void (*createPageTransitionExit)(ani_env* env, ani_object options);
-    void (*pageTransitionSetOnExit)(ani_env* env, ani_fn_object callback);
-    void (*pageTransitionSetSlide)(ani_env* env, ani_object slide);
-    void (*pageTransitionSetTranslate)(ani_env* env, ani_object options);
-    void (*pageTransitionSetScale)(ani_env* env, ani_object options);
-    void (*pageTransitionSetOpacity)(ani_env* env, ani_double opacity);
+    bool (*hasAnimatableProperty)(ArkUINodeHandle node, const char* name);
+    void (*updateAnimatableFloat)(ArkUINodeHandle node, const char* propertyName, float property);
+    void (*createAnimatableFloat)(ArkUINodeHandle node, const char* propertyName, float property, void* callback);
+    void (*updateAnimatableArithmetic)(
+        ArkUINodeHandle node, const char* propertyName, ArkUIAniAnimatableArithmeticObject property);
+    void (*createAnimatableArithmetic)(
+        ArkUINodeHandle node, const char* propertyName, ArkUIAniAnimatableArithmeticObject property, void* callback);
+    void (*initAnimatableArithmeticClass)(const ArkUIAniAnimatableArithmeticFuncs* funcs);
+    void (*createPageTransitionEnter)(const ArkUIAniPageTransitionOption* options);
+    void (*pageTransitionSetOnEnter)(void* callback);
+    void (*createPageTransitionExit)(const ArkUIAniPageTransitionOption* options);
+    void (*pageTransitionSetOnExit)(void* callback);
+    void (*pageTransitionSetSlide)(ArkUIAniSlideEffect slide);
+    void (*pageTransitionSetTranslate)(const ArkUIAniTranslateOptions* options);
+    void (*pageTransitionSetScale)(const ArkUIAniScaleOptions* options);
+    void (*pageTransitionSetOpacity)(float opacity);
 };
 struct ArkUIAniInteropModifier {
     ani_long (*createViewStackProcessor)();
@@ -454,10 +638,10 @@ struct ArkUIAniRichEditorModifier {
     ani_long (*transferPixelMap)(void* pixelMap);
 };
 struct ArkUIAniStateMgmtModifier {
-    std::string (*persistentStorageGet)(const std::string& key);
-    void (*persistentStorageSet)(const std::string& key, const std::string& value);
-    bool (*persistentStorageHas)(const std::string& key);
-    void (*persistentStorageDelete)(const std::string& key);
+    std::string (*persistentStorageGet)(const std::string& key, const int32_t areaMode);
+    void (*persistentStorageSet)(const std::string& key, const std::string& value, const int32_t areaMode);
+    bool (*persistentStorageHas)(const std::string& key, const int32_t areaMode);
+    void (*persistentStorageDelete)(const std::string& key, const int32_t areaMode);
     void (*persistentStorageClear)();
     int32_t (*getColorMode)();
     float (*getFontWeightScale)();
@@ -467,10 +651,9 @@ struct ArkUIAniStateMgmtModifier {
     std::string (*getLanguageCode)();
 };
 struct ArkUIAniXComponentModifier {
-    void (*setXComponentControllerCallback)(ArkUINodeHandle node,
-        std::function<void(const std::string&)>&& onSurfaceCreated,
-        std::function<void(const std::string&, float, float, float, float)>&& onSurfaceChanged,
-        std::function<void(const std::string&)>&& onSurfaceDestroyed);
+    void (*setXComponentInitParameters)(ArkUINodeHandle node, const ArkUIXComponentParams& params);
+    void (*setScreenId)(ArkUINodeHandle node, uint64_t screenId);
+    void (*markBindNative)(ArkUINodeHandle node);
 };
 
 struct ArkUIAniConditionScopeModifier {
@@ -499,13 +682,46 @@ struct ArkUIAniCanvasModifier {
     void (*putImageData1)(ArkUICanvasRenderer peer, uint8_t* data, ani_size length, ani_double dx, ani_double dy,
         ani_int width, ani_int height, ani_double dirtyX, ani_double dirtyY, ani_double dirtyWidth,
         ani_double dirtyHeight);
+    void* (*getDrawingCanvas)(ArkUIDrawingRenderingContext peer);
+    ani_int (*getCanvasId)(ArkUICanvasRenderingContext peer);
 };
 
+struct ArkUIAniTraceModifier {
+    void (*traceBegin)(const std::string& traceName);
+    void (*traceEnd)();
+    void (*asyncTraceBegin)(const std::string& traceName, int taskId);
+    void (*asyncTraceEnd)(const std::string& traceName, int taskId);
+};
+
+struct ArkUIAniUINodeOnUpdateDoneAniModifier {
+    void (*onUpdateDone)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node);
+    void (*setUINodeIsStatic)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node);
+};
+
+struct ArkUIAniNodeAdapterModifier {
+    ani_long (*nodeAdapterConstruct)(NodeAdapterInfo&& info);
+    void (*nodeAdapterDetachNodeAdapter)(ani_long node);
+    ani_boolean (*nodeAdapterAttachNodeAdapter)(ani_long ptr, ani_long node);
+    void (*nodeAdapterDispose)(ani_long node);
+    void (*nodeAdapterNotifyItemReloaded)(ani_long node);
+    void (*nodeAdapterSetTotalNodeCount)(ani_long node, ani_double count);
+    void (*nodeAdapterNotifyItemChanged)(ani_long node, ani_double start, ani_double count);
+    void (*nodeAdapterNotifyItemRemoved)(ani_long node, ani_double start, ani_double count);
+    void (*nodeAdapterNotifyItemInserted)(ani_long node, ani_double start, ani_double count);
+    void (*nodeAdapterNotifyItemMoved)(ani_long node, ani_double from, ani_double to);
+    AniDoubleArray (*nodeAdapterGetAllItems)(ani_long node);
+};
 struct ArkUIAniSyntaxItemModifier {
     ani_long (*constructSyntaxItem)(ani_int);
 };
 struct ArkUIAniForEachNodeModifier {
-    ani_long (*constructForEachNode)(ani_int);
+    ani_long (*construct)(ani_int, ani_boolean);
+    void (*finishRender)(ani_long);
+};
+
+struct ArkUIAniComponent3DModifier {
+    void (*setScene)(ArkUINodeHandle node, void* scene, int32_t modelType);
+    void (*setWidget)(ArkUINodeHandle node, const std::string& scenePath, int32_t modelType);
 };
 
 struct ArkUIAniModifiers {
@@ -535,8 +751,13 @@ struct ArkUIAniModifiers {
     const ArkUIAniConditionScopeModifier* (*getArkUIAniConditionScopeModifier)();
     const ArkUIAniComponentConentModifier* (*getArkUIAniComponentConentModifier)();
     const ArkUIAniCanvasModifier* (*getCanvasAniModifier)();
+    const ArkUIAniTraceModifier* (*getTraceAniModifier)();
+    const ArkUIAniUINodeOnUpdateDoneAniModifier* (*getUINodeOnUpdateDoneAniModifier)();
+    const ArkUIAniNodeAdapterModifier* (*getNodeAdapterAniModifier)();
     const ArkUIAniSyntaxItemModifier* (*getSyntaxItemAniModifier)();
     const ArkUIAniForEachNodeModifier* (*getForEachNodeAniModifier)();
+    const ArkUIAniComponent3DModifier* (*getComponent3DModifier)();
+    const ArkUIAniXBarModifier* (*getXBarAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

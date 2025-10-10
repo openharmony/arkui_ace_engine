@@ -68,7 +68,6 @@ private:
     float mainGap_ = 0.0f;
     float crossGap_ = 0.0f;
     float mainSize_ = 0.0f;
-    float footerMainSize_ = 0.0f;
     float footerMainStartPos_ = 0.0f;
     bool skipMeasure_ = false;
 

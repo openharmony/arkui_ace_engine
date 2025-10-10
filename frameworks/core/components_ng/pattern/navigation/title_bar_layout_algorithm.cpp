@@ -73,7 +73,7 @@ void TitleBarLayoutAlgorithm::BackButtonLayout(LayoutWrapper* layoutWrapper)
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
     CHECK_NULL_VOID(backButtonLayoutProperty);
     PaddingProperty padding;
-    padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
+    padding.SetEdges(CalcLength(menuButtonPadding_));
     backButtonLayoutProperty->UpdatePadding(padding);
 }
 
@@ -150,6 +150,15 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
     constraint.selfIdealSize = OptionalSizeF(
         static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()), static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()));
     backButtonWrapper->Measure(constraint);
+}
+
+void TitleBarLayoutAlgorithm::GetFullTitleWidth(bool isCustom, float& occupiedWidth)
+{
+    if (fullModeTitleCenter_ && !NearZero(menuOccupiedWidth_)) {
+        occupiedWidth += (paddingRight_ + menuOccupiedWidth_ + menuCompPadding_.ConvertToPx());
+        return;
+    }
+    occupiedWidth += isCustom ? 0.0f : paddingRight_;
 }
 
 float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBarNode,
@@ -235,7 +244,7 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
     // right padding of full mode
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FULL
         || isCustom) {
-        occupiedWidth += isCustom ? 0.0f : paddingRight;
+        GetFullTitleWidth(isCustom, occupiedWidth);
         return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
     }
     // right padding of free mode
@@ -579,6 +588,10 @@ float TitleBarLayoutAlgorithm::GetFullModeTitleOffsetY(float titleHeight, float 
     auto titleSpace = titleBarHeight - menuOccupiedHeight_ - static_cast<float>(paddingTopTwolines_.ConvertToPx());
     auto titleRealHeight = titleHeight + subtitleHeight + navTitleSpaceVertical_;
     float dividerOffset = 2.0f;
+    if (fullModeTitleCenter_) {
+        offsetY = (titleBarHeight - titleRealHeight) / dividerOffset;
+        return offsetY;
+    }
     if (NearZero(subtitleHeight) && titleHeight < titleBarHeight - menuOccupiedHeight_) {
         offsetY = (titleBarHeight - menuOccupiedHeight_ - titleRealHeight) / dividerOffset;
         return offsetY;
@@ -749,7 +762,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         }
         // fixed white space menuHeight
         OffsetF titleOffset = OffsetF(0.0f, 0.0f);
-        titleOffset = OffsetF(offsetX, menuOccupiedHeight_ + offsetY);
+        titleOffset = OffsetF(offsetX, fullModeTitleCenter_ ? offsetY : menuOccupiedHeight_ + offsetY);
         geometryNode->SetMarginFrameOffset(titleOffset);
         titleWrapper->Layout();
         return;
@@ -878,7 +891,7 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
             offsetY = titleOffsetY + titleHeight + navTitleSpaceVertical_;
         }
         offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
-        initialSubtitleOffsetY_ = menuOccupiedHeight_ + offsetY;
+        initialSubtitleOffsetY_ = fullModeTitleCenter_ ? offsetY : menuOccupiedHeight_ + offsetY;
         if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
             if (isInitialSubtitle_) {
                 isInitialSubtitle_ = false;
@@ -1079,9 +1092,11 @@ void TitleBarLayoutAlgorithm::InitializeTheme(const RefPtr<TitleBarNode>& titleB
             paddingRight_ = theme->GetMarginRight().ConvertToPx();
             paddingRightForMenu_ = theme->GetMarginRightForMenu().ConvertToPx();
         }
+        menuButtonPadding_ = theme->GetMenuButtonPadding();
         navBackIconWidth_ = backIconWidth_.ConvertToPx();
-        navButtonPadding_ = (MENU_BUTTON_PADDING + MENU_BUTTON_PADDING).ConvertToPx();
+        navButtonPadding_ = (menuButtonPadding_ + menuButtonPadding_).ConvertToPx();
         navHorizontalMargin_ = navButtonPadding_ + menuCompPadding_.ConvertToPx();
+        fullModeTitleCenter_ = SystemProperties::GetDeviceType() == DeviceType::TV;
     }
 }
 

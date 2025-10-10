@@ -203,6 +203,22 @@ const std::string PATTERN_CONTENTUNITS_ERROR_LABEL =
     "<rect x=\"10\" y=\"10\" width=\"200\" height=\"200\" fill=\"url(#pattern1)\" />"
     "</svg>";
 
+const std::string INHERIT_LABEL =
+    "<svg fill=\"none\" width=\"102\" height=\"102\" viewBox=\"0 0 12 12\" xmlns=\"http://www.w3.org/2000/svg\">"
+        "<defs>"
+            "<clipPath id=\"master_svg0_1056_43703\">"
+                "<rect x=\"0\" y=\"0\" width=\"13\" height=\"13\"/>"
+            "</clipPath>"
+        "</defs>"
+        "<g clip-path=\"url(#master_svg0_1056_43703)\">"
+            "<g transform=\"matrix(-1,0,0,-1,17.845,16.5)\">"
+                "<path d=\"M12.47700535003662,12.1875C12.696465350036622,12.1875,10.99487535003662,12.1875,"
+                "9.919773350036621,12.1875C10.01970535003662,10.70984,10.71409535003662,9.7744,11.21433535003662,"
+                "9.1005\" fill=\"blue\" fill-opacity=\"1\"/>"
+            "</g>"
+        "</g>"
+    "</svg>";
+
 std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
 } // namespace
 class ParseTestThreeNg : public testing::Test {
@@ -1163,5 +1179,57 @@ HWTEST_F(ParseTestThreeNg, PatternContentunitsErrorTest002, TestSize.Level1)
     EXPECT_NE(svgPattern, nullptr);
     EXPECT_EQ(svgPattern->patternAttr_.usrConfigVersion, 2);
     EXPECT_EQ(svgPattern->patternAttr_.patternContentUnits, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+}
+
+/**
+ * @tc.name: InheritTest001
+ * @tc.desc: Inherit test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestThreeNg, InheritTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(INHERIT_LABEL.c_str(), INHERIT_LABEL.length());
+    ImageSourceInfo src;
+    src.SetSupportSvg2(true);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    auto svgG = AceType::DynamicCast<SvgG>(svg->children_.at(1));
+    EXPECT_NE(svgG, nullptr);
+    EXPECT_TRUE(svgG->GetBaseAttributes().clipState.hasHref_);
+    auto href = svgG->GetBaseAttributes().clipState.href_;
+    auto svgGL2 = AceType::DynamicCast<SvgG>(svgG->children_.at(0));
+    EXPECT_NE(svgGL2, nullptr);
+    svgGL2->InheritAttr(svgG->GetBaseAttributes());
+    auto svgPath = AceType::DynamicCast<SvgPath>(svgGL2->children_.at(0));
+    EXPECT_NE(svgPath, nullptr);
+    svgPath->InheritAttr(svgGL2->GetBaseAttributes());
+    EXPECT_EQ(svgPath->GetBaseAttributes().clipState.href_, "");
+}
+
+/**
+ * @tc.name: InheritTest002
+ * @tc.desc: Inherit test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestThreeNg, InheritTest002, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(INHERIT_LABEL.c_str(), INHERIT_LABEL.length());
+    ImageSourceInfo src;
+    src.SetSupportSvg2(false);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    auto svgG = AceType::DynamicCast<SvgG>(svg->children_.at(1));
+    EXPECT_NE(svgG, nullptr);
+    EXPECT_TRUE(svgG->GetBaseAttributes().clipState.hasHref_);
+    auto href = svgG->GetBaseAttributes().clipState.href_;
+    auto svgGL2 = AceType::DynamicCast<SvgG>(svgG->children_.at(0));
+    EXPECT_NE(svgGL2, nullptr);
+    svgGL2->InheritAttr(svgG->GetBaseAttributes());
+    auto svgPath = AceType::DynamicCast<SvgPath>(svgGL2->children_.at(0));
+    EXPECT_NE(svgPath, nullptr);
+    svgPath->InheritAttr(svgGL2->GetBaseAttributes());
+    EXPECT_EQ(svgPath->GetBaseAttributes().clipState.href_, href);
 }
 } // namespace OHOS::Ace::NG

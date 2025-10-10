@@ -29,6 +29,7 @@ public:
                                  const std::optional<bool>&  indicator = false);
     static void SetOnChange(FrameNode* frameNode, RatingChangeEvent&& onChange);
     static void SetOnChangeEvent(FrameNode* frameNode, RatingChangeEvent&& onChange);
+    static void TriggerChange(FrameNode* frameNode, double value);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_STATIC_H

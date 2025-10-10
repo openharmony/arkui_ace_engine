@@ -17,4 +17,5 @@ if (globalThis.requireNapi === undefined) {
     const UIContext = globalThis.requireNapiPreview('arkui.uicontext');
 } else {
     const UIContext = globalThis.requireNapi('arkui.uicontext');
+    const resMgr = globalThis.requireNapi('global.resmgr');
 }

@@ -15,7 +15,7 @@
 
 #include "core/interfaces/native/utility/accessor_utils.h"
 
-bool AccessorUtils::CheckKeysPressed(const std::vector<std::string>& keysStrs,
+bool OHOS::Ace::NG::AccessorUtils::CheckKeysPressed(const std::vector<std::string>& keysStrs,
     const std::vector<OHOS::Ace::KeyCode>& keysCodes)
 {
     auto intersects =

@@ -103,7 +103,7 @@ void ModelTestNg::TearDownTestSuite()
  * @tc.desc: Test Without Setting Property
  * @tc.type: FUNC
  */
-HWTEST_F(ModelTestNg, ModelViewNgTest001, TestSize.Level1)
+HWTEST_F(ModelTestNg, ModelViewNgTest001, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);

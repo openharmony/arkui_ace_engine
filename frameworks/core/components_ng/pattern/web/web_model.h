@@ -78,6 +78,7 @@ public:
     virtual void SetImageAccessEnabled(bool isImageAccessEnabled) = 0;
     virtual void SetMixedMode(MixedModeContent mixedMode) = 0;
     virtual void SetZoomAccessEnabled(bool isZoomAccessEnabled) = 0;
+    virtual void SetZoomControlAccess(bool zoomControlAccess) {}
     virtual void SetGeolocationAccessEnabled(bool isGeolocationAccessEnabled) = 0;
     virtual void SetJsProxyCallback(std::function<void()>&& jsProxyCallback) = 0;
     virtual void SetUserAgent(const std::string& userAgent) = 0;
@@ -240,6 +241,7 @@ public:
     virtual void SetForceEnableZoom(bool isEnabled) {}
     virtual void SetSafeBrowsingCheckFinishId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId) {};
+    virtual void SetBackToTop(bool isBackToTop) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

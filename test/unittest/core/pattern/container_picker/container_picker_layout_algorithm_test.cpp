@@ -1026,4 +1026,58 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_SetG
     EXPECT_TRUE(NearEqual(algorithm_->GetHeight(), 600.0f));
     EXPECT_TRUE(NearEqual(algorithm_->GetCurrentOffset(), 100.0f));
 }
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithmTranslateAndRotateTest001
+ * @tc.desc: Test TranslateAndRotate method of ContainerPickerLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithmTranslateAndRotateTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and set up necessary properties
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    // Set up algorithm properties needed for TranslateAndRotate
+    algorithm_->SetHeight(500.0f);
+    algorithm_->CalcMainAndMiddlePos();
+    algorithm_->topPadding_ = 20.0f;
+
+    /**
+     * @tc.steps: step2. Test TranslateAndRotate with different offset values
+     */
+    // Test case 1: Zero offset
+    OffsetF offset1(0.0f, 0.0f);
+    float originalY1 = offset1.GetY();
+    algorithm_->TranslateAndRotate(frameNode, offset1);
+    EXPECT_TRUE(GreatNotEqual(offset1.GetY(), originalY1));
+
+    // Test case 2: Positive offset
+    OffsetF offset2(0.0f, 100.0f);
+    float originalY2 = offset2.GetY();
+    algorithm_->TranslateAndRotate(frameNode, offset2);
+    EXPECT_TRUE(GreatNotEqual(offset2.GetY(), originalY2));
+
+    // Test case 3: Negative offset
+    OffsetF offset3(0.0f, -100.0f);
+    float originalY3 = offset3.GetY();
+    algorithm_->TranslateAndRotate(frameNode, offset3);
+    EXPECT_TRUE(GreatNotEqual(offset3.GetY(), originalY3));
+
+    // Test case 4: Large positive offset (should be clamped to VERTICAL_ANGLE)
+    OffsetF offset4(0.0f, 1000.0f);
+    float originalY4 = offset4.GetY();
+    algorithm_->TranslateAndRotate(frameNode, offset4);
+    EXPECT_TRUE(NearEqual(offset4.GetY(), originalY4));
+
+    // Test case 5: Large negative offset (should be clamped to -VERTICAL_ANGLE)
+    OffsetF offset5(0.0f, -1000.0f);
+    float originalY5 = offset5.GetY();
+    algorithm_->TranslateAndRotate(frameNode, offset5);
+    EXPECT_TRUE(NearEqual(offset5.GetY(), originalY5));
+}
+
 } // namespace OHOS::Ace::NG

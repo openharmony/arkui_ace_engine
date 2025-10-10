@@ -158,6 +158,7 @@ private:
     void AdjustOffsetOnAbove(float currentStartPos);
     float GetChildMainAxisSize(const RefPtr<LayoutWrapper>& childWrapper);
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
+    void TranslateAndRotate(RefPtr<FrameNode> node, OffsetF& offset);
 
     LayoutConstraintF childLayoutConstraint_;
     LayoutCalPolicy widthLayoutPolicy = LayoutCalPolicy::NO_MATCH;

@@ -27,7 +27,9 @@ void RequestFrame(ani_env* env);
 ani_object QueryNavigationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long pointer);
 ani_object QueryNavDestinationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long pointer);
 ani_object QueryNavDestinationInfo0(ani_env* env, [[maybe_unused]] ani_object, ani_long pointer, ani_boolean isInner);
+ani_object QueryNavDestinationInfo1(ani_env* env, [[maybe_unused]] ani_object, ani_int uniqueId);
 ani_object QueryRouterPageInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long pointer);
+ani_object QueryRouterPageInfo1(ani_env* env, [[maybe_unused]] ani_object, ani_int uniqueId);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_CUSTOM_NODE_MODULE

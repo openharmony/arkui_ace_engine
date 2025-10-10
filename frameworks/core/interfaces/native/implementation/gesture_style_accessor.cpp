@@ -27,7 +27,7 @@ void DestroyPeerImpl(Ark_GestureStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_GestureStyle CtorImpl(const Opt_GestureStyleInterface* value)
+Ark_GestureStyle ConstructImpl(const Opt_GestureStyleInterface* value)
 {
     auto peer = PeerUtils::CreatePeer<GestureStylePeer>();
     CHECK_NULL_RETURN(value, peer);
@@ -63,7 +63,7 @@ const GENERATED_ArkUIGestureStyleAccessor* GetGestureStyleAccessor()
 {
     static const GENERATED_ArkUIGestureStyleAccessor GestureStyleAccessorImpl {
         GestureStyleAccessor::DestroyPeerImpl,
-        GestureStyleAccessor::CtorImpl,
+        GestureStyleAccessor::ConstructImpl,
         GestureStyleAccessor::GetFinalizerImpl,
     };
     return &GestureStyleAccessorImpl;

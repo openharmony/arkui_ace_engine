@@ -3928,6 +3928,24 @@ ArkUI_ErrorCode IsKeyEventSupportedScenario(uint32_t scenarioExpr, const ArkUIKe
     return support ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
 }
 
+ArkUI_ErrorCode IsClickEventSupportedScenario(uint32_t scenarioExpr, ArkUI_UIInputEvent_Type inputType)
+{
+    if (inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) {
+        // click event from click or tap gesture triggered by keyboard
+        return scenarioExpr & S_GESTURE_CLICK_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
+                                                    : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+    } else {
+        // click event registered by NODE_ON_CLICK
+        return scenarioExpr & S_NODE_ON_CLICK_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
+                                                    : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+    }
+}
+
+ArkUI_ErrorCode CheckScenario(uint32_t scenarioExpr, uint32_t mask)
+{
+    return (scenarioExpr & mask) ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+}
+
 ArkUI_ErrorCode CheckIsSupportedScenario(uint32_t scenarioExpr, const ArkUI_UIInputEvent* event)
 {
     if (!event) {
@@ -3936,13 +3954,11 @@ ArkUI_ErrorCode CheckIsSupportedScenario(uint32_t scenarioExpr, const ArkUI_UIIn
     switch (event->eventTypeId) {
         case AXIS_EVENT_ID: {
             // axis event from nativeXComponent
-            return scenarioExpr & S_NXC_DISPATCH_AXIS_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
-                                                            : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+            return CheckScenario(scenarioExpr, S_NXC_DISPATCH_AXIS_EVENT);
         }
         case TOUCH_EVENT_ID: {
             // touch intercept from nativeXComponent
-            return scenarioExpr & S_NXC_ON_TOUCH_INTERCEPT ? ARKUI_ERROR_CODE_NO_ERROR
-                                                           : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+            return CheckScenario(scenarioExpr, S_NXC_ON_TOUCH_INTERCEPT);
         }
         case C_TOUCH_EVENT_ID: {
             return IsTouchEventSupportedScenario(scenarioExpr, reinterpret_cast<ArkUITouchEvent*>(event->inputEvent));
@@ -3958,24 +3974,17 @@ ArkUI_ErrorCode CheckIsSupportedScenario(uint32_t scenarioExpr, const ArkUI_UIIn
         }
         case C_FOCUS_AXIS_EVENT_ID: {
             // focus axis event registed by NODE_ON_FOCUS_AXIS
-            return scenarioExpr & S_NODE_ON_FOCUS_AXIS ? ARKUI_ERROR_CODE_NO_ERROR
-                                                       : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+            return CheckScenario(scenarioExpr, S_NODE_ON_FOCUS_AXIS);
         }
         case C_CLICK_EVENT_ID: {
-            if (event->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) {
-                // click event from click or tap gesture triggered by keyboard
-                return scenarioExpr & S_GESTURE_CLICK_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
-                                                            : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
-            } else {
-                // click event registed by NODE_ON_CLICK
-                return scenarioExpr & S_NODE_ON_CLICK_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
-                                                            : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
-            }
+            return IsClickEventSupportedScenario(scenarioExpr, event->inputType);
         }
         case C_HOVER_EVENT_ID: {
             // hover event registed by NODE_ON_HOVER_EVENT
-            return scenarioExpr & S_NODE_ON_HOVER_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
-                                                        : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+            return CheckScenario(scenarioExpr, S_NODE_ON_HOVER_EVENT);
+        }
+        case C_COASTING_AXIS_EVENT_ID: {
+            return CheckScenario(scenarioExpr, S_NODE_ON_COASTING_AXIS_EVENT);
         }
         default: {
             LOGE("received event with unknown eventType");
@@ -3987,6 +3996,87 @@ ArkUI_ErrorCode CheckIsSupportedScenario(uint32_t scenarioExpr, const ArkUI_UIIn
 ArkUI_ErrorCode OH_ArkUI_UIInputEvent_GetLatestStatus()
 {
     return g_latestEventStatus;
+}
+
+ArkUI_CoastingAxisEvent* OH_ArkUI_UIInputEvent_GetCoastingAxisEvent(ArkUI_UIInputEvent* event)
+{
+    CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_COASTING_AXIS_EVENT, event);
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(nullptr, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    switch (event->eventTypeId) {
+        case C_COASTING_AXIS_EVENT_ID: {
+            auto* coastingAxisEvent = reinterpret_cast<ArkUI_CoastingAxisEvent*>(event->inputEvent);
+            if (!coastingAxisEvent) {
+                RETURN_RET_WITH_STATUS_CHECK(nullptr, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            return coastingAxisEvent;
+        }
+        default:
+            RETURN_RET_WITH_STATUS_CHECK(nullptr, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(nullptr, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+int64_t OH_ArkUI_CoastingAxisEvent_GetEventTime(ArkUI_CoastingAxisEvent* event)
+{
+    if (!event) {
+        return 0;
+    }
+    auto* coastingAxisEvent = reinterpret_cast<ArkUICoastingAxisEvent*>(event);
+    if (coastingAxisEvent) {
+        return coastingAxisEvent->timeStamp;
+    }
+    return 0;
+}
+
+ArkUI_CoastingAxisEventPhase OH_ArkUI_CoastingAxisEvent_GetPhase(ArkUI_CoastingAxisEvent* event)
+{
+    if (!event) {
+        return ARKUI_COASTING_AXIS_EVENT_PHASE_NONE;
+    }
+    auto* coastingAxisEvent = reinterpret_cast<ArkUICoastingAxisEvent*>(event);
+    if (coastingAxisEvent) {
+        return static_cast<ArkUI_CoastingAxisEventPhase>(coastingAxisEvent->phase);
+    }
+    return ARKUI_COASTING_AXIS_EVENT_PHASE_NONE;
+}
+
+float OH_ArkUI_CoastingAxisEvent_GetDeltaX(ArkUI_CoastingAxisEvent* event)
+{
+    if (!event) {
+        return 0;
+    }
+    auto* coastingAxisEvent = reinterpret_cast<ArkUICoastingAxisEvent*>(event);
+    if (coastingAxisEvent) {
+        return coastingAxisEvent->deltaX;
+    }
+    return 0;
+}
+
+float OH_ArkUI_CoastingAxisEvent_GetDeltaY(ArkUI_CoastingAxisEvent* event)
+{
+    if (!event) {
+        return 0;
+    }
+    auto* coastingAxisEvent = reinterpret_cast<ArkUICoastingAxisEvent*>(event);
+    if (coastingAxisEvent) {
+        return coastingAxisEvent->deltaY;
+    }
+    return 0;
+}
+
+int32_t OH_ArkUI_CoastingAxisEvent_SetPropagation(ArkUI_CoastingAxisEvent* event, bool propagation)
+{
+    if (!event) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* coastingAxisEvent = reinterpret_cast<ArkUICoastingAxisEvent*>(event);
+    if (coastingAxisEvent) {
+        coastingAxisEvent->stopPropagation = !propagation;
+        return ARKUI_ERROR_CODE_NO_ERROR;
+    }
+    return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 #ifdef __cplusplus

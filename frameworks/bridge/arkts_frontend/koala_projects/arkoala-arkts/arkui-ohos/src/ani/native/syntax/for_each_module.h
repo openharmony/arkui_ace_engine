@@ -22,15 +22,22 @@
 
 namespace OHOS::Ace::Ani {
 
-ani_long ConstructForEachNode(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id, ani_object obj)
+ani_long ConstructForEachNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
+    ani_int id, ani_boolean isRepeat, ani_object obj)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
-        return 0;
-    }
+    CHECK_NULL_RETURN(modifier, 0);
 
-    ani_long node = modifier->getForEachNodeAniModifier()->constructForEachNode(id);
+    ani_long node = modifier->getForEachNodeAniModifier()->construct(id, isRepeat);
     return node;
+}
+
+void ForEachFinishRender(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+
+    modifier->getForEachNodeAniModifier()->finishRender(ptr);
 }
 
 } // namespace OHOS::Ace::Ani

@@ -73,6 +73,10 @@ public:
         int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_value callback);
     static void HandleDensityChange(NG::AbilityContextInfo& info, double density);
+    static void RegisterWinSizeLayoutBreakpointCallback(
+        int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterWinSizeLayoutBreakpointCallback(int32_t uiContextInstanceId, napi_value callback);
+    static void HandleWinSizeLayoutBreakpointChange(int32_t instanceId, const NG::WindowSizeBreakpoint& info);
     static void RegisterDrawCallback(int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterDrawCallback(int32_t uiContextInstanceId, napi_value callback);
     static void RegisterLayoutCallback(
@@ -199,6 +203,8 @@ private:
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> infosForRouterPage_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedDensityListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedWinSizeLayoutBreakpointListeners_;
 
     static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
         abilityContextWillClickListeners_;

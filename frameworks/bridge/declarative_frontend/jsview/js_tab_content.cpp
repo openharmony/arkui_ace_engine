@@ -17,18 +17,28 @@
 
 #include <optional>
 
+#include "base/image/image_defines.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/tab_content_model_impl.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/property/measure_property.h"
+
+namespace {
+constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
+constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
+constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
+constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
+} // namespace
 
 namespace OHOS::Ace {
 
@@ -202,6 +212,76 @@ void JSTabContent::Pop()
     TabContentModel::GetInstance()->Pop();
 }
 
+ImageType JSTabContent::ParseImageType(const JSRef<JSVal>& imageInfo)
+{
+    if (!imageInfo->IsObject()) {
+        return ImageType::BASE;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(imageInfo);
+    if (jsObj->IsUndefined()) {
+        return ImageType::BASE;
+    }
+    JSRef<JSVal> jsTypeName = jsObj->GetProperty("typeName");
+    if (!jsTypeName->IsString()) {
+        return ImageType::BASE;
+    }
+    auto typeName = jsTypeName->ToString();
+    if (typeName == DRAWABLE_DESCRIPTOR_NAME) {
+        return ImageType::DRAWABLE;
+    } else if (typeName == LAYERED_DRAWABLE_DESCRIPTOR_NAME) {
+        return ImageType::LAYERED_DRAWABLE;
+    } else if (typeName == ANIMATED_DRAWABLE_DESCRIPTOR_NAME) {
+        return ImageType::ANIMATED_DRAWABLE;
+    } else if (typeName == PIXELMAP_DRAWABLE_DESCRIPTOR_NAME) {
+        return ImageType::PIXELMAP_DRAWABLE;
+    } else {
+        return ImageType::BASE;
+    }
+}
+
+bool JSTabContent::ParseDrawableIndicator(const JSRef<JSVal>& info, ImageInfoConfig& drawableIndicatorConfig)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    if (!info->IsObject()) {
+        return false;
+    }
+
+    obj = JSRef<JSObject>::Cast(info);
+    if (!obj->HasProperty("drawable")) {
+        return false;
+    }
+
+    std::string src;
+    auto imageInfo = obj->GetProperty("drawable");
+    RefPtr<PixelMap> pixelMap = nullptr;
+    RefPtr<DrawableDescriptor> drawable = nullptr;
+    ImageType type = ImageType::BASE;
+#ifdef PIXEL_MAP_SUPPORTED
+    std::string bundleName;
+    std::string moduleName;
+    RefPtr<ResourceObject> resObj;
+    int32_t resId = 0;
+    bool srcValid = ParseJsMediaWithBundleName(imageInfo, src, bundleName, moduleName, resId, resObj);
+    if (!srcValid) {
+        type = ParseImageType(imageInfo);
+        if (type == ImageType::ANIMATED_DRAWABLE) {
+            auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(UnwrapNapiValue(imageInfo));
+            drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
+        } else if (type == ImageType::PIXELMAP_DRAWABLE || type == ImageType::DRAWABLE ||
+                   type == ImageType::LAYERED_DRAWABLE) {
+            pixelMap = GetDrawablePixmap(imageInfo);
+        } else {
+            return false;
+        }
+    }
+#endif
+    drawableIndicatorConfig.type = type;
+    drawableIndicatorConfig.pixelMap = pixelMap;
+    drawableIndicatorConfig.drawable = drawable;
+    return true;
+}
+
 void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -218,10 +298,17 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
     CalcDimension indicatorWidth;
     CalcDimension indicatorBorderRadius;
     CalcDimension indicatorMarginTop;
+    bool isDrawableIndicator = false;
     if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), indicator.color, indicatorColorResObj)) {
-        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
-        if (tabTheme) {
-            indicator.color = tabTheme->GetActiveIndicatorColor();
+        ImageInfoConfig drawableIndicatorConfig;
+        isDrawableIndicator = ParseDrawableIndicator(info, drawableIndicatorConfig);
+        if (isDrawableIndicator) {
+            TabContentModel::GetInstance()->SetDrawableIndicatorConfig(drawableIndicatorConfig);
+        } else {
+            RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+            if (tabTheme) {
+                indicator.color = tabTheme->GetActiveIndicatorColor();
+            }
         }
         TabContentModel::GetInstance()->SetIndicatorColorByUser(false);
     } else {
@@ -259,6 +346,7 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
     } else {
         indicator.marginTop = indicatorMarginTop;
     }
+    TabContentModel::GetInstance()->SetDrawableIndicatorFlag(isDrawableIndicator);
     TabContentModel::GetInstance()->SetIndicator(indicator);
     if (SystemProperties::ConfigChangePerform()) {
         TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::INDICATOR_COLOR, indicatorColorResObj);

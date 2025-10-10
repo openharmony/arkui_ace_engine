@@ -26,6 +26,7 @@
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "interfaces/inner_api/ui_session/ui_content_stub_impl.h"
+#include "interfaces/inner_api/ui_session/param_config.h"
 #include "key_event.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
@@ -40,6 +41,7 @@
 #include "core/common/update_config_manager.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/popup_param.h"
+#include "core/components_ng/base/observer_handler.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -580,6 +582,10 @@ protected:
     std::string restoreNavDestinationInfo_;
 
     VMType vmType_ = VMType::NORMAL;
+    NG::WindowSizeBreakpoint lastBreakpoint_;
+
+private:
+    void ProcessWindowSizeLayoutBreakPointChange();
 };
 
 } // namespace OHOS::Ace

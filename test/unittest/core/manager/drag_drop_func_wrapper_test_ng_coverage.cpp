@@ -18,6 +18,7 @@
 #include "gtest/gtest.h"
 #define private public
 
+#include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/base/mock_drag_window.h"
@@ -140,7 +141,7 @@ void SetFrameNodeAllowDrag(RefPtr<FrameNode>& frameNode)
     auto eventHub = gestureHub->eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
-    eventHub->onDragStart_ = func;
+    eventHub->SetOnDragStart(std::move(func));
 }
 /**
  * @tc.name: DragDropFuncWrapperTestNgCoverage001
@@ -1094,6 +1095,127 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, StartDragAction, TestSize.Level1)
     MockContainer::Current()->pipelineContext_->SetIsDragging(true);
     ret = DragDropFuncWrapper::StartDragAction(dragAction);
     EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: Test StartDragAction01
+ * @tc.desc: Test StartDragAction func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, StartDragAction01, TestSize.Level1)
+{
+    auto dragAction = std::make_shared<OHOS::Ace::NG::ArkUIInteralDragAction>();
+    ASSERT_NE(dragAction, nullptr);
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    AceEngine& aceEngine = AceEngine::Get();
+    ASSERT_NE(aceEngine, nullptr);
+    aceEngine.AddContainer(0, MockContainer::container_);
+    dragAction->instanceId = 0;
+
+    auto pipelineContext = PipelineContext::GetContextByContainerId(0);
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsDragging(false);
+
+    RefPtr<MockPixelMap> mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    ASSERT_NE(mockPixelMap, nullptr);
+    dragAction->pixelMapList.push_back(mockPixelMap);
+    EXPECT_CALL(*mockPixelMap, GetWidth()).Times(2).WillRepeatedly(testing::Return(10.0f));
+    EXPECT_CALL(*mockPixelMap, GetHeight()).Times(2).WillRepeatedly(testing::Return(10.0f));
+    dragAction->callback = [](const OHOS::Ace::DragNotifyMsg& info, int32_t status){};
+    int32_t ret = DragDropFuncWrapper::StartDragAction(dragAction);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: Test StartDragAction02
+ * @tc.desc: Test StartDragAction func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, StartDragAction02, TestSize.Level1)
+{
+    auto dragAction = std::make_shared<OHOS::Ace::NG::ArkUIInteralDragAction>();
+    ASSERT_NE(dragAction, nullptr);
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    AceEngine& aceEngine = AceEngine::Get();
+    ASSERT_NE(aceEngine, nullptr);
+    aceEngine.AddContainer(0, MockContainer::container_);
+    dragAction->instanceId = 0;
+
+    auto pipelineContext = PipelineContext::GetContextByContainerId(0);
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsDragging(false);
+
+    RefPtr<MockPixelMap> mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    ASSERT_NE(mockPixelMap, nullptr);
+    dragAction->pixelMapList.push_back(mockPixelMap);
+    EXPECT_CALL(*mockPixelMap, GetWidth()).Times(2).WillRepeatedly(testing::Return(10.0f));
+    EXPECT_CALL(*mockPixelMap, GetHeight()).Times(2).WillRepeatedly(testing::Return(10.0f));
+    dragAction->callback = [](const OHOS::Ace::DragNotifyMsg& info, int32_t status){};
+    dragAction->previewOption.isScaleEnabled = false;
+    int32_t ret = DragDropFuncWrapper::StartDragAction(dragAction);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: Test StartDragAction03
+ * @tc.desc: Test StartDragAction func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, StartDragAction03, TestSize.Level1)
+{
+    auto dragAction = std::make_shared<OHOS::Ace::NG::ArkUIInteralDragAction>();
+    ASSERT_NE(dragAction, nullptr);
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    AceEngine& aceEngine = AceEngine::Get();
+    ASSERT_NE(aceEngine, nullptr);
+    aceEngine.AddContainer(0, MockContainer::container_);
+    dragAction->instanceId = 0;
+
+    auto pipelineContext = PipelineContext::GetContextByContainerId(0);
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsDragging(false);
+
+    RefPtr<MockPixelMap> mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    ASSERT_NE(mockPixelMap, nullptr);
+    dragAction->pixelMapList.push_back(mockPixelMap);
+    EXPECT_CALL(*mockPixelMap, GetWidth()).Times(2).WillRepeatedly(testing::Return(10.0f));
+    EXPECT_CALL(*mockPixelMap, GetHeight()).Times(2).WillRepeatedly(testing::Return(0.0f));
+    dragAction->callback = [](const OHOS::Ace::DragNotifyMsg& info, int32_t status){};
+    int32_t ret = DragDropFuncWrapper::StartDragAction(dragAction);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: Test StartDragAction04
+ * @tc.desc: Test StartDragAction func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, StartDragAction04, TestSize.Level1)
+{
+    auto dragAction = std::make_shared<OHOS::Ace::NG::ArkUIInteralDragAction>();
+    ASSERT_NE(dragAction, nullptr);
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    AceEngine& aceEngine = AceEngine::Get();
+    ASSERT_NE(aceEngine, nullptr);
+    aceEngine.AddContainer(0, MockContainer::container_);
+    dragAction->instanceId = 0;
+
+    auto pipelineContext = PipelineContext::GetContextByContainerId(0);
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsDragging(false);
+
+    RefPtr<MockPixelMap> mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    ASSERT_NE(mockPixelMap, nullptr);
+    dragAction->pixelMapList.push_back(mockPixelMap);
+    EXPECT_CALL(*mockPixelMap, GetWidth()).Times(2).WillRepeatedly(testing::Return(0.0f));
+    EXPECT_CALL(*mockPixelMap, GetHeight()).Times(2).WillRepeatedly(testing::Return(10.0f));
+    dragAction->callback = [](const OHOS::Ace::DragNotifyMsg& info, int32_t status){};
+    int32_t ret = DragDropFuncWrapper::StartDragAction(dragAction);
+    ASSERT_EQ(ret, 0);
 }
 
 /**

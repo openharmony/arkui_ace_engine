@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ import { __context, __id } from "../internals"
  * @param listener - a function to perform if the given value has changed
  */
 /** @memo:intrinsic */
-export function OnChange<Value>(value: Value, listener: (value: Value) => void) {
+export function OnChange<Value>(value: Value, listener: (value: Value) => void): void {
     watch(__context(), __id(), false, value, listener)
 }
 
@@ -36,7 +36,7 @@ export function OnChange<Value>(value: Value, listener: (value: Value) => void) 
  * @param effect - a function to perform if the given value has changed or initialized
  */
 /** @memo:intrinsic */
-export function RunEffect<Value>(value: Value, effect: (value: Value) => void) {
+export function RunEffect<Value>(value: Value, effect: (value: Value) => void): void {
     watch(__context(), __id(), true, value, effect)
 }
 

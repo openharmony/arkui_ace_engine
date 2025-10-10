@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-#include "text_input_base.h"
-#include "core/components_ng/pattern/select/select_pattern.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "text_input_base.h"
+
+#include "core/components_ng/pattern/select/select_pattern.h"
+#include "core/components_ng/pattern/text/span/mutable_span_string.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 
 namespace OHOS::Ace::NG {
 
@@ -582,5 +584,59 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite004, TestSize.Level0)
     pattern_->HandleOnCameraInput();
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
     EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
+}
+
+/**
+ * @tc.name: PlaceholderResponseArea001
+ * @tc.desc: test PlaceholderResponseArea PlaceholderResponseArea001 function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, PlaceholderResponseArea001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    // 创建 PlaceholderResponseArea 实例
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"0123456789");
+    pattern_->SetPlaceholderStyledString(spanString);
+    auto placeholderResponseArea = pattern_->GetPlaceholderResponseArea();
+    ASSERT_NE(placeholderResponseArea, nullptr);
+    
+    // 验证 placeholderNode_ 是否创建成功
+    auto placeholderNode = placeholderResponseArea->GetFrameNode();
+    ASSERT_NE(placeholderNode, nullptr);
+    
+    // 验证节点标签是否正确
+    EXPECT_EQ(placeholderNode->GetTag(), V2::TEXT_ETS_TAG);
+    
+    // 验证手势事件中心是否正确配置
+    auto gesture = placeholderNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    EXPECT_EQ(gesture->GetHitTestMode(), HitTestMode::HTMNONE);
+}
+
+/**
+ * @tc.name: PlaceholderResponseArea002
+ * @tc.desc: test PlaceholderResponseArea PlaceholderResponseArea002 function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, PlaceholderResponseArea002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    // 创建 PlaceholderResponseArea 实例
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"0123456789");
+    pattern_->SetPlaceholderStyledString(spanString);
+    auto placeholderResponseArea = pattern_->GetPlaceholderResponseArea();
+    ASSERT_NE(placeholderResponseArea, nullptr);
+    
+    // 验证 placeholderNode_ 是否创建成功
+    auto placeholderNode = placeholderResponseArea->GetFrameNode();
+    ASSERT_NE(placeholderNode, nullptr);
+    
+    // 验证节点标签是否正确
+    EXPECT_EQ(placeholderNode->GetTag(), V2::TEXT_ETS_TAG);
+    
+    // 验证手势事件中心是否正确配置
+    auto gesture = placeholderNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    EXPECT_EQ(gesture->GetHitTestMode(), HitTestMode::HTMNONE);
 }
 } // namespace OHOS::Ace::NG

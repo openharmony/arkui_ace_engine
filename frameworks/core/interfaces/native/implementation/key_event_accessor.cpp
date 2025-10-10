@@ -14,15 +14,18 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/accessor_utils.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor();
+
 namespace {
 const auto DefaultValueInt32 = Converter::ArkValue<Ark_Number>(0);
+const Ark_Boolean DefaultValueBoolean = Converter::ArkValue<Ark_Boolean>(false);
 } // namespace
 
 namespace KeyEventAccessor {
@@ -30,19 +33,13 @@ void DestroyPeerImpl(Ark_KeyEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_KeyEvent CtorImpl()
+Ark_KeyEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<KeyEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
-Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
-                                    Ark_KeyEvent peer,
-                                    const Array_String* keys)
-{
-    return GetFullAPI()->getAccessors()->getBaseEventAccessor()->getModifierKeyState(vmContext, peer, keys);
 }
 Ark_KeyType GetTypeImpl(Ark_KeyEvent peer)
 {
@@ -98,13 +95,15 @@ void SetKeySourceImpl(Ark_KeyEvent peer,
 }
 Ark_Number GetDeviceIdImpl(Ark_KeyEvent peer)
 {
-    auto id = GetFullAPI()->getAccessors()->getBaseEventAccessor()->getDeviceId(peer);
+    auto id = GetBaseEventAccessor()->getDeviceId(peer);
     return Converter::GetOpt(id).value_or(Converter::ArkValue<Ark_Number>(-1));
 }
 void SetDeviceIdImpl(Ark_KeyEvent peer,
                      const Ark_Number* deviceId)
 {
-    GetFullAPI()->getAccessors()->getBaseEventAccessor()->setDeviceId(peer, deviceId);
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(deviceId);
+    peer->GetBaseInfo()->SetDeviceId(Converter::Convert<int>(*deviceId));
 }
 Ark_Number GetMetaKeyImpl(Ark_KeyEvent peer)
 {
@@ -124,14 +123,14 @@ void SetMetaKeyImpl(Ark_KeyEvent peer,
     const auto convMetaKey = Converter::Convert<int32_t>(*metaKey);
     info->SetMetaKey(convMetaKey);
 }
-Ark_Int64 GetTimestampImpl(Ark_KeyEvent peer)
+Ark_Number GetTimestampImpl(Ark_KeyEvent peer)
 {
-    return GetFullAPI()->getAccessors()->getBaseEventAccessor()->getTimestamp(peer);
+    return GetBaseEventAccessor()->getTimestamp(peer);
 }
 void SetTimestampImpl(Ark_KeyEvent peer,
-                      Ark_Int64 timestamp)
+                      const Ark_Number* timestamp)
 {
-    GetFullAPI()->getAccessors()->getBaseEventAccessor()->setTimestamp(peer, timestamp);
+    GetBaseEventAccessor()->setTimestamp(peer, timestamp);
 }
 Callback_Void GetStopPropagationImpl(Ark_KeyEvent peer)
 {
@@ -161,6 +160,27 @@ void SetIntentionCodeImpl(Ark_KeyEvent peer,
 {
     LOGW("ARKOALA KeyEventAccessor::SetIntentionCodeImpl doesn't have sense.");
 }
+Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_KeyEvent peer)
+{
+    const auto invalid = Converter::ArkValue<Opt_ModifierKeyStateGetter>(Ark_Empty());
+    CHECK_NULL_RETURN(peer, invalid);
+    auto info = peer->GetBaseInfo();
+    CHECK_NULL_RETURN(info, invalid);
+    auto getter = CallbackKeeper::RegisterReverseCallback<ModifierKeyStateGetter,
+            std::function<void(const Array_String, const Callback_Boolean_Void)>>([info]
+            (const Array_String keys, const Callback_Boolean_Void continuation) {
+        auto eventKeys = info->GetPressedKeyCodes();
+        auto keysStr = Converter::Convert<std::vector<std::string>>(keys);
+        Ark_Boolean arkResult = Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
+        CallbackHelper(continuation).InvokeSync(arkResult);
+    });
+    return Converter::ArkValue<Opt_ModifierKeyStateGetter, ModifierKeyStateGetter>(getter);
+}
+void SetGetModifierKeyStateImpl(Ark_KeyEvent peer,
+                                const Opt_ModifierKeyStateGetter* getModifierKeyState)
+{
+    LOGE("KeyEventAccessor.SetGetModifierKeyStateImpl does nothing");
+}
 Opt_Number GetUnicodeImpl(Ark_KeyEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
@@ -171,7 +191,7 @@ Opt_Number GetUnicodeImpl(Ark_KeyEvent peer)
     return Converter::ArkValue<Opt_Number>(unicode);
 }
 void SetUnicodeImpl(Ark_KeyEvent peer,
-                    const Ark_Number* unicode)
+                    const Opt_Number* unicode)
 {
     LOGW("ARKOALA KeyEventAccessor::SetUnicodeImpl doesn't have sense.");
 }
@@ -180,9 +200,8 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
 {
     static const GENERATED_ArkUIKeyEventAccessor KeyEventAccessorImpl {
         KeyEventAccessor::DestroyPeerImpl,
-        KeyEventAccessor::CtorImpl,
+        KeyEventAccessor::ConstructImpl,
         KeyEventAccessor::GetFinalizerImpl,
-        KeyEventAccessor::GetModifierKeyStateImpl,
         KeyEventAccessor::GetTypeImpl,
         KeyEventAccessor::SetTypeImpl,
         KeyEventAccessor::GetKeyCodeImpl,
@@ -201,6 +220,8 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
         KeyEventAccessor::SetStopPropagationImpl,
         KeyEventAccessor::GetIntentionCodeImpl,
         KeyEventAccessor::SetIntentionCodeImpl,
+        KeyEventAccessor::GetGetModifierKeyStateImpl,
+        KeyEventAccessor::SetGetModifierKeyStateImpl,
         KeyEventAccessor::GetUnicodeImpl,
         KeyEventAccessor::SetUnicodeImpl,
     };

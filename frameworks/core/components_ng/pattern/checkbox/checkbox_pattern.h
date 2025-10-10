@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/toggle/toggle_base_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
@@ -30,13 +31,12 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace::NG {
 class CheckBoxGroupPaintProperty;
-class CheckBoxPattern : public Pattern {
-    DECLARE_ACE_TYPE(CheckBoxPattern, Pattern);
+class CheckBoxPattern : public ToggleBasePattern {
+    DECLARE_ACE_TYPE(CheckBoxPattern, ToggleBasePattern);
 
 public:
     CheckBoxPattern() = default;

@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_LinearGradient peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_LinearGradient CtorImpl(const Array_ColorStop* colorStops)
+Ark_LinearGradient ConstructImpl(const Array_ColorStop* colorStops)
 {
     CHECK_NULL_RETURN(colorStops, nullptr);
     auto colors = Converter::Convert<std::vector<std::pair<std::optional<Color>, Dimension>>>(*colorStops);
@@ -39,7 +39,7 @@ const GENERATED_ArkUILinearGradientAccessor* GetLinearGradientAccessor()
 {
     static const GENERATED_ArkUILinearGradientAccessor LinearGradientAccessorImpl {
         LinearGradientAccessor::DestroyPeerImpl,
-        LinearGradientAccessor::CtorImpl,
+        LinearGradientAccessor::ConstructImpl,
         LinearGradientAccessor::GetFinalizerImpl,
     };
     return &LinearGradientAccessorImpl;

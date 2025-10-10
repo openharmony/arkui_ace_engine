@@ -27,7 +27,7 @@ void DestroyPeerImpl(Ark_TextController peer)
 {
     delete peer;
 }
-Ark_TextController CtorImpl()
+Ark_TextController ConstructImpl()
 {
     return new TextControllerPeer();
 }
@@ -56,7 +56,7 @@ Ark_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)
     CHECK_NULL_RETURN(peer && peer->controller, nullptr);
     auto layoutManagerAccessor = GetLayoutManagerAccessor();
     CHECK_NULL_RETURN(layoutManagerAccessor, nullptr);
-    auto layoutManagerPeer = layoutManagerAccessor->ctor();
+    auto layoutManagerPeer = layoutManagerAccessor->construct();
     CHECK_NULL_RETURN(layoutManagerPeer, nullptr);
     layoutManagerPeer->handler = peer->controller->GetLayoutInfoInterface();
     return layoutManagerPeer;
@@ -66,7 +66,7 @@ const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor()
 {
     static const GENERATED_ArkUITextControllerAccessor TextControllerAccessorImpl {
         TextControllerAccessor::DestroyPeerImpl,
-        TextControllerAccessor::CtorImpl,
+        TextControllerAccessor::ConstructImpl,
         TextControllerAccessor::GetFinalizerImpl,
         TextControllerAccessor::CloseSelectionMenuImpl,
         TextControllerAccessor::SetStyledStringImpl,

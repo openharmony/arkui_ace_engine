@@ -18,6 +18,7 @@
 #include <atomic>
 #include <cstdint>
 #include <functional>
+#include "param_config.h"
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include <iremote_object.h>
 
@@ -35,7 +36,7 @@
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UiSessionManager {
 public:
-    using InspectorFunction = std::function<void(bool onlyNeedVisible)>;
+    using InspectorFunction = std::function<void(bool onlyNeedVisible, ParamConfig config)>;
     using NotifyAllWebFunction = std::function<void(bool isRegister)>;
     using GetPixelMapFunction = std::function<void()>;
     using NotifySendCommandFunction = std::function<void(int32_t id, const std::string& command)>;
@@ -82,7 +83,7 @@ public:
     /**
      * @description: get current page inspector tree value
      */
-    virtual void GetInspectorTree() {};
+    virtual void GetInspectorTree(ParamConfig config = ParamConfig()) {};
     virtual void AddValueForTree(int32_t id, const std::string& value) {};
     virtual void WebTaskNumsChange(int32_t num) {};
     virtual void ReportInspectorTreeValue(const std::string& value) {};
@@ -152,8 +153,7 @@ public:
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     virtual void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) {};
 #endif
-    virtual void GetVisibleInspectorTree() {};
-
+    virtual void GetVisibleInspectorTree(ParamConfig config = ParamConfig()) {};
     virtual void RegisterPipeLineExeAppAIFunction(
         std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) {};
     virtual void ExeAppAIFunction(const std::string& funcName, const std::string& params) {};

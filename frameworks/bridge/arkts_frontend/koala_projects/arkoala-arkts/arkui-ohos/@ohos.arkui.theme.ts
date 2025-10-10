@@ -13,13 +13,8 @@
  * limitations under the License.
  */
 
-import { ResourceColor, Color } from 'arkui/component';
-import { ArkThemeScopeManager } from 'arkui/handwritten/theme/ArkThemeScopeManager';
-import { ArkSystemShapes } from 'arkui/handwritten/theme/system/ArkSystemShapes';
-import { ArkSystemTypography } from 'arkui/handwritten/theme/system/ArkSystemTypography';
-import { Shapes, Typography, CustomTypography, CustomShapes, BrandColors, ArkThemeResource } from 'arkui/handwritten/theme';
-import { Resource } from 'global.resource';
-import { ArkUIAniModule } from 'arkui.ani';
+import { ResourceColor } from 'arkui/component/units';
+import { ArkThemeScopeManager } from 'arkui/theme/ArkThemeScopeManager';
 import { _r } from 'arkui/component/resources';
 
 export interface Colors {

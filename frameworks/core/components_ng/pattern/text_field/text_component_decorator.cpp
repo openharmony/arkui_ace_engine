@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text_field/text_component_decorator.h"
 
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "frameworks/base/utils/multi_thread.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -47,11 +48,29 @@ void TextComponentDecorator::BuildDecorator()
 {
     auto decoratedNode = decoratedNode_.Upgrade();
     CHECK_NULL_VOID(decoratedNode);
+    FREE_NODE_CHECK(decoratedNode, BuildDecorator);
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
     textNode_ = textNode;
     CHECK_NULL_VOID(textNode);
     textNode->MountToParent(decoratedNode);
+}
+
+void TextComponentDecorator::BuildDecoratorMultiThread()
+{
+    auto decoratedNode = decoratedNode_.Upgrade();
+    CHECK_NULL_VOID(decoratedNode);
+    decoratedNode->PostAfterAttachMainTreeTask([weakThis = WeakClaim(this)]() {
+        auto decorator = weakThis.Upgrade();
+        CHECK_NULL_VOID(decorator);
+        auto decoratedNode = decorator->decoratedNode_.Upgrade();
+        CHECK_NULL_VOID(decoratedNode);
+        auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        decorator->textNode_ = textNode;
+        CHECK_NULL_VOID(textNode);
+        textNode->MountToParent(decoratedNode);
+    });
 }
 
 void TextComponentDecorator::CleanDecorator()
@@ -187,9 +206,10 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
     } else {
         accessibilityProperty->SetAccessibilityText("");
     }
-    TextStyle countTextStyle = (textFieldPattern->GetShowCounterStyleValue() && textFieldPattern->HasFocus()) ?
+    TextStyle countTextStyle = (textFieldPattern->GetShowCounterStyleValue() && textFieldPattern->HasFocus())?
                                 theme->GetOverCountTextStyle() :
                                 theme->GetCountTextStyle();
+    ProcessCounterColor(decoratedNode, countTextStyle);
     counterNodeLayoutProperty->UpdateContent(counterText);
     if (textFieldLayoutProperty->HasMaxFontScale()) {
         auto maxFontScale = textFieldLayoutProperty->GetMaxFontScale().value();
@@ -205,6 +225,23 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
     counterNodeLayoutProperty->UpdateTextAlign(GetCounterNodeAlignment());
     counterNodeLayoutProperty->UpdateMaxLines(theme->GetCounterTextMaxline());
     context->UpdateForegroundColor(countTextStyle.GetTextColor());
+}
+
+void CounterDecorator::ProcessCounterColor(RefPtr<FrameNode>& decoratedNode, TextStyle& countTextStyle)
+{
+    auto textFieldPattern = decoratedNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldLayoutProperty = decoratedNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (textFieldPattern->GetShowCounterStyleValue() && textFieldPattern->HasFocus()) {
+        if (textFieldLayoutProperty->HasCounterTextOverflowColor()) {
+            countTextStyle.SetTextColor(textFieldLayoutProperty->GetCounterTextOverflowColor());
+        }
+    } else {
+        if (textFieldLayoutProperty->HasCounterTextColor()) {
+            countTextStyle.SetTextColor(textFieldLayoutProperty->GetCounterTextColor());
+        }
+    }
 }
 
 std::string CounterDecorator::GetAccessibilityText(uint32_t textLength, uint32_t maxLength)

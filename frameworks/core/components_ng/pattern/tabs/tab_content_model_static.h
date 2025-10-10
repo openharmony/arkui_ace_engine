@@ -21,6 +21,7 @@
 
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,6 +29,7 @@ using TabBarBuilderFunc = std::function<void()>;
 
 class ACE_EXPORT TabContentModelStatic {
 public:
+    static void SetShallowBuilder(FrameNode* frameNode, const RefPtr<ShallowBuilder>& shallowBuilder);
     static void SetIndicator(FrameNode* frameNode, const std::optional<IndicatorStyle>& indicatorOpt);
     static void SetLabelStyle(FrameNode* frameNode, const std::optional<LabelStyle>& labelStyleOpt);
     static void SetSelectedMode(FrameNode* node, const std::optional<SelectedMode>& selectedMode);
@@ -45,6 +47,12 @@ public:
     static void SetOnWillShow(FrameNode* node, std::function<void()>&& onWillShow);
     static void SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void UpdateDefaultSymbol(RefPtr<TabTheme>& tabTheme, RefPtr<TextLayoutProperty> symbolProperty);
+    static void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive);
+    static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);
+    static RefPtr<TabsNode> FindTabsNode(const RefPtr<UINode>& tabContent);
+    static void AddTabBarItem(
+        const RefPtr<UINode>& tabContent, int32_t position = DEFAULT_NODE_SLOT, bool update = false);
 };
 } // namespace OHOS::Ace::NG
 

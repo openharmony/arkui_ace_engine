@@ -39,6 +39,7 @@ struct ResourceInfo {
     std::vector<std::string> params;
     std::optional<std::string> bundleName = std::nullopt;
     std::optional<std::string> moduleName = std::nullopt;
+    bool hasGetter = false;
 };
 
 enum class ResourceType : uint32_t {
@@ -117,6 +118,8 @@ bool ParseNapiColor(napi_env env, napi_value value, Color& result, RefPtr<Resour
 bool ParseNapiColor(napi_env env, napi_value value, Color& result);
 bool ParseStyle(napi_env env, napi_value value, std::optional<BorderStyle>& style);
 bool ParseShadowColorStrategy(napi_env env, napi_value value, ShadowColorStrategy& strategy);
+bool HasGetter(napi_env env, napi_value value, const std::string& key);
+int32_t GetStringFormatStartIndex(bool hasGetter);
 } // namespace OHOS::Ace::Napi
 
 #endif // FOUNDATION_ACE_INTERFACES_NAPI_KITS_UTILS_H

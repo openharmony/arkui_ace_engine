@@ -43,12 +43,17 @@ private:
 namespace {
 using ReverseResultHandler = std::variant<
     std::function<void()>,
-    std::function<void(bool)>,
+    std::function<void(const Array_String, const Callback_Boolean_Void)>,
+    std::function<void(const void *)>,
+    std::function<void(Ark_Boolean)>,
     std::function<void(Ark_Number)>,
+    std::function<void(Ark_DrawContext)>,
     std::function<void(Ark_Number, Ark_Number)>,
     std::function<void(Ark_Number, Ark_SliderChangeMode)>,
-    std::function<void(const void *)>,
-    std::function<void(Ark_Boolean)>
+    std::function<void(Ark_Number, Callback_Number_Void)>,
+    std::function<void(Ark_DrawContext, Ark_CustomSpanDrawInfo)>,
+    std::function<void(Ark_CustomSpanMeasureInfo, Callback_CustomSpanMetrics_Void)>,
+    std::monostate // Keep this last
 >;
 }
 
@@ -56,7 +61,7 @@ class CallbackKeeper : public BaseKeeper<ReverseResultHandler> {
 public:
     using AnyResultHandlerType = std::function<void(const void *)>;
     using ReverseHandler = std::function<void()>;
-    using BooleanHandlerType = std::function<void(bool)>;
+    using BooleanHandlerType = std::function<void(Ark_Boolean)>;
     using NumberHandlerType = std::function<void(Ark_Number)>;
     using ButtonTriggerClickHandlerType = std::function<void(Ark_Number, Ark_Number)>;
     using SliderTriggerChangeHandlerType = std::function<void(Ark_Number, Ark_SliderChangeMode)>;
@@ -137,7 +142,7 @@ public:
         Release(callback.resource.resourceId);
     }
 
-    template <typename CallbackType = Callback_Void>
+    template <typename CallbackType = VoidCallback>
     static AutoCallbackKeeper<CallbackType> Claim(ReverseHandler &&handler)
     {
         return AutoCallbackKeeper<CallbackType>(std::move(handler));

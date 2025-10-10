@@ -14,6 +14,7 @@
  */
 
 #include "core/interfaces/native/implementation/navigation_transition_proxy_peer.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -53,7 +54,7 @@ void DestroyPeerImpl(Ark_NavigationTransitionProxy peer)
 {
     delete peer;
 }
-Ark_NavigationTransitionProxy CtorImpl()
+Ark_NavigationTransitionProxy ConstructImpl()
 {
     return new NavigationTransitionProxyPeer();
 }
@@ -65,21 +66,6 @@ void FinishTransitionImpl(Ark_NavigationTransitionProxy peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->FireFinishCallback();
-}
-void CancelTransitionImpl(Ark_NavigationTransitionProxy peer)
-{
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->CancelInteractiveAnimation();
-}
-void UpdateTransitionImpl(Ark_NavigationTransitionProxy peer,
-                          const Ark_Number* progress)
-{
-    CHECK_NULL_VOID(peer && progress && peer->handler);
-    auto convProgress = Converter::OptConvert<float>(*progress);
-    Validator::ValidateByRange(convProgress, 0.0f, 1.0f);
-    if (convProgress.has_value()) {
-        peer->handler->UpdateTransition(convProgress.value());
-    }
 }
 Ark_NavContentInfo GetFromImpl(Ark_NavigationTransitionProxy peer)
 {
@@ -110,27 +96,81 @@ Opt_Boolean GetIsInteractiveImpl(Ark_NavigationTransitionProxy peer)
     return Converter::ArkValue<Opt_Boolean>(peer->handler->GetInteractive());
 }
 void SetIsInteractiveImpl(Ark_NavigationTransitionProxy peer,
-                          Ark_Boolean isInteractive)
+                          const Opt_Boolean* isInteractive)
 {
     CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->SetInteractive(Converter::Convert<bool>(isInteractive));
+    peer->handler->SetInteractive(Converter::OptConvertPtr<bool>(isInteractive).value_or(false));
+}
+Opt_VoidCallback GetCancelTransitionImpl(Ark_NavigationTransitionProxy peer)
+{
+    CHECK_NULL_RETURN(peer, {});
+    auto callback = CallbackKeeper::DefineReverseCallback<VoidCallback>([peer]() {
+        CHECK_NULL_VOID(peer && peer->handler);
+        peer->handler->FireCancelAnimation();
+    });
+    return Converter::ArkValue<Opt_VoidCallback>(callback);
+}
+void SetCancelTransitionImpl(Ark_NavigationTransitionProxy peer,
+                             const Opt_VoidCallback* cancelTransition)
+{
+    CHECK_NULL_VOID(peer && peer->handler);
+    std::function<void()> cancelAnimation = nullptr;
+    std::optional<VoidCallback> callback = Converter::GetOptPtr(cancelTransition);
+    if (callback) {
+        cancelAnimation = [arkCallback = CallbackHelper(*callback), peer]() {
+            CHECK_NULL_VOID(peer && peer->handler);
+            peer->handler->CancelInteractiveAnimation();
+            arkCallback.InvokeSync();
+        };
+    }
+    peer->handler->SetCancelAnimationCallback(std::move(cancelAnimation));
+}
+Opt_UpdateTransitionCallback GetUpdateTransitionImpl(Ark_NavigationTransitionProxy peer)
+{
+    auto callback = CallbackKeeper::RegisterReverseCallback<UpdateTransitionCallback,
+        std::function<void(Ark_Number)>>([peer](Ark_Number progress) {
+        CHECK_NULL_VOID(peer && peer->handler);
+        if (peer->handler->GetInteractive()) {
+            peer->FireUpdateProgress(Converter::Convert<float>(progress));
+        }
+    });
+    return Converter::ArkValue<Opt_UpdateTransitionCallback>(callback);
+}
+void SetUpdateTransitionImpl(Ark_NavigationTransitionProxy peer,
+                             const Opt_UpdateTransitionCallback* updateTransition)
+{
+    CHECK_NULL_VOID(peer && peer->handler);
+    std::function<void(const float& progress)> updateTransitionCallback = nullptr;
+    std::optional<UpdateTransitionCallback> updateTransitionOpt = Converter::GetOptPtr(updateTransition);
+    if (updateTransitionOpt) {
+        updateTransitionCallback = [arkCallback = CallbackHelper(*updateTransitionOpt), peer](const float& progress) {
+            CHECK_NULL_VOID(peer && peer->handler);
+            if (peer->handler->GetInteractive()) {
+                peer->handler->UpdateTransition(progress);
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(progress));
+            }
+        };
+    }
+    peer->SetUpdateProgressCallback(std::move(updateTransitionCallback));
 }
 } // NavigationTransitionProxyAccessor
 const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionProxyAccessor()
 {
     static const GENERATED_ArkUINavigationTransitionProxyAccessor NavigationTransitionProxyAccessorImpl {
         NavigationTransitionProxyAccessor::DestroyPeerImpl,
-        NavigationTransitionProxyAccessor::CtorImpl,
+        NavigationTransitionProxyAccessor::ConstructImpl,
         NavigationTransitionProxyAccessor::GetFinalizerImpl,
         NavigationTransitionProxyAccessor::FinishTransitionImpl,
-        NavigationTransitionProxyAccessor::CancelTransitionImpl,
-        NavigationTransitionProxyAccessor::UpdateTransitionImpl,
         NavigationTransitionProxyAccessor::GetFromImpl,
         NavigationTransitionProxyAccessor::SetFromImpl,
         NavigationTransitionProxyAccessor::GetToImpl,
         NavigationTransitionProxyAccessor::SetToImpl,
         NavigationTransitionProxyAccessor::GetIsInteractiveImpl,
         NavigationTransitionProxyAccessor::SetIsInteractiveImpl,
+        NavigationTransitionProxyAccessor::GetCancelTransitionImpl,
+        NavigationTransitionProxyAccessor::SetCancelTransitionImpl,
+        NavigationTransitionProxyAccessor::GetUpdateTransitionImpl,
+        NavigationTransitionProxyAccessor::SetUpdateTransitionImpl,
     };
     return &NavigationTransitionProxyAccessorImpl;
 }

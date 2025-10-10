@@ -206,6 +206,7 @@ struct TouchRestrict final {
     InputEventType inputEventType = InputEventType::TOUCH_SCREEN;
     // use to dump event tree
     NG::EventTreeType touchTestType = NG::EventTreeType::TOUCH;
+    bool isCoastingAxisEvent = false;
 };
 
 class TouchCallBackInfo : public BaseEventInfo {

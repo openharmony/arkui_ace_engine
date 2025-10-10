@@ -321,6 +321,18 @@ class ArkLinearGradientBlur {
   }
 }
 
+class ArkCustomKeyboard {
+  value: ComponentContent | undefined;
+  supportAvoidance?: boolean | undefined;
+  constructor() {
+    this.value = undefined;
+    this.supportAvoidance = undefined;
+  }
+  isEqual(another: ArkCustomKeyboard): boolean {
+    return ((this.value === another.value) && (this.supportAvoidance === another.supportAvoidance));
+  }
+}
+
 class ArkOverlay {
   value: string | CustomBuilder | undefined;
   align: number | undefined;
@@ -1228,10 +1240,14 @@ class ArkTextFieldShowCounter {
   value: boolean;
   highlightBorder?: boolean;
   thresholdPercentage?: number;
+  counterTextColor?: ResourceColor;
+  counterTextOverflowColor?: ResourceColor;
   constructor() {
     this.value = undefined;
     this.highlightBorder = undefined;
     this.thresholdPercentage = undefined;
+    this.counterTextColor = undefined;
+    this.counterTextOverflowColor = undefined;
   }
   isEqual(another: ArkTextFieldShowCounter): boolean {
     return (this.value === another.value) &&

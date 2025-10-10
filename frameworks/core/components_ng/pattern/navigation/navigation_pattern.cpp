@@ -1622,7 +1622,7 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
 
     if (isOnShow) {
         if (overlayManager && overlayManager->HasModalPage() &&
-            navigationPattern->GetEnableShowHideWithContentCover()) {
+            navigationPattern->GetEnableVisibilityLifecycleWithContentCover()) {
             return;
         }
         if (needHideOrShowPrimaryNodes) {
@@ -1727,7 +1727,7 @@ void NavigationPattern::FireNavigationLifecycleChange(
             auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
             CHECK_NULL_VOID(navigationPattern);
             if (reason == NavDestVisibilityChangeReason::CONTENT_COVER &&
-                !navigationPattern->GetEnableShowHideWithContentCover()) {
+                !navigationPattern->GetEnableVisibilityLifecycleWithContentCover()) {
                 continue;
             }
             navigationPattern->FireNavDestinationStateChange(lifecycle, reason);
@@ -2862,8 +2862,6 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "preDestination and topDestination is invalid");
         return;
     }
-    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition end");
-    PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     auto replaceValue = navigationStack_->GetReplaceValue();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -4066,8 +4064,6 @@ void NavigationPattern::RecoveryToLastStack(
 
     // update name index
     navigationStack_->RecoveryNavigationStack();
-    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page transition end");
-    PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     hostNode->SetIsOnAnimation(false);
     auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
     hostNode->OnAccessibilityEvent(
@@ -5709,7 +5705,7 @@ void NavigationPattern::RemoveRedundantPrimaryNavDestination()
     }
 }
 
-bool NavigationPattern::IsHomeDestinationVisible()
+bool NavigationPattern::IsHomeDestinationOrNavBarVisible()
 {
     auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(host, false);

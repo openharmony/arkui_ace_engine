@@ -28,6 +28,7 @@ public:
     TextComponentDecorator(const RefPtr<FrameNode>& decoratedNode);
     ~TextComponentDecorator();
     void BuildDecorator();
+    void BuildDecoratorMultiThread();
     void CleanDecorator();
     virtual void UpdateTextFieldMargin() = 0;
     virtual float MeasureDecorator(float contentWidth, const std::u16string& textContent, bool showPlaceHolder) = 0;
@@ -59,6 +60,7 @@ private:
     void HandleNonTextArea();
     void HandleTextArea();
     std::string GetAccessibilityText(uint32_t textLength, uint32_t maxLength);
+    void ProcessCounterColor(RefPtr<FrameNode>& decoratedNode, TextStyle& countTextStyle);
 };
 
 class ACE_EXPORT ErrorDecorator : public TextComponentDecorator {

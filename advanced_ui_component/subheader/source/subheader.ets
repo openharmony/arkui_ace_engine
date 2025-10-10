@@ -37,10 +37,21 @@ const RESOURCE_TYPE_SYMBOL: number = 40000;
 const LEFT_ICON_SIZE_NUMBER: number = 16;
 const LEFT_TEXT_NUMBER: number = 8;
 // 右边尺寸常量
-const OPERATE_ITEM_LENGTH: number = 24;
-const ARROW_ICON_WIDTH: number = 12;
-const SINGLE_ICON_ZONE_SIZE: number = 28;
-const RIGHT_SINGLE_ICON_SIZE: ResourceStr = '24vp';
+const OPERATE_ITEM_LENGTH = lazyInit<number>(() => {
+  return getResourceValue('sys.float.subheader_right_arrow_height');
+});
+const ARROW_ICON_WIDTH = lazyInit<number>(() => {
+  return getResourceValue('sys.float.subheader_right_arrow_width');
+});
+const SINGLE_ICON_ZONE_SIZE = lazyInit<number>(() => {
+  return getResourceValue('sys.float.subheader_right_icon_zone_size');
+});
+const RIGHT_SINGLE_ICON_SIZE = lazyInit<number>(() => {
+  return getResourceValue('sys.float.subheader_right_icon_size');
+});
+const DEFAULT_FOCUS_STYLE = lazyInit<number>(() => {
+  return getResourceValue('sys.float.subheader_right_button_default_focus_style');
+});
 const PADDING_LEVEL_2: number = 4;
 const MAX_RIGHT_WIDTH: Length = '34%';
 const MIN_FONT_SIZE: number = 1.75;
@@ -222,6 +233,38 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_left_icon_end_margin', { resourceId:
 RESOURCE_CACHE_MAP.set('sys.float.subheader_subtitle_font_weight', { resourceId: 125835685, defaultValue: 400 });
 // subheader_titles_space: 125835686, padding_level1, 2
 RESOURCE_CACHE_MAP.set('sys.float.subheader_titles_space', { resourceId: 125835686, defaultValue: 2 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_padding_horizontal', { resourceId: 125835784, defaultValue: 2 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_padding_vertical', { resourceId: 125835785, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_x_offset', { resourceId: 125835786, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_radius', { resourceId: 125835787, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_default_focus_style', { resourceId: 125835788, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_margin_start', { resourceId: 125835789, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_margin_bottom', { resourceId: 125835790, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_right_button_margin_bottom', { resourceId: 125835791, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_padding_vertical', { resourceId: 125835792, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_padding_start', { resourceId: 125835793, defaultValue: 2 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_font_arrow_space', { resourceId: 125835794, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_arrow_padding_horizontal', { resourceId: 125835795, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_arrow_x_offset', { resourceId: 125835796, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_arrow_margin_start', { resourceId: 125835797, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_arrow_height', { resourceId: 125835798, defaultValue: 24 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_arrow_width', { resourceId: 125835799, defaultValue: 12 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_arrow_margin_bottom', { resourceId: 125835800, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_right_text_arrow_margin_bottom', { resourceId: 125835801, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_arrow_radius', { resourceId: 125835802, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_only_arrow_margin_bottom', { resourceId: 125835803, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_group_padding_start', { resourceId: 125835804, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_group_margin_bottom', { resourceId: 125835805, defaultValue: 6 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_right_icon_group_margin_bottom', { resourceId: 125835806, defaultValue: 6 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_group_x_offset', { resourceId: 125835807, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_radius', { resourceId: 125835808, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_image_radius', { resourceId: 125835809, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_image_padding', { resourceId: 125835810, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_zone_size', { resourceId: 125835811, defaultValue: 28 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_size', { resourceId: 125835812, defaultValue: 24 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_loading_padding_bottom', { resourceId: 125835813, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_right_loading_padding_bottom', { resourceId: 125835814, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_loading_margin_start', { resourceId: 125835815, defaultValue: 8 });
 
 @Component
 export struct SubHeader {
@@ -607,16 +650,16 @@ export struct SubHeader {
 
   private getTextArrowPaddingLeft(): LengthMetrics {
     if (this.operationItem && this.operationItem.length > 0 && this.operationItem[0].value) {
-      return LengthMetrics.vp(getResourceValue('sys.float.padding_level1'));
+      return LengthMetrics.vp(getResourceValue('sys.float.subheader_right_text_padding_start'));
     }
     return LengthMetrics.vp(getResourceValue('sys.float.padding_level0'));
   }
 
   private getTextArrowMarginRight(): LengthMetrics {
     if (this.operationItem && this.operationItem.length > 0 && this.operationItem[0].value) {
-      return LengthMetrics.vp(PADDING_LEVEL_2 + ARROW_ICON_WIDTH);
+      return LengthMetrics.vp(getResourceValue('sys.float.subheader_right_font_arrow_space') + ARROW_ICON_WIDTH());
     }
-    return LengthMetrics.vp(ARROW_ICON_WIDTH);
+    return LengthMetrics.vp(ARROW_ICON_WIDTH());
   }
 
   private getAreaPadding(): LocalizedPadding {
@@ -691,7 +734,7 @@ export struct SubHeader {
         SymbolGlyph($$.iconOptions?.icon)
           .fontSize($$.iconOptions?.symbolicIconOption?.fontSize ?
           Util.symbolFontSize($$.iconOptions?.symbolicIconOption?.fontSize) :
-            getResourceValue('sys.float.subheader_left_icon_size'))
+          getResourceValue('sys.float.subheader_left_icon_size'))
           .fontColor($$.iconOptions?.symbolicIconOption?.fontColor ?? [this.subHeaderTheme.leftIconColor])
           .fontWeight($$.iconOptions?.symbolicIconOption?.fontWeight)
           .renderingStrategy($$.iconOptions?.symbolicIconOption?.renderingStrategy)
@@ -817,24 +860,35 @@ export struct SubHeader {
         strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
       })
       .padding({
-        start: LengthMetrics.vp(getResourceValue('sys.float.padding_level1')),
-        end: LengthMetrics.vp(getResourceValue('sys.float.padding_level1')),
-        top: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
-        bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
+        start: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_horizontal')),
+        end: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_horizontal')),
+        top: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_vertical')),
+        bottom: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_vertical')),
       })
       .margin({
         start: this.ageing ?
         LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.padding_level0')).value +
         this.leftIconMargin().value) :
-        LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.padding_level4')).value +
+        LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_margin_start')).value +
         this.leftIconMargin().value),
         bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-        getResourceValue('sys.float.padding_level2')),
+          (this.secondaryTitle && this.primaryTitle ?
+          getResourceValue('sys.float.subheader_right_button_margin_bottom') :
+          getResourceValue('sys.float.subheader_single_right_button_margin_bottom'))),
       })
       .backgroundColor(this.buttonBgColor)
-      .constraintSize({ minHeight: OPERATE_ITEM_LENGTH })
+      .constraintSize({ minHeight: OPERATE_ITEM_LENGTH() })
       .align(Alignment.End)
-      .borderRadius(getResourceValue('sys.float.corner_radius_level4'))
+      .borderRadius(getResourceValue('sys.float.subheader_right_button_radius'))
+      .offset({ x: getResourceValue('sys.float.subheader_right_button_x_offset') })
+      .attributeModifier(!DEFAULT_FOCUS_STYLE() ? undefined :
+        new DefaultFocusStyleModifier((isFocused: boolean): void => {
+          if (isFocused) {
+            this.buttonBgColor = $r('sys.color.comp_background_focus')
+          } else {
+            this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+          }
+        }))
       .onHover((isHover: boolean) => {
         if (isHover) {
           this.buttonBgColor = this.subHeaderTheme.textArrowHoverBgColor;
@@ -884,11 +938,13 @@ export struct SubHeader {
     .attributeModifier(this.subHeaderModifier)
     .alignItems(VerticalAlign.Center)
     .focusable(true)
-    .constraintSize({ minHeight: OPERATE_ITEM_LENGTH })
+    .constraintSize({ minHeight: OPERATE_ITEM_LENGTH() })
     .padding({
       start: this.getTextArrowPaddingLeft(),
-      top: this.ageing ? LengthMetrics.vp(0) : LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
-      bottom: this.ageing ? LengthMetrics.vp(0) : LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
+      top: this.ageing ? LengthMetrics.vp(0) :
+      LengthMetrics.vp(getResourceValue('sys.float.subheader_right_text_padding_vertical')),
+      bottom: this.ageing ? LengthMetrics.vp(0) :
+      LengthMetrics.vp(getResourceValue('sys.float.subheader_right_text_padding_vertical')),
     })
   }
 
@@ -896,11 +952,11 @@ export struct SubHeader {
   ArrowStyle(): void {
     Row() {
       SymbolGlyph($r('sys.symbol.chevron_right'))
-        .fontSize(RIGHT_SINGLE_ICON_SIZE)
+        .fontSize(OPERATE_ITEM_LENGTH())
         .fontColor([this.subHeaderTheme.iconArrowColor])
         .draggable(false)
-        .width(ARROW_ICON_WIDTH)
-        .height(OPERATE_ITEM_LENGTH)
+        .width(ARROW_ICON_WIDTH())
+        .height(OPERATE_ITEM_LENGTH())
     }
     .justifyContent(FlexAlign.End)
   }
@@ -920,7 +976,12 @@ export struct SubHeader {
             });
           }
         }
-        .padding(INDEX_ZERO)
+        .padding({
+          top: INDEX_ZERO,
+          bottom: INDEX_ZERO,
+          left: getResourceValue('sys.float.subheader_right_text_arrow_padding_horizontal'),
+          right: getResourceValue('sys.float.subheader_right_text_arrow_padding_horizontal'),
+        })
         .margin({ start: this.leftIconMargin() })
         .backgroundColor(this.textArrowBgColor)
         .focusBox({
@@ -928,7 +989,16 @@ export struct SubHeader {
           strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
           strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
         })
-        .borderRadius(getResourceValue('sys.float.corner_radius_level4'))
+        .borderRadius(getResourceValue('sys.float.subheader_right_text_arrow_radius'))
+        .offset({ x: getResourceValue('sys.float.subheader_right_text_arrow_x_offset') })
+        .attributeModifier(!DEFAULT_FOCUS_STYLE() ? undefined :
+          new DefaultFocusStyleModifier((isFocused: boolean): void => {
+            if (isFocused) {
+              this.textArrowBgColor = $r('sys.color.comp_background_focus');
+            } else {
+              this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+            }
+          }))
         .stateStyles({
           pressed: pressedStyle,
           disabled: disabledStyle,
@@ -945,30 +1015,40 @@ export struct SubHeader {
       .align(this.ageing ? Alignment.Start : Alignment.End)
       .margin({
         start: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-        getResourceValue('sys.float.padding_level4')),
+        getResourceValue('sys.float.subheader_right_text_arrow_margin_start')),
         bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-        getResourceValue('sys.float.padding_level2')),
+          (this.secondaryTitle && this.primaryTitle ?
+          getResourceValue('sys.float.subheader_right_text_arrow_margin_bottom') :
+          getResourceValue('sys.float.subheader_single_right_text_arrow_margin_bottom'))),
       })
     } else {
       Row() {
         Button({ type: ButtonType.Normal, stateEffect: false }) {
           SymbolGlyph($r('sys.symbol.chevron_right'))
-            .fontSize(RIGHT_SINGLE_ICON_SIZE)
+            .fontSize(OPERATE_ITEM_LENGTH())
             .fontColor([this.subHeaderTheme.iconArrowColor])
             .draggable(false)
             .focusable(true)
-            .width(ARROW_ICON_WIDTH)
-            .height(OPERATE_ITEM_LENGTH)
+            .width(ARROW_ICON_WIDTH())
+            .height(OPERATE_ITEM_LENGTH())
         }
-        .width(ARROW_ICON_WIDTH)
-        .height(OPERATE_ITEM_LENGTH)
+        .width(ARROW_ICON_WIDTH())
+        .height(OPERATE_ITEM_LENGTH())
         .backgroundColor(this.textArrowBgColor)
         .focusBox({
           margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
           strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
           strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
         })
-        .borderRadius(getResourceValue('sys.float.corner_radius_level4'))
+        .borderRadius(getResourceValue('sys.float.subheader_right_text_arrow_radius'))
+        .attributeModifier(!DEFAULT_FOCUS_STYLE() ? undefined :
+          new DefaultFocusStyleModifier((isFocused: boolean): void => {
+            if (isFocused) {
+              this.textArrowBgColor = $r('sys.color.comp_background_focus');
+            } else {
+              this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+            }
+          }))
         .stateStyles({
           pressed: pressedStyle,
           disabled: disabledStyle,
@@ -983,11 +1063,14 @@ export struct SubHeader {
         .focusable(true)
         .margin({
           start: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-          getResourceValue('sys.float.padding_level4')),
+          getResourceValue('sys.float.subheader_right_text_arrow_margin_start')),
           bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-          getResourceValue('sys.float.padding_level2')),
+            (this.secondaryTitle && this.primaryTitle ?
+            getResourceValue('sys.float.subheader_right_text_arrow_margin_bottom') :
+            getResourceValue('sys.float.subheader_single_right_text_arrow_margin_bottom'))),
         })
       }
+      .margin({ bottom: getResourceValue('sys.float.subheader_right_only_arrow_margin_bottom')})
       .focusable(true)
       .constraintSize({ minWidth: this.getRightAreaMinWidth() })
       .justifyContent(FlexAlign.End)
@@ -1015,9 +1098,12 @@ export struct SubHeader {
             isSingleIcon: this.operationItem?.length === SINGLE_ICON_NUMBER,
           })
             .margin({
-              start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
-              bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level3')),
+              start: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_icon_group_padding_start')),
+              bottom: LengthMetrics.vp(this.secondaryTitle && this.primaryTitle ?
+              getResourceValue('sys.float.subheader_right_icon_group_margin_bottom') :
+              getResourceValue('sys.float.subheader_single_right_icon_group_margin_bottom')),
             })
+            .offset({ x: getResourceValue('sys.float.subheader_right_icon_group_x_offset') })
         } else {
           // 最大支持3个ICON,此场景不支持
         }
@@ -1031,17 +1117,19 @@ export struct SubHeader {
   LoadingProcessStyle(): void {
     Row() {
       LoadingProgress()
-        .width(OPERATE_ITEM_LENGTH)
-        .height(OPERATE_ITEM_LENGTH)
+        .width(OPERATE_ITEM_LENGTH())
+        .height(OPERATE_ITEM_LENGTH())
         .color($r('sys.color.icon_secondary'))
     }
     .justifyContent(FlexAlign.End)
     .padding({
       top: getResourceValue('sys.float.padding_level2'),
-      bottom: getResourceValue('sys.float.padding_level2'),
+      bottom: this.secondaryTitle && this.primaryTitle ?
+      getResourceValue('sys.float.subheader_right_loading_padding_bottom') :
+      getResourceValue('sys.float.subheader_single_right_loading_padding_bottom'),
     })
     .margin({
-      start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+      start: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_loading_margin_start')),
     })
   }
 
@@ -1088,11 +1176,11 @@ struct SingleIconStyle {
       }
       .focusable(true)
       .defaultFocus(this.item.defaultFocus)
-      .width(SINGLE_ICON_ZONE_SIZE)
-      .height(SINGLE_ICON_ZONE_SIZE)
+      .width(SINGLE_ICON_ZONE_SIZE())
+      .height(SINGLE_ICON_ZONE_SIZE())
       .align(Alignment.Center)
       .backgroundColor(this.bgColor)
-      .borderRadius(getResourceValue('sys.float.corner_radius_level4'))
+      .borderRadius(getResourceValue('sys.float.subheader_right_icon_radius'))
       .accessibilityLevel(this.getRightIconAccessibilityLevel())
       .accessibilityText(this.getRightIconAccessibilityText())
       .accessibilityDescription(this.getRightIconAccessibilityDescription())
@@ -1105,6 +1193,14 @@ struct SingleIconStyle {
         pressed: pressedStyle,
         disabled: disabledStyle,
       })
+      .attributeModifier(!DEFAULT_FOCUS_STYLE() ? undefined :
+        new DefaultFocusStyleModifier((isFocused: boolean): void => {
+          if (isFocused) {
+            this.bgColor = $r('sys.color.comp_background_focus')
+          } else {
+            this.bgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+          }
+        }))
       .onTouch((event) => {
         if (event.type === TouchType.Down || TouchType.Cancel) {
           this.bgColor = $r('sys.color.interactive_pressed');
@@ -1148,7 +1244,7 @@ struct SingleIconStyle {
 
   private fontSizeValue(item: ContentIconOption): Length {
     return item.iconOptions?.symbolicIconOption?.fontSize ?
-    Util.symbolFontSize(item.iconOptions?.symbolicIconOption?.fontSize) : RIGHT_SINGLE_ICON_SIZE;
+    Util.symbolFontSize(item.iconOptions?.symbolicIconOption?.fontSize) : RIGHT_SINGLE_ICON_SIZE();
   }
 
   @Builder
@@ -1162,13 +1258,17 @@ struct SingleIconStyle {
           .fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight)
           .renderingStrategy(this.item.iconOptions?.symbolicIconOption?.renderingStrategy)
           .effectStrategy(this.item.iconOptions?.symbolicIconOption?.effectStrategy)
+          .borderRadius(getResourceValue('sys.float.subheader_right_image_radius'))
+          .padding(getResourceValue('sys.float.subheader_right_image_padding'))
       } else {
         Image(this.item?.iconOptions?.icon)
           .fillColor(this.subHeaderTheme.rightIconColor)
-          .width(RIGHT_SINGLE_ICON_SIZE)
-          .height(RIGHT_SINGLE_ICON_SIZE)
+          .width(RIGHT_SINGLE_ICON_SIZE())
+          .height(RIGHT_SINGLE_ICON_SIZE())
           .focusable(true)
           .draggable(false)
+          .borderRadius(getResourceValue('sys.float.subheader_right_image_radius'))
+          .padding(getResourceValue('sys.float.subheader_right_image_padding'))
       }
     }
   }
@@ -1299,8 +1399,8 @@ struct TextArrowLayout {
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
     constraint: ConstraintSizeOptions): SizeResult {
-    let textArrowWidth: number = ARROW_ICON_WIDTH;
-    let textArrowHeight: number = OPERATE_ITEM_LENGTH;
+    let textArrowWidth: number = ARROW_ICON_WIDTH();
+    let textArrowHeight: number = OPERATE_ITEM_LENGTH();
 
     let textChild: Measurable = children[INDEX_ZERO];
     let textConstraint: ConstraintSizeOptions = {
@@ -1326,5 +1426,43 @@ struct TextArrowLayout {
 
   build() {
     this.textArrowBuilder();
+  }
+}
+
+/**
+ * lazy init
+ * @param initializer lazy initializer
+ * @returns lazy init result
+ */
+function lazyInit<T>(initializer: () => T): () => T {
+  let value: T | null = null;
+  return () => {
+    if (value === null) {
+      value = initializer();
+    }
+    return value;
+  };
+}
+
+class DefaultFocusStyleModifier implements AttributeModifier<ButtonAttribute> {
+  private stateStyleAction?: (isFocused: boolean) => void;
+
+  constructor(stateStyleAction: (isFocused: boolean) => void) {
+    this.stateStyleAction = stateStyleAction;
+  }
+
+  applyNormalAttribute(instance: ButtonAttribute): void {
+    if (!instance) {
+      return;
+    }
+    instance
+      .focusBox(undefined)
+      .scale(undefined)
+      .onFocus(() => {
+        this.stateStyleAction && this.stateStyleAction(true);
+      })
+      .onBlur(() => {
+        this.stateStyleAction && this.stateStyleAction(false);
+      })
   }
 }

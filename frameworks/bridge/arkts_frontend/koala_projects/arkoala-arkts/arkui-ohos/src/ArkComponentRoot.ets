@@ -1,0 +1,77 @@
+/*
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { mutableState, MutableState, NodeAttach, rememberDisposable, RunEffect, scheduleCallback } from "@koalaui/runtime"
+import { PeerNode } from "./PeerNode";
+import { ArkCustomComponentRootPeer } from "#generated";
+import { ArkCustomComponent } from "./ArkCustomComponent"
+import { InteropNativeModule } from "@koalaui/interop"
+import { __context, GlobalStateManager, StateManager } from "@koalaui/runtime"
+
+export function setNeedCreate(isNeedCreate: boolean): boolean
+{
+    const temp = GlobalStateManager.instance._isNeedCreate
+    GlobalStateManager.instance._isNeedCreate = isNeedCreate
+    return temp
+}
+
+@memo
+export function ArkComponentRoot(
+    component: ArkCustomComponent,
+    @memo
+    content: (node: PeerNode) => void
+) {
+    InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot enter`)
+    NodeAttach<PeerNode>(
+        () => ArkCustomComponentRootPeer.create(component),
+        (node: PeerNode) => {
+            if ((__context() as StateManager)._isNeedCreate) {
+                rememberDisposable(() => {
+                    let state = mutableState(false)
+                    scheduleCallback(() => { })
+                    return state;
+                }, (_: MutableState<boolean> | undefined) => {
+                    scheduleCallback(() => {
+                        component.aboutToDisappear()
+                    })
+                })
+                component.aboutToAppear()
+                InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach before content`)
+                content(node)
+                InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach after content`)
+                return
+            }
+            let shown = rememberDisposable(() => {
+                let state = mutableState(false)
+                scheduleCallback(() => {
+                    component.aboutToAppear()
+                    state.value = true
+                })
+                return state
+            }, (_: MutableState<boolean> | undefined) =>
+                scheduleCallback(() => {
+                    component.aboutToDisappear()
+                })
+            )
+            InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach before condition ${shown.value}`)
+            if (shown.value) {
+                InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach before WithRouterTransitionState`)
+                InteropNativeModule._NativeLog("AceRouter:ArkComponentRoot NodeAttach, UpdateRouter page visibility state")
+                content(node);
+                InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach after WithRouterTransitionState`)
+            }
+        }
+    )
+}

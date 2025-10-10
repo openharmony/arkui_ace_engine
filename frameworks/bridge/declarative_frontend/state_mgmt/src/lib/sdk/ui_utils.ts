@@ -97,6 +97,18 @@ class UIUtilsImpl {
       ObserveV2.getObserve().clearMonitorPath(target, path, monitorFunc);
     }
 
+    public applySync<T>(task: () => T): T {
+      return ObserveV2.getObserve().applySync(task);
+    }
+
+    public flushUpdates(): void {
+      ObserveV2.getObserve().flushUpdates();
+    }
+
+    public flushUIUpdates(): void {
+      ObserveV2.getObserve().flushUIUpdates();
+    }
+
     public static instance(): UIUtilsImpl {
       if (UIUtilsImpl.instance_) {
         return UIUtilsImpl.instance_;

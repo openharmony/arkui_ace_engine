@@ -43,7 +43,7 @@ void GetImpl(const Ark_String* id,
 {
     CHECK_NULL_VOID(id);
     CHECK_NULL_VOID(callback);
-    auto opts = options ? Converter::OptConvert<SnapshotOptions>(*options) : std::nullopt;
+    auto opts = Converter::OptConvertPtr<SnapshotOptions>(options);
     auto componentId = Converter::Convert<std::string>(*id);
     auto onDone = [arkCallback = CallbackHelper(*callback)](
         std::shared_ptr<Media::PixelMap> mediaPixelMap, int32_t errorCode, std::function<void()> inCallback) {
@@ -51,7 +51,7 @@ void GetImpl(const Ark_String* id,
             return;
         }
         RefPtr<PixelMap> pixelMapRef = PixelMap::CreatePixelMap(&mediaPixelMap);
-        static PixelMapPeer peer;
+        image_PixelMapPeer peer;
         peer.pixelMap = pixelMapRef;
         arkCallback.Invoke(&peer);
     };

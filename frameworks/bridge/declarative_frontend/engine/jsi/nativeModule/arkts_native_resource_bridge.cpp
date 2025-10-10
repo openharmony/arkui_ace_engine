@@ -180,4 +180,34 @@ ArkUINativeModuleValue ResourceBridge::SetResourceManagerCacheMaxCountForHSP(Ark
     }
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ResourceBridge::GetResourceId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsString(vm)) {
+        return panda::NumberRef::New(vm, -1);
+    }
+    auto resName = firstArg->ToString(vm)->ToString(vm);
+
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!secondArg->IsString(vm)) {
+        return panda::NumberRef::New(vm, -1);
+    }
+    auto bundleName = secondArg->ToString(vm)->ToString(vm);
+
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2); // 2 means the arg of moduleName
+    if (!thirdArg->IsString(vm)) {
+        return panda::NumberRef::New(vm, -1);
+    }
+    auto moduleName = thirdArg->ToString(vm)->ToString(vm);
+
+    int32_t resId = -1;
+    if (!ArkTSUtils::GetResourceId(resName, bundleName, moduleName, resId)) {
+        return panda::NumberRef::New(vm, -1);
+    }
+    return panda::NumberRef::New(vm, resId);
+}
 } // namespace OHOS::Ace::NG

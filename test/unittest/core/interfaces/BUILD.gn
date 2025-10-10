@@ -24,7 +24,5 @@ ace_unittest("interfaces_test") {
 
 group("core_interfaces_unittest") {
   testonly = true
-  deps = [
-    ":interfaces_test",
-  ]
+  deps = [ ":interfaces_test" ]
 }

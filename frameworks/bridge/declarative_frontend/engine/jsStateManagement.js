@@ -294,6 +294,46 @@ class UIUtils {
   static clearMonitor(target, path, monitorCallback) {
     UIUtils.uiUtilsImpl_.clearMonitor(target, path, monitorCallback) ;
   }
+
+  /**
+   * Runs a task and processes all resulting updates immediately
+   *
+   * @param { object } task to be executed
+   * @static
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @crossplatform
+   * @atomicservice
+   * @returns { T } The value returned by the task
+   */
+  static applySync(task) {
+    return UIUtils.uiUtilsImpl_.applySync(task);
+  }
+
+  /**
+   * Immediately processes all updates
+   *
+   * @static
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @crossplatform
+   * @atomicservice
+   */
+  static flushUpdates() {
+    return UIUtils.uiUtilsImpl_.flushUpdates();
+  }
+
+
+  /**
+   * Immediately rerenders UINodes that need updates
+   *
+   * @static
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @crossplatform
+   * @atomicservice
+   */
+  static flushUIUpdates() {
+    return UIUtils.uiUtilsImpl_.flushUIUpdates(); 
+  }
+
 }
 
 UIUtils.uiUtilsImpl_ = UIUtilsImpl.instance();

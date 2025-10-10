@@ -76,12 +76,19 @@ public:
         }
         auto middlePos = height / 2;
         for (const auto& item : itemPosition) {
+            // find middle index
             auto index = GetLoopIndex(item.first, totalItemCount);
             auto startPos = item.second.startPos;
             auto endPos = item.second.endPos;
             if (LessOrEqual(startPos, middlePos) && GreatOrEqual(endPos, middlePos)) {
                 return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
             }
+        }
+        for (const auto& item : itemPosition) {
+            // find middle index when loop is false and overscrolled middle index
+            auto index = GetLoopIndex(item.first, totalItemCount);
+            auto startPos = item.second.startPos;
+            auto endPos = item.second.endPos;
             if (LessOrEqual(endPos, middlePos) && !isLoop && index == totalItemCount - 1) {
                 return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
             }

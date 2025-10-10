@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/shape/shape_abstract_model_static.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -43,6 +42,19 @@ LineOptions Convert(const Ark_LineOptions& src)
     return options;
 }
 
+template<>
+ShapePoint Convert(const Array_Length& src)
+{
+    ShapePoint point = {0.0_vp, 0.0_vp};
+    if (src.length < SHAPE_POINT_DIM) {
+        return point;
+    }
+    auto x = Converter::OptConvert<Dimension>(src.array[0]);
+    auto y = Converter::OptConvert<Dimension>(src.array[1]);
+    point.first = x.value_or(0.0_vp);
+    point.second = y.value_or(0.0_vp);
+    return point;
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -63,8 +75,7 @@ void SetLineOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opt = Converter::OptConvert<LineOptions>(*options);
+    auto opt = Converter::OptConvertPtr<LineOptions>(options);
     CHECK_NULL_VOID(opt);
     if (opt->width) {
         ShapeAbstractModelStatic::SetWidth(frameNode, opt->width);
@@ -75,37 +86,29 @@ void SetLineOptionsImpl(Ark_NativePointer node,
 }
 } // LineInterfaceModifier
 namespace LineAttributeModifier {
-void StartPointImpl(Ark_NativePointer node,
-                    const Opt_ShapePoint* value)
+void SetStartPointImpl(Ark_NativePointer node,
+                       const Opt_ShapePoint* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+    auto convValue = Converter::OptConvertPtr<ShapePoint>(value);
+    if (!convValue) {
+        // Implement Reset value
         return;
     }
-    ShapePoint point = {0.0_vp, 0.0_vp};
-    auto x = Converter::OptConvertFromArkLength(value->value.value0, DimensionUnit::VP);
-    auto y = Converter::OptConvertFromArkLength(value->value.value1, DimensionUnit::VP);
-    point.first = x.value_or(0.0_vp);
-    point.second = y.value_or(0.0_vp);
-    LineModelNG::StartPoint(frameNode, point);
+    LineModelNG::StartPoint(frameNode, *convValue);
 }
-void EndPointImpl(Ark_NativePointer node,
-                  const Opt_ShapePoint* value)
+void SetEndPointImpl(Ark_NativePointer node,
+                     const Opt_ShapePoint* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+    auto convValue = Converter::OptConvertPtr<ShapePoint>(value);
+    if (!convValue) {
+        // Implement Reset value
         return;
     }
-    ShapePoint point = {0.0_vp, 0.0_vp};
-    auto x = Converter::OptConvertFromArkLength(value->value.value0, DimensionUnit::VP);
-    auto y = Converter::OptConvertFromArkLength(value->value.value1, DimensionUnit::VP);
-    point.first = x.value_or(0.0_vp);
-    point.second = y.value_or(0.0_vp);
-    LineModelNG::EndPoint(frameNode, point);
+    LineModelNG::EndPoint(frameNode, *convValue);
 }
 } // LineAttributeModifier
 const GENERATED_ArkUILineModifier* GetLineModifier()
@@ -113,8 +116,8 @@ const GENERATED_ArkUILineModifier* GetLineModifier()
     static const GENERATED_ArkUILineModifier ArkUILineModifierImpl {
         LineModifier::ConstructImpl,
         LineInterfaceModifier::SetLineOptionsImpl,
-        LineAttributeModifier::StartPointImpl,
-        LineAttributeModifier::EndPointImpl,
+        LineAttributeModifier::SetStartPointImpl,
+        LineAttributeModifier::SetEndPointImpl,
     };
     return &ArkUILineModifierImpl;
 }

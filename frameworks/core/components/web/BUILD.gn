@@ -50,16 +50,13 @@ build_component("web") {
       "ipc:ipc_core",
       "napi:ace_napi",
       "opengles:libGLES",
-      "webview:libnweb",
       "webview:cj_webview_ffi",
+      "webview:libnweb",
       "webview:ohos_base_glue_source",
       "window_manager:libwm",
     ]
-    if (defined(global_parts_info) &&
-      defined(global_parts_info.web_webview)) {
-      external_deps += [
-        "webview:libarkweb_utils",
-      ]
+    if (defined(global_parts_info) && defined(global_parts_info.web_webview)) {
+      external_deps += [ "webview:libarkweb_utils" ]
     }
   }
 }

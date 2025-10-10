@@ -26,10 +26,8 @@ constexpr int32_t DISMIN = 0;
 constexpr float VMIN = 0.0f;
 constexpr float PICKER_SPEED_TH = 0.25f;
 constexpr int32_t VELOCTY_TRANS = 1000;
-constexpr float PICKER_SPRING_MASS = 1.f;
 constexpr float PICKER_SPRING_STIFFNESS = 20.f;
 constexpr float PICKER_SPRING_DAMPING = 10.f;
-constexpr int32_t DISMAX = 30;
 constexpr float VMAX = 5.0f;
 } // namespace
 
@@ -156,9 +154,10 @@ void TextPickerTossAnimationController::StopTossAnimation()
 RefPtr<Curve> TextPickerTossAnimationController::UpdatePlayAnimationValue()
 {
     speed_ = std::abs(speed_) >= std::abs(VMAX) ? std::abs(VMAX) : std::abs(speed_);
-    showCount_ = static_cast<int>(DISMIN + (DISMAX - DISMIN) * (std::abs(speed_) - VMIN) / (VMAX - VMIN));
+    auto maxDistance = GetPickerMaxSlidingDistance();
+    showCount_ = static_cast<int>(DISMIN + (maxDistance - DISMIN) * (std::abs(speed_) - VMIN) / (VMAX - VMIN));
     return AceType::MakeRefPtr<InterpolatingSpring>(
-        speed_, PICKER_SPRING_MASS, PICKER_SPRING_STIFFNESS, PICKER_SPRING_DAMPING);
+        speed_, GetPickerSpringMass(), PICKER_SPRING_STIFFNESS, PICKER_SPRING_DAMPING);
 }
 
 double TextPickerTossAnimationController::GetCurrentTime() const
@@ -211,5 +210,26 @@ bool TextPickerTossAnimationController::GetTossPlaying() const
 void TextPickerTossAnimationController::SetTossPlaying(bool playing)
 {
     isTossPlaying_ = playing;
+}
+
+RefPtr<PickerTheme> TextPickerTossAnimationController::GetPickerTheme()
+{
+    auto column = column_.Upgrade();
+    CHECK_NULL_RETURN(column, {});
+    auto context = column->GetContext();
+    CHECK_NULL_RETURN(context, {});
+    return context->GetTheme<PickerTheme>();
+}
+
+double TextPickerTossAnimationController::GetPickerSpringMass()
+{
+    auto theme = GetPickerTheme();
+    return theme ? theme->GetPickerSpringMass() : PICKER_SPRING_MASS;
+}
+
+int32_t TextPickerTossAnimationController::GetPickerMaxSlidingDistance()
+{
+    auto theme = GetPickerTheme();
+    return theme ? theme->GetPickerMaxSlidingDistance() : PICKER_MAX_SLIDING_DISTANCE;
 }
 } // namespace OHOS::Ace::NG

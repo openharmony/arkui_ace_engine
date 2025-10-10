@@ -86,6 +86,10 @@ struct ArkUI_OptionalFloat {
     float value;
 };
 
+struct ArkUI_SelectedDataDetectorConfig {
+    std::vector<uint32_t> types;
+};
+
 struct ArkUI_OptionalInt {
     int32_t isSet;
     int32_t value;
@@ -233,6 +237,11 @@ struct ArkUI_ContentTransitionEffect {
 struct ArkUI_DrawableDescriptor_AnimationController {
     void* drawableDescriptor;
     void* controller;
+};
+
+struct ArkUI_ShowCounterConfig {
+    ArkUI_OptionalUint counterTextColor;
+    ArkUI_OptionalUint counterTextOverflowColor;
 };
 
 #ifdef __cplusplus

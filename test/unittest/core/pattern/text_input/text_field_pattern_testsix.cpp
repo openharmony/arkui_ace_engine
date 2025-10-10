@@ -510,4 +510,56 @@ HWTEST_F(TextFieldPatternTestSix, IsTriggerAutoFillPassword006, TestSize.Level0)
     layoutProperty_->UpdateTextContentType(TextContentType::PROVINCE_ADDRESS);
     EXPECT_EQ(pattern_->IsTriggerAutoFillPassword(), false);
 }
+
+/**
+ * @tc.name: testHandleCounterBorder001
+ * @tc.desc: test HandleCounterBorder
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, TestHandleCounterBorder001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    auto theme = pattern->GetTheme();
+    CHECK_NULL_VOID(theme);
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    pattern->showCountBorderStyle_ = true;
+    layoutProperty->UpdateShowUnderline(false);
+    ViewAbstract::SetBorderWidth(Dimension(10.0));
+    EXPECT_EQ(theme->GetOverCounterColor(), Color::BLACK);
+    pattern->showCountBorderStyle_ = true;
+    layoutProperty->UpdateShowUnderline(false);
+    ViewAbstract::SetBorderWidth(Dimension(10.0));
+    layoutProperty->UpdateCounterTextOverflowColor(Color::BLACK);
+    EXPECT_EQ(layoutProperty->GetCounterTextOverflowColor(), Color::BLACK);
+    pattern->showCountBorderStyle_ = true;
+    layoutProperty->UpdateShowUnderline(false);
+    EXPECT_EQ(theme->GetOverCounterColor(), Color::BLACK);
+    pattern->showCountBorderStyle_ = true;
+    layoutProperty->UpdateShowUnderline(false);
+    layoutProperty->UpdateCounterTextOverflowColor(Color::GREEN);
+    EXPECT_EQ(layoutProperty->GetCounterTextOverflowColor(), Color::GREEN);
+}
+
+/**
+ * @tc.name: TestUpdateCounterContentAndStyle001
+ * @tc.desc: test UpdateCounterContentAndStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, TestUpdateCounterContentAndStyle001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateCounterTextColor(Color::BLUE);
+    EXPECT_EQ(textFieldLayoutProperty->GetCounterTextColor(), Color::BLUE);
+    textFieldLayoutProperty->UpdateCounterTextOverflowColor(Color::BLACK);
+    EXPECT_EQ(textFieldLayoutProperty->GetCounterTextOverflowColor(), Color::BLACK);
+}
 } // namespace OHOS::Ace::NG

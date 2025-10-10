@@ -241,7 +241,7 @@ void TextFieldPaintMethod::UpdateScrollBar()
     CHECK_NULL_VOID(textFieldPattern);
     auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto defaultValue = Color(0x66182431);
+    auto defaultValue = scrollBar->GetForegroundColor();
     auto barColorValue = textFieldLayoutProperty->GetScrollBarColorValue(defaultValue);
     textFieldOverlayModifier_->SetBarColor(barColorValue);
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
@@ -261,5 +261,9 @@ void TextFieldPaintMethod::UpdateForegroundModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(paintProperty);
     textFieldForegroundModifier_->SetInnerBorderWidth(
         static_cast<float>(paintProperty->GetInnerBorderWidthValue(Dimension()).ConvertToPx()));
+    auto textFieldTheme = textFieldPattern->GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    textFieldForegroundModifier_->SetInnerBorderColor(
+        paintProperty->GetInnerBorderColorValue(textFieldTheme->GetOverCounterColor()));
 }
 } // namespace OHOS::Ace::NG

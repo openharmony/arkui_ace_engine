@@ -160,7 +160,8 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
 
 int32_t UiContentStub::GetInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    GetInspectorTree(nullptr);
+    ParamConfig settedParamConfig = { data.ReadBool(), data.ReadBool(), data.ReadBool() };
+    GetInspectorTree(nullptr, settedParamConfig);
     return NO_ERROR;
 }
 
@@ -346,7 +347,8 @@ int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, Message
 
 int32_t UiContentStub::GetVisibleInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    GetVisibleInspectorTree(nullptr);
+    ParamConfig settedParamConfig = { data.ReadBool(), data.ReadBool(), data.ReadBool() };
+    GetVisibleInspectorTree(nullptr, settedParamConfig);
     return NO_ERROR;
 }
 

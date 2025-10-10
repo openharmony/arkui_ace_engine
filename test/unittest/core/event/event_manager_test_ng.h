@@ -52,6 +52,7 @@
 #include "core/event/ace_events.h"
 #include "core/event/resample_algo.h"
 #include "core/event/axis_event.h"
+#include "core/event/coasting_axis_event_generator.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"

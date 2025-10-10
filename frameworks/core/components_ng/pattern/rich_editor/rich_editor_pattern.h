@@ -890,6 +890,11 @@ public:
         return paragraphs_.GetParagraphs();
     }
 
+    RichEditorParagraphManager& GetRichEditorParagraphManager()
+    {
+        return paragraphs_;
+    }
+
     std::optional<SelectHandleInfo> GetFirstHandleInfo() const
     {
         return selectOverlay_->GetFirstHandleInfo();
@@ -1561,9 +1566,12 @@ private:
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
         SourceType sourceType = SourceType::NONE);
     void UpdateCaretInfoToController();
+    IMEClient GetIMEClientInfo();
+    void FireOnWillAttachIME(IMEClient& imeClient);
 #if defined(ENABLE_STANDARD_INPUT)
     bool EnableStandardInput(bool needShowSoftKeyboard, SourceType sourceType = SourceType::NONE);
     std::optional<MiscServices::TextConfig> GetMiscTextConfig();
+    void BeforeAttachInputMethod(MiscServices::TextConfig& textConfig);
     float CalcCursorHeight(float& caretHeight);
 #else
     bool UnableStandardInput(bool isFocusViewChanged);

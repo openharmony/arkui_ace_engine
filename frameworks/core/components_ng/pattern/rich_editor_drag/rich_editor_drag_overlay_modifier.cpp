@@ -64,8 +64,11 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     if (textEffect) {
         textEffect->NoEffect(canvas, offset.GetX(), offset.GetY());
     } else {
+        auto relativeOffset = pattern->GetTextRect().GetOffset();
         for (auto&& info : hostPattern->GetParagraphs()) {
             info.paragraph->Paint(canvas, offset.GetX(), offset.GetY());
+            IF_TRUE(richEditor,
+                richEditor->GetRichEditorParagraphManager().PaintLeadingMarginSpan(info, relativeOffset, context));
             offset.AddY(info.paragraph->GetHeight());
         }
     }

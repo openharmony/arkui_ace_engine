@@ -549,6 +549,30 @@ HWTEST_F(WaterFlowTestNg, EstimateTotalHeight001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: EstimateTotalHeight002
+ * @tc.desc: Test EstimateTotalHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, EstimateTotalHeight002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    constexpr int32_t number = 4;
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * number);
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateDone();
+    FlushUITasks();
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    constexpr float offset = 5000.f;
+    pattern_->UpdateCurrentOffset(-offset, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    auto prevOffset = info->EstimateTotalHeight();
+    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(info->EstimateTotalHeight(), prevOffset);
+}
+
+/**
  * @tc.name: ScrollToIndex004
  * @tc.desc: Test ScrollToIndex with extraOffset
  * @tc.type: FUNC
@@ -1893,5 +1917,74 @@ HWTEST_F(WaterFlowTestNg, AnimateToIndexAutoWithContentOffsetTest, TestSize.Leve
     AnimateToIndexWithTicks(0, scrollAlign);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), CONTENT_START_OFFSET);
     EXPECT_EQ(pattern_->GetTotalOffset(), -20);
+}
+
+/**
+ * @tc.name: onWillStopDragging001
+ * @tc.desc: Test onWillStopDragging001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, onWillStartDragging001, TestSize.Level1)
+{
+    bool isOnWillStartDraggingCallBack = false;
+    auto onWillStartDragging = [&isOnWillStartDraggingCallBack]() {
+        isOnWillStartDraggingCallBack = true;
+    };
+
+    WaterFlowModelNG model = CreateWaterFlow();
+    CreateWaterFlowItems();
+    CreateDone();
+    eventHub_->SetOnWillStartDragging(onWillStartDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStartDraggingCallBack);
+}
+
+/**
+* @tc.name: onDidStopDragging002
+* @tc.desc: Test onDidStopDragging002
+* @tc.type: FUNC
+*/
+HWTEST_F(WaterFlowTestNg, onDidStopDragging002, TestSize.Level1)
+{
+    bool isOnDidStopDraggingCallBack = false;
+    bool isFlingAfterDrag = false;
+    auto onDidStopDragging = [&isFlingAfterDrag, &isOnDidStopDraggingCallBack](bool isWillFling) {
+        isFlingAfterDrag = isWillFling;
+        isOnDidStopDraggingCallBack = true;
+    };
+
+    WaterFlowModelNG model = CreateWaterFlow();
+    CreateWaterFlowItems();
+    CreateDone();
+    eventHub_->SetOnDidStopDragging(onDidStopDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnDidStopDraggingCallBack);
+    EXPECT_TRUE(isFlingAfterDrag);
 }
 } // namespace OHOS::Ace::NG

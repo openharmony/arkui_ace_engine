@@ -41,7 +41,7 @@ void DestroyPeerImpl(Ark_AxisEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_AxisEvent CtorImpl()
+Ark_AxisEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<AxisEventPeer>();
 }
@@ -67,16 +67,6 @@ Ark_Number GetVerticalAxisValueImpl(Ark_AxisEvent peer)
     CHECK_NULL_RETURN(event, errValue);
 
     double value = event->GetVerticalAxis();
-    return Converter::ArkValue<Ark_Number>(value);
-}
-Ark_Number GetPinchAxisScaleValueImpl(Ark_AxisEvent peer)
-{
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, errValue);
-    AxisInfo* event = peer->GetEventInfo();
-    CHECK_NULL_RETURN(event, errValue);
-
-    double value = event->GetPinchAxisScale();
     return Converter::ArkValue<Ark_Number>(value);
 }
 Ark_AxisAction GetActionImpl(Ark_AxisEvent peer)
@@ -252,7 +242,7 @@ Opt_Number GetScrollStepImpl(Ark_AxisEvent peer)
     return Converter::ArkValue<Opt_Number>(info->GetScrollStep());
 }
 void SetScrollStepImpl(Ark_AxisEvent peer,
-                       const Ark_Number* scrollStep)
+                       const Opt_Number* scrollStep)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(scrollStep);
@@ -260,23 +250,33 @@ void SetScrollStepImpl(Ark_AxisEvent peer,
     CHECK_NULL_VOID(info);
     LOGE("Arkoala method AxisEventAccessor.SetScrollStep doesn't have sense. Not implemented...");
 }
-void PropagationImpl(Ark_AxisEvent peer)
+Callback_Void GetPropagationImpl(Ark_AxisEvent peer)
+{
+    CHECK_NULL_RETURN(peer, {});
+    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
+        AxisInfo* info = peer->GetEventInfo();
+        CHECK_NULL_VOID(info);
+        info->SetStopPropagation(false);
+    });
+    return callback;
+}
+void SetPropagationImpl(Ark_AxisEvent peer,
+                        const Callback_Void* propagation)
 {
     CHECK_NULL_VOID(peer);
-    AxisInfo* info = peer->GetEventInfo();
+    auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    info->SetStopPropagation(false);
+    LOGE("Arkoala method AxisEventAccessor.SetPropagation doesn't have sense. Not implemented...");
 }
 } // AxisEventAccessor
 const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
 {
     static const GENERATED_ArkUIAxisEventAccessor AxisEventAccessorImpl {
         AxisEventAccessor::DestroyPeerImpl,
-        AxisEventAccessor::CtorImpl,
+        AxisEventAccessor::ConstructImpl,
         AxisEventAccessor::GetFinalizerImpl,
         AxisEventAccessor::GetHorizontalAxisValueImpl,
         AxisEventAccessor::GetVerticalAxisValueImpl,
-        AxisEventAccessor::GetPinchAxisScaleValueImpl,
         AxisEventAccessor::GetActionImpl,
         AxisEventAccessor::SetActionImpl,
         AxisEventAccessor::GetDisplayXImpl,
@@ -293,7 +293,8 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::SetYImpl,
         AxisEventAccessor::GetScrollStepImpl,
         AxisEventAccessor::SetScrollStepImpl,
-        AxisEventAccessor::PropagationImpl,
+        AxisEventAccessor::GetPropagationImpl,
+        AxisEventAccessor::SetPropagationImpl,
     };
     return &AxisEventAccessorImpl;
 }

@@ -36,7 +36,7 @@ HWTEST_F(TabsLayoutTestNg, TabsSize001, TestSize.Level1)
     // TabBar
     EXPECT_EQ(tabBarNode_->GetTag(), V2::TAB_BAR_ETS_TAG);
     EXPECT_TRUE(IsEqual(tabBarNode_->GetGeometryNode()->GetFrameSize(), SizeF(TABS_WIDTH, TAB_BAR_SIZE)));
-    EXPECT_EQ(tabBarNode_->GetTotalChildCount(), TABCONTENT_NUMBER + MASK_COUNT);
+    EXPECT_EQ(tabBarNode_->GetTotalChildCount(), TABCONTENT_NUMBER + MASK_COUNT + IMAGE_INDICATOR_COUNT);
     float barItemWidth = TABS_WIDTH / TABCONTENT_NUMBER;
     EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 0), RectF(0, 0, barItemWidth, TAB_BAR_SIZE)));
     EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 1), RectF(barItemWidth * 1, 0, barItemWidth, TAB_BAR_SIZE)));

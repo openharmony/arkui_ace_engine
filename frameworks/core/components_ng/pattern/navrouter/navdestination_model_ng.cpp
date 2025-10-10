@@ -395,7 +395,13 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
         backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(theme->GetCornerRadius()));
         renderContext->UpdateBackgroundColor(theme->GetCompBackgroundColor());
         PaddingProperty padding;
-        padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
+        padding.SetEdges(CalcLength(theme->GetMenuButtonPadding()));
+        BorderWidthProperty borderWidthProperty;
+        borderWidthProperty.SetBorderWidth(theme->GetIconBorderWidth());
+        backButtonLayoutProperty->UpdateBorderWidth(borderWidthProperty);
+        BorderColorProperty borderColorProperty;
+        borderColorProperty.SetColor(theme->GetIconBorderColor());
+        renderContext->UpdateBorderColor(borderColorProperty);
         backButtonLayoutProperty->UpdatePadding(padding);
     } else {
         backButtonLayoutProperty->UpdateUserDefinedIdealSize(

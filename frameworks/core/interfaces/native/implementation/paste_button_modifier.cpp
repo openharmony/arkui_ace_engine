@@ -21,6 +21,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -41,12 +42,12 @@ void AssignCast(std::optional<PasteButtonPasteDescription>& dst, const Ark_Paste
     }
 }
 template<>
-PasteButtonStyle Convert(const Ark_PasteButtonOptions& src)
+PasteButtonStyle Convert(const Opt_PasteButtonOptions& src)
 {
     PasteButtonStyle style;
-    style.text = OptConvert<PasteButtonPasteDescription>(src.text);
-    style.icon = OptConvert<PasteButtonIconStyle>(src.icon);
-    style.backgroundType = OptConvert<ButtonType>(src.buttonType);
+    style.text = OptConvert<PasteButtonPasteDescription>(src.value.text);
+    style.icon = OptConvert<PasteButtonIconStyle>(src.value.icon);
+    style.backgroundType = OptConvert<ButtonType>(src.value.buttonType);
     return style;
 }
 } // namespace OHOS::Ace::NG::Converter
@@ -65,14 +66,8 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // PasteButtonModifier
 namespace PasteButtonInterfaceModifier {
-void SetPasteButtonOptions0Impl(Ark_NativePointer node)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    PasteButtonModelNG::InitPasteButton(frameNode, PasteButtonStyle(), false);
-}
-void SetPasteButtonOptions1Impl(Ark_NativePointer node,
-                                const Ark_PasteButtonOptions* options)
+void SetPasteButtonOptionsImpl(Ark_NativePointer node,
+                               const Opt_PasteButtonOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -82,12 +77,16 @@ void SetPasteButtonOptions1Impl(Ark_NativePointer node,
 }
 } // PasteButtonInterfaceModifier
 namespace PasteButtonAttributeModifier {
-void OnClickImpl(Ark_NativePointer node,
-                 const Opt_PasteButtonCallback* value)
+void SetOnClickImpl(Ark_NativePointer node,
+                    const Opt_PasteButtonCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
     auto onEvent = [arkCallback = CallbackHelper(value->value), frameNode](GestureEvent& info) {
         auto res = SecurityComponentHandleResult::CLICK_GRANT_FAILED;
         std::string message;
@@ -106,14 +105,8 @@ void OnClickImpl(Ark_NativePointer node,
 #endif
         const auto event = Converter::ArkClickEventSync(info);
         auto arkResult = Converter::ArkValue<Ark_PasteButtonOnClickResult>(res);
-        arkCallback.InvokeSync(event.ArkValue(), arkResult, Opt_BusinessError{
-            .value = Ark_BusinessError{
-                .name = Converter::ArkValue<Ark_String>("123", Converter::FC),
-                .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
-                .stack = Converter::ArkValue<Opt_String>("asdf", Converter::FC),
-                .code = Converter::ArkValue<Ark_Number>(code)
-            }
-        });
+        auto error = Converter::ArkValue<Opt_BusinessError>();
+        arkCallback.InvokeSync(event.ArkValue(), arkResult, error);
     };
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
 }
@@ -122,9 +115,8 @@ const GENERATED_ArkUIPasteButtonModifier* GetPasteButtonModifier()
 {
     static const GENERATED_ArkUIPasteButtonModifier ArkUIPasteButtonModifierImpl {
         PasteButtonModifier::ConstructImpl,
-        PasteButtonInterfaceModifier::SetPasteButtonOptions0Impl,
-        PasteButtonInterfaceModifier::SetPasteButtonOptions1Impl,
-        PasteButtonAttributeModifier::OnClickImpl,
+        PasteButtonInterfaceModifier::SetPasteButtonOptionsImpl,
+        PasteButtonAttributeModifier::SetOnClickImpl,
     };
     return &ArkUIPasteButtonModifierImpl;
 }

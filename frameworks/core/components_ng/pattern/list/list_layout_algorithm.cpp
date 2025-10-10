@@ -1039,7 +1039,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         needLayoutBackward = needLayoutBackward || (draggingIndex_ >= 0 &&
             revertIndex(draggingIndex_) <= startIndex && NearEqual(prevContentMainSize_, contentMainSize_));
         OffScreenLayoutDirection(layoutWrapper);
-        prevItemPosCount_ = prevMeasureBreak_ ? itemPosition_.size() : 0;
+        prevItemPosCount_ = prevMeasureBreak_ ? static_cast<int32_t>(itemPosition_.size()) : 0;
         itemPosition_.clear();
     }
     if (jumpIndex_ && scrollAlign_ == ScrollAlign::AUTO &&
@@ -1296,7 +1296,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     auto currentIndex = startIndex - 1;
     auto chainOffset = 0.0f;
     do {
-        if ((itemPosition_.size() > prevItemPosCount_) && !syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+        if ((static_cast<int32_t>(itemPosition_.size()) > prevItemPosCount_) && !syncLoad_ &&
+            layoutWrapper->ReachResponseDeadline()) {
             measureInNextFrame_ = true;
             return;
         }
@@ -1385,7 +1386,8 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     auto currentIndex = endIndex + 1;
     auto chainOffset = 0.0f;
     do {
-        if ((itemPosition_.size() > prevItemPosCount_) && !syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+        if ((static_cast<int32_t>(itemPosition_.size()) > prevItemPosCount_) && !syncLoad_ &&
+            layoutWrapper->ReachResponseDeadline()) {
             measureInNextFrame_ = true;
             return;
         }

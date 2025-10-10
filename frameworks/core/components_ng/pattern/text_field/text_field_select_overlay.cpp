@@ -299,6 +299,12 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && pattern->IsSelected();
+    if (pattern->IsShowAIMenuOption() && !pattern->GetAIItemOption().empty()) {
+        auto firstSpanItem = pattern->GetAIItemOption().begin()->second;
+        menuInfo.aiMenuOptionType = firstSpanItem.type;
+    } else {
+        menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
+    }
 }
 
 void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
@@ -412,6 +418,26 @@ void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
             return;
         default:
             return;
+    }
+}
+
+void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo)
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "MenuActionId=%{public}d, MenuType=%{public}d, labelInfo=%{public}s",
+        id, type, labelInfo.c_str());
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (labelInfo.empty()) {
+        OnMenuItemAction(id, type);
+        return;
+    }
+    switch (id) {
+        case OptionMenuActionId::AI_MENU_OPTION:
+            pattern->HandleAIMenuOption(labelInfo);
+            break;
+        default:
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Unsupported menu option id %{public}d", id);
+            break;
     }
 }
 
@@ -562,6 +588,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
             Offset(caretRect.Left(), caretRect.Top() + caretRect.Height() / 2.0f));
         overlayManager->MarkInfoChange(DIRTY_SECOND_HANDLE);
     }
+    pattern->SelectAIDetect();
     overlayManager->SetHandleCircleIsShow(isFirst, true);
     if (IsSingleHandle()) {
         overlayManager->SetIsHandleLineShow(true);
@@ -783,5 +810,12 @@ bool TextFieldSelectOverlay::CheckIfInterruptProcessing(const OverlayRequest& re
         return overlayInfo && overlayInfo->selectText == GetSelectedText();
     }
     return false;
+}
+
+void TextFieldSelectOverlay::UpdateAISelectMenu()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM);
 }
 } // namespace OHOS::Ace::NG

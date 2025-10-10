@@ -29,6 +29,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float MAX_FONT_SCALE = 2.0;
+} // namespace
 
 void TextModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
@@ -181,20 +184,20 @@ void TextModelStatic::SetAdaptMaxFontSize(FrameNode* frameNode, const std::optio
 
 void TextModelStatic::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value)
 {
+    float minFontScale = 0.0f;
     if (value.has_value()) {
-        TextModelNG::SetMinFontScale(frameNode, value.value());
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, frameNode);
+        minFontScale = std::clamp(value.value(), 0.0f, 1.0f);
     }
+    TextModelNG::SetMinFontScale(frameNode, minFontScale);
 }
 
 void TextModelStatic::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value)
 {
+    float maxFontScale = MAX_FONT_SCALE;
     if (value.has_value()) {
-        TextModelNG::SetMaxFontScale(frameNode, value.value());
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, frameNode);
+        maxFontScale = std::max(value.value(), 1.0f);
     }
+    TextModelNG::SetMaxFontScale(frameNode, maxFontScale);
 }
 
 void TextModelStatic::SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& value)

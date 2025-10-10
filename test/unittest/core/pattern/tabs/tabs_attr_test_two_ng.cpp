@@ -18,6 +18,7 @@
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
@@ -388,9 +389,13 @@ HWTEST_F(TabsAttrTestNg, TabContentCreateMoreWithResourceObj010, TestSize.Level1
     g_isConfigChangePerform = false;
 }
 
-HWTEST_F(TabsAttrTestNg, TabContentPatternOnColorModeChange001, TestSize.Level1)
+/**
+ * @tc.name: TabContentModelSetDrawableIndicatorFlag001
+ * @tc.desc: test SetDrawableIndicatorFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentModelSetDrawableIndicatorFlag001, TestSize.Level1)
 {
-    g_isConfigChangePerform = true;
     TabContentModelNG tabContentModel = CreateTabContent();
     auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     ASSERT_NE(tabContentFrameNode, nullptr);
@@ -398,11 +403,32 @@ HWTEST_F(TabsAttrTestNg, TabContentPatternOnColorModeChange001, TestSize.Level1)
     ASSERT_NE(tabContentNode, nullptr);
     auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
     ASSERT_NE(tabContentPattern, nullptr);
+    tabContentModel.SetDrawableIndicatorFlag(true);
+    EXPECT_TRUE(tabContentPattern->IsDrawableIndicator());
+    tabContentModel.SetDrawableIndicatorFlag(false);
+    EXPECT_FALSE(tabContentPattern->IsDrawableIndicator());
+    tabContentModel.Pop();
+}
 
-    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
-    tabContentPattern->OnColorModeChange(colorMode);
-    auto currentIndicator = tabContentPattern->GetIndicatorStyle();
-    EXPECT_EQ(currentIndicator.color, Color::RED);
-    g_isConfigChangePerform = false;
+/**
+ * @tc.name: TabContentModelSetDrawableIndicatorConfig001
+ * @tc.desc: test SetDrawableIndicatorConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentModelSetDrawableIndicatorConfig001, TestSize.Level1)
+{
+    TabContentModelNG tabContentModel = CreateTabContent();
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    ASSERT_NE(tabContentNode, nullptr);
+    auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(tabContentPattern, nullptr);
+    ImageInfoConfig config;
+    config.type = ImageType::ANIMATED_DRAWABLE;
+    tabContentModel.SetDrawableIndicatorConfig(config);
+    ImageInfoConfig configResult = tabContentPattern->GetDrawableIndicatorConfig();
+    EXPECT_EQ(configResult.type, ImageType::ANIMATED_DRAWABLE);
+    tabContentModel.Pop();
 }
 } // namespace OHOS::Ace::NG

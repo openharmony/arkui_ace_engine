@@ -135,6 +135,8 @@ private:
     void UpdateMaxLines(LayoutWrapper* layoutWrapper, int32_t index);
     float GetCurrentOffset(RefPtr<TabBarLayoutProperty>& layoutProperty, ScrollableBarModeOptions& layoutStyle);
     void CheckBorderAndPadding(SizeF& frameSize, const PaddingPropertyF& padding);
+    void MeasureSubTabBarImageIndicator(LayoutWrapper* layoutWrapper) const;
+    void LayoutSubTabBarImageIndicator(LayoutWrapper* layoutWrapper) const;
 
     bool isRTL_ = false;
     Axis axis_ = Axis::NONE;

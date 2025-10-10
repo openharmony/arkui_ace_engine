@@ -56,9 +56,9 @@ void DestroyPeerImpl(Ark_ProgressMask peer)
 {
     delete peer;
 }
-Ark_ProgressMask CtorImpl(const Ark_Number* value,
-                          const Ark_Number* total,
-                          const Ark_ResourceColor* color)
+Ark_ProgressMask ConstructImpl(const Ark_Number* value,
+                               const Ark_Number* total,
+                               const Ark_ResourceColor* color)
 {
     auto peer = new ProgressMaskPeer();
     const auto& property = peer->GetProperty();
@@ -94,7 +94,7 @@ const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor()
 {
     static const GENERATED_ArkUIProgressMaskAccessor ProgressMaskAccessorImpl {
         ProgressMaskAccessor::DestroyPeerImpl,
-        ProgressMaskAccessor::CtorImpl,
+        ProgressMaskAccessor::ConstructImpl,
         ProgressMaskAccessor::GetFinalizerImpl,
         ProgressMaskAccessor::UpdateProgressImpl,
         ProgressMaskAccessor::UpdateColorImpl,

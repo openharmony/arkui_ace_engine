@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_FileSelectorResult peer)
 {
     delete peer;
 }
-Ark_FileSelectorResult CtorImpl()
+Ark_FileSelectorResult ConstructImpl()
 {
     return new FileSelectorResultPeer();
 }
@@ -45,7 +45,7 @@ const GENERATED_ArkUIFileSelectorResultAccessor* GetFileSelectorResultAccessor()
 {
     static const GENERATED_ArkUIFileSelectorResultAccessor FileSelectorResultAccessorImpl {
         FileSelectorResultAccessor::DestroyPeerImpl,
-        FileSelectorResultAccessor::CtorImpl,
+        FileSelectorResultAccessor::ConstructImpl,
         FileSelectorResultAccessor::GetFinalizerImpl,
         FileSelectorResultAccessor::HandleFileListImpl,
     };

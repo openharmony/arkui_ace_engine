@@ -35,7 +35,6 @@
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -52,6 +51,12 @@
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/image/image_source_info.h"
 #include "core/text/text_emoji_processor.h"
+#ifdef ENABLE_STANDARD_INPUT
+#include "extra_config_napi.h"
+#include "js_native_api_types.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -204,9 +209,7 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
         }
     }
     auto controller = TextFieldModel::GetInstance()->CreateTextInput(placeholderSrc, value);
-    if (jsController) {
-        jsController->SetController(controller);
-    }
+    SetController(jsController, controller);
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseTextFieldTextObject(info, changeEventVal);
     }
@@ -254,9 +257,7 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
         }
     }
     auto controller = TextFieldModel::GetInstance()->CreateTextArea(placeholderSrc, value);
-    if (jsController) {
-        jsController->SetController(controller);
-    }
+    SetController(jsController, controller);
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseTextFieldTextObject(info, changeEventVal);
     }
@@ -272,6 +273,19 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
         UnregisterResource("text");
         if (textResult && textObject) {
             RegisterResource<std::u16string>("text", textObject, text);
+        }
+    }
+}
+
+void JSTextField::SetController(
+    JSTextEditableController* jsController, const RefPtr<TextFieldControllerBase>& controller)
+{
+    if (jsController) {
+        jsController->SetController(controller);
+        auto styledString = jsController->GetPlaceholderStyledString();
+        if (styledString && controller) {
+            controller->SetPlaceholderStyledString(styledString);
+            jsController->ClearPlaceholderStyledString();
         }
     }
 }
@@ -435,6 +449,36 @@ void JSTextField::SetTextAlign(int32_t value)
     if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
         TextFieldModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
     }
+}
+
+void JSTextField::SetSelectDetectEnable(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        auto enabled = info[0]->ToBoolean();
+        TextFieldModel::GetInstance()->SetSelectDetectEnable(enabled);
+    }
+}
+
+void JSTextField::SetSelectDetectConfig(const JSCallbackInfo& info)
+{
+    std::vector<TextDataDetectType> typesList;
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto args = info[0];
+    auto paramObject = JSRef<JSObject>::Cast(args);
+    auto getTypes = paramObject->GetProperty("types");
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(getTypes);
+    if (!array->IsArray()) {
+        return;
+    }
+    for (size_t i = 0; i < array->Length(); ++i) {
+        JSRef<JSVal> type = array->GetValueAt(i);
+        if (type->IsNumber()) {
+            typesList.push_back(static_cast<TextDataDetectType>(type->ToNumber<int32_t>()));
+        }
+    }
+    TextFieldModel::GetInstance()->SetSelectDetectConfig(typesList);
 }
 
 void JSTextField::SetLineBreakStrategy(const JSCallbackInfo& info)
@@ -1658,11 +1702,46 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
             return;
         }
         TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
+        ParseShowCounterColor(paramObject);
         return;
     }
     TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
     TextFieldModel::GetInstance()->SetCounterType(DEFAULT_MODE);
     TextFieldModel::GetInstance()->SetShowCounterBorder(true);
+    TextFieldModel::GetInstance()->ResetCounterTextColor();
+    TextFieldModel::GetInstance()->ResetCounterTextOverflowColor();
+}
+
+void JSTextField::ParseShowCounterColor(const JSRef<JSObject>& paramObject)
+{
+    auto paramColor = paramObject->GetProperty("counterTextColor");
+    Color counterTextColor;
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("counterTextColor");
+    bool isColorValid = !paramColor->IsNull() && !paramColor->IsUndefined();
+    bool colorParsed = isColorValid && ParseColorMetricsToColor(paramColor, counterTextColor, resourceObject);
+    if (colorParsed) {
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<Color>("counterTextColor", resourceObject, counterTextColor);
+        }
+        TextFieldModel::GetInstance()->SetCounterTextColor(counterTextColor);
+    } else {
+        TextFieldModel::GetInstance()->ResetCounterTextColor();
+    }
+    auto paramOverflowColor = paramObject->GetProperty("counterTextOverflowColor");
+    Color counterTextOverflowColor;
+    UnregisterResource("counterTextOverflowColor");
+    bool isOverflowColorValid = !paramOverflowColor->IsNull() && !paramOverflowColor->IsUndefined();
+    bool overflowColorParsed =
+        isOverflowColorValid && ParseColorMetricsToColor(paramOverflowColor, counterTextOverflowColor, resourceObject);
+    if (overflowColorParsed) {
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<Color>("counterTextOverflowColor", resourceObject, counterTextOverflowColor);
+        }
+        TextFieldModel::GetInstance()->SetCounterTextOverflowColor(counterTextOverflowColor);
+    } else {
+        TextFieldModel::GetInstance()->ResetCounterTextOverflowColor();
+    }
 }
 
 void JSTextField::SetBarState(const JSCallbackInfo& info)
@@ -1720,26 +1799,47 @@ void JSTextField::SetSelectionMenuHidden(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetSelectionMenuHidden(jsValue->ToBoolean());
 }
 
-bool JSTextField::ParseJsCustomKeyboardBuilder(
-    const JSCallbackInfo& info, int32_t index, std::function<void()>& buildFunc)
+bool JSTextField::ParseJsCustomKeyboardBuilder(const JSCallbackInfo& info, int32_t index,
+    std::function<void()>& buildFunc, NG::FrameNode*& contentNode, bool& isBuilder)
 {
     if (info.Length() <= static_cast<uint32_t>(index) || !info[index]->IsObject()) {
         return false;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[index]);
     auto builder = obj->GetProperty("builder");
-    if (!builder->IsFunction()) {
+    if (builder->IsFunction()) {
+        isBuilder = true;
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        CHECK_NULL_RETURN(builderFunc, false);
+        WeakPtr<NG::FrameNode> targetNode =
+            AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("CustomKeyboard");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        return true;
+    }
+    JSRef<JSVal> builderNode = obj->GetProperty("builderNode_");
+    if (!builderNode->IsObject()) {
         return false;
     }
-    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-    CHECK_NULL_RETURN(builderFunc, false);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = targetNode]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("CustomKeyboard");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute();
-    };
+    isBuilder = false;
+    auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
+    JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
+    if (nodePtr.IsEmpty()) {
+        return false;
+    }
+    const auto* vm = nodePtr->GetEcmaVM();
+    auto localHandle = nodePtr->GetLocalHandle();
+    if (!localHandle->IsNativePointer(vm)) {
+        return false;
+    }
+    auto* node = localHandle->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    contentNode = frameNode;
     return true;
 }
 
@@ -1751,6 +1851,7 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
     auto jsValue = info[0];
     if (jsValue->IsUndefined() || jsValue->IsNull() || !jsValue->IsObject()) {
         TextFieldModel::GetInstance()->SetCustomKeyboard(nullptr);
+        TextFieldModel::GetInstance()->SetCustomKeyboardWithNode(nullptr);
         return;
     }
     bool supportAvoidance = false;
@@ -1762,8 +1863,16 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
         }
     }
     std::function<void()> buildFunc;
-    if (ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
-        TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
+    NG::FrameNode* contentNode = nullptr;
+    bool isBuilder = true;
+    if (ParseJsCustomKeyboardBuilder(info, 0, buildFunc, contentNode, isBuilder)) {
+        if (isBuilder) {
+            TextFieldModel::GetInstance()->SetCustomKeyboardWithNode(nullptr, supportAvoidance);
+            TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
+        } else {
+            TextFieldModel::GetInstance()->SetCustomKeyboard(nullptr, supportAvoidance);
+            TextFieldModel::GetInstance()->SetCustomKeyboardWithNode(contentNode, supportAvoidance);
+        }
     }
 }
 
@@ -2434,19 +2543,71 @@ NG::KeyboardAppearanceConfig JSTextField::ParseKeyboardAppearanceConfig(const JS
 
 void JSTextField::SetOnWillAttachIME(const JSCallbackInfo& info)
 {
+    auto onWillAttachIME = ParseAndCreateAttachCallback(info);
+    CHECK_NULL_VOID(onWillAttachIME);
+    TextFieldModel::GetInstance()->SetOnWillAttachIME(std::move(onWillAttachIME));
+}
+
+IMEAttachCallback JSTextField::ParseAndCreateAttachCallback(const JSCallbackInfo& info)
+{
     auto jsValue = info[0];
-    CHECK_NULL_VOID(jsValue->IsFunction());
+    CHECK_NULL_RETURN(jsValue->IsFunction(), nullptr);
     auto jsOnWillAttachIMEFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsValue));
     auto onWillAttachIME = [execCtx = info.GetExecutionContext(), func = std::move(jsOnWillAttachIMEFunc)](
-        const IMEClient& imeClientInfo) {
+                               IMEClient& imeClientInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onWillAttachIME");
-        JSRef<JSObject> imeClientObj = JSRef<JSObject>::New();
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(1);
+        JSRef<JSObject> imeClientObj = objectTemplate->NewInstance();
         imeClientObj->SetProperty<int32_t>("nodeId", imeClientInfo.nodeId);
+        imeClientObj->SetPropertyObject(
+            "setExtraConfig", JSRef<JSFunc>::New<FunctionCallback>(JSTextField::JsSetIMEExtraInfo));
+        imeClientObj->Wrap(&imeClientInfo);
         JSRef<JSVal> argv[] = { imeClientObj };
         func->ExecuteJS(1, argv);
     };
-    TextFieldModel::GetInstance()->SetOnWillAttachIME(std::move(onWillAttachIME));
+    return std::move(onWillAttachIME);
+}
+
+Local<JSValueRef> JSTextField::JsSetIMEExtraInfo(panda::JsiRuntimeCallInfo* info)
+{
+    EcmaVM* vm = info->GetVM();
+#ifdef ENABLE_STANDARD_INPUT
+    auto imeClient =
+        static_cast<IMEClient*>(panda::Local<panda::ObjectRef>(info->GetThisRef())->GetNativePointerField(vm, 0));
+    if (info->GetArgsNumber() <= 0 || !imeClient) {
+        return JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> arg = info->GetCallArgRef(0);
+    if (!arg->IsObject(vm)) {
+        return JSValueRef::Undefined(vm);
+    }
+    auto jsObject = JsiObject(arg->ToObject(vm));
+    JSRef<JSObject> extraConfigObj = JSRef<JSObject>::Make(jsObject);
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        return JSValueRef::Undefined(vm);
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    if (!nativeEngine) {
+        return JSValueRef::Undefined(vm);
+    }
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    if (!env) {
+        return JSValueRef::Undefined(vm);
+    }
+    napi_value configValue = JsConverter::ConvertJsValToNapiValue(extraConfigObj);
+    auto shareConfigPtr = std::make_shared<OHOS::MiscServices::ExtraConfig>();
+    auto status = OHOS::MiscServices::JsExtraConfig::GetExtraConfig(env, configValue, *shareConfigPtr);
+    if (status != napi_ok) {
+        return JSValueRef::Undefined(vm);
+    }
+    RefPtr<IMEExtraInfo> imeExtraConfig = AceType::MakeRefPtr<IMEExtraInfo>(
+        shareConfigPtr.get(), [configPtr = shareConfigPtr]() mutable { configPtr.reset(); });
+    imeClient->extraInfo = imeExtraConfig;
+#endif
+    return JSValueRef::Undefined(vm);
 }
 
 void JSTextField::SetKeyboardAppearanceConfig(const JSCallbackInfo& info)

@@ -41,6 +41,7 @@ constexpr float DEFAULT_MAX_FONT_SCALE = static_cast<float>(INT32_MAX);
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr int32_t DEFAULT_CARET_POSITION = 0;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
+const int32_t ERROR_INT_CODE = -1;
 
 void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr)
 {
@@ -673,6 +674,56 @@ void ResetSearchSelectedBackgroundColor(ArkUINodeHandle node)
     }
 }
 
+void SetSelectDetectorEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetSelectDetectEnable(frameNode, static_cast<bool>(value));
+}
+
+ArkUI_Int32 GetSelectDetectorEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SearchModelNG::GetSelectDetectEnable(frameNode));
+}
+
+void ResetSelectDetectorEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::ResetSelectDetectEnable(frameNode);
+}
+
+void SetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<TextDataDetectType> typelists;
+    for (ArkUI_Int32 i = 0; i < size; ++i) {
+        typelists.push_back(static_cast<TextDataDetectType>(types[i]));
+    }
+    SearchModelNG::SetSelectDetectConfig(frameNode, typelists);
+}
+
+ArkUI_Int32 GetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Int32 (*values)[32])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    std::vector<TextDataDetectType> types = SearchModelNG::GetSelectDetectConfig(frameNode);
+    for (uint32_t i = 0; i < types.size(); i++) {
+        (*values)[i] = static_cast<ArkUI_Int32>(types[i]);
+    }
+    return types.size();
+}
+
+void ResetSelectDetectorConfig(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::ResetSelectDetectConfig(frameNode);
+}
+
 void SetSearchTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1277,12 +1328,50 @@ void ResetSearchMargin(ArkUINodeHandle node)
     SearchModelNG::SetUserMargin(frameNode);
 }
 
+void SetSearchCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetCustomKeyboardWithNode(frameNode, reinterpret_cast<FrameNode*>(contentNode), supportAvoidance);
+}
+
+void ResetSearchCustomKeyboard(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetCustomKeyboardWithNode(frameNode, nullptr);
+}
+
+void SetSearchOnWillAttachIME(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillAttachIMECallback = reinterpret_cast<IMEAttachCallback*>(callback);
+        SearchModelNG::SetOnWillAttachIME(frameNode, std::move(*onWillAttachIMECallback));
+    } else {
+        SearchModelNG::SetOnWillAttachIME(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnWillAttachIME(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnWillAttachIME(frameNode, nullptr);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISearchModifier modifier = {
+        .setSelectDetectorEnable = SetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
+        .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .setSelectDetectorConfig = SetSelectDetectorConfig,
+        .getSelectDetectorConfig = GetSelectDetectorConfig,
+        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setSearchPlaceholderColor = SetSearchPlaceholderColor,
         .resetSearchPlaceholderColor = ResetSearchPlaceholderColor,
         .setSearchTextFont = SetSearchTextFont,
@@ -1396,6 +1485,10 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
         .setSearchMargin = SetSearchMargin,
         .resetSearchMargin = ResetSearchMargin,
+        .setSearchCustomKeyboard = SetSearchCustomKeyboard,
+        .resetSearchCustomKeyboard = ResetSearchCustomKeyboard,
+        .setSearchOnWillAttachIME = SetSearchOnWillAttachIME,
+        .resetSearchOnWillAttachIME = ResetSearchOnWillAttachIME
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1405,6 +1498,12 @@ const CJUISearchModifier* GetCJUISearchModifier()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISearchModifier modifier = {
+        .setSelectDetectorEnable = SetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
+        .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .setSelectDetectorConfig = SetSelectDetectorConfig,
+        .getSelectDetectorConfig = GetSelectDetectorConfig,
+        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setSearchPlaceholderColor = SetSearchPlaceholderColor,
         .resetSearchPlaceholderColor = ResetSearchPlaceholderColor,
         .setSearchTextFont = SetSearchTextFont,

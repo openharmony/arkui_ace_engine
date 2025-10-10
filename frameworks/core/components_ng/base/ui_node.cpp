@@ -1269,7 +1269,7 @@ void UINode::DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json)
     json->PutRef(key.c_str(), std::move(currentNode));
 }
 
-void UINode::DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current)
+void UINode::DumpSimplifyTreeBase(std::shared_ptr<JsonValue>& current)
 {
     current->Put("$type", tag_.c_str());
     current->Put("$ID", nodeId_);
@@ -1278,6 +1278,47 @@ void UINode::DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current
     } else {
         current->Put("type", "build-in");
     }
+}
+
+void UINode::DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& current, ParamConfig config)
+{
+    DumpSimplifyInfo(current);
+    DumpSimplifyInfoOnlyForParamConfig(current, config);
+}
+
+void UINode::DumpSimplifyTreeWithParamConfig(
+    int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible, ParamConfig config)
+{
+    DumpSimplifyTreeBase(current);
+    auto nodeChildren = GetChildren();
+    DumpSimplifyInfoWithParamConfig(current, config);
+    if (onlyNeedVisible && !CheckVisibleOrActive()) {
+        return;
+    }
+    bool hasChildren = !nodeChildren.empty() || !disappearingChildren_.empty();
+    if (hasChildren) {
+        auto array = JsonUtil::CreateArray();
+        if (!nodeChildren.empty()) {
+            for (const auto& item : nodeChildren) {
+                auto child = JsonUtil::CreateSharedPtrJson();
+                item->DumpSimplifyTreeWithParamConfig(depth + 1, child, onlyNeedVisible, config);
+                array->PutRef(std::move(child));
+            }
+        }
+        if (!disappearingChildren_.empty()) {
+            for (const auto& [item, index, branch] : disappearingChildren_) {
+                auto child = JsonUtil::CreateSharedPtrJson();
+                item->DumpSimplifyTreeWithParamConfig(depth + 1, child, onlyNeedVisible, config);
+                array->PutRef(std::move(child));
+            }
+        }
+        current->PutRef("$children", std::move(array));
+    }
+}
+
+void UINode::DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current)
+{
+    DumpSimplifyTreeBase(current);
     auto nodeChildren = GetChildren();
     DumpSimplifyInfo(current);
     if (!CheckVisibleOrActive()) {

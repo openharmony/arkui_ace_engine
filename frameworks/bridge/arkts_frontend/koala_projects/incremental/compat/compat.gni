@@ -18,10 +18,10 @@
 koalaui_compat_files = [
   "src/arkts/array.ts",
   "src/arkts/atomic.ts",
-  "src/arkts/double.ts",
   "src/arkts/finalization.ts",
   "src/arkts/observable.ts",
   "src/arkts/performance.ts",
+  "src/arkts/primitive.ts",
   "src/arkts/prop-deep-copy.ts",
   "src/arkts/reflection.ts",
   "src/arkts/strings.ts",

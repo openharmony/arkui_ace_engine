@@ -57,6 +57,8 @@ public:
     void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& value) override;
     void ResetTextColor() override {};
+    void SetSelectDetectEnable(bool value) override;
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void SetFontStyle(FontStyle value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>&& func) override;
@@ -112,7 +114,7 @@ public:
     void SetEnableHapticFeedback(bool state) override {};
     void SetKeyboardAppearance(KeyboardAppearance value) override {};
     void SetEnableAutoSpacing(bool enabled) override {};
-    void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) override {};
+    void SetOnWillAttachIME(IMEAttachCallback&& func) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

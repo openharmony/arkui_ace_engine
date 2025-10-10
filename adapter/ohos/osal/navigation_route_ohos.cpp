@@ -21,6 +21,78 @@
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
+NavigationRouteOhos::NavigationRouteOhos(const std::string& bundleName)
+{
+    InitRouteMap();
+    RegisteHspUpdateCallback();
+}
+
+NavigationRouteOhos::~NavigationRouteOhos()
+{
+    auto bundleManager = GetBundleManager();
+    if (bundleManager && navigationBundleEventCallback_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "unregiste plugin change callback");
+        bundleManager->UnregisterPluginEventCallback(navigationBundleEventCallback_);
+    }
+}
+
+void NavigationRouteOhos::RegisteHspUpdateCallback()
+{
+    auto bundleManager = GetBundleManager();
+    if (!bundleManager) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "[%{public}s] get bundle manager failed", __func__);
+        return;
+    }
+    navigationBundleEventCallback_ = new NavigationBundleEventCallback(WeakClaim(this));
+    bundleManager->RegisterPluginEventCallback(navigationBundleEventCallback_);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "subscribe hsp Update successfully");
+}
+
+void NavigationBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData eventData)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "on receive bundle change event");
+    auto navigationRoute = navigationRoute_.Upgrade();
+    if (!navigationRoute) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "update route map failed cause invalid navigaiton route");
+        return;
+    }
+    navigationRoute->InitRouteMap();
+}
+
+bool NavigationRouteOhos::IsPluginRouteInfo(const std::string& bundleName, const std::string& moduleName)
+{
+    for (auto pluginHspInfo: pluginHspInfos_) {
+        if (bundleName == pluginHspInfo.bundleName && moduleName == pluginHspInfo.moduleName) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void NavigationRouteOhos::UpdatePluginHspInfos(sptr<AppExecFwk::IBundleMgr> bundleManager)
+{
+    if (!bundleManager) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "[%{public}s] get bundle manager failed", __func__);
+        return;
+    }
+    pluginHspInfos_.clear();
+    std::vector<AppExecFwk::PluginBundleInfo> infos;
+    bundleManager->GetPluginInfosForSelf(infos);
+    if (infos.empty()) {
+        return;
+    }
+    for (auto pluginBundleInfo: infos) {
+        if (pluginBundleInfo.pluginModuleInfos.empty()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+                "current plugin bundle has no module: %{public}s", pluginBundleInfo.pluginBundleName.c_str());
+            continue;
+        }
+        for (auto pluginModuleInfo: pluginBundleInfo.pluginModuleInfos) {
+            pluginHspInfos_.push_back(PluginHspInfo(pluginBundleInfo.pluginBundleName, pluginModuleInfo.moduleName));
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "update plugin hsp info success, size: %{public}zu", pluginHspInfos_.size());
+}
 
 sptr<AppExecFwk::IBundleMgr> NavigationRouteOhos::GetBundleManager()
 {
@@ -41,7 +113,7 @@ void NavigationRouteOhos::InitRouteMap()
 {
     auto bundleManager = GetBundleManager();
     if (!bundleManager) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "get bundle manager failed");
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "[%{public}s] get bundle manager failed", __func__);
         return;
     }
     AppExecFwk::BundleInfo bundleInfo;
@@ -54,6 +126,7 @@ void NavigationRouteOhos::InitRouteMap()
     }
     allRouteItems_ = bundleInfo.routerArray;
     moduleInfos_ = bundleInfo.hapModuleInfos;
+    UpdatePluginHspInfos(bundleManager);
 }
 
 bool NavigationRouteOhos::GetRouteItem(const std::string& name, NG::RouteItem& info)
@@ -93,10 +166,22 @@ int32_t NavigationRouteOhos::LoadPage(const std::string& name)
     if (callback_ == nullptr) {
         return -1;
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "load navdestination %{public}s, ohmurl: %{public}s",
+    if (IsPluginRouteInfo(item.bundleName, item.moduleName)) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "load navdestination from plugin hsp, bundleName: %{public}s, moduleName: %{public}s",
+            item.bundleName.c_str(), item.moduleName.c_str());
+        // pass its real bundleName means navigate between two applications.
+        int32_t errorCode = callback_(item.bundleName, item.moduleName, item.ohmurl, false);
+        if (errorCode == 0) {
+            names_.emplace_back(name);
+        }
+        return errorCode;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "load navdestination, bundleName: %{public}s, moduleName: %{public}s",
         item.bundleName.c_str(), item.moduleName.c_str());
-    int32_t res = callback_(item.bundleName, item.moduleName, item.ohmurl, false);
-    if (res == 0) {
+    // pass emptry string as bundleName means navigate inside current application.
+    int32_t errorCode = callback_("", item.moduleName, item.ohmurl, false);
+    if (errorCode == 0) {
         names_.emplace_back(name);
     }
     return LoadPageFromHapModule(name);
@@ -116,9 +201,9 @@ bool NavigationRouteOhos::IsNavigationItemExits(const std::string& name)
 
 int32_t NavigationRouteOhos::LoadPageFromHapModule(const std::string& name)
 {
-    int32_t res = -1;
+    int32_t errorCode = -1;
     if (!callback_) {
-        return res;
+        return errorCode;
     }
     for (auto hapIter = moduleInfos_.begin(); hapIter != moduleInfos_.end(); hapIter++) {
         auto routerInfo = hapIter->routerArray;
@@ -126,15 +211,16 @@ int32_t NavigationRouteOhos::LoadPageFromHapModule(const std::string& name)
             if (routerIter->name != name) {
                 continue;
             }
-            res = callback_(routerIter->bundleName, routerIter->moduleName, routerIter->ohmurl, false);
+            // pass bundleName as emptry string means navigate inside current application.
+            errorCode = callback_("", routerIter->moduleName, routerIter->ohmurl, false);
             TAG_LOGD(AceLogTag::ACE_NAVIGATION, "load current destination name: %{public}s, ohmurl: %{public}s",
                 name.c_str(), routerIter->ohmurl.c_str());
-            if (res == 0) {
+            if (errorCode == 0) {
                 return 0;
             }
             break;
         }
     }
-    return res;
+    return errorCode;
 }
 } // namespace OHOS::Ace

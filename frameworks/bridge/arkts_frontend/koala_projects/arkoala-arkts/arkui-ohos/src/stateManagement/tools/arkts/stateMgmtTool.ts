@@ -29,8 +29,8 @@ import { InterfaceProxyHandler } from './observeInterfaceProxy';
 import { ISubscribedWatches, IWatchSubscriberRegister } from '../../decorator';
 import { DecoratedV1VariableBase } from '../../decoratorImpl/decoratorBase';
 import { StateManager, GlobalStateManager } from '@koalaui/runtime';
-import { UIContextUtil } from '../../../handwritten/UIContextUtil';
-import { UIContextImpl } from '../../../handwritten/UIContextImpl';
+import { UIContextUtil } from '../../../base/UIContextUtil';
+import { UIContextImpl } from '../../../base/UIContextImpl';
 import { StateMgmtConsole } from '../stateMgmtDFX';
 import { int32 } from '@koalaui/common';
 export class StateMgmtTool {
@@ -80,6 +80,12 @@ export class StateMgmtTool {
         const objType = Type.of(value);
         return objType instanceof ClassType && (objType as ClassType).getName().endsWith('@Proxy')
             ? (proxy.Proxy.tryGetHandler(value) as NullableObject) // a very slow call so need to judge proxy first
+            : undefined;
+    }
+    static tryGetTarget(value: Object): NullableObject {
+        const objType = Type.of(value);
+        return objType instanceof ClassType && (objType as ClassType).getName().endsWith('@Proxy')
+            ? (proxy.Proxy.tryGetTarget(value as Object) as NullableObject)
             : undefined;
     }
     static createProxy<T extends Object>(value: T, allowDeep: boolean = false): T {

@@ -88,17 +88,8 @@ UpdateSpanStyle Convert(const Ark_RichEditorTextStyle& src)
 void AssignArkValue(Ark_DecorationStyleInterface& dst, const UpdateSpanStyle& src,
     Converter::ConvContext *ctx)
 {
-    if (src.updateTextDecorationColor.has_value()) {
-        auto strColor = Converter::ArkValue<Ark_String>(src.updateTextDecorationColor->ToString(), ctx);
-        dst.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(strColor);
-    } else {
-        dst.color = Converter::ArkUnion<Opt_ResourceColor>(Ark_Empty());
-    }
-    if (src.updateTextDecorationStyle.has_value()) {
-        dst.style = Converter::ArkValue<Opt_TextDecorationStyle>(src.updateTextDecorationStyle.value());
-    } else {
-        dst.style = Converter::ArkValue<Opt_TextDecorationStyle>(Ark_Empty());
-    }
+    dst.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(src.updateTextDecorationColor, ctx);
+    dst.style = Converter::ArkValue<Opt_TextDecorationStyle>(src.updateTextDecorationStyle);
     dst.type = Converter::ArkValue<Ark_TextDecorationType>(src.updateTextDecoration.value_or(TextDecoration::NONE));
 }
 
@@ -106,7 +97,7 @@ Ark_RichEditorTextStyle CreateEmptyArkTextStyle()
 {
     Ark_RichEditorTextStyle dst;
     dst.fontColor = Converter::ArkUnion<Opt_ResourceColor>(Ark_Empty());
-    dst.fontSize = Converter::ArkUnion<Opt_Union_Length_Number>(Ark_Empty());
+    dst.fontSize = Converter::ArkUnion<Opt_Union_String_Number_Resource>(Ark_Empty());
     dst.fontStyle = Converter::ArkValue<Opt_FontStyle>(Ark_Empty());
     dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String>(Ark_Empty());
     dst.fontFamily = Converter::ArkUnion<Opt_ResourceStr>(Ark_Empty());
@@ -123,57 +114,32 @@ Ark_RichEditorTextStyle CreateEmptyArkTextStyle()
 void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Converter::ConvContext *ctx)
 {
     dst = CreateEmptyArkTextStyle();
-    if (src.updateTextColor.has_value()) {
-        auto color = src.updateTextColor.value();
-        auto strColor = Converter::ArkValue<Ark_String>(color.ToString(), ctx);
-        dst.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(strColor);
-    }
-    if (src.updateFontSize.has_value()) {
-        dst.fontSize =
-            Converter::ArkUnion<Opt_Union_Length_Number, Ark_Length>(src.updateFontSize.value());
-    }
-    if (src.updateItalicFontStyle.has_value()) {
-        dst.fontStyle = Converter::ArkValue<Opt_FontStyle>(src.updateItalicFontStyle.value());
-    }
-    if (src.updateFontWeight.has_value()) {
-        auto arkFontWeight = Converter::ArkValue<Ark_FontWeight>(src.updateFontWeight.value());
-        dst.fontWeight =
-            Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(arkFontWeight);
-    }
+    dst.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(src.updateTextColor, ctx);
+    dst.fontSize = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_String>(src.updateFontSize, ctx);
+    dst.fontStyle = Converter::ArkValue<Opt_FontStyle>(src.updateItalicFontStyle);
+    dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(src.updateFontWeight);
     if (src.updateFontFamily.has_value() && !src.updateFontFamily->empty()) {
         std::string family = V2::ConvertFontFamily(src.updateFontFamily.value());
-        dst.fontFamily = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(family, ctx));
+        dst.fontFamily = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(family, ctx);
     }
     if (src.isInitDecoration) {
         dst.decoration = Converter::ArkValue<Opt_DecorationStyleInterface>(src, ctx);
     }
-    if (src.updateTextShadows.has_value()) {
-        auto array = Converter::ArkValue<Array_ShadowOptions>(src.updateTextShadows.value(), ctx);
-        dst.textShadow = Converter::ArkUnion<Opt_Union_ShadowOptions_Array_ShadowOptions, Array_ShadowOptions>(array);
-    }
-    if (src.updateLetterSpacing.has_value()) {
-        auto str = Converter::ArkValue<Ark_String>(src.updateLetterSpacing.value().ToString(), ctx);
-        dst.letterSpacing = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(str);
-    }
-    if (src.updateLineHeight.has_value()) {
-        auto str = Converter::ArkValue<Ark_String>(src.updateLineHeight.value().ToString(), ctx);
-        dst.lineHeight = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(str);
-    }
+    dst.textShadow = Converter::ArkUnion<Opt_Union_ShadowOptions_Array_ShadowOptions, Array_ShadowOptions>(
+        src.updateTextShadows, ctx);
+    dst.letterSpacing = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(src.updateLetterSpacing, ctx);
+    dst.lineHeight = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(src.updateLineHeight, ctx);
     if (src.updateFontFeature.has_value()) {
         dst.fontFeature =
             Converter::ArkValue<Opt_String>(UnParseFontFeatureSetting(src.updateFontFeature.value()), ctx);
     }
-    if (src.updateHalfLeading.has_value()) {
-        dst.halfLeading = Converter::ArkValue<Opt_Boolean>(src.updateHalfLeading.value());
-    }
-    if (src.updateTextBackgroundStyle.has_value()) {
-        dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(src.updateTextBackgroundStyle.value(), ctx);
-    }
+    dst.halfLeading = Converter::ArkValue<Opt_Boolean>(src.updateHalfLeading);
+    dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(src.updateTextBackgroundStyle, ctx);
 }
 
 void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, Converter::ConvContext *ctx)
 {
-    dst.offset = ArkValue<Ark_Number>(src.offset.value_or(0.0f));
+    dst.offset = ArkValue<Ark_Int32>(src.offset.value_or(0.0f));
     dst.value = ArkValue<Ark_String>(src.value.value_or(std::u16string()), ctx);
 }
 }
@@ -187,7 +153,7 @@ void DestroyPeerImpl(Ark_RichEditorBaseController peer)
         delete peer;
     }
 }
-Ark_RichEditorBaseController CtorImpl()
+Ark_RichEditorBaseController ConstructImpl()
 {
     return new RichEditorBaseControllerPeer();
 }
@@ -241,10 +207,9 @@ void SetSelectionImpl(Ark_RichEditorBaseController peer,
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(selectionStart);
     CHECK_NULL_VOID(selectionEnd);
-    CHECK_NULL_VOID(options);
     int32_t start = Converter::Convert<int32_t>(*selectionStart);
     int32_t end = Converter::Convert<int32_t>(*selectionEnd);
-    auto optOptions = Converter::OptConvert<SelectionOptions>(*options);
+    auto optOptions = Converter::OptConvertPtr<SelectionOptions>(options);
     peer->SetSelection(start, end, optOptions, start < end);
 }
 Ark_Boolean IsEditingImpl(Ark_RichEditorBaseController peer)
@@ -261,7 +226,7 @@ void StopEditingImpl(Ark_RichEditorBaseController peer)
 Ark_LayoutManager GetLayoutManagerImpl(Ark_RichEditorBaseController peer)
 {
     CHECK_NULL_RETURN(peer && GetLayoutManagerAccessor(), {});
-    auto layoutManagerPeer = GetLayoutManagerAccessor()->ctor();
+    auto layoutManagerPeer = GetLayoutManagerAccessor()->construct();
     CHECK_NULL_RETURN(layoutManagerPeer, {});
     layoutManagerPeer->handler = peer->GetLayoutInfoInterface();
     return layoutManagerPeer;
@@ -286,7 +251,7 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
 {
     static const GENERATED_ArkUIRichEditorBaseControllerAccessor RichEditorBaseControllerAccessorImpl {
         RichEditorBaseControllerAccessor::DestroyPeerImpl,
-        RichEditorBaseControllerAccessor::CtorImpl,
+        RichEditorBaseControllerAccessor::ConstructImpl,
         RichEditorBaseControllerAccessor::GetFinalizerImpl,
         RichEditorBaseControllerAccessor::GetCaretOffsetImpl,
         RichEditorBaseControllerAccessor::SetCaretOffsetImpl,

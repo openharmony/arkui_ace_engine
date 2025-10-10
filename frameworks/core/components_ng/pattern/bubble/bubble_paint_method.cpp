@@ -43,8 +43,7 @@ constexpr int16_t P1INDEX = 0;
 constexpr int16_t P2INDEX = 1;
 constexpr int16_t P3INDEX = 2;
 constexpr int16_t P4INDEX = 3;
-constexpr double TOP_ARROW_LEFT_OFFSET = 3.0;
-constexpr double TOP_ARROW_RIGHT_OFFSET = 4.5;
+constexpr double ARROW_HEIGHT_OFFSET = 4.0;
 
 static RefPtr<PopupTheme> GetPopupTheme(PaintWrapper* paintWrapper)
 {
@@ -700,9 +699,22 @@ void BubblePaintMethod::BuildTopLinePath(
     path.LineTo(childOffset_.GetX() + childSize_.Width() - radius, childOffsetY + borderOffset);
 }
 
+float BubblePaintMethod::GetDoubleBorderWidthOffset(const RefPtr<PopupTheme>& popupTheme)
+{
+    float borderOffset = 0.0f;
+    if (innerBorderWidthByUser_ > 0.0f && outerBorderWidthByUser_  > 0.0f) {
+        borderOffset = GetBorderOffset(popupTheme);
+        if (borderOffset > 0.0f) {
+            borderOffset = 0.0f;
+        }
+    }
+    return borderOffset;
+}
+
 void BubblePaintMethod::BuildTopDoubleBorderPath(RSPath& path, float radius, const RefPtr<PopupTheme>& popupTheme)
 {
     float borderOffset = 0.0f;
+    float doubleBorderOffset = 0.0f;
     if (needPaintOuterBorder_) {
         borderOffset = -(outerBorderWidth_ / HALF);
     } else {
@@ -715,15 +727,17 @@ void BubblePaintMethod::BuildTopDoubleBorderPath(RSPath& path, float radius, con
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
             borderOffset = GetBorderOffset(popupTheme);
-            path.LineTo(arrowTopOffset + arrowOffsetsFromClip_[P1INDEX][0] + borderOffset / HALF,
+            doubleBorderOffset = GetDoubleBorderWidthOffset(popupTheme);
+            path.LineTo(arrowTopOffset + arrowOffsetsFromClip_[P1INDEX][0] + doubleBorderOffset,
                 childOffsetY + borderOffset);
-            path.LineTo(arrowTopOffset + arrowOffsetsFromClip_[P2INDEX][0] + borderOffset / TOP_ARROW_LEFT_OFFSET,
-                childOffsetY + arrowOffsetsFromClip_[P2INDEX][1] - BUBBLE_ARROW_HEIGHT.ConvertToPx());
+            path.LineTo(arrowTopOffset + arrowOffsetsFromClip_[P2INDEX][0],
+                childOffsetY + arrowOffsetsFromClip_[P2INDEX][1] - BUBBLE_ARROW_HEIGHT.ConvertToPx()
+                + borderOffset + doubleBorderOffset / ARROW_HEIGHT_OFFSET);
             path.ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f,
                 RSPathDirection::CW_DIRECTION, arrowTopOffset + arrowOffsetsFromClip_[P3INDEX][0],
                 childOffsetY + arrowOffsetsFromClip_[P3INDEX][1] - BUBBLE_ARROW_HEIGHT.ConvertToPx()
-                + borderOffset / TOP_ARROW_RIGHT_OFFSET);
-            path.LineTo(arrowTopOffset + arrowOffsetsFromClip_[P4INDEX][0],
+                + borderOffset + doubleBorderOffset / ARROW_HEIGHT_OFFSET);
+            path.LineTo(arrowTopOffset + arrowOffsetsFromClip_[P4INDEX][0] - doubleBorderOffset,
                 childOffsetY + borderOffset);
             break;
         default:
@@ -882,20 +896,24 @@ void BubblePaintMethod::BuildBottomLinePath(
 void BubblePaintMethod::BuildBottomDoubleBorderPath(RSPath& path, float radius, const RefPtr<PopupTheme>& popupTheme)
 {
     float borderOffset = GetBorderOffset(popupTheme);
+    float doubleBorderOffset = 0.0f;
     float childOffsetY = childOffset_.GetY();
     float arrowBottomOffset = childOffset_.GetX() - BUBBLE_ARROW_HEIGHT.ConvertToPx();
     switch (arrowPlacement_) {
         case Placement::TOP:
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
-            path.LineTo(arrowBottomOffset + arrowOffsetsFromClip_[P1INDEX][0],
+            doubleBorderOffset = GetDoubleBorderWidthOffset(popupTheme);
+            path.LineTo(arrowBottomOffset + arrowOffsetsFromClip_[P1INDEX][0] - doubleBorderOffset,
                 childOffsetY + childSize_.Height() - borderOffset);
             path.LineTo(arrowBottomOffset + arrowOffsetsFromClip_[P2INDEX][0],
-                childOffsetY + arrowOffsetsFromClip_[P2INDEX][1] - BUBBLE_ARROW_HEIGHT.ConvertToPx() - borderOffset);
+                childOffsetY + arrowOffsetsFromClip_[P2INDEX][1] - BUBBLE_ARROW_HEIGHT.ConvertToPx()
+                - borderOffset - doubleBorderOffset / ARROW_HEIGHT_OFFSET);
             path.ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f,
                 RSPathDirection::CW_DIRECTION, arrowBottomOffset + arrowOffsetsFromClip_[P3INDEX][0],
-                childOffsetY + arrowOffsetsFromClip_[P3INDEX][1] - BUBBLE_ARROW_HEIGHT.ConvertToPx() - borderOffset);
-            path.LineTo(arrowBottomOffset + arrowOffsetsFromClip_[P4INDEX][0],
+                childOffsetY + arrowOffsetsFromClip_[P3INDEX][1] - BUBBLE_ARROW_HEIGHT.ConvertToPx()
+                - borderOffset - doubleBorderOffset / ARROW_HEIGHT_OFFSET);
+            path.LineTo(arrowBottomOffset + arrowOffsetsFromClip_[P4INDEX][0] + doubleBorderOffset,
                 childOffsetY + childSize_.Height() - borderOffset);
             break;
         default:

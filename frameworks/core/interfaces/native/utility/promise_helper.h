@@ -50,6 +50,11 @@ public:
         AsyncWorkHelper::QueueWork(work_);
     }
 
+    void Resolve() const
+    {
+        callback_.InvokeSync(Converter::ArkValue<Opt_Array_String>(Ark_Empty()));
+    }
+
     // Resolve the promise.
     template<typename... ArkResult>
     void Resolve(ArkResult&&... result) const
@@ -71,7 +76,7 @@ public:
     }
 
 private:
-    Ark_AsyncWork work_ { nullptr, nullptr, nullptr };
+    Ark_AsyncWork work_ {};
     CallbackHelper<PromiseCallback> callback_ {};
 };
 } // namespace OHOS::Ace::NG

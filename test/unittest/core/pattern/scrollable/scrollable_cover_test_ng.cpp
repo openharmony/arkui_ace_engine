@@ -1636,6 +1636,43 @@ HWTEST_F(ScrollableCoverTestNg, UpdateScrollSnapEndWithOffsetTest001, TestSize.L
 }
 
 /**
+ * @tc.name: UpdateScrollSnapEndWithOffsetTest002
+ * @tc.desc: Test the UpdateScrollSnapEndWithOffset method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, UpdateScrollSnapEndWithOffsetTest002, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->GetSnapProperty();
+    /**
+     * @tc.steps: step1. Set isSnapScrollAnimationStop_ to false and snapOffsetProperty_ nullptr.
+     */
+    scrollable->snapOffsetProperty_ = nullptr;
+    scrollable->state_ = Scrollable::AnimationState::SNAP;
+    scrollable->updateSnapAnimationCount_ = 0;
+    scrollable->endPos_ = 200.0;
+    scrollable->finalPosition_ = 0.0f;
+    scrollable->listSnapSpeed_ = ScrollSnapAnimationSpeed::SLOW;
+    scrollable->SetGetSnapTypeCallback([]() { return SnapType::LIST_SNAP; });
+    scrollable->UpdateScrollSnapEndWithOffset(100.0);
+    ASSERT_NE(scrollable->snapOffsetProperty_, nullptr);
+    EXPECT_EQ(scrollable->endPos_, 100.0);
+    EXPECT_EQ(scrollable->finalPosition_, 100.0);
+    /**
+     * @tc.steps: step2. Set isSnapScrollAnimationStop_ to false and snapOffsetProperty_ has value.
+     */
+    scrollable->updateSnapAnimationCount_ = 3;
+    auto snapPropertyCallback = [](float offset) {};
+    scrollable->snapOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(snapPropertyCallback));
+    scrollable->UpdateScrollSnapEndWithOffset(50.0);
+    EXPECT_EQ(scrollable->endPos_, 50.0);
+    EXPECT_EQ(scrollable->finalPosition_, 50.0);
+}
+
+/**
  * @tc.name: GetFrictionPropertyTest001
  * @tc.desc: Test the GetFrictionProperty method
  * @tc.type: FUNC

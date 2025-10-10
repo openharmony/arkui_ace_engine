@@ -12,14 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "dialog_common.h"
+
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/utility/callback_keeper.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/implementation/dialog_common.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 
+#include "dismiss_dialog_action_peer.h"
+
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor();
 void AddOnWillDismiss(DialogProperties& properties, Opt_Callback_DismissDialogAction_Void onWillDismiss)
 {
     auto onWillDismissOpt = Converter::OptConvert<Callback_DismissDialogAction_Void>(onWillDismiss);
@@ -27,12 +29,9 @@ void AddOnWillDismiss(DialogProperties& properties, Opt_Callback_DismissDialogAc
     properties.onWillDismiss = [callback = CallbackHelper(onWillDismissOpt.value())](
         const int32_t& info, const int32_t& instanceId
     ) {
-        Ark_DismissDialogAction parameter = GetDismissDialogActionAccessor()->construct();
-        auto reasonValue = Converter::ArkValue<Ark_DismissReason>(
-            static_cast<BindSheetDismissReason>(info));
-        GetDismissDialogActionAccessor()->setReason(parameter, reasonValue);
-        callback.InvokeSync(parameter);
-        GetDismissDialogActionAccessor()->destroyPeer(parameter);
+        auto peer = PeerUtils::CreatePeer<DismissDialogActionPeer>();
+        peer->reason = static_cast<BindSheetDismissReason>(info);
+        callback.InvokeSync(peer);
     };
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

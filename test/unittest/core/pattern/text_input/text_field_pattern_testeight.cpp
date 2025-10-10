@@ -1827,7 +1827,7 @@ HWTEST_F(TextFieldPatternTestEight, InitTheme001, TestSize.Level0)
         static_cast<int32_t>(PlatformVersion::VERSION_NINE));
 
     pattern_->InitTheme();
-
+    pattern_->InitTheme();
     auto theme = pattern_->GetTheme();
     EXPECT_NE(theme, nullptr);
     EXPECT_NE(pattern_->needToRequestKeyboardOnFocus_, pattern_->independentControlKeyboard_);

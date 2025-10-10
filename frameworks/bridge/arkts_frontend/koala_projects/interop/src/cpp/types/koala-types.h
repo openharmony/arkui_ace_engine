@@ -17,11 +17,12 @@
 #define _KOALA_TYPES_H
 
 #include <stdint.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <string.h>
 #include <cmath>
 
 #include "interop-types.h"
+#include "interop-utils.h"
 
 #ifdef _MSC_VER
 #define KOALA_EXECUTE(name, code) \
@@ -42,12 +43,19 @@
 #endif
 
 struct KStringPtrImpl {
+    KStringPtrImpl(const uint8_t* str) : _value(nullptr), _owned(true) {
+      int len = str ? interop_strlen((const char*)str) : 0;
+      assign((const char*)str, len);
+    }
     KStringPtrImpl(const char* str) : _value(nullptr), _owned(true) {
-        int len = str ? strlen(str) : 0;
+        int len = str ? interop_strlen(str) : 0;
         assign(str, len);
     }
     KStringPtrImpl(const char* str, int len, bool owned) : _value(nullptr), _owned(owned) {
         assign(str, len);
+    }
+    KStringPtrImpl(const uint8_t* str, int len, bool owned) : _value(nullptr), _owned(owned) {
+        assign((const char*)str, len);
     }
     KStringPtrImpl() : _value(nullptr), _length(0), _owned(true) {}
 
@@ -77,13 +85,13 @@ struct KStringPtrImpl {
         if (_value && _owned) free(_value);
         _value = reinterpret_cast<char*>(malloc(size + 1));
         if (!_value) {
-          return;
+          INTEROP_FATAL("Cannot allocate memory");
         }
         _value[size] = 0;
     }
 
     void assign(const char* data) {
-        assign(data, data ? strlen(data) : 0);
+        assign(data, data ? interop_strlen(data) : 0);
     }
 
     void assign(const char* data, int len) {
@@ -91,7 +99,10 @@ struct KStringPtrImpl {
         if (data) {
           if (_owned) {
             _value = reinterpret_cast<char*>(malloc(len + 1));
-            memcpy(_value, data, len);
+            if (!_value) {
+              INTEROP_FATAL("Cannot allocate memory");
+            }
+            interop_memcpy(_value, len, data, len);
             _value[len] = 0;
           } else {
             _value = const_cast<char*>(data);
@@ -144,10 +155,10 @@ struct KInteropNumber {
     }
     static inline KInteropNumber fromDouble(double value) {
       KInteropNumber result;
-      // TODO: boundary check
+      // Improve: boundary check
       if (value == std::floor(value)) {
         result.tag = INTEROP_TAG_INT32;
-        result.i32 = (int)value;
+        result.i32 = static_cast<int>(value);
       } else {
         result.tag = INTEROP_TAG_FLOAT32;
         result.f32 = (float)value;
@@ -220,60 +231,6 @@ struct KInteropReturnBuffer {
   KNativePointer data;
   void (*dispose)(KNativePointer data, KInt length);
 };
-
-struct KLength {
-    KByte type;
-    KFloat value;
-    KInt unit;
-    KInt resource;
-    InteropLength toCType() {
-      InteropLength result;
-      result.type = this->type;
-      result.value = this->value;
-      result.unit = this->unit;
-      result.resource = this->resource;
-      return result;
-    }
-};
-
-inline void parseKLength(const KStringPtrImpl &string, KLength *result)
-{
-  char *suffixPtr = nullptr;
-
-  float value = std::strtof(string.c_str(), &suffixPtr);
-
-  if (!suffixPtr || suffixPtr == string.c_str())
-  {
-    // not a numeric value
-    result->unit = -1;
-    return;
-  }
-  result->value = value;
-  if (suffixPtr[0] == '\0' || (suffixPtr[0] == 'v' && suffixPtr[1] == 'p'))
-  {
-    result->unit = 1;
-  }
-  else if (suffixPtr[0] == '%')
-  {
-    result->unit = 3;
-  }
-  else if (suffixPtr[0] == 'p' && suffixPtr[1] == 'x')
-  {
-    result->unit = 0;
-  }
-  else if (suffixPtr[0] == 'l' && suffixPtr[1] == 'p' && suffixPtr[2] == 'x')
-  {
-    result->unit = 4;
-  }
-  else if (suffixPtr[0] == 'f' && suffixPtr[1] == 'p')
-  {
-    result->unit = 2;
-  }
-  else
-  {
-    result->unit = -1;
-  }
-}
 
 typedef _InteropVMContext *KVMContext;
 

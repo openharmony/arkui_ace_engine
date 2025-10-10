@@ -558,6 +558,18 @@ void ContextMenuSwitchDragPreviewAnimationProc(const RefPtr<FrameNode>& menu,
         option.GetOnFinishEvent(), nullptr, previewChild->GetContextRefPtr());
 }
 
+void CancelMenuTransformScaleAnimation(const RefPtr<FrameNode>& menuNode, float scale)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto renderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimationOption cancelOption = AnimationOption(Curves::FAST_OUT_LINEAR_IN, 0);
+    AnimationUtils::Animate(cancelOption, [renderContext, scale]() {
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateTransformScale({ scale, scale });
+    }, nullptr, nullptr, menuNode->GetContextRefPtr());
+}
+
 void ShowContextMenuDisappearAnimation(
     AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern, bool startDrag = false)
 {
@@ -579,8 +591,7 @@ void ShowContextMenuDisappearAnimation(
     auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     if (startDrag) {
-        menuRenderContext->UpdateTransformScale(
-            VectorF(menuTheme->GetMenuDragAnimationScale(), menuTheme->GetMenuDragAnimationScale()));
+        CancelMenuTransformScaleAnimation(menuChild, menuTheme->GetMenuDragAnimationScale());
     }
     auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
     auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
@@ -6878,7 +6889,9 @@ void OverlayManager::CloseKeyboard(int32_t targetId)
     auto pattern = customKeyboard->GetPattern<KeyboardPattern>();
     CHECK_NULL_VOID(pattern);
     customKeyboardMap_.erase(pattern->GetTargetId());
-    customKeyboard->MarkRemoving();
+    if (!customKeyboard->IsFree()) {
+        customKeyboard->MarkRemoving();
+    }
     PlayKeyboardTransition(customKeyboard, false);
     Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, 0.0f);
     auto safeAreaManager = pipeline->GetSafeAreaManager();

@@ -1405,6 +1405,18 @@ void ButtonPattern::HandleBlurStyleTask()
     UpdateButtonStyle();
 }
 
+void ButtonPattern::SetNavBarMenuFocusStyle(RefPtr<RenderContext>& renderContext, bool isFocus)
+{
+    if (buttonType_ != ComponentButtonType::NAVIGATION || !navMenuItemNeedFocus_) {
+        return;
+    }
+    if (isFocus) {
+        renderContext->BlendBgColor(navigationFocusBlendBgColor_);
+        return;
+    }
+    renderContext->BlendBgColor(Color::TRANSPARENT);
+}
+
 void ButtonPattern::SetBlurButtonStyle(RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme,
     RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<FrameNode>& textNode)
 {
@@ -1425,6 +1437,7 @@ void ButtonPattern::SetBlurButtonStyle(RefPtr<RenderContext>& renderContext, Ref
         bgColorModify_ = false;
         renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
     }
+    SetNavBarMenuFocusStyle(renderContext, false);
     if (focusTextColorModify_) {
         focusTextColorModify_ = false;
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -1460,6 +1473,7 @@ void ButtonPattern::SetFocusButtonStyle(RefPtr<RenderContext>& renderContext, Re
             renderContext->UpdateBackgroundColor(buttonTheme->GetEmphasizeBackgroundFocus());
         }
     }
+    SetNavBarMenuFocusStyle(renderContext, true);
 
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -1534,5 +1548,15 @@ void ButtonPattern::HandleFocusStatusStyle()
         pattern->HandleBlurStyleTask();
     };
     focusHub->SetOnBlurInternal(blurTask);
+}
+
+void ButtonPattern::SetNavigationFocusBlendBgColor(const Color& navigationFocusBlendBgColor)
+{
+    navigationFocusBlendBgColor_ = navigationFocusBlendBgColor;
+}
+
+void ButtonPattern::SetNavMenuItemNeedFocus(bool navMenuItemNeedFocus)
+{
+    navMenuItemNeedFocus_ = navMenuItemNeedFocus;
 }
 } // namespace OHOS::Ace::NG

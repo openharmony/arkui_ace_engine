@@ -180,6 +180,8 @@ enum class PreviewTextStyle {
     UNDERLINE,
 };
 
+class SpanStringBase;
+
 class ACE_EXPORT TextFieldControllerBase : public AceType {
     DECLARE_ACE_TYPE(TextFieldControllerBase, AceType);
 
@@ -277,6 +279,8 @@ public:
         return true;
     }
 
+    virtual void SetPlaceholderStyledString(const RefPtr<SpanStringBase>& value) {};
+
 protected:
     std::function<void(const int32_t)> setCaretPosition_;
     std::function<Rect(void)> getTextContentRect_;
@@ -298,6 +302,8 @@ public:
     virtual void RequestKeyboardOnFocus(bool needToRequest) = 0;
     virtual void SetWidthAuto(bool isAuto) {}
     virtual void SetType(TextInputType value) = 0;
+    virtual void SetSelectDetectEnable(bool value) = 0;
+    virtual void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) = 0;
     virtual void SetContentType(const NG::TextContentType& value) = 0;
     virtual void SetPlaceholderColor(const Color& value) = 0;
     virtual void ResetPlaceholderColor() = 0;
@@ -341,6 +347,10 @@ public:
     virtual void ResetMaxLength() = 0;
     virtual void SetForegroundColor(const Color& value) = 0;
     virtual void SetBackgroundColor(const Color& color, bool tmp) = 0;
+    virtual void SetCounterTextColor(const Color& value) {};
+    virtual void SetCounterTextOverflowColor(const Color& value) {};
+    virtual void ResetCounterTextColor() {};
+    virtual void ResetCounterTextOverflowColor() {};
     virtual void ResetBackgroundColor() = 0;
     virtual void SetHeight(const Dimension& value) = 0;
     virtual void SetPadding(
@@ -376,6 +386,7 @@ public:
     virtual void SetFocusableAndFocusNode() {};
     virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) = 0;
+    virtual void SetCustomKeyboardWithNode(NG::FrameNode* customKeyboard, bool supportAvoidance = false) {};
     virtual void SetPasswordRules(const std::string& passwordRules) = 0;
     virtual void SetEnableAutoFill(bool enableAutoFill) = 0;
     virtual void SetEnableAutoFillAnimation(bool enableAutoFillAnimation) = 0;
@@ -420,7 +431,7 @@ public:
     virtual void SetStrokeColor(const Color& value) {};
     virtual void ResetStrokeColor() {};
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
-    virtual void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) = 0;
+    virtual void SetOnWillAttachIME(IMEAttachCallback&& func) = 0;
     virtual void SetTextAreaScrollBarColor(const Color& value) {};
     virtual void ResetTextAreaScrollBarColor() {};
 

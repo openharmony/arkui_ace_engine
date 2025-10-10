@@ -325,6 +325,62 @@ public:
         indicatorStyles_[position] = indicatorStyle;
     }
 
+    IndicatorStyle GetIndicatorStyleByIndex(uint32_t index) const
+    {
+        if (index >= indicatorStyles_.size()) {
+            IndicatorStyle indicatorStyle;
+            return indicatorStyle;
+        }
+        return indicatorStyles_[index];
+    }
+
+    void SetDrawableIndicatorConfig(const ImageInfoConfig& config, uint32_t position, bool newTabBar = false)
+    {
+        if (drawableIndicatorConfigs_.size() <= position) {
+            drawableIndicatorConfigs_.emplace_back(config);
+            return;
+        }
+
+        if (newTabBar) {
+            drawableIndicatorConfigs_.insert(drawableIndicatorConfigs_.begin() + position, config);
+            return;
+        }
+
+        drawableIndicatorConfigs_[position] = config;
+    }
+
+    ImageInfoConfig GetDrawableIndicatorConfigByIndex(uint32_t index)
+    {
+        if (index >= drawableIndicatorConfigs_.size()) {
+            ImageInfoConfig config;
+            return config;
+        }
+        return drawableIndicatorConfigs_[index];
+    }
+
+    void SetDrawableIndicatorFlag(bool isDrawableIndicator, uint32_t position, bool newTabBar = false)
+    {
+        if (isDrawableIndicators_.size() <= position) {
+            isDrawableIndicators_.emplace_back(isDrawableIndicator);
+            return;
+        }
+
+        if (newTabBar) {
+            isDrawableIndicators_.insert(isDrawableIndicators_.begin() + position, isDrawableIndicator);
+            return;
+        }
+
+        isDrawableIndicators_[position] = isDrawableIndicator;
+    }
+
+    bool GetDrawableIndicatorFlagByIndex(uint32_t index) const
+    {
+        if (index >= isDrawableIndicators_.size()) {
+            return false;
+        }
+        return isDrawableIndicators_[index];
+    }
+
     void SetTabBarStyle(TabBarStyle tabBarStyle, uint32_t position, bool newTabBar = false)
     {
         if (tabBarStyles_.size() <= position) {
@@ -566,6 +622,15 @@ public:
     void ResetOnForceMeasure(int32_t index);
     void OnColorModeChange(uint32_t colorMode) override;
 
+    bool NeedShowImageIndicator(int32_t index) const
+    {
+        auto isImageIndicator = GetDrawableIndicatorFlagByIndex(index);
+        if (GetTabBarStyle(index) != TabBarStyle::SUBTABBATSTYLE || !isImageIndicator || axis_ != Axis::HORIZONTAL) {
+            return false;
+        }
+        return true;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -701,6 +766,7 @@ private:
 
     template<typename T>
     void UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_t>& retainedIndex);
+    void UpdateSubTabBarImageIndicator();
 
     RefPtr<NodeAnimatablePropertyFloat> tabBarProperty_;
     CancelableCallback<void()> showTabBarTask_;
@@ -755,6 +821,8 @@ private:
     float currentIndicatorOffset_ = 0.0f;
     std::vector<SelectedMode> selectedModes_;
     std::vector<IndicatorStyle> indicatorStyles_;
+    std::vector<ImageInfoConfig> drawableIndicatorConfigs_;
+    std::vector<bool> isDrawableIndicators_;
     std::vector<TabBarStyle> tabBarStyles_;
     std::vector<int32_t> tabBarItemIds_;
     std::unordered_map<int32_t, LabelStyle> labelStyles_;

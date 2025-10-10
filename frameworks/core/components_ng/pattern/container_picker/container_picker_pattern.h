@@ -187,6 +187,7 @@ private:
     void UpdateClipEdge();
     float ShortestDistanceBetweenCurrentAndTarget();
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
+    void CreateChildrenClickEvent(RefPtr<UINode>& host);
 
     int32_t containerPickerId_ = -1;
     int32_t displayCount_ = 7;
@@ -205,6 +206,8 @@ private:
 
     bool crossMatchChild_ = false;
     float currentDelta_ = 0.0f;
+    float currentOffset_ = 0.0f;
+    float currentIndexOffset_ = 0.0f;
     float totalOffset_ = 0.0f; // indicates the offset of the actual layout
     float height_ = 0.0f;
     float contentMainSize_ = 0.0f;

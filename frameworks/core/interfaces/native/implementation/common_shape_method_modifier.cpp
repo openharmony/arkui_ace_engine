@@ -37,146 +37,133 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 {
     return {};
 }
-void StrokeImpl(Ark_NativePointer node,
-                const Opt_ResourceColor* value)
+void SetStrokeImpl(Ark_NativePointer node,
+                   const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ShapeModelStatic::SetStroke(frameNode, Converter::OptConvert<Color>(*value));
+    ShapeModelStatic::SetStroke(frameNode, Converter::OptConvertPtr<Color>(value));
 }
-void FillImpl(Ark_NativePointer node,
-              const Opt_ResourceColor* value)
+void SetFillImpl(Ark_NativePointer node,
+                 const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ShapeModelStatic::SetFill(frameNode, Converter::OptConvert<Color>(*value));
+    ShapeModelStatic::SetFill(frameNode, Converter::OptConvertPtr<Color>(value));
 }
-void StrokeDashOffsetImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String* value)
+void SetStrokeDashOffsetImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto strokeDashOffset = Converter::OptConvert<Dimension>(*value);
+    auto strokeDashOffset = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidatePositive(strokeDashOffset);
     Validator::ValidateNonPercent(strokeDashOffset);
     ShapeModelStatic::SetStrokeDashOffset(frameNode, strokeDashOffset);
 }
-void StrokeLineCapImpl(Ark_NativePointer node,
-                       const Opt_LineCapStyle* value)
+void SetStrokeLineCapImpl(Ark_NativePointer node,
+                          const Opt_LineCapStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto enumLineCapStyle = Converter::OptConvert<LineCapStyle>(*value);
+    auto enumLineCapStyle = Converter::OptConvertPtr<LineCapStyle>(value);
     auto intLineCapStyle = EnumToInt(enumLineCapStyle);
     ShapeModelStatic::SetStrokeLineCap(frameNode, intLineCapStyle);
 }
-void StrokeLineJoinImpl(Ark_NativePointer node,
-                        const Opt_LineJoinStyle* value)
+void SetStrokeLineJoinImpl(Ark_NativePointer node,
+                           const Opt_LineJoinStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto enumLineJoinStyle = Converter::OptConvert<LineJoinStyle>(*value);
+    auto enumLineJoinStyle = Converter::OptConvertPtr<LineJoinStyle>(value);
     auto intLineJoinStyle = EnumToInt(enumLineJoinStyle);
     ShapeModelStatic::SetStrokeLineJoin(frameNode, intLineJoinStyle);
 }
-void StrokeMiterLimitImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String* value)
+void SetStrokeMiterLimitImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto strokeMiterLimit = Converter::OptConvert<float>(*value);
+    auto strokeMiterLimit = Converter::OptConvertPtr<float>(value);
     validateStrokeMiterLimit(strokeMiterLimit);
     ShapeModelStatic::SetStrokeMiterLimit(frameNode, strokeMiterLimit);
 }
-void StrokeOpacityImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_String_Resource* value)
+void SetStrokeOpacityImpl(Ark_NativePointer node,
+                          const Opt_Union_Number_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto strokeOpacity = Converter::OptConvert<float>(*value);
+    auto strokeOpacity = Converter::OptConvertPtr<float>(value);
     Validator::ValidateOpacity(strokeOpacity);
     ShapeModelStatic::SetStrokeOpacity(frameNode, strokeOpacity);
 }
-void FillOpacityImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_String_Resource* value)
+void SetFillOpacityImpl(Ark_NativePointer node,
+                        const Opt_Union_Number_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto strokeOpacity = Converter::OptConvert<float>(*value);
+    auto strokeOpacity = Converter::OptConvertPtr<float>(value);
     Validator::ValidateOpacity(strokeOpacity);
     ShapeModelStatic::SetFillOpacity(frameNode, strokeOpacity);
 }
-void StrokeWidthImpl(Ark_NativePointer node,
-                     const Opt_Length* value)
+void SetStrokeWidthImpl(Ark_NativePointer node,
+                        const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        ShapeModelStatic::SetStrokeWidth(frameNode, std::nullopt);
-        return;
-    }
-    auto strokeWidth = Converter::OptConvertFromArkLength(value->value, DimensionUnit::VP);
-    Validator::ValidatePositive(strokeWidth);
+    auto strokeWidth = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonNegative(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     ShapeModelStatic::SetStrokeWidth(frameNode, strokeWidth);
 }
-void AntiAliasImpl(Ark_NativePointer node,
-                   const Opt_Boolean* value)
+void SetAntiAliasImpl(Ark_NativePointer node,
+                      const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         ShapeModelNG::SetAntiAlias(frameNode, false);
         return;
     }
     ShapeModelNG::SetAntiAlias(frameNode, *convValue);
 }
-void StrokeDashArrayImpl(Ark_NativePointer node,
-                         const Opt_Array_Length* value)
+void SetStrokeDashArrayImpl(Ark_NativePointer node,
+                            const Opt_Array_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    std::vector<Dimension> dashArray;
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        ShapeModelNG::SetStrokeDashArray(frameNode, dashArray);
+    auto dashArray = Converter::OptConvertPtr<std::vector<Dimension>>(value);
+    if (!dashArray) {
+        std::vector<Dimension> defaultDashArray;
+        ShapeModelNG::SetStrokeDashArray(frameNode, defaultDashArray);
         return;
     }
-    Array_Length arrayValue = value->value;
-    int32_t length = arrayValue.length;
-    for (int32_t i = 0; i < length; ++i) {
-        auto optLength = Converter::OptConvertFromArkLength(arrayValue.array[i], DimensionUnit::VP);
-        if (optLength.has_value()) {
-            dashArray.emplace_back(optLength.value());
-        }
-    }
     // if odd,add twice
-    auto dashArraySize = dashArray.size();
-    if (dashArraySize & 1) {
-        for (size_t i = 0; i < dashArraySize; ++i) {
-            dashArray.emplace_back(dashArray[i]);
+    auto length = dashArray->size();
+    if (length & 1) {
+        for (int32_t i = 0; i < length; i++) {
+            dashArray->emplace_back((*dashArray)[i]);
         }
     }
-    ShapeModelNG::SetStrokeDashArray(frameNode, dashArray);
+    ShapeModelNG::SetStrokeDashArray(frameNode, std::move(*dashArray));
 }
 } // CommonShapeMethodModifier
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()
 {
     static const GENERATED_ArkUICommonShapeMethodModifier ArkUICommonShapeMethodModifierImpl {
         CommonShapeMethodModifier::ConstructImpl,
-        CommonShapeMethodModifier::StrokeImpl,
-        CommonShapeMethodModifier::FillImpl,
-        CommonShapeMethodModifier::StrokeDashOffsetImpl,
-        CommonShapeMethodModifier::StrokeLineCapImpl,
-        CommonShapeMethodModifier::StrokeLineJoinImpl,
-        CommonShapeMethodModifier::StrokeMiterLimitImpl,
-        CommonShapeMethodModifier::StrokeOpacityImpl,
-        CommonShapeMethodModifier::FillOpacityImpl,
-        CommonShapeMethodModifier::StrokeWidthImpl,
-        CommonShapeMethodModifier::AntiAliasImpl,
-        CommonShapeMethodModifier::StrokeDashArrayImpl,
+        CommonShapeMethodModifier::SetStrokeImpl,
+        CommonShapeMethodModifier::SetFillImpl,
+        CommonShapeMethodModifier::SetStrokeDashOffsetImpl,
+        CommonShapeMethodModifier::SetStrokeLineCapImpl,
+        CommonShapeMethodModifier::SetStrokeLineJoinImpl,
+        CommonShapeMethodModifier::SetStrokeMiterLimitImpl,
+        CommonShapeMethodModifier::SetStrokeOpacityImpl,
+        CommonShapeMethodModifier::SetFillOpacityImpl,
+        CommonShapeMethodModifier::SetStrokeWidthImpl,
+        CommonShapeMethodModifier::SetAntiAliasImpl,
+        CommonShapeMethodModifier::SetStrokeDashArrayImpl,
     };
     return &ArkUICommonShapeMethodModifierImpl;
 }

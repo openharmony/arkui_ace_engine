@@ -23,12 +23,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HoverEventAccessor {
 namespace {
     const Opt_Number INVALID_OPT_NUMBER = Converter::ArkValue<Opt_Number>();
+    const float DEFAULT_VALUE = 0.0f;
 } // namespace
 void DestroyPeerImpl(Ark_HoverEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_HoverEvent CtorImpl()
+Ark_HoverEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<HoverEventPeer>();
 }
@@ -45,14 +46,14 @@ Opt_Number GetXImpl(Ark_HoverEvent peer)
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetXImpl(Ark_HoverEvent peer,
-              const Ark_Number* x)
+              const Opt_Number* x)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(x);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     auto location = info->GetLocalLocation();
-    auto value = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(*x));
+    auto optX = x ? Converter::OptConvertPtr<float>(x) : std::nullopt;
+    auto value = PipelineBase::Vp2PxWithCurrentDensity(optX.value_or(DEFAULT_VALUE));
     location.SetX(value, location.GetXAnimationOption());
     info->SetLocalLocation(location);
 }
@@ -65,14 +66,14 @@ Opt_Number GetYImpl(Ark_HoverEvent peer)
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetYImpl(Ark_HoverEvent peer,
-              const Ark_Number* y)
+              const Opt_Number* y)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(y);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     auto location = info->GetLocalLocation();
-    auto value = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(*y));
+    auto optY = y ? Converter::OptConvertPtr<float>(y) : std::nullopt;
+    auto value = PipelineBase::Vp2PxWithCurrentDensity(optY.value_or(DEFAULT_VALUE));
     location.SetY(value, location.GetYAnimationOption());
     info->SetLocalLocation(location);
 }
@@ -85,14 +86,14 @@ Opt_Number GetWindowXImpl(Ark_HoverEvent peer)
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetWindowXImpl(Ark_HoverEvent peer,
-                    const Ark_Number* windowX)
+                    const Opt_Number* windowX)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(windowX);
     const auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     auto location = info->GetGlobalLocation();
-    const auto value = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(*windowX));
+    auto optWX = windowX ? Converter::OptConvertPtr<float>(windowX) : std::nullopt;
+    const auto value = PipelineBase::Vp2PxWithCurrentDensity(optWX.value_or(DEFAULT_VALUE));
     location.SetX(value, location.GetXAnimationOption());
     info->SetGlobalLocation(location);
 }
@@ -105,14 +106,14 @@ Opt_Number GetWindowYImpl(Ark_HoverEvent peer)
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetWindowYImpl(Ark_HoverEvent peer,
-                    const Ark_Number* windowY)
+                    const Opt_Number* windowY)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(windowY);
     const auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     auto location = info->GetGlobalLocation();
-    const auto value = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(*windowY));
+    auto optWY = windowY ? Converter::OptConvertPtr<float>(windowY) : std::nullopt;
+    const auto value = PipelineBase::Vp2PxWithCurrentDensity(optWY.value_or(DEFAULT_VALUE));
     location.SetY(value, location.GetYAnimationOption());
     info->SetGlobalLocation(location);
 }
@@ -125,14 +126,14 @@ Opt_Number GetDisplayXImpl(Ark_HoverEvent peer)
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetDisplayXImpl(Ark_HoverEvent peer,
-                     const Ark_Number* displayX)
+                     const Opt_Number* displayX)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(displayX);
     const auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     auto location = info->GetScreenLocation();
-    const auto value = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(*displayX));
+    auto optDX = displayX ? Converter::OptConvertPtr<float>(displayX) : std::nullopt;
+    const auto value = PipelineBase::Vp2PxWithCurrentDensity(optDX.value_or(DEFAULT_VALUE));
     location.SetX(value, location.GetXAnimationOption());
     info->SetScreenLocation(location);
 }
@@ -145,14 +146,15 @@ Opt_Number GetDisplayYImpl(Ark_HoverEvent peer)
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetDisplayYImpl(Ark_HoverEvent peer,
-                     const Ark_Number* displayY)
+                     const Opt_Number* displayY)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(displayY);
     const auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     auto location = info->GetScreenLocation();
-    const auto value = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(*displayY));
+    auto optDY = displayY ? Converter::OptConvertPtr<float>(displayY) : std::nullopt;
+    const auto value = PipelineBase::Vp2PxWithCurrentDensity(optDY.value_or(DEFAULT_VALUE));
     location.SetY(value, location.GetYAnimationOption());
     info->SetScreenLocation(location);
 }
@@ -176,7 +178,7 @@ const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
 {
     static const GENERATED_ArkUIHoverEventAccessor HoverEventAccessorImpl {
         HoverEventAccessor::DestroyPeerImpl,
-        HoverEventAccessor::CtorImpl,
+        HoverEventAccessor::ConstructImpl,
         HoverEventAccessor::GetFinalizerImpl,
         HoverEventAccessor::GetXImpl,
         HoverEventAccessor::SetXImpl,

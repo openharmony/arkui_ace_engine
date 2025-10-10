@@ -19,12 +19,20 @@ import { AppStorage } from './appStorage';
 import { ArkUIAniModule } from 'arkui.ani';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
-interface IAniStorage {
-    get(key: string): string | undefined;
-    set(key: string, val: string): void;
-    has(key: string): boolean;
+export const enum AreaMode {
+    EL1 = 0,
+    EL2 = 1,
+    EL3 = 2,
+    EL4 = 3,
+    EL5 = 4,
+}
+
+export interface IAniStorage {
+    get(key: string, areaMode?: AreaMode): string | undefined;
+    set(key: string, val: string, areaMode?: AreaMode): void;
+    has(key: string, areaMode?: AreaMode): boolean;
     clear(): void;
-    delete(key: string): void;
+    delete(key: string, areaMode?: AreaMode): void;
 }
 
 // class JsonElement{}
@@ -97,21 +105,42 @@ class TypedMap {
     }
 }
 
-class AniStorage implements IAniStorage {
-    get(key: string): string | undefined {
-        return ArkUIAniModule._PersistentStorage_Get(key);
-    }
-    set(key: string, val: string): void {
-        ArkUIAniModule._PersistentStorage_Set(key, val);
-    }
-    has(key: string): boolean {
-        return ArkUIAniModule._PersistentStorage_Has(key);
-    }
-    clear(): void {
+export class AniStorage implements IAniStorage {
+    clear(): void { // No AreaMode parameter
         ArkUIAniModule._PersistentStorage_Clear();
     }
-    delete(key: string): void {
-        ArkUIAniModule._PersistentStorage_Delete(key);
+    delete(key: string, areaMode?: AreaMode): void {
+        ArkUIAniModule._PersistentStorage_Delete(key, areaModeToInt(areaMode));
+    }
+    get(key: string, areaMode?: AreaMode): string | undefined {
+        return ArkUIAniModule._PersistentStorage_Get(key, areaModeToInt(areaMode));
+    }
+    has(key: string, areaMode?: AreaMode): boolean {
+        return ArkUIAniModule._PersistentStorage_Has(key, areaModeToInt(areaMode));
+    }
+    set(key: string, val: string, areaMode?: AreaMode): void {
+        ArkUIAniModule._PersistentStorage_Set(key, val, areaModeToInt(areaMode));
+    }
+}
+
+function areaModeToInt(areaMode?: AreaMode): Int {
+    if (areaMode === undefined) {
+        return -1;
+    }
+    switch(areaMode) {
+        case AreaMode.EL1:
+            return 0;
+        case AreaMode.EL2:
+            return 1;
+        case AreaMode.EL3:
+            return 2;
+        case AreaMode.EL4:
+            return 3;
+        case AreaMode.EL5:
+            return 4;
+        default:
+            // never getting here
+            return -1;
     }
 }
 
@@ -193,7 +222,7 @@ class PersistentStorage {
         fromJson?: FromJSONType<T>
     ): boolean {
         const ttype = Type.of(defaultValue);
-        let isSimpleType: boolean = false;
+        let isSimpleType = false;
         if (!toJson && !fromJson && this.simpleTypeSet.has(ttype)) {
             isSimpleType = true;
         }

@@ -929,7 +929,7 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
         needAvoidKeyboard = false;
     }
     auto childOffset = AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
-    AvoidScreen(childOffset, prop, childSize);
+    AvoidScreen(childOffset, prop, dialogChildSize_);
     return childOffset;
 }
 
@@ -1086,9 +1086,10 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     auto childOffset = topLeftPoint + dialogOffset;
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
+    auto dialogCorrectionEnabled = FeatureParam::IsDialogCorrectionEnabled();
+    DialogOverflowAdjust(childOffset, childSize, dialogCorrectionEnabled);
     auto childBottom = childOffset.GetY() + childSize.Height() + embeddedDialogOffsetY_ + stackRootDialogOffsetY_;
     auto paddingBottom = static_cast<float>(GetPaddingBottom());
-    auto dialogCorrectionEnabled = FeatureParam::IsDialogCorrectionEnabled();
     if (needAvoidKeyboard && keyboardInsert.Length() > 0 && childBottom > (keyboardInsert.start - paddingBottom)) {
         auto limitPos = std::min(childOffset.GetY(),
             static_cast<float>(safeAreaInsets_.top_.Length() + AVOID_LIMIT_PADDING.ConvertToPx()));
@@ -1107,8 +1108,6 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
             }
             childOffset.SetY(limitPos);
         }
-    } else {
-        DialogOverflowAdjust(childOffset, childSize, dialogCorrectionEnabled);
     }
     return childOffset;
 }
@@ -1119,32 +1118,40 @@ void DialogLayoutAlgorithm::DialogOverflowAdjust(
     if (!dialogCorrectionEnabled) {
         return;
     }
-    
-    auto limitAreaPadding = ((1 - DIALOG_VIEWPORT_HEIGHT_RATIO) / HALF)
-         * (safeAreaInsets_.bottom_.start - safeAreaInsets_.top_.end);
-    auto limitTop = safeAreaInsets_.top_.end + limitAreaPadding;
-    auto limitBottom = safeAreaInsets_.bottom_.start - limitAreaPadding;
+
+    auto viewTop = GreatNotEqual(safeAreaInsets_.top_.Length(), 0) ? safeAreaInsets_.top_.end : 0;
+    auto viewBottom =
+        GreatNotEqual(safeAreaInsets_.bottom_.Length(), 0) ? safeAreaInsets_.bottom_.start : wrapperSize_.Height();
+    auto limitAreaPadding = ((1 - DIALOG_VIEWPORT_HEIGHT_RATIO) / HALF) * (viewBottom - viewTop);
+    auto limitTop = viewTop + limitAreaPadding;
+    auto limitBottom = viewBottom - limitAreaPadding;
+    if (GreatNotEqual(limitTop, limitBottom)) {
+        return;
+    }
+
     float childBottom = 0.0f;
-    if (childOffset.GetY() < limitTop) {
+    if (LessNotEqual(childOffset.GetY(), limitTop)) {
         childOffset.SetY(limitTop);
         childBottom = childOffset.GetY() + childSize.Height() + embeddedDialogOffsetY_ + stackRootDialogOffsetY_;
-        if (childBottom > limitBottom) {
+        if (GreatNotEqual(childBottom, limitBottom)) {
             resizeFlag_ = true;
             dialogChildSize_ = childSize;
-            if (childBottom - limitBottom > dialogChildSize_.Height()) {
+            if (GreatNotEqual(childBottom - limitBottom, dialogChildSize_.Height())) {
                 dialogChildSize_.MinusHeight(dialogChildSize_.Height());
             } else {
                 dialogChildSize_.MinusHeight(childBottom - limitBottom);
             }
         }
+        return;
     }
+
     childBottom = childOffset.GetY() + childSize.Height() + embeddedDialogOffsetY_ + stackRootDialogOffsetY_;
-    if (childBottom > limitBottom) {
+    if (GreatNotEqual(childBottom, limitBottom)) {
         childOffset.SetY(childOffset.GetY() - (childBottom - limitBottom));
-        if (childOffset.GetY() < limitTop) {
+        if (LessNotEqual(childOffset.GetY(), limitTop)) {
             resizeFlag_ = true;
             dialogChildSize_ = childSize;
-            if (limitTop - childOffset.GetY() > dialogChildSize_.Height()) {
+            if (GreatNotEqual(limitTop - childOffset.GetY(), dialogChildSize_.Height())) {
                 dialogChildSize_.MinusHeight(dialogChildSize_.Height());
             } else {
                 dialogChildSize_.MinusHeight(limitTop - childOffset.GetY());

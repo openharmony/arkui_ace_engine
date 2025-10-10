@@ -185,21 +185,21 @@ bool UiSessionManagerOhos::GetComponentChangeEventRegistered()
     return componentChangeEventRegisterProcesses_.load() > 0 ? true : false;
 }
 
-void UiSessionManagerOhos::GetInspectorTree()
+void UiSessionManagerOhos::GetInspectorTree(ParamConfig config)
 {
     webTaskNums_.store(0);
     WebTaskNumsChange(1);
     std::unique_lock<std::mutex> lock(mutex_);
     jsonValue_ = InspectorJsonUtil::Create(true);
     if (inspectorFunction_) {
-        inspectorFunction_(false);
+        inspectorFunction_(false, config);
     }
 }
 
-void UiSessionManagerOhos::GetVisibleInspectorTree()
+void UiSessionManagerOhos::GetVisibleInspectorTree(ParamConfig config)
 {
     if (inspectorFunction_) {
-        inspectorFunction_(true);
+        inspectorFunction_(true, config);
     }
 }
 

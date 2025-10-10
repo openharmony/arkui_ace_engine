@@ -67,6 +67,11 @@ public:
         return unselectedMaskId_.has_value();
     }
 
+    bool HasIndicatorNode() const
+    {
+        return indicatorId_.has_value();
+    }
+
     int32_t GetSwiperId()
     {
         if (!swiperId_.has_value()) {
@@ -113,6 +118,14 @@ public:
             unselectedMaskId_ = ElementRegister::GetInstance()->MakeUniqueId();
         }
         return unselectedMaskId_.value();
+    }
+
+    int32_t GetIndicatorId()
+    {
+        if (!indicatorId_.has_value()) {
+            indicatorId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return indicatorId_.value();
     }
 
     RefPtr<UINode> GetBuilderByContentId(int32_t tabContentId, const RefPtr<UINode>& builderNode)
@@ -178,6 +191,7 @@ private:
     std::optional<int32_t> effectId_;
     std::optional<int32_t> selectedMaskId_;
     std::optional<int32_t> unselectedMaskId_;
+    std::optional<int32_t> indicatorId_;
     std::set<int32_t> swiperChildren_;
     std::map<int32_t, RefPtr<UINode>> builderNode_; // Key is id of TabContent, value is id of builder of TabBar.
 };

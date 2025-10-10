@@ -33,6 +33,7 @@ public:
     static void SetBuilder(FrameNode* frameNode, std::optional<std::function<void(void)>>& buildFunc);
     static void SetCheckboxStyle(FrameNode* frameNode, const std::optional<CheckBoxStyle>& checkboxStyle);
     static void SetChangeEvent(FrameNode* frameNode, ChangeEvent&& onChange);
+    static void TriggerChange(FrameNode* frameNode, bool value);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_STATIC_H

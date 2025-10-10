@@ -73,7 +73,7 @@ export class CustomTextEncoder {
     }
 
     private addLength(array: Uint8Array, offset: int32, length: int32 | number): void {
-        const len = length as int32
+        const len = length.toInt()
         array.set(offset, len & 0xff)
         array.set(offset + 1, (len >> 8) & 0xff)
         array.set(offset + 2, (len >> 16) & 0xff)
@@ -82,10 +82,10 @@ export class CustomTextEncoder {
 
     static getHeaderLength(array: Uint8Array, offset: int32 = 0): int32 {
         return (
-            Double.toInt(array.at(offset)!) |
-            Double.toInt(array.at((offset + 1) << 8)!) |
-            Double.toInt(array.at((offset + 2) << 16)!) |
-            Double.toInt(array.at((offset + 3) << 24)!))
+            (array.at(offset)!.toInt()) |
+            (array.at(((offset + 1) << 8))!.toInt()) |
+            (array.at((offset + 2) << 16)!.toInt()) |
+            (array.at((offset + 3) << 24))!.toInt())
     }
 
     // Produces array of bytes with encoded string headed by 4 bytes (little endian) size information:
@@ -103,7 +103,7 @@ export class CustomTextEncoder {
             this.encodeInto(input, result, headerLen)
         }
         if (addLength) {
-            this.addLength(result, 0, Double.toInt(result.length - headerLen))
+            this.addLength(result, 0, (result.length - headerLen).toInt())
         }
         return result
     }
@@ -119,10 +119,10 @@ export class CustomTextEncoder {
         }
         let array = new Uint8Array(totalBytes)
         let position = 0
-        this.addLength(array, position, Double.toInt(lengths.length))
+        this.addLength(array, position, lengths.length.toInt())
         position += CustomTextEncoder.HeaderLen
         for (let i = 0; i < lengths.length; i++) {
-            this.addLength(array, position, Double.toInt(lengths[i]))
+            this.addLength(array, position, lengths[i].toInt())
             position += CustomTextEncoder.HeaderLen
             this.encodeInto(strings[i], array, position)
             position += lengths[i]
@@ -179,7 +179,7 @@ export class CustomTextDecoder {
         let index = 0
         let result = ""
         while (index < input.length) {
-            let elem = Double.toByte(input[index])
+            let elem = input[index].toByte()
             let lead = elem & 0xff
             let count = 0
             let value = 0
@@ -187,15 +187,15 @@ export class CustomTextDecoder {
                 count = 1
                 value = elem
             } else if ((lead >> 5) == 0x6) {
-                value = Long.toInt(((elem << 6) & 0x7ff) + (input[index + 1] & 0x3f))
+                value = (((elem << 6) & 0x7ff) + (input[index + 1] & 0x3f)).toInt()
                 count = 2
             } else if ((lead >> 4) == 0xe) {
-                value = Long.toInt(((elem << 12) & 0xffff) + ((input[index + 1] << 6) & 0xfff) +
-                    (input[index + 2] & 0x3f))
+                value = (((elem << 12) & 0xffff) + ((input[index + 1] << 6) & 0xfff) +
+                    (input[index + 2] & 0x3f)).toInt()
                 count = 3
             } else if ((lead >> 3) == 0x1e) {
-                value = Long.toInt(((elem << 18) & 0x1fffff) + ((input[index + 1] << 12) & 0x3ffff) +
-                    ((input[index + 2] << 6) & 0xfff) + (input[index + 3] & 0x3f))
+                value = (((elem << 18) & 0x1fffff) + ((input[index + 1] << 12) & 0x3ffff) +
+                    ((input[index + 2] << 6) & 0xfff) + (input[index + 3] & 0x3f)).toInt()
                 count = 4
             }
             codePoints[cpIndex++] = value

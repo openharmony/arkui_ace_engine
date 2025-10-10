@@ -1472,4 +1472,39 @@ HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest031, TestSize.Level1)
     sequencedRecognizer->HandleOverdueDeadline();
     EXPECT_EQ(sequencedRecognizer->disposal_, GestureDisposal::REJECT);
 }
+
+/**
+ * @tc.name: SequencedRecognizerTest032
+ * @tc.desc: Test ResetStatusOnFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    int32_t callbackCounts = 0;
+    sequencedRecognizer->onActionCancel_ = std::make_unique<GestureEventFunc>(
+        [&callbackCounts](GestureEvent& info) { callbackCounts++; });
+
+    /**
+     * @tc.steps: step2. call ResetStatusOnFinish function and compare result.
+     * @tc.expected: step2. result equals.
+     */
+    sequencedRecognizer->currentIndex_ = 0;
+    sequencedRecognizer->refereeState_ = RefereeState::READY;
+    sequencedRecognizer->ResetStatusOnFinish();
+    sequencedRecognizer->currentIndex_ = 0;
+    sequencedRecognizer->refereeState_ = RefereeState::PENDING;
+    sequencedRecognizer->ResetStatusOnFinish();
+    sequencedRecognizer->currentIndex_ = -1;
+    sequencedRecognizer->refereeState_ = RefereeState::READY;
+    sequencedRecognizer->ResetStatusOnFinish();
+    sequencedRecognizer->currentIndex_ = -1;
+    sequencedRecognizer->refereeState_ = RefereeState::PENDING;
+    sequencedRecognizer->ResetStatusOnFinish();
+    EXPECT_EQ(callbackCounts, 1);
+}
 } // namespace OHOS::Ace::NG

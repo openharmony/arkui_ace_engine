@@ -173,6 +173,8 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("onWillChange", &JSSearch::SetOnWillChange);
     JSClass<JSSearch>::StaticMethod("enableAutoSpacing", &JSSearch::SetEnableAutoSpacing);
     JSClass<JSSearch>::StaticMethod("onWillAttachIME", &JSSearch::SetOnWillAttachIME);
+    JSClass<JSSearch>::StaticMethod("enableSelectedDataDetector", &JSSearch::SetSelectDetectEnable);
+    JSClass<JSSearch>::StaticMethod("selectedDataDetectorConfig", &JSSearch::SetSelectDetectConfig);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -201,6 +203,36 @@ void JSSearch::SetFontFeature(const JSCallbackInfo& info)
     }
     std::string fontFeatureSettings = info[0]->ToString();
     SearchModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
+}
+
+void JSSearch::SetSelectDetectEnable(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        auto enabled = info[0]->ToBoolean();
+        SearchModel::GetInstance()->SetSelectDetectEnable(enabled);
+    }
+}
+
+void JSSearch::SetSelectDetectConfig(const JSCallbackInfo& info)
+{
+    std::vector<TextDataDetectType> typesList;
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto args = info[0];
+    auto paramObject = JSRef<JSObject>::Cast(args);
+    auto getTypes = paramObject->GetProperty("types");
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(getTypes);
+    if (!array->IsArray()) {
+        return;
+    }
+    for (size_t i = 0; i < array->Length(); ++i) {
+        JSRef<JSVal> type = array->GetValueAt(i);
+        if (type->IsNumber()) {
+            typesList.push_back(static_cast<TextDataDetectType>(type->ToNumber<int32_t>()));
+        }
+    }
+    SearchModel::GetInstance()->SetSelectDetectConfig(typesList);
 }
 
 void JSSearch::Create(const JSCallbackInfo& info)
@@ -263,6 +295,11 @@ void JSSearch::Create(const JSCallbackInfo& info)
     auto controller = SearchModel::GetInstance()->Create(key, tip, src);
     if (jsController) {
         jsController->SetController(controller);
+        auto styledString = jsController->GetPlaceholderStyledString();
+        if (styledString && controller) {
+            controller->SetPlaceholderStyledString(styledString);
+            jsController->ClearPlaceholderStyledString();
+        }
     }
     SearchModel::GetInstance()->SetFocusable(true);
     SearchModel::GetInstance()->SetFocusNode(true);
@@ -1319,6 +1356,7 @@ void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && (info[0]->IsUndefined() || info[0]->IsNull())) {
         SearchModel::GetInstance()->SetCustomKeyboard(nullptr);
+        SearchModel::GetInstance()->SetCustomKeyboardWithNode(nullptr);
         return;
     }
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -1333,8 +1371,16 @@ void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
         }
     }
     std::function<void()> buildFunc;
-    if (JSTextField::ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
-        SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
+    NG::FrameNode* contentNode = nullptr;
+    bool isBuilder = true;
+    if (JSTextField::ParseJsCustomKeyboardBuilder(info, 0, buildFunc, contentNode, isBuilder)) {
+        if (isBuilder) {
+            SearchModel::GetInstance()->SetCustomKeyboardWithNode(nullptr, supportAvoidance);
+            SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
+        } else {
+            SearchModel::GetInstance()->SetCustomKeyboard(nullptr, supportAvoidance);
+            SearchModel::GetInstance()->SetCustomKeyboardWithNode(contentNode, supportAvoidance);
+        }
     }
 }
 
@@ -1728,18 +1774,8 @@ void JSSearch::SetEnableAutoSpacing(const JSCallbackInfo& info)
 
 void JSSearch::SetOnWillAttachIME(const JSCallbackInfo& info)
 {
-    auto jsValue = info[0];
-    CHECK_NULL_VOID(jsValue->IsFunction());
-    auto jsOnWillAttachIMEFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsValue));
-    auto onWillAttachIME = [execCtx = info.GetExecutionContext(), func = std::move(jsOnWillAttachIMEFunc)](
-        const IMEClient& imeClientInfo) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onWillAttachIME");
-        JSRef<JSObject> imeClientObj = JSRef<JSObject>::New();
-        imeClientObj->SetProperty<int32_t>("nodeId", imeClientInfo.nodeId);
-        JSRef<JSVal> argv[] = { imeClientObj };
-        func->ExecuteJS(1, argv);
-    };
+    auto onWillAttachIME = JSTextField::ParseAndCreateAttachCallback(info);
+    CHECK_NULL_VOID(onWillAttachIME);
     SearchModel::GetInstance()->SetOnWillAttachIME(std::move(onWillAttachIME));
 }
 

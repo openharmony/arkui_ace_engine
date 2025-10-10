@@ -52,6 +52,7 @@ public:
         value->propBadgeFontSize_ = CloneBadgeFontSize();
         value->propBadgeFontWeight_ = CloneBadgeFontWeight();
         value->propBadgeBorderWidth_ = CloneBadgeBorderWidth();
+        value->propBadgeOuterBorderWidth_ = CloneBadgeOuterBorderWidth();
         return value;
     }
 
@@ -69,10 +70,12 @@ public:
         ResetBadgeColor();
         ResetBadgeTextColor();
         ResetBadgeBorderColor();
+        ResetBadgeOuterBorderColor();
         ResetBadgeCircleSize();
         ResetBadgeFontSize();
         ResetBadgeFontWeight();
         ResetBadgeBorderWidth();
+        ResetBadgeOuterBorderWidth();
     }
 
     double GetBadgeCircleRadius() const
@@ -127,10 +130,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeTextColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeBorderColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeOuterBorderColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeCircleSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeFontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeBorderWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeOuterBorderWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsEnableAutoAvoidance, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgePositionXByuser, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgePositionYByuser, bool, PROPERTY_UPDATE_MEASURE_SELF);
@@ -139,7 +145,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeCircleSizeByuser, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeFontSizeByuser, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeBorderColorByuser, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeOuterBorderColorByuser, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeBorderWidthByuser, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeOuterBorderWidthByuser, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeFontWeightByuser, bool, PROPERTY_UPDATE_MEASURE_SELF);
 
 private:

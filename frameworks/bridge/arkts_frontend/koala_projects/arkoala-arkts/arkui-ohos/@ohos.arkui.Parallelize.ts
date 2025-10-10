@@ -1,14 +1,17 @@
 
-import { int32, KoalaCallsiteKey, observableProxy, Utils } from "@koalaui/common"
-import { MutableState, rememberDisposable, mutableState, __context, StateContext, memoEntry, __id, StateManager, ComputableState, NodeAttach } from "@koalaui/runtime"
+import { int32, KoalaCallsiteKey, observableProxy } from "@koalaui/common"
+import { MutableState, rememberDisposable, mutableState, __context, StateContext, memoEntry, __id, StateManager, ComputableState, remember, memoize } from "@koalaui/runtime"
 import { PeerNode } from "arkui/PeerNode";
-import { ArkContentSlotPeer } from "arkui/component";
+import { ArkContentSlotPeer } from "arkui/component/contentSlot";
 import { ArkUIGeneratedNativeModule } from "#components"
-import { Serializer } from "arkui/component/peers/Serializer";
+import { SerializerBase } from "@koalaui/interop";
 import { UIContext } from "@ohos/arkui/UIContext"
-import { UIContextImpl, ContextRecord } from "arkui/handwritten/UIContextImpl"
+import { UIContextImpl, ContextRecord } from "arkui/base/UIContextImpl"
 import { ArkUIAniModule } from "arkui.ani"
 import { setNeedCreate } from "arkui/ArkComponentRoot"
+import { ArkCommonMethodComponent, CommonMethod } from 'arkui/component/common'
+import { CascadeMemoState } from 'arkui/stateManagement/remember';
+import { AceTrace } from "arkui/base/AceTrace";
 
 
 /** @memo:stable */
@@ -38,9 +41,11 @@ export class ParallelNode {
             this.manager!.merge(__context(), this.rootState!, () => {
                 if (updateUseParallel) {
                     const task = () => {
+                        AceTrace.begin('update use Parallel')
                         this.manager!.syncChanges()
                         this.manager!.updateSnapshot()
                         this.rootState!.value
+                        AceTrace.end()
                     }
                     //@ts-ignore
                     taskpool.execute(task).then(() => { }).catch((err: Error) => {
@@ -91,9 +96,11 @@ export class ParallelNode {
         this.manager!.merge(__context(), this.rootState!, () => {
             if (updateUseParallel) {
                 const task = () => {
+                    AceTrace.begin('update use Parallel')
                     this.manager!.syncChanges()
                     this.manager!.updateSnapshot()
                     this.rootState!.value
+                    AceTrace.end()
                 }
                 //@ts-ignore
                 taskpool.execute(task).then(() => { }).catch((err: Error) => {
@@ -106,7 +113,6 @@ export class ParallelNode {
             this.manager!.updateSnapshot()
             this.rootState!.value
         });
-        Utils.traceEnd();
     }
 
     dispose(): void {
@@ -122,32 +128,27 @@ export interface ParallelOption {
     updateUseParallel?: boolean,
 }
 
-/** @memo:stable */
-export interface ParallelAttribute {
-}
-
 /** @memo */
 export function ParallelizeUI(
-    /** @memo */
-    style: ((attributes: ParallelAttribute) => void) | undefined,
-    options?: ParallelOption | undefined,
-    /** @memo */
-    content_?: () => void,
+  options: ParallelOption | undefined,
+  /** @memo */
+  content_: () => void,
 ) {
     const option = rememberDisposable<ParallelOption | undefined>(() => {
         return options;
-    }, () => { })
-    if (option?.enable === false) {
-        content_?.()
+    }, () => {});
+     if (option?.enable === false) {
+        content_();
         return;
     }
-    Serializer.setMultithreadMode()
+
+    SerializerBase.setMultithreadMode();
     const receiver = rememberDisposable<ParallelNode>(() => {
         return new ParallelNode(options);
     }, (parallelNode: ParallelNode | undefined) => {
         parallelNode?.dispose()
     })
     if (content_ !== undefined) {
-        receiver.build(content_!, options?.updateUseParallel);
+        receiver.build(content_, options?.updateUseParallel);
     }
 }

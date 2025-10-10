@@ -14,8 +14,10 @@
  */
 #include <string>
 #include <vector>
+#include <stdarg.h>
 
 #include "interop-logging.h"
+#include "interop-utils.h"
 
 namespace {
 
@@ -27,7 +29,7 @@ struct Log {
 std::vector<Log*> groupedLogs;
 
 void startGroupedLog(int index) {
-    if (index >= (int)groupedLogs.size()) {
+    if (index >= static_cast<int>(groupedLogs.size())) {
         groupedLogs.resize(index + 1);
         for (int i = 0; i <= index; i++) {
             if (!groupedLogs[i]) groupedLogs[i] = new Log();
@@ -38,27 +40,27 @@ void startGroupedLog(int index) {
 }
 
 void stopGroupedLog(int index) {
-    if (index < (int)groupedLogs.size()) {
+    if (index < static_cast<int>(groupedLogs.size())) {
         groupedLogs[index]->isActive = false;
     }
 }
 
 void appendGroupedLog(int index, const char* str) {
-    if (index < (int)groupedLogs.size()) {
+    if (index < static_cast<int>(groupedLogs.size())) {
         groupedLogs[index]->log.append(str);
     }
 }
 
 const char* getGroupedLog(int index) {
-    if (index < (int)groupedLogs.size()) {
-        auto result = groupedLogs[index]->log.c_str();
+    if (index < static_cast<int>(groupedLogs.size())) {
+        const char* result = groupedLogs[index]->log.c_str();
         return result;
     }
     return "";
 }
 
 int needGroupedLog(int index) {
-    if (index < (int)groupedLogs.size()) {
+    if (index < static_cast<int>(groupedLogs.size())) {
         return groupedLogs[index]->isActive;
     }
     return 0;
@@ -78,16 +80,11 @@ const GroupLogger* GetDefaultLogger() {
     return &defaultInstance;
 }
 
-extern "C" [[noreturn]] void InteropLogFatal(const char* format, ...)
-{
+extern "C" [[noreturn]] void InteropLogFatal(const char* format, ...) {
     va_list args;
     va_start(args, format);
     char buffer[4096];
-#ifdef __STDC_LIB_EXT1__
-    vsnprintf_s(buffer, sizeof(buffer) - 1, format, args);
-#else
-    vsnprintf(buffer, sizeof(buffer) - 1, format, args);
-#endif
+    interop_vsnprintf(buffer, sizeof(buffer) - 1, format, args);
     LOGE("FATAL: %s", buffer);
     va_end(args);
     abort();

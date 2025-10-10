@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,9 +93,11 @@
 #include "bridge/declarative_frontend/jsview/js_list.h"
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_list_item_group.h"
+#include "bridge/declarative_frontend/jsview/js_list_children_main_size.h"
 #include "bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "bridge/declarative_frontend/jsview/js_location_button.h"
+#include "bridge/declarative_frontend/jsview/js_magnifier_controller.h"
 #include "bridge/declarative_frontend/jsview/js_marquee.h"
 #include "bridge/declarative_frontend/jsview/js_menu.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item.h"
@@ -164,6 +166,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/js_water_flow.h"
 #include "bridge/declarative_frontend/jsview/js_water_flow_item.h"
+#include "bridge/declarative_frontend/jsview/js_water_flow_sections.h"
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
@@ -467,6 +470,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "CanvasPattern", JSCanvasPattern::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },
+    { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "Counter", JSCounter::JSBind },
@@ -704,6 +708,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
     { "Gauge", JSGauge::JSBind },
+    { "MagnifierController", JSMagnifierController::JSBind },
     { "Marquee", JSMarquee::JSBind },
     { "Menu", JSMenu::JSBind },
     { "MenuItem", JSMenuItem::JSBind },
@@ -759,6 +764,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Refresh", JSRefresh::JSBind },
     { "WaterFlow", JSWaterFlow::JSBind },
     { "FlowItem", JSWaterFlowItem::JSBind },
+    { "NativeWaterFlowSection", JSWaterFlowSections::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },
@@ -1023,24 +1029,6 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     (*func).second(globalObj);
 }
 
-void JsUINodeRegisterCleanUp(BindingTarget globalObj)
-{
-    // globalObj is panda::Local<panda::ObjectRef>
-    const auto globalObject = JSRef<JSObject>::Make(globalObj);
-
-    const JSRef<JSVal> cleanUpIdleTask = globalObject->GetProperty("uiNodeCleanUpIdleTask");
-    if (cleanUpIdleTask->IsFunction()) {
-        LOGI("CleanUpIdleTask is a valid function");
-        const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
-        const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
-            JAVASCRIPT_EXECUTION_SCOPE_STATIC;
-            auto params = ConvertToJSValues(maxTimeInNs / 1e6);
-            jsFunc->Call(globalObject, params.size(), params.data());
-        };
-        ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
-    }
-}
-
 void JsRegisterModules(BindingTarget globalObj, std::string modules, void* nativeEngine)
 {
     std::stringstream input(modules);
@@ -1048,7 +1036,6 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules, void* nativ
     while (std::getline(input, moduleName, ',')) {
         RegisterModuleByName(globalObj, moduleName);
     }
-    JsUINodeRegisterCleanUp(globalObj);
 
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
@@ -1132,6 +1119,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSPersistent::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
+    JSMagnifierController::JSBind(globalObj);
 
     JSProfiler::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);

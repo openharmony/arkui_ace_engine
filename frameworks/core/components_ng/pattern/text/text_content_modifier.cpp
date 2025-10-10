@@ -535,16 +535,26 @@ void TextContentModifier::PaintLeadingMarginSpan(const RefPtr<TextPattern>& text
     auto offset = textPattern->GetTextRect().GetOffset();
     size_t lineCount = 0;
     for (auto&& paragraphInfo : paragraphs) {
-        auto drawableLeadingMargin = paragraphInfo.paragraphStyle.drawableLeadingMargin;
+        const auto& drawableLeadingMargin = paragraphInfo.paragraphStyle.drawableLeadingMargin;
         auto currentParagraphLineCount = paragraphInfo.paragraph->GetLineCount();
         if (!drawableLeadingMargin.has_value() || currentParagraphLineCount <= 0) {
             lineCount += currentParagraphLineCount;
             continue;
         }
-        auto leadingMarginOnDraw = drawableLeadingMargin.value().onDraw_;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::PaintLeadingMarginSpan");
+        }
+        CHECK_NULL_VOID(paragraphInfo.paragraph);
+        const auto& leadingMarginOnDraw = drawableLeadingMargin.value().onDraw_;
         CHECK_NULL_VOID(leadingMarginOnDraw);
         for (size_t i = 0; i < currentParagraphLineCount; i++) {
             auto lineMetrics = pManager->GetLineMetrics(lineCount + i);
+            if (paragraphInfo.paragraph->empty()) {
+                CaretMetricsF caretMetricsF;
+                paragraphInfo.paragraph->HandleCaretWhenEmpty(caretMetricsF, true);
+                lineMetrics.x = caretMetricsF.offset.GetX();
+                lineMetrics.height = caretMetricsF.height;
+            }
             LeadingMarginSpanOptions options;
             options.x = paragraphInfo.paragraphStyle.direction != TextDirection::RTL ?
                 lineMetrics.x + offset.GetX() : lineMetrics.x + offset.GetX() + lineMetrics.width;

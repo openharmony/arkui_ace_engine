@@ -50,7 +50,8 @@ template("link_abc_files") {
     foreach(target, invoker.targets) {
       target_out_dir = get_label_info(target, "target_out_dir")
       target_name = get_label_info(target, "name")
-    #   target_label = get_label_info(target, "label_no_toolchain")
+
+      #   target_label = get_label_info(target, "label_no_toolchain")
       component_name = string_replace(target_name, "_", ".")
       input_files += [ "$target_out_dir/${component_name}" ]
     }

@@ -1093,13 +1093,20 @@ void SetBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPt
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!SystemProperties::ConfigChangePerform() || !bgColorRawPtr) {
-        ViewAbstract::SetBackgroundColor(frameNode, Color(color));
-    } else {
-        auto* bgColor = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
-        auto backgroundColorResObj = AceType::Claim(bgColor);
-        ViewAbstract::SetBackgroundColor(frameNode, Color(color), backgroundColorResObj);
+    Color result = Color(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!bgColorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(bgColorRawPtr));
+        }
+        if (resObj) {
+            ViewAbstract::SetBackgroundColor(frameNode, result, resObj);
+            return;
+        }
     }
+    ViewAbstract::SetBackgroundColor(frameNode, result);
 }
 
 void SetBackgroundColorWithColorSpace(
@@ -5091,7 +5098,7 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::RemoveResObj(frameNode, "backgroundEffect");
     CalcDimension radius;
-    radius = CalcDimension(radiusArg, DimensionUnit::VP);
+    radius.SetValue(radiusArg);
     Color color(colorArg);
     BlurOption blurOption;
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
@@ -7948,7 +7955,7 @@ void ResetBias(ArkUINodeHandle node)
 }
 void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
     std::vector<double> ratioList(values, values + size);
@@ -10958,7 +10965,7 @@ void SetOnBlur(ArkUINodeHandle node, void* extraParam)
 
 void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
     auto onAreaChanged = [nodeId, node = AceType::WeakClaim(frameNode), extraParam](
@@ -11883,6 +11890,29 @@ void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnAxisEvent(frameNode, onEvent);
 }
 
+void SetOnCoastingAxisEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](CoastingAxisInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = COASTING_AXIS_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.coastingAxisEvent.subKind = ON_COASTING_AXIS_EVENT;
+        event.coastingAxisEvent.phase = static_cast<int32_t>(info.GetPhase());
+        event.coastingAxisEvent.timeStamp = static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count());
+        event.coastingAxisEvent.deltaY = static_cast<float>(info.GetVerticalAxis());
+        event.coastingAxisEvent.deltaX = static_cast<float>(info.GetHorizontalAxis());
+        event.coastingAxisEvent.stopPropagation = info.IsStopPropagation();
+
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.coastingAxisEvent.stopPropagation);
+    };
+    ViewAbstract::SetOnCoastingAxisEvent(frameNode, onEvent);
+}
+
 void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -11945,14 +11975,14 @@ void ResetOnBlur(ArkUINodeHandle node)
 
 void ResetOnAreaChange(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ResetAreaChanged(frameNode);
 }
 
 void ResetOnVisibleAreaChange(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ResetVisibleChange(frameNode);
 }
@@ -12022,6 +12052,13 @@ void ResetOnAxisEvent(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::DisableOnAxisEvent(frameNode);
+}
+
+void ResetOnCoastingAxisEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnCoastingAxisEvent(frameNode);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

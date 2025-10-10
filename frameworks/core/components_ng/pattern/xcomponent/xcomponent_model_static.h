@@ -18,15 +18,21 @@
 
 #include <optional>
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
+#include "core/components_ng/pattern/xcomponent/inner_xcomponent_controller.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT XComponentModelStatic {
 public:
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::optional<std::string>& id,
-        XComponentType type, const std::optional<std::string>& libraryname);
-    static void SetXComponentController(FrameNode* frameNode, std::shared_ptr<InnerXComponentController> controller);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isTypedNode);
+    static bool SetXComponentController(
+        FrameNode* frameNode, const std::shared_ptr<InnerXComponentController>& controller);
+    static void SetNativeXComponentHandler(FrameNode* frameNode, const std::function<void(void*)>& handler);
+    static void InitParams(FrameNode* frameNode);
+    static void SetXComponentId(FrameNode* frameNode, const std::string& id);
+    static void SetXComponentType(FrameNode* frameNode, XComponentType type);
+    static void MarkBindNative(FrameNode* frameNode);
+    static void SetScreenId(FrameNode* frameNode, uint64_t screenId);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_XCOMPONENT_XCOMPONENT_MODEL_STATIC_H

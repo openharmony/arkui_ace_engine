@@ -802,14 +802,43 @@ ArkUI_Int32 GetTextAreaTextAlign(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(TextFieldModelNG::GetTextAlign(frameNode));
 }
 
-void SetTextAreaShowCounterOptions(
-    ArkUINodeHandle node, ArkUI_Bool open, ArkUI_Int32 thresholdPercentage, ArkUI_Bool highlightBorder)
+void SetTextAreaShowCounterOptions(ArkUINodeHandle node, ArkUIShowCountOptions* showCountOptions,
+    void* counterTextColorRawPtr, void* counterTextOverflowColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetShowCounter(frameNode, open);
-    TextFieldModelNG::SetCounterType(frameNode, thresholdPercentage);
-    TextFieldModelNG::SetShowCounterBorder(frameNode, highlightBorder);
+    TextFieldModelNG::SetShowCounter(frameNode, showCountOptions->open);
+    TextFieldModelNG::SetCounterType(frameNode, showCountOptions->thresholdPercentage);
+    TextFieldModelNG::SetShowCounterBorder(frameNode, showCountOptions->highlightBorder);
+    if (showCountOptions->counterTextColor != -1) {
+        TextFieldModelNG::SetCounterTextColor(frameNode, Color(showCountOptions->counterTextColor));
+    } else {
+        TextFieldModelNG::ResetCounterTextColor(frameNode);
+    }
+    if (showCountOptions->counterTextOverflowColor != -1) {
+        TextFieldModelNG::SetCounterTextOverflowColor(frameNode, Color(showCountOptions->counterTextOverflowColor));
+    } else {
+        TextFieldModelNG::ResetCounterTextOverflowColor(frameNode);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (counterTextColorRawPtr) {
+            auto resObjTextColor = AceType::Claim(reinterpret_cast<ResourceObject*>(counterTextColorRawPtr));
+            pattern->RegisterResource<Color>(
+                "counterTextColor", resObjTextColor, Color(showCountOptions->counterTextColor));
+        } else {
+            pattern->UnRegisterResource("counterTextColor");
+        }
+        if (counterTextOverflowColorRawPtr) {
+            auto resObjTextOverflowColor =
+                AceType::Claim(reinterpret_cast<ResourceObject*>(counterTextOverflowColorRawPtr));
+            pattern->RegisterResource<Color>(
+                "counterTextOverflowColor", resObjTextOverflowColor, Color(showCountOptions->counterTextOverflowColor));
+        } else {
+            pattern->UnRegisterResource("counterTextOverflowColor");
+        }
+    }
 }
 
 void ResetTextAreaShowCounterOptions(ArkUINodeHandle node)
@@ -819,6 +848,14 @@ void ResetTextAreaShowCounterOptions(ArkUINodeHandle node)
     TextFieldModelNG::SetShowCounter(frameNode, false);
     TextFieldModelNG::SetCounterType(frameNode, -1);
     TextFieldModelNG::SetShowCounterBorder(frameNode, true);
+    TextFieldModelNG::ResetCounterTextColor(frameNode);
+    TextFieldModelNG::ResetCounterTextOverflowColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("caretColor");
+        pattern->UnRegisterResource("counterTextOverflowColor");
+    }
 }
 
 void GetTextAreaShowCounterOptions(ArkUINodeHandle node, ArkUIShowCountOptions* options)
@@ -828,6 +865,8 @@ void GetTextAreaShowCounterOptions(ArkUINodeHandle node, ArkUIShowCountOptions* 
     options->open = TextFieldModelNG::GetShowCounter(frameNode);
     options->thresholdPercentage = TextFieldModelNG::GetCounterType(frameNode);
     options->highlightBorder = TextFieldModelNG::GetShowCounterBorder(frameNode);
+    options->counterTextColor = TextFieldModelNG::GetCounterTextColor(frameNode).GetValue();
+    options->counterTextOverflowColor = TextFieldModelNG::GetCounterTextOverflowColor(frameNode).GetValue();
 }
 
 void SetTextAreaFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -1731,6 +1770,56 @@ void SetOptionalBorderStyle(
     offset = offset + NUM_2;
 }
 
+void SetSelectDetectorEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetSelectDetectEnable(frameNode, static_cast<bool>(value));
+}
+
+ArkUI_Int32 GetSelectDetectorEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetSelectDetectEnable(frameNode));
+}
+
+void ResetSelectDetectorEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ResetSelectDetectEnable(frameNode);
+}
+
+void SetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<TextDataDetectType> typelists;
+    for (ArkUI_Int32 i = 0; i < size; ++i) {
+        typelists.push_back(static_cast<TextDataDetectType>(types[i]));
+    }
+    TextFieldModelNG::SetSelectDetectConfig(frameNode, typelists);
+}
+
+ArkUI_Int32 GetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Int32 (*values)[32])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    std::vector<TextDataDetectType> types = TextFieldModelNG::GetSelectDetectConfig(frameNode);
+    for (uint32_t i = 0; i < types.size(); i++) {
+        (*values)[i] = static_cast<ArkUI_Int32>(types[i]);
+    }
+    return types.size();
+}
+
+void ResetSelectDetectorConfig(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ResetSelectDetectConfig(frameNode);
+}
+
 void SetAllOptionalBorderStyle(
     NG::BorderStyleProperty& borderStyles, const uint32_t* values, ArkUI_Int32 valuesSize, ArkUI_Int32& offset)
 {
@@ -2446,6 +2535,55 @@ void ResetTextAreaScrollBarColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetTextAreaScrollBarColor(frameNode);
 }
+
+void SetTextAreaCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCustomKeyboardWithNode(frameNode, reinterpret_cast<FrameNode*>(contentNode), supportAvoidance);
+}
+
+ArkUINodeHandle GetTextAreaCustomKeyboard(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto customKeyboard = TextFieldModelNG::GetCustomKeyboard(frameNode);
+    CHECK_NULL_RETURN(customKeyboard, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(customKeyboard));
+}
+
+ArkUI_Int32 GetTextAreaCustomKeyboardOption(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetCustomKeyboardOption(frameNode));
+}
+
+void ResetTextAreaCustomKeyboard(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCustomKeyboardWithNode(frameNode, nullptr);
+}
+
+void SetTextAreaOnWillAttachIME(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillAttachIMECallback = reinterpret_cast<IMEAttachCallback*>(callback);
+        TextFieldModelNG::SetOnWillAttachIME(frameNode, std::move(*onWillAttachIMECallback));
+    } else {
+        TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnWillAttachIME(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2453,6 +2591,12 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITextAreaModifier modifier = {
+        .setSelectDetectorEnable = SetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
+        .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .setSelectDetectorConfig = SetSelectDetectorConfig,
+        .getSelectDetectorConfig = GetSelectDetectorConfig,
+        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextAreaStyle = SetTextAreaStyle,
         .resetTextAreaStyle = ResetTextAreaStyle,
         .setTextAreaSelectionMenuHidden = SetTextAreaSelectionMenuHidden,
@@ -2637,6 +2781,12 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setTextAreaScrollBarColor = SetTextAreaScrollBarColor,
         .getTextAreaScrollBarColor = GetTextAreaScrollBarColor,
         .resetTextAreaScrollBarColor = ResetTextAreaScrollBarColor,
+        .setTextAreaCustomKeyboard = SetTextAreaCustomKeyboard,
+        .getTextAreaCustomKeyboard = GetTextAreaCustomKeyboard,
+        .getTextAreaCustomKeyboardOption = GetTextAreaCustomKeyboardOption,
+        .resetTextAreaCustomKeyboard = ResetTextAreaCustomKeyboard,
+        .setTextAreaOnWillAttachIME = SetTextAreaOnWillAttachIME,
+        .resetTextAreaOnWillAttachIME = ResetTextAreaOnWillAttachIME
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2646,6 +2796,12 @@ const CJUITextAreaModifier* GetCJUITextAreaModifier()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITextAreaModifier modifier = {
+        .setSelectDetectorEnable = SetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
+        .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .setSelectDetectorConfig = SetSelectDetectorConfig,
+        .getSelectDetectorConfig = GetSelectDetectorConfig,
+        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextAreaStyle = SetTextAreaStyle,
         .resetTextAreaStyle = ResetTextAreaStyle,
         .setTextAreaSelectionMenuHidden = SetTextAreaSelectionMenuHidden,

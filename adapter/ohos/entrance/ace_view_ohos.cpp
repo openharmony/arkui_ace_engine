@@ -136,6 +136,10 @@ void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
     LogPointInfo(pointerEvent, instanceId);
     DispatchEventToPerf(pointerEvent);
     int32_t pointerAction = pointerEvent->GetPointerAction();
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_TOUCHPAD_ACTIVE) {
+        view->ProcessTouchpadInteractionBegin(pointerEvent);
+        return;
+    }
     auto container = Platform::AceContainer::GetContainer(instanceId);
     if (!container) {
         MMI::InputManager::GetInstance()->MarkProcessed(
@@ -305,6 +309,12 @@ void AceViewOhos::RegisterRotationEventCallback(RotationEventCallBack&& callback
 {
     ACE_DCHECK(callback);
     rotationEventCallBack_ = std::move(callback);
+}
+
+void AceViewOhos::RegisterTouchpadInteractionBeginCallback(TouchpadInteractionBeginCallback&& callback)
+{
+    ACE_DCHECK(callback);
+    touchpadInteractionBeginCallback_ = std::move(callback);
 }
 
 void AceViewOhos::Launch()
@@ -490,6 +500,25 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
         ConvertAxisEvent(fakeAxisUpdate, event);
     }
     axisEventCallback_(event, markProcess, node);
+}
+
+void AceViewOhos::ProcessTouchpadInteractionBegin(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    auto markProcess = [eventId = pointerEvent->GetId(), actionTime = pointerEvent->GetActionTime(),
+                           enabled = pointerEvent->IsMarkEnabled()]() {
+        MMI::InputManager::GetInstance()->MarkProcessed(eventId, actionTime, enabled);
+    };
+    NonPointerEvent event;
+    event.eventType = UIInputEventType::TOUCHPAD_ACTIVE;
+
+    if (!touchpadInteractionBeginCallback_) {
+        markProcess();
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+            "ProcessTouchpadInteractionBegin eventId:%{public}d touchEventCallback_ is null return.",
+            pointerEvent->GetId());
+        return;
+    }
+    touchpadInteractionBeginCallback_(event, markProcess);
 }
 
 bool AceViewOhos::ProcessAxisEventWithTouch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,

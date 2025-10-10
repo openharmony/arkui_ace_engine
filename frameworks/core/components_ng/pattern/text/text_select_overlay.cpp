@@ -241,6 +241,7 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
         ProcessOverlay({ .animation = true });
     }
+    textPattern->SelectAIDetect();
     overlayManager->SetHandleCircleIsShow(isFirst, true);
     if (textPattern->GetTextSelector().SelectNothing()) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "Close the selectoverlay when nothing is selected.");
@@ -333,7 +334,7 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     menuInfo.showTranslate = menuInfo.showCopy && textPattern->IsShowTranslate() && IsNeedMenuTranslate();
     menuInfo.showSearch = menuInfo.showCopy && textPattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
-    if (textPattern->IsShowAIMenuOption()) {
+    if (textPattern->IsShowAIMenuOption() && !textPattern->GetAIItemOption().empty()) {
         // do not support two selected ai entity, hence it's enough to pick first item to determine type
         auto firstSpanItem = textPattern->GetAIItemOption().begin()->second;
         menuInfo.aiMenuOptionType = firstSpanItem.type;
@@ -734,5 +735,12 @@ void TextSelectOverlay::GetVisibleDragViewHandles(RectF& first, RectF& second)
     if (selectOverlayInfo->secondHandle.isShow) {
         second = secondHandle;
     }
+}
+
+void TextSelectOverlay::UpdateAISelectMenu()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM);
 }
 } // namespace OHOS::Ace::NG

@@ -59,11 +59,6 @@ void PluginSubContainer::Initialize(const std::string& codeLanguage)
 
     taskExecutor_ = executor;
 
-    frontend_ = AceType::MakeRefPtr<PluginFrontend>();
-    if (!frontend_) {
-        return;
-    }
-
     auto container = AceEngine::Get().GetContainer(outSidePipelineContext->GetInstanceId());
     if (!container) {
         return;

@@ -401,4 +401,58 @@ HWTEST_F(GaugePatternTestTwoNg, GaugeTestOnColorConfigurationUpdate001, TestSize
     pattern->OnColorConfigurationUpdate();
     EXPECT_NE(gaugePaintProperty->GetGradientColorsValue(), gaugePaintProperty->GetGradientColorsInitValue());
 }
+
+/**
+ * @tc.name: GaugeTestOnColorConfigurationUpdate002
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePatternTestTwoNg, GaugeTestOnColorConfigurationUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GaugeModelNG.
+     */
+    GaugeModelNG gauge;
+    gauge.Create(50.0f, 100.0f, 0.0f);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    g_isConfigChangePerform = true;
+    auto pattern = frameNode->GetPattern<GaugePattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    ASSERT_NE(gaugePaintProperty, nullptr);
+    gaugePaintProperty->UpdateUseJsLinearGradient(false);
+    std::vector<Color> colorVector = { Color::BLUE, Color::RED, Color::GREEN };
+    std::vector<ColorStopArray> colors;
+    ColorStopArray colorStopArray;
+    for (const auto& color : colorVector) {
+        colorStopArray.emplace_back(std::make_pair(color, Dimension(0.0)));
+    }
+    colors.emplace_back(colorStopArray);
+    gaugePaintProperty->UpdateGradientColors(colors);
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+
+    /**
+     * @tc.steps: step2.call OnColorConfigurationUpdate.
+     */
+    pattern->OnColorConfigurationUpdate();
+    gaugePaintProperty->UpdateColorModeInit(static_cast<int>(ColorMode::DARK));
+
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    pattern->OnColorConfigurationUpdate();
+    gauge.SetGradientInit(frameNode, colors);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(gaugePaintProperty->GetGradientColorsValue(), gaugePaintProperty->GetGradientColorsInitValue());
+
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+    std::vector<ColorStopArray> colors2;
+    ColorStopArray colorStopArray2;
+    Color color1(0xFFFFFFFF);
+    colorStopArray2.emplace_back(std::make_pair(color1, Dimension(0.0)));
+    colors2.emplace_back(colorStopArray2);
+    gaugePaintProperty->UpdateGradientColors(colors2);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_NE(gaugePaintProperty->GetGradientColorsValue(), gaugePaintProperty->GetGradientColorsInitValue());
+}
 } // namespace OHOS::Ace::NG

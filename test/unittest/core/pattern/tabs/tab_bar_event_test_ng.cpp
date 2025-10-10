@@ -652,7 +652,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchEvent003, TestSize.Level1)
         tabBarPattern_->tabBarType_.clear();
         tabBarNode_->RemoveChildAtIndex(1);
     }
-    EXPECT_EQ(tabBarNode_->TotalChildCount(), 1);
+    EXPECT_EQ(tabBarNode_->TotalChildCount(), 2);
 }
 
 /**

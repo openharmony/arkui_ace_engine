@@ -385,6 +385,15 @@ void JsiObject::SetPropertyObject(const char* prop, JsiRef<JsiValue> value) cons
     GetHandle()->Set(vm, stringRef, value.Get().GetLocalHandle());
 }
 
+bool JsiObject::HasGetter(int32_t propertyIndex) const
+{
+    auto vm = GetEcmaVM();
+    auto stringRef = panda::ExternalStringCache::GetCachedString(vm, propertyIndex);
+    panda::PropertyAttribute propertyAttribute;
+    GetHandle()->GetOwnProperty(vm, stringRef, propertyAttribute);
+    return propertyAttribute.HasGetter();
+}
+
 // -----------------------
 // Implementation of JsiFunction
 // -----------------------

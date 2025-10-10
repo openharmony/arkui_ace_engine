@@ -106,7 +106,7 @@ std::pair<RefPtr<FrameNode>, std::list<RefPtr<FrameNode>>> DragAnimationHelperTe
             continue;
         }
         auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
-        eventHub->onDragStart_ = func;
+        eventHub->SetOnDragStart(std::move(func));
         childNode->MountToParent(frameNode);
         childNodes.emplace_back(childNode);
     }

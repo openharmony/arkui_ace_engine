@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXT_EDITABLE_CONTROLLER_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXT_EDITABLE_CONTROLLER_H
 
+#include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -50,8 +51,13 @@ public:
     void ClearPreviewText(const JSCallbackInfo& info);
     void GetText(const JSCallbackInfo& info);
 
+    void SetPlaceholderStyledString(const JSCallbackInfo& info);
+    RefPtr<SpanString> GetPlaceholderStyledString() const;
+    void ClearPlaceholderStyledString();
+
 private:
     WeakPtr<TextFieldControllerBase> controllerWeak_;
+    WeakPtr<SpanString> placeholderStyledString_;
     JSRef<JSObject> CreateRectangle(const Rect& info);
     ACE_DISALLOW_COPY_AND_MOVE(JSTextEditableController);
 };

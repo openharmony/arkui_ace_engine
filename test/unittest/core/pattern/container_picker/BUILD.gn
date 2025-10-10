@@ -16,9 +16,9 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("container_picker_test") {
   type = "new"
   sources = [
-    "container_picker_test.cpp",
+    "container_picker_event_hub_test.cpp",
     "container_picker_layout_algorithm_test.cpp",
     "container_picker_pattern_test.cpp",
-    "container_picker_event_hub_test.cpp"
+    "container_picker_test.cpp",
   ]
 }

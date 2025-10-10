@@ -13,30 +13,55 @@
  * limitations under the License.
  */
 
-#include "NativeEntry.h"
+#include "manager.h"
 #include "napi/native_api.h"
 
+namespace ScrollableNDK {
 EXTERN_C_START
 static napi_value Init(napi_env env, napi_value exports)
 {
-    // 绑定Native侧的创建组件和销毁组件。
     napi_property_descriptor desc[] = {
-        {"createNativeRoot", nullptr, NativeModule::CreateNativeRoot, nullptr, nullptr, nullptr, napi_default, nullptr},
-        {"destroyNativeRoot", nullptr, NativeModule::DestroyNativeRoot, nullptr, nullptr, nullptr, napi_default,
-         nullptr}};
+        // —— WaterFlow 示例 —— //
+        {"CreateWaterFlowInfiniteScrollingEarly", nullptr, Manager::CreateWaterFlowInfiniteScrollingEarly, nullptr,
+         nullptr, nullptr, napi_default, nullptr},
+
+        // —— Grid 示例 —— //
+        {"CreateScrollableGrid", nullptr, Manager::CreateScrollableGrid, nullptr, nullptr, nullptr, napi_default,
+         nullptr},
+
+        // —— List 示例 —— //
+        {"CreateAlphabetIndexedList", nullptr, Manager::CreateAlphabetIndexedList, nullptr, nullptr, nullptr,
+         napi_default, nullptr},
+        {"createNormalTextListExample", nullptr, Manager::CreateNormalTextListExample, nullptr, nullptr, nullptr,
+         napi_default, nullptr},
+        {"createLazyTextListExample", nullptr, Manager::CreateLazyTextListExample, nullptr, nullptr, nullptr,
+         napi_default, nullptr},
+        {"createListItemGroupExample", nullptr, Manager::CreateListItemGroupExample, nullptr, nullptr, nullptr,
+         napi_default, nullptr},
+        {"destroyListExample", nullptr, Manager::DestroyListExample, nullptr, nullptr, nullptr, napi_default, nullptr},
+
+        // —— Refresh 示例 —— //
+        {"CreateRefreshList", nullptr, Manager::CreateRefreshList, nullptr, nullptr, nullptr, napi_default, nullptr},
+
+        // —— Refresh 示例 —— //
+        {"CreateScrollableInfiniteScroll", nullptr, Manager::CreateScrollableInfiniteScroll, nullptr, nullptr, nullptr,
+         napi_default, nullptr},
+    };
     napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc);
     return exports;
 }
 EXTERN_C_END
 
-static napi_module demoModule = {
-    .nm_version = 1,
-    .nm_flags = 0,
-    .nm_filename = nullptr,
-    .nm_register_func = Init,
-    .nm_modname = "entry",
-    .nm_priv = ((void *)0),
-    .reserved = {0},
-};
+static napi_module entryModule = {.nm_version = 1,
+                                  .nm_flags = 0,
+                                  .nm_filename = nullptr,
+                                  .nm_register_func = Init,
+                                  .nm_modname = "entry",
+                                  .nm_priv = ((void *)0),
+                                  .reserved = {0}};
 
-extern "C" __attribute__((constructor)) void RegisterEntryModule(void) { napi_module_register(&demoModule); }
+extern "C" __attribute__((constructor)) void RegisterModule(void)
+{
+    napi_module_register(&entryModule);
+}
+} // namespace ScrollableNDK

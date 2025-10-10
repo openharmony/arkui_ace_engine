@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_SslErrorHandler peer)
 {
     delete peer;
 }
-Ark_SslErrorHandler CtorImpl()
+Ark_SslErrorHandler ConstructImpl()
 {
     return new SslErrorHandlerPeer();
 }
@@ -37,17 +37,17 @@ void HandleConfirmImpl(Ark_SslErrorHandler peer)
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->HandleConfirm();
 }
-void HandleCancelImpl(Ark_SslErrorHandler peer, const Ark_Boolean abortLoading)
+void HandleCancelImpl(Ark_SslErrorHandler peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->HandleCancel(abortLoading);
+    // CHECK_NULL_VOID(peer && peer->handler);
+    // peer->handler->HandleCancel();
 }
 } // SslErrorHandlerAccessor
 const GENERATED_ArkUISslErrorHandlerAccessor* GetSslErrorHandlerAccessor()
 {
     static const GENERATED_ArkUISslErrorHandlerAccessor SslErrorHandlerAccessorImpl {
         SslErrorHandlerAccessor::DestroyPeerImpl,
-        SslErrorHandlerAccessor::CtorImpl,
+        SslErrorHandlerAccessor::ConstructImpl,
         SslErrorHandlerAccessor::GetFinalizerImpl,
         SslErrorHandlerAccessor::HandleConfirmImpl,
         SslErrorHandlerAccessor::HandleCancelImpl,

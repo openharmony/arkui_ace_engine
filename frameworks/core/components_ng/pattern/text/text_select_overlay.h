@@ -83,6 +83,7 @@ public:
     bool ChangeSecondHandleHeight(const GestureEvent& event, bool isOverlayMode) override;
     void GetVisibleDragViewHandles(RectF& first, RectF& second);
     void IsAIMenuOptionChanged(SelectMenuInfo& menuInfo) override;
+    void UpdateAISelectMenu();
 
 protected:
     OffsetF GetHandleReferenceOffset(const RectF& handleRect);

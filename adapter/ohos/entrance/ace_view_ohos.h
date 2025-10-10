@@ -77,6 +77,7 @@ public:
     void RegisterCardViewPositionCallback(CardViewPositionCallBack&& callback) override {}
     void RegisterCardViewAccessibilityParamsCallback(CardViewAccessibilityParamsCallback&& callback) override {}
     void RegisterCrownEventCallback(CrownEventCallback&& callback) override;
+    void RegisterTouchpadInteractionBeginCallback(TouchpadInteractionBeginCallback&& callback) override;
     void Launch() override;
 
     void ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -103,6 +104,8 @@ public:
 
     void ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
+
+    void ProcessTouchpadInteractionBegin(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     int32_t GetInstanceId() const override
     {
@@ -256,6 +259,7 @@ private:
     KeyEventCallback keyEventCallback_;
     NonPointerEventCallback nonPointerEventCallback_;
     CrownEventCallback crownEventCallback_;
+    TouchpadInteractionBeginCallback touchpadInteractionBeginCallback_;
     KeyEventRecognizer keyEventRecognizer_;
     // mark the touch event's state, HORIZONTAL_STATE: the event should send to platform, VERTICAL_STATE: should not
     enum class EventState { INITIAL_STATE, HORIZONTAL_STATE, VERTICAL_STATE };

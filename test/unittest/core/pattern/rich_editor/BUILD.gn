@@ -42,6 +42,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_mouse_test.cpp",
     "rich_editor_onwill_test_normal_insert.cpp",
     "rich_editor_onwill_test_replace_insert.cpp",
+    "rich_editor_overlay_modifier_test_ng.cpp",
     "rich_editor_placeholder_span_test_ng.cpp",
     "rich_editor_preview_text_test_ng.cpp",
     "rich_editor_resource_test.cpp",
@@ -56,11 +57,10 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_styled_string_extend_test_ng.cpp",
     "rich_editor_styled_string_test_ng.cpp",
     "rich_editor_styled_undo_test_ng.cpp",
+    "rich_editor_theme_test_ng.cpp",
     "rich_editor_touch_test_ng.cpp",
     "rich_editor_typing_style_test.cpp",
     "rich_editor_undo_redo_test.cpp",
     "rich_editor_url_style_test.cpp",
-    "rich_editor_theme_test_ng.cpp",
-    "rich_editor_overlay_modifier_test_ng.cpp",
   ]
 }

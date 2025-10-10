@@ -34,6 +34,8 @@ public:
         int32_t end = 0;
         float topPos = 0.0f;
         float bottomPos = 0.0f;
+        size_t topLineIndex = 0;
+        size_t bottomLineIndex = 0;
 
         std::string ToString() const;
     };
@@ -97,6 +99,8 @@ public:
     size_t GetLineCount() const;
     LineMetrics GetLineMetricsByRectF(RectF rect, int32_t paragraphIndex) const;
     void GetPaintRegion(RectF& boundsRect, float x, float y) const;
+    void PaintLeadingMarginSpan(const ParagraphManager::ParagraphInfo& paragraphInfo, const OffsetT<float>& offset,
+        DrawingContext& drawingContext);
     std::vector<TextBox> GetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle);
     std::pair<size_t, size_t> GetEllipsisTextRange();

@@ -2166,6 +2166,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("nativeEmbedOptions", &JSWeb::NativeEmbedOptions);
     JSClass<JSWeb>::StaticMethod("registerNativeEmbedRule", &JSWeb::RegisterNativeEmbedRule);
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("zoomControlAccess", &JSWeb::ZoomControlAccess);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
     JSClass<JSWeb>::StaticMethod("javaScriptProxy", &JSWeb::JavaScriptProxy);
     JSClass<JSWeb>::StaticMethod("userAgent", &JSWeb::UserAgent);
@@ -2297,6 +2298,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDetectedBlankScreen", &JSWeb::OnDetectedBlankScreen);
     JSClass<JSWeb>::StaticMethod("blankScreenDetectionConfig", &JSWeb::BlankScreenDetectionConfig);
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckFinish", &JSWeb::OnSafeBrowsingCheckFinish);
+    JSClass<JSWeb>::StaticMethod("backToTop", &JSWeb::JSBackToTop);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -4301,6 +4303,12 @@ void JSWeb::MixedMode(int32_t mixedMode)
 void JSWeb::ZoomAccessEnabled(bool isZoomAccessEnabled)
 {
     WebModel::GetInstance()->SetZoomAccessEnabled(isZoomAccessEnabled);
+}
+
+void JSWeb::ZoomControlAccess(bool zoomControlAccess)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    WebModel::GetInstance()->SetZoomControlAccess(zoomControlAccess);
 }
 
 void JSWeb::EnableNativeEmbedMode(bool isEmbedModeEnabled)
@@ -6800,6 +6808,21 @@ void JSWeb::SetForceEnableZoom(const JSCallbackInfo& args)
     }
     bool enabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetForceEnableZoom(enabled);
+}
+
+void JSWeb::JSBackToTop(const JSCallbackInfo& args)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    if (args.Length() < 1) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "JSBackToTop Length less than 1");
+        return;
+    }
+    
+    if (args[0]->IsBoolean()) {
+        WebModel::GetInstance()->SetBackToTop(args[0]->ToBoolean());
+    } else {
+        WebModel::GetInstance()->SetBackToTop(true);
+    }
 }
 
 void JSWeb::OnDetectedBlankScreen(const JSCallbackInfo& args)

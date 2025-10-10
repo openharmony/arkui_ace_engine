@@ -145,65 +145,74 @@ template("ace_core_interfaces_native_node") {
 
     if (!is_arkui_x) {
       sources += [
-        "${ace_root}/frameworks/bridge/arkts_frontend/ani_list_module.cpp",
-        "${ace_root}/frameworks/bridge/arkts_frontend/ani_water_flow_module.cpp",
+        "ani/ani_animatable_arithmetic.cpp",
         "ani/ani_theme.cpp",
         "ani/ani_theme_module.cpp",
-        "ani/ani_utils.cpp",
         "ani/animation_ani_modifier.cpp",
         "ani/canvas_ani_modifier.cpp",
         "ani/common_ani_modifier.cpp",
+        "ani/component3d_ani_modifier.cpp",
         "ani/component_content_ani_modifier.cpp",
         "ani/component_snapshot_ani_modifier.cpp",
         "ani/condition_scope_ani_modifier.cpp",
         "ani/content_slot_ani_modifier.cpp",
         "ani/custom_node_ani_modifier.cpp",
         "ani/drag_ani_modifier.cpp",
-        "ani/drag_controller_ani_modifier.cpp",
         "ani/image_ani_modifier.cpp",
         "ani/image_span_ani_modifier.cpp",
         "ani/interop_ani_modifier.cpp",
         "ani/list_ani_modifier.cpp",
+        "ani/node_adapter_ani_modifier.cpp",
         "ani/node_ani_modifier.cpp",
         "ani/rich_editor_ani_modifier.cpp",
         "ani/search_ani_modifier.cpp",
         "ani/shape_ani_modifier.cpp",
         "ani/stateMgmt_ani_modifier.cpp",
         "ani/styled_string_ani_modifier.cpp",
+        "ani/trace_ani_modifier.cpp",
+        "ani/uinode_ani_modifier.cpp",
         "ani/video_ani_modifier.cpp",
         "ani/waterflow_ani_modifier.cpp",
         "ani/web_ani_modifier.cpp",
+        "ani/xbar_ani_modifier.cpp",
         "ani/xcomponent_ani_modifier.cpp",
       ]
+      if (build_ohos_sdk) {
+        sources -= [
+          "ani/ani_theme.cpp",
+          "ani/ani_theme_module.cpp",
+          "ani/common_ani_modifier.cpp",
+          "ani/component3d_ani_modifier.cpp",
+          "ani/custom_node_ani_modifier.cpp",
+          "ani/interop_ani_modifier.cpp",
+          "ani/list_ani_modifier.cpp",
+          "ani/node_adapter_ani_modifier.cpp",
+          "ani/node_ani_modifier.cpp",
+          "ani/uinode_ani_modifier.cpp",
+          "ani/waterflow_ani_modifier.cpp",
+        ]
+      }
+
+      if (ace_engine_feature_wearable) {
+        sources -= [
+          "ani/ani_theme.cpp",
+          "ani/ani_theme_module.cpp",
+          "ani/canvas_ani_modifier.cpp",
+          "ani/common_ani_modifier.cpp",
+          "ani/node_ani_modifier.cpp",
+        ]
+      }
+
+      if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
+          !build_ohos_sdk) {
+        sources += [ "ani/drag_controller_ani_modifier.cpp" ]
+      }
     }
 
-    if (build_ohos_sdk) {
-      sources -= [
-        "${ace_root}/frameworks/bridge/arkts_frontend/ani_list_module.cpp",
-        "${ace_root}/frameworks/bridge/arkts_frontend/ani_water_flow_module.cpp",
-        "ani/ani_theme.cpp",
-        "ani/ani_theme_module.cpp",
-        "ani/ani_utils.cpp",
-        "ani/animation_ani_modifier.cpp",
-        "ani/common_ani_modifier.cpp",
-        "ani/custom_node_ani_modifier.cpp",
-        "ani/drag_controller_ani_modifier.cpp",
-        "ani/interop_ani_modifier.cpp",
-        "ani/list_ani_modifier.cpp",
-        "ani/node_ani_modifier.cpp",
-        "ani/waterflow_ani_modifier.cpp",
-      ]
-    }
-
-    if (ace_engine_feature_wearable) {
-      sources -= [
-        "ani/ani_theme.cpp",
-        "ani/ani_theme_module.cpp",
-        "ani/common_ani_modifier.cpp",
-       ]
-     }
-
-    deps = [ "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform" ]
+    deps = [
+      "$ace_root/frameworks/core/components/theme:build_theme_code",
+      "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform",
+    ]
     if (defined(config.web_components_support) &&
         config.web_components_support) {
       sources += [ "node/web_modifier.cpp" ]
@@ -221,11 +230,7 @@ template("ace_core_interfaces_native_node") {
       "${ace_root}/interfaces/native/node",
       "${ace_root}/interfaces/native/runtime",
     ]
-    if (is_arkui_x) {
-      include_dirs -= [
-        "${ace_root}/frameworks/core/interfaces/native/generated/interface",
-      ]
-    }
+
     if (qrcodegen_support) {
       sources += [ "node/qrcode_modifier.cpp" ]
     }
@@ -263,11 +268,6 @@ template("ace_core_interfaces_native_node") {
 
     if (is_arkui_x) {
       deps += [ "//foundation/arkui/napi:ace_napi" ]
-      deps -= [ "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform" ]
-    }
-
-    if (ace_engine_feature_enable_upgrade_skia) {
-      defines += [ "USE_NEW_SKIA" ]
     }
 
     external_deps = [
@@ -276,10 +276,11 @@ template("ace_core_interfaces_native_node") {
       "napi:ace_napi",
       "runtime_core:ani",
     ]
+
     if (current_os == "ohos") {
-      external_deps += [ "eventhandler:libeventhandler" ]
       external_deps += [ "graphic_2d:drawing_ani" ]
     }
+
     if (defined(config.pixel_map_support)) {
       external_deps += [ "image_framework:image" ]
     }
@@ -290,15 +291,10 @@ template("ace_core_interfaces_native_node") {
         external_deps += [ "udmf:libudmf" ]
       }
     }
-    if (build_ohos_sdk || is_arkui_x) {
+    if (build_ohos_sdk) {
       external_deps -= [ "runtime_core:ani" ]
     }
-    if (ace_engine_feature_wearable) {
-      sources -= [ 
-        "ani/canvas_ani_modifier.cpp",
-        "ani/node_ani_modifier.cpp",
-      ]
-    }
+
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]

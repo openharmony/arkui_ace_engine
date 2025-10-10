@@ -40,6 +40,19 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
 namespace OHOS::Ace {
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
+const std::vector<TextDataDetectType> TEXT_DETECT_ALL_TYPES_VECTOR = { TextDataDetectType::PHONE_NUMBER,
+    TextDataDetectType::URL, TextDataDetectType::EMAIL, TextDataDetectType::ADDRESS, TextDataDetectType::DATE_TIME };
+const std::unordered_map<std::string, TextDataDetectType> TEXT_DETECT_MAP_REVERSE = {
+    { "phoneNum", TextDataDetectType::PHONE_NUMBER }, { "url", TextDataDetectType::URL },
+    { "email", TextDataDetectType::EMAIL }, { "location", TextDataDetectType::ADDRESS },
+    { "datetime", TextDataDetectType::DATE_TIME }
+};
+const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
+    { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
+    { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" },
+    { TextDataDetectType::DATE_TIME, "datetime" }
+};
 struct TextDetectConfig {
     std::string types;
     std::function<void(const std::string&)> onResult;
@@ -174,6 +187,8 @@ public:
     virtual void SetLetterSpacing(const Dimension& value) = 0;
     virtual void SetAdaptMinFontSize(const Dimension& value) = 0;
     virtual void SetAdaptMaxFontSize(const Dimension& value) = 0;
+    virtual void SetSelectDetectEnable(bool value) = 0;
+    virtual void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) = 0;
     virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) = 0;
     virtual void SetContentTransition(TextEffectStrategy value, TextFlipDirection direction, bool enableBlur) {};
     virtual void ResetContentTransition() {};
@@ -220,6 +235,12 @@ public:
     virtual void SetColorShaderStyle(const Color& value) = 0;
     virtual void ResetGradientShaderStyle() = 0;
     virtual void SetTextVerticalAlign(TextVerticalAlign verticalAlign) = 0;
+    virtual void ResetLineHeightMultiply() {};
+    virtual void ResetMinimumLineHeight() {};
+    virtual void ResetMaximumLineHeight() {};
+    virtual void SetLineHeightMultiply(double value) {};
+    virtual void SetMinimumLineHeight(const Dimension& value) {};
+    virtual void SetMaximumLineHeight(const Dimension& value) {};
 
 private:
     static std::unique_ptr<TextModel> instance_;

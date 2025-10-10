@@ -467,11 +467,12 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEventType(inputEventType_);
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
-    info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
     if (inputEventType_ == InputEventType::AXIS) {
         info->SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
+        info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
     } else {
         info->SetTargetDisplayId(touchPoint.targetDisplayId);
+        info->SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
     }
     if (gestureRecognizerJudgeFunc) {
         return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);

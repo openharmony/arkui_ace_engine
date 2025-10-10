@@ -19,6 +19,7 @@
 #include "ani.h"
 
 namespace OHOS::Ace::Ani {
+class AniGlobalReference;
 void SetOrCreateAnimatableProperty(
     ani_env* env, ani_object aniClass, ani_long node, ani_string name, ani_object property, ani_fn_object callback);
 void CreatePageTransitionEnter(ani_env* env, ani_object aniClass, ani_object options);

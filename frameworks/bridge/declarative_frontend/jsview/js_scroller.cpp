@@ -77,6 +77,7 @@ void JSScroller::JSBind(BindingTarget globalObj)
     JSClass<JSScroller>::CustomMethod("isAtEnd", &JSScroller::IsAtEnd);
     JSClass<JSScroller>::CustomMethod("getItemRect", &JSScroller::GetItemRect);
     JSClass<JSScroller>::CustomMethod("getItemIndex", &JSScroller::GetItemIndex);
+    JSClass<JSScroller>::CustomMethod("contentSize", &JSScroller::ContentSize);
     JSClass<JSScroller>::Bind(globalObj, JSScroller::Constructor, JSScroller::Destructor);
 }
 
@@ -433,5 +434,20 @@ void JSScroller::GetItemIndex(const JSCallbackInfo& args)
     args.SetReturnValue(retVal);
 
     return;
+}
+
+void JSScroller::ContentSize(const JSCallbackInfo& args)
+{
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
+        JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
+        return;
+    }
+    auto retObj = JSRef<JSObject>::New();
+    ContainerScope scope(instanceId_);
+    auto contentSize = scrollController->ContentSize();
+    retObj->SetProperty<double>("width", Dimension(contentSize.Width(), DimensionUnit::PX).ConvertToVp());
+    retObj->SetProperty<double>("height", Dimension(contentSize.Height(), DimensionUnit::PX).ConvertToVp());
+    args.SetReturnValue(retObj);
 }
 } // namespace OHOS::Ace::Framework

@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_PinchGestureEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_PinchGestureEvent CtorImpl()
+Ark_PinchGestureEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<PinchGestureEventPeer>();
 }
@@ -109,7 +109,7 @@ const GENERATED_ArkUIPinchGestureEventAccessor* GetPinchGestureEventAccessor()
 {
     static const GENERATED_ArkUIPinchGestureEventAccessor PinchGestureEventAccessorImpl {
         PinchGestureEventAccessor::DestroyPeerImpl,
-        PinchGestureEventAccessor::CtorImpl,
+        PinchGestureEventAccessor::ConstructImpl,
         PinchGestureEventAccessor::GetFinalizerImpl,
         PinchGestureEventAccessor::GetScaleImpl,
         PinchGestureEventAccessor::SetScaleImpl,

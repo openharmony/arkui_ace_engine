@@ -20,6 +20,7 @@
 #include "core/interfaces/native/implementation/styled_string.h"
 #include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
+#include "core/interfaces/native/implementation/custom_span_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 using namespace Converter;
@@ -43,12 +44,12 @@ void UpdateSpansRange(std::vector<RefPtr<SpanBase>>& styles, int32_t maxLength)
 namespace MutableStyledStringAccessor {
 void DestroyPeerImpl(Ark_MutableStyledString peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
-Ark_MutableStyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
-    const Opt_Array_StyleOptions* styles)
+Ark_MutableStyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+                                      const Opt_Array_StyleOptions* styles)
 {
-    auto peer = MutableStyledStringPeer::Create();
+    auto peer = PeerUtils::CreatePeer<MutableStyledStringPeer>();
     if (value) {
         Converter::VisitUnion(*value,
             [&peer, styles](const Ark_String& arkText) {
@@ -66,8 +67,11 @@ Ark_MutableStyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSp
                 auto options = peerImageAttachment->span->GetImageSpanOptions();
                 peer->spanString = AceType::MakeRefPtr<MutableSpanString>(options);
             },
-            [](const Ark_CustomSpan& arkCustomSpan) {
-                LOGE("StyledStringAccessor::CtorImpl unsupported Ark_CustomSpan");
+            [&peer](const Ark_CustomSpan& arkCustomSpan) {
+                CustomSpanPeer* peerCustomSpan = arkCustomSpan;
+                CHECK_NULL_VOID(peerCustomSpan && peerCustomSpan->span);
+                auto customSpan = AceType::DynamicCast<CustomSpan>(peerCustomSpan->span);
+                peer->spanString = AceType::MakeRefPtr<SpanString>(customSpan);
             },
             []() {}
         );
@@ -81,17 +85,16 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ReplaceStringImpl(Ark_VMContext vmContext,
-                       Ark_MutableStyledString peer,
-                       const Ark_Number* start,
-                       const Ark_Number* length,
+void ReplaceStringImpl(Ark_MutableStyledString peer,
+                       const Ark_Int32 start,
+                       const Ark_Int32 length,
                        const Ark_String* other)
 {
-    CHECK_NULL_VOID(peer && start && length && other);
+    CHECK_NULL_VOID(peer && other);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
-    const auto convStart = Converter::Convert<int32_t>(*start);
-    const auto convLength = Converter::Convert<int32_t>(*length);
+    const auto convStart = Converter::Convert<int32_t>(start);
+    const auto convLength = Converter::Convert<int32_t>(length);
     if (mutableString->CheckRange(convStart, convLength)) {
         const auto string = Converter::Convert<std::u16string>(*other);
         mutableString->ReplaceString(convStart, convLength, string);
@@ -101,16 +104,15 @@ void ReplaceStringImpl(Ark_VMContext vmContext,
             convStart, convLength);
     }
 }
-void InsertStringImpl(Ark_VMContext vmContext,
-                      Ark_MutableStyledString peer,
-                      const Ark_Number* start,
+void InsertStringImpl(Ark_MutableStyledString peer,
+                      const Ark_Int32 start,
                       const Ark_String* other)
 {
-    CHECK_NULL_VOID(peer && start && other);
+    CHECK_NULL_VOID(peer && other);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
     auto strLength = mutableString->GetLength();
-    const auto convStart = Converter::Convert<int32_t>(*start);
+    const auto convStart = Converter::Convert<int32_t>(start);
     if (convStart >= 0 && convStart <= strLength) {
         const auto string = Converter::Convert<std::u16string>(*other);
         mutableString->InsertString(convStart, string);
@@ -120,16 +122,15 @@ void InsertStringImpl(Ark_VMContext vmContext,
             convStart, strLength);
     }
 }
-void RemoveStringImpl(Ark_VMContext vmContext,
-                      Ark_MutableStyledString peer,
-                      const Ark_Number* start,
-                      const Ark_Number* length)
+void RemoveStringImpl(Ark_MutableStyledString peer,
+                      const Ark_Int32 start,
+                      const Ark_Int32 length)
 {
-    CHECK_NULL_VOID(peer && start && length);
+    CHECK_NULL_VOID(peer);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
-    const auto convStart = Converter::Convert<int32_t>(*start);
-    const auto convLength = Converter::Convert<int32_t>(*length);
+    const auto convStart = Converter::Convert<int32_t>(start);
+    const auto convLength = Converter::Convert<int32_t>(length);
     if (mutableString->CheckRange(convStart, convLength)) {
         mutableString->RemoveString(convStart, convLength);
     } else {
@@ -138,8 +139,7 @@ void RemoveStringImpl(Ark_VMContext vmContext,
             convStart, convLength);
     }
 }
-void ReplaceStyleImpl(Ark_VMContext vmContext,
-                      Ark_MutableStyledString peer,
+void ReplaceStyleImpl(Ark_MutableStyledString peer,
                       const Ark_SpanStyle* spanStyle)
 {
     CHECK_NULL_VOID(peer && spanStyle);
@@ -157,8 +157,7 @@ void ReplaceStyleImpl(Ark_VMContext vmContext,
             convStart, convLength);
     }
 }
-void SetStyleImpl(Ark_VMContext vmContext,
-                  Ark_MutableStyledString peer,
+void SetStyleImpl(Ark_MutableStyledString peer,
                   const Ark_SpanStyle* spanStyle)
 {
     CHECK_NULL_VOID(peer && spanStyle);
@@ -181,32 +180,30 @@ void SetStyleImpl(Ark_VMContext vmContext,
             convStart, convLength);
     }
 }
-void RemoveStyleImpl(Ark_VMContext vmContext,
-                     Ark_MutableStyledString peer,
-                     const Ark_Number* start,
-                     const Ark_Number* length,
+void RemoveStyleImpl(Ark_MutableStyledString peer,
+                     const Ark_Int32 start,
+                     const Ark_Int32 length,
                      Ark_StyledStringKey styledKey)
 {
-    CHECK_NULL_VOID(peer && start && length);
+    CHECK_NULL_VOID(peer);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
-    const auto convStart = Converter::Convert<int32_t>(*start);
-    const auto convLength = Converter::Convert<int32_t>(*length);
+    const auto convStart = Converter::Convert<int32_t>(start);
+    const auto convLength = Converter::Convert<int32_t>(length);
     CHECK_NULL_VOID(mutableString->CheckRange(convStart, convLength));
     const auto type = Converter::OptConvert<Ace::SpanType>(styledKey);
     CHECK_NULL_VOID(type);
     mutableString->RemoveSpan(convStart, convLength, type.value());
 }
-void RemoveStylesImpl(Ark_VMContext vmContext,
-                      Ark_MutableStyledString peer,
-                      const Ark_Number* start,
-                      const Ark_Number* length)
+void RemoveStylesImpl(Ark_MutableStyledString peer,
+                      const Ark_Int32 start,
+                      const Ark_Int32 length)
 {
-    CHECK_NULL_VOID(peer && start && length);
+    CHECK_NULL_VOID(peer);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
-    const auto convStart = Converter::Convert<int32_t>(*start);
-    const auto convLength = Converter::Convert<int32_t>(*length);
+    const auto convStart = Converter::Convert<int32_t>(start);
+    const auto convLength = Converter::Convert<int32_t>(length);
     CHECK_NULL_VOID(mutableString->CheckRange(convStart, convLength));
     mutableString->RemoveSpans(convStart, convLength);
 }
@@ -217,19 +214,18 @@ void ClearStylesImpl(Ark_MutableStyledString peer)
     CHECK_NULL_VOID(mutableString);
     mutableString->ClearAllSpans();
 }
-void ReplaceStyledStringImpl(Ark_VMContext vmContext,
-                             Ark_MutableStyledString peer,
-                             const Ark_Number* start,
-                             const Ark_Number* length,
+void ReplaceStyledStringImpl(Ark_MutableStyledString peer,
+                             const Ark_Int32 start,
+                             const Ark_Int32 length,
                              Ark_StyledString other)
 {
-    CHECK_NULL_VOID(peer && start && length && other);
+    CHECK_NULL_VOID(peer && other);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
     auto otherString = other->GetString();
     CHECK_NULL_VOID(otherString);
-    const auto convStart = Converter::Convert<int32_t>(*start);
-    const auto convLength = Converter::Convert<int32_t>(*length);
+    const auto convStart = Converter::Convert<int32_t>(start);
+    const auto convLength = Converter::Convert<int32_t>(length);
     if (mutableString->CheckRange(convStart, convLength)) {
         mutableString->ReplaceSpanString(convStart, convLength, otherString);
     } else {
@@ -238,16 +234,15 @@ void ReplaceStyledStringImpl(Ark_VMContext vmContext,
             convStart, convLength);
     }
 }
-void InsertStyledStringImpl(Ark_VMContext vmContext,
-                            Ark_MutableStyledString peer,
-                            const Ark_Number* start,
+void InsertStyledStringImpl(Ark_MutableStyledString peer,
+                            const Ark_Int32 start,
                             Ark_StyledString other)
 {
-    CHECK_NULL_VOID(peer && start && other);
+    CHECK_NULL_VOID(peer && other);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
     auto strLength = mutableString->GetLength();
-    const auto convStart = Converter::Convert<int32_t>(*start);
+    const auto convStart = Converter::Convert<int32_t>(start);
     if (convStart >= 0 && convStart <= strLength) {
         auto otherString = other->GetString();
         CHECK_NULL_VOID(otherString);
@@ -273,7 +268,7 @@ const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor
 {
     static const GENERATED_ArkUIMutableStyledStringAccessor MutableStyledStringAccessorImpl {
         MutableStyledStringAccessor::DestroyPeerImpl,
-        MutableStyledStringAccessor::CtorImpl,
+        MutableStyledStringAccessor::ConstructImpl,
         MutableStyledStringAccessor::GetFinalizerImpl,
         MutableStyledStringAccessor::ReplaceStringImpl,
         MutableStyledStringAccessor::InsertStringImpl,

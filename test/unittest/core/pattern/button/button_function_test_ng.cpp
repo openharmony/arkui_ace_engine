@@ -2550,4 +2550,57 @@ HWTEST_F(ButtonFunctionTestNg, StringToVector, TestSize.Level1)
     auto ret = pattern->StringToVector("hello,world", ',');
     EXPECT_EQ(ret, vec);
 }
+
+/**
+ * @tc.name: SetNavBarMenuFocusStyle
+ * @tc.desc: test SetNavBarMenuFocusStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, SetNavBarMenuFocusStyle, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create button frame node and get pattern.
+     * @tc.expected: step1. Button node and pattern are not null.
+     */
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto buttonNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = buttonNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto theme = pipelineContext->GetTheme<ButtonTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto layout = AceType::MakeRefPtr<ButtonLayoutProperty>();
+    ASSERT_NE(layout, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    Color color = Color::RED;
+    renderContext->UpdateBackgroundColor(color);
+    pattern->buttonType_ = ComponentButtonType::BUTTON;
+    pattern->navMenuItemNeedFocus_ = false;
+    pattern->SetNavBarMenuFocusStyle(renderContext, true);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), color);
+
+    pattern->buttonType_ = ComponentButtonType::NAVIGATION;
+    pattern->navMenuItemNeedFocus_ = false;
+    pattern->SetNavBarMenuFocusStyle(renderContext, true);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), color);
+
+    pattern->buttonType_ = ComponentButtonType::BUTTON;
+    pattern->navMenuItemNeedFocus_ = true;
+    pattern->SetNavBarMenuFocusStyle(renderContext, true);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), color);
+
+    pattern->buttonType_ = ComponentButtonType::NAVIGATION;
+    pattern->navMenuItemNeedFocus_ = true;
+    pattern->SetNavBarMenuFocusStyle(renderContext, true);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), color);
+
+    pattern->buttonType_ = ComponentButtonType::NAVIGATION;
+    pattern->navMenuItemNeedFocus_ = true;
+    pattern->SetNavBarMenuFocusStyle(renderContext, false);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), color);
+}
 } // namespace OHOS::Ace::NG

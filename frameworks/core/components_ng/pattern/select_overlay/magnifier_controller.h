@@ -37,10 +37,8 @@ public:
     void OpenMagnifier();
     void CloseMagnifier();
 
-    bool UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset,
-        const OffsetF& basePaintOffset);
-    bool UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset,
-        const OffsetF& basePaintOffset);
+    bool UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset);
+    bool UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset);
     bool UpdateMagnifierOffset();
 
     void UpdateShowMagnifier(bool isShowMagnifier = false);
@@ -50,14 +48,8 @@ public:
         return isShowMagnifier_;
     }
 
-    void SetLocalOffset(OffsetF localOffset, std::optional<OffsetF> localOffsetWithoutTrans = std::nullopt)
-    {
-        localOffset_.SetX(localOffset.GetX());
-        localOffset_.SetY(localOffset.GetY());
-        localOffsetWithoutTrans_ = localOffsetWithoutTrans;
-        magnifierNodeExist_ = true;
-        UpdateShowMagnifier(true);
-    }
+    void SetLocalOffset(
+        const OffsetF& localOffset, const std::optional<OffsetF>& localOffsetWithoutTrans = std::nullopt);
 
     OffsetF GetLocalOffset() const
     {
@@ -109,6 +101,7 @@ private:
     RefPtr<FrameNode> magnifierFrameNode_ = nullptr;
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
+    OffsetF globalOffset_;
     std::optional<OffsetF> localOffsetWithoutTrans_;
     WeakPtr<Pattern> pattern_;
     bool removeFrameNode_ = false;

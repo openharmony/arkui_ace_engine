@@ -162,8 +162,9 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
             ParseAltImageAlt(errorVal, isCard, IMAGE_ALT_ERROR);
         }
         return;
+    } else {
+        ParseAltImageAlt(args[0], isCard, IMAGE_ALT_NORMAL);
     }
-    ParseAltImageAlt(args[0], isCard, IMAGE_ALT_NORMAL);
 }
 
 void JSImage::SetObjectFit(const JSCallbackInfo& args)

@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 using namespace testing;
@@ -44,6 +45,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     RefPtr<FrameNode> CreateContainerPickerNode();
+    RefPtr<FrameNode> CreateChildNode(const std::string& tag, const RefPtr<Pattern>& pattern);
 };
 
 void ContainerPickerPatternTest::SetUpTestSuite()
@@ -68,6 +70,13 @@ RefPtr<FrameNode> ContainerPickerPatternTest::CreateContainerPickerNode()
     ContainerPickerModel picker;
     picker.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_NE(frameNode, nullptr);
+    return frameNode;
+}
+
+RefPtr<FrameNode> ContainerPickerPatternTest::CreateChildNode(const std::string& tag, const RefPtr<Pattern>& pattern)
+{
+    auto frameNode = FrameNode::CreateFrameNode(tag, ElementRegister::GetInstance()->MakeUniqueId(), pattern);
     EXPECT_NE(frameNode, nullptr);
     return frameNode;
 }
@@ -331,6 +340,121 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SetContentMainSi
 
     pattern->SetContentMainSize(200.0f);
     EXPECT_EQ(pattern->contentMainSize_, 200.0f);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_CreateChildrenClickEvent_VerifyEventRegistration001
+ * @tc.desc: Verify that CreateChildrenClickEvent correctly registers click events for supported node types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CreateChildrenClickEvent_VerifyEventRegistration001,
+    TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create container picker node and mock gesture event hub.
+     */
+    auto containerPickerNode = CreateContainerPickerNode();
+    auto pattern = containerPickerNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create child nodes with different tags and set up mock event hubs.
+     */
+    auto rowNode = CreateChildNode(V2::ROW_ETS_TAG, AceType::MakeRefPtr<Pattern>());
+    auto imageNode = CreateChildNode(V2::IMAGE_ETS_TAG, AceType::MakeRefPtr<ImagePattern>());
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, AceType::MakeRefPtr<TextPattern>());
+    auto symbolNode = CreateChildNode(V2::SYMBOL_ETS_TAG, AceType::MakeRefPtr<Pattern>());
+    
+    containerPickerNode->AddChild(rowNode);
+    containerPickerNode->AddChild(imageNode);
+    containerPickerNode->AddChild(textNode);
+    containerPickerNode->AddChild(symbolNode);
+
+    RefPtr<UINode> rowUiNode = AceType::DynamicCast<UINode>(rowNode);
+    EXPECT_FALSE(rowUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+
+    RefPtr<UINode> imageUiNode = AceType::DynamicCast<UINode>(imageNode);
+    EXPECT_FALSE(imageUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+
+    RefPtr<UINode> textUiNode = AceType::DynamicCast<UINode>(textNode);
+    EXPECT_FALSE(textUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+
+    RefPtr<UINode> symbolUiNode = AceType::DynamicCast<UINode>(symbolNode);
+    EXPECT_FALSE(symbolUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+
+    RefPtr<UINode> uiNode = AceType::DynamicCast<UINode>(containerPickerNode);
+    pattern->CreateChildrenClickEvent(uiNode);
+    EXPECT_TRUE(rowUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    EXPECT_TRUE(imageUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    EXPECT_TRUE(textUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    EXPECT_TRUE(symbolUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_InitMouseAndPressEvent_VerifyEventCreation001
+ * @tc.desc: Verify that InitMouseAndPressEvent correctly creates mouse and press events.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_InitMouseAndPressEvent_VerifyEventCreation001,
+    TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create container picker node and pattern.
+     */
+    auto containerPickerNode = CreateContainerPickerNode();
+    auto pattern = containerPickerNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Verify initial state of isItemClickEventCreated_.
+     */
+    EXPECT_FALSE(pattern->isItemClickEventCreated_);
+
+    /**
+     * @tc.steps: step3. Call InitMouseAndPressEvent and verify event creation flag is set.
+     */
+    pattern->InitMouseAndPressEvent();
+    EXPECT_TRUE(pattern->isItemClickEventCreated_);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_CreateChildrenClickEvent_RecursiveProcessing001
+ * @tc.desc: Verify that CreateChildrenClickEvent recursively processes nested container nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CreateChildrenClickEvent_RecursiveProcessing001,
+    TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create container picker node and pattern.
+     */
+    auto containerPickerNode = CreateContainerPickerNode();
+    auto pattern = containerPickerNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create nested container nodes with FOR_EACH and ITEM tags.
+     */
+    auto forEachNode = CreateChildNode(V2::JS_FOR_EACH_ETS_TAG, AceType::MakeRefPtr<Pattern>());
+    auto itemNode = CreateChildNode(V2::JS_SYNTAX_ITEM_ETS_TAG, AceType::MakeRefPtr<Pattern>());
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, AceType::MakeRefPtr<TextPattern>());
+
+    containerPickerNode->AddChild(forEachNode);
+    forEachNode->AddChild(itemNode);
+    itemNode->AddChild(textNode);
+
+    /**
+     * @tc.steps: step3. Call CreateChildrenClickEvent and verify recursive processing.
+     */
+    RefPtr<UINode> uiNode = AceType::DynamicCast<UINode>(containerPickerNode);
+    // This should trigger recursive processing of the nested nodes
+    pattern->CreateChildrenClickEvent(uiNode);
+    RefPtr<UINode> forEachUiNode = AceType::DynamicCast<UINode>(forEachNode);
+    RefPtr<UINode> itemUiNode = AceType::DynamicCast<UINode>(itemNode);
+    RefPtr<UINode> textUiNode = AceType::DynamicCast<UINode>(textNode);
+    EXPECT_FALSE(forEachUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    EXPECT_FALSE(itemUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    EXPECT_TRUE(textUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
 }
 
 } // namespace OHOS::Ace::NG

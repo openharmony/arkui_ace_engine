@@ -37,6 +37,8 @@ namespace {
 constexpr Dimension DIVIDER_THICKNESS = 1.0_px;
 constexpr Dimension PICKER_FOCUS_PADDING = 2.0_vp;
 constexpr uint32_t FOCUS_AREA_TYPE_IMPL = 1;
+constexpr double PICKER_SPRING_MASS = 1.0;
+constexpr int32_t PICKER_MAX_SLIDING_DISTANCE = 30;
 } // namespace
 
 class PickerTheme : public virtual Theme {
@@ -77,6 +79,7 @@ public:
             CHECK_NULL_VOID(themeConstants);
             auto themeStyle = themeConstants->GetThemeStyle();
             CHECK_NULL_VOID(themeStyle);
+            InitializeSildeParams(theme, themeStyle);
             InitializeTextStyles(theme, themeStyle);
             theme->optionSizeUnit_ = DimensionUnit::VP;
             theme->lunarWidth_ =
@@ -218,6 +221,15 @@ public:
             InitializeTitleTextStyles(theme, themeStyle);
             InitializeButtonTextStyles(theme, themeStyle);
         }
+
+        void InitializeSildeParams(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
+        {
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
+            CHECK_NULL_VOID(pattern);
+            theme->pickerSpringMass_ = pattern->GetAttr<double>("picker_spring_mass", PICKER_SPRING_MASS);
+            theme->pickerMaxSlidingDistance_ = pattern->GetAttr<int32_t>("picker_max_sliding_distance",
+                PICKER_MAX_SLIDING_DISTANCE);
+        }
     };
 
     ~PickerTheme() override = default;
@@ -267,6 +279,8 @@ public:
         theme->lunarswitchTextSize_ = lunarswitchTextSize_;
         theme->defaultStartDate_ = defaultStartDate_;
         theme->defaultEndDate_ = defaultEndDate_;
+        theme->pickerSpringMass_ = pickerSpringMass_;
+        theme->pickerMaxSlidingDistance_ = pickerMaxSlidingDistance_;
         cloneSelectorProps(theme);
         cloneSelectedBackgroundStyle(theme);
         return theme;
@@ -701,6 +715,16 @@ public:
         return nextText_;
     }
 
+    double GetPickerSpringMass() const
+    {
+        return pickerSpringMass_;
+    }
+
+    int32_t GetPickerMaxSlidingDistance()
+    {
+        return pickerMaxSlidingDistance_;
+    }
+
 private:
 
     Color focusColor_;
@@ -802,6 +826,9 @@ private:
 
     Color selectedBackgroundColor_;
     NG::BorderRadiusProperty selectedBorderRadius_;
+
+    double pickerSpringMass_ = PICKER_SPRING_MASS;
+    int32_t pickerMaxSlidingDistance_ = PICKER_MAX_SLIDING_DISTANCE;
 };
 
 } // namespace OHOS::Ace

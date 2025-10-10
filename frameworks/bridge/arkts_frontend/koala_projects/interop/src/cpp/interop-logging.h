@@ -15,8 +15,15 @@
 #ifndef _INTEROP_LGGING_H
 #define _INTEROP_LGGING_H
 
-#include <stdio.h>
-#include <stdint.h>
+#ifdef __cplusplus
+    #include <cstdio>
+    #include <cstdint>
+    #include <cassert>
+#else
+    #include <stdio.h>
+    #include <stdint.h>
+    #include <assert.h>
+#endif
 
 #if defined(KOALA_OHOS)
 #include "oh_sk_log.h"
@@ -37,6 +44,10 @@
 #define INTEROP_API_EXPORT __attribute__((visibility("default")))
 #endif
 
+#ifndef ASSERT
+    #define ASSERT(expression) assert(expression)
+#endif
+
 // Grouped logs. Keep consistent with type in ServiceGroupLogger
 typedef struct GroupLogger {
     void (*startGroupedLog)(int kind);
@@ -46,6 +57,6 @@ typedef struct GroupLogger {
     int (*needGroupedLog)(int kind);
 } GroupLogger;
 
-const GroupLogger* GetDefaultLogger();
+extern "C" INTEROP_API_EXPORT const GroupLogger* GetDefaultLogger();
 
 #endif // _INTEROP_LOGGING_H

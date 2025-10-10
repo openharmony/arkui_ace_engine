@@ -795,6 +795,10 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg003, TestSize.Level1)
      */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    EXPECT_NE(pattern, nullptr);
+    NG::FrameNode* contentNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(contentNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
     PasswordIcon passwordIcon;
@@ -804,6 +808,14 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg003, TestSize.Level1)
     textFieldModelNG.SetPasswordIcon(passwordIcon);
     std::function<void()> buildFunc;
     textFieldModelNG.SetCustomKeyboard(std::move(buildFunc), true);
+
+    textFieldModelNG.SetCustomKeyboard(frameNode, []() {}, true);
+    EXPECT_NE(pattern->customKeyboardBuilder_, nullptr);
+    textFieldModelNG.SetCustomKeyboardWithNode(contentNode, true);
+    EXPECT_NE(pattern->customKeyboard_, nullptr);
+    contentNode = nullptr;
+    textFieldModelNG.SetCustomKeyboardWithNode(frameNode, contentNode, true);
+    EXPECT_EQ(pattern->customKeyboard_, nullptr);
 }
 
 /**
@@ -1084,6 +1096,63 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg011, TestSize.Level1)
     layoutProperty->UpdateTextInputType(TextInputType::TEXT);
     TextFieldModelNG::SetShowCounter(frameNode, true);
     TextFieldModelNG::SetShowCounter(frameNode, false);
+}
+HWTEST_F(TextInputAreaTest, testSetCounterTextColor02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text field model and create a frame node.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(u"Default Text", u"");
+
+    /**
+     * @tc.steps: step2. Get the main frame node and layout property.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Set the counter text color and verify it.
+     */
+    TextFieldModelNG::SetCounterTextColor(frameNode, Color::RED);
+    EXPECT_EQ(layoutProperty->GetCounterTextColor(), Color::RED);
+    TextFieldModelNG::SetCounterTextOverflowColor(frameNode, Color::BLACK);
+    EXPECT_EQ(layoutProperty->GetCounterTextOverflowColor(), Color::BLACK);
+}
+HWTEST_F(TextInputAreaTest, testResetCounterTextColor02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text field model and create a frame node.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(u"Default Text", u"");
+
+    /**
+     * @tc.steps: step2. Get the main frame node and layout property.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Set the counter text color and verify it.
+     */
+    TextFieldModelNG::SetCounterTextColor(frameNode, Color::RED);
+    EXPECT_EQ(layoutProperty->GetCounterTextColor(), Color::RED);
+    TextFieldModelNG::SetCounterTextOverflowColor(frameNode, Color::BLACK);
+    EXPECT_EQ(layoutProperty->GetCounterTextOverflowColor(), Color::BLACK);
+    /**
+     * @tc.steps: step4. Reset the counter text color and verify it.
+     */
+    TextFieldModelNG::ResetCounterTextColor(frameNode);
+    TextFieldModelNG::ResetCounterTextOverflowColor(frameNode);
+    EXPECT_NE(layoutProperty->GetCounterTextColor(), Color::RED);
+    EXPECT_NE(layoutProperty->GetCounterTextOverflowColor(), Color::BLACK);
 }
 
 /**
@@ -2810,4 +2879,42 @@ HWTEST_F(TextInputAreaTest, SetCapitalizationMode001, TestSize.Level1)
     EXPECT_EQ(AutoCapitalizationMode::WORDS, pattern->GetAutoCapitalizationMode());
 }
 
+/**
+ * @tc.name: SetExtraConfig
+ * @tc.desc: test pass extra config to ime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, SetExtraConfig, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1 Create Text filed node
+     */
+    struct ExtraConfig {
+        std::string key;
+        std::string value;
+    };
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        IMEAttachCallback attach = [](IMEClient& client) {
+            ExtraConfig* extraConfig = new ExtraConfig();
+            extraConfig->key = "name";
+            extraConfig->value = "test";
+            client.extraInfo = AceType::MakeRefPtr<IMEExtraInfo>(extraConfig, [extraConfig]() {
+                delete extraConfig;
+            });
+        };
+        model.SetOnWillAttachIME(std::move(attach));
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.step: step2. Call FireOnWillAttachIME
+     */
+    auto clientInfo = pattern_->GetIMEClientInfo();
+    pattern_->FireOnWillAttachIME(clientInfo);
+    ASSERT_NE(clientInfo.extraInfo, nullptr);
+    ASSERT_NE(clientInfo.extraInfo->GetExtraInfo(), nullptr);
+    auto parsedConfig = *reinterpret_cast<ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
+    EXPECT_EQ(parsedConfig.key, "name");
+    EXPECT_EQ(parsedConfig.value, "test");
+}
 } // namespace OHOS::Ace::NG

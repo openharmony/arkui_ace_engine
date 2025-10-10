@@ -1,9 +1,32 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+
 #ifndef _INTEROP_TYPES_H_
 #define _INTEROP_TYPES_H_
 
-#include <stdint.h>
+#ifdef __cplusplus
+  #include <cstdint>
+#else
+  #include <stdint.h>
+#endif
 
-#define INTEROP_FATAL(msg, ...) do { fprintf(stderr, msg "\n", ##__VA_ARGS__); abort(); } while (0)
+#ifdef __cplusplus
+extern "C" [[noreturn]]
+#endif
+void InteropLogFatal(const char* format, ...);
+#define INTEROP_FATAL(msg, ...) do { InteropLogFatal(msg, ##__VA_ARGS__); } while (0)
 
 typedef enum InteropTag
 {
@@ -33,7 +56,7 @@ typedef enum InteropRuntimeType
 typedef float InteropFloat32;
 typedef double InteropFloat64;
 typedef int32_t InteropInt32;
-typedef unsigned int InteropUInt32; // TODO: update unsigned int
+typedef unsigned int InteropUInt32; // Improve: update unsigned int
 typedef int64_t InteropInt64;
 typedef uint64_t InteropUInt64;
 typedef int8_t InteropInt8;
@@ -75,15 +98,6 @@ typedef struct InteropNumber {
     InteropInt32 i32;
   };
 } InteropNumber;
-
-// Binary layout of InteropLength must match that of KLength.
-typedef struct InteropLength
-{
-  InteropInt8 type;
-  InteropFloat32 value;
-  InteropInt32 unit;
-  InteropInt32 resource;
-} InteropLength;
 
 typedef struct InteropCustomObject {
   char kind[20];

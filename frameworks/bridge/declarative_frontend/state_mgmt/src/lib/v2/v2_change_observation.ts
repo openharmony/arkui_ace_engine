@@ -141,6 +141,9 @@ class ObserveV2 {
   // flag to disable nested component optimization if V1 and V2 components are involved in the nested cases.
   public isParentChildOptimizable_ : boolean = true;
 
+  // counter for nested applySync() calls
+  private applySyncRunningCount_: number = 0;
+
   private static obsInstance_: ObserveV2;
 
   public static getObserve(): ObserveV2 {
@@ -236,13 +239,19 @@ class ObserveV2 {
       const symRefs: Object = target?.[ObserveV2.SYMBOL_REFS];
 
       if (idRefs) {
-        idRefs[id]?.forEach(key =>
+        idRefs[id]?.forEach(key => {
           symRefs?.[key]?.delete(id)
-        );
+          if (symRefs?.[key]?.size === 0) {
+            delete symRefs[key];
+          }
+        });
         delete idRefs[id];
       } else {
         for (let key in symRefs) {
           symRefs[key]?.delete(id);
+          if (symRefs?.[key]?.size === 0) {
+            delete symRefs[key];
+          }
         };
       }
 
@@ -493,8 +502,6 @@ class ObserveV2 {
     stateMgmtConsole.propertyAccess(`executeUnrecorded - done`);
     return ret;
   }
-
-
 
   /**
   * mark view model object 'target' property 'attrName' as changed
@@ -760,10 +767,11 @@ class ObserveV2 {
    * process UINode update until no more @Computed and @Monitor and UINode rerender
    *
    * @param updateUISynchronously should be set to true if called during VSYNC only
+   * @param snapshot optional, used by applySync() to track processed IDs for optimization
    *
    */
 
-  public updateDirty2(updateUISynchronously: boolean = false, isReuse: boolean = false): void {
+  public updateDirty2(updateUISynchronously: boolean = false, isReuse: boolean = false, snapshot?: Object): void {
     aceDebugTrace.begin('updateDirty2');
     stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} ... `);
     // obtain and unregister the removed elmtIds
@@ -776,10 +784,14 @@ class ObserveV2 {
     // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
     // FIXME prevent infinite loops
     do {
-      this.updateComputedAndMonitors();
+      // update and remove processed ids from the snapshot
+      this.updateComputedAndMonitors(snapshot);
 
       if (this.elmtIdsChanged_.size) {
         const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
+        if (snapshot) {
+          this.elmtIdsChanged_.forEach(Set.prototype.delete, snapshot['elmtIdsChanged_']);
+        }
         this.elmtIdsChanged_ = new Set<number>();
         updateUISynchronously ? isReuse ? this.updateUINodesForReuse(elmtIds) : this.updateUINodesSynchronously(elmtIds) : this.updateUINodes(elmtIds);
       }
@@ -797,26 +809,37 @@ class ObserveV2 {
    * three nested loops, means:
    * process @Computed until no more @Computed need update
    * process @Monitor until no more @Computed and @Monitor
+   * 
+   * @param snapshot optional, used by applySync() to track processed IDs for optimization
   */
-  private updateComputedAndMonitors(): void {
+  private updateComputedAndMonitors(snapshot?: Object): void {
     do {
       while (this.computedPropIdsChanged_.size) {
         //  sort the ids and update in ascending order
         // If a @Computed property depends on other @Computed properties, their
         // ids will be smaller as they are defined first.
         const computedProps = Array.from(this.computedPropIdsChanged_).sort((id1, id2) => id1 - id2);
+        if (snapshot) {
+          this.computedPropIdsChanged_.forEach(Set.prototype.delete, snapshot['computedPropIdsChanged_']);
+        }
         this.computedPropIdsChanged_ = new Set<number>();
         this.updateDirtyComputedProps(computedProps);
       }
 
       if (this.persistenceChanged_.size) {
         const persistKeys: Array<number> = Array.from(this.persistenceChanged_);
+        if (snapshot) {
+          this.persistenceChanged_.forEach(Set.prototype.delete, snapshot['persistenceChanged_']);
+        }
         this.persistenceChanged_ = new Set<number>();
         PersistenceV2Impl.instance().onChangeObserved(persistKeys);
       }
 
       if (this.monitorIdsChanged_.size) {
         const monitors = this.monitorIdsChanged_;
+        if (snapshot) {
+          this.monitorIdsChanged_.forEach(Set.prototype.delete, snapshot['monitorIdsChanged_']);
+        }
         this.monitorIdsChanged_ = new Set<number>();
         this.updateDirtyMonitors(monitors);
       }
@@ -898,7 +921,7 @@ class ObserveV2 {
           // monitor notifyChange delayed if target is a View that is not active
           monitorTarget.addDelayedMonitorIds(watchId);
         } else {
-          monitor.notifyChange();
+          monitor.notifyChange(); // can delete this.elmtIdsChanged_
         }
       }
     });
@@ -1336,6 +1359,93 @@ class ObserveV2 {
   public setCurrentReuseId(elmtId: number): void {
     this.currentReuseId_ = elmtId;
   }
+
+  // Runs a task and processes all resulting updates immediately
+  public applySync<T>(task: () => T): T {
+    if (ComputedV2.runningCount) {
+      const message = 'The function is not allowed to be called in @Computed';
+      stateMgmtConsole.applicationError(message);
+      throw new BusinessError(FUNC_CALLED_IN_COMPUTED_ILLEGAL, message);
+    }
+
+    this.applySyncRunningCount_++;
+
+    const names = [
+      'elmtIdsChanged_',
+      'computedPropIdsChanged_',
+      'monitorIdsChanged_', 'monitorIdsChangedForAddMonitor_', 'monitorSyncIdsChangedForAddMonitor_',
+      'persistenceChanged_'
+    ];
+
+    // Take a snapshot of the current pending IDs and reset them to empty sets
+    const snapshot = {};
+    names.forEach(name => snapshot[name] = this[name]);
+    names.forEach(name => this[name] = new Set());
+
+    // Execute the task — any state changes here will be recorded in the cleared sets
+    let retValue;
+    try {
+      retValue = task();     
+    } catch (error) {
+      stateMgmtConsole.applicationError(`UIUtils.applySync - task execution caught error ${error} !`);
+      throw error;
+    }
+
+    // Remove IDs added by task() from the original snapshot
+    names.forEach((name) =>
+      this[name].forEach(Set.prototype.delete, snapshot[name])
+    );
+
+    // Process the new changes immediately (may produce further changes) and
+    // remove IDs added by updateDirty2 from the original snapshot
+    this.updateDirty2(false, false, snapshot);
+
+    // Restore unprocessed IDs from the snapshot
+    names.forEach((name) => this[name] = snapshot[name]);
+
+    this.applySyncRunningCount_--;
+    return retValue;
+  }
+
+  // Immediately processes all updates
+  public flushUpdates(): void {
+    if (ComputedV2.runningCount) {
+      const message = 'The function is not allowed to be called in @Computed';
+      stateMgmtConsole.applicationError(message);
+      throw new BusinessError(FUNC_CALLED_IN_COMPUTED_ILLEGAL, message);
+    }
+    if (MonitorV2.runningCount) {
+      const message = 'The function is not allowed to be called in @Monitor';
+      stateMgmtConsole.applicationError(message);
+      throw new BusinessError(FUNC_CALLED_IN_MONITOR_ILLEGAL, message);
+    }
+    if (this.applySyncRunningCount_) {
+      stateMgmtConsole.warn('UIUtils.flushUpdates will be skipped when called within UIUtils.applySync');
+      return;
+    }
+    this.updateDirty2(false);
+  }
+
+  // Update all UINodes that currently need update
+  public flushUIUpdates(): void {
+    if (ComputedV2.runningCount) {
+      const message = 'The function is not allowed to be called in @Computed';
+      stateMgmtConsole.applicationError(message);
+      throw new BusinessError(FUNC_CALLED_IN_COMPUTED_ILLEGAL, message);
+    }
+    if (MonitorV2.runningCount) {
+      const message = 'The function is not allowed to be called in @Monitor';
+      stateMgmtConsole.applicationError(message);
+      throw new BusinessError(FUNC_CALLED_IN_MONITOR_ILLEGAL, message);
+    }
+    if (this.applySyncRunningCount_) {
+      stateMgmtConsole.warn('UIUtils.flushUIUpdates will be skipped when called within UIUtils.applySync'); 
+      return;
+    }
+    const elmtIds = Array.from(this.elmtIdsChanged_).sort((id1, id2) => id1 - id2);
+    this.updateUINodes(elmtIds);
+  }
+
 } // class ObserveV2
 
 const trackInternal = (

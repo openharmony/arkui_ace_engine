@@ -76,6 +76,7 @@ using DragEventCallBack = std::function<void(const DragPointerEvent&, const Drag
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
 using CrownEventCallback = std::function<void(const CrownEvent&, const std::function<void()>&)>;
+using TouchpadInteractionBeginCallback = std::function<void(const NonPointerEvent&, const std::function<void()>&)>;
 
 class PipelineBase;
 

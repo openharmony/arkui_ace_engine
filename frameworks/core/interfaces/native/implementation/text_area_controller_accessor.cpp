@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_TextAreaController peer)
 {
     delete peer;
 }
-Ark_TextAreaController CtorImpl()
+Ark_TextAreaController ConstructImpl()
 {
     return new TextAreaControllerPeer();
 }
@@ -33,21 +33,21 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void CaretPositionImpl(Ark_TextAreaController peer,
-                       const Ark_Number* value)
+                       const Ark_Int32 value)
 {
-    CHECK_NULL_VOID(peer && value && peer->controller_);
-    peer->controller_->CaretPosition(std::max(Converter::Convert<int32_t>(*value), 0));
+    CHECK_NULL_VOID(peer && peer->controller_);
+    peer->controller_->CaretPosition(std::max(Converter::Convert<int32_t>(value), 0));
 }
 void SetTextSelectionImpl(Ark_TextAreaController peer,
-                          const Ark_Number* selectionStart,
-                          const Ark_Number* selectionEnd,
+                          const Ark_Int32 selectionStart,
+                          const Ark_Int32 selectionEnd,
                           const Opt_SelectionOptions* options)
 {
-    CHECK_NULL_VOID(peer && selectionStart && selectionEnd && peer->controller_);
-    auto selectionOptions = options ? Converter::OptConvert<SelectionOptions>(*options) : std::nullopt;
+    CHECK_NULL_VOID(peer && peer->controller_);
+    auto selectionOptions = Converter::OptConvertPtr<SelectionOptions>(options);
     peer->controller_->SetTextSelection(
-        Converter::Convert<int32_t>(*selectionStart),
-        Converter::Convert<int32_t>(*selectionEnd),
+        Converter::Convert<int32_t>(selectionStart),
+        Converter::Convert<int32_t>(selectionEnd),
         selectionOptions);
 }
 void StopEditingImpl(Ark_TextAreaController peer)
@@ -60,7 +60,7 @@ const GENERATED_ArkUITextAreaControllerAccessor* GetTextAreaControllerAccessor()
 {
     static const GENERATED_ArkUITextAreaControllerAccessor TextAreaControllerAccessorImpl {
         TextAreaControllerAccessor::DestroyPeerImpl,
-        TextAreaControllerAccessor::CtorImpl,
+        TextAreaControllerAccessor::ConstructImpl,
         TextAreaControllerAccessor::GetFinalizerImpl,
         TextAreaControllerAccessor::CaretPositionImpl,
         TextAreaControllerAccessor::SetTextSelectionImpl,

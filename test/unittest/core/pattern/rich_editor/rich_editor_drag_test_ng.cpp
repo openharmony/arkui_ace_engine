@@ -645,7 +645,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorPatternTestClearDragDropEvent001, TestS
     ASSERT_NE(host, nullptr);
     auto eventHub = host->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
-    ASSERT_EQ(eventHub->onDragStart_, nullptr);
+    ASSERT_EQ(eventHub->GetOnDragStart(), nullptr);
 }
 
 /**

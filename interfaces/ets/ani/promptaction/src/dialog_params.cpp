@@ -44,7 +44,7 @@ bool GetButtonInfo(ani_env* env, ani_ref resultRef, OHOS::Ace::ButtonInfo& resul
 
 bool GetButtonInfo(ani_env* env, ani_object object, OHOS::Ace::ButtonInfo& result)
 {
-    if (!IsClassObject(env, object, "L@ohos/promptAction/promptAction/Button;")) {
+    if (!IsClassObject(env, object, "@ohos.promptAction.promptAction.Button")) {
         return false;
     }
     GetResourceStrParam(env, object, "text", result.text);
@@ -168,7 +168,7 @@ bool GetMaskRect(ani_env *env, ani_object object, std::optional<OHOS::Ace::Dimen
 bool GetDialogAlignment(ani_env* env, ani_object object, OHOS::Ace::DialogAlignment& result)
 {
     int32_t resultInt;
-    if (!GetEnumInt(env, object, "alignment", "Larkui/component/alertDialog/DialogAlignment;", resultInt)) {
+    if (!GetEnumInt(env, object, "alignment", "arkui.component.alertDialog.DialogAlignment", resultInt)) {
         return false;
     }
     result = static_cast<OHOS::Ace::DialogAlignment>(resultInt);
@@ -178,7 +178,7 @@ bool GetDialogAlignment(ani_env* env, ani_object object, OHOS::Ace::DialogAlignm
 bool GetThemeColorMode(ani_env* env, ani_object object, OHOS::Ace::ThemeColorMode& result)
 {
     int32_t resultInt;
-    if (!GetEnumInt(env, object, "colorMode", "Larkui/component/common/ThemeColorMode;", resultInt)) {
+    if (!GetEnumInt(env, object, "colorMode", "arkui.component.common.ThemeColorMode", resultInt)) {
         return false;
     }
     result = static_cast<OHOS::Ace::ThemeColorMode>(resultInt);
@@ -188,7 +188,7 @@ bool GetThemeColorMode(ani_env* env, ani_object object, OHOS::Ace::ThemeColorMod
 bool GetAdaptiveColor(ani_env* env, ani_object object, OHOS::Ace::AdaptiveColor& result)
 {
     int32_t resultInt;
-    if (!GetEnumInt(env, object, "adaptiveColor", "Larkui/component/common/AdaptiveColor;", resultInt)) {
+    if (!GetEnumInt(env, object, "adaptiveColor", "arkui.component.common.AdaptiveColor", resultInt)) {
         return false;
     }
     result = static_cast<OHOS::Ace::AdaptiveColor>(resultInt);
@@ -246,7 +246,7 @@ bool GetBlurOptions(ani_env* env, ani_object object, OHOS::Ace::BlurOption& resu
     }
 
     ani_object resultObj = static_cast<ani_object>(resultRef);
-    if (!IsClassObject(env, resultObj, "Larkui/component/common/BlurOptions;")) {
+    if (!IsClassObject(env, resultObj, "arkui.component.common.BlurOptions")) {
         return false;
     }
 
@@ -261,7 +261,7 @@ bool GetBlurOptions(ani_env* env, ani_object object, OHOS::Ace::BlurOption& resu
 bool GetBlurStyleActivePolicy(ani_env* env, ani_object object, OHOS::Ace::BlurStyleActivePolicy& result)
 {
     ani_int resultInt;
-    if (!GetEnumInt(env, object, "policy", "Larkui/component/common/BlurStyleActivePolicy;", resultInt)) {
+    if (!GetEnumInt(env, object, "policy", "arkui.component.common.BlurStyleActivePolicy", resultInt)) {
         return false;
     }
     result = static_cast<OHOS::Ace::BlurStyleActivePolicy>(resultInt);
@@ -281,7 +281,7 @@ bool GetBackgroundBlurStyleOptions(ani_env* env, ani_object object, std::optiona
     }
 
     ani_object resultObj = static_cast<ani_object>(resultRef);
-    if (!IsClassObject(env, resultObj, "Larkui/component/common/BackgroundBlurStyleOptions;")) {
+    if (!IsClassObject(env, resultObj, "arkui.component.common.BackgroundBlurStyleOptions")) {
         return false;
     }
 
@@ -311,7 +311,7 @@ bool GetBackgroundEffectOptions(ani_env* env, ani_object object, std::optional<O
     }
 
     ani_object resultObj = static_cast<ani_object>(resultRef);
-    if (!IsClassObject(env, resultObj, "Larkui/component/common/BackgroundEffectOptions;")) {
+    if (!IsClassObject(env, resultObj, "arkui.component.common.BackgroundEffectOptions")) {
         return false;
     }
 
@@ -349,7 +349,7 @@ bool GetBackgroundEffectOptions(ani_env* env, ani_object object, std::optional<O
 bool GetLevelMode(ani_env* env, ani_object object, OHOS::Ace::LevelMode& result)
 {
     ani_int resultInt;
-    if (!GetEnumInt(env, object, "levelMode", "L@ohos/promptAction/LevelMode;", resultInt)) {
+    if (!GetEnumInt(env, object, "levelMode", "@ohos.promptAction.LevelMode", resultInt)) {
         return false;
     }
     result = static_cast<OHOS::Ace::LevelMode>(resultInt);
@@ -359,7 +359,7 @@ bool GetLevelMode(ani_env* env, ani_object object, OHOS::Ace::LevelMode& result)
 bool GetImmersiveMode(ani_env* env, ani_object object, OHOS::Ace::ImmersiveMode& result)
 {
     ani_int resultInt;
-    if (!GetEnumInt(env, object, "immersiveMode", "L@ohos/promptAction/ImmersiveMode;", resultInt)) {
+    if (!GetEnumInt(env, object, "immersiveMode", "@ohos.promptAction.ImmersiveMode", resultInt)) {
         return false;
     }
     result = static_cast<OHOS::Ace::ImmersiveMode>(resultInt);
@@ -437,7 +437,7 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
         return false;
     }
 
-    if (!IsClassObject(env, object, "L@ohos/promptAction/promptAction/ShowDialogOptions;")) {
+    if (!IsClassObject(env, object, "@ohos.promptAction.promptAction.ShowDialogOptions")) {
         return false;
     }
 
@@ -478,7 +478,7 @@ bool GetShowDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::Di
         return false;
     }
 
-    if (!IsClassObject(env, object, "L@ohos/promptAction/promptAction/ShowDialogOptionsInternal;")) {
+    if (!IsClassObject(env, object, "@ohos.promptAction.promptAction.ShowDialogOptionsInternal")) {
         return false;
     }
 
@@ -492,7 +492,7 @@ ani_ref CreateShowDialogSuccessResponse(ani_env* env, int32_t index)
 {
     ani_class responseCls;
     ani_status status = env->FindClass(
-        "L@ohos/promptAction/promptAction/ShowDialogSuccessResponseInner;", &responseCls);
+        "@ohos.promptAction.promptAction.ShowDialogSuccessResponseInner", &responseCls);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FindClass failed %{public}d", status);
         return nullptr;
@@ -539,24 +539,31 @@ std::function<void(int32_t, int32_t)> GetShowDialogCallback(std::shared_ptr<Prom
             if (asyncContext == nullptr) {
                 return;
             }
+            ani_env* env = nullptr;
+            ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
+                    "[ANI] GetEnv fail. status: %{public}d", status);
+                return;
+            }
 
             ani_size nrRefs = 16;
-            ani_status status = asyncContext->env->CreateLocalScope(nrRefs);
+            status = env->CreateLocalScope(nrRefs);
             if (status != ANI_OK && !nrRefs) {
                 return;
             }
 
             std::vector<ani_ref> args(CALLBACK_PARAM_LENGTH);
             if (errorCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-                asyncContext->env->GetNull(&args[0]);
+                env->GetNull(&args[0]);
             } else {
-                args[0] = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, "cancel", errorCode);
+                args[0] = OHOS::Ace::Ani::GetErrorObject(env, "cancel", errorCode);
             }
-            args[1] = CreateShowDialogSuccessResponse(asyncContext->env, successIndex);
+            args[1] = CreateShowDialogSuccessResponse(env, successIndex);
             ani_ref fnReturnVal {};
-            status = asyncContext->env->FunctionalObject_Call(
+            status = env->FunctionalObject_Call(
                 asyncContext->callback, args.size(), args.data(), &fnReturnVal);
-            status = asyncContext->env->DestroyLocalScope();
+            status = env->DestroyLocalScope();
         };
         taskExecutor->PostTask(
             std::move(task), OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIDialogParseDialogCallback");
@@ -591,28 +598,36 @@ std::function<void(int32_t, int32_t)> GetShowDialogPromise(std::shared_ptr<Promp
                 return;
             }
 
+            ani_env* env = nullptr;
+            ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
+                    "[ANI] GetEnv fail. status: %{public}d", status);
+                return;
+            }
+
             ani_size nrRefs = 16;
-            ani_status status = asyncContext->env->CreateLocalScope(nrRefs);
+            status = env->CreateLocalScope(nrRefs);
             if (status != ANI_OK && !nrRefs) {
                 return;
             }
 
             if (callbackType == 0) {
-                ani_ref responseRef = CreateShowDialogSuccessResponse(asyncContext->env, successIndex);
-                status = asyncContext->env->PromiseResolver_Resolve(asyncContext->deferred, responseRef);
+                ani_ref responseRef = CreateShowDialogSuccessResponse(env, successIndex);
+                status = env->PromiseResolver_Resolve(asyncContext->deferred, responseRef);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
                         "[ANI] PromiseResolver_Resolve fail. status: %{public}d", status);
                 }
             } else {
-                ani_error error = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, "cancel", 0);
-                status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(env, "cancel", 0);
+                status = env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_OVERLAY,
                         "[ANI] PromiseResolver_Reject fail. status: %{public}d", status);
                 }
             }
-            status = asyncContext->env->DestroyLocalScope();
+            status = env->DestroyLocalScope();
         };
         taskExecutor->PostTask(
             std::move(task), OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogIdCallback");
@@ -680,7 +695,7 @@ bool GetActionMenuOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
         return false;
     }
 
-    if (!IsClassObject(env, object, "L@ohos/promptAction/promptAction/ActionMenuOptions;")) {
+    if (!IsClassObject(env, object, "@ohos.promptAction.promptAction.ActionMenuOptions")) {
         return false;
     }
 
@@ -702,7 +717,7 @@ ani_ref CreateActionMenuSuccessResponse(ani_env* env, int32_t index)
 {
     ani_class responseCls;
     ani_status status = env->FindClass(
-        "L@ohos/promptAction/promptAction/ActionMenuSuccessResponseInner;", &responseCls);
+        "@ohos.promptAction.promptAction.ActionMenuSuccessResponseInner", &responseCls);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FindClass failed %{public}d", status);
         return nullptr;
@@ -750,24 +765,31 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuCallback(
             if (asyncContext == nullptr) {
                 return;
             }
+            ani_env* env = nullptr;
+            ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
+                    "[ANI] GetEnv fail. status: %{public}d", status);
+                return;
+            }
 
             ani_size nrRefs = 16;
-            ani_status status = asyncContext->env->CreateLocalScope(nrRefs);
+            status = env->CreateLocalScope(nrRefs);
             if (status != ANI_OK && !nrRefs) {
                 return;
             }
 
             std::vector<ani_ref> args(CALLBACK_PARAM_LENGTH);
             if (errorCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-                asyncContext->env->GetNull(&args[0]);
+                env->GetNull(&args[0]);
             } else {
-                args[0] = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, "cancel", errorCode);
+                args[0] = OHOS::Ace::Ani::GetErrorObject(env, "cancel", errorCode);
             }
-            args[1] = CreateActionMenuSuccessResponse(asyncContext->env, successIndex);
+            args[1] = CreateActionMenuSuccessResponse(env, successIndex);
             ani_ref fnReturnVal {};
-            status = asyncContext->env->FunctionalObject_Call(
+            status = env->FunctionalObject_Call(
                 asyncContext->callback, args.size(), args.data(), &fnReturnVal);
-            status = asyncContext->env->DestroyLocalScope();
+            status = env->DestroyLocalScope();
         };
         taskExecutor->PostTask(
             std::move(task), OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuCallback");
@@ -801,29 +823,35 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuPromise(std::shared_ptr<P
             if (!asyncContext->deferred) {
                 return;
             }
-
+            ani_env* env = nullptr;
+            ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
+                    "[ANI] GetEnv fail. status: %{public}d", status);
+                return;
+            }
             ani_size nrRefs = 16;
-            ani_status status = asyncContext->env->CreateLocalScope(nrRefs);
+            status = env->CreateLocalScope(nrRefs);
             if (status != ANI_OK && !nrRefs) {
                 return;
             }
 
             if (callbackType == 0) {
-                ani_ref responseRef = CreateActionMenuSuccessResponse(asyncContext->env, successIndex);
-                status = asyncContext->env->PromiseResolver_Resolve(asyncContext->deferred, responseRef);
+                ani_ref responseRef = CreateActionMenuSuccessResponse(env, successIndex);
+                status = env->PromiseResolver_Resolve(asyncContext->deferred, responseRef);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
                         "[ANI] PromiseResolver_Resolve fail. status: %{public}d", status);
                 }
             } else {
-                ani_error error = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, "cancel", 0);
-                status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(env, "cancel", 0);
+                status = env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY,
                         "[ANI] PromiseResolver_Reject fail. status: %{public}d", status);
                 }
             }
-            status = asyncContext->env->DestroyLocalScope();
+            status = env->DestroyLocalScope();
         };
         taskExecutor->PostTask(
             std::move(task), OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuCallback");
@@ -874,7 +902,7 @@ bool GetOnWillDismiss(ani_env* env, ani_object object,
 bool GetKeyboardAvoidMode(ani_env* env, ani_object object, OHOS::Ace::KeyboardAvoidMode& result)
 {
     ani_int resultInt;
-    if (!GetEnumInt(env, object, "keyboardAvoidMode", "Larkui/component/common/KeyboardAvoidMode;", resultInt)) {
+    if (!GetEnumInt(env, object, "keyboardAvoidMode", "arkui.component.common.KeyboardAvoidMode", resultInt)) {
         return false;
     }
     result = static_cast<OHOS::Ace::KeyboardAvoidMode>(resultInt);
@@ -901,7 +929,7 @@ bool GetKeyboardAvoidDistance(ani_env *env, ani_object object, std::optional<OHO
     }
 
     int32_t unit;
-    if (!GetEnumInt(env, resultObj, "unit", "Larkui/Graphics/LengthUnit;", unit)) {
+    if (!GetEnumInt(env, resultObj, "unit", "arkui.Graphics.LengthUnit", unit)) {
         return false;
     }
 
@@ -924,7 +952,7 @@ bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
         return false;
     }
 
-    if (!IsClassObject(env, object, "L@ohos/promptAction/promptAction/BaseDialogOptions;")) {
+    if (!IsClassObject(env, object, "@ohos.promptAction.promptAction.BaseDialogOptions")) {
         return false;
     }
 
@@ -979,7 +1007,7 @@ bool GetDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::Dialog
         return false;
     }
 
-    if (!IsClassObject(env, object, "L@ohos/promptAction/promptAction/DialogOptionsInternal;")) {
+    if (!IsClassObject(env, object, "@ohos.promptAction.promptAction.DialogOptionsInternal")) {
         return false;
     }
 
@@ -1014,11 +1042,18 @@ bool GetCustomBuilder(ani_env *env, ani_object object, std::function<void()>& bu
     return true;
 }
 
-bool GetDestroyCallback(ani_env *env, ani_object object,
+bool GetDestroyCallback(ani_vm *vm, ani_object object,
     std::function<void(const OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode> node)>& destroyCallback)
 {
+    ani_env* env = nullptr;
+    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+    if (status != ANI_OK || env == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
+            "[ANI] GetEnv fail. status: %{public}d", status);
+        return false;
+    }
     ani_ref destroyFuncRef;
-    ani_status status = env->Object_GetPropertyByName_Ref(object, "destroyFunc", &destroyFuncRef);
+    status = env->Object_GetPropertyByName_Ref(object, "destroyFunc", &destroyFuncRef);
     if (status != ANI_OK) {
         return false;
     }
@@ -1033,8 +1068,15 @@ bool GetDestroyCallback(ani_env *env, ani_object object,
         return false;
     }
 
-    destroyCallback = [env, globalDestroyRef](const OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode> node) {
+    destroyCallback = [vm, globalDestroyRef](const OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode> node) {
         if (!globalDestroyRef) {
+            return;
+        }
+        ani_env* env = nullptr;
+        ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+        if (status != ANI_OK || env == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
+                "[ANI] GetEnv fail. status: %{public}d", status);
             return;
         }
 
@@ -1048,7 +1090,7 @@ bool GetDestroyCallback(ani_env *env, ani_object object,
         ani_object builderObj = CreateANILongObject(env, builderPtr);
         ani_ref builderRef = static_cast<ani_ref>(builderObj);
         ani_ref fnReturnVal {};
-        ani_status status = env->FunctionalObject_Call(func, 1, &builderRef, &fnReturnVal);
+        status = env->FunctionalObject_Call(func, 1, &builderRef, &fnReturnVal);
         env->GlobalReference_Delete(globalDestroyRef);
         if (status != ANI_OK) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
@@ -1057,11 +1099,18 @@ bool GetDestroyCallback(ani_env *env, ani_object object,
     return true;
 }
 
-bool GetCustomBuilderWithId(ani_env *env, ani_object object,
+bool GetCustomBuilderWithId(ani_vm *vm, ani_object object,
     std::function<void(const int32_t dialogId)>& builderCallback)
 {
+    ani_env* env = nullptr;
+    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+    if (status != ANI_OK || env == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
+            "[ANI] GetEnv fail. status: %{public}d", status);
+        return false;
+    }
     ani_ref builderFuncRef;
-    ani_status status = env->Object_GetPropertyByName_Ref(object, "builderWithId", &builderFuncRef);
+    status = env->Object_GetPropertyByName_Ref(object, "builderWithId", &builderFuncRef);
     if (status != ANI_OK) {
         return false;
     }
@@ -1076,8 +1125,15 @@ bool GetCustomBuilderWithId(ani_env *env, ani_object object,
         return false;
     }
 
-    builderCallback = [env, globalBuilderRef](const int32_t dialogId) {
+    builderCallback = [vm, globalBuilderRef](const int32_t dialogId) {
         if (!globalBuilderRef) {
+            return;
+        }
+        ani_env* env = nullptr;
+        ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+        if (status != ANI_OK || env == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
+                "[ANI] GetEnv fail. status: %{public}d", status);
             return;
         }
 
@@ -1085,7 +1141,7 @@ bool GetCustomBuilderWithId(ani_env *env, ani_object object,
         ani_object dialogIdObj = CreateANIDoubleObject(env, static_cast<double>(dialogId));
         ani_ref dialogIdRef = static_cast<ani_ref>(dialogIdObj);
         ani_ref fnReturnVal {};
-        ani_status status = env->FunctionalObject_Call(func, 1, &dialogIdRef, &fnReturnVal);
+        status = env->FunctionalObject_Call(func, 1, &dialogIdRef, &fnReturnVal);
         env->GlobalReference_Delete(globalBuilderRef);
         if (status != ANI_OK) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
@@ -1255,7 +1311,7 @@ bool GetBorderColor(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG
 bool GetBorderStyle(ani_env* env, ani_object object, OHOS::Ace::BorderStyle& result)
 {
     ani_int resultInt;
-    if (!GetEnumInt(env, object, "Larkui/component/enums/BorderStyle;", resultInt)) {
+    if (!GetEnumInt(env, object, "arkui.component.enums.BorderStyle", resultInt)) {
         return false;
     }
 
@@ -1271,7 +1327,7 @@ bool GetBorderStyle(ani_env* env, ani_object object, OHOS::Ace::BorderStyle& res
 bool GetBorderStyle(ani_env* env, ani_object object, const char *name, OHOS::Ace::BorderStyle& result)
 {
     ani_int resultInt;
-    if (!GetEnumInt(env, object, name, "Larkui/component/enums/BorderStyle;", resultInt)) {
+    if (!GetEnumInt(env, object, name, "arkui.component.enums.BorderStyle", resultInt)) {
         return false;
     }
 
@@ -1334,7 +1390,7 @@ bool GetCustomDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogPr
         return false;
     }
 
-    if (!IsClassObject(env, object, "L@ohos/promptAction/promptAction/CustomDialogOptions;")) {
+    if (!IsClassObject(env, object, "@ohos.promptAction.promptAction.CustomDialogOptions")) {
         return false;
     }
 
@@ -1377,30 +1433,38 @@ std::function<void(int32_t)> GetOpenCustomDialogPromise(std::shared_ptr<PromptAc
                 return;
             }
 
+            ani_env* env = nullptr;
+            ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
+                    "[ANI] GetEnv fail. status: %{public}d", status);
+                return;
+            }
+
             ani_size nrRefs = 16;
-            asyncContext->env->CreateLocalScope(nrRefs);
+            env->CreateLocalScope(nrRefs);
             if (!nrRefs) {
                 return;
             }
 
             if (dialogId > 0) {
                 double returnDialogId = static_cast<double>(dialogId);
-                ani_object dialogIdObj = CreateANIDoubleObject(asyncContext->env, returnDialogId);
+                ani_object dialogIdObj = CreateANIDoubleObject(env, returnDialogId);
                 ani_ref dialogRef = static_cast<ani_ref>(dialogIdObj);
-                ani_status status = asyncContext->env->PromiseResolver_Resolve(asyncContext->deferred, dialogRef);
+                status = env->PromiseResolver_Resolve(asyncContext->deferred, dialogRef);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] PromiseResolver_Resolve fail.");
                 }
             } else {
                 int32_t errorCode = OHOS::Ace::ERROR_CODE_INTERNAL_ERROR;
                 std::string errorMsg = OHOS::Ace::Ani::GetErrorMsg(errorCode);
-                ani_error error = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, errorMsg, errorCode);
-                ani_status status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(env, errorMsg, errorCode);
+                status = env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] PromiseResolver_Reject fail.");
                 }
             }
-            asyncContext->env->DestroyLocalScope();
+            env->DestroyLocalScope();
         };
         taskExecutor->PostTask(
             std::move(task), OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogIdCallback");
@@ -1434,29 +1498,36 @@ std::function<void(int32_t)> GetCustomDialogContentPromise(std::shared_ptr<Promp
             if (!asyncContext->deferred) {
                 return;
             }
+            ani_env* env = nullptr;
+            ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
+                    "[ANI] GetEnv fail. status: %{public}d", status);
+                return;
+            }
 
             ani_size nrRefs = 16;
-            asyncContext->env->CreateLocalScope(nrRefs);
+            env->CreateLocalScope(nrRefs);
             if (!nrRefs) {
                 return;
             }
 
             if (errorCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
                 ani_ref successRef;
-                asyncContext->env->GetUndefined(&successRef);
-                ani_status status = asyncContext->env->PromiseResolver_Resolve(asyncContext->deferred, successRef);
+                env->GetUndefined(&successRef);
+                status = env->PromiseResolver_Resolve(asyncContext->deferred, successRef);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] PromiseResolver_Resolve fail.");
                 }
             } else {
                 std::string strMsg = OHOS::Ace::Ani::GetErrorMsg(errorCode);
-                ani_error error = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, strMsg, errorCode);
-                ani_status status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(env, strMsg, errorCode);
+                status = env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] PromiseResolver_Reject fail.");
                 }
             }
-            asyncContext->env->DestroyLocalScope();
+            env->DestroyLocalScope();
         };
         taskExecutor->PostTask(
             std::move(task), OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContentCallback");
@@ -1471,7 +1542,7 @@ bool GetDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperti
         return false;
     }
 
-    if (!IsClassObject(env, object, "L@ohos/promptAction/promptAction/DialogOptions;")) {
+    if (!IsClassObject(env, object, "@ohos.promptAction.promptAction.DialogOptions")) {
         return false;
     }
 

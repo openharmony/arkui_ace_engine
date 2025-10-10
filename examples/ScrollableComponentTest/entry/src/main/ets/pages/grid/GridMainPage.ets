@@ -52,7 +52,8 @@ struct WaterFlowMainPage {
     new TextList(18, 'NestedScroll001', 'pages/grid/st/NestedScroll001'),
     new TextList(19, 'GridIndex', 'pages/grid/GridIndex'),
     new TextList(20, 'GridModifierIndex', 'pages/grid/GridModifierIndex'),
-    new TextList(21, 'scrollBarColor', 'pages/grid/scrollBarColor')
+    new TextList(21, 'scrollBarColor', 'pages/grid/scrollBarColor'),
+    new TextList(22, 'ScrollableGrid', 'pages/grid/CAPI/ScrollableGrid')
   ]
   @State fontSize: Resource | undefined = undefined
 

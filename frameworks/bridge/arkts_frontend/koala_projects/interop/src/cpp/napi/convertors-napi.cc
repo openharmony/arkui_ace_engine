@@ -113,7 +113,7 @@ KStringPtr getString(napi_env env, napi_value value) {
   return result;
 }
 
-KNativePointer getPointer(napi_env env, napi_value value) {
+KNativePointer getPointerSlow(napi_env env, napi_value value) {
     napi_valuetype valueType = getValueTypeChecked(env, value);
     if (valueType == napi_valuetype::napi_external) {
         KNativePointer result = nullptr;
@@ -139,19 +139,29 @@ KNativePointer getPointer(napi_env env, napi_value value) {
 }
 
 KLong getInt64(napi_env env, napi_value value) {
-    if (getValueTypeChecked(env, value) != napi_valuetype::napi_bigint) {
-        napi_throw_error(env, nullptr, "cannot be coerced to int64");
-        return -1;
+    if (getValueTypeChecked(env, value) == napi_valuetype::napi_number) {
+        int64_t result = 0;
+        if (napi_get_value_int64(env, value, &result) != napi_ok) {
+            napi_throw_error(env, nullptr, "cannot be coerced to int64");
+            return -1;
+        }
+        return static_cast<KLong>(result);
     }
-
-    bool isWithinRange = true;
-    int64_t ptr64 = 0;
-    napi_get_value_bigint_int64(env, value, &ptr64, &isWithinRange);
-    if (!isWithinRange) {
-        napi_throw_error(env, nullptr, "cannot be coerced to int64, value is too large");
-        return -1;
+    if (getValueTypeChecked(env, value) == napi_valuetype::napi_bigint) {
+        bool isWithinRange = true;
+        int64_t ptr64 = 0;
+        if (napi_get_value_bigint_int64(env, value, &ptr64, &isWithinRange) != napi_ok) {
+            napi_throw_error(env, nullptr, "cannot be coerced to int64");
+            return -1;
+        }
+        if (!isWithinRange) {
+            napi_throw_error(env, nullptr, "cannot be coerced to int64, value is too large");
+            return -1;
+        }
+        return static_cast<KLong>(ptr64);
     }
-    return static_cast<KLong>(ptr64);
+    napi_throw_error(env, nullptr, "cannot be coerced to int64");
+    return -1;
 }
 
 KULong getUInt64(napi_env env, napi_value value) {
@@ -234,6 +244,14 @@ napi_value makeFloat32(napi_env env, float value) {
     return result;
 }
 
+napi_value makeFloat64(napi_env env, double value) {
+    napi_value result;
+    napi_status status;
+    status = napi_create_double(env, value, &result);
+    KOALA_NAPI_THROW_IF_FAILED(env, status, result);
+    return result;
+}
+
 napi_value makePointer(napi_env env, void* value) {
     napi_value result;
     napi_status status;
@@ -300,11 +318,11 @@ const std::vector<std::pair<std::string, napi_type_t>>& Exports::getMethods(cons
 //
 // Callback dispatcher
 //
-// TODO Should we get rid of explicit Node_* declrations and hide the naming convention behind the macro definitions?
+// Improve: Should we get rid of explicit Node_* declrations and hide the naming convention behind the macro definitions?
 
 static napi_ref g_koalaNapiCallbackDispatcher = nullptr;
 
-// TODO: shall we pass name in globalThis instead of object reference?
+// Improve: shall we pass name in globalThis instead of object reference?
 napi_value Node_SetCallbackDispatcher(napi_env env, napi_callback_info cbinfo) {
     fprintf(stderr, "Node_SetCallbackDispatcher!\n");
 
@@ -360,7 +378,7 @@ ModuleRegisterCallback ProvideModuleRegisterCallback(ModuleRegisterCallback valu
 static constexpr bool splitModules = true;
 
 static napi_value InitModule(napi_env env, napi_value exports) {
-    LOG("InitModule: " QUOTE(INTEROP_LIBRARY_NAME) "\n");
+    // LOG("InitModule: " QUOTE(INTEROP_LIBRARY_NAME));
     Exports* inst = Exports::getInstance();
     napi_status status;
     napi_value target = exports;

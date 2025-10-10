@@ -54,8 +54,6 @@ public:
 private:
     void PaintCustomSpan(DrawingContext& drawingContext);
     float AdjustParagraphX(const ParagraphManager::ParagraphInfo& info, const RectF& contentRect);
-    void PaintLeadingMarginSpan(const ParagraphManager::ParagraphInfo& paragraphInfo, const OffsetT<float>& offset,
-        size_t& lineCount, DrawingContext& drawingContext);
     RichEditorParagraphManager* const pManager_;
     WeakPtr<OHOS::Ace::NG::Pattern> pattern_;
     RefPtr<PropertyFloat> richTextRectX_;

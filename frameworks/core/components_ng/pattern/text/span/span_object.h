@@ -73,11 +73,6 @@ struct SpanParagraphStyle {
         } else {
             flag &= false;
         }
-        if (!drawableLeadingMargin.has_value() && !other.drawableLeadingMargin.has_value()) {
-            flag &= true;
-        } else {
-            flag &= false;
-        }
         return flag;
     }
 };
@@ -372,7 +367,10 @@ public:
     ParagraphStyleSpan() = default;
     explicit ParagraphStyleSpan(SpanParagraphStyle paragraphStyle);
     ParagraphStyleSpan(SpanParagraphStyle paragraphStyle, int32_t start, int32_t end);
-    SpanParagraphStyle GetParagraphStyle() const;
+    SpanParagraphStyle GetParagraphStyle() const
+    {
+        return paragraphStyle_;
+    }
     void SetParagraphStyle(const SpanParagraphStyle& paragraphStyle);
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;

@@ -252,6 +252,7 @@ template("ace_core_source_set") {
       # event
       "event/axis_event.cpp",
       "event/back_end_event_manager.cpp",
+      "event/coasting_axis_event_generator.cpp",
       "event/key_event.cpp",
       "event/key_event_recognizer.cpp",
       "event/mouse_event.cpp",
@@ -808,6 +809,7 @@ template("ace_core_ng_source_set") {
       # event
       "event/axis_event.cpp",
       "event/back_end_event_manager.cpp",
+      "event/coasting_axis_event_generator.cpp",
       "event/key_event.cpp",
       "event/key_event_recognizer.cpp",
       "event/mouse_event.cpp",

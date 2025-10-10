@@ -254,6 +254,7 @@ private:
     const TimeStamp& GetLastClickTime() const;
     void UpdateCaretOriginalRect(const OffsetF& offset);
     void SetCaretRectAtEmptyValue();
+    NG::SizeF GetAlignParentSize() const;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FirstIndex, int32_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecondIndex, int32_t, PROPERTY_UPDATE_RENDER);

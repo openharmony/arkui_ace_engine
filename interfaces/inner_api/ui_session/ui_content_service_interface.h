@@ -18,6 +18,7 @@
 #include <iremote_broker.h>
 
 #include "ui/base/macros.h"
+#include "param_config.h"
 
 namespace OHOS {
 namespace Media {
@@ -66,8 +67,10 @@ public:
      * @description: define get the current page inspector tree info interface
      * @return: result number
      */
-    virtual int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) = 0;
-    virtual int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) = 0;
+    virtual int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
+        ParamConfig config = ParamConfig()) = 0;
+    virtual int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
+        ParamConfig config = ParamConfig()) = 0;
     /**
      * @description: define SA process and current process connect interface
      * @return: result number
