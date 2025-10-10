@@ -719,14 +719,14 @@ public:
 
     void AddBuildDividerTask();
 
-    void SetOriginOffset(OffsetF offset)
+    void SetSubMenuOriginOffset(OffsetF offset)
     {
-        this.originOffset_ = offset;
+        this.subMenuOriginOffset_ = offset;
     }
 
-    OffsetF GetOriginOffset() const
+    OffsetF GetSubMenuOriginOffset() const
     {
-        return this->originOffset_;
+        return this->subMenuOriginOffset_;
     }
 
 protected:
@@ -878,7 +878,7 @@ private:
     float originPreviewYForStack_ = 0.0f;
     bool isDisableMenuBgColorByUser_ = false;
     bool buildDividerTaskAdded_ = false;
-    OffSetF originOffset_ = OffsetF();
+    OffsetF subMenuOriginOffset_ = OffsetF();
 
     // only used for Side sub menu
     int32_t subMenuDepth_ = 0;
