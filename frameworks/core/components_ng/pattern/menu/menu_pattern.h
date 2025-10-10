@@ -721,12 +721,12 @@ public:
 
     void SetSubMenuOriginOffset(OffsetF offset)
     {
-        this.subMenuOriginOffset_ = offset;
+        subMenuOriginOffset_ = offset;
     }
 
     OffsetF GetSubMenuOriginOffset() const
     {
-        return this->subMenuOriginOffset_;
+        return subMenuOriginOffset_;
     }
 
 protected:
