@@ -1383,7 +1383,7 @@ void ViewAbstractModelStatic::SetFocusBoxStyle(FrameNode* frameNode, const std::
     focusHub->GetFocusBox().SetStyle(style.value());
 }
 
-void ViewAbstractModelStatic::SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId,
+void ViewAbstractModelStatic::SetFocusScopeId(FrameNode* frameNode, const std::optional<std::string>& focusScopeId,
     const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1391,7 +1391,7 @@ void ViewAbstractModelStatic::SetFocusScopeId(FrameNode* frameNode, const std::s
     CHECK_NULL_VOID(focusHub);
     bool isGroupValue = isGroup.value_or(DEFAULT_FOCUS_IS_GROUP);
     bool arrowKeyStepOutValue = arrowKeyStepOut.value_or(DEFAULT_FOCUS_ARROW_KEY_STEP_OUT);
-    focusHub->SetFocusScopeId(focusScopeId, isGroupValue, arrowKeyStepOutValue);
+    focusHub->SetFocusScopeId(focusScopeId.value_or(""), isGroupValue, arrowKeyStepOutValue);
 }
 
 void ViewAbstractModelStatic::SetFocusScopePriority(
@@ -1486,8 +1486,12 @@ void ViewAbstractModelStatic::SetClickEffectLevel(FrameNode* frameNode,
         }
         ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
     } else {
-        auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, ClickEffectLevel, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->ResetClickEffectLevel();
+        ClickEffectInfo info;
+        renderContext->OnClickEffectLevelUpdate(info);
     }
 }
 
@@ -1623,7 +1627,12 @@ void ViewAbstractModelStatic::SetBackgroundImage(FrameNode* frameNode,
     if (src) {
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src.value(), frameNode);
     } else {
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImage, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->ResetBackgroundImage();
+        ImageSourceInfo info;
+        renderContext->OnBackgroundImageUpdate(info);
     }
 }
 
@@ -1633,7 +1642,12 @@ void ViewAbstractModelStatic::SetBackgroundImageRepeat(FrameNode* frameNode,
     if (imageRepeat) {
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat.value(), frameNode);
     } else {
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImageRepeat, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->ResetBackgroundImageRepeat();
+        ImageRepeat repeat = ImageRepeat::NO_REPEAT;
+        renderContext->OnBackgroundImageRepeatUpdate(repeat);
     }
 }
 
@@ -1741,5 +1755,28 @@ void ViewAbstractModelStatic::SetMask(FrameNode* frameNode, const RefPtr<BasicSh
             target->ResetClipMask();
         }
     }
+}
+
+void ViewAbstractModelStatic::SetBackgroundImagePosition(
+    FrameNode* frameNode, BackgroundImagePosition& bgImgPosition, bool isReset)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition, isReset);
+    if (isReset) {
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->ResetBackgroundImagePosition();
+        renderContext->OnBackgroundImagePositionUpdate(bgImgPosition);
+    }
+}
+
+void ViewAbstractModelStatic::ResetOverlay(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    OverlayOptions overlay;
+    ViewAbstract::SetOverlay(frameNode, overlay);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, OverlayText, frameNode);
+    frameNode->SetOverlayNode(nullptr);
+    frameNode->MarkDirtyNode();
 }
 } // namespace OHOS::Ace::NG

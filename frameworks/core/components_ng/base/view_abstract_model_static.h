@@ -310,7 +310,7 @@ public:
     static void SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius);
     static void SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode);
     static void SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style);
-    static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId,
+    static void SetFocusScopeId(FrameNode* frameNode, const std::optional<std::string>& focusScopeId,
         const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut);
     static void SetFocusScopePriority(FrameNode* frameNode, const std::optional<std::string>& focusScopeId,
         const std::optional<uint32_t>& focusPriority);
@@ -345,6 +345,8 @@ public:
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
+    static void SetBackgroundImagePosition(FrameNode* frameNode, BackgroundImagePosition& bgImgPosition, bool isReset);
+    static void ResetOverlay(FrameNode* frameNode);
     static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
         .disableSystemAdaptation = false
     };
