@@ -38,9 +38,9 @@ void JSScrollableBase::JsOnWillScroll(const JSCallbackInfo& args)
         auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                             const CalcDimension& scrollOffset, const ScrollState& scrollState,
                             ScrollSource scrollSource) {
-            auto params = ConvertToJSValues(scrollOffset, scrollState, scrollSource);
             ScrollFrameResult scrollRes { .offset = scrollOffset };
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+            auto params = ConvertToJSValues(scrollOffset, scrollState, scrollSource);
             auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
             if (result.IsEmpty()) {
                 return scrollRes;

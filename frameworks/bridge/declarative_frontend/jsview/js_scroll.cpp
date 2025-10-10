@@ -217,9 +217,9 @@ void JSScroll::OnWillScrollCallback(const JSCallbackInfo& args)
         auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                             const Dimension& xOffset, const Dimension& yOffset, const ScrollState& scrollState,
                             ScrollSource scrollSource) {
-            auto params = ConvertToJSValues(xOffset, yOffset, scrollState, scrollSource);
             NG::TwoDimensionScrollResult scrollRes { .xOffset = xOffset, .yOffset = yOffset };
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+            auto params = ConvertToJSValues(xOffset, yOffset, scrollState, scrollSource);
             auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
             if (result.IsEmpty()) {
                 return scrollRes;

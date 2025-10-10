@@ -235,6 +235,7 @@ void JSLazyForEach::OnMove(const JSCallbackInfo& info)
     if (info[0]->IsFunction()) {
         auto context = info.GetExecutionContext();
         auto onMove = [execCtx = context, func = JSRef<JSFunc>::Cast(info[0])](int32_t from, int32_t to) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(from, to);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
         };
@@ -257,6 +258,7 @@ void JSLazyForEach::JsParseItemDragEventHandler(
     std::function<void(int32_t)> onLongPressCallback;
     if (onLongPress->IsFunction()) {
         onLongPressCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onLongPress)](int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(index);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
         };
@@ -266,6 +268,7 @@ void JSLazyForEach::JsParseItemDragEventHandler(
     std::function<void(int32_t)> onDragStartCallback;
     if (onDragStart->IsFunction()) {
         onDragStartCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onDragStart)](int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(index);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
         };
@@ -276,6 +279,7 @@ void JSLazyForEach::JsParseItemDragEventHandler(
     if (onMoveThrough->IsFunction()) {
         onMoveThroughCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onMoveThrough)](
                                     int32_t from, int32_t to) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(from, to);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
         };
@@ -285,6 +289,7 @@ void JSLazyForEach::JsParseItemDragEventHandler(
     std::function<void(int32_t)> onDropCallback;
     if (onDrop->IsFunction()) {
         onDropCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onDrop)](int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(index);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
         };
