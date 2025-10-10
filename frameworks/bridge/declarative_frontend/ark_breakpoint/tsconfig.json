@@ -1,0 +1,20 @@
+{
+    "include": [
+        "src/interfaces.d.ts"
+    ],
+    "files": [
+        "src/WindowSizeLayoutBreakpoint.ts"
+    ],
+    "compilerOptions": {
+        "module": "ESNext",
+        "target": "ESNext",
+        "outDir": "../engine",
+        "rootDir": "src",
+        "declaration": false,
+        "noEmitOnError": true,
+        "experimentalDecorators": true,
+        "lib": [
+            "ES2016"
+        ],
+    }
+}
