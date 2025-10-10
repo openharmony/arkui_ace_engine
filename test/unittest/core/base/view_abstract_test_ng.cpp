@@ -4216,6 +4216,42 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest022, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetClipEdge
+ * @tc.desc: Test SetClipEdge of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstract_SetClipEdge1, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetClipEdge(true);
+    std::string shapeStr = pattern->GetResCacheMapByKey("clipShape");
+    EXPECT_EQ(shapeStr, "");
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetClipEdge
+ * @tc.desc: Test SetClipEdge of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstract_SetClipEdge2, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetClipEdge(frameNode, true);
+    std::string shapeStr = pattern->GetResCacheMapByKey("clipShape");
+    EXPECT_EQ(shapeStr, "");
+    g_isConfigChangePerform = false;
+}
+
+/**
  * @tc.name: CreateWithColorResourceObj
  * @tc.desc: Test CreateWithColorResourceObj of View_Abstract
  * @tc.type: FUNC
