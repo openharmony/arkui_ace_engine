@@ -11094,11 +11094,11 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
         func->ExecuteJS(2, params);
     };
 
-    bool isOutOfBoundsAllowed = false;
+    bool measureFromViewport = false;
     if (info.Length() == 3 && info[2]->IsBoolean()) {
-        isOutOfBoundsAllowed = info[2]->ToBoolean();
+        measureFromViewport = info[2]->ToBoolean();
     }
-    ViewAbstractModel::GetInstance()->SetOnVisibleChange(std::move(onVisibleChange), ratioVec, isOutOfBoundsAllowed);
+    ViewAbstractModel::GetInstance()->SetOnVisibleChange(std::move(onVisibleChange), ratioVec, measureFromViewport);
 }
 
 void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info)
@@ -11135,6 +11135,12 @@ void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info
         expectedUpdateInterval = DEFAULT_DURATION;
     }
 
+    bool measureFromViewport = false;
+    JSRef<JSVal> measureFromViewportVal = optionObj->GetProperty("measureFromViewport");
+    if (measureFromViewportVal->IsBoolean()) {
+        measureFromViewport = measureFromViewportVal->ToBoolean();
+    }
+
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onVisibleChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
@@ -11149,7 +11155,7 @@ void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info
         func->ExecuteJS(2, params);
     };
     ViewAbstractModel::GetInstance()->SetOnVisibleAreaApproximateChange(
-        std::move(onVisibleChange), ratioVec, expectedUpdateInterval);
+        std::move(onVisibleChange), ratioVec, expectedUpdateInterval, measureFromViewport);
 }
 
 void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)

@@ -302,7 +302,6 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest005, TestSize.Level1)
     eventHub->AttachHost(frameNode);
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     ClickEventActuator clickEventActuator = ClickEventActuator(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
-
     /**
      * @tc.steps: step2. test clear callback and add event.
      * @tc.expected: Add clickRecognizer_ to finalResult, and it's size is equal 1.

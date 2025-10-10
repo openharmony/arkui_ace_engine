@@ -1353,15 +1353,16 @@ public:
     }
 
     void SetOnVisibleChange(std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios,
-        bool isOutOfBoundsAllowed) override
+        bool measureFromViewport) override
     {
-        ViewAbstract::SetOnVisibleChange(std::move(onVisibleChange), ratios, isOutOfBoundsAllowed);
+        ViewAbstract::SetOnVisibleChange(std::move(onVisibleChange), ratios, measureFromViewport);
     }
 
     void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
-        const std::vector<double>& ratioList, int32_t expectedUpdateInterval) override
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval, bool measureFromViewport) override
     {
-        ViewAbstract::SetOnVisibleAreaApproximateChange(std::move(onVisibleChange), ratioList, expectedUpdateInterval);
+        ViewAbstract::SetOnVisibleAreaApproximateChange(
+            std::move(onVisibleChange), ratioList, expectedUpdateInterval, measureFromViewport);
     }
 
     void SetOnAreaChanged(

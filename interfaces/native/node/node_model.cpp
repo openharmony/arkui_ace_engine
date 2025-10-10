@@ -376,18 +376,23 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
             return ERROR_CODE_PARAM_INVALID;
         }
         ArkUI_Int32 radioLength = radio->size;
-        if (radioLength <= 0) {
+        auto visibleAreaEventOptions = reinterpret_cast<ArkUI_VisibleAreaEventOptions*>(radio->object);
+        if (radioLength <= 0 && !visibleAreaEventOptions) {
             return ERROR_CODE_PARAM_INVALID;
         }
+        radioLength =
+            visibleAreaEventOptions ? static_cast<ArkUI_Int32>(visibleAreaEventOptions->ratios.size()) : radio->size;
         ArkUI_Float32 radioList[radioLength];
         for (int i = 0; i < radioLength; ++i) {
-            if (LessNotEqual(radio->value[i].f32, 0.0f) || GreatNotEqual(radio->value[i].f32, 1.0f)) {
+            ArkUI_Float32 data =  visibleAreaEventOptions ? visibleAreaEventOptions->ratios[i] : radio->value[i].f32;
+            if (LessNotEqual(data, 0.0f) || GreatNotEqual(data, 1.0f)) {
                 return ERROR_CODE_PARAM_INVALID;
             }
-            radioList[i] = radio->value[i].f32;
+            radioList[i] = data;
         }
+        bool measureFromViewport = visibleAreaEventOptions ? visibleAreaEventOptions->measureFromViewport : false;
         impl->getNodeModifiers()->getCommonModifier()->setOnVisibleAreaChange(
-            nodePtr->uiNodeHandle, reinterpret_cast<int64_t>(nodePtr), radioList, radioLength);
+            nodePtr->uiNodeHandle, reinterpret_cast<int64_t>(nodePtr), radioList, radioLength, measureFromViewport);
     } else if (eventType == NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT) {
         auto options = nodePtr->visibleAreaEventOptions;
         if (!options) {
@@ -411,7 +416,7 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
         }
         impl->getNodeModifiers()->getCommonModifier()->setOnVisibleAreaApproximateChange(nodePtr->uiNodeHandle,
             reinterpret_cast<int64_t>(nodePtr), radioList, radioLength,
-            visibleAreaEventOptions->expectedUpdateInterval);
+            visibleAreaEventOptions->expectedUpdateInterval, visibleAreaEventOptions->measureFromViewport);
     } else {
         impl->getBasicAPI()->registerNodeAsyncEvent(
             nodePtr->uiNodeHandle, static_cast<ArkUIEventSubKind>(originEventType), reinterpret_cast<int64_t>(nodePtr));

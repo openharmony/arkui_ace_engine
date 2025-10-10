@@ -10995,7 +10995,13 @@ ArkUINativeModuleValue CommonBridge::SetOnVisibleAreaChange(ArkUIRuntimeCallInfo
         panda::Local<panda::JSValueRef> params[NUM_2] = { isVisibles, visibleRatios };
         function->Call(vm, function.ToLocal(), params, NUM_2);
     };
-    NG::ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioList);
+    JsiRef<JsiValue> fourthArg =
+        JsiRef<JsiValue>::FastMake(runtimeCallInfo->GetVM(), runtimeCallInfo->GetCallArgRef(NUM_3));
+    bool measureFromViewport = false;
+    if (fourthArg->IsBoolean()) {
+        measureFromViewport = fourthArg->ToBoolean();
+    }
+    NG::ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioList, measureFromViewport);
     return panda::JSValueRef::Undefined(vm);
 }
 

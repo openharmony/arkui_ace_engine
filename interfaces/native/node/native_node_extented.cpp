@@ -1199,6 +1199,24 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(ArkUI_Visible
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+int32_t OH_ArkUI_VisibleAreaEventOptions_SetMeasureFromViewport(
+    ArkUI_VisibleAreaEventOptions* option, bool measureFromViewport)
+{
+    if (!option) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    option->measureFromViewport = measureFromViewport;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+bool OH_ArkUI_VisibleAreaEventOptions_GetMeasureFromViewport(ArkUI_VisibleAreaEventOptions* option)
+{
+    if (!option) {
+        return false;
+    }
+    return option->measureFromViewport;
+}
+
 int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t* size)
 {
     if (!option || !value || !size) {

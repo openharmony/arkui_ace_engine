@@ -11658,6 +11658,7 @@ void ResetAccessibilityValue(ArkUI_NodeHandle node)
 void ResetAreaChangeRatio(ArkUI_NodeHandle node)
 {
     if (node->areaChangeRadio) {
+        node->areaChangeRadio->object = nullptr;
         delete[] node->areaChangeRadio->value;
         delete node->areaChangeRadio;
     }
@@ -11683,6 +11684,9 @@ int32_t SetAreaChangeRatio(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         ResetAreaChangeRatio(node);
     }
     node->areaChangeRadio = new ArkUI_AttributeItem { .value = radioList, .size = radioLength};
+    if (item->object) {
+        node->areaChangeRadio->object = item->object;
+    }
     return ERROR_CODE_NO_ERROR;
 }
 

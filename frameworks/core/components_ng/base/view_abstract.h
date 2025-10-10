@@ -424,7 +424,7 @@ public:
     static void SetOnAreaChanged(std::function<void(const RectF &oldRect, const OffsetF &oldOrigin, const RectF &rect,
         const OffsetF &origin)> &&onAreaChanged);
     static void SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
-        const std::vector<double> &ratioList, bool isOutOfBoundsAllowed = false);
+        const std::vector<double> &ratioList, bool measureFromViewport = false);
     static void SetOnSizeChanged(std::function<void(const RectF &oldRect, const RectF &rect)> &&onSizeChanged);
     static void SetResponseRegion(const std::vector<DimensionRect> &responseRegion);
     static void SetMouseResponseRegion(const std::vector<DimensionRect> &mouseResponseRegion);
@@ -955,7 +955,7 @@ public:
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
     static void SetFrameNodeCommonOnVisibleAreaApproximateChange(FrameNode* frameNode,
         const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
-        int32_t expectedUpdateInterval = 1000);
+        int32_t expectedUpdateInterval = 1000, bool measureFromViewport = false);
     static void ClearJSFrameNodeOnClick(FrameNode* frameNode);
     static void ClearJSFrameNodeOnTouch(FrameNode* frameNode);
     static void ClearJSFrameNodeOnAppear(FrameNode* frameNode);
@@ -1024,12 +1024,12 @@ public:
     static void ResetAlignRules(FrameNode* frameNode);
     static void ResetResObj(const std::string& key);
     static void SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
-        const std::vector<double> &ratioList);
+        const std::vector<double> &ratioList, bool measureFromViewport = false);
     static void SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
         const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
-        int32_t expectedUpdateInterval = 1000);
+        int32_t expectedUpdateInterval = 1000, bool measureFromViewport = false);
     static void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
-        const std::vector<double>& ratioList, int32_t expectedUpdateInterval = 1000);
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval = 1000, bool measureFromViewport = false);
 
     static Color GetColorBlend(FrameNode* frameNode);
     static void ResetAreaChanged(FrameNode* frameNode);

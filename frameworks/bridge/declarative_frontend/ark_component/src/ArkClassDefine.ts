@@ -64,14 +64,17 @@ class ArkBorderStyle {
 class ArkOnVisibleAreaChange {
   ratios: Array<number>;
   event: (isVisible: boolean, currentRatio: number) => void;
+  measureFromViewport?: boolean;
 
-  constructor(ratios: Array<number> | undefined, event: (isVisible: boolean, currentRatio: number) => void | undefined) {
+  constructor(ratios: Array<number> | undefined, event: (isVisible: boolean, currentRatio: number) => void | undefined,
+    measureFromViewport?: boolean | undefined) {
     this.ratios = ratios;
     this.event = event;
+    this.measureFromViewport = measureFromViewport;
   }
 
   isEqual(another: ArkOnVisibleAreaChange): boolean {
-    return this.ratios === another.ratios && this.event === another.event;
+    return this.ratios === another.ratios && this.event === another.event && this.measureFromViewport === another.measureFromViewport;
   }
 }
 
