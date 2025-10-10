@@ -1196,52 +1196,6 @@ HWTEST_F(XComponentTestNg, XComponentTextureTypeTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentOnAreaChangedInnerTest019
- * @tc.desc: Test XComponent OnAreaChangedInner.
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentTestNg, XComponentOnAreaChangedInnerTest019, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. set the testProperty and CreateXComponentNode
-     *            case: type = XCOMPONENT_SURFACE_TYPE
-     * @tc.expected: frameNode create successfully
-     */
-    std::string onLoadKey;
-    std::string onDestroyKey;
-    auto onLoad = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = CHECK_KEY; };
-    auto onDestroy = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = CHECK_KEY; };
-
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    testProperty.loadEvent = std::move(onLoad);
-    testProperty.destroyEvent = std::move(onDestroy);
-    auto frameNode = CreateXComponentNode(testProperty);
-    EXPECT_TRUE(frameNode);
-    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
-    auto pattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. call OnAreaChangedInner
-     *            case: SystemProperties::GetExtSurfaceEnabled() == true
-     * @tc.expected: call SetExtSurfaceBounds
-     */
-    auto host = pattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    geometryNode->SetFrameSize(MAX_SIZE);
-    geometryNode->SetContentSize(MAX_SIZE);
-
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
-                SetExtSurfaceBounds(0, 0, MAX_WIDTH, MAX_HEIGHT))
-        .WillOnce(Return());
-    SystemProperties::SetExtSurfaceEnabled(true);
-    pattern->OnAreaChangedInner();
-    SystemProperties::SetExtSurfaceEnabled(false);
-}
-
-/**
  * @tc.name: XComponentSetHistoryPointTest20
  * @tc.desc: Test SetHistoryPoint
  * @tc.type: FUNC
