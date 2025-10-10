@@ -1773,4 +1773,22 @@ HWTEST_F(TextFieldControllerTest, GetGraphemeClusterLength003, TestSize.Level1)
     auto result = controller->GetGraphemeClusterLength(text, extend, checkPrev);
     EXPECT_EQ(result, 2);
 }
+
+/**
+ * @tc.name: GetAlignParentSize001
+ * @tc.desc: test GetAlignParentSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, GetAlignParentSize001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetLineHeight(30.0_px); });
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    ASSERT_NE(controller->paragraph_, nullptr);
+    layoutProperty_->UpdateMinLines(3);
+    FlushLayoutTask(frameNode_);
+    auto size = controller->GetAlignParentSize();
+    EXPECT_EQ(size.Height(), controller->paragraph_->GetHeight());
+}
 }
