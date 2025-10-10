@@ -522,7 +522,7 @@ public:
     SslErrorResult() = default;
     ~SslErrorResult() = default;
     virtual void HandleConfirm() = 0;
-    virtual void HandleCancel() = 0;
+    virtual void HandleCancel(bool abortLoading) = 0;
 };
 
 class ACE_EXPORT WebSslErrorEvent : public BaseEventInfo {

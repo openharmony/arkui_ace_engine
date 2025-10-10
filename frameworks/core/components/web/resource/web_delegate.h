@@ -198,7 +198,7 @@ public:
     explicit SslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result) : result_(result) {}
 
     void HandleConfirm() override;
-    void HandleCancel() override;
+    void HandleCancel(bool abortLoading) override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result_;
