@@ -198,7 +198,12 @@ void SetBarPositionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TabsModelStatic::SetTabBarPosition(frameNode, Converter::OptConvertPtr<BarPosition>(value));
+    auto convValue = Converter::OptConvertPtr<BarPosition>(value);
+    if (!convValue) {
+        TabsModelStatic::SetTabBarPosition(frameNode, BarPosition::START);
+        return;
+    }
+    TabsModelStatic::SetTabBarPosition(frameNode, convValue);
 }
 void SetScrollableImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
@@ -218,6 +223,11 @@ void SetBarWidthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto valueOpt = Converter::OptConvertPtr<Dimension>(value);
+    if (!valueOpt) {
+        CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
+        TabsModelStatic::SetTabBarWidth(frameNode, width);
+        return;
+    }
     Validator::ValidateNonNegative(valueOpt);
     TabsModelStatic::SetTabBarWidth(frameNode, valueOpt);
 }
@@ -445,7 +455,11 @@ void SetBarBackgroundColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TabsModelStatic::SetBarBackgroundColor(frameNode,  Converter::OptConvertPtr<Color>(value));
+    auto convValue = Converter::OptConvertPtr<Color>(value);
+    if (!convValue) {
+        TabsModelStatic::SetBarBackgroundColor(frameNode, Color::TRANSPARENT);
+    }
+    TabsModelStatic::SetBarBackgroundColor(frameNode, convValue);
 }
 void SetBarGridAlignImpl(Ark_NativePointer node,
                          const Opt_BarGridColumnOptions* value)
