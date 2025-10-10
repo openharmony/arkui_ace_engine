@@ -1009,6 +1009,9 @@ struct ArkUIBadgeParam {
     struct ArkUIDimensionType badgeSize;
     struct ArkUIDimensionType borderWidth;
     struct ArkUIDimensionType fontSize;
+    ArkUI_Bool enableAutoAvoidance;
+    ArkUI_Uint32 outerBorderColor;
+    struct ArkUIDimensionType outerBorderWidth;
 };
 
 struct ArkUI_StyledString_Descriptor {

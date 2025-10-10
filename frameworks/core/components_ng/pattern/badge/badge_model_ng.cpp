@@ -93,6 +93,29 @@ void BadgeModelNG::CreateByFrameNode(const RefPtr<FrameNode>& frameNode, BadgePa
     }
 }
 
+static void UpdateBadgeStyleProperties(BadgeParameters& badgeParameters, const RefPtr<FrameNode>& frameNode)
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    if (badgeParameters.badgeOuterBorderColor.has_value()) {
+        layoutProperty->UpdateBadgeOuterBorderColor(badgeParameters.badgeOuterBorderColor.value());
+    } else {
+        layoutProperty->UpdateBadgeOuterBorderColor(badgeTheme->GetBadgeOuterBorderColor());
+    }
+    if (badgeParameters.badgeOuterBorderWidth.has_value()) {
+        layoutProperty->UpdateBadgeOuterBorderWidth(badgeParameters.badgeOuterBorderWidth.value());
+    } else {
+        layoutProperty->UpdateBadgeOuterBorderWidth(badgeTheme->GetBadgeOuterBorderWidth());
+    }
+    if (badgeParameters.isEnableAutoAvoidance.has_value()) {
+        layoutProperty->UpdateIsEnableAutoAvoidance(badgeParameters.isEnableAutoAvoidance.value());
+    } else {
+        layoutProperty->UpdateIsEnableAutoAvoidance(false);
+    }
+}
+
 void BadgeModelNG::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefPtr<FrameNode>& frameNode)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -130,6 +153,7 @@ void BadgeModelNG::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefP
     } else {
         layoutProperty->UpdateBadgeFontWeight(FontWeight::NORMAL);
     }
+    UpdateBadgeStyleProperties(badgeParameters, frameNode);
 }
 
 RefPtr<FrameNode> BadgeModelNG::CreateFrameNode(int32_t nodeId)
@@ -197,12 +221,14 @@ void BadgeModelNG::CreateWithResourceObj(const RefPtr<FrameNode>& frameNode, Bad
     ProcessBadgeTextColor(badgePattern, badgeParameters.resourceColorObject);
     ProcessBadgeColor(badgePattern, badgeParameters.resourceBadgeColorObject);
     ProcessBorderColor(badgePattern, badgeParameters.resourceBorderColorObject);
+    ProcessOuterBorderColor(badgePattern, badgeParameters.resourceOuterBorderColorObject);
     ProcessFontWeight(badgePattern, badgeParameters.resourceFontWeightObject);
     ProcessFontSize(badgePattern, badgeParameters.resourceFontSizeObject);
     ProcessBadgeSize(badgePattern, badgeParameters.resourceBadgeSizeObject);
     ProcessBadgePositionX(badgePattern, badgeParameters.resourceBadgePositionXObject);
     ProcessBadgePositionY(badgePattern, badgeParameters.resourceBadgePositionYObject);
     ProcessBorderWidth(badgePattern, badgeParameters.resourceBorderWidthObject);
+    ProcessOuterBorderWidth(badgePattern, badgeParameters.resourceOuterBorderWidthObject);
 }
 
 void BadgeModelNG::CreateWithResourceObjFlag(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters)
@@ -217,6 +243,8 @@ void BadgeModelNG::CreateWithResourceObjFlag(const RefPtr<FrameNode>& frameNode,
     layoutProperty->UpdateBadgeColorByuser(badgeParameters.badgeColorByUser);
     layoutProperty->UpdateBadgeBorderWidthByuser(badgeParameters.badgeBorderWidthByUser);
     layoutProperty->UpdateBadgeBorderColorByuser(badgeParameters.badgeBorderColorByUser);
+    layoutProperty->UpdateBadgeOuterBorderWidthByuser(badgeParameters.badgeOuterBorderWidthByUser);
+    layoutProperty->UpdateBadgeOuterBorderColorByuser(badgeParameters.badgeOuterBorderColorByUser);
 }
 
 void BadgeModelNG::ProcessBadgeValue(
@@ -311,6 +339,31 @@ void BadgeModelNG::ProcessBorderColor(
         badgePattern->UpdateBorderColor(result, isFirstLoad);
     };
     badgePattern->AddResObj("badge.BorderColor", resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessOuterBorderColor(
+    const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject)
+{
+    const std::string key = "badge.outerBorderColor";
+    badgePattern->RemoveResObj(key);
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(badgePattern))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto badgePattern = weak.Upgrade();
+        CHECK_NULL_VOID(badgePattern);
+        Color result;
+        bool state = ResourceParseUtils::ParseResColor(resObj, result);
+        if (!state) {
+            auto pipeline = badgePattern->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+            result = badgeTheme->GetBadgeOuterBorderColor();
+        }
+        badgePattern->UpdateOuterBorderColor(result, isFirstLoad);
+    };
+    badgePattern->AddResObj("badge.outerBorderColor", resourceObject, std::move(updateFunc));
 }
 
 void BadgeModelNG::ProcessFontWeight(
@@ -457,5 +510,29 @@ void BadgeModelNG::ProcessBorderWidth(const RefPtr<BadgePattern>& pattern, const
         pattern->UpdateBorderWidth(result, isFirstLoad);
     };
     pattern->AddResObj("badge.borderWidth", resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessOuterBorderWidth(
+    const RefPtr<BadgePattern>& pattern, const RefPtr<ResourceObject>& resourceObject)
+{
+    pattern->RemoveResObj("badge.outerBorderWidth");
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        CalcDimension result;
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            auto pipeline = pattern->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+            CHECK_NULL_VOID(badgeTheme);
+            result = badgeTheme->GetBadgeOuterBorderWidth();
+        }
+        pattern->UpdateOuterBorderWidth(result, isFirstLoad);
+    };
+    pattern->AddResObj("badge.outerBorderWidth", resourceObject, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

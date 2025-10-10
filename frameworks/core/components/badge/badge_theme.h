@@ -63,6 +63,8 @@ public:
             theme->badgeTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK);
             theme->badgeBorderColor_ = pattern->GetAttr<Color>(BADGE_BORDER_COLOR, Color::BLACK);
             theme->badgeBorderWidth_ = pattern->GetAttr<Dimension>(BADGE_BORDER_WIDTH, 0.0_vp);
+            theme->badgeOuterBorderColor_ = pattern->GetAttr<Color>(BADGE_OUTER_BORDER_COLOR, Color::WHITE);
+            theme->badgeOuterBorderWidth_ = pattern->GetAttr<Dimension>(BADGE_OUTER_BORDER_WIDTH, 0.0_vp);
             theme->littleBadgeSize_ = pattern->GetAttr<Dimension>(LITTLE_BADGE_SIZE, 6.0_vp);
             theme->numericalBadgePadding_ = pattern->GetAttr<Dimension>(NUMERICAL_BADGE_PADDING_SIZE, 6.0_vp);
         }
@@ -115,6 +117,11 @@ public:
         return badgeBorderColor_;
     }
 
+    const Color& GetBadgeOuterBorderColor() const
+    {
+        return badgeOuterBorderColor_;
+    }
+
     const Dimension& GetBadgeFontSize() const
     {
         return badgeFontSize_;
@@ -160,6 +167,11 @@ public:
         return badgeBorderWidth_;
     }
 
+    const Dimension& GetBadgeOuterBorderWidth()
+    {
+        return badgeOuterBorderWidth_;
+    }
+
 protected:
     BadgeTheme() = default;
 
@@ -167,6 +179,7 @@ private:
     Color badgeColor_;
     Color badgeTextColor_;
     Color badgeBorderColor_;
+    Color badgeOuterBorderColor_;
     int64_t messageCount_;
     BadgePosition badgePosition_ = BadgePosition::RIGHT_TOP;
     Dimension badgePositionX_ = 0.0_vp;
@@ -176,6 +189,7 @@ private:
     Dimension badgeFontSize_;
     Dimension badgeAgeFontSize_;
     Dimension badgeBorderWidth_;
+    Dimension badgeOuterBorderWidth_;
     Dimension badgeSize_ = 16.0_vp;
     Dimension badgeAgeSize_;
     Dimension badgeAgeAddPadding_;

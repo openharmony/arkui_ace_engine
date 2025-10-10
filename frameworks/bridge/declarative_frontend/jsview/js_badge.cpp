@@ -145,7 +145,9 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         JSRef<JSVal> borderColorValue = value->GetProperty("borderColor");
         JSRef<JSVal> borderWidthValue = value->GetProperty("borderWidth");
         JSRef<JSVal> fontWeightValue = value->GetProperty("fontWeight");
-
+        JSRef<JSVal> outerBorderColorValue = value->GetProperty("outerBorderColor");
+        JSRef<JSVal> outerBorderWidthValue = value->GetProperty("outerBorderWidth");
+        JSRef<JSVal> enableAutoAvoidanceValue = value->GetProperty("enableAutoAvoidance");
         bool isDefaultFontSize = true;
         bool isDefaultBadgeSize = true;
 
@@ -281,6 +283,36 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
                 badgeParameters.badgeBorderColor =
                     themeColors ? themeColors->Warning() : badgeTheme->GetBadgeBorderColor();
             }
+        }
+
+        CalcDimension outerBorderWidth;
+        if (SystemProperties::ConfigChangePerform()) {
+            badgeParameters.badgeOuterBorderWidthByUser = true;
+            badgeParameters.badgeOuterBorderColorByUser = true;
+        }
+        if (outerBorderWidthValue->IsObject()) {
+            JSRef<JSObject> outerBorderWidthObject = JSRef<JSObject>::Cast(outerBorderWidthValue);
+            if (ParseJsLengthMetricsVpWithResObj(
+                outerBorderWidthObject, outerBorderWidth, badgeParameters.resourceOuterBorderWidthObject)) {
+                badgeParameters.badgeOuterBorderWidth = outerBorderWidth;
+            }
+        } else {
+            badgeParameters.badgeOuterBorderWidth = badgeTheme->GetBadgeOuterBorderWidth();
+            badgeParameters.badgeOuterBorderWidthByUser = false;
+        }
+
+        Color outerBorderColor;
+        if (ParseJsColor(outerBorderColorValue, outerBorderColor, badgeParameters.resourceOuterBorderColorObject)) {
+            badgeParameters.badgeOuterBorderColor = outerBorderColor;
+        } else {
+            badgeParameters.badgeOuterBorderColor = badgeTheme->GetBadgeOuterBorderColor();
+            badgeParameters.badgeOuterBorderColorByUser = false;
+        }
+
+        if (enableAutoAvoidanceValue->IsBoolean()) {
+            badgeParameters.isEnableAutoAvoidance = enableAutoAvoidanceValue->ToBoolean();
+        } else {
+            badgeParameters.isEnableAutoAvoidance = false;
         }
 
         std::string fontWeight;

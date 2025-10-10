@@ -33,12 +33,16 @@ void SetBadgeBaseParam(BadgeParameters& badgeParameters, const ArkUIBadgeParam& 
     badgeParameters.badgeColor = Color(style.badgeColor);
     badgeParameters.badgeTextColor = Color(style.textColor);
     badgeParameters.badgeBorderColor = Color(style.borderColor);
+    badgeParameters.badgeOuterBorderColor = Color(style.outerBorderColor);
     badgeParameters.badgeFontWeight = static_cast<FontWeight>(style.fontWeight);
     badgeParameters.badgeFontSize = Dimension(style.fontSize.value, static_cast<DimensionUnit>(style.fontSize.units));
     badgeParameters.badgeCircleSize =
         Dimension(style.badgeSize.value, static_cast<DimensionUnit>(style.badgeSize.units));
     badgeParameters.badgeBorderWidth =
         Dimension(style.borderWidth.value, static_cast<DimensionUnit>(style.borderWidth.units));
+    badgeParameters.badgeOuterBorderWidth =
+        Dimension(style.outerBorderWidth.value, static_cast<DimensionUnit>(style.outerBorderWidth.units));
+    badgeParameters.isEnableAutoAvoidance = style.enableAutoAvoidance;
 }
 } // namespace
 

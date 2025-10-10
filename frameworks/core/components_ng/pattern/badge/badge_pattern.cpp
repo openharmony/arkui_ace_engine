@@ -89,9 +89,11 @@ void BadgePattern::OnModifyDone()
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);
     Dimension width = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth());
+    Dimension outerWidth = layoutProperty->GetBadgeOuterBorderWidthValue(badgeTheme->GetBadgeOuterBorderWidth());
     if (LessOrEqual(circleSize->ConvertToPx(), 0)) {
         badgeVisible = true;
         width.Reset();
+        outerWidth.Reset();
     }
     auto badgeTextColor = layoutProperty->GetBadgeTextColor();
     textLayoutProperty->UpdateTextColor(badgeTextColor.value_or(badgeTheme->GetBadgeTextColor()));
@@ -112,12 +114,46 @@ void BadgePattern::OnModifyDone()
     CHECK_NULL_VOID(textRenderContext);
     textRenderContext->SetVisible(badgeVisible);
     textRenderContext->UpdateBackgroundColor(badgeColor);
+    BorderWidthProperty outerBorderWidth;
+    outerBorderWidth.SetBorderWidth(outerWidth);
+    textLayoutProperty->UpdateOuterBorderWidth(outerBorderWidth);
+    textRenderContext->UpdateOuterBorderWidth(outerBorderWidth);
 
     Color color = layoutProperty->GetBadgeBorderColorValue(badgeTheme->GetBadgeBorderColor());
     BorderColorProperty borderColor;
     borderColor.SetColor(color);
     textRenderContext->UpdateBorderColor(borderColor);
+
+    BorderColorProperty outerBorderColor;
+    Color outColor = layoutProperty->GetBadgeOuterBorderColorValue(badgeTheme->GetBadgeOuterBorderColor());
+    outerBorderColor.SetColor(outColor);
+    textRenderContext->UpdateOuterBorderColor(outerBorderColor);
     lastFrameNode->MarkModifyDone();
+}
+
+void BadgePattern::BorderDumpInfo()
+{
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto badgeBorderColor = layoutProperty->GetBadgeBorderColor();
+    auto badgeBorderWidth = layoutProperty->GetBadgeBorderWidth();
+    auto badgeOuterBorderColor = layoutProperty->GetBadgeOuterBorderColor();
+    auto badgeOuterBorderWidth = layoutProperty->GetBadgeOuterBorderWidth();
+
+    if (badgeBorderColor.has_value()) {
+        DumpLog::GetInstance().AddDesc(std::string("badgeBorderColor: ").append(badgeBorderColor.value().ToString()));
+    }
+    if (badgeBorderWidth.has_value()) {
+        DumpLog::GetInstance().AddDesc(std::string("badgeBorderWidth: ").append(badgeBorderWidth.value().ToString()));
+    }
+    if (badgeOuterBorderColor.has_value()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("badgeOuterBorderColor: ").append(badgeOuterBorderColor.value().ToString()));
+    }
+    if (badgeOuterBorderWidth.has_value()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("badgeOuterBorderWidth: ").append(badgeOuterBorderWidth.value().ToString()));
+    }
 }
 
 void BadgePattern::DumpInfo()
@@ -131,8 +167,6 @@ void BadgePattern::DumpInfo()
     auto badgePosition = layoutProperty->GetBadgePosition();
     auto badgeColor = layoutProperty->GetBadgeColor();
     auto badgeFontWeight = layoutProperty->GetBadgeFontWeight();
-    auto badgeBorderColor = layoutProperty->GetBadgeBorderColor();
-    auto badgeBorderWidth = layoutProperty->GetBadgeBorderWidth();
     if (badgeCount.has_value()) {
         const int32_t maxCountNum = 99;
         auto badgeMaxCount = layoutProperty->GetBadgeMaxCount().value_or(maxCountNum);
@@ -166,12 +200,7 @@ void BadgePattern::DumpInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("badgeFontWeight: ").append(V2::ConvertWrapFontWeightToStirng(badgeFontWeight.value())));
     }
-    if (badgeBorderColor.has_value()) {
-        DumpLog::GetInstance().AddDesc(std::string("badgeBorderColor: ").append(badgeBorderColor.value().ToString()));
-    }
-    if (badgeBorderWidth.has_value()) {
-        DumpLog::GetInstance().AddDesc(std::string("badgeBorderWidth: ").append(badgeBorderWidth.value().ToString()));
-    }
+    BorderDumpInfo();
 }
 
 void BadgePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -187,6 +216,8 @@ void BadgePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     auto badgeFontWeight = layoutProperty->GetBadgeFontWeight();
     auto badgeBorderColor = layoutProperty->GetBadgeBorderColor();
     auto badgeBorderWidth = layoutProperty->GetBadgeBorderWidth();
+    auto badgeOuterBorderColor = layoutProperty->GetBadgeOuterBorderColor();
+    auto badgeOuterBorderWidth = layoutProperty->GetBadgeOuterBorderWidth();
     if (badgeCount.has_value()) {
         const int32_t maxCountNum = 99;
         auto badgeMaxCount = layoutProperty->GetBadgeMaxCount().value_or(maxCountNum);
@@ -208,6 +239,8 @@ void BadgePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("badgeFontWeight", V2::ConvertWrapFontWeightToStirng(badgeFontWeight.value()).c_str());
     json->Put("badgeBorderColor", badgeBorderColor.value().ToString().c_str());
     json->Put("badgeBorderWidth", badgeBorderWidth.value().ToString().c_str());
+    json->Put("badgeOuterBorderColor", badgeOuterBorderColor.value().ToString().c_str());
+    json->Put("badgeOuterBorderWidth", badgeOuterBorderWidth.value().ToString().c_str());
 }
 
 void BadgePattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
@@ -292,6 +325,19 @@ void BadgePattern::UpdateBorderColor(const Color& borderColor, bool isFirstLoad)
     CHECK_NULL_VOID(layoutProperty);
     if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
         layoutProperty->UpdateBadgeBorderColor(borderColor);
+    }
+}
+
+void BadgePattern::UpdateOuterBorderColor(const Color& outerBorderColor, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        layoutProperty->UpdateBadgeOuterBorderColor(outerBorderColor);
     }
 }
 
@@ -400,6 +446,19 @@ void BadgePattern::UpdateBorderWidth(const CalcDimension& borderWidth, bool isFi
     }
 }
 
+void BadgePattern::UpdateOuterBorderWidth(const CalcDimension& outerBorderWidth, bool isFirstLoad)
+{
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+        layoutProperty->UpdateBadgeOuterBorderWidth(outerBorderWidth);
+    }
+}
+
 void BadgePattern::OnColorConfigurationUpdate()
 {
     if (!SystemProperties::ConfigChangePerform()) {
@@ -426,11 +485,17 @@ void BadgePattern::OnColorConfigurationUpdate()
     if (!layoutProperty->GetBadgeCircleSizeByuser().value_or(false)) {
         UpdateBadgeCircleSize(badgeTheme->GetBadgeCircleSize(), true);
     }
+    if (!layoutProperty->GetBadgeOuterBorderColorByuser().value_or(false)) {
+        UpdateOuterBorderColor(badgeTheme->GetBadgeOuterBorderColor());
+    }
     if (!layoutProperty->GetBadgeBorderColorByuser().value_or(false)) {
         UpdateBorderColor(badgeTheme->GetBadgeBorderColor());
     }
     if (!layoutProperty->GetBadgeBorderWidthByuser().value_or(false)) {
         UpdateBorderWidth(badgeTheme->GetBadgeBorderWidth());
+    }
+    if (!layoutProperty->GetBadgeOuterBorderWidthByuser().value_or(false)) {
+        UpdateOuterBorderWidth(badgeTheme->GetBadgeOuterBorderWidth());
     }
     if (!layoutProperty->GetBadgeTextColorByuser().value_or(false)) {
         UpdateColor(badgeTheme->GetBadgeTextColor());

@@ -38,21 +38,26 @@ struct BadgeParameters {
     std::optional<Color> badgeColor;
     std::optional<Color> badgeTextColor;
     std::optional<Color> badgeBorderColor;
+    std::optional<Color> badgeOuterBorderColor;
     std::optional<Dimension> badgeFontSize;
     std::optional<Dimension> badgeCircleSize;
     std::optional<Dimension> badgeBorderWidth;
+    std::optional<Dimension> badgeOuterBorderWidth;
     std::optional<FontWeight> badgeFontWeight;
+    std::optional<bool> isEnableAutoAvoidance;
 
     RefPtr<ResourceObject> resourceBadgeValueObject;
     RefPtr<ResourceObject> resourceColorObject;
     RefPtr<ResourceObject> resourceBadgeColorObject;
     RefPtr<ResourceObject> resourceBorderColorObject;
+    RefPtr<ResourceObject> resourceOuterBorderColorObject;
     RefPtr<ResourceObject> resourceFontWeightObject;
     RefPtr<ResourceObject> resourceBadgeSizeObject;
     RefPtr<ResourceObject> resourceFontSizeObject;
     RefPtr<ResourceObject> resourceBadgePositionXObject;
     RefPtr<ResourceObject> resourceBadgePositionYObject;
     RefPtr<ResourceObject> resourceBorderWidthObject;
+    RefPtr<ResourceObject> resourceOuterBorderWidthObject;
     
     bool badgePositionXByUser = false;
     bool badgePositionYByUser = false;
@@ -62,6 +67,8 @@ struct BadgeParameters {
     bool badgeColorByUser = false;
     bool badgeBorderWidthByUser = false;
     bool badgeBorderColorByUser = false;
+    bool badgeOuterBorderWidthByUser = false;
+    bool badgeOuterBorderColorByUser = false;
 };
 } // namespace OHOS::Ace
 
