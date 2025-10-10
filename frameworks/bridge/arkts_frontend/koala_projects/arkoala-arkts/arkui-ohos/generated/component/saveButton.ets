@@ -16,10 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { SizeOptions_serializer, BorderRadiuses_serializer, Dimension, SizeOptions, BorderRadiuses } from "./units"
-import { int32, int64, float32 } from "@koalaui/common"
+import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
@@ -47,8 +47,17 @@ export class ArkSaveButtonPeer extends ArkSecurityComponentMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setSaveButtonOptionsAttribute(): void {
-        ArkUIGeneratedNativeModule._SaveButtonInterface_setSaveButtonOptions(this.peer.ptr)
+    setSaveButtonOptionsAttribute(options?: SaveButtonOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            SaveButtonOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SaveButtonInterface_setSaveButtonOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     setOnClickAttribute(value: SaveButtonCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -202,7 +211,7 @@ export enum SaveButtonOnClickResult {
 }
 export type SaveButtonCallback = (event: ClickEvent, result: SaveButtonOnClickResult, error?: BusinessError) => void;
 export interface SaveButtonAttribute extends SecurityComponentMethod {
-    setSaveButtonOptions(): this {
+    setSaveButtonOptions(options?: SaveButtonOptions): this {
         throw new Error("Unimplemented method setSaveButtonOptions")
     }
     onClick(value: SaveButtonCallback | undefined): this {
@@ -234,7 +243,7 @@ export class ArkSaveButtonStyle extends ArkSecurityComponentMethodStyle implemen
     iconSize_value?: Dimension | SizeOptions | undefined
     iconBorderRadius_value?: Dimension | BorderRadiuses | undefined
     stateEffect_value?: boolean | undefined
-    setSaveButtonOptions(): this {
+    setSaveButtonOptions(options?: SaveButtonOptions): this {
         return this
     }
     onClick(value: SaveButtonCallback | undefined): this {
@@ -267,9 +276,10 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
         }
         return (this.peer as ArkSaveButtonPeer)
     }
-    public setSaveButtonOptions(): this {
+    public setSaveButtonOptions(options?: SaveButtonOptions): this {
         if (this.checkPriority("setSaveButtonOptions")) {
-            this.getPeer()?.setSaveButtonOptionsAttribute()
+            const options_casted = options as (SaveButtonOptions | undefined)
+            this.getPeer()?.setSaveButtonOptionsAttribute(options_casted)
             return this
         }
         return this
@@ -336,8 +346,6 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
 export function SaveButtonImpl(
     @memo
     style: ((attributes: SaveButtonAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkSaveButtonComponent>((): ArkSaveButtonComponent => {
         return new ArkSaveButtonComponent()
@@ -345,8 +353,60 @@ export function SaveButtonImpl(
     NodeAttach<ArkSaveButtonPeer>((): ArkSaveButtonPeer => ArkSaveButtonPeer.create(receiver), (peer: ArkSaveButtonPeer): void => {
         receiver.setPeer(peer)
         style?.(receiver)
+        receiver.applyAttributesFinish()
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
+export class SaveButtonOptions_serializer {
+    public static write(buffer: SerializerBase, value: SaveButtonOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForIcon  = value.icon
+        if (valueHolderForIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIconTmpValue  = (valueHolderForIcon as SaveIconStyle)
+            valueSerializer.writeInt32(valueHolderForIconTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForText  = value.text
+        if (valueHolderForText !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextTmpValue  = (valueHolderForText as SaveDescription)
+            valueSerializer.writeInt32(valueHolderForTextTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForButtonType  = value.buttonType
+        if (valueHolderForButtonType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForButtonTypeTmpValue  = (valueHolderForButtonType as ButtonType)
+            valueSerializer.writeInt32(valueHolderForButtonTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SaveButtonOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let iconTmpBuf : SaveIconStyle | undefined = undefined
+        if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            iconTmpBuf = SaveIconStyle.fromValue(valueDeserializer.readInt32())
+        }
+        const iconTmpResult : SaveIconStyle | undefined = iconTmpBuf
+        const textTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textTmpBuf : SaveDescription | undefined = undefined
+        if ((textTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textTmpBuf = SaveDescription.fromValue(valueDeserializer.readInt32())
+        }
+        const textTmpResult : SaveDescription | undefined = textTmpBuf
+        const buttonTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let buttonTypeTmpBuf : ButtonType | undefined = undefined
+        if ((buttonTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buttonTypeTmpBuf = ButtonType.fromValue(valueDeserializer.readInt32())
+        }
+        const buttonTypeTmpResult : ButtonType | undefined = buttonTypeTmpBuf
+        let value : SaveButtonOptions = ({icon: iconTmpResult, text: textTmpResult, buttonType: buttonTypeTmpResult} as SaveButtonOptions)
+        return value
+    }
+}

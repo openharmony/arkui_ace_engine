@@ -4162,7 +4162,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // PasteButtonModifier
     namespace PasteButtonInterfaceModifier {
-    void SetPasteButtonOptionsImpl(Ark_NativePointer node)
+    void SetPasteButtonOptionsImpl(Ark_NativePointer node,
+                                   const Opt_PasteButtonOptions* options)
     {
     }
     } // PasteButtonInterfaceModifier
@@ -4784,7 +4785,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // SaveButtonModifier
     namespace SaveButtonInterfaceModifier {
-    void SetSaveButtonOptionsImpl(Ark_NativePointer node)
+    void SetSaveButtonOptionsImpl(Ark_NativePointer node,
+                                  const Opt_SaveButtonOptions* options)
     {
     }
     } // SaveButtonInterfaceModifier
