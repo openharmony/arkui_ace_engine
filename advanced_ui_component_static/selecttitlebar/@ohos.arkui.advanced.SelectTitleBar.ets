@@ -358,7 +358,7 @@ struct CollapsibleMenuSection {
             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
         } else {
-          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
+          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems.toInt() - 1),
             (item: SelectTitleBarMenuItem, index: int) => {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
             })
@@ -457,7 +457,7 @@ struct CollapsibleMenuSection {
   @Builder
   popupBuilder() {
     Column() {
-      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length),
+      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems.toInt() - 1, this.menuItems.length),
         (item: SelectTitleBarMenuItem, index: int) => {
           ImageMenuItem({
             item: item, index: this.index * 1000 +

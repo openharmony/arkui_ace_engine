@@ -1572,7 +1572,7 @@ struct CustomDialogContentComponent {
   buildVerticalAlignButtons(): void {
     if (this.buttons) {
       Column() {
-        ForEach((this.buttons as Array<AdvancedDialogV2Button>).slice(0, VERTICAL_BUTTON_MAX_COUNT),
+        ForEach((this.buttons as Array<AdvancedDialogV2Button>).slice(0, VERTICAL_BUTTON_MAX_COUNT.toInt()),
           (item: AdvancedDialogV2Button, index: int) => {
             this.buildButtonWithDivider(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
               HORIZON_BUTTON_MAX_COUNT - index.toInt() - 1 : index.toInt());

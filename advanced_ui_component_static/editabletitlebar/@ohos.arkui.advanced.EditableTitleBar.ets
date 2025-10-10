@@ -438,9 +438,9 @@ struct EditableTitleBarMenuSection {
     Column() {
       Row() {
         if (this.menuItems) {
-          ForEach((this.menuItems as EditableTitleBarMenuItem[]).slice(EditableTitleBar.commonZero,
+          ForEach((this.menuItems as EditableTitleBarMenuItem[]).slice(EditableTitleBar.commonZero.toInt(),
               this.isSaveEnabled ?
-              EditableTitleBar.maxOtherCountOfExtraItems : EditableTitleBar.maxCountOfExtraItems),
+              EditableTitleBar.maxOtherCountOfExtraItems.toInt() : EditableTitleBar.maxCountOfExtraItems.toInt()),
             (item: EditableTitleBarMenuItem, index: int) => {
               ImageMenuItem({
                 item: item,

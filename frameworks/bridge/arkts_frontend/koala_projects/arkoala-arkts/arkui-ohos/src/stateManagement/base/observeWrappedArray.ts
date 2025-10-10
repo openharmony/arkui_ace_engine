@@ -130,7 +130,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param arrayLength amount of new added elements.
      * @param initialValue initial value of new elements.
      */
-    public override extendTo(arrayLength: number, initialValue: T): void {
+    public override extendTo(arrayLength: int, initialValue: T): void {
         this.store_.extendTo(arrayLength, initialValue);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -142,7 +142,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      *
      * @param arrayLength length at which to shrink.
      */
-    public override shrinkTo(arrayLength: number): void {
+    public override shrinkTo(arrayLength: int): void {
         this.store_.shrinkTo(arrayLength);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -390,18 +390,6 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * into it recursively up to the specified depth.
      *
      * @param depth
-     * @returns a flattened Array with respect to depth (not WrappedArray !)
-     */
-    public override flat<U>(depth: number): Array<U> {
-        this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-        return this.store_.flat<U>(depth);
-    }
-
-    /**
-     * Creates a new Array with all sub-array elements concatenated
-     * into it recursively up to the specified depth.
-     *
-     * @param depth
      * @returns a flattened Array with respect to depth
      */
     public override flat<U>(depth: int): Array<U> {
@@ -438,24 +426,6 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @returns The element in the array matching the given index.
      * Returns undefined if `index` < `-length()` or `index` >= `length()`.
      */
-    public override at(index: number): T | undefined {
-        if (this.shouldAddRef()) {
-            this.meta_.addRef(CONSTANT.OB_LENGTH);
-            this.meta_.addRef(String(index as Object | undefined | null));
-        }
-        return this.store_.at(index);
-    }
-
-    /**
-     * Takes an integer value and returns the item at that index,
-     * allowing for positive and negative integers. Negative integers count back
-     * from the last item in the array.
-     *
-     * @param index Zero-based index of the array element to be returned.
-     * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
-     * @returns The element in the array matching the given index.
-     * Returns undefined if `index` < `-length()` or `index` >= `length()`.
-     */
     public override at(index: int): T | undefined {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_LENGTH);
@@ -472,25 +442,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param end index at which to end copying elements from
      * @returns this array after transformation
      */
-    public override copyWithin(target: number, start: number, end?: Number): this {
-        this.store_.copyWithin(target, start, end);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
-        // exec all subscribing @Watch
-        this.executeOnSubscribingWatches('copyWithin');
-
-        return this;
-    }
-
-    /**
-     * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
-     *
-     * @param target index at which to copy the sequence
-     * @param start index at which to start copying elements from
-     * @param end index at which to end copying elements from
-     * @returns this array after transformation
-     */
-    public copyWithin(target: int, start: int, end: int): this {
+    public copyWithin(target: int, start: int, end?: int): this {
         this.store_.copyWithin(target, start, end);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -544,26 +496,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param end index at which to end filling, but not including
      * @returns this array after transformation
      */
-    public override fill(value: T, start?: Number, end?: Number): this {
-        this.store_.fill(value, start, end);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
-
-        // exec all subscribing @Watch
-        this.executeOnSubscribingWatches('fill');
-
-        return this;
-    }
-
-    /**
-     * Changes all elements in the Array to a static value, from a start index to an end index
-     *
-     * @param value to fill the array with
-     * @param start index at which to start filling
-     * @param end index at which to end filling, but not including
-     * @returns this array after transformation
-     */
-    public override fill(value: T, start: int, end: int): this {
+    public override fill(value: T, start?: int, end?: int): this {
         this.store_.fill(value, start, end);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -736,22 +669,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
      * @returns `Array` instance, constructed from extracted elements of `this` instance.
      */
-    public override slice(start?: Number, end?: Number): Array<T> {
-        if (this.shouldAddRef()) {
-            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-        }
-        return this.store_.slice(start, end);
-    }
-
-    /**
-     * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
-     * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
-     *
-     * @param start zero-based index at which to start extraction
-     * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
-     * @returns `Array` instance, constructed from extracted elements of `this` instance.
-     */
-    public override slice(start: int, end: int): Array<T> {
+    public override slice(start?: int, end?: int): Array<T> {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
@@ -866,18 +784,11 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param delete number of items after start index
      * @returns a new Array with some elements removed and/or replaced at a given index.
      */
-    public override toSpliced(start?: Number, deleteIdx?: Number): Array<T> {
+    public override toSpliced(start?: int, deleteIdx?: int): Array<T> {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
         return this.store_.toSpliced(start, deleteIdx);
-    }
-
-    public override toSpliced(start: number, delete: number, ...items: FixedArray<T>): Array<T> {
-        if (this.shouldAddRef()) {
-            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-        }
-        return this.store_.toSpliced(start, delete, ...items);
     }
 
     public override toSpliced(start: int, delete: int, ...items: FixedArray<T>): Array<T> {
@@ -908,7 +819,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param fromIndex start index
      * @returns true if val is in Array
      */
-    public override includes(val: T, fromIndex?: Number): boolean {
+    public override includes(val: T, fromIndex?: int): boolean {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
@@ -992,21 +903,6 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
         return this.store_.toReversed();
-    }
-
-    /**
-     * Copying version of using the bracket notation to change the value of a given index.
-     * It returns a new Array with the element at the given index replaced with the given value.
-     *
-     * @param index to replace
-     * @param value new value
-     * @returns a new Array with the element at the given index replaced with the given value
-     */
-    public override with(index: number, value: T): Array<T> {
-        if (this.shouldAddRef()) {
-            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-        }
-        return this.store_.with(index, value);
     }
 
     /**
