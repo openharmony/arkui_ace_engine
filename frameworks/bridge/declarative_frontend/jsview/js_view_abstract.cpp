@@ -6024,7 +6024,7 @@ void JSViewAbstract::CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::st
     // dynamic $r raw input format is
     // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}
     JSRef<JSVal> resId = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ID));
-    ResourceType resType;
+    ResourceType resType = ResourceType::UNKNOWN;
 
     JSRef<JSVal> type = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TYPE));
     if (type->IsNumber()) {
@@ -6057,7 +6057,7 @@ void JSViewAbstract::CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::st
         jsObj->SetProperty<std::string>(static_cast<int32_t>(ArkUIIndex::MODULE_NAME), moduleName);
     }
 
-    if (resTypeValue == UNKNOWN_RESOURCE_TYPE) {
+    if (resTypeValue == UNKNOWN_RESOURCE_TYPE && resType != ResourceType::UNKNOWN) {
         resTypeValue = static_cast<int32_t>(resType);
     }
 }
