@@ -296,6 +296,27 @@ void JSSwiper::SetEffectMode(const JSCallbackInfo& info)
     SwiperModel::GetInstance()->SetEdgeEffect(EDGE_EFFECT[edgeEffect]);
 }
 
+void JSSwiper::ParseDisplayCountObject(const JSRef<JSObject>& object)
+{
+    auto minSizeParam = object->GetProperty("minSize");
+    auto fillTypeParam = object->GetProperty("fillType");
+    // FillType may be optional, prioritize parsing minSize.
+    if (!minSizeParam->IsUndefined()) {
+        CalcDimension minSizeValue;
+        if (!ParseJsDimensionVp(minSizeParam, minSizeValue)) {
+            SwiperModel::GetInstance()->SetMinSize(0.0_vp);
+            return;
+        }
+        SwiperModel::GetInstance()->SetMinSize(minSizeValue);
+    } else {
+        int32_t fillTypeValue = 0;
+        if (fillTypeParam->IsNumber()) {
+            fillTypeValue = fillTypeParam->ToNumber<int32_t>();
+        }
+        SwiperModel::GetInstance()->SetFillType(fillTypeValue);
+    }
+}
+
 void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -311,26 +332,15 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
     }
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        SwiperModel::GetInstance()->ResetDisplayCountWithObject();
+        SwiperModel::GetInstance()->ResetDisplayMode();
         if (info[0]->IsString() && info[0]->ToString() == "auto") {
             SwiperModel::GetInstance()->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
             SwiperModel::GetInstance()->ResetDisplayCount();
-            SwiperModel::GetInstance()->ResetMinSize();
         } else if (info[0]->IsNumber() && info[0]->ToNumber<int32_t>() > 0) {
             SwiperModel::GetInstance()->SetDisplayCount(info[0]->ToNumber<int32_t>());
         } else if (info[0]->IsObject()) {
-            JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-            auto minSizeParam = jsObj->GetProperty("minSize");
-            if (minSizeParam->IsNull()) {
-                return;
-            }
-            CalcDimension minSizeValue;
-            if (!ParseJsDimensionVp(minSizeParam, minSizeValue)) {
-                SwiperModel::GetInstance()->SetMinSize(0.0_vp);
-                return;
-            }
-            SwiperModel::GetInstance()->SetMinSize(minSizeValue);
-            SwiperModel::GetInstance()->ResetDisplayCount();
-            SwiperModel::GetInstance()->ResetDisplayMode();
+            ParseDisplayCountObject(JSRef<JSObject>::Cast(info[0]));
         } else {
             SwiperModel::GetInstance()->SetDisplayCount(DEFAULT_DISPLAY_COUNT);
         }

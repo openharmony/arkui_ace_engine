@@ -4601,3 +4601,10 @@ let WebRotateEffect;
   WebRotateEffect[WebRotateEffect.TOPLEFT_EFFECT = 0] = 'TOPLEFT_EFFECT';
   WebRotateEffect[WebRotateEffect.RESIZE_COVER_EFFECT = 1] = 'RESIZE_COVER_EFFECT';
 })(WebRotateEffect || (WebRotateEffect = {}));
+
+let PresetFillType;
+(function (PresetFillType) {
+  PresetFillType[PresetFillType.BREAKPOINT_DEFAULT = 0] = 'BREAKPOINT_DEFAULT';
+  PresetFillType[PresetFillType.BREAKPOINT_SM1MD2LG3 = 1] = 'BREAKPOINT_SM1MD2LG3';
+  PresetFillType[PresetFillType.BREAKPOINT_SM2MD3LG5 = 2] = 'BREAKPOINT_SM2MD3LG5';
+})(PresetFillType || (PresetFillType = {}));

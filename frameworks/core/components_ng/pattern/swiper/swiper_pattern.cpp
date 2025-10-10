@@ -4870,9 +4870,18 @@ int32_t SwiperPattern::CalculateDisplayCount() const
                 PROPERTY_UPDATE_RENDER);
         }
         return displayCount;
-    } else {
-        return props->GetDisplayCount().value_or(1);
+    } else if (IsBreakPointType()) {
+        float contentWidth = GetMainContentSize();
+        auto isNeedMarkDirty = SwiperUtils::CheckBreakPointDisplayCount(props, contentWidth);
+        if (isNeedMarkDirty) {
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, 1);
+            host->MarkDirtyNode(
+                (crossMatchChild_ ? PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD : PROPERTY_UPDATE_MEASURE_SELF) |
+                PROPERTY_UPDATE_RENDER);
+        }
     }
+    return props->GetDisplayCount().value_or(1);
 }
 
 int32_t SwiperPattern::CalculateCount(
@@ -4886,6 +4895,13 @@ bool SwiperPattern::IsAutoFill() const
     auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(props, false);
     return props->GetMinSize().has_value();
+}
+
+bool SwiperPattern::IsBreakPointType() const
+{
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, false);
+    return props->GetFillType().has_value();
 }
 
 bool SwiperPattern::IsAutoPlay() const

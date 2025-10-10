@@ -85,8 +85,9 @@ protected:
     static void SetMaintainVisibleContentPosition(const JSCallbackInfo& info);
     static void SetOnScrollStateChanged(const JSCallbackInfo& info);
 
-    private:
-        static bool ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result);
+private:
+    static bool ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static void ParseDisplayCountObject(const JSRef<JSObject>& object);
 };
 
 class JSSwiperController final : public Referenced {

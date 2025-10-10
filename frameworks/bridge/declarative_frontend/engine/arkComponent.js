@@ -36267,8 +36267,16 @@ class SwiperDisplayCountModifier extends ModifierWithKey {
         getUINativeModule().swiper.setSwiperSwipeByGroup(node, swipeByGroup);
 
         if (typeof this.value.value === 'object') {
-          let minSize = this.value.value.minSize.toString();
-          getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value.value);
+          if ('minsize' in this.value.value) {
+            let minSize = this.value.value.minSize.toString();
+            getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, 'minSize');
+          } else {
+            let fillType = this.value.value.fillType;
+            if (typeof fillType !== 'number') {
+              fillType = 0;
+            }
+            getUINativeModule().swiper.setSwiperDisplayCount(node, fillType, 'fillType');
+          }
         } else {
           getUINativeModule().swiper.setSwiperDisplayCount(node, this.value.value, typeof this.value.value, swipeByGroup);
         }
