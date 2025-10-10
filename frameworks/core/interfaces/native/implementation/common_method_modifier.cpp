@@ -5468,7 +5468,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::ConstructImpl,
         CommonMethodModifier::SetWidthImpl,
         CommonMethodModifier::SetHeightImpl,
-        CommonMethodModifier::SetDrawModifierImpl,
         CommonMethodModifier::SetResponseRegionImpl,
         CommonMethodModifier::SetMouseResponseRegionImpl,
         CommonMethodModifier::SetSizeImpl,
