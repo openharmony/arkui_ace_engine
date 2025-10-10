@@ -27,7 +27,7 @@
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
-class FocusMoveResult;
+enum FocusMoveResult;
 } // namespace OHOS::Accessibility
 
 namespace OHOS::Ace {
