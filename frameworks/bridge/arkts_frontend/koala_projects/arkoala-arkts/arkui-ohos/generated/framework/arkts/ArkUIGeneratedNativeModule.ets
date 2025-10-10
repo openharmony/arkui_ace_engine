@@ -1369,7 +1369,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _PasteButton_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
-    native static _PasteButtonInterface_setPasteButtonOptions(ptr: KPointer): void
+    native static _PasteButtonInterface_setPasteButtonOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _PasteButtonAttribute_setOnClick(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -1611,7 +1611,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SaveButton_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
-    native static _SaveButtonInterface_setSaveButtonOptions(ptr: KPointer): void
+    native static _SaveButtonInterface_setSaveButtonOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SaveButtonAttribute_setOnClick(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct

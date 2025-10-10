@@ -16,8 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
-import { int32, int64, float32 } from "@koalaui/common"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
@@ -44,8 +44,17 @@ export class ArkPasteButtonPeer extends ArkSecurityComponentMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setPasteButtonOptionsAttribute(): void {
-        ArkUIGeneratedNativeModule._PasteButtonInterface_setPasteButtonOptions(this.peer.ptr)
+    setPasteButtonOptionsAttribute(options?: PasteButtonOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            PasteButtonOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._PasteButtonInterface_setPasteButtonOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     setOnClickAttribute(value: PasteButtonCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -77,7 +86,7 @@ export enum PasteButtonOnClickResult {
 }
 export type PasteButtonCallback = (event: ClickEvent, result: PasteButtonOnClickResult, error?: BusinessError) => void;
 export interface PasteButtonAttribute extends SecurityComponentMethod {
-    setPasteButtonOptions(): this {
+    setPasteButtonOptions(options?: PasteButtonOptions): this {
         throw new Error("Unimplemented method setPasteButtonOptions")
     }
     onClick(value: PasteButtonCallback | undefined): this {
@@ -89,7 +98,7 @@ export interface PasteButtonAttribute extends SecurityComponentMethod {
 }
 export class ArkPasteButtonStyle extends ArkSecurityComponentMethodStyle implements PasteButtonAttribute {
     onClick_value?: PasteButtonCallback | undefined
-    setPasteButtonOptions(): this {
+    setPasteButtonOptions(options?: PasteButtonOptions): this {
         return this
     }
     onClick(value: PasteButtonCallback | undefined): this {
@@ -107,9 +116,10 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
         }
         return (this.peer as ArkPasteButtonPeer)
     }
-    public setPasteButtonOptions(): this {
+    public setPasteButtonOptions(options?: PasteButtonOptions): this {
         if (this.checkPriority("setPasteButtonOptions")) {
-            this.getPeer()?.setPasteButtonOptionsAttribute()
+            const options_casted = options as (PasteButtonOptions | undefined)
+            this.getPeer()?.setPasteButtonOptionsAttribute(options_casted)
             return this
         }
         return this
@@ -136,8 +146,6 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
 export function PasteButtonImpl(
     @memo
     style: ((attributes: PasteButtonAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkPasteButtonComponent>((): ArkPasteButtonComponent => {
         return new ArkPasteButtonComponent()
@@ -145,8 +153,60 @@ export function PasteButtonImpl(
     NodeAttach<ArkPasteButtonPeer>((): ArkPasteButtonPeer => ArkPasteButtonPeer.create(receiver), (peer: ArkPasteButtonPeer): void => {
         receiver.setPeer(peer)
         style?.(receiver)
+        receiver.applyAttributesFinish()
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
+export class PasteButtonOptions_serializer {
+    public static write(buffer: SerializerBase, value: PasteButtonOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForIcon  = value.icon
+        if (valueHolderForIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIconTmpValue  = (valueHolderForIcon as PasteIconStyle)
+            valueSerializer.writeInt32(valueHolderForIconTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForText  = value.text
+        if (valueHolderForText !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextTmpValue  = (valueHolderForText as PasteDescription)
+            valueSerializer.writeInt32(valueHolderForTextTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForButtonType  = value.buttonType
+        if (valueHolderForButtonType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForButtonTypeTmpValue  = (valueHolderForButtonType as ButtonType)
+            valueSerializer.writeInt32(valueHolderForButtonTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): PasteButtonOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let iconTmpBuf : PasteIconStyle | undefined = undefined
+        if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            iconTmpBuf = PasteIconStyle.fromValue(valueDeserializer.readInt32())
+        }
+        const iconTmpResult : PasteIconStyle | undefined = iconTmpBuf
+        const textTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textTmpBuf : PasteDescription | undefined = undefined
+        if ((textTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textTmpBuf = PasteDescription.fromValue(valueDeserializer.readInt32())
+        }
+        const textTmpResult : PasteDescription | undefined = textTmpBuf
+        const buttonTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let buttonTypeTmpBuf : ButtonType | undefined = undefined
+        if ((buttonTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buttonTypeTmpBuf = ButtonType.fromValue(valueDeserializer.readInt32())
+        }
+        const buttonTypeTmpResult : ButtonType | undefined = buttonTypeTmpBuf
+        let value : PasteButtonOptions = ({icon: iconTmpResult, text: textTmpResult, buttonType: buttonTypeTmpResult} as PasteButtonOptions)
+        return value
+    }
+}
