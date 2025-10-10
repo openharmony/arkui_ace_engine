@@ -2683,6 +2683,25 @@ void ResetEnableAutoSpacing(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetEnableAutoSpacing(frameNode, false);
 }
+
+void SetTextInputOnWillAttachIME(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillAttachIMECallback = reinterpret_cast<IMEAttachCallback*>(callback);
+        TextFieldModelNG::SetOnWillAttachIME(frameNode, std::move(*onWillAttachIMECallback));
+    } else {
+        TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
+    }
+}
+
+void ResetTextInputOnWillAttachIME(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2920,6 +2939,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
         .resetTextInputOnSecurityStateChange = ResetTextInputOnSecurityStateChange,
         .getTextInputShowCounterOptions = GetTextInputShowCounterOptions,
+        .setTextInputOnWillAttachIME = SetTextInputOnWillAttachIME,
+        .resetTextInputOnWillAttachIME = ResetTextInputOnWillAttachIME
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

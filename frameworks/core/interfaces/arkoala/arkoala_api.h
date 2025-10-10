@@ -4890,6 +4890,8 @@ struct ArkUITextAreaModifier {
     ArkUINodeHandle (*getTextAreaCustomKeyboard)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextAreaCustomKeyboardOption)(ArkUINodeHandle node);
     void (*resetTextAreaCustomKeyboard)(ArkUINodeHandle node);
+    void (*setTextAreaOnWillAttachIME)(ArkUINodeHandle node, void* callback);
+    void (*resetTextAreaOnWillAttachIME)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -5137,6 +5139,8 @@ struct ArkUITextInputModifier {
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
     void (*resetTextInputOnSecurityStateChange)(ArkUINodeHandle node);
+    void (*setTextInputOnWillAttachIME)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnWillAttachIME)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -6197,6 +6201,8 @@ struct ArkUISearchModifier {
     void (*resetSearchMargin)(ArkUINodeHandle node);
     void (*setSearchCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance);
     void (*resetSearchCustomKeyboard)(ArkUINodeHandle node);
+    void (*setSearchOnWillAttachIME)(ArkUINodeHandle node, void* callback);
+    void (*resetSearchOnWillAttachIME)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

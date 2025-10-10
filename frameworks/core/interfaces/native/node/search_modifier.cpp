@@ -1342,6 +1342,24 @@ void ResetSearchCustomKeyboard(ArkUINodeHandle node)
     SearchModelNG::SetCustomKeyboardWithNode(frameNode, nullptr);
 }
 
+void SetSearchOnWillAttachIME(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillAttachIMECallback = reinterpret_cast<IMEAttachCallback*>(callback);
+        SearchModelNG::SetOnWillAttachIME(frameNode, std::move(*onWillAttachIMECallback));
+    } else {
+        SearchModelNG::SetOnWillAttachIME(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnWillAttachIME(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnWillAttachIME(frameNode, nullptr);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
@@ -1469,6 +1487,8 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchMargin = ResetSearchMargin,
         .setSearchCustomKeyboard = SetSearchCustomKeyboard,
         .resetSearchCustomKeyboard = ResetSearchCustomKeyboard,
+        .setSearchOnWillAttachIME = SetSearchOnWillAttachIME,
+        .resetSearchOnWillAttachIME = ResetSearchOnWillAttachIME
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

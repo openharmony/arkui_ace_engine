@@ -130,6 +130,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("strokeColor", &JSTextField::SetStrokeColor);
     JSClass<JSTextArea>::StaticMethod("enableAutoSpacing", &JSTextField::SetEnableAutoSpacing);
     JSClass<JSTextArea>::StaticMethod("scrollBarColor", &JSTextField::SetScrollBarColor);
+    JSClass<JSTextArea>::StaticMethod("onWillAttachIME", &JSTextField::SetOnWillAttachIME);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

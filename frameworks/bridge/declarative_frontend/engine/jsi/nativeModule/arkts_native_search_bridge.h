@@ -135,6 +135,8 @@ public:
     static ArkUINativeModuleValue ResetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCustomKeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCustomKeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnWillAttachIME(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnWillAttachIME(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

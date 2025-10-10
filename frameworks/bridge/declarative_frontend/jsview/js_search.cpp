@@ -1774,18 +1774,8 @@ void JSSearch::SetEnableAutoSpacing(const JSCallbackInfo& info)
 
 void JSSearch::SetOnWillAttachIME(const JSCallbackInfo& info)
 {
-    auto jsValue = info[0];
-    CHECK_NULL_VOID(jsValue->IsFunction());
-    auto jsOnWillAttachIMEFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsValue));
-    auto onWillAttachIME = [execCtx = info.GetExecutionContext(), func = std::move(jsOnWillAttachIMEFunc)](
-        const IMEClient& imeClientInfo) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onWillAttachIME");
-        JSRef<JSObject> imeClientObj = JSRef<JSObject>::New();
-        imeClientObj->SetProperty<int32_t>("nodeId", imeClientInfo.nodeId);
-        JSRef<JSVal> argv[] = { imeClientObj };
-        func->ExecuteJS(1, argv);
-    };
+    auto onWillAttachIME = JSTextField::ParseAndCreateAttachCallback(info);
+    CHECK_NULL_VOID(onWillAttachIME);
     SearchModel::GetInstance()->SetOnWillAttachIME(std::move(onWillAttachIME));
 }
 

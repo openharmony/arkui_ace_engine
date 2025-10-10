@@ -447,7 +447,8 @@ HWTEST_F(TextFieldPatternTestSeven, FireOnWillAttachIME002, TestSize.Level1)
     auto onWillAttachIME = [&fireOnWillAttachIME](const IMEClient& info) { fireOnWillAttachIME = true; };
 
     eventHub_->SetOnWillAttachIME(std::move(onWillAttachIME));
-    pattern_->FireOnWillAttachIME();
+    IMEClient clientInfo;
+    pattern_->FireOnWillAttachIME(clientInfo);
     EXPECT_EQ(fireOnWillAttachIME, true);
 }
 

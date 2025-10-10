@@ -51,6 +51,12 @@
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/image/image_source_info.h"
 #include "core/text/text_emoji_processor.h"
+#ifdef ENABLE_STANDARD_INPUT
+#include "extra_config_napi.h"
+#include "js_native_api_types.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -2537,19 +2543,71 @@ NG::KeyboardAppearanceConfig JSTextField::ParseKeyboardAppearanceConfig(const JS
 
 void JSTextField::SetOnWillAttachIME(const JSCallbackInfo& info)
 {
+    auto onWillAttachIME = ParseAndCreateAttachCallback(info);
+    CHECK_NULL_VOID(onWillAttachIME);
+    TextFieldModel::GetInstance()->SetOnWillAttachIME(std::move(onWillAttachIME));
+}
+
+IMEAttachCallback JSTextField::ParseAndCreateAttachCallback(const JSCallbackInfo& info)
+{
     auto jsValue = info[0];
-    CHECK_NULL_VOID(jsValue->IsFunction());
+    CHECK_NULL_RETURN(jsValue->IsFunction(), nullptr);
     auto jsOnWillAttachIMEFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsValue));
     auto onWillAttachIME = [execCtx = info.GetExecutionContext(), func = std::move(jsOnWillAttachIMEFunc)](
-        const IMEClient& imeClientInfo) {
+                               IMEClient& imeClientInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onWillAttachIME");
-        JSRef<JSObject> imeClientObj = JSRef<JSObject>::New();
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(1);
+        JSRef<JSObject> imeClientObj = objectTemplate->NewInstance();
         imeClientObj->SetProperty<int32_t>("nodeId", imeClientInfo.nodeId);
+        imeClientObj->SetPropertyObject(
+            "setExtraConfig", JSRef<JSFunc>::New<FunctionCallback>(JSTextField::JsSetIMEExtraInfo));
+        imeClientObj->Wrap(&imeClientInfo);
         JSRef<JSVal> argv[] = { imeClientObj };
         func->ExecuteJS(1, argv);
     };
-    TextFieldModel::GetInstance()->SetOnWillAttachIME(std::move(onWillAttachIME));
+    return std::move(onWillAttachIME);
+}
+
+Local<JSValueRef> JSTextField::JsSetIMEExtraInfo(panda::JsiRuntimeCallInfo* info)
+{
+    EcmaVM* vm = info->GetVM();
+#ifdef ENABLE_STANDARD_INPUT
+    auto imeClient =
+        static_cast<IMEClient*>(panda::Local<panda::ObjectRef>(info->GetThisRef())->GetNativePointerField(vm, 0));
+    if (info->GetArgsNumber() <= 0 || !imeClient) {
+        return JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> arg = info->GetCallArgRef(0);
+    if (!arg->IsObject(vm)) {
+        return JSValueRef::Undefined(vm);
+    }
+    auto jsObject = JsiObject(arg->ToObject(vm));
+    JSRef<JSObject> extraConfigObj = JSRef<JSObject>::Make(jsObject);
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        return JSValueRef::Undefined(vm);
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    if (!nativeEngine) {
+        return JSValueRef::Undefined(vm);
+    }
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    if (!env) {
+        return JSValueRef::Undefined(vm);
+    }
+    napi_value configValue = JsConverter::ConvertJsValToNapiValue(extraConfigObj);
+    auto shareConfigPtr = std::make_shared<OHOS::MiscServices::ExtraConfig>();
+    auto status = OHOS::MiscServices::JsExtraConfig::GetExtraConfig(env, configValue, *shareConfigPtr);
+    if (status != napi_ok) {
+        return JSValueRef::Undefined(vm);
+    }
+    RefPtr<IMEExtraInfo> imeExtraConfig = AceType::MakeRefPtr<IMEExtraInfo>(
+        shareConfigPtr.get(), [configPtr = shareConfigPtr]() mutable { configPtr.reset(); });
+    imeClient->extraInfo = imeExtraConfig;
+#endif
+    return JSValueRef::Undefined(vm);
 }
 
 void JSTextField::SetKeyboardAppearanceConfig(const JSCallbackInfo& info)
