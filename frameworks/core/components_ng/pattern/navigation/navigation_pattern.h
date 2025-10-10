@@ -570,7 +570,7 @@ public:
     }
 
     bool CreateHomeDestination(RefPtr<UINode>& customNode, RefPtr<NavDestinationGroupNode>& homeDest);
-    bool IsHomeDestinationVisible();
+    bool IsHomeDestinationOrNavBarVisible();
     void FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle lifecycle, bool isModeChange = false,
         NavDestLifecycleReason reason = NavDestinationActiveReason::TRANSITION);
 
