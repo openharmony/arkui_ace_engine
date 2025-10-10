@@ -92,7 +92,7 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     );
     return this;
   }
-  displayCount(value: string | number | SwiperAutoFill, swipeByGroup?: boolean | undefined): this {
+  displayCount(value: string | number | SwiperAutoFill | ItemFillPolicy, swipeByGroup?: boolean | undefined): this {
     let arkDisplayCount = new ArkDisplayCount();
     arkDisplayCount.value = value;
     arkDisplayCount.swipeByGroup = swipeByGroup;
@@ -242,8 +242,16 @@ class SwiperDisplayCountModifier extends ModifierWithKey<ArkDisplayCount> {
         getUINativeModule().swiper.setSwiperSwipeByGroup(node, swipeByGroup);
 
         if (typeof this.value.value === 'object') {
-          let minSize = (this.value.value as SwiperAutoFill).minSize.toString();
-          getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value.value);
+          if ('minsize' in this.value.value) {
+            let minSize = (this.value.value as SwiperAutoFill).minSize.toString();
+            getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, 'minSize');
+          } else {
+            let fillType = (this.value.value as ItemFillPolicy).fillType;
+            if (typeof fillType !== 'number') {
+              fillType = 0;
+            }
+            getUINativeModule().swiper.setSwiperDisplayCount(node, fillType, 'fillType');
+          }
         } else {
           getUINativeModule().swiper.setSwiperDisplayCount(node, this.value.value, typeof this.value.value);
         }

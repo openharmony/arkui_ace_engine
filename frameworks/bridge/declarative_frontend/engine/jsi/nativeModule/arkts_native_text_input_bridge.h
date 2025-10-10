@@ -180,6 +180,10 @@ public:
     static ArkUINativeModuleValue SetCustomKeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCustomKeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static bool ParseLayoutPolicy(EcmaVM* vm, const Local<JSValueRef> value, bool isWidth);
+    static ArkUINativeModuleValue SetOnWillAttachIME(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnWillAttachIME(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static IMEAttachCallback ParseAndCreateIMEAttachCallback(
+        EcmaVM* vm, Local<JSValueRef> callbackArg, FrameNode* frameNode);
 
 private:
     static void SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t style);

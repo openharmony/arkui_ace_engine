@@ -54,6 +54,8 @@ const int COUNT = 10;
 constexpr Dimension BADGE_FONT_SIZE = 10.0_vp;
 constexpr Dimension BADGE_CIRCLE_SIZE = 30.0_vp;
 constexpr Dimension BADGE_BORDER_WIDTH = 10.0_vp;
+constexpr Dimension BADGE_OUTER_BORDER_WIDTH = 10.0_vp;
+constexpr Dimension BADGE_OUTER_BORDER_WIDTH_2 = 5.0_vp;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float FIRST_ITEM_WIDTH = 100.0f;
@@ -828,7 +830,6 @@ HWTEST_F(BadgeTestNg, BadgeModelNG001, TestSize.Level1)
     badgeParameters2.badgeValue = VALUE;
     badgeParameters2.badgeFontWeight = FontWeight::W100;
     badgeParameters2.badgeBorderWidth = BADGE_BORDER_WIDTH;
-
     BadgeModelNG::UpdateBadgeStyle(badgeParameters2, frameNode);
     EXPECT_EQ(layoutProperty->GetBadgeColorValue(), Color::RED);
     EXPECT_EQ(layoutProperty->GetBadgeBorderColorValue(), Color::RED);
@@ -836,6 +837,49 @@ HWTEST_F(BadgeTestNg, BadgeModelNG001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetBadgeValueValue(), VALUE);
     EXPECT_EQ(layoutProperty->GetBadgeFontWeightValue(), FontWeight::W100);
     EXPECT_EQ(layoutProperty->GetBadgeBorderWidthValue(), BADGE_BORDER_WIDTH);
+}
+
+HWTEST_F(BadgeTestNg, BadgeModelNG002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateFrameNode.
+     */
+    auto frameNode = BadgeModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Set Value with String.
+     */
+    auto node = AceType::RawPtr(frameNode);
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeOuterBorderWidth = BADGE_OUTER_BORDER_WIDTH;
+    badgeParameters.badgeOuterBorderColor = Color::RED;
+
+    BadgeModelNG::SetBadgeParam(node, badgeParameters, false, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderWidthValue(), BADGE_OUTER_BORDER_WIDTH);
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderColorValue(), Color::RED);
+    /**
+     * @tc.steps: step3. Set Value with Number.
+     */
+    badgeParameters.isEnableAutoAvoidance = true;
+    BadgeModelNG::SetBadgeParam(node, badgeParameters, false, false);
+    EXPECT_EQ(layoutProperty->GetIsEnableAutoAvoidanceValue(), true);
+    /**
+     * @tc.steps: step4. Test updateBadgeStyle method.
+     */
+    BadgeParameters badgeParameters2;
+    BadgeModelNG::UpdateBadgeStyle(badgeParameters2, frameNode);
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderWidthValue(), Dimension(0.0_vp));
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderColorValue(), Color::WHITE);
+    EXPECT_EQ(layoutProperty->GetIsEnableAutoAvoidanceValue(), false);
+    badgeParameters2.badgeOuterBorderWidth = BADGE_OUTER_BORDER_WIDTH;
+    badgeParameters2.badgeOuterBorderColor = Color::RED;
+    badgeParameters2.isEnableAutoAvoidance = true;
+    BadgeModelNG::UpdateBadgeStyle(badgeParameters2, frameNode);
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderWidthValue(), BADGE_OUTER_BORDER_WIDTH);
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderColorValue(), Color::RED);
+    EXPECT_EQ(layoutProperty->GetIsEnableAutoAvoidanceValue(), true);
 }
 
 /**
@@ -1299,6 +1343,49 @@ HWTEST_F(BadgeTestNg, BadgePatternTest011, TestSize.Level0)
 }
 
 /**
+ * @tc.name: BadgePatternTest010
+ * @tc.desc: Test UpdateOuterBorderWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, UpdateBadgePatternTest010, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+
+    CalcDimension width(BADGE_OUTER_BORDER_WIDTH);
+    pattern_->UpdateOuterBorderWidth(width, true);
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderWidth(), width);
+
+    CalcDimension width2(BADGE_OUTER_BORDER_WIDTH_2);
+    pattern_->UpdateOuterBorderWidth(width2, false);
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderWidth(), width); // should not update
+}
+
+/**
+ * @tc.name: UpdateBadgePatternTest011
+ * @tc.desc: Test UpdateOuterBorderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, UpdateBadgePatternTest011, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    
+    Color testColor = Color::BLACK;
+    pattern_->UpdateOuterBorderColor(testColor, true);
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderColor(), testColor);
+    
+    Color testColor2 = Color::WHITE;
+    auto frameNode = pattern_->GetHost();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetIsSystemColorChange(false);
+    pattern_->UpdateOuterBorderColor(testColor2, false);
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderColor(), testColor); // should not update
+}
+
+/**
  * @tc.name: BadgeModelNGSetBadgeParameMaxCount
  * @tc.desc: Test badge SetBadgeParam.
  * @tc.type: FUNC
@@ -1575,6 +1662,45 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBorderWidth, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BadgeModelNGProcessOuterBorderWidth
+ * @tc.desc: Test badge ProcessOuterBorderWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGProcessOuterBorderWidth, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode.
+     */
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCount = COUNT;
+    badgeParameters.badgeOuterBorderWidth = BADGE_OUTER_BORDER_WIDTH;
+    badge.Create(badgeParameters);
+    GetInstance();
+    /**
+     * @tc.steps: step2. call to ProcessOuterBorderWidth.
+     */
+    badgeParameters.resourceOuterBorderWidthObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badge.ProcessOuterBorderWidth(pattern_, badgeParameters.resourceOuterBorderWidthObject);
+
+    /**
+     * @tc.steps: step3. check the key value.
+     * @tc.expected: it should be 0.0.
+     */
+    auto frameNode = pattern_->GetHost();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetIsSystemColorChange(true);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
+    Dimension outerBorderWidth = layoutProperty_->GetBadgeOuterBorderWidthValue();
+    EXPECT_EQ(outerBorderWidth, Dimension(0.0_vp));
+    pipeline->SetIsSystemColorChange(false);
+}
+
+/**
  * @tc.name: BadgeModelNGProcessFontSize
  * @tc.desc: Test badge ProcessFontSize
  * @tc.type: FUNC
@@ -1601,13 +1727,13 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessFontSize, TestSize.Level1)
      * @tc.steps: step3. check the key value.
      * @tc.expected: it should be 0.0f.
      */
-    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
-    pattern_->OnColorModeChange(colorMode);
     auto frameNode = pattern_->GetHost();
     ASSERT_NE(frameNode, nullptr);
     auto pipeline = frameNode->GetContext();
     ASSERT_NE(pipeline, nullptr);
-    pipeline->isSystemColorChange_ = true;
+    pipeline->SetIsSystemColorChange(true);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     ASSERT_NE(badgeTheme, nullptr);
     Dimension FontSize = layoutProperty_->GetBadgeFontSizeValue();
@@ -1686,6 +1812,47 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBorderColor, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BadgeModelNGProcessOuterBorderColor
+ * @tc.desc: Test badge ProcessOuterBorderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGProcessOuterBorderColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode.
+     */
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCount = COUNT;
+    badgeParameters.badgeOuterBorderColor = Color::BLUE;
+    badge.Create(badgeParameters);
+    GetInstance();
+    /**
+     * @tc.steps: step2. call to ProcessOuterBorderColor.
+     */
+    badgeParameters.resourceOuterBorderColorObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badge.ProcessOuterBorderColor(pattern_, badgeParameters.resourceOuterBorderColorObject);
+
+    /**
+     * @tc.steps: step3. check the key value.
+     * @tc.expected: it should be FFFFFFFF.
+     */
+    auto frameNode = pattern_->GetHost();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetIsSystemColorChange(true);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    auto outerBorderColor = layoutProperty_->GetBadgeOuterBorderColorValue();
+    EXPECT_EQ(outerBorderColor, badgeTheme->GetBadgeOuterBorderColor());
+    pipeline->SetIsSystemColorChange(false);
+}
+
+/**
  * @tc.name: BadgeModelNGProcessBadgeColor
  * @tc.desc: Test badge ProcessBadgeColor
  * @tc.type: FUNC
@@ -1736,8 +1903,10 @@ HWTEST_F(BadgeTestNg, BadgeDumpInfo001, TestSize.Level1)
     
     CalcDimension width2(BADGE_FONT_SIZE);
     pattern_->UpdateBorderWidth(width2, false);
+    layoutProperty->UpdateBadgeOuterBorderWidth(BADGE_OUTER_BORDER_WIDTH);
     pattern_->DumpInfo();
     EXPECT_EQ(layoutProperty->GetBadgeBorderWidth(), width); // should not update
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderWidth(), BADGE_OUTER_BORDER_WIDTH);
 }
 
 /**
@@ -1815,6 +1984,8 @@ HWTEST_F(BadgeTestNg, BadgePatternOnColorUpdate001, TestSize.Level1)
     layoutProperty->UpdateBadgeCircleSizeByuser(true);
     layoutProperty->UpdateBadgeBorderColorByuser(true);
     layoutProperty->UpdateBadgeBorderWidthByuser(true);
+    layoutProperty->UpdateBadgeOuterBorderColorByuser(true);
+    layoutProperty->UpdateBadgeOuterBorderWidthByuser(true);
     layoutProperty->UpdateBadgeTextColorByuser(true);
     layoutProperty->UpdateBadgeColorByuser(true);
     pattern_->OnColorConfigurationUpdate();

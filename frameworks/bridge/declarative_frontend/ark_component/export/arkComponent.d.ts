@@ -1921,7 +1921,7 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     itemSpace(value: string | number): this;
     displayMode(value: SwiperDisplayMode): this;
     cachedCount(value: number, isShown?: boolean): this;
-    displayCount(value: string | number | SwiperAutoFill, swipeByGroup?: boolean | undefined): this;
+    displayCount(value: string | number | SwiperAutoFill | ItemFillPolicy, swipeByGroup?: boolean | undefined): this;
     effectMode(value: EdgeEffect): this;
     disableSwipe(value: boolean): this;
     curve(value: string | Curve | ICurve): this;

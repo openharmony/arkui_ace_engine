@@ -225,6 +225,9 @@ public:
     virtual void SetMaintainVisibleContentPosition(bool value) {}
     virtual void ProcessNextMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) {}
     virtual void ProcessPreviousMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void SetFillType(int32_t fillType) {}
+    virtual void ResetFillType() {}
+    virtual void ResetDisplayCountWithObject() {}
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

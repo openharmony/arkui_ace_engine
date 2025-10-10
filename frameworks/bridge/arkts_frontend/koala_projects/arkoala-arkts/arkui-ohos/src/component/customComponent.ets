@@ -28,6 +28,8 @@ import { PeerNode } from '../PeerNode';
 import { UIContext } from '@ohos/arkui/UIContext';
 import promptAction from '@ohos/promptAction';
 import { RecordData } from "@ohos.base"
+import { UIContextImpl } from "arkui/base/UIContextImpl"
+import { UIContextUtil } from "arkui/base/UIContextUtil"
 
 export class ReuseObject {
     readonly _raw: RecordData;
@@ -91,7 +93,7 @@ export interface PageLifeCycle {
     onNewParam(param: object | undefined | null): void {}
 }
 
-export interface LayoutCallback {
+export interface LayoutCallbacks {
     onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {}
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
         return {width: 0, height: 0} as SizeResult
@@ -112,7 +114,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     get isCustomLayout(): boolean {
-        return this.instance instanceof LayoutCallback;
+        return this.instance instanceof LayoutCallbacks;
     }
 
     __removeChildWhenDispose__IExtendableComponent_Internal(): void {
@@ -263,16 +265,16 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
 
     // Custom layout
     onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {
-        if (this.instance instanceof LayoutCallback) {
-            const layout = this.instance as LayoutCallback;
+        if (this.instance instanceof LayoutCallbacks) {
+            const layout = this.instance as LayoutCallbacks;
             layout.onPlaceChildren(selfLayoutInfo, children, constraint);
         } else {
             throw new Error('not a custom layout component');
         }
     }
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
-        if (this.instance instanceof LayoutCallback) {
-            const layout = this.instance as LayoutCallback;
+        if (this.instance instanceof LayoutCallbacks) {
+            const layout = this.instance as LayoutCallbacks;
             return layout.onMeasureSize(selfLayoutInfo, children, constraint);
         } else {
             throw new Error('not a custom layout component');
@@ -283,9 +285,8 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         return this.instance.onDumpInspector();
     }
 
-    // Theme
     onWillApplyTheme(theme: Theme): void {
-        // TODO: this.instance.onWillApplyTheme(theme);
+        this.instance.onWillApplyTheme(theme);
     }
 
     protected __initializeStruct(
@@ -331,6 +332,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
 
     onCleanup(): void {
         this.aboutToDisappear();
+    }
+
+    onGlobalThemeChanged(theme: Theme): void {
+        this.onWillApplyTheme(theme);
     }
 }
 
@@ -435,4 +440,25 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
     }
 
     aboutToReuse(): void {}
+}
+
+export class EntryPoint {
+    constructor() {}
+    /** @memo */
+    entry(): void {
+    }
+
+    public static RegisterNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface) {
+        let uiContext : UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImpl = uiContext.getRouter().getRouter();
+        globalRouterImpl.registerNamedRouter(routerName, instance, param);
+    }
+}
+
+export interface NavInterface {
+    bundleName: string;
+    moduleName: string;
+    pagePath: string;
+    pageFullPath: string;
+    integratedHsp: string;
 }

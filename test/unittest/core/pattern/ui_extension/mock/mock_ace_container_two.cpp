@@ -298,7 +298,8 @@ void AceContainer::DispatchExtensionDataToHostWindow(
     uint32_t code, const AAFwk::Want& data, int32_t persistentId)
 {}
 
-void AceContainer::UpdateColorMode(uint32_t colorMode) {}
+void AceContainer::UpdateColorMode(uint32_t colorMode,
+    const ParsedConfig& parsedConfig, const std::string& configuration) {}
 
 void AceContainer::TriggerModuleSerializer() {}
 

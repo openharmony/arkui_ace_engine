@@ -3252,6 +3252,32 @@ HWTEST_F(WebModelTestNg, SetNativeEmbedLifecycleChangeId018, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetNativeEmbedObjectParamChangeId002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetNativeEmbedObjectParamChangeId002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    WebModelNG webModelNG;
+    auto NativeEmbedObjectParamChangeId = [&callCount](const BaseEventInfo* info) { callCount++; };
+    webModelNG.SetNativeEmbedObjectParamChangeId(
+        AccessibilityManager::RawPtr(frameNode), std::move(NativeEmbedObjectParamChangeId));
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnNativeEmbedObjectParamChangeEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
  * @tc.name: RegisterNativeEmbedRule009
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC

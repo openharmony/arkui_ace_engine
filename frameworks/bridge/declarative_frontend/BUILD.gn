@@ -339,6 +339,7 @@ template("declarative_js_engine") {
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
+      "jsview/js_list_children_main_size.cpp",
       "jsview/js_loading_progress.cpp",
       "jsview/js_local_storage.cpp",
       "jsview/js_location_button.cpp",
@@ -759,6 +760,10 @@ template("declarative_js_engine") {
         }
       }
     }
+
+    if (defined(config.enable_standard_input) && config.enable_standard_input) {
+      external_deps += [ "imf:extra_config_napi" ]
+    }
   }
 }
 
@@ -930,6 +935,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
+      "jsview/js_list_children_main_size.cpp",
       "jsview/js_loading_progress.cpp",
       "jsview/js_location_button.cpp",
       "jsview/js_magnifier_controller.cpp",
@@ -1208,6 +1214,10 @@ template("declarative_js_engine_ng") {
         "image_framework:image",
         "image_framework:image_native",
       ]
+    }
+
+    if (defined(config.enable_standard_input) && config.enable_standard_input) {
+      external_deps += [ "imf:extra_config_napi" ]
     }
   }
 }

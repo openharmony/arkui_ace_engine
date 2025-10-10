@@ -49,7 +49,7 @@ class BadgeParamWithNumberModifier extends ModifierWithKey<BadgeParamWithNumber>
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().badge.setBadgeParamWithNumber(node, undefined, undefined, undefined,
-        undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 0, undefined);
+        undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 0, undefined, undefined, undefined, undefined);
     } else {
       if (this.value?.style === undefined) {
         getUINativeModule().badge.setBadgeParamWithNumber(node,
@@ -57,7 +57,8 @@ class BadgeParamWithNumberModifier extends ModifierWithKey<BadgeParamWithNumber>
           isObject(this.value?.position) ? this.value.position?.x : undefined,
           isObject(this.value?.position) ? this.value.position?.y : undefined,
           undefined, undefined, undefined, undefined, undefined, undefined, undefined,
-          isObject(this.value?.position) && !isNull(this.value?.position), this.value?.count, this.value?.maxCount);
+          isObject(this.value?.position) && !isNull(this.value?.position), this.value?.count, this.value?.maxCount,
+          undefined, undefined, undefined);
       } else {
         getUINativeModule().badge.setBadgeParamWithNumber(node,
           isNumber(this.value?.position) ? this.value.position : undefined,
@@ -66,7 +67,8 @@ class BadgeParamWithNumberModifier extends ModifierWithKey<BadgeParamWithNumber>
           this.value.style?.badgeColor, this.value.style?.badgeSize,
           this.value.style?.borderColor, this.value.style?.borderWidth,
           this.value.style?.color, this.value.style?.fontSize, this.value.style?.fontWeight,
-          isObject(this.value?.position) && !isNull(this.value?.position), this.value?.count, this.value?.maxCount);
+          isObject(this.value?.position) && !isNull(this.value?.position), this.value?.count, this.value?.maxCount,
+          this.value.style?.outerBorderColor, this.value.style?.outerBorderWidth, this.value.style?.enableAutoAvoidance);
       }
     }
   }
@@ -79,6 +81,9 @@ class BadgeParamWithNumberModifier extends ModifierWithKey<BadgeParamWithNumber>
     let colorResult: boolean = false;
     let fontSizeResult: boolean = false;
     let fontWeightResult: boolean = false;
+    let outerBorderColorResult: boolean = false;
+    let outerBorderWidthResult: boolean = false;
+    let enableAutoAvoidanceResult: boolean = false;
     if (isNumber(this.stageValue?.position) && isNumber(this.value?.position)) {
       positionResult = !isBaseOrResourceEqual(this.stageValue.position, this.value.position);
     } else if (isObject(this.stageValue?.position) && isObject(this.value?.position)) {
@@ -95,6 +100,9 @@ class BadgeParamWithNumberModifier extends ModifierWithKey<BadgeParamWithNumber>
       colorResult = !isBaseOrResourceEqual(this.stageValue.style?.color, this.value.style?.color);
       fontSizeResult = !isBaseOrResourceEqual(this.stageValue.style?.fontSize, this.value.style?.fontSize);
       fontWeightResult = !isBaseOrResourceEqual(this.stageValue.style?.fontWeight, this.value.style?.fontWeight);
+      outerBorderColorResult = !isBaseOrResourceEqual(this.stageValue.style?.outerBorderColor, this.value.style?.outerBorderColor);
+      outerBorderWidthResult = !isBaseOrResourceEqual(this.stageValue.style?.outerBorderWidth, this.value.style?.outerBorderWidth);
+      enableAutoAvoidanceResult = !isBaseOrResourceEqual(this.stageValue.style?.enableAutoAvoidance, this.value.style?.enableAutoAvoidance);
     } else if (this.stageValue?.style !== undefined || this.value?.style !== undefined) {
       badgeSizeResult = true;
       borderWidthResult = true;
@@ -103,10 +111,14 @@ class BadgeParamWithNumberModifier extends ModifierWithKey<BadgeParamWithNumber>
       colorResult = true;
       fontSizeResult = true;
       fontWeightResult = true;
+      outerBorderColorResult = true;
+      outerBorderWidthResult = true;
+      enableAutoAvoidanceResult = true;
     }
     return positionResult || badgeSizeResult || borderWidthResult || badgeColorResult || borderColorResult || colorResult ||
       fontSizeResult || fontWeightResult || !isBaseOrResourceEqual(this.stageValue?.count, this.value?.count) ||
-      !isBaseOrResourceEqual(this.stageValue?.maxCount, this.value?.maxCount);
+      !isBaseOrResourceEqual(this.stageValue?.maxCount, this.value?.maxCount) ||
+      outerBorderColorResult || outerBorderWidthResult || enableAutoAvoidanceResult;
   }
 }
 
@@ -118,7 +130,8 @@ class BadgeParamWithStringModifier extends ModifierWithKey<BadgeParamWithString>
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().badge.setBadgeParamWithString(node, undefined, undefined, undefined,
-        undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+        undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined,
+        undefined, undefined, undefined);
     } else {
       if (this.value?.style === undefined) {
         getUINativeModule().badge.setBadgeParamWithString(node,
@@ -126,7 +139,8 @@ class BadgeParamWithStringModifier extends ModifierWithKey<BadgeParamWithString>
           isObject(this.value?.position) ? this.value.position?.x : undefined,
           isObject(this.value?.position) ? this.value.position?.y : undefined,
           undefined, undefined, undefined, undefined, undefined, undefined, undefined,
-          isObject(this.value?.position) && !isNull(this.value?.position), this.value?.value);
+          isObject(this.value?.position) && !isNull(this.value?.position), this.value?.value,
+          undefined, undefined, undefined);
       } else {
         getUINativeModule().badge.setBadgeParamWithString(node,
           isNumber(this.value?.position) ? this.value.position : undefined,
@@ -135,7 +149,8 @@ class BadgeParamWithStringModifier extends ModifierWithKey<BadgeParamWithString>
           this.value.style?.badgeColor, this.value.style?.badgeSize,
           this.value.style?.borderColor, this.value.style?.borderWidth,
           this.value.style?.color, this.value.style?.fontSize, this.value.style?.fontWeight,
-          isObject(this.value?.position) && !isNull(this.value?.position), this.value?.value);
+          isObject(this.value?.position) && !isNull(this.value?.position), this.value?.value,
+          this.value.style?.outerBorderColor, this.value.style?.outerBorderWidth, this.value.style?.enableAutoAvoidance);
       }
     }
   }
@@ -148,6 +163,9 @@ class BadgeParamWithStringModifier extends ModifierWithKey<BadgeParamWithString>
     let colorResult: boolean = false;
     let fontSizeResult: boolean = false;
     let fontWeightResult: boolean = false;
+    let outerBorderColorResult: boolean = false;
+    let outerBorderWidthResult: boolean = false;
+    let enableAutoAvoidanceResult: boolean = false;
     if (isNumber(this.stageValue?.position) && isNumber(this.value?.position)) {
       positionResult = !isBaseOrResourceEqual(this.stageValue.position, this.value.position);
     } else if (isObject(this.stageValue?.position) && isObject(this.value?.position)) {
@@ -164,6 +182,9 @@ class BadgeParamWithStringModifier extends ModifierWithKey<BadgeParamWithString>
       colorResult = !isBaseOrResourceEqual(this.stageValue.style?.color, this.value.style?.color);
       fontSizeResult = !isBaseOrResourceEqual(this.stageValue.style?.fontSize, this.value.style?.fontSize);
       fontWeightResult = !isBaseOrResourceEqual(this.stageValue.style?.fontWeight, this.value.style?.fontWeight);
+      outerBorderColorResult = !isBaseOrResourceEqual(this.stageValue.style?.outerBorderColor, this.value.style?.outerBorderColor);
+      outerBorderWidthResult = !isBaseOrResourceEqual(this.stageValue.style?.outerBorderWidth, this.value.style?.outerBorderWidth);
+      enableAutoAvoidanceResult = !isBaseOrResourceEqual(this.stageValue.style?.enableAutoAvoidance, this.value.style?.enableAutoAvoidance);
     } else if (this.stageValue?.style !== undefined || this.value?.style !== undefined) {
       badgeSizeResult = true;
       borderWidthResult = true;
@@ -172,9 +193,13 @@ class BadgeParamWithStringModifier extends ModifierWithKey<BadgeParamWithString>
       colorResult = true;
       fontSizeResult = true;
       fontWeightResult = true;
+      outerBorderColorResult = true;
+      outerBorderWidthResult = true;
+      enableAutoAvoidanceResult = true;
     }
     return positionResult || badgeSizeResult || borderWidthResult || badgeColorResult || borderColorResult || colorResult ||
-      fontSizeResult || fontWeightResult || !isBaseOrResourceEqual(this.stageValue?.value, this.value?.value);
+      fontSizeResult || fontWeightResult || !isBaseOrResourceEqual(this.stageValue?.value, this.value?.value) ||
+      outerBorderColorResult || outerBorderWidthResult || enableAutoAvoidanceResult;
   }
 }
 

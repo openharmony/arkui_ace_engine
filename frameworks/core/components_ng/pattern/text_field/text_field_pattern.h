@@ -2104,7 +2104,7 @@ private:
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
-    void FireOnWillAttachIME();
+    void FireOnWillAttachIME(IMEClient& imeClient);
     Offset GetCaretClickLocalOffset(const Offset& offset);
     void MoveCaretToContentRectMultiThread(const MoveCaretToContentRectData& value);
     bool ShouldSkipUpdateParagraph();

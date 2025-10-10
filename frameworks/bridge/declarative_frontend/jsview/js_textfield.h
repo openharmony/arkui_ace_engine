@@ -160,6 +160,8 @@ public:
     static void SetUnderlineColorObject(const JSRef<JSObject>& jsValue);
     static void UnregisterResource(const std::string& key);
     static void SetScrollBarColor(const JSCallbackInfo& info);
+    static Local<JSValueRef> JsSetIMEExtraInfo(panda::JsiRuntimeCallInfo* info);
+    static IMEAttachCallback ParseAndCreateAttachCallback(const JSCallbackInfo& info);
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);

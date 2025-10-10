@@ -93,6 +93,7 @@
 #include "bridge/declarative_frontend/jsview/js_list.h"
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_list_item_group.h"
+#include "bridge/declarative_frontend/jsview/js_list_children_main_size.h"
 #include "bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "bridge/declarative_frontend/jsview/js_location_button.h"
@@ -469,6 +470,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "CanvasPattern", JSCanvasPattern::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },
+    { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "Counter", JSCounter::JSBind },

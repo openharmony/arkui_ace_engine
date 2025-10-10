@@ -2533,9 +2533,19 @@ bool SearchModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
     return value;
 }
 
-void SearchModelNG::SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func)
+void SearchModelNG::SetOnWillAttachIME(IMEAttachCallback&& func)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(textFieldEventHub);
+    textFieldEventHub->SetOnWillAttachIME(std::move(func));
+}
+
+void SearchModelNG::SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func)
+{
     CHECK_NULL_VOID(frameNode);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(textFieldChild);

@@ -14,8 +14,6 @@
  */
 import { int32, } from "@koalaui/common"
 import { NativeLog } from "./NativeLog"
-import { UIContextImpl } from "arkui/base/UIContextImpl"
-import { UIContextUtil } from "arkui/base/UIContextUtil"
 
 export type UserViewBuilder = @memo () => void
 
@@ -65,25 +63,4 @@ export function UserMemoWrapper(
     @memo
     const wrapper = () => { page_() }
     return wrapper
-}
-
-export class EntryPoint {
-    constructor() {}
-    /** @memo */
-    entry(): void {
-    }
-
-    public static RegisterNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface) {
-        let uiContext : UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        const globalRouterImpl = uiContext.getRouter().getRouter();
-        globalRouterImpl.registerNamedRouter(routerName, instance, param);
-    }
-}
-
-export interface NavInterface {
-    bundleName: string;
-    moduleName: string;
-    pagePath: string;
-    pageFullPath: string;
-    integratedHsp: string;
 }

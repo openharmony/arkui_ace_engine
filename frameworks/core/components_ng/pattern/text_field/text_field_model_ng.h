@@ -160,7 +160,7 @@ public:
     void SetStrokeColor(const Color& value) override;
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
-    void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) override;
+    void SetOnWillAttachIME(IMEAttachCallback&& func) override;
     void SetTextAreaScrollBarColor(const Color& value) override;
     void ResetTextAreaScrollBarColor() override;
 
@@ -383,6 +383,7 @@ public:
     static void SetTextAreaScrollBarColor(FrameNode* frameNode, const Color& value);
     static Color GetTextAreaScrollBarColor(FrameNode* frameNode);
     static void ResetTextAreaScrollBarColor(FrameNode* frameNode);
+    static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
 
 private:
     void AddDragFrameNodeToManager() const;

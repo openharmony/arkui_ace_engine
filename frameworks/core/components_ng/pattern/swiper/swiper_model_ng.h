@@ -97,6 +97,9 @@ public:
     void SetMaintainVisibleContentPosition(bool value) override;
     void ProcessNextMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) override;
     void ProcessPreviousMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) override;
+    void SetFillType(int32_t fillType) override;
+    void ResetFillType() override;
+    void ResetDisplayCountWithObject() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlankn = false);
@@ -114,6 +117,7 @@ public:
     static void SetDisableSwipe(FrameNode* frameNode, bool disableSwipe);
     static void SetItemSpace(FrameNode* frameNode, const Dimension& itemSpace);
     static void SetDisplayMode(FrameNode* frameNode, SwiperDisplayMode displayMode);
+    static void ResetDisplayMode(FrameNode* frameNode);
     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect EdgeEffect);
     static void SetMinSize(FrameNode* frameNode, const Dimension& minSize);
     static void SetDisplayCount(FrameNode* frameNode, int32_t displayCount);
@@ -206,6 +210,9 @@ public:
     static void CreateArrowWithResourceObj(const SwiperArrowParameters& swiperArrowParameters);
     static void CreateArrowWithResourceObj(const SwiperArrowParameters& swiperArrowParameters,
         FrameNode* frameNode);
+    static void SetFillType(FrameNode* frameNode, int32_t options);
+    static int32_t GetFillType(FrameNode* frameNode);
+    static void ResetDisplayCountWithObject(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

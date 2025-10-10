@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string NEWLINE = "\n";
 const std::u16string WIDE_NEWLINE = UtfUtils::Str8DebugToStr16(NEWLINE);
+constexpr uint32_t DEFAULT_MINLINES = 1;
 } // namespace
 void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex)
 {
@@ -87,7 +88,7 @@ RectF TextSelectController::CalculateEmptyValueCaretRect(float width)
     if (layoutProperty->GetPositionProperty()) {
         align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
-    OffsetF offset = Alignment::GetAlignPosition(contentRect_.GetSize(), rect.GetSize(), align);
+    OffsetF offset = Alignment::GetAlignPosition(GetAlignParentSize(), rect.GetSize(), align);
     rect.SetTop(offset.GetY() + contentRect_.GetY());
     if (textAlign != TextAlign::END) {
         AdjustHandleAtEdge(rect);
@@ -962,5 +963,22 @@ void TextSelectController::AdjustAllHandlesWithBoundary()
 {
     AdjustHandleOffsetWithBoundary(firstHandleInfo_.rect);
     AdjustHandleOffsetWithBoundary(secondHandleInfo_.rect);
+}
+
+NG::SizeF TextSelectController::GetAlignParentSize() const
+{
+    // Use text content height for alignment if minLines is set.
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, contentRect_.GetSize());
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textField, contentRect_.GetSize());
+    auto layoutProperty = textField->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, contentRect_.GetSize());
+    CHECK_EQUAL_RETURN(layoutProperty->HasMinLines(), false, contentRect_.GetSize());
+    CHECK_EQUAL_RETURN(layoutProperty->GetMinLines().value() >= DEFAULT_MINLINES, false, contentRect_.GetSize());
+    CHECK_NULL_RETURN(paragraph_, contentRect_.GetSize());
+    SizeF alignParentSize = contentRect_.GetSize();
+    alignParentSize.SetHeight(paragraph_->GetHeight());
+    return alignParentSize;
 }
 } // namespace OHOS::Ace::NG

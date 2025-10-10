@@ -64,7 +64,7 @@ import { InteropNativeModule } from "@koalaui/interop"
 import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
 import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender } from '../framework';
-import { EntryPoint, NavInterface } from "../UserView"
+import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
 export class ContextRecord {
     uiContext?: UIContext

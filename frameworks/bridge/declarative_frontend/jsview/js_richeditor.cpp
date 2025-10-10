@@ -683,6 +683,13 @@ void JSRichEditor::SetOnShare(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetOnShare(std::move(onShare));
 }
 
+void JSRichEditor::SetOnWillAttachIME(const JSCallbackInfo& info)
+{
+    auto onWillAttachIME = JSTextField::ParseAndCreateAttachCallback(info);
+    CHECK_NULL_VOID(onWillAttachIME);
+    RichEditorModel::GetInstance()->SetOnWillAttachIME(std::move(onWillAttachIME));
+}
+
 void JSRichEditor::SetCustomKeyboard(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && (args[0]->IsUndefined() || args[0]->IsNull())) {
@@ -1531,6 +1538,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onCut", &JSRichEditor::SetOnCut);
     JSClass<JSRichEditor>::StaticMethod("onCopy", &JSRichEditor::SetOnCopy);
     JSClass<JSRichEditor>::StaticMethod("onShare", &JSRichEditor::SetOnShare);
+    JSClass<JSRichEditor>::StaticMethod("onWillAttachIME", &JSRichEditor::SetOnWillAttachIME);
     JSClass<JSRichEditor>::StaticMethod("editMenuOptions", &JSRichEditor::EditMenuOptions);
     JSClass<JSRichEditor>::StaticMethod("enableKeyboardOnFocus", &JSRichEditor::SetEnableKeyboardOnFocus);
     JSClass<JSRichEditor>::StaticMethod("enableHapticFeedback", &JSRichEditor::SetEnableHapticFeedback);

@@ -97,6 +97,7 @@ constexpr int32_t USED_JSON_PARAM = 4;
 constexpr int32_t MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION = 100;
 constexpr int32_t RATIO_OF_VSYNC_PERIOD = 2;
 constexpr int32_t MAX_DVSYNC_TIME_USE_COUNT = 5;
+constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 6;
 #ifndef IS_RELEASE_VERSION
 constexpr int32_t SINGLE_FRAME_TIME_MICROSEC = 16600;
 #endif
@@ -3724,6 +3725,11 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-compname" && params.size() >= PARAM_NUM) {
         rootNode_->DumpTreeByComponentName(params[1]);
         DumpLog::GetInstance().OutPutDefault();
+    } else if (params[0] == "-allInfoWithParamConfigTotal" && params.size() == SIMPLIFYTREE_WITH_PARAMCONFIG) {
+        auto root = JsonUtil::CreateSharedPtrJson(true);
+        rootNode_->DumpSimplifyTreeWithParamConfig(
+            0, root, params[1] == "1", { params[2] == "1", params[3] == "1", params[4] == "1" });
+        DumpLog::GetInstance().Print(root->ToString());
     }
     return true;
 }

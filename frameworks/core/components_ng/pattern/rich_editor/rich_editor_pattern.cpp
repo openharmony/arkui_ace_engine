@@ -5224,6 +5224,24 @@ bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartT
     return true;
 }
 
+IMEClient RichEditorPattern::GetIMEClientInfo()
+{
+    IMEClient clientInfo;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, clientInfo);
+    clientInfo.nodeId = host->GetId();
+    return clientInfo;
+}
+
+void RichEditorPattern::FireOnWillAttachIME(IMEClient& imeClient)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnWillAttachIME(imeClient);
+}
+
 #if defined(ENABLE_STANDARD_INPUT)
 #ifdef WINDOW_SCENE_SUPPORTED
 uint32_t RichEditorPattern::GetSCBSystemWindowId()
@@ -5268,6 +5286,7 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard, SourceTyp
     attachOptions.isShowKeyboard = needShowSoftKeyboard;
     attachOptions.requestKeyboardReason =
         static_cast<OHOS::MiscServices::RequestKeyboardReason>(static_cast<int32_t>(sourceType));
+    BeforeAttachInputMethod(textconfig);
     auto ret = inputMethod->Attach(richEditTextChangeListener_, attachOptions, textconfig);
     if (ret == MiscServices::ErrorCode::NO_ERROR) {
         std::unordered_map<std::string, MiscServices::PrivateDataValue> privateCommand;
@@ -5357,6 +5376,15 @@ float RichEditorPattern::CalcCursorHeight(float& caretHeight)
         caretHeight = caretAdjustHeight;
     }
     return caretHeight;
+}
+
+void RichEditorPattern::BeforeAttachInputMethod(MiscServices::TextConfig& textConfig)
+{
+    auto clientInfo = GetIMEClientInfo();
+    FireOnWillAttachIME(clientInfo);
+    CHECK_NULL_VOID(clientInfo.extraInfo && clientInfo.extraInfo->GetExtraInfo());
+    textConfig.inputAttribute.extraConfig =
+        *reinterpret_cast<MiscServices::ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
 }
 
 #else
@@ -10639,6 +10667,7 @@ void RichEditorPattern::HandleOnCameraInput()
             textConfig.windowId = systemWindowId;
         }
 #endif
+        BeforeAttachInputMethod(textConfig);
         auto ret = inputMethod->Attach(richEditTextChangeListener_, false, textConfig);
         if (ret == MiscServices::ErrorCode::NO_ERROR) {
             auto pipeline = GetContext();
@@ -11526,7 +11555,8 @@ void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info, int textIn
         info.SetOffsetInSpan(0);
         return;
     }
-    if ((*it)->content.back() == '\n' && (*it)->position == textIndex) { // next line/span begin
+    // next line/span begin
+    if (!(*it)->content.empty() && (*it)->content.back() == '\n' && (*it)->position == textIndex) {
         info.SetSpanIndex(std::distance(spans_.begin(), it) + 1);
         info.SetOffsetInSpan(0);
     } else {

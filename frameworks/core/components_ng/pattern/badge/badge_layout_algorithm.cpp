@@ -203,6 +203,34 @@ static OffsetF GetTextOffsetByPosition(const RefPtr<BadgeLayoutProperty> layoutP
     return textOffset;
 }
 
+static void AdjustTextOffsetForBadge(const RefPtr<BadgeLayoutProperty>& layoutProperty,
+    const RefPtr<GeometryNode>& textGeometryNode, double badgeCircleDiameter, bool textIsSpace, OffsetF& textOffset)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetIsEnableAutoAvoidanceValue(false)) {
+        return;
+    }
+    CHECK_NULL_VOID(textGeometryNode);
+    auto badgePosition = layoutProperty->GetBadgePosition();
+    auto isRtl = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto textWidth = textGeometryNode->GetFrameSize().Width();
+    double offsetX = 0.0;
+    double offsetY = 0.0;
+
+    if ((!isRtl && badgePosition == BadgePosition::RIGHT_TOP) ||
+        (badgePosition == BadgePosition::RIGHT && !isRtl) ||
+        (badgePosition == BadgePosition::LEFT && isRtl)) {
+        offsetX = badgeCircleDiameter - textWidth;
+    }
+
+    if (badgePosition == BadgePosition::RIGHT_TOP && !textIsSpace) {
+        offsetX -= Dimension(2.0_vp).ConvertToPx();
+        offsetY = Dimension(2.0_vp).ConvertToPx();
+    }
+    textOffset.AddX(offsetX);
+    textOffset.AddY(offsetY);
+}
+
 void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -294,6 +322,10 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto textRenderContext = textFrameNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
     textRenderContext->UpdateBorderRadius(radius);
+    BorderRadiusProperty outerBorderRadius;
+    auto outerBorderWidth = layoutProperty->GetBadgeOuterBorderWidthValue(badgeTheme->GetBadgeOuterBorderWidth());
+    outerBorderRadius.SetRadius(Dimension(badgeCircleRadius + outerBorderWidth.ConvertToPx()));
+    textRenderContext->UpdateOuterBorderRadius(outerBorderRadius);
 
     textLayoutProperty->UpdateAlignment(Alignment::CENTER);
 
@@ -301,6 +333,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutProperty->GetIsPositionXy().has_value() && !layoutProperty->GetIsPositionXy().value()) {
         textOffset = GetTextDataOffset(layoutProperty, badgeCircleDiameter, badgeCircleRadius,
             geometryNode, textData == u" ");
+        AdjustTextOffsetForBadge(layoutProperty, textGeometryNode, badgeCircleDiameter, textData == u" ", textOffset);
     } else {
         textOffset = GetTextOffsetByPosition(layoutProperty, geometryNode);
     }

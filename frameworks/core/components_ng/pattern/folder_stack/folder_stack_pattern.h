@@ -137,6 +137,7 @@ private:
     void RestoreScreenState();
     void SetAutoRotate();
     void UpdateChildAlignment();
+    bool IsSupportHoverState(const RefPtr<DisplayInfo>& displayInfo);
     std::optional<int32_t> foldStatusChangedCallbackId_;
     bool isScreenRotationLocked_ = false;
     Orientation lastOrientation_ = Orientation::UNSPECIFIED;

@@ -1375,7 +1375,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _PasteButton_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
-    native static _PasteButtonInterface_setPasteButtonOptions(ptr: KPointer): void
+    native static _PasteButtonInterface_setPasteButtonOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _PasteButtonAttribute_setOnClick(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -1617,7 +1617,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SaveButton_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
-    native static _SaveButtonInterface_setSaveButtonOptions(ptr: KPointer): void
+    native static _SaveButtonInterface_setSaveButtonOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SaveButtonAttribute_setOnClick(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -5521,6 +5521,14 @@ export class ArkUIGeneratedNativeModule {
     native static _TextTimerController_pause(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _TextTimerController_reset(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _ThemeOps_sendThemeToNative(thisArray: KSerializerBuffer, thisLength: int32, elmtId: KInt): void
+    @ani.unsafe.Direct
+    native static _ThemeOps_setDefaultTheme(thisArray: KSerializerBuffer, thisLength: int32, isDark: KInt): void
+    @ani.unsafe.Direct
+    native static _ThemeOps_createAndBindTheme(themeScopeId: KInt, themeId: KInt, thisArray: KSerializerBuffer, thisLength: int32, colorMode: KInt): void
+    @ani.unsafe.Direct
+    native static _ThemeOps_applyThemeScopeIdToNode(ptr: KPointer, themeScopeId: KInt): void
     @ani.unsafe.Direct
     native static _TimePickerDialog_construct(): KPointer
     @ani.unsafe.Direct

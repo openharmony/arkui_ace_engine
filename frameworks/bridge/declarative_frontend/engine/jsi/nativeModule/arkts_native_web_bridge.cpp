@@ -1219,6 +1219,63 @@ ArkUINativeModuleValue WebBridge::ResetOnNativeEmbedLifecycleChange(ArkUIRuntime
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue WebBridge::SetOnNativeEmbedObjectParamChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto obj = secondArg->ToObject(vm);
+    panda::Local<panda::FunctionRef> func = obj;
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::Undefined(vm));
+    std::function<void(NativeEmbedParamDataInfo&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                             func = panda::CopyableGlobal(vm, func)](
+                                                             NativeEmbedParamDataInfo& event) -> void {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(weak.Upgrade());
+        auto paramItems = event.GetParamItems();
+        auto paramArr = panda::ArrayRef::New(vm);
+        uint32_t idx = 0;
+        for (const auto& item : paramItems) {
+            const char* keys[] = { "status", "id", "name", "value" };
+            Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(item.status)),
+                panda::StringRef::NewFromUtf8(vm, item.id.c_str()),
+                panda::StringRef::NewFromUtf8(vm, item.name.c_str()),
+                panda::StringRef::NewFromUtf8(vm, item.value.c_str()) };
+            auto paramItemObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+            paramItemObj->SetNativePointerFieldCount(vm, 1);
+            panda::ArrayRef::SetValueAt(vm, paramArr, idx++, paramItemObj);
+        }
+        const char* keysEvent[] = { "embedId", "objectAttributeId", "paramItems" };
+        Local<JSValueRef> valuesEvent[] = { panda::StringRef::NewFromUtf8(vm, event.GetEmbedId().c_str()),
+            panda::StringRef::NewFromUtf8(vm, event.GetObjectAttributeId().c_str()), paramArr };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysEvent), keysEvent, valuesEvent);
+        eventObject->SetNativePointerFieldCount(vm, CALL_ARG_1);
+        eventObject->SetNativePointerField(vm, CALL_ARG_0, static_cast<void*>(&event));
+        panda::Local<panda::JSValueRef> params[CALL_ARG_1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, CALL_ARG_1);
+    };
+    GetArkUINodeModifiers()->getWebModifier()->setOnNativeEmbedObjectParamChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetOnNativeEmbedObjectParamChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetOnNativeEmbedObjectParamChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 Local<panda::ObjectRef> WebBridge::CreateEventTargetObject(EcmaVM* vm, const BaseEventInfo& info)
 {
     const auto& localOffset = info.GetTarget().area.GetOffset();

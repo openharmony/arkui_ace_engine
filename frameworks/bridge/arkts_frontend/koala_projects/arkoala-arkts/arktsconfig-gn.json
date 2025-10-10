@@ -88,6 +88,9 @@
             "@ohos/arkui/dragController": [
                 "@ohos.arkui.dragController.ets"
             ],
+            "@ohos/arkui/theme": [
+                "@ohos.arkui.theme.ets"
+            ],
             "arkui.Graphics": [
                 "./arkui/Graphics.ets"
             ],

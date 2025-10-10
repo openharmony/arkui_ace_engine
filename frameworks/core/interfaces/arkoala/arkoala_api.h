@@ -1009,6 +1009,9 @@ struct ArkUIBadgeParam {
     struct ArkUIDimensionType badgeSize;
     struct ArkUIDimensionType borderWidth;
     struct ArkUIDimensionType fontSize;
+    ArkUI_Bool enableAutoAvoidance;
+    ArkUI_Uint32 outerBorderColor;
+    struct ArkUIDimensionType outerBorderWidth;
 };
 
 struct ArkUI_StyledString_Descriptor {
@@ -3726,6 +3729,9 @@ struct ArkUISwiperModifier {
     void (*setSwiperOnScrollStateChanged)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnScrollStateChanged)(ArkUINodeHandle node);
     void (*setSwiperFinishAnimation)(ArkUINodeHandle node);
+    void (*setSwiperFillType)(ArkUINodeHandle node, ArkUI_Int32 fillType);
+    void (*resetSwiperFillType)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperFillType)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -4890,6 +4896,8 @@ struct ArkUITextAreaModifier {
     ArkUINodeHandle (*getTextAreaCustomKeyboard)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextAreaCustomKeyboardOption)(ArkUINodeHandle node);
     void (*resetTextAreaCustomKeyboard)(ArkUINodeHandle node);
+    void (*setTextAreaOnWillAttachIME)(ArkUINodeHandle node, void* callback);
+    void (*resetTextAreaOnWillAttachIME)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -5137,6 +5145,8 @@ struct ArkUITextInputModifier {
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
     void (*resetTextInputOnSecurityStateChange)(ArkUINodeHandle node);
+    void (*setTextInputOnWillAttachIME)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnWillAttachIME)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -5229,6 +5239,8 @@ struct ArkUIWebModifier {
     void (*resetOnNativeEmbedLifecycleChange)(ArkUINodeHandle node);
     void (*setOnNativeEmbedGestureEvent)(ArkUINodeHandle node, void* callback);
     void (*resetOnNativeEmbedGestureEvent)(ArkUINodeHandle node);
+    void (*setOnNativeEmbedObjectParamChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnNativeEmbedObjectParamChange)(ArkUINodeHandle node);
     void (*setRegisterNativeEmbedRule)(ArkUINodeHandle node, ArkUI_CharPtr tag, ArkUI_CharPtr type);
     void (*resetRegisterNativeEmbedRule)(ArkUINodeHandle node);
     void (*setNativeEmbedOptions)(ArkUINodeHandle node, ArkUI_Bool value);
@@ -6197,6 +6209,8 @@ struct ArkUISearchModifier {
     void (*resetSearchMargin)(ArkUINodeHandle node);
     void (*setSearchCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance);
     void (*resetSearchCustomKeyboard)(ArkUINodeHandle node);
+    void (*setSearchOnWillAttachIME)(ArkUINodeHandle node, void* callback);
+    void (*resetSearchOnWillAttachIME)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

@@ -302,7 +302,8 @@ bool AceContainer::IsCrossAxisWindow()
     return false;
 }
 
-void AceContainer::UpdateColorMode(uint32_t colorMode) {}
+void AceContainer::UpdateColorMode(uint32_t colorMode,
+    const ParsedConfig& parsedConfig, const std::string& configuration) {}
 
 void AceContainer::TriggerModuleSerializer() {}
 

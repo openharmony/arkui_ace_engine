@@ -223,6 +223,7 @@ interface ManagedState extends Disposable {
 }
 
 interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
+    forceCompleteRerender(): void
     hasDependencies(): boolean
     readonly id: KoalaCallsiteKey
     readonly node: IncrementalNode | undefined
@@ -297,7 +298,6 @@ export class StateImpl<Value> implements Observable, ManagedState, MutableState<
     get value(): Value {
         this.onAccess()
         const manager = this.manager
-        this.checkUIThreadAccess()
         return manager === undefined || manager.frozen ? this.snapshot : this.current(manager.journal)
     }
 

@@ -33,7 +33,8 @@ import {
     IncrementalNode
 } from "@koalaui/runtime"
 import { KPointer, runtimeType, RuntimeType } from "@koalaui/interop"
-import { UserViewBuilder, UserView, EntryPoint, NavInterface } from "../UserView"
+import { UserViewBuilder, UserView } from "../UserView"
+import { EntryPoint, NavInterface } from '../component/customComponent';
 import { ArkUINativeModule } from "#components"
 import { CommonMethod, CustomBuilder, Dimension, LayoutSafeAreaEdge, LayoutSafeAreaType, Length, NavBarPosition, NavContentInfo, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavigationMenuItem, NavigationMode, NavigationOperation, NavigationTitleMode, NavigationTitleOptions, NavigationToolbarOptions, PixelMap, Resource, ResourceStr, SystemBarStyle, ToolbarItem } from "#generated"
 import { RouteType } from "#generated"
@@ -359,7 +360,6 @@ class RouterImpl implements Router {
     }
 
     pushNamedRoute(options: router.NamedRouterOptions, mode?: router.RouterMode): Promise<void> {
-        console.log("sxy:: enter pushNamedRoute, routerName: " + options.name);
         if (mode !== undefined && mode === router.RouterMode.Single && this.findPageInStack(options.name)) {
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -433,7 +433,6 @@ class RouterImpl implements Router {
             };
             return RouterExtender.pushNamedRoute(jsViewNodePtr, pageOptions, pagePushTransitionCallback);
         }
-        console.log("sxy:: exit pushNamedRoute, routerName: " + options.name);
         return Promise.reject({
             code: 100002,
             message: "The uri of router is not exist."});

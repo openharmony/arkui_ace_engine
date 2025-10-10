@@ -1194,4 +1194,24 @@ void PipelineBase::ForceUpdateDesignWidthScale(int32_t width)
         viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
     }
 }
+
+WidthBreakpoint PipelineBase::GetCalcWidthBreakpoint(double width)
+{
+    WidthLayoutBreakPoint finalBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
+    WidthBreakpoint breakpoint;
+    if (finalBreakpoints.widthVPXS_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXS_ * density_, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_XS;
+    } else if (finalBreakpoints.widthVPSM_ < 0 || GreatNotEqual(finalBreakpoints.widthVPSM_ * density_, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_SM;
+    } else if (finalBreakpoints.widthVPMD_ < 0 || GreatNotEqual(finalBreakpoints.widthVPMD_ * density_, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_MD;
+    } else if (finalBreakpoints.widthVPLG_ < 0 || GreatNotEqual(finalBreakpoints.widthVPLG_ * density_, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_LG;
+    } else if (finalBreakpoints.widthVPXL_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXL_ * density_, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_XL;
+    } else {
+        breakpoint = WidthBreakpoint::WIDTH_XXL;
+    }
+    return breakpoint;
+}
 } // namespace OHOS::Ace

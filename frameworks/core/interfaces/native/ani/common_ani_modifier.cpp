@@ -804,10 +804,11 @@ void RemoveThemeInNative(ani_env* env, ani_int withThemeId)
 
 void SetDefaultTheme(ani_env* env, const std::vector<Ark_ResourceColor>& colorArray, ani_boolean isDark)
 {
-    // auto isDarkValue = static_cast<bool>(isDark);
-    // std::vector<uint32_t> colors;
-    // AniThemeModule::ConvertToColorArray(colorArray, colors);
-    // NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue);
+    auto isDarkValue = static_cast<bool>(isDark);
+    std::vector<uint32_t> colors;
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    AniThemeModule::ConvertToColorArray(colorArray, colors, resObjs);
+    NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue, static_cast<void*>(&resObjs));
 }
 
 void UpdateColorMode(ani_int colorMode)
@@ -836,24 +837,25 @@ void SetThemeScopeId(ani_env* env, ani_int themeScopeId)
 void CreateAndBindTheme(ani_env* env, ani_int themeScopeId, ani_int themeId,
     const std::vector<Ark_ResourceColor>& colorArray, ani_int colorMode, void* func)
 {
-    // int32_t colorModeValue = static_cast<int32_t>(colorMode);
+    int32_t colorModeValue = static_cast<int32_t>(colorMode);
 
-    // std::vector<uint32_t> colors;
-    // std::vector<RefPtr<ResourceObject>> resObjs;
-    // AniThemeModule::ConvertToColorArray(colorArray, colors);
+    std::vector<uint32_t> colors;
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    AniThemeModule::ConvertToColorArray(colorArray, colors, resObjs);
 
-    // if (!func) {
-    //     return;
-    // }
-    // auto themeModifier = NodeModifier::GetThemeModifier();
-    // auto theme = themeModifier->createTheme(themeId, colors.data(), colorModeValue, static_cast<void*>(&resObjs));
-    // CHECK_NULL_VOID(theme);
-    // ArkUINodeHandle node = themeModifier->getWithThemeNode(themeScopeId);
-    // if (!node) {
-    //     node = AniThemeModule::CreateWithThemeNode(themeScopeId);
-    // }
-    // themeModifier->createThemeScope(node, theme);
-    // themeModifier->setOnThemeScopeDestroy(node, func);
+    if (!func) {
+        return;
+    }
+    auto themeModifier = NodeModifier::GetThemeModifier();
+    auto theme = themeModifier->createTheme(themeId, colors.data(), colors.data(), colorModeValue,
+        static_cast<void*>(&resObjs), static_cast<void*>(&resObjs));
+    CHECK_NULL_VOID(theme);
+    ArkUINodeHandle node = themeModifier->getWithThemeNode(themeScopeId);
+    if (!node) {
+        node = AniThemeModule::CreateWithThemeNode(themeScopeId);
+    }
+    themeModifier->createThemeScope(node, theme);
+    themeModifier->setOnThemeScopeDestroy(node, func);
 }
 
 void ApplyParentThemeScopeId(ani_env* env, ani_long self, ani_long parent)

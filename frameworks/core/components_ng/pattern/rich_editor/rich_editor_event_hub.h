@@ -384,6 +384,18 @@ public:
         }
     }
 
+    void SetOnWillAttachIME(IMEAttachCallback&& func)
+    {
+        onWillAttachIME_ = std::move(func);
+    }
+
+    void FireOnWillAttachIME(IMEClient& info)
+    {
+        if (onWillAttachIME_) {
+            onWillAttachIME_(info);
+        }
+    }
+
     void SetOnWillChange(std::function<bool(const RichEditorChangeValue&)> && func);
     bool FireOnWillChange(const RichEditorChangeValue& info);
     bool HasOnWillChange() const;
@@ -423,6 +435,7 @@ private:
     std::function<void(NG::TextCommonEvent&)> onShare_;
     std::function<bool(const StyledStringChangeValue&)> onStyledStringWillChange_;
     std::function<void(const StyledStringChangeValue&)> onStyledStringDidChange_;
+    IMEAttachCallback onWillAttachIME_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorEventHub);
 };
 } // namespace OHOS::Ace::NG

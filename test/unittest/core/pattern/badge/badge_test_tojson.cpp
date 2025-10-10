@@ -301,6 +301,9 @@ HWTEST_F(BadgeTestToJson, BadgeLayoutPropertyToJsonStyle, TestSize.Level1)
     jsonValue->Put("borderWidth", layoutProperty_->GetBadgeBorderWidth().value().ToString().c_str());
     jsonValue->Put(
         "fontWeight", V2::ConvertWrapFontWeightToStirng(layoutProperty_->GetBadgeFontWeight().value()).c_str());
+    jsonValue->Put("outerBorderColor", layoutProperty_->GetBadgeOuterBorderColor().value().ColorToString().c_str());
+    jsonValue->Put("outerBorderWidth", layoutProperty_->GetBadgeOuterBorderWidth().value().ToString().c_str());
+    jsonValue->Put("enableAutoAvoidance", layoutProperty_->GetIsEnableAutoAvoidance().value());
 
     /**
      * @tc.steps: step2. call ToJsonValue.

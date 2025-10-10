@@ -1899,11 +1899,11 @@ HWTEST_F(NavigationPatternTestFiveNg, NotifyNavDestinationSwitch002, TestSize.Le
 }
 
 /**
- * @tc.name: IsHomeDestinationVisible
+ * @tc.name: IsHomeDestinationOrNavBarVisible
  * @tc.desc: Branch: if (navigationMode_ == NavigationMode::STACK)
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestFiveNg, IsHomeDestinationVisible, TestSize.Level1)
+HWTEST_F(NavigationPatternTestFiveNg, IsHomeDestinationOrNavBarVisible, TestSize.Level1)
 {
     NavigationPatternTestFiveNg::SetUpTestSuite();
     MockPipelineContextGetTheme();
@@ -1918,11 +1918,11 @@ HWTEST_F(NavigationPatternTestFiveNg, IsHomeDestinationVisible, TestSize.Level1)
     
     pattern->navigationMode_ = NavigationMode::STACK;
     navNode->lastStandardIndex_ = 0;
-    bool ret = pattern->IsHomeDestinationVisible();
+    bool ret = pattern->IsHomeDestinationOrNavBarVisible();
     EXPECT_FALSE(ret);
     
     navNode->lastStandardIndex_ = -1;
-    ret = pattern->IsHomeDestinationVisible();
+    ret = pattern->IsHomeDestinationOrNavBarVisible();
     EXPECT_TRUE(ret);
 }
 } // namespace OHOS::Ace::NG

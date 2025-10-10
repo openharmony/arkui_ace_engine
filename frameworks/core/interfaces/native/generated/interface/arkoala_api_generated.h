@@ -779,6 +779,8 @@ typedef struct Ark_Union_I32_TextOverflow Ark_Union_I32_TextOverflow;
 typedef struct Opt_Union_I32_TextOverflow Opt_Union_I32_TextOverflow;
 typedef struct Ark_Union_I64_String Ark_Union_I64_String;
 typedef struct Opt_Union_I64_String Opt_Union_I64_String;
+typedef struct Ark_Union_ImageAnalyzerController_Object Ark_Union_ImageAnalyzerController_Object;
+typedef struct Opt_Union_ImageAnalyzerController_Object Opt_Union_ImageAnalyzerController_Object;
 typedef struct Ark_Union_Number_FontWeight_String Ark_Union_Number_FontWeight_String;
 typedef struct Opt_Union_Number_FontWeight_String Opt_Union_Number_FontWeight_String;
 typedef struct Ark_Union_Number_String Ark_Union_Number_String;
@@ -2567,6 +2569,10 @@ typedef struct Ark_PageRouterOptions Ark_PageRouterOptions;
 typedef struct Opt_PageRouterOptions Opt_PageRouterOptions;
 typedef struct Ark_PasswordIcon Ark_PasswordIcon;
 typedef struct Opt_PasswordIcon Opt_PasswordIcon;
+typedef struct Ark_PasteButtonOptions Ark_PasteButtonOptions;
+typedef struct Opt_PasteButtonOptions Opt_PasteButtonOptions;
+typedef struct Ark_SaveButtonOptions Ark_SaveButtonOptions;
+typedef struct Opt_SaveButtonOptions Opt_SaveButtonOptions;
 typedef struct Ark_PasteEvent Ark_PasteEvent;
 typedef struct Opt_PasteEvent Opt_PasteEvent;
 typedef struct Ark_PluginComponentOptions Ark_PluginComponentOptions;
@@ -8040,6 +8046,18 @@ typedef struct Opt_Union_I64_String {
     Ark_Tag tag;
     Ark_Union_I64_String value;
 } Opt_Union_I64_String;
+typedef struct Ark_Union_ImageAnalyzerController_Object {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_ImageAnalyzerController value0;
+        Ark_Object value1;
+    };
+} Ark_Union_ImageAnalyzerController_Object;
+typedef struct Opt_Union_ImageAnalyzerController_Object {
+    Ark_Tag tag;
+    Ark_Union_ImageAnalyzerController_Object value;
+} Opt_Union_ImageAnalyzerController_Object;
 typedef struct Ark_Union_Number_FontWeight_String {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -13121,7 +13139,7 @@ typedef struct Opt_HoverEventParam {
 typedef struct Ark_ImageAIOptions {
     /* kind: Interface */
     Opt_Array_ImageAnalyzerType types;
-    Opt_ImageAnalyzerController aiController;
+    Opt_Union_ImageAnalyzerController_Object aiController;
 } Ark_ImageAIOptions;
 typedef struct Opt_ImageAIOptions {
     Ark_Tag tag;
@@ -16474,6 +16492,24 @@ typedef struct Opt_PasswordIcon {
     Ark_Tag tag;
     Ark_PasswordIcon value;
 } Opt_PasswordIcon;
+typedef struct Ark_PasteButtonOptions {
+    Opt_PasteIconStyle icon;
+    Opt_PasteDescription text;
+    Opt_ButtonType buttonType;
+} Ark_PasteButtonOptions;
+typedef struct Opt_PasteButtonOptions {
+    Ark_Tag tag;
+    Ark_PasteButtonOptions value;
+} Opt_PasteButtonOptions;
+typedef struct Ark_SaveButtonOptions {
+    Opt_SaveIconStyle icon;
+    Opt_SaveDescription text;
+    Opt_ButtonType buttonType;
+} Ark_SaveButtonOptions;
+typedef struct Opt_SaveButtonOptions {
+    Ark_Tag tag;
+    Ark_SaveButtonOptions value;
+} Opt_SaveButtonOptions;
 typedef struct Ark_PasteEvent {
     /* kind: Interface */
     Opt_VoidCallback preventDefault;
@@ -21554,7 +21590,8 @@ typedef struct GENERATED_ArkUINodeContainerModifier {
 typedef struct GENERATED_ArkUIPasteButtonModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
-    void (*setPasteButtonOptions)(Ark_NativePointer node);
+    void (*setPasteButtonOptions)(Ark_NativePointer node,
+                                  const Opt_PasteButtonOptions* value);
     void (*setOnClick)(Ark_NativePointer node,
                        const Opt_PasteButtonCallback* value);
 } GENERATED_ArkUIPasteButtonModifier;
@@ -21860,7 +21897,8 @@ typedef struct GENERATED_ArkUIRowSplitModifier {
 typedef struct GENERATED_ArkUISaveButtonModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
-    void (*setSaveButtonOptions)(Ark_NativePointer node);
+    void (*setSaveButtonOptions)(Ark_NativePointer node,
+                                 const Opt_SaveButtonOptions* value);
     void (*setOnClick)(Ark_NativePointer node,
                        const Opt_SaveButtonCallback* value);
     void (*setSetIcon)(Ark_NativePointer node,
@@ -26165,6 +26203,20 @@ typedef struct GENERATED_ArkUITextTimerControllerAccessor {
     void (*reset)(Ark_TextTimerController peer);
 } GENERATED_ArkUITextTimerControllerAccessor;
 
+typedef struct GENERATED_ArkUIThemeOpsAccessor {
+    void (*sendThemeToNative)(const Array_ResourceColor* colorArray,
+                              Ark_Int32 elmtId);
+    void (*setDefaultTheme)(const Array_ResourceColor* colorArray,
+                            Ark_Boolean isDark);
+    void (*createAndBindTheme)(Ark_Int32 themeScopeId,
+                               Ark_Int32 themeId,
+                               const Array_ResourceColor* colorArray,
+                               Ark_ThemeColorMode colorMode,
+                               const Callback_Void* onThemeScopeDestroy);
+    void (*applyThemeScopeIdToNode)(Ark_NativePointer ptr,
+                                    Ark_Int32 themeScopeId);
+} GENERATED_ArkUIThemeOpsAccessor;
+
 typedef struct GENERATED_ArkUITimePickerDialogAccessor {
     void (*destroyPeer)(Ark_TimePickerDialog peer);
     Ark_TimePickerDialog (*construct)();
@@ -26753,6 +26805,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUITextShadowStyleAccessor* (*getTextShadowStyleAccessor)();
     const GENERATED_ArkUITextStyleAccessor* (*getTextStyleAccessor)();
     const GENERATED_ArkUITextTimerControllerAccessor* (*getTextTimerControllerAccessor)();
+    const GENERATED_ArkUIThemeOpsAccessor* (*getThemeOpsAccessor)();
     const GENERATED_ArkUITimePickerDialogAccessor* (*getTimePickerDialogAccessor)();
     const GENERATED_ArkUITouchEventAccessor* (*getTouchEventAccessor)();
     const GENERATED_ArkUITransitionEffectAccessor* (*getTransitionEffectAccessor)();

@@ -4162,7 +4162,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // PasteButtonModifier
     namespace PasteButtonInterfaceModifier {
-    void SetPasteButtonOptionsImpl(Ark_NativePointer node)
+    void SetPasteButtonOptionsImpl(Ark_NativePointer node,
+                                   const Opt_PasteButtonOptions* options)
     {
     }
     } // PasteButtonInterfaceModifier
@@ -4784,7 +4785,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // SaveButtonModifier
     namespace SaveButtonInterfaceModifier {
-    void SetSaveButtonOptionsImpl(Ark_NativePointer node)
+    void SetSaveButtonOptionsImpl(Ark_NativePointer node,
+                                  const Opt_SaveButtonOptions* options)
     {
     }
     } // SaveButtonInterfaceModifier
@@ -17236,6 +17238,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // TextTimerControllerAccessor
+    namespace ThemeOpsAccessor {
+    void SendThemeToNativeImpl(const Array_ResourceColor* colorArray,
+                               Ark_Int32 elmtId)
+    {
+    }
+    void SetDefaultThemeImpl(const Array_ResourceColor* colorArray,
+                             Ark_Boolean isDark)
+    {
+    }
+    } // ThemeOpsAccessor
     namespace TimePickerDialogAccessor {
     void DestroyPeerImpl(Ark_TimePickerDialog peer)
     {
@@ -21017,6 +21029,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct TextTimerControllerPeer {
         virtual ~TextTimerControllerPeer() = default;
     };
+    const GENERATED_ArkUIThemeOpsAccessor* GetThemeOpsAccessor()
+    {
+        static const GENERATED_ArkUIThemeOpsAccessor ThemeOpsAccessorImpl {
+            ThemeOpsAccessor::SendThemeToNativeImpl,
+            ThemeOpsAccessor::SetDefaultThemeImpl,
+        };
+        return &ThemeOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
     {
         static const GENERATED_ArkUITimePickerDialogAccessor TimePickerDialogAccessorImpl {
@@ -21549,6 +21570,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetTextShadowStyleAccessor,
             GetTextStyleAccessor,
             GetTextTimerControllerAccessor,
+            GetThemeOpsAccessor,
             GetTimePickerDialogAccessor,
             GetTouchEventAccessor,
             GetTransitionEffectAccessor,

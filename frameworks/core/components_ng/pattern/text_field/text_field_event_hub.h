@@ -64,9 +64,36 @@ struct ChangeValueInfo {
     PreviewText oldPreviewText;
 };
 
+class IMEExtraInfo : public virtual AceType {
+    DECLARE_ACE_TYPE(IMEExtraInfo, AceType);
+
+public:
+    IMEExtraInfo(void* imeExtraInfo, std::function<void()>&& callback)
+        : imeExtraInfo_(imeExtraInfo), destroyCallback_(std::move(callback))
+    {}
+    ~IMEExtraInfo()
+    {
+        if (destroyCallback_) {
+            destroyCallback_();
+        }
+    }
+
+    void* GetExtraInfo()
+    {
+        return imeExtraInfo_;
+    }
+
+private:
+    void* imeExtraInfo_ = nullptr;
+    std::function<void()> destroyCallback_;
+};
+
 struct IMEClient {
     int32_t nodeId = -1;
+    RefPtr<IMEExtraInfo> extraInfo = nullptr;
 };
+
+using IMEAttachCallback = std::function<void(IMEClient&)>;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -419,12 +446,12 @@ public:
         }
     }
 
-    void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func)
+    void SetOnWillAttachIME(IMEAttachCallback&& func)
     {
         onWillAttachIME_ = std::move(func);
     }
 
-    void FireOnWillAttachIME(const IMEClient& info)
+    void FireOnWillAttachIME(IMEClient& info)
     {
         if (onWillAttachIME_) {
             onWillAttachIME_(info);
@@ -463,7 +490,7 @@ private:
     std::function<bool(const DeleteValueInfo&)> onWillDeleteEvent_;
     std::function<void(const DeleteValueInfo&)> onDidDeleteEvent_;
 
-    std::function<void(const IMEClient&)> onWillAttachIME_;
+    IMEAttachCallback onWillAttachIME_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldEventHub);
 };
 

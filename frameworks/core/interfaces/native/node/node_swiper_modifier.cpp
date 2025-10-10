@@ -729,6 +729,8 @@ void SetSwiperMinSize(ArkUINodeHandle node, ArkUI_Float32 minSizeValue, ArkUI_In
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::ResetDisplayCountWithObject(frameNode);
+    SwiperModelNG::ResetDisplayMode(frameNode);
     SwiperModelNG::SetMinSize(frameNode, CalcDimension(minSizeValue, (DimensionUnit)minSizeUnitt));
 }
 
@@ -779,14 +781,17 @@ void SetSwiperDisplayCount(ArkUINodeHandle node, ArkUI_CharPtr displayCountChar,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::ResetDisplayCountWithObject(frameNode);
+    SwiperModelNG::ResetDisplayMode(frameNode);
     std::string displayCountValue = std::string(displayCountChar);
     std::string type = std::string(displayCountType);
+
     if (type == "string" && displayCountValue == "auto") {
         SwiperModelNG::SetDisplayMode(frameNode, SwiperDisplayMode::AUTO_LINEAR);
         SwiperModelNG::ResetDisplayCount(frameNode);
     } else if (type == "number" && StringUtils::StringToInt(displayCountValue) > 0) {
         SwiperModelNG::SetDisplayCount(frameNode, StringUtils::StringToInt(displayCountValue));
-    } else if (type == "object") {
+    } else if (type == "minSize") {
         if (displayCountValue.empty()) {
             return;
         }
@@ -795,6 +800,8 @@ void SetSwiperDisplayCount(ArkUINodeHandle node, ArkUI_CharPtr displayCountChar,
             minSizeValue.SetValue(0.0);
         }
         SwiperModelNG::SetMinSize(frameNode, minSizeValue);
+    } else if (type == "fillType") {
+        SwiperModelNG::SetFillType(frameNode, StringUtils::StringToInt(displayCountValue));
     } else {
         SwiperModelNG::SetDisplayCount(frameNode, DEFAULT_DISPLAY_COUNT);
     }
@@ -804,6 +811,8 @@ void ResetSwiperDisplayCount(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::ResetDisplayCountWithObject(frameNode);
+    SwiperModelNG::ResetDisplayMode(frameNode);
     SwiperModelNG::SetDisplayCount(frameNode, DEFAULT_DISPLAY_COUNT);
 }
 
@@ -1896,6 +1905,29 @@ void SetSwiperFinishAnimation(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetSwiperFinishAnimation(frameNode);
 }
+
+void SetSwiperFillType(ArkUINodeHandle node, ArkUI_Int32 fillType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::ResetDisplayCountWithObject(frameNode);
+    SwiperModelNG::ResetDisplayMode(frameNode);
+    SwiperModelNG::SetFillType(frameNode, fillType);
+}
+
+void ResetSwiperFillType(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetFillType(frameNode, NUM_0);
+}
+
+ArkUI_Int32 GetSwiperFillType(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    return SwiperModelNG::GetFillType(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2014,6 +2046,9 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setSwiperOnScrollStateChanged = SetSwiperOnScrollStateChanged,
         .resetSwiperOnScrollStateChanged = ResetSwiperOnScrollStateChanged,
         .setSwiperFinishAnimation = SetSwiperFinishAnimation,
+        .setSwiperFillType = SetSwiperFillType,
+        .resetSwiperFillType = ResetSwiperFillType,
+        .getSwiperFillType = GetSwiperFillType,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

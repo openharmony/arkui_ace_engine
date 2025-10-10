@@ -780,6 +780,32 @@ void ResetOnNativeEmbedGestureEvent(ArkUINodeHandle node)
     WebModelNG::SetNativeEmbedGestureEventId(frameNode, nullptr);
 }
 
+void SetOnNativeEmbedObjectParamChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* originalCallbackPtr = reinterpret_cast<std::function<void(NativeEmbedParamDataInfo&)>*>(extraParam);
+    CHECK_NULL_VOID(originalCallbackPtr);
+    if (extraParam) {
+        auto adaptedCallback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (auto changeEvent = static_cast<const NativeEmbedParamDataInfo*>(event)) {
+                auto& onNativeEmbedObjectParamChange = const_cast<NativeEmbedParamDataInfo&>(*changeEvent);
+                originalCallback(onNativeEmbedObjectParamChange);
+            }
+        };
+        WebModelNG::SetNativeEmbedObjectParamChangeId(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetNativeEmbedObjectParamChangeId(frameNode, nullptr);
+    }
+}
+
+void ResetOnNativeEmbedObjectParamChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetNativeEmbedObjectParamChangeId(frameNode, nullptr);
+}
+
 void SetRegisterNativeEmbedRule(ArkUINodeHandle node, ArkUI_CharPtr tag, ArkUI_CharPtr type)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2454,6 +2480,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnNativeEmbedLifecycleChange = ResetOnNativeEmbedLifecycleChange,
         .setOnNativeEmbedGestureEvent = SetOnNativeEmbedGestureEvent,
         .resetOnNativeEmbedGestureEvent = ResetOnNativeEmbedGestureEvent,
+        .setOnNativeEmbedObjectParamChange = SetOnNativeEmbedObjectParamChange,
+        .resetOnNativeEmbedObjectParamChange = ResetOnNativeEmbedObjectParamChange,
         .setRegisterNativeEmbedRule = SetRegisterNativeEmbedRule,
         .resetRegisterNativeEmbedRule = ResetRegisterNativeEmbedRule,
         .setNativeEmbedOptions = SetNativeEmbedOptions,
@@ -2683,6 +2711,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnNativeEmbedLifecycleChange = ResetOnNativeEmbedLifecycleChange,
         .setOnNativeEmbedGestureEvent = SetOnNativeEmbedGestureEvent,
         .resetOnNativeEmbedGestureEvent = ResetOnNativeEmbedGestureEvent,
+        .setOnNativeEmbedObjectParamChange = SetOnNativeEmbedObjectParamChange,
+        .resetOnNativeEmbedObjectParamChange = ResetOnNativeEmbedObjectParamChange,
         .setRegisterNativeEmbedRule = SetRegisterNativeEmbedRule,
         .resetRegisterNativeEmbedRule = ResetRegisterNativeEmbedRule,
         .setNativeEmbedOptions = SetNativeEmbedOptions,

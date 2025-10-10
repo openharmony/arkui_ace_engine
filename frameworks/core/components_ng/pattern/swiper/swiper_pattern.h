@@ -537,6 +537,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     bool IsAutoFill() const;
+    bool IsBreakPointType() const;
     void SwipeToWithoutAnimation(int32_t index, std::optional<int32_t> rawIndex = std::nullopt);
     void StopAutoPlay();
     void StartAutoPlay();

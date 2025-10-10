@@ -627,6 +627,20 @@ class WebNativeEmbedOptionsModifier extends ModifierWithKey<EmbedOptions> {
   }
 }
 
+class WebOnNativeEmbedObjectParamChangeModifier extends ModifierWithKey<(DataInfo: NativeEmbedParamDataInfo) => void> {
+  constructor (value: (DataInfo: NativeEmbedParamDataInfo) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnNativeEmbedObjectParamChangeModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnNativeEmbedObjectParamChange(node);
+    } else {
+      getUINativeModule().web.setOnNativeEmbedObjectParamChange(node, this.value);
+    }
+  }
+}
+
 class WebOnFirstContentfulPaintModifier extends ModifierWithKey<(navigationStartTick: number, firstContentfulPaintMs: number) => void> {
   constructor(value: (navigationStartTick: number, firstContentfulPaintMs: number) => void) {
     super(value);
@@ -1948,6 +1962,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   onNativeEmbedGestureEvent(callback: (event: NativeEmbedTouchInfo) => void): this {
     modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedGestureEventModifier.identity, WebOnNativeEmbedGestureEventModifier, callback);
+    return this;
+  }
+  onNativeEmbedObjectParamChange(callback: (event: NativeEmbedParamDataInfo) => void): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedObjectParamChangeModifier.identity, WebOnNativeEmbedObjectParamChangeModifier, callback);
     return this;
   }
   registerNativeEmbedRule(tag: string, type: string): this {

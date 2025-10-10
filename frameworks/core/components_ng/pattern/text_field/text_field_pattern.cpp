@@ -1956,10 +1956,15 @@ void TextFieldPattern::HandleOnCameraInput()
     if (imeShown_) {
         inputMethod->StartInputTypeAsync(MiscServices::InputType::CAMERA_INPUT);
     } else {
-        FireOnWillAttachIME();
+        auto clientInfo = GetIMEClientInfo();
+        FireOnWillAttachIME(clientInfo);
         auto optionalTextConfig = GetMiscTextConfig();
         CHECK_NULL_VOID(optionalTextConfig.has_value());
         MiscServices::TextConfig textConfig = optionalTextConfig.value();
+        if (clientInfo.extraInfo && clientInfo.extraInfo->GetExtraInfo()) {
+            textConfig.inputAttribute.extraConfig =
+                *reinterpret_cast<MiscServices::ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
+        }
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnCameraInput set calling window id is : %{public}u",
             textConfig.windowId);
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -4881,10 +4886,15 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "RequestKeyboard, inputMethod is null");
         return false;
     }
-    FireOnWillAttachIME();
+    auto clientInfo = GetIMEClientInfo();
+    FireOnWillAttachIME(clientInfo);
     auto optionalTextConfig = GetMiscTextConfig();
     CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
     MiscServices::TextConfig textConfig = optionalTextConfig.value();
+    if (clientInfo.extraInfo && clientInfo.extraInfo->GetExtraInfo()) {
+        textConfig.inputAttribute.extraConfig =
+            *reinterpret_cast<MiscServices::ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
+    }
     ACE_LAYOUT_SCOPED_TRACE("RequestKeyboard[id:%d][WId:%u]", tmpHost->GetId(), textConfig.windowId);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
         " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d, sourceType:%{public}u"
@@ -11722,13 +11732,13 @@ IMEClient TextFieldPattern::GetIMEClientInfo()
     return clientInfo;
 }
 
-void TextFieldPattern::FireOnWillAttachIME()
+void TextFieldPattern::FireOnWillAttachIME(IMEClient& imeClient)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnWillAttachIME(GetIMEClientInfo());
+    eventHub->FireOnWillAttachIME(imeClient);
 }
 
 void TextFieldPattern::OnColorModeChange(uint32_t colorMode)

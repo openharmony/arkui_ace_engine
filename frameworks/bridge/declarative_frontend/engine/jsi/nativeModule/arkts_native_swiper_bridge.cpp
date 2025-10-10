@@ -262,7 +262,7 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperDisplayCount(ArkUIRuntimeCallInfo*
         Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_TYPE_INDEX);
         std::string displayCountValue;
         std::string type = typeArg->ToString(vm)->ToString(vm);
-        if (type == "number") {
+        if (type == "number" || type == "fillType") {
             displayCountValue = std::to_string(valueArg->Int32Value(vm));
         } else {
             displayCountValue = valueArg->ToString(vm)->ToString(vm);
