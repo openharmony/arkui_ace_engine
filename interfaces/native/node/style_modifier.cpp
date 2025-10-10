@@ -17158,7 +17158,7 @@ int32_t SetSliderBlockLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_Att
     for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
         colorValues.push_back(colorStop->colors[i]);
     }
-    gradientObj.color = &(*colorValues.begin());
+    gradientObj.color = colorValues.data();
     std::vector<ArkUILengthType> offsetValues;
     for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
         auto stop = colorStop->stops[i];
@@ -17170,7 +17170,7 @@ int32_t SetSliderBlockLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_Att
             offsetValues.push_back(ArkUILengthType {.number = stop});
         }
     }
-    gradientObj.offset = &(*offsetValues.begin());
+    gradientObj.offset = offsetValues.data();
     fullImpl->getNodeModifiers()->getSliderModifier()->setLinearBlockColor(
         node->uiNodeHandle, &gradientObj, colorLength);
     return ERROR_CODE_NO_ERROR;
@@ -17228,8 +17228,8 @@ int32_t SetSliderSelectedLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_
             offsetValues.push_back(ArkUILengthType {.number = stop});
         }
     }
-    gradientObj.color = &(*colorValues.begin());
-    gradientObj.offset = &(*offsetValues.begin());
+    gradientObj.color = colorValues.data();
+    gradientObj.offset = offsetValues.data();
     fullImpl->getNodeModifiers()->getSliderModifier()->setLinearSelectColor(
         node->uiNodeHandle, &gradientObj, colorLength);
     return ERROR_CODE_NO_ERROR;
@@ -17278,7 +17278,7 @@ int32_t SetSliderTrackLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_Att
     for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
         colorValues.push_back(colorStop->colors[i]);
     }
-    gradientObj.color = &(*colorValues.begin());
+    gradientObj.color = colorValues.data();
     std::vector<ArkUILengthType> offsetValues;
     for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
         auto stop = colorStop->stops[i];
@@ -17290,7 +17290,7 @@ int32_t SetSliderTrackLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_Att
             offsetValues.push_back(ArkUILengthType {.number = stop});
         }
     }
-    gradientObj.offset = &(*offsetValues.begin());
+    gradientObj.offset = offsetValues.data();
     fullImpl->getNodeModifiers()->getSliderModifier()->setLinearTrackBackgroundColor(
         node->uiNodeHandle, &gradientObj, colorLength);
     return ERROR_CODE_NO_ERROR;
