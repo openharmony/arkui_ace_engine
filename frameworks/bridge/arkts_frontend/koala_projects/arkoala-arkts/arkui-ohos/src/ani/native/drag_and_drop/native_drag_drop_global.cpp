@@ -255,7 +255,7 @@ void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
         if (isUndef != ANI_TRUE) {
             ani_object value = static_cast<ani_object>(onlyForLifting);
             ani_boolean onlyForLiftingValue;
-            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "unboxed", ":z", &onlyForLiftingValue)) {
+            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "toBoolean", ":z", &onlyForLiftingValue)) {
                 info.onlyForLifting = static_cast<bool>(onlyForLiftingValue);
             }
         }
@@ -267,7 +267,7 @@ void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
         if (isUndef != ANI_TRUE) {
             ani_object value = static_cast<ani_object>(delayCreating);
             ani_boolean delayCreatingValue;
-            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "unboxed", ":z", &delayCreatingValue)) {
+            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "toBoolean", ":z", &delayCreatingValue)) {
                 info.delayCreating = static_cast<bool>(delayCreatingValue);
             }
         }
@@ -476,7 +476,7 @@ bool ParseNumberBadge(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_
     if (AniUtils::IsClassObject(env, numberBadgeObj, "std.core.Boolean")) {
         previewOptions.isNumber = false;
         ani_boolean aniValue;
-        if (ANI_OK == env->Object_CallMethodByName_Boolean(numberBadgeObj, "unboxed", nullptr, &aniValue)) {
+        if (ANI_OK == env->Object_CallMethodByName_Boolean(numberBadgeObj, "toBoolean", nullptr, &aniValue)) {
             previewOptions.isShowBadge = static_cast<bool>(aniValue);
         }
         return true;
@@ -485,7 +485,7 @@ bool ParseNumberBadge(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_
         return false;
     }
     ani_double numberValue;
-    if ((ANI_OK != env->Object_CallMethodByName_Double(numberBadgeObj, "unboxed", ":d", &numberValue))) {
+    if ((ANI_OK != env->Object_CallMethodByName_Double(numberBadgeObj, "toDouble", ":d", &numberValue))) {
         return false;
     }
     auto number = static_cast<double>(numberValue);
@@ -542,7 +542,7 @@ void SetPropertyValueByName(ani_env* env, ani_object obj, std::string name, bool
         return;
     }
     ani_boolean aniValue;
-    if (ANI_OK != env->Object_CallMethodByName_Boolean(valueObj, "unboxed", nullptr, &aniValue)) {
+    if (ANI_OK != env->Object_CallMethodByName_Boolean(valueObj, "toBoolean", nullptr, &aniValue)) {
         return;
     }
     target = static_cast<bool>(aniValue);
