@@ -1254,7 +1254,7 @@ Local<panda::ObjectRef> WebBridge::CreateTouchEventInfoObj(EcmaVM* vm, TouchEven
 {
     const char* keys[] = { "source", "timestamp", "target", "pressure", "sourceTool", "targetDisplayId", "deviceId" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
-        panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
+        panda::NumberRef::New(vm, static_cast<double>(GetSysTimestamp())),
         CreateEventTargetObject(vm, info), panda::NumberRef::New(vm, info.GetForce()),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceTool())),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTargetDisplayId())),
@@ -1268,13 +1268,16 @@ Local<panda::ObjectRef> WebBridge::CreateTouchInfo(EcmaVM* vm, const TouchLocati
     const Offset& globalOffset = touchInfo.GetGlobalLocation();
     const Offset& localOffset = touchInfo.GetLocalLocation();
     const Offset& screenOffset = touchInfo.GetScreenLocation();
-    const char* keys[] = { "type", "id", "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x", "y" };
+    const Offset& globalDisplayLocation = touchInfo.GetGlobalDisplayLocation();
+    const char* keys[] = { "type", "id", "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x", "y",
+        "globalDisplayX", "globalDisplayY" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(touchInfo.GetTouchType())),
         panda::NumberRef::New(vm, touchInfo.GetFingerId()), panda::NumberRef::New(vm, screenOffset.GetX()),
         panda::NumberRef::New(vm, screenOffset.GetY()), panda::NumberRef::New(vm, globalOffset.GetX()),
         panda::NumberRef::New(vm, globalOffset.GetY()), panda::NumberRef::New(vm, globalOffset.GetX()),
         panda::NumberRef::New(vm, globalOffset.GetY()), panda::NumberRef::New(vm, localOffset.GetX()),
-        panda::NumberRef::New(vm, localOffset.GetY()) };
+        panda::NumberRef::New(vm, localOffset.GetY()), panda::NumberRef::New(vm, globalDisplayLocation.GetX()),
+        panda::NumberRef::New(vm, globalDisplayLocation.GetY()) };
     auto touchInfoObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     touchInfoObj->SetNativePointerFieldCount(vm, 1);
     touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
