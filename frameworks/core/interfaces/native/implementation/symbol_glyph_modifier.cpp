@@ -219,7 +219,6 @@ void SetSymbolEffect0Impl(Ark_NativePointer node,
     if (optSymbolEffect.has_value()) {
         ParseSymbolEffectOptions(symbolEffectOptions, optSymbolEffect.value());
     }
-    symbolEffectOptions.SetIsActive(false);
     SymbolModelNG::SetSymbolEffectOptions(frameNode, symbolEffectOptions);
 }
 void SetMinFontScaleImpl(Ark_NativePointer node,
@@ -252,8 +251,6 @@ void SetSymbolEffect1Impl(Ark_NativePointer node,
     auto optBool = Converter::OptConvertPtr<bool>(isActive);
     if (optBool.has_value()) {
         symbolEffectOptions.SetIsActive(optBool.value());
-    } else {
-        symbolEffectOptions.SetIsActive(false);
     }
     SymbolModelNG::SetSymbolEffectOptions(frameNode, symbolEffectOptions);
 }
