@@ -66,15 +66,13 @@ ArkUINativeModuleValue ScrollBarBridge::SetScrollBarScrollBarColor(ArkUIRuntimeC
         RefPtr<ResourceObject> resObj;
         if (!ArkTSUtils::ParseColorMetricsToColor(vm, secondArg, color, resObj)) {
             GetArkUINodeModifiers()->getScrollBarModifier()->resetScrollBarScrollBarColor(nativeNode);
-            GetArkUINodeModifiers()->getScrollBarModifier()->createScrollBarScrollBarColorWithResourceObj(
-                nativeNode, nullptr);
         } else {
             auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
             ArkTSUtils::CompleteResourceObjectFromColor(resObj, color, true, nodeInfo);
             GetArkUINodeModifiers()->getScrollBarModifier()->setScrollBarScrollBarColor(nativeNode, color.GetValue());
-            GetArkUINodeModifiers()->getScrollBarModifier()->createScrollBarScrollBarColorWithResourceObj(
-                nativeNode, AceType::RawPtr(resObj));
         }
+        GetArkUINodeModifiers()->getScrollBarModifier()->createScrollBarScrollBarColorWithResourceObj(
+            nativeNode, AceType::RawPtr(resObj));
     } else {
         if (!ParseColorMetricsToColor(vm, secondArg, color)) {
             GetArkUINodeModifiers()->getScrollBarModifier()->resetScrollBarScrollBarColor(nativeNode);
