@@ -225,6 +225,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/component/dataPanel.ets",
   "arkui-preprocessed/arkui/component/datePicker.ets",
   "arkui-preprocessed/arkui/component/divider.ets",
+  "arkui-preprocessed/arkui/component/dynamicComponent.ets",
   "arkui-preprocessed/arkui/component/effectComponent.ets",
   "arkui-preprocessed/arkui/component/ellipse.ets",
   "arkui-preprocessed/arkui/component/embeddedComponent.ets",
