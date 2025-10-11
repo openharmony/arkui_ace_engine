@@ -34,6 +34,10 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
+#include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
+#include "core/components_ng/pattern/navigation/navdestination_content_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
@@ -281,7 +285,7 @@ RefPtr<FrameNode> NavigationModelStatic::CreateFrameNode(int32_t nodeId)
         if (!navBarNode->GetContentNode()) {
             int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
             auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId,
-                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+                []() { return AceType::MakeRefPtr<NavDestinationContentPattern>(true); });
             auto navBarContentRenderContext = navBarContentNode->GetRenderContext();
             CHECK_NULL_RETURN(navBarContentRenderContext, nullptr);
             navBarContentRenderContext->UpdateClipEdge(true);
@@ -774,6 +778,11 @@ void NavigationModelStatic::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const 
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto content = AceType::DynamicCast<FrameNode>(navBarNode->GetContentNode());
+    CHECK_NULL_VOID(content);
+    auto contentLayoutProperty = content->GetLayoutProperty();
+    CHECK_NULL_VOID(contentLayoutProperty);
+    contentLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
 }
 
 bool NavigationModelStatic::CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode)

@@ -339,7 +339,7 @@ RefPtr<FrameNode> NavDestinationModelStatic::CreateFrameNode(int32_t nodeId, std
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
         auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+            []() { return AceType::MakeRefPtr<NavDestinationContentPattern>(true); });
         navDestinationNode->AddChild(contentNode);
         navDestinationNode->SetContentNode(contentNode);
     }
@@ -500,6 +500,11 @@ void NavDestinationModelStatic::SetIgnoreLayoutSafeArea(FrameNode* frameNode, co
     auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navdestinationLayoutProperty);
     navdestinationLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto content = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
+    CHECK_NULL_VOID(content);
+    auto contentLayoutProperty = content->GetLayoutProperty();
+    CHECK_NULL_VOID(contentLayoutProperty);
+    contentLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
 }
 
 void NavDestinationModelStatic::SetToolbarConfiguration(FrameNode* frameNode, 
