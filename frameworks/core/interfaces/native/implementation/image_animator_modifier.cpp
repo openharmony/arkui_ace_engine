@@ -106,7 +106,7 @@ void SetImagesImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto images = Converter::OptConvert<std::vector<ImageProperties>>(*value);
     if (!images) {
-        // Implement Reset value
+        ImageAnimatorModelNG::SetImages(frameNode, std::vector<ImageProperties>());
         return;
     }
     ImageAnimatorModelNG::SetImages(frameNode, *images);
@@ -135,7 +135,7 @@ void SetReverseImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        ImageAnimatorModelNG::SetIsReverse(frameNode, false);
         return;
     }
     ImageAnimatorModelNG::SetIsReverse(frameNode, *convValue);
@@ -147,7 +147,7 @@ void SetFixedSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        ImageAnimatorModelNG::SetFixedSize(frameNode, true);
         return;
     }
     ImageAnimatorModelNG::SetFixedSize(frameNode, *convValue);
@@ -176,7 +176,7 @@ void SetMonitorInvisibleAreaImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(frameNode, false);
         return;
     }
     ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(frameNode, *convValue);
@@ -188,7 +188,7 @@ void SetOnStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ImageAnimatorModelNG::SetOnStart(frameNode, nullptr);
         return;
     }
     auto onStart = [arkCallback = CallbackHelper(*optValue)]() -> void {
@@ -203,7 +203,7 @@ void SetOnPauseImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ImageAnimatorModelNG::SetOnPause(frameNode, nullptr);
         return;
     }
     auto onPause = [arkCallback = CallbackHelper(*optValue)]() -> void {
@@ -218,7 +218,7 @@ void SetOnRepeatImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ImageAnimatorModelNG::SetOnRepeat(frameNode, nullptr);
         return;
     }
     auto onRepeat = [arkCallback = CallbackHelper(*optValue)]() -> void {
@@ -233,7 +233,7 @@ void SetOnCancelImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ImageAnimatorModelNG::SetOnCancel(frameNode, nullptr);
         return;
     }
     auto onCancel = [arkCallback = CallbackHelper(*optValue)]() -> void {
@@ -248,7 +248,7 @@ void SetOnFinishImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ImageAnimatorModelNG::SetOnFinish(frameNode, nullptr);
         return;
     }
     auto onFinish = [arkCallback = CallbackHelper(*optValue)]() -> void {

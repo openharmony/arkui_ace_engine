@@ -49,12 +49,8 @@ void SetEnableLoadingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
-    LoadingProgressModelNG::SetEnableLoading(frameNode, *convValue);
+    auto convValue = Converter::OptConvert<bool>(*value).value_or(true);
+    LoadingProgressModelNG::SetEnableLoading(frameNode, convValue);
 }
 } // LoadingProgressAttributeModifier
 const GENERATED_ArkUILoadingProgressModifier* GetLoadingProgressModifier()

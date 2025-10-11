@@ -37,7 +37,7 @@ void ProgressModelStatic::SetColor(FrameNode* frameNode, const std::optional<Col
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Color, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, Color, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -46,7 +46,8 @@ void ProgressModelStatic::SetGradientColor(FrameNode* frameNode, const std::opti
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, GradientColor, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, GradientColor, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ProgressPaintProperty, GradientColor, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -55,7 +56,8 @@ void ProgressModelStatic::SetSmoothEffect(FrameNode* frameNode, const std::optio
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableSmoothEffect, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableSmoothEffect, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ProgressPaintProperty, EnableSmoothEffect, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -64,7 +66,8 @@ void ProgressModelStatic::SetStrokeWidth(FrameNode* frameNode, const std::option
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ProgressLayoutProperty, StrokeWidth, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ProgressLayoutProperty, StrokeWidth, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            ProgressLayoutProperty, StrokeWidth, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
@@ -73,7 +76,8 @@ void ProgressModelStatic::SetLinearSweepingEffect(FrameNode* frameNode, const st
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableLinearScanEffect, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableLinearScanEffect, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ProgressPaintProperty, EnableLinearScanEffect, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -82,7 +86,8 @@ void ProgressModelStatic::SetRingSweepingEffect(FrameNode* frameNode, const std:
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableRingScanEffect, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableRingScanEffect, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ProgressPaintProperty, EnableRingScanEffect, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -91,7 +96,7 @@ void ProgressModelStatic::SetPaintShadow(FrameNode* frameNode, const std::option
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, PaintShadow, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, PaintShadow, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, PaintShadow, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -100,7 +105,8 @@ void ProgressModelStatic::SetProgressStatus(FrameNode* frameNode, const std::opt
     if (status) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressStatus, status.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressStatus, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ProgressPaintProperty, ProgressStatus, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -109,7 +115,7 @@ void ProgressModelStatic::SetScaleCount(FrameNode* frameNode, const std::optiona
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ScaleCount, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, ScaleCount, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, ScaleCount, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -118,7 +124,7 @@ void ProgressModelStatic::SetScaleWidth(FrameNode* frameNode, const std::optiona
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ScaleWidth, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, ScaleWidth, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, ScaleWidth, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -127,7 +133,7 @@ void ProgressModelStatic::SetBorderWidth(FrameNode* frameNode, const std::option
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderWidth, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderWidth, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderWidth, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -136,7 +142,7 @@ void ProgressModelStatic::SetBorderColor(FrameNode* frameNode, const std::option
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderColor, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -145,7 +151,8 @@ void ProgressModelStatic::SetSweepingEffect(FrameNode* frameNode, const std::opt
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableScanEffect, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableScanEffect, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ProgressPaintProperty, EnableScanEffect, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -154,7 +161,8 @@ void ProgressModelStatic::SetShowText(FrameNode* frameNode, const std::optional<
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableShowText, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableShowText, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ProgressPaintProperty, EnableShowText, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -201,7 +209,7 @@ void ProgressModelStatic::SetFontColor(FrameNode* frameNode, const std::optional
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, TextColor, value.value(), frameNode);
     } else {
         textLayoutProperty->ResetTextColor();
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, TextColor, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, TextColor, PROPERTY_UPDATE_RENDER, frameNode);
     }
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -217,7 +225,7 @@ void ProgressModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, TextSize, value.value(), frameNode);
     } else {
         textLayoutProperty->ResetFontSize();
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, TextSize, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, TextSize, PROPERTY_UPDATE_RENDER, frameNode);
     }
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -233,7 +241,7 @@ void ProgressModelStatic::SetFontWeight(FrameNode* frameNode, const std::optiona
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, FontWeight, value.value(), frameNode);
     } else {
         textLayoutProperty->ResetFontWeight();
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, FontWeight, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, FontWeight, PROPERTY_UPDATE_RENDER, frameNode);
     }
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -249,7 +257,7 @@ void ProgressModelStatic::SetFontFamily(FrameNode* frameNode, const std::optiona
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, FontFamily, value.value(), frameNode);
     } else {
         textLayoutProperty->ResetFontFamily();
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, FontFamily, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, FontFamily, PROPERTY_UPDATE_RENDER, frameNode);
     }
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -265,7 +273,8 @@ void ProgressModelStatic::SetItalicFontStyle(FrameNode* frameNode, const std::op
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ItalicFontStyle, value.value(), frameNode);
     } else {
         textLayoutProperty->ResetItalicFontStyle();
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, ItalicFontStyle, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ProgressPaintProperty, ItalicFontStyle, PROPERTY_UPDATE_RENDER, frameNode);
     }
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -275,17 +284,36 @@ void ProgressModelStatic::SetStrokeRadius(FrameNode* frameNode, const std::optio
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, StrokeRadius, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, StrokeRadius, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, StrokeRadius, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
 void ProgressModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
 {
-    // if (flag) {
-    //     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, IsSensitive, *flag, frameNode);
-    // } else {
-    //     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
-    // }
-    // ViewAbstractModelStatic::SetPrivacySensitive(frameNode, flag);
+    if (flag) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, IsSensitive, *flag, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
+    }
+    ViewAbstractModelStatic::SetPrivacySensitive(frameNode, flag);
+}
+
+void ProgressModelStatic::SetValue(FrameNode* frameNode, const std::optional<double>& valueOpt)
+{
+    auto progressPaintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    if (valueOpt) {
+        auto maxValue = progressPaintProperty->GetMaxValue();
+        double value = valueOpt.value() < 0 ? 0 : valueOpt.value();
+        value = value > maxValue ? maxValue.value_or(0) : value;
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Value, value, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, Value, PROPERTY_UPDATE_RENDER, frameNode);
+    }
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->IsTextFromUser()) {
+        SetText(frameNode, std::nullopt);
+    }
 }
 } // namespace OHOS::Ace::NG
