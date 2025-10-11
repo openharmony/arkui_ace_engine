@@ -129,7 +129,7 @@ void SetOnWillScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ScrollModelStatic::SetOnWillScroll(frameNode, nullptr);
         return;
     }
     if (optValue) {
@@ -159,7 +159,7 @@ void SetOnDidScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ScrollModelStatic::SetOnDidScroll(frameNode, nullptr);
         return;
     }
     auto call = [arkCallback = CallbackHelper(*optValue)](
@@ -178,7 +178,7 @@ void SetOnScrollEdgeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ScrollModelStatic::SetOnScrollEdge(frameNode, nullptr);
         return;
     }
     auto call = [arkCallback = CallbackHelper(*optValue)](ScrollEdge edgeIn) {
@@ -194,7 +194,7 @@ void SetOnScrollStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ScrollModelStatic::SetOnScrollStart(frameNode, nullptr);
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
@@ -209,7 +209,7 @@ void SetOnScrollStopImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ScrollModelStatic::SetOnScrollStop(frameNode, nullptr);
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
@@ -250,7 +250,7 @@ void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ScrollModelStatic::SetOnScrollFrameBegin(frameNode, nullptr);
         return;
     }
     auto onScrollFrameEvent = [callback = CallbackHelper(*optValue)](
@@ -273,7 +273,7 @@ void SetNestedScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ScrollModelStatic::SetNestedScroll(frameNode, std::nullopt, std::nullopt);
         return;
     }
     auto forward = Converter::OptConvert<NestedScrollMode>(optValue->scrollForward);
@@ -287,8 +287,7 @@ void SetEnableScrollInteractionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
-        return;
+        convValue = true;
     }
     ScrollModelStatic::SetScrollEnabled(frameNode, *convValue);
 }
@@ -307,7 +306,8 @@ void SetScrollSnapImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        std::vector<Dimension> snapSizes;
+        ScrollModelStatic::SetScrollSnap(frameNode, std::nullopt, std::nullopt, snapSizes, std::nullopt, std::nullopt);
         return;
     }
     auto snapAlign = Converter::OptConvert<ScrollSnapAlign>(optValue->snapAlign);
@@ -341,8 +341,7 @@ void SetEnablePagingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
-        return;
+        convValue = false;
     }
     ScrollModelStatic::SetEnablePaging(frameNode, *convValue);
 }
@@ -353,7 +352,7 @@ void SetInitialOffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<OffsetT<CalcDimension>>(*value);
     if (!convValue) {
-        // Implement Reset value
+        ScrollModelStatic::SetInitialOffset(frameNode, std::nullopt);
         return;
     }
     ScrollModelStatic::SetInitialOffset(frameNode, *convValue);

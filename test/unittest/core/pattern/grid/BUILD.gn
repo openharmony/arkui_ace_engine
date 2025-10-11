@@ -54,3 +54,11 @@ ace_unittest("grid_test_ng") {
     "layout_info_test.cpp",
   ]
 }
+
+ace_unittest("grid_static_test_ng") {
+  type = "new"
+  sources = [
+    "grid_test_ng.cpp",
+    "grid_static_test_ng.cpp",
+  ]
+}

@@ -162,8 +162,7 @@ void SetSelectableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
-        return;
+        convValue = true;
     }
     ListItemModelStatic::SetSelectable(frameNode, *convValue);
 }
@@ -174,8 +173,7 @@ void SetSelectedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = ProcessBindableSelected(frameNode, value);
     if (!convValue) {
-        // Implement Reset value
-        return;
+        convValue = false;
     }
     ListItemModelStatic::SetSelected(frameNode, *convValue);
 }
@@ -186,7 +184,11 @@ void SetSwipeActionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListItemModelStatic::SetDeleteArea(frameNode, nullptr, nullptr, nullptr, nullptr, nullptr,
+            Dimension(0, DimensionUnit::VP), true);
+        ListItemModelStatic::SetDeleteArea(frameNode, nullptr, nullptr, nullptr, nullptr, nullptr,
+            Dimension(0, DimensionUnit::VP), false);
+        ListItemModelStatic::SetSwiperAction(frameNode, nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::None);
         return;
     }
 
@@ -214,7 +216,7 @@ void SetOnSelectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListItemModelStatic::SetSelectCallback(frameNode, nullptr);
         return;
     }
     auto onSelect = [arkCallback = CallbackHelper(*optValue)](bool param) {

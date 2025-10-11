@@ -45,7 +45,7 @@ public:
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetContentStartOffset(FrameNode* frameNode, float startOffset);
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);
-    static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static void SetCachedCount(FrameNode* frameNode, const std::optional<int32_t>& cachedCount);
     static void SetCachedCount(
         FrameNode* frameNode, const std::optional<int32_t>& count, const std::optional<bool>& show);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
@@ -70,6 +70,7 @@ public:
     static void SetListMaintainVisibleContentPosition(FrameNode* frameNode, const std::optional<bool>& enabled);
     static void SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled);
     static void SetLanes(FrameNode* frameNode, int32_t lanes);
+    static void ResetLanes(FrameNode* frameNode);
     static void SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter);
     static void SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMinLength, const Dimension& laneMaxLength);
     static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
