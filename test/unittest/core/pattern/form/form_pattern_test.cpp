@@ -1481,6 +1481,12 @@ HWTEST_F(FormPatternTest, FormPatternTest_037, TestSize.Level1)
     pattern->ProcDeleteImageNode(want);
     num = formNode->GetTotalChildCount();
     EXPECT_EQ(num, 0);
+
+    want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_STATIC_FORM_UPDATE_SIZE, true);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE, childNode);
+    pattern->ProcDeleteImageNode(want);
+    num = formNode->GetTotalChildCount();
+    EXPECT_EQ(num, 0);
 }
 
 /**

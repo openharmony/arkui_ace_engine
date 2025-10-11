@@ -53,7 +53,8 @@ public:
     void SetAllowUpdate(bool allowUpdate);
     bool IsAllowUpdate();
 
-    int32_t OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo, bool isRecoverFormToHandleClickEvent);
+    int32_t OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo, bool isRecoverFormToHandleClickEvent,
+        bool isStaticFormUpdateSize);
     int32_t OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void OnSurfaceDetach();
     void OnActionEvent(const std::string& action);
