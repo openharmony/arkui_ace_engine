@@ -38,8 +38,8 @@ void SetLazyVGridLayoutOptionsImpl(Ark_NativePointer node)
 }
 } // LazyVGridLayoutInterfaceModifier
 namespace LazyVGridLayoutAttributeModifier {
-void ColumnsTemplateImpl(Ark_NativePointer node,
-                         const Opt_String* value)
+void SetColumnsTemplateImpl(Ark_NativePointer node,
+                            const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -52,7 +52,7 @@ const GENERATED_ArkUILazyVGridLayoutModifier* GetLazyVGridLayoutModifier()
     static const GENERATED_ArkUILazyVGridLayoutModifier ArkUILazyVGridLayoutModifierImpl {
         LazyVGridLayoutModifier::ConstructImpl,
         LazyVGridLayoutInterfaceModifier::SetLazyVGridLayoutOptionsImpl,
-        LazyVGridLayoutAttributeModifier::ColumnsTemplateImpl,
+        LazyVGridLayoutAttributeModifier::SetColumnsTemplateImpl,
     };
     return &ArkUILazyVGridLayoutModifierImpl;
 }

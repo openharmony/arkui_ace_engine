@@ -31,16 +31,16 @@ public:
 
     void TriggerScrollTo(const Ark_ScrollOptions* options);
     void TriggerScrollEdge(Ark_Edge value, const Opt_ScrollEdgeOptions* options);
-    void TriggerFling(const Ark_Number* velocity);
+    void TriggerFling(const Ark_Float64 velocity);
     void TriggerScrollPage0(const Ark_ScrollPageOptions* value);
     void TriggerScrollPage1(bool next);
     Ark_OffsetResult TriggerCurrentOffset();
-    void TriggerScrollToIndex(const Ark_Number* value, const Opt_Boolean* smooth,
+    void TriggerScrollToIndex(const Ark_Int32 value, const Opt_Boolean* smooth,
         const Opt_ScrollAlign* align, const Opt_ScrollToIndexOptions* options);
     void TriggerScrollBy(const Dimension& xOffset, const Dimension& yOffset);
     Ark_Boolean TriggerIsAtEnd();
-    Ark_RectResult TriggerGetItemRect(const Ark_Number* index);
-    Ark_Int32 TriggerGetItemIndex(const Ark_Number* x, const Ark_Number* y);
+    Ark_RectResult TriggerGetItemRect(const Ark_Int32 index);
+    Ark_Int32 TriggerGetItemIndex(const Ark_Float64 x, const Ark_Float64 y);
 
     const WeakPtr<ScrollControllerBase>& GetController() const
     {

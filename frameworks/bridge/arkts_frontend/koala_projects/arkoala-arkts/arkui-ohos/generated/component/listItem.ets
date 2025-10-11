@@ -139,7 +139,7 @@ export interface SwipeActionOptions {
     start?: CustomBuilder | SwipeActionItem;
     end?: CustomBuilder | SwipeActionItem;
     edgeEffect?: SwipeEdgeEffect;
-    onOffsetChange?: ((offset: number) => void);
+    onOffsetChange?: ((offset: double) => void);
 }
 export enum ListItemStyle {
     NONE = 0,
@@ -574,23 +574,23 @@ export class SwipeActionOptions_serializer {
         }
         const edgeEffectTmpResult : SwipeEdgeEffect | undefined = edgeEffectTmpBuf
         const onOffsetChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onOffsetChangeTmpBuf : ((offset: number) => void) | undefined = undefined
+        let onOffsetChangeTmpBuf : ((offset: double) => void) | undefined = undefined
         if ((onOffsetChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onOffsetChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onOffsetChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onOffsetChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onOffsetChangeTmpBuf = (offset: number):void => {
+            onOffsetChangeTmpBuf = (offset: double):void => {
                 const onOffsetChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onOffsetChangeTmpBuf_BufArgsSerializer.writeInt32(onOffsetChangeTmpBuf_BufResource.resourceId);
                 onOffsetChangeTmpBuf_BufArgsSerializer.writePointer(onOffsetChangeTmpBuf_BufCall);
                 onOffsetChangeTmpBuf_BufArgsSerializer.writePointer(onOffsetChangeTmpBuf_BufCallSync);
-                onOffsetChangeTmpBuf_BufArgsSerializer.writeNumber(offset);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onOffsetChangeTmpBuf_BufArgsSerializer.asBuffer(), onOffsetChangeTmpBuf_BufArgsSerializer.length());
+                onOffsetChangeTmpBuf_BufArgsSerializer.writeFloat64(offset);
+                InteropNativeModule._CallCallbackSync(10, -949162837, onOffsetChangeTmpBuf_BufArgsSerializer.asBuffer(), onOffsetChangeTmpBuf_BufArgsSerializer.length());
                 onOffsetChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onOffsetChangeTmpResult : ((offset: number) => void) | undefined = onOffsetChangeTmpBuf
+        const onOffsetChangeTmpResult : ((offset: double) => void) | undefined = onOffsetChangeTmpBuf
         let value : SwipeActionOptions = ({start: startTmpResult, end: endTmpResult, edgeEffect: edgeEffectTmpResult, onOffsetChange: onOffsetChangeTmpResult} as SwipeActionOptions)
         return value
     }

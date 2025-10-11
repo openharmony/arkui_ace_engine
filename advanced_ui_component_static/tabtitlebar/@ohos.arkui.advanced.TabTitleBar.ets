@@ -254,7 +254,7 @@ export struct TabTitleBar {
           }
         } as Callback<int>)
         .onAppear(() => {
-          this.scroller.scrollToIndex(this.currentIndex);
+          this.scroller.scrollToIndex(Double.toInt(this.currentIndex));
           this.scroller.scrollBy(TabTitleBar.correctionOffset, 0);
         })
       }

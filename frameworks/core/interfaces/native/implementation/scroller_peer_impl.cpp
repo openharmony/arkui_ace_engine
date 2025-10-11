@@ -175,15 +175,14 @@ void ScrollerPeerImpl::TriggerScrollEdge(Ark_Edge value, const Opt_ScrollEdgeOpt
     scrollController->ScrollToEdge(edgeType.value(), true);
 }
 
-void ScrollerPeerImpl::TriggerFling(const Ark_Number* velocity)
+void ScrollerPeerImpl::TriggerFling(const Ark_Float64 velocity)
 {
-    CHECK_NULL_VOID(velocity);
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerFling Controller not bound to component.");
         return;
     }
-    double flingVelocity = Converter::Convert<float>(*velocity);
+    double flingVelocity = Converter::Convert<double>(velocity);
     if (NearZero(flingVelocity)) {
         return;
     }
@@ -231,17 +230,17 @@ Ark_OffsetResult ScrollerPeerImpl::TriggerCurrentOffset()
     return Converter::ArkValue<Ark_OffsetResult>(offset);
 }
 
-void ScrollerPeerImpl::TriggerScrollToIndex(const Ark_Number* value, const Opt_Boolean* smoothValue,
+void ScrollerPeerImpl::TriggerScrollToIndex(const Ark_Int32 value, const Opt_Boolean* smoothValue,
     const Opt_ScrollAlign* alignValue, const Opt_ScrollToIndexOptions* options)
 {
-    CHECK_NULL_VOID(value);
+
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollToIndex Controller not bound to component.");
         return;
     }
 
-    int32_t index = Converter::Convert<int32_t>(*value);
+    int32_t index = Converter::Convert<int32_t>(value);
     if (index < 0) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollToIndex Incorrect index value.");
         return;
@@ -297,27 +296,24 @@ Ark_Boolean ScrollerPeerImpl::TriggerIsAtEnd()
     return Converter::ArkValue<Ark_Boolean>(scrollController->IsAtEnd());
 }
 
-Ark_RectResult ScrollerPeerImpl::TriggerGetItemRect(const Ark_Number* indexValue)
+Ark_RectResult ScrollerPeerImpl::TriggerGetItemRect(const Ark_Int32 indexValue)
 {
-    CHECK_NULL_RETURN(indexValue, {});
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerGetItemRect Controller not bound to component.");
         return {};
     }
-    int32_t index = Converter::Convert<int32_t>(*indexValue);
+    int32_t index = Converter::Convert<int32_t>(indexValue);
     ContainerScope scope(instanceId_);
     auto rect = scrollController->GetItemRect(index); // the result of GetItemRect need to be returned
     return Converter::ArkValue<Ark_RectResult>(rect);
 }
 
-Ark_Int32 ScrollerPeerImpl::TriggerGetItemIndex(const Ark_Number* x, const Ark_Number* y)
+Ark_Int32 ScrollerPeerImpl::TriggerGetItemIndex(const Ark_Float64 x, const Ark_Float64 y)
 {
-    CHECK_NULL_RETURN(x, Converter::ArkValue<Ark_Int32>(-1));
-    CHECK_NULL_RETURN(y, Converter::ArkValue<Ark_Int32>(-1));
 
-    Dimension xOffset = Converter::Convert<Dimension>(*x);
-    Dimension yOffset = Converter::Convert<Dimension>(*y);
+    Dimension xOffset = Converter::Convert<Dimension>(x);
+    Dimension yOffset = Converter::Convert<Dimension>(y);
 
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {

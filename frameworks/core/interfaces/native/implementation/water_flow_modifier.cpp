@@ -170,7 +170,7 @@ void SetLayoutDirectionImpl(Ark_NativePointer node,
     WaterFlowModelStatic::SetLayoutDirection(frameNode, convValue);
 }
 void SetCachedCount0Impl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -191,7 +191,7 @@ void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
     auto onScrollFrameEvent = [callback = CallbackHelper(*optValue)](
         Dimension offset, ScrollState state) -> ScrollFrameResult {
         ScrollFrameResult result;
-        Ark_Number arkOffset = Converter::ArkValue<Ark_Number>(offset);
+        Ark_Float64 arkOffset = Converter::ArkValue<Ark_Float64>(offset);
         Ark_ScrollState arkState = Converter::ArkValue<Ark_ScrollState>(state);
         return callback.InvokeWithOptConvertResult<
             ScrollFrameResult, Ark_OnScrollFrameBeginHandlerResult,
@@ -202,7 +202,7 @@ void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
     WaterFlowModelStatic::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameEvent));
 }
 void SetOnScrollIndexImpl(Ark_NativePointer node,
-                          const Opt_Callback_Number_Number_Void* value)
+                          const Opt_Callback_I32_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -212,7 +212,7 @@ void SetOnScrollIndexImpl(Ark_NativePointer node,
         return;
     }
     auto onScrollIndex = [arkCallback = CallbackHelper(*optValue)](const int32_t first, const int32_t last) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(first), Converter::ArkValue<Ark_Number>(last));
+        arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(first), Converter::ArkValue<Ark_Int32>(last));
     };
 
     WaterFlowModelStatic::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
@@ -230,7 +230,7 @@ void SetOnDidScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
 }
 void SetCachedCount1Impl(Ark_NativePointer node,
-                         const Opt_Number* count,
+                         const Opt_Int32* count,
                          const Opt_Boolean* show)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

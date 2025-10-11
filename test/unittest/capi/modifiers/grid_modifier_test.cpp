@@ -99,10 +99,10 @@ namespace {
     const auto RESOURCE_OPACITY_BY_STRING = 0.4f;
     const auto RESOURCE_OPACITY_BY_NUMBER = 0.5f;
 
-    using OneNumResStep = std::pair<Opt_Union_Number_Resource, float>;
+    using OneNumResStep = std::pair<Opt_Union_I32_Resource, float>;
     static const std::vector<OneNumResStep> UNION_NUMBER_RES_TEST_PLAN = {
-        { CreateResourceUnion<Opt_Union_Number_Resource>(RES_NAME), RESOURCE_OPACITY_BY_STRING },
-        { CreateResourceUnion<Opt_Union_Number_Resource>(RES_ID), RESOURCE_OPACITY_BY_NUMBER },
+        { CreateResourceUnion<Opt_Union_I32_Resource>(RES_NAME), RESOURCE_OPACITY_BY_STRING },
+        { CreateResourceUnion<Opt_Union_I32_Resource>(RES_ID), RESOURCE_OPACITY_BY_NUMBER },
     };
 
     const int64_t FAKE_RES_ID(1234);
@@ -169,12 +169,12 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidLayoutOptionsValues, TestSize.
     Ark_GridLayoutOptions layoutOptions;
     Opt_GridLayoutOptions inputValue1;
 
-    layoutOptions.regularSize.value0 = Converter::ArkValue<Ark_Number>(1);
-    layoutOptions.regularSize.value1 = Converter::ArkValue<Ark_Number>(1);
+    layoutOptions.regularSize.value0 = Converter::ArkValue<Ark_Int32>(1);
+    layoutOptions.regularSize.value1 = Converter::ArkValue<Ark_Int32>(1);
     std::vector<int32_t> indexes{1, 2, 3, 4, 5};
-    Converter::ArkArrayHolder<Array_Number> indexesHolder(indexes);
-    Array_Number indexesArrayResult = indexesHolder.ArkValue();
-    layoutOptions.irregularIndexes = Converter::ArkValue<Opt_Array_Number>(indexesArrayResult);
+    Converter::ArkArrayHolder<Array_I32> indexesHolder(indexes);
+    Array_I32 indexesArrayResult = indexesHolder.ArkValue();
+    layoutOptions.irregularIndexes = Converter::ArkValue<Opt_Array_I32>(indexesArrayResult);
     inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
     strResult = GetStringAttribute(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
@@ -184,8 +184,8 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidLayoutOptionsValues, TestSize.
     strResult = GetStringAttribute(node_, ATTRIBUTE_SET_IRREGULAR_INDEXES_NAME);
     EXPECT_EQ(strResult, "[1,2,3,4,5]");
 
-    layoutOptions.regularSize.value0 = Converter::ArkValue<Ark_Number>(2);
-    layoutOptions.regularSize.value1 = Converter::ArkValue<Ark_Number>(2);
+    layoutOptions.regularSize.value0 = Converter::ArkValue<Ark_Int32>(2);
+    layoutOptions.regularSize.value1 = Converter::ArkValue<Ark_Int32>(2);
     inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
     strResult = GetStringAttribute(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
@@ -301,21 +301,21 @@ HWTEST_F(GridModifierTest, setGridOptionsGetSizeByIndex, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
-        const Ark_Number parameter,
-        const Callback_Tuple_Number_Number_Void continuation) {
+        const Ark_Int32 parameter,
+        const Callback_Tuple_I32_I32_Void continuation) {
         int32_t info = Converter::Convert<int32_t>(parameter);
 
         checkEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),
             .info = info,
         };
-        Ark_Tuple_Number_Number arkRes;
-        arkRes.value0 = ArkValue<Ark_Number>(1);
-        arkRes.value1 = ArkValue<Ark_Number>(1);
+        Ark_Tuple_I32_I32 arkRes;
+        arkRes.value0 = ArkValue<Ark_Int32>(1);
+        arkRes.value1 = ArkValue<Ark_Int32>(1);
         CallbackHelper(continuation).InvokeSync(arkRes);
     };
-    auto func = Converter::ArkValue<Callback_Number_Tuple_Number_Number>(nullptr, inputCallback, expectedResId);
-    auto optFunc = Converter::ArkValue<Opt_Callback_Number_Tuple_Number_Number>(func);
+    auto func = Converter::ArkValue<Callback_I32_Tuple_I32_I32>(nullptr, inputCallback, expectedResId);
+    auto optFunc = Converter::ArkValue<Opt_Callback_I32_Tuple_I32_I32>(func);
 
     Opt_Scroller inputValue0;
     Ark_GridLayoutOptions layoutOptions;
@@ -349,24 +349,24 @@ HWTEST_F(GridModifierTest, setGridOptionsGetRectByIndex, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
-        const Ark_Number parameter,
-        const Callback_Tuple_Number_Number_Number_Number_Void continuation) {
+        const Ark_Int32 parameter,
+        const Callback_Tuple_I32_I32_I32_I32_Void continuation) {
         int32_t info = Converter::Convert<int32_t>(parameter);
 
         checkEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),
             .info = info,
         };
-        Ark_Tuple_Number_Number_Number_Number arkRes;
-        arkRes.value0 = ArkValue<Ark_Number>(-1);
-        arkRes.value1 = ArkValue<Ark_Number>(1);
-        arkRes.value0 = ArkValue<Ark_Number>(-1);
-        arkRes.value1 = ArkValue<Ark_Number>(1);
+        Ark_Tuple_I32_I32_I32_I32 arkRes;
+        arkRes.value0 = ArkValue<Ark_Int32>(-1);
+        arkRes.value1 = ArkValue<Ark_Int32>(1);
+        arkRes.value0 = ArkValue<Ark_Int32>(-1);
+        arkRes.value1 = ArkValue<Ark_Int32>(1);
         CallbackHelper(continuation).InvokeSync(arkRes);
     };
-    auto func = Converter::ArkValue<Callback_Number_Tuple_Number_Number_Number_Number>
+    auto func = Converter::ArkValue<Callback_I32_Tuple_I32_I32_I32_I32>
                                                     (nullptr, inputCallback, expectedResId);
-    auto optFunc = Converter::ArkValue<Opt_Callback_Number_Tuple_Number_Number_Number_Number>(func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_I32_Tuple_I32_I32_I32_I32>(func);
     Opt_Scroller inputValue0;
     Ark_GridLayoutOptions layoutOptions;
     Opt_GridLayoutOptions inputValue1;
@@ -711,25 +711,25 @@ HWTEST_F(GridModifierTest, setCachedCount0TestDefaultValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, setCachedCount0TestValidValues, TestSize.Level1)
 {
     int intResult;
-    Ark_Number inputValue;
+    Ark_Int32 inputValue;
 
     // check 0 value
-    inputValue = Converter::ArkValue<Ark_Number>(0);
-    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(0);
+    auto optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setCachedCount0(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, 0);
 
     // check 5 value
-    inputValue = Converter::ArkValue<Ark_Number>(5);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(5);
+    optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setCachedCount0(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, 5);
 
     // check maximum value
-    inputValue = Converter::ArkValue<Ark_Number>(INT_MAX);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(INT_MAX);
+    optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setCachedCount0(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, INT_MAX);
@@ -743,29 +743,29 @@ HWTEST_F(GridModifierTest, setCachedCount0TestValidValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, DISABLED_setCachedCount0TestInvalidValues, TestSize.Level1)
 {
     int intResult;
-    Ark_Number inputValue;
+    Ark_Int32 inputValue;
 
     modifier_->setCachedCount0(node_, nullptr);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE);
 
     // check minimum value
-    inputValue = Converter::ArkValue<Ark_Number>(INT_MIN);
-    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(INT_MIN);
+    auto optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setCachedCount0(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE);
 
     // check negative value
-    inputValue = Converter::ArkValue<Ark_Number>(-1);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(-1);
+    optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setCachedCount0(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE);
 
     // check float value
-    inputValue = Converter::ArkValue<Ark_Number>(2.2f);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(2.2f);
+    optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setCachedCount0(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, 2);
@@ -868,18 +868,18 @@ HWTEST_F(GridModifierTest, setMaxCountTestDefaultValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, setMaxCountTestValidValues, TestSize.Level1)
 {
     int intResult;
-    Ark_Number inputValue;
+    Ark_Int32 inputValue;
 
     // check 5 value
-    inputValue = Converter::ArkValue<Ark_Number>(5);
-    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(5);
+    auto optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMaxCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
     EXPECT_EQ(intResult, 5);
 
     // check maximum value
-    inputValue = Converter::ArkValue<Ark_Number>(INT_MAX);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(INT_MAX);
+    optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMaxCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
     EXPECT_EQ(intResult, INT_MAX);
@@ -893,36 +893,36 @@ HWTEST_F(GridModifierTest, setMaxCountTestValidValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, DISABLED_setMaxCountTestInvalidValues, TestSize.Level1)
 {
     int intResult;
-    Ark_Number inputValue;
+    Ark_Int32 inputValue;
 
     modifier_->setMaxCount(node_, nullptr);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE);
 
     // check 0 value
-    inputValue = Converter::ArkValue<Ark_Number>(0);
-    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(0);
+    auto optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMaxCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE);
 
     // check minimum value
-    inputValue = Converter::ArkValue<Ark_Number>(INT_MIN);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(INT_MIN);
+    optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMaxCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE);
 
     // check negative value
-    inputValue = Converter::ArkValue<Ark_Number>(-2);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(-2);
+    optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMaxCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE);
 
     // check float value
-    inputValue = Converter::ArkValue<Ark_Number>(5.3f);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(5.3f);
+    optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMaxCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
     EXPECT_EQ(intResult, 5);
@@ -949,18 +949,18 @@ HWTEST_F(GridModifierTest, setMinCountTestDefaultValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, setMinCountTestValidValues, TestSize.Level1)
 {
     int intResult;
-    Ark_Number inputValue;
+    Ark_Int32 inputValue;
 
     // check 5 value
-    inputValue = Converter::ArkValue<Ark_Number>(5);
-    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(5);
+    auto optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMinCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
     EXPECT_EQ(intResult, 5);
 
     // check maximum value
-    inputValue = Converter::ArkValue<Ark_Number>(INT_MAX);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(INT_MAX);
+    optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMinCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
     EXPECT_EQ(intResult, INT_MAX);
@@ -974,36 +974,36 @@ HWTEST_F(GridModifierTest, setMinCountTestValidValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, DISABLED_setMinCountTestInvalidValues, TestSize.Level1)
 {
     int intResult;
-    Ark_Number inputValue;
+    Ark_Int32 inputValue;
 
     modifier_->setMinCount(node_, nullptr);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE);
 
     // check 0 value
-    inputValue = Converter::ArkValue<Ark_Number>(0);
-    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(0);
+    auto optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMinCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE);
 
     // check minimum value
-    inputValue = Converter::ArkValue<Ark_Number>(INT_MIN);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(INT_MIN);
+    optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMinCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE);
 
     // check negative value
-    inputValue = Converter::ArkValue<Ark_Number>(-4);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(-4);
+    optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMinCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE);
 
     // check float value
-    inputValue = Converter::ArkValue<Ark_Number>(6.4f);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Int32>(6.4f);
+    optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMinCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
     EXPECT_EQ(intResult, 6);
@@ -1030,32 +1030,32 @@ HWTEST_F(GridModifierTest, setCellLengthTestDefaultValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, setCellLengthTestValidValues, TestSize.Level1)
 {
     int intResult;
-    Ark_Number inputValue;
+    Ark_Float64 inputValue;
 
     // check 1 value
-    inputValue = Converter::ArkValue<Ark_Number>(1);
-    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Float64>(1);
+    auto optInputValue = Converter::ArkValue<Opt_Float64>(inputValue);
     modifier_->setCellLength(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CELL_LENGTH_NAME);
     EXPECT_EQ(intResult, 1);
 
     // check 5 value
-    inputValue = Converter::ArkValue<Ark_Number>(5);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Float64>(5);
+    optInputValue = Converter::ArkValue<Opt_Float64>(inputValue);
     modifier_->setCellLength(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CELL_LENGTH_NAME);
     EXPECT_EQ(intResult, 5);
 
     // check maximum value
-    inputValue = Converter::ArkValue<Ark_Number>(INT_MAX);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Float64>(INT_MAX);
+    optInputValue = Converter::ArkValue<Opt_Float64>(inputValue);
     modifier_->setCellLength(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CELL_LENGTH_NAME);
     EXPECT_EQ(intResult, INT_MAX);
 
     // check minimum value
-    inputValue = Converter::ArkValue<Ark_Number>(INT_MIN);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    inputValue = Converter::ArkValue<Ark_Float64>(INT_MIN);
+    optInputValue = Converter::ArkValue<Opt_Float64>(inputValue);
     modifier_->setCellLength(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CELL_LENGTH_NAME);
     EXPECT_EQ(intResult, INT_MIN);
