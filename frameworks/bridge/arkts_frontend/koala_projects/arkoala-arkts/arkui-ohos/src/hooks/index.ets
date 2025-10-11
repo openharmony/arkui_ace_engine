@@ -43,7 +43,7 @@ import { SymbolGlyphModifier } from "../SymbolGlyphModifier";
 import { TextModifier } from "../TextModifier";
 import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
-import { CommonMethod, StateStyles, ArkCommonMethodComponent, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent } from "#generated";
+import { CommonMethod, StateStyles, ArkCommonMethodComponent, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent, DragPreviewOptions, DragInteractionOptions, UniformDataType, DragEventInternal } from "#generated";
 import { CommonMethodModifier } from "../CommonMethodModifier"
 import { ArkXComponentComponent, XComponentOptions, XComponentParameters, NativeXComponentParameters } from "#generated";
 
@@ -110,6 +110,30 @@ export function hookGestureModifier(commonMethod: ArkCommonMethodComponent, valu
     }
     gestureEvent!.clearGestures();
     value_casted.applyGesture(gestureEvent as UIGestureEvent);
+}
+
+export function hookAllowDropAttribute(node: ArkCommonMethodComponent, value: Array<UniformDataType> | null | undefined) : void {
+    if (!node) {
+        return
+    }
+    if (value === null) {
+        ArkUIAniModule._Drag_Set_AllowDrop_Null(node.getPeer().getPeerPtr())
+        return
+    }
+    let array = value as (Array<UniformDataType> | undefined)
+    ArkUIAniModule._Drag_Set_AllowDrop(node.getPeer().getPeerPtr(), array)
+}
+
+export function hookDragPreviewOptions(node: ArkCommonMethodComponent, value: DragPreviewOptions | undefined, options?: DragInteractionOptions) {
+    ArkUIAniModule._Drag_Set_DragPreviewOptions(node.getPeer().getPeerPtr(), value, options)
+}
+
+export function hookDragEventStartDataLoading(event: DragEventInternal, options: unifiedDataChannel.GetDataParams) : string {
+  return ArkUIAniModule._DragEvent_Start_Data_Loading(event.peer!.ptr, options)
+}
+
+export function hookDragEventGetSummary(event: DragEventInternal) : unifiedDataChannel.Summary {
+  return ArkUIAniModule._DragEvent_Get_Summary(event.peer!.ptr)
 }
 
 export function hookStateStyleImpl(

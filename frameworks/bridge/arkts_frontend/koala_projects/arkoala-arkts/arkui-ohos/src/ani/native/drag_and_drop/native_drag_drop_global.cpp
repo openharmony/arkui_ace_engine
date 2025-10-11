@@ -17,15 +17,16 @@
 #include <cstdint>
 #include <memory>
 
-#include "utils/ani_utils.h"
-#include "log/log.h"
-#include "utils/convert_utils.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/gestures/drag_event.h"
 #include "load.h"
+#include "log/log.h"
 #include "pixel_map_taihe_ani.h"
+#include "securec.h"
 #include "udmf_ani_converter_utils.h"
-#include "core/common/udmf/udmf_client.h"
 #include "udmf_async_client.h"
+#include "utils/ani_utils.h"
+#include "utils/convert_utils.h"
 
 namespace OHOS::Ace::Ani {
 namespace {
@@ -122,6 +123,8 @@ ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused
     const char* ptr = modifier->getDragAniModifier()->getUdKey(dragEvent);
     std::string key = ptr ? ptr : "";
     if (key.empty()) {
+        AniUtils::AniThrow(env, "Operation not allowed for current phase.", ERROR_CODE_DRAG_DATA_NOT_ONDROP);
+        env->DestroyLocalScope();
         return value;
     }
     auto getDataParams = OHOS::UDMF::AniConverter::UnwrapGetDataParams(env, dataSyncOptions, key);
@@ -196,35 +199,78 @@ void DragSetAllowDropNull([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_ob
     modifier->getDragAniModifier()->setDragAllowDropNull(frameNode);
 }
 
+std::string GetAniStringEnum(ani_env* env, ani_array array, ani_int index, bool& isSuccess)
+{
+    ani_ref modeRef;
+    if (ANI_OK != env->Object_CallMethodByName_Ref(
+        array, "$_get", "i:C{std.core.Object}", &modeRef, index)) {
+        isSuccess = false;
+        return "";
+    }
+    if (AniUtils::IsUndefined(env, static_cast<ani_object>(modeRef))) {
+        isSuccess = false;
+        return "";
+    }
+    ani_string dataTypeAni;
+    if ((ANI_OK != env->EnumItem_GetValue_String(static_cast<ani_enum_item>(modeRef), &dataTypeAni))) {
+        isSuccess = false;
+        return "";
+    }
+    return AniUtils::ANIStringToStdString(env, dataTypeAni);
+}
+
 void DragSetAllowDrop([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_array array, [[maybe_unused]] ani_int length)
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_array array)
 {
     auto* frameNode = reinterpret_cast<ArkUINodeHandle>(pointer);
-    if (!frameNode || length < 0) {
-        return;
-    }
-
+    CHECK_NULL_VOID(frameNode);
     const auto* modifier = GetNodeAniModifier();
     if (!modifier || !modifier->getDragAniModifier() || !env) {
         return;
     }
-    if (length == 0) {
+
+    if (!AniUtils::IsClassObject(env, array, "escompat.Array")) {
         modifier->getDragAniModifier()->setDragAllowDrop(frameNode, nullptr, 0);
         return;
     }
-    ani_ref ref = nullptr;
-    const char** allowDrops = new const char* [length];
-    std::vector<std::string> allowDropsSave(length);
-    for (int i = 0; i < length; i++) {
-        if (ANI_OK == env->Array_Get(array, i, &ref)) {
-            ani_string stringValue = static_cast<ani_string>(ref);
-            std::string dataType = AniUtils::ANIStringToStdString(env, stringValue);
-            allowDropsSave[i] = dataType;
-            allowDrops[i] = dataType.c_str();
-        }
+    ani_size length;
+    ani_array arrayObj = static_cast<ani_array>(array);
+    if (ANI_OK != env->Array_GetLength(arrayObj, &length)) {
+        return;
     }
-    modifier->getDragAniModifier()->setDragAllowDrop(frameNode, allowDrops, static_cast<ArkUI_Int32>(length));
+    int32_t lengthInt = static_cast<int32_t>(length);
+
+    if (length <= 0) {
+        modifier->getDragAniModifier()->setDragAllowDrop(frameNode, nullptr, 0);
+        return;
+    }
+
+    char** allowDrops = new char* [lengthInt];
+    bool isSuccess = true;
+    int32_t count = 0;
+    for (int32_t i = 0; i < lengthInt; i++) {
+        auto dataType = GetAniStringEnum(env, array, static_cast<ani_int>(i), isSuccess);
+        if (!isSuccess) {
+            break;
+        }
+        auto size = dataType.length() + 1;
+        allowDrops[i] = new char[size];
+        auto errCode = strcpy_s(allowDrops[i], size, dataType.c_str());
+        if (errCode != 0) {
+            isSuccess = false;
+            break;
+        }
+        count++;
+    }
+    if (isSuccess) {
+        modifier->getDragAniModifier()->setDragAllowDrop(frameNode, allowDrops, static_cast<ArkUI_Int32>(length));
+    }
+    for (int32_t i = 0; i < lengthInt && i < count; i++) {
+        delete[] allowDrops[i];
+        allowDrops[i] = nullptr;
+    }
     delete[] allowDrops;
+    allowDrops = nullptr;
 }
 
 void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -579,5 +625,41 @@ void DragSetDragPreviewOptions([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     ParseDragPreviewOptions(env, previewOptions, value);
     ParseDragInteractionOptions(env, previewOptions, options);
     modifier->getDragAniModifier()->setDragPreviewOptions(frameNode, previewOptions);
+}
+
+ani_long ExtractorFromUnifiedDataToPtr(ani_env* env, [[maybe_unused]] ani_object object, ani_object data)
+{
+    auto dataValue = OHOS::UDMF::AniConverter::UnwrapUnifiedData(env, data);
+    auto peer = reinterpret_cast<void*>(&dataValue);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getDragAniModifier()->createUnifiedDataPeer(peer);
+}
+
+ani_object ExtractorFromPtrToUnifiedData(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer)
+{
+    ani_object result_obj = {};
+        const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return result_obj;
+    }
+    auto unifiedDataPtr = reinterpret_cast<OHOS::UDMF::UnifiedData*>(
+        modifier->getDragAniModifier()->getUnifiedData(pointer));
+    if (!unifiedDataPtr) {
+        return result_obj;
+    }
+    std::shared_ptr<OHOS::UDMF::UnifiedData> unifiedData(unifiedDataPtr);
+    auto unifiedData_obj = OHOS::UDMF::AniConverter::WrapUnifiedData(env, unifiedData);
+    ani_boolean isUnifiedData;
+    ani_class dataClass;
+    env->FindClass("L@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;", &dataClass);
+    env->Object_InstanceOf(unifiedData_obj, dataClass, &isUnifiedData);
+    if (!isUnifiedData) {
+        return result_obj;
+    }
+    return unifiedData_obj;
+    return {};
 }
 } // namespace OHOS::Ace::Ani

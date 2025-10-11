@@ -146,7 +146,6 @@ HWTEST_F(DragEventTestNg, DragEventActuatorPropertyTest002, TestSize.Level1)
     GestureEventFunc actionUpdate = [](GestureEvent& info) {};
     GestureEventFunc actionEnd = [](GestureEvent& info) {};
     GestureEventNoParameter actionCancel = []() {};
-
     auto dragEvent = AceType::MakeRefPtr<DragEvent>(
         std::move(actionStart), std::move(actionUpdate), std::move(actionEnd), std::move(actionCancel));
     dragEventActuator.ReplaceDragEvent(dragEvent);

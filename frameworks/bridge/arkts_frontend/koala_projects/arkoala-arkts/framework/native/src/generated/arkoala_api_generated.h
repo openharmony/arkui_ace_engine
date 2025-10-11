@@ -4225,6 +4225,7 @@ typedef struct Opt_DragPreviewMode {
     Ark_DragPreviewMode value;
 } Opt_DragPreviewMode;
 typedef enum Ark_DragResult {
+    ARK_DRAG_RESULT_UNKNOWN = -1,
     ARK_DRAG_RESULT_DRAG_SUCCESSFUL = 0,
     ARK_DRAG_RESULT_DRAG_FAILED = 1,
     ARK_DRAG_RESULT_DRAG_CANCELED = 2,
