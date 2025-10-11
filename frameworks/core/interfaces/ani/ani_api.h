@@ -24,6 +24,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "frameworks/core/components/common/layout/constants.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -547,6 +548,10 @@ struct ArkUIAniCustomNodeModifier {
     bool (*queryNavDestinationInfo1)(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& info);
     bool (*queryRouterPageInfo1)(ArkUI_Int32 uniqueId, ArkUIRouterPageInfo& info);
 };
+struct ArkUIAniKeyboardAvoidModeModifier {
+    ArkUI_Int32 (*getKeyboardAvoidMode)();
+    void (*setKeyboardAvoidMode)(int32_t index);
+};
 struct ArkUIAniDrawModifier {
     void (*setDrawModifier)(ani_long ptr, uint32_t flag,
         void* fnDrawBehindFun, void* fnDrawContentFun, void* fnDrawFrontFun);
@@ -731,6 +736,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniDragModifier* (*getDragAniModifier) ();
     const ArkUIAniCommonModifier* (*getCommonAniModifier)();
     const ArkUIAniCustomNodeModifier* (*getCustomNodeAniModifier)();
+    const ArkUIAniKeyboardAvoidModeModifier* (*getKeyboardAvoidModeAniModifier)();
     const ArkUIAniLazyForEachNodeModifier* (*getLazyForEachNodeAniModifier)();
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
