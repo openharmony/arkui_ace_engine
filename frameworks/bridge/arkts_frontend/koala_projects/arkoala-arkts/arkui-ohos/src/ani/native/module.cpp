@@ -22,6 +22,7 @@
 #include "component3d/component3d_module_methods.h"
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
+#include "keyboard_avoid_mode/keyboard_avoid_mode_module.h"
 #include "custom_node/custom_node_module.h"
 #include "syntax/lazy_for_each_module.h"
 #include "syntax/syntax_module.h"
@@ -489,6 +490,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_SetListChildrenMainSize",
             "lC{arkui.component.common.ChildrenMainSize}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetListChildrenMainSize)
+        },
+        ani_native_function {
+            "_GetKeyboardAvoidMode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetKeyboardAvoidMode)
+        },
+        ani_native_function {
+            "_SetKeyboardAvoidMode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetKeyboardAvoidMode)
         },
         ani_native_function {
             "_DragEvent_Set_Data",

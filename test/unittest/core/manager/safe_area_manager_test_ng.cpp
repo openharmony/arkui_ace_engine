@@ -87,6 +87,7 @@ public:
         float top;
         float bottom;
     };
+
     void CommonExpectEQ(const Rect& s1, const Rect& s2);
 
     RefPtr<SafeAreaManager> safeAreaManager_;

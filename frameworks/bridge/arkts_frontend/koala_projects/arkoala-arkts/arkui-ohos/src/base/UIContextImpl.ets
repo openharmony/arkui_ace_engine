@@ -13,59 +13,60 @@
  * limitations under the License.
  */
 
-import { FrameNode, FrameNodeUtils } from "arkui/FrameNode"
-import { ArkUIGeneratedNativeModule } from "#components"
-import { int32, int64 } from "@koalaui/common"
+import { FrameNode, FrameNodeUtils } from 'arkui/FrameNode';
+import { ArkUIGeneratedNativeModule } from '#components';
+import { int32, int64 } from '@koalaui/common';
 import { nullptr, KPointer, KSerializerBuffer, toPeerPtr, RuntimeType,
-    runtimeType, Finalizable, SerializerBase, DeserializerBase } from "@koalaui/interop"
-import { _animateTo } from "arkui/base/ArkAnimation"
+    runtimeType, Finalizable, SerializerBase, DeserializerBase } from '@koalaui/interop';
+import { _animateTo } from 'arkui/base/ArkAnimation';
 import { AnimateParam, KeyframeAnimateParam, KeyframeState } from 'arkui/framework'
-import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from "@ohos/animator"
+import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from '@ohos/animator';
 import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
-    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId }
-    from "@ohos/arkui/UIContext"
+    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
+    KeyboardAvoidMode } from '@ohos/arkui/UIContext';
 import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry, memoEntry1,
-    IncrementalNode } from '@koalaui/runtime'
-import { Context, PointerStyle, PixelMap } from "#external"
-import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
-import { KeyEvent, PopupCommonOptions, MenuOptions } from "arkui/component/common"
-import { GlobalScope_ohos_font } from "#generated"
-import router from '@ohos/router'
+    IncrementalNode } from '@koalaui/runtime';
+import { Context, PointerStyle, PixelMap } from '#external';
+import { Nullable,  WidthBreakpoint, HeightBreakpoint } from 'arkui/component/enums';
+import { KeyEvent, PopupCommonOptions, MenuOptions } from 'arkui/component/common';
+import { GlobalScope_ohos_font } from '#generated';
+import router from '@ohos/router';
 import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
-    AlertDialogParamWithOptions }from "arkui/component/alertDialog"
-import { ActionSheetOptions } from "arkui/component/actionSheet"
-import inspector from "@ohos/arkui/inspector"
-import { ComponentContent } from 'arkui/ComponentContent'
-import overlayManager from '@ohos/overlayManager'
-import promptAction, { LevelOrder } from '@ohos/promptAction'
-import { ArkUIAniModule } from "arkui.ani"
-import { default as font } from "@ohos/font"
-import { MeasureOptions } from "@ohos/measure"
-import { GlobalScope_ohos_measure_utils } from "#generated"
-import { SizeOptions, ResourceColor } from "arkui/component/units"
-import { Frame } from "arkui/Graphics"
-import { TextMenuOptions } from "arkui/component/textCommon"
-import { focusController } from "@ohos/arkui/focusController"
-import { KeyProcessingMode } from "arkui/component/focus"
-import { componentUtils } from "@ohos/arkui/componentUtils"
-import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
-import { dragController } from "@ohos/arkui/dragController"
-import { UIContextAtomicServiceBar } from "#generated"
-import { GlobalScope } from "#generated"
-import { default as mediaquery } from '@ohos/mediaquery'
-import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework'
+    AlertDialogParamWithOptions } from 'arkui/component/alertDialog';
+import { ActionSheetOptions } from 'arkui/component/actionSheet';
+import inspector from '@ohos/arkui/inspector';
+import { ComponentContent } from 'arkui/ComponentContent';
+import overlayManager from '@ohos/overlayManager';
+import promptAction, { LevelOrder } from '@ohos/promptAction';
+import { ArkUIAniModule } from 'arkui.ani';
+import { default as font } from '@ohos/font';
+import { MeasureOptions } from '@ohos/measure';
+import { GlobalScope_ohos_measure_utils } from '#generated';
+import { SizeOptions, ResourceColor } from 'arkui/component/units';
+import { Frame } from 'arkui/Graphics';
+import { TextMenuOptions } from 'arkui/component/textCommon';
+import { focusController } from '@ohos/arkui/focusController';
+import { KeyProcessingMode } from 'arkui/component/focus';
+import { componentUtils } from '@ohos/arkui/componentUtils';
+import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
+import { dragController } from '@ohos/arkui/dragController';
+import { UIContextAtomicServiceBar } from '#generated';
+import { GlobalScope } from '#generated';
+import { default as mediaquery } from '@ohos/mediaquery';
+import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework';
 import { AsyncCallback } from 'arkui/base';
-import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from "arkui/ArkUIEntry"
-import { PeerNode, findPeerNode } from 'arkui/PeerNode'
-import { KBuffer } from "@koalaui/interop"
-import { deserializeAndCallCallback } from "arkui/framework/peers/CallbackDeserializeCall"
-import { InteropNativeModule } from "@koalaui/interop"
+import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
+import { PeerNode, findPeerNode } from 'arkui/PeerNode';
+import { KBuffer } from '@koalaui/interop';
+import { deserializeAndCallCallback } from 'arkui/framework/peers/CallbackDeserializeCall';
+import { InteropNativeModule } from '@koalaui/interop';
 import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
 import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender } from '../framework';
-import { EntryPoint, NavInterface } from "../component/customComponent"
-import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
+import { EntryPoint, NavInterface } from '../component/customComponent';
+import { AsyncCallback as routerAsyncCallback } from '@ohos.base';
+
 export class ContextRecord {
     uiContext?: UIContext
 }
@@ -1262,6 +1263,7 @@ export class UIContextImpl extends UIContext {
     contextMenuController_: ContextMenuControllerImpl;
     overlayManager_: OverlayManagerImpl | null = null;
     promptAction_: PromptActionImpl | null = null;
+    keyboardAvoidMode_: KeyboardAvoidMode = KeyboardAvoidMode.OFFSET;
     cursorController_: CursorControllerImpl;
     font_: FontImpl;
     measureUtils_: MeasureUtilsImpl;
@@ -1405,6 +1407,20 @@ export class UIContextImpl extends UIContext {
     }
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
+    }
+
+    setKeyboardAvoidMode(mode: KeyboardAvoidMode): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ArkUIAniModule._SetKeyboardAvoidMode(mode);
+        this.keyboardAvoidMode_ = mode;
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    getKeyboardAvoidMode(): KeyboardAvoidMode {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let mode:KeyboardAvoidMode = ArkUIAniModule._GetKeyboardAvoidMode();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return mode;
     }
 
     public getAtomicServiceBar(): Nullable<AtomicServiceBar> {
