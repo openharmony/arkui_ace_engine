@@ -3351,6 +3351,63 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager057, TestSize.Level1)
     EXPECT_FALSE(accessibilityProperty->accessibilityGroupOptions_.has_value());
 }
 
+/**
+ * @tc.name: JsAccessibilityManager058
+ * @tc.desc: test HasAccessibilityGroupOptions when has value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager058, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AccessibilityProperty
+     */
+    auto frameNode = AceType::MakeRefPtr<NG::FrameNode>("frameNode", 1, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. construct accessibilityGroupOptions
+     */
+    AccessibilityGroupOptions accessibilityGroupOptions;
+    accessibilityGroupOptions.accessibilityTextPreferred = true;
+    accessibilityGroupOptions.stateControllerByType = AccessibilityRoleType::BACK_BUTTON;
+    accessibilityGroupOptions.stateControllerByInspector = "Test StateControllerByInspector";
+    accessibilityGroupOptions.actionControllerByType = AccessibilityRoleType::TEXT_INPUT;
+    accessibilityGroupOptions.actionControllerByInspector = "Test ActionControllerByInspector";
+    accessibilityProperty->accessibilityGroupOptions_ = accessibilityGroupOptions;
+
+    /**
+     * @tc.steps: step3. test HasAccessibilityGroupOptions
+     */
+    EXPECT_TRUE(accessibilityProperty->accessibilityGroupOptions_.has_value());
+    auto ret = accessibilityProperty->HasAccessibilityGroupOptions();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager059
+ * @tc.desc: test HasAccessibilityGroupOptions when no value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager059, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AccessibilityProperty
+     */
+    auto frameNode = AceType::MakeRefPtr<NG::FrameNode>("frameNode", 1, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. test HasAccessibilityGroupOptions
+     */
+    EXPECT_FALSE(accessibilityProperty->accessibilityGroupOptions_.has_value());
+    auto ret = accessibilityProperty->HasAccessibilityGroupOptions();
+    EXPECT_FALSE(ret);
+}
+
 #ifdef WEB_SUPPORTED
 /**
  * @tc.name: GetWebAccessibilityIdBySurfaceId
