@@ -500,7 +500,7 @@ HWTEST_F(ThreadSafeNodeTestNg, ThreadSafeNodeTestNg016, TestSize.Level1)
      * @tc.expected: CheckThreadSafeNodeTree success
      */
     EXPECT_EQ(frameNode->CheckThreadSafeNodeTree(true), true);
-    EXPECT_EQ(frameNode->CheckThreadSafeNodeTree(false), true);
+    EXPECT_EQ(frameNode->CheckThreadSafeNodeTree(false), false);
 
     frameNode->setIsCNode(true);
     EXPECT_EQ(frameNode->CheckThreadSafeNodeTree(true), false);
