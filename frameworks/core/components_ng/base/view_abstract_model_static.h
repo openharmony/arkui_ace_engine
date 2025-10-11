@@ -104,7 +104,7 @@ public:
 
     static void SetOpacity(FrameNode* frameNode, const std::optional<double>& opacity)
     {
-        ViewAbstract::SetOpacity(frameNode, opacity.value_or(0));
+        ViewAbstract::SetOpacity(frameNode, opacity.value_or(1));
     }
     static void BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub);
 
