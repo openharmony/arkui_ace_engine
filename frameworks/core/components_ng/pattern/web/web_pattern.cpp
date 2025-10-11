@@ -9325,7 +9325,11 @@ void WebPattern::SetImeShow(bool visible)
 
 void WebPattern::OnBackToTopUpdate(bool isBackToTop)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnBackToTopUpdate = %{public}d", isBackToTop);
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "Using API Version less than 22");
+        return;
+    }
+
     backToTop_ = isBackToTop;
     if (backToTop_) {
         WebStatusBarEventProxy::GetWebInstance()->Register(WeakClaim(this));
