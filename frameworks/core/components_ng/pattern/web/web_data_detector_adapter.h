@@ -49,6 +49,12 @@ struct WebDataDetectorConfig {
     std::string textDecorationStyle;
 };
 
+struct WebSelectDataDetectorConfig {
+    bool enable;
+    bool useDDtypes;
+    std::string types;
+};
+
 struct AIMenuInfo {
     std::string entityType;
     std::string content;
@@ -143,6 +149,11 @@ public:
         return config_.enable;
     }
 
+    bool GetSelectDataDetectorEnable()
+    {
+        return selectConfig_.enable;
+    }
+
     bool GetDataDetectorEnablePrewiew()
     {
         return config_.enablePreview;
@@ -150,6 +161,10 @@ public:
 
     void SetDataDetectorEnable(bool enable);
     void SetDataDetectorConfig(const TextDetectConfig& config);
+    void SetSelectDataDetectorEnable(bool enable);
+    void SetSelectedDataDetectorConfig(const TextDetectConfig& config, bool fromInner = false);
+    std::string GetSelectDataDetectorTypes();
+    void InitSelectDataDetector();
     void Init();
     void InitJSProxy();
     void ReleaseJSProxy();
@@ -201,6 +216,8 @@ public:
 
     static TextDataDetectType ConvertTypeFromString(const std::string& type);
 
+    static std::string FilterAndMapTypes(const std::string& types);
+
     void CloseAIMenu();
     void CloseOtherMenu();
 
@@ -218,6 +235,7 @@ private:
     // properties
     WebDataDetectorConfig config_ { false, false, "", "", "" };
     WebDataDetectorConfig newConfig_ { false, false, "", "", "" };
+    WebSelectDataDetectorConfig selectConfig_ { true, true, "" };
     bool hasInit_ = false;
 
     bool initDataDetectorProxy_ = false;

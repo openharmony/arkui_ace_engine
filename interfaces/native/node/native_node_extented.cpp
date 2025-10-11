@@ -67,6 +67,35 @@ void* OH_ArkUI_LayoutConstraint_Dispose(ArkUI_LayoutConstraint* constraint)
     return nullptr;
 }
 
+ArkUI_SelectedDataDetectorConfig* OH_ArkUI_SelectedDataDetectorConfig_Create()
+{
+    ArkUI_SelectedDataDetectorConfig* config = new ArkUI_SelectedDataDetectorConfig();
+    return config;
+}
+
+void OH_ArkUI_SelectedDataDetectorConfig_Dispose(ArkUI_SelectedDataDetectorConfig* config)
+{
+    delete config;
+    config = nullptr;
+}
+
+void OH_ArkUI_SelectedDataDetectorConfig_SetTypes(
+    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length)
+{
+    CHECK_NULL_VOID(config);
+    config->types.clear();
+    for (int32_t i = 0; i < length; ++i) {
+        config->types.push_back(types[i]);
+    }
+}
+
+int32_t OH_ArkUI_SelectedDataDetectorConfig_GetTypes(
+    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length)
+{
+    CHECK_NULL_RETURN(config, 0);
+    return config->types.size();
+}
+
 ArkUI_LayoutConstraint* OH_ArkUI_NodeCustomEvent_GetLayoutConstraintInMeasure(ArkUI_NodeCustomEvent* event)
 {
     CHECK_NULL_RETURN(event, nullptr);
@@ -1352,6 +1381,42 @@ int32_t OH_ArkUI_PixelRoundPolicy_GetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_P
     }
     *value = policy->end.value;
     return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ShowCounterConfig* OH_ArkUI_ShowCounterConfig_Create()
+{
+    ArkUI_ShowCounterConfig* config = new ArkUI_ShowCounterConfig { { 0, 0.0f }, { 0, 0.0f } };
+    return config;
+}
+
+void OH_ArkUI_ShowCounterConfig_Dispose(ArkUI_ShowCounterConfig* config)
+{
+    delete config;
+    config = nullptr;
+}
+
+void OH_ArkUI_ShowCounterConfig_SetCounterTextColor(ArkUI_ShowCounterConfig* config, uint32_t color)
+{
+    CHECK_NULL_VOID(config);
+    config->counterTextColor = { 1, color };
+}
+
+void OH_ArkUI_ShowCounterConfig_SetCounterTextOverflowColor(ArkUI_ShowCounterConfig* config, uint32_t color)
+{
+    CHECK_NULL_VOID(config);
+    config->counterTextOverflowColor = { 1, color };
+}
+
+uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextColor(ArkUI_ShowCounterConfig* config)
+{
+    CHECK_NULL_RETURN(config, 0);
+    return config->counterTextColor.value;
+}
+
+uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(ArkUI_ShowCounterConfig* config)
+{
+    CHECK_NULL_RETURN(config, 0);
+    return config->counterTextOverflowColor.value;
 }
 #ifdef __cplusplus
 };

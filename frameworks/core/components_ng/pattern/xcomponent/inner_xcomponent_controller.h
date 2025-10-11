@@ -87,6 +87,7 @@ public:
         return nullptr;
     }
     virtual void UnlockCanvasAndPost(RSCanvas* canvas) {}
+    virtual void SetSurfaceConfig(bool isOpaque) {}
 
 private:
     ConfigSurfaceImpl configSurfaceImpl_;

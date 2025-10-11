@@ -25,9 +25,9 @@ ace_unittest("geometry_test") {
     "matrix3_test.cpp",
     "matrix4_test.cpp",
     "quaternion_test.cpp",
+    "size_t_test.cpp",
     "subwindow_manager_test.cpp",
     "transform_util_test.cpp",
-    "size_t_test.cpp",
   ]
 }
 

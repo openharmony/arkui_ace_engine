@@ -290,9 +290,20 @@ class JSBuilderNode extends BaseNode {
             this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
     }
+    clearChildBuilderNodeWeakMap() {
+        this.builderNodeWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild?.deref();
+            if (child instanceof JSBuilderNode) {
+                child.__parentViewOfBuildNode = undefined;
+                this.removeChildBuilderNode(child.id__());
+            }
+        });
+        this.clearChildBuilderNode();
+    }
     build(builder, params, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
+        this.clearChildBuilderNodeWeakMap();
         const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
         this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
         this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing) ? (options?.enableProvideConsumeCrossing) : false;
@@ -1517,6 +1528,28 @@ class FrameNode extends Disposable {
             return;
         }
         getUINativeModule().frameNode.applyAttributesFinish(this.nodePtr_);
+    }
+    convertPoint(position, targetNode) {
+        if (targetNode === null) {
+            throw { message: "The parameter 'targetNode' is invalid: it cannot be null. Please pass a non-null FrameNode object.", code: 100025 };
+        }
+        if (targetNode === undefined) {
+            throw { message: "The parameter 'targetNode' is invalid: it cannot be undefined.", code: 100025 };
+        }
+        if (targetNode.isDisposed()) {
+            throw { message: "The parameter 'targetNode' is invalid: the node has already been disposed. Check the node's status with 'isDisposed()' before passing it.", code: 100025 };
+        }
+        if (position === undefined) {
+            throw { message: "The parameter 'position' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.", code: 100025 };
+        }
+        if (position === null) {
+            throw { message: "The parameter 'position' is invalid: it cannot be null. Provide a non-null position object.", code: 100025 };
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const offsetPosition = getUINativeModule().frameNode.convertPoint(
+            this.getNodePtr(), position.x, position.y, targetNode.nodePtr_);
+        __JSScopeUtil__.restoreInstanceId();
+        return { x: offsetPosition[0], y: offsetPosition[1] };
     }
 }
 class ImmutableFrameNode extends FrameNode {

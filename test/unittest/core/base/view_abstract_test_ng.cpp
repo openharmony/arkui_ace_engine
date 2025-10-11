@@ -525,7 +525,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest009, TestSize.Level1)
     auto hoverEffect = static_cast<HoverEffectType>(INDEX);
     ViewAbstract::SetHoverEffect(hoverEffect);
     ViewAbstract::SetHoverEffect(AceType::RawPtr(FRAME_NODE_REGISTER), hoverEffect);
-
     ViewAbstract::SetFocusable(false);
     ViewAbstract::SetFocusable(AceType::RawPtr(FRAME_NODE_REGISTER), false);
     ViewAbstract::SetEnabled(false);
@@ -4012,9 +4011,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest015, TestSize.Level1)
     ViewAbstract::SetColorBlend(frameNode, colorBlend, resObj);
     Color result;
     ResourceParseUtils::ParseResColor(resObj, result);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
     colorStr = pattern->GetResCacheMapByKey("viewAbstract.colorBlend");
     EXPECT_EQ(colorStr, result.ToString());
-    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
     g_isConfigChangePerform = false;
 }
 

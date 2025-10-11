@@ -80,6 +80,9 @@ public:
     static void SetFontSizeByUser(FrameNode* frameNode, bool value);
     static void SetFontWeightByUser(FrameNode* frameNode, bool value);
     static void SetFontFamilyByUser(FrameNode* frameNode, bool value);
+
+private:
+    static void SetOnTimerMultiThread(FrameNode* frameNode, std::function<void(int64_t, int64_t)>&& onChange);
 };
 } // namespace OHOS::Ace::NG
 

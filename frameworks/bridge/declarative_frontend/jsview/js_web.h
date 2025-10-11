@@ -63,6 +63,7 @@ public:
     static void ImageAccessEnabled(bool isImageAccessEnabled);
     static void MixedMode(int32_t MixedModeNum);
     static void ZoomAccessEnabled(bool isZoomAccessEnabled);
+    static void ZoomControlAccess(bool zoomControlAccess);
     static void GeolocationAccessEnabled(bool isGeolocationAccessEnabled);
     static void JavaScriptProxy(const JSCallbackInfo& args);
     static void UserAgent(const std::string& userAgent);
@@ -163,6 +164,7 @@ public:
     static void RunJavaScriptOnHeadEnd(const JSCallbackInfo& args);
     static void SetCallbackFromController(const JSRef<JSObject> controller);
     static void SetForceEnableZoom(const JSCallbackInfo& args);
+    static void JSBackToTop(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
     static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
     static JSRef<JSVal> CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo);
@@ -212,10 +214,15 @@ public:
     static void EnableWebAVSession(const JSCallbackInfo& args);
     static void EnableDataDetector(const JSCallbackInfo& args);
     static void DataDetectorConfig(const JSCallbackInfo& args);
+    static void EnableSelectedDataDetector(const JSCallbackInfo& args);
+    static void SelectedDataDetectorConfig(const JSCallbackInfo& args);
     static void EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
     static void OnLoadStarted(const JSCallbackInfo& args);
     static void OnLoadFinished(const JSCallbackInfo& args);
     static void GestureFocusMode(int32_t gestureFocusMode);
+    static void RotateRenderEffect(int32_t webRotateEffect);
+    static void OnDetectedBlankScreen(const JSCallbackInfo& args);
+    static void BlankScreenDetectionConfig(const JSCallbackInfo& args);
     static void OnPdfScrollAtBottom(const JSCallbackInfo& args);
     static void OnPdfLoadEvent(const JSCallbackInfo& args);
     static void OnSafeBrowsingCheckFinish(const JSCallbackInfo& args);
@@ -229,6 +236,9 @@ protected:
 private:
     static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems,
         ScriptItemsByOrder& scriptItemsByOrder);
+    static void GetDoubleVectorFromJSArray(const JSRef<JSArray>& jsArray, std::vector<double>& params);
+    static void GetBlankScreenDetectionMethodVectorFromJSArray(
+        const JSRef<JSArray>& jsArray, std::vector<int32_t>& params);
     static bool CheckNestedScrollMode(const int32_t& modeValue);
 };
 } // namespace OHOS::Ace::Framework

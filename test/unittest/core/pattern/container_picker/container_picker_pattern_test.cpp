@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 using namespace testing;
@@ -44,6 +45,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     RefPtr<FrameNode> CreateContainerPickerNode();
+    RefPtr<FrameNode> CreateChildNode(const std::string& tag, const RefPtr<Pattern>& pattern);
 };
 
 void ContainerPickerPatternTest::SetUpTestSuite()
@@ -68,6 +70,13 @@ RefPtr<FrameNode> ContainerPickerPatternTest::CreateContainerPickerNode()
     ContainerPickerModel picker;
     picker.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_NE(frameNode, nullptr);
+    return frameNode;
+}
+
+RefPtr<FrameNode> ContainerPickerPatternTest::CreateChildNode(const std::string& tag, const RefPtr<Pattern>& pattern)
+{
+    auto frameNode = FrameNode::CreateFrameNode(tag, ElementRegister::GetInstance()->MakeUniqueId(), pattern);
     EXPECT_NE(frameNode, nullptr);
     return frameNode;
 }
@@ -111,8 +120,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerUtilsTest_GetLoopIndex002, T
  * @tc.desc: Test CalcCurrentMiddleItem method of ContainerPickerUtils
  * @tc.type: FUNC
  */
-HWTEST_F(
-    ContainerPickerPatternTest, ContainerPickerUtilsCalcCurrentMiddleItemTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerUtilsCalcCurrentMiddleItemTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Add items to itemPosition_
@@ -152,49 +160,19 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SetSelectedIndex
      * @tc.expected: step2. the selected index is set correctly.
      */
     pattern->totalItemCount_ = 5;
+    pattern->selectedIndex_ = 1;
     pattern->SetSelectedIndex(3);
-    EXPECT_EQ(pattern->selectedIndex_, 3);
+    EXPECT_EQ(pattern->targetIndex_, 3);
 
     /**
      * @tc.steps: step3. test SetSelectedIndex with invalid index.
      * @tc.expected: step3. the selected index is set to 0.
      */
     pattern->SetSelectedIndex(-1);
-    EXPECT_EQ(pattern->selectedIndex_, 0);
+    EXPECT_EQ(pattern->targetIndex_, 0);
 
     pattern->SetSelectedIndex(10);
-    EXPECT_EQ(pattern->selectedIndex_, 0);
-}
-
-/**
- * @tc.name: ContainerPickerPatternTest_FireChangeEvent001
- * @tc.desc: Test FireChangeEvent function
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_FireChangeEvent001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create picker and get pattern.
-     */
-    auto frameNode = CreateContainerPickerNode();
-    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. set change event and test FireChangeEvent.
-     * @tc.expected: step2. the change event is triggered with correct index.
-     */
-    int32_t testIndex = -1;
-    auto eventHub = frameNode->GetEventHub<ContainerPickerEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->SetOnChange([&testIndex](const double& index) { testIndex = static_cast<int32_t>(index); });
-
-    pattern->FireChangeEvent();
-    EXPECT_EQ(testIndex, 0);
-
-    pattern->selectedIndex_ = 3;
-    pattern->FireChangeEvent();
-    EXPECT_EQ(testIndex, 3);
+    EXPECT_EQ(pattern->targetIndex_, 0);
 }
 
 /**
@@ -331,6 +309,341 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SetContentMainSi
 
     pattern->SetContentMainSize(200.0f);
     EXPECT_EQ(pattern->contentMainSize_, 200.0f);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_CreateChildrenClickEvent_VerifyEventRegistration001
+ * @tc.desc: Verify that CreateChildrenClickEvent correctly registers click events for supported node types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CreateChildrenClickEvent_VerifyEventRegistration001,
+    TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create container picker node and mock gesture event hub.
+     */
+    auto containerPickerNode = CreateContainerPickerNode();
+    auto pattern = containerPickerNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create child nodes with different tags and set up mock event hubs.
+     */
+    auto rowNode = CreateChildNode(V2::ROW_ETS_TAG, AceType::MakeRefPtr<Pattern>());
+    auto imageNode = CreateChildNode(V2::IMAGE_ETS_TAG, AceType::MakeRefPtr<ImagePattern>());
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, AceType::MakeRefPtr<TextPattern>());
+    auto symbolNode = CreateChildNode(V2::SYMBOL_ETS_TAG, AceType::MakeRefPtr<Pattern>());
+
+    containerPickerNode->AddChild(rowNode);
+    containerPickerNode->AddChild(imageNode);
+    containerPickerNode->AddChild(textNode);
+    containerPickerNode->AddChild(symbolNode);
+
+    RefPtr<UINode> rowUiNode = AceType::DynamicCast<UINode>(rowNode);
+    EXPECT_FALSE(rowUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+
+    RefPtr<UINode> imageUiNode = AceType::DynamicCast<UINode>(imageNode);
+    EXPECT_FALSE(imageUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+
+    RefPtr<UINode> textUiNode = AceType::DynamicCast<UINode>(textNode);
+    EXPECT_FALSE(textUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+
+    RefPtr<UINode> symbolUiNode = AceType::DynamicCast<UINode>(symbolNode);
+    EXPECT_FALSE(symbolUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+
+    RefPtr<UINode> uiNode = AceType::DynamicCast<UINode>(containerPickerNode);
+    pattern->CreateChildrenClickEvent(uiNode);
+    EXPECT_TRUE(rowUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    EXPECT_TRUE(imageUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    EXPECT_TRUE(textUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    EXPECT_TRUE(symbolUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_InitMouseAndPressEvent_VerifyEventCreation001
+ * @tc.desc: Verify that InitMouseAndPressEvent correctly creates mouse and press events.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_InitMouseAndPressEvent_VerifyEventCreation001,
+    TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create container picker node and pattern.
+     */
+    auto containerPickerNode = CreateContainerPickerNode();
+    auto pattern = containerPickerNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Verify initial state of isItemClickEventCreated_.
+     */
+    EXPECT_FALSE(pattern->isItemClickEventCreated_);
+
+    /**
+     * @tc.steps: step3. Call InitMouseAndPressEvent and verify event creation flag is set.
+     */
+    pattern->InitMouseAndPressEvent();
+    EXPECT_TRUE(pattern->isItemClickEventCreated_);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_CreateChildrenClickEvent_RecursiveProcessing001
+ * @tc.desc: Verify that CreateChildrenClickEvent recursively processes nested container nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CreateChildrenClickEvent_RecursiveProcessing001,
+    TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create container picker node and pattern.
+     */
+    auto containerPickerNode = CreateContainerPickerNode();
+    auto pattern = containerPickerNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create nested container nodes with FOR_EACH and ITEM tags.
+     */
+    auto forEachNode = CreateChildNode(V2::JS_FOR_EACH_ETS_TAG, AceType::MakeRefPtr<Pattern>());
+    auto itemNode = CreateChildNode(V2::JS_SYNTAX_ITEM_ETS_TAG, AceType::MakeRefPtr<Pattern>());
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, AceType::MakeRefPtr<TextPattern>());
+
+    containerPickerNode->AddChild(forEachNode);
+    forEachNode->AddChild(itemNode);
+    itemNode->AddChild(textNode);
+
+    /**
+     * @tc.steps: step3. Call CreateChildrenClickEvent and verify recursive processing.
+     */
+    RefPtr<UINode> uiNode = AceType::DynamicCast<UINode>(containerPickerNode);
+    // This should trigger recursive processing of the nested nodes
+    pattern->CreateChildrenClickEvent(uiNode);
+    RefPtr<UINode> forEachUiNode = AceType::DynamicCast<UINode>(forEachNode);
+    RefPtr<UINode> itemUiNode = AceType::DynamicCast<UINode>(itemNode);
+    RefPtr<UINode> textUiNode = AceType::DynamicCast<UINode>(textNode);
+    EXPECT_FALSE(forEachUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    EXPECT_FALSE(itemUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    EXPECT_TRUE(textUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_CustomizeSafeAreaPadding001
+ * @tc.desc: Test CustomizeSafeAreaPadding function with different safe area configurations
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CustomizeSafeAreaPadding001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set safe area padding with values and test CustomizeSafeAreaPadding.
+     * @tc.expected: step2. top and bottom padding are reset to nullopt.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    // Set initial padding values
+    PaddingPropertyF padding { 10, 10, 10, 10 };
+    padding = pattern->CustomizeSafeAreaPadding(padding, true);
+
+    // Verify results
+    EXPECT_EQ(padding.top, std::nullopt);
+    EXPECT_EQ(padding.bottom, std::nullopt);
+    EXPECT_EQ(padding.left, 10);
+    EXPECT_EQ(padding.right, 10);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_ShortestDistanceBetweenCurrentAndTarget001
+ * @tc.desc: Test ShortestDistanceBetweenCurrentAndTarget function with non-loop mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    ContainerPickerPatternTest, ContainerPickerPatternTest_ShortestDistanceBetweenCurrentAndTarget001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set non-loop mode and test different current and target indexes.
+     * @tc.expected: step2. function returns correct distance in non-loop mode.
+     */
+    pattern->totalItemCount_ = 5;
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCanLoop(false);
+
+    // Test with target > current
+    pattern->selectedIndex_ = 1;
+    pattern->targetIndex_ = 3;
+    int32_t distance1 = pattern->ShortestDistanceBetweenCurrentAndTarget();
+    EXPECT_TRUE(NearEqual(distance1, 260.0f));
+
+    // Test with target < current
+    pattern->selectedIndex_ = 3;
+    pattern->targetIndex_ = 1;
+    int32_t distance2 = pattern->ShortestDistanceBetweenCurrentAndTarget();
+    EXPECT_TRUE(NearEqual(distance2, -260.0f));
+
+    // Test with same indexes
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = 2;
+    int32_t distance3 = pattern->ShortestDistanceBetweenCurrentAndTarget();
+    EXPECT_TRUE(NearEqual(distance3, 0.0f));
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_ShortestDistanceBetweenCurrentAndTarget002
+ * @tc.desc: Test ShortestDistanceBetweenCurrentAndTarget function with loop mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    ContainerPickerPatternTest, ContainerPickerPatternTest_ShortestDistanceBetweenCurrentAndTarget002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set loop mode and test different current and target indexes.
+     * @tc.expected: step2. function returns shortest distance in loop mode.
+     */
+    pattern->totalItemCount_ = 5;
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCanLoop(true);
+
+    // Test with shorter clockwise path
+    pattern->selectedIndex_ = 0;
+    pattern->targetIndex_ = 4;
+    int32_t distance1 = pattern->ShortestDistanceBetweenCurrentAndTarget();
+    EXPECT_TRUE(NearEqual(distance1, -130.0f)); // Shortest path is counterclockwise: 0 -> 4
+
+    // Test with shorter counterclockwise path
+    pattern->selectedIndex_ = 4;
+    pattern->targetIndex_ = 0;
+    int32_t distance2 = pattern->ShortestDistanceBetweenCurrentAndTarget();
+    EXPECT_TRUE(NearEqual(distance2, 130.0f)); // Shortest path is clockwise: 4 -> 0
+
+    // Test with equal distance both ways
+    pattern->totalItemCount_ = 4; // Even number for equal distance test
+    pattern->selectedIndex_ = 0;
+    pattern->targetIndex_ = 2;
+    int32_t distance3 = pattern->ShortestDistanceBetweenCurrentAndTarget();
+    EXPECT_TRUE(NearEqual(distance3, 260.0f)); // Either direction is same distance
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_HandleTargetIndex001
+ * @tc.desc: Test HandleTargetIndex function with normal case
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_HandleTargetIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto algorithm = AceType::MakeRefPtr<ContainerPickerLayoutAlgorithm>();
+    ASSERT_NE(algorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. test HandleTargetIndex with normal target index.
+     * @tc.expected: step2. function sets targetIndex_ and starts animation.
+     */
+    pattern->selectedIndex_ = 1;
+    pattern->totalItemCount_ = 5;
+    pattern->isTargetAnimationRunning_ = false;
+
+    // Call function under test
+    pattern->targetIndex_ = 3;
+    pattern->HandleTargetIndex(layoutWrapper, algorithm);
+
+    // Verify results
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+    EXPECT_EQ(pattern->runningTargetIndex_.value(), 3);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_SwipeTo001
+ * @tc.desc: Test SwipeTo function with valid target index
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SwipeTo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test SwipeTo with valid target index.
+     * @tc.expected: step2. function sets targetIndex_ and marks as dirty.
+     */
+    pattern->selectedIndex_ = 1;
+    pattern->isTargetAnimationRunning_ = false;
+
+    // Call function under test
+    pattern->SwipeTo(3);
+
+    // Verify results
+    EXPECT_EQ(pattern->targetIndex_, 3);
+    // We can't directly verify PickerMarkDirty is called, but we check targetIndex_ is set
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_SwipeTo002
+ * @tc.desc: Test SwipeTo function with edge cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SwipeTo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test SwipeTo with edge cases.
+     * @tc.expected: step2. function handles edge cases correctly.
+     */
+    // Test with same index as current selection
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = 0; // Different initial targetIndex_
+    pattern->isTargetAnimationRunning_ = false;
+
+    pattern->SwipeTo(2);
+    EXPECT_EQ(pattern->targetIndex_, 0); // Should not change targetIndex_
+
+    // Test with animation already running
+    pattern->selectedIndex_ = 1;
+    pattern->targetIndex_ = 0; // Different from selectedIndex_
+    pattern->isTargetAnimationRunning_ = true;
+
+    pattern->SwipeTo(3);
+    EXPECT_EQ(pattern->targetIndex_, 0); // Should not change targetIndex_ when animation is running
 }
 
 } // namespace OHOS::Ace::NG

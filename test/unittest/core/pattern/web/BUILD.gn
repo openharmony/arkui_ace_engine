@@ -45,6 +45,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/web/web_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_select_overlay.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_statusbar_click.cpp",
     "mock_rosen_render_surface.cpp",
     "mock_web_delegate.cpp",
     "richtext_model_test_ng.cpp",
@@ -80,7 +81,6 @@ ohos_unittest("web_pattern_unit_test_ohos") {
 
   deps = [
     "$ace_root/frameworks/core/components/custom_paint:ace_core_components_custom_paint_ohos",
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",
@@ -143,11 +143,8 @@ ohos_unittest("web_pattern_unit_test_ohos") {
   if (defined(global_parts_info.inputmethod_imf)) {
     external_deps += [ "imf:inputmethod_client" ]
   }
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.web_webview)) {
-    external_deps += [
-      "webview:libarkweb_utils",
-    ]
+  if (defined(global_parts_info) && defined(global_parts_info.web_webview)) {
+    external_deps += [ "webview:libarkweb_utils" ]
   }
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
@@ -185,6 +182,7 @@ ohos_unittest("web_accessibility_event_report_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/web/web_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_select_overlay.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_statusbar_click.cpp",
     "mock_rosen_render_surface.cpp",
     "mock_web_delegate.cpp",
     "web_accessibility_event_report_test.cpp",
@@ -192,7 +190,6 @@ ohos_unittest("web_accessibility_event_report_unit_test_ohos") {
 
   deps = [
     "$ace_root/frameworks/core/components/custom_paint:ace_core_components_custom_paint_ohos",
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",
@@ -255,11 +252,8 @@ ohos_unittest("web_accessibility_event_report_unit_test_ohos") {
   if (defined(global_parts_info.inputmethod_imf)) {
     external_deps += [ "imf:inputmethod_client" ]
   }
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.web_webview)) {
-    external_deps += [
-      "webview:libarkweb_utils",
-    ]
+  if (defined(global_parts_info) && defined(global_parts_info.web_webview)) {
+    external_deps += [ "webview:libarkweb_utils" ]
   }
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

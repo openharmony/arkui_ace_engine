@@ -18,7 +18,10 @@
 
 #include <future>
 #include <list>
+#include "core/components_ng/pattern/xcomponent/xcomponent_surface_config_interface.h"
 #include "interfaces/native/native_interface_xcomponent.h"
+
+struct OH_ArkUI_SurfaceHolder;
 
 struct OH_ArkUI_SurfaceCallback {
     /** Called when the surface is created. */
@@ -31,6 +34,11 @@ struct OH_ArkUI_SurfaceCallback {
     void (*onSurfaceShow)(OH_ArkUI_SurfaceHolder* surfaceHolder);
     /** Called when the surface is on background */
     void (*onSurfaceHide)(OH_ArkUI_SurfaceHolder* surfaceHolder);
+};
+
+struct ArkUI_XComponentSurfaceConfig {
+    bool isOpaque_ = false;
+    std::set<OH_ArkUI_SurfaceHolder*> surfaceHolders_;
 };
 
 struct OH_ArkUI_SurfaceHolder {
@@ -55,9 +63,23 @@ struct OH_ArkUI_SurfaceHolder {
         surfaceCallbackList_.erase(iter);
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
+
+    int32_t SetSurfaceConfig(ArkUI_XComponentSurfaceConfig* config)
+    {
+        CHECK_NULL_RETURN(config, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+        if (config_) {
+            config_->surfaceHolders_.erase(this);
+        }
+        config_ = config;
+        CHECK_NULL_RETURN(xComponentSurfaceConfigInterface_, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+        return xComponentSurfaceConfigInterface_->SetSurfaceIsOpaque(config->isOpaque_);
+    }
+
     void* userData_ = nullptr;
     OHNativeWindow* nativeWindow_ = nullptr;
     std::list<OH_ArkUI_SurfaceCallback*> surfaceCallbackList_;
     ArkUI_NodeHandle node_ = nullptr;
+    ArkUI_XComponentSurfaceConfig* config_ = nullptr;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::XComponentSurfaceConfigInterface> xComponentSurfaceConfigInterface_ = nullptr;
 };
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_XCOMPONENT_XCOMPONENT_SURFACE_HOLDER_H

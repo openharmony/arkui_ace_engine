@@ -19,6 +19,7 @@
 #include <optional>
 #include <cstdint>
 
+#include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/interfaces/native/ani/ani_theme.h"
 
 namespace OHOS::Ace::NG {

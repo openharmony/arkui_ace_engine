@@ -2679,5 +2679,27 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg408, TestSize.Level1)
     EXPECT_TRUE(context_->hasIdleTasks_);
 }
 
+/**
+ * @tc.name: PipelineContextTestNg409
+ * @tc.desc: Test OnAxisEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg409, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    AxisEvent lastEvent;
+    AxisEvent currentEvent;
+    lastEvent.id = 0;
+    lastEvent.action = AxisAction::BEGIN;
+    lastEvent.deviceId = 0;
+    lastEvent.id = 0;
+    currentEvent.action = AxisAction::BEGIN;
+    currentEvent.deviceId = 1;
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    context_->OnAxisEvent(lastEvent, context_->rootNode_);
+    context_->OnAxisEvent(currentEvent, context_->rootNode_);
+    EXPECT_EQ(context_->eventManager_->deviceIdChecker_.empty(), false);
+}
 } // namespace NG
 } // namespace OHOS::Ace

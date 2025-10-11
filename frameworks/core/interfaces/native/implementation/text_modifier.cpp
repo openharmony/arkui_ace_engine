@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/text/text_model_static.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/macros.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -169,53 +168,6 @@ void AssignArkValue(Ark_MarqueeState& dst, int32_t src)
             break;
     }
 }
-
-std::optional<Dimension> OptConvertTextFromResource(const Ark_Resource& src, DimensionUnit defaultUnit)
-{
-    std::optional<Dimension> dimension;
-    auto localResource = src;
-
-    localResource.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::STRING));
-    ResourceConverter converter(localResource);
-    std::optional<std::string> optStr = converter.ToString();
-    if (optStr.has_value() && !optStr.value().empty()) {
-        dimension = ConvertFromString(optStr.value(), defaultUnit);
-        return dimension;
-    }
-
-    localResource.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::INTEGER));
-    ResourceConverter converterInt(localResource);
-    std::optional<int32_t> intValue = converterInt.ToInt();
-    if (intValue.has_value() && intValue.value() > 0) {
-        dimension = Dimension(intValue.value(), defaultUnit);
-        return dimension;
-    }
-
-    localResource.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
-    ResourceConverter converterFloat(localResource);
-    dimension = converterFloat.ToDimension();
-    if (dimension.has_value()) {
-        return dimension;
-    }
-
-    return std::nullopt;
-}
-
-std::optional<Dimension> OptConvertTextFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
-{
-    std::optional<Dimension> dimension;
-    if (src.type == Ark_RuntimeType::INTEROP_RUNTIME_OBJECT) {
-        auto resource = ArkValue<Ark_Resource>(src);
-        return OptConvertTextFromResource(resource, defaultUnit);
-    } else {
-        auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
-        auto value = src.value;
-        if (unit == OHOS::Ace::DimensionUnit::PERCENT) {
-            value /= 100.0f;
-        }
-        return Dimension(value, unit);
-    }
-}
 } /* namespace OHOS::Ace::NG::Converter */
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -237,72 +189,38 @@ void SetTextOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 
-    if (content) {
-        auto text = Converter::OptConvert<std::u16string>(*content);
-        if (text) {
-            TextModelNG::InitText(frameNode, text.value());
-        }
+    auto text = Converter::OptConvertPtr<std::u16string>(content);
+    if (text) {
+        TextModelNG::InitText(frameNode, text.value());
     }
 
-    if (value) {
-        // obtain internal controller
-        auto internalController = TextModelNG::InitTextController(frameNode);
+    // obtain internal controller
+    auto internalController = TextModelNG::InitTextController(frameNode);
 
-        // pass internal controller to peer
-        auto textOptions = Converter::OptConvert<Converter::TextOptions>(*value);
-        if (textOptions && textOptions->peer) {
-            textOptions->peer->controller = AceType::DynamicCast<TextController>(internalController);
-        }
+    // pass internal controller to peer
+    auto textOptions = Converter::OptConvertPtr<Converter::TextOptions>(value);
+    CHECK_NULL_VOID(textOptions);
+    auto textController = textOptions->peer;
+    CHECK_NULL_VOID(textController);
+    textController->controller = AceType::DynamicCast<TextController>(internalController);
+    auto styledStringCache = textController->GetStyledStringCache();
+    if (styledStringCache) {
+        textController->controller->SetStyledString(styledStringCache);
+        textController->SetStyledStringCache(nullptr);
     }
 }
 } // TextInterfaceModifier
 namespace TextAttributeModifier {
-static void FontImplInternal(Ark_NativePointer node,
-                             const Opt_Font* value,
-                             std::optional<bool> enableVariableFontWeight = std::nullopt)
+void SetFontColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Font>(*value);
-    if (convValue.has_value()) {
-        convValue->enableVariableFontWeight = enableVariableFontWeight;
-    }
-    Converter::FontWeightInt defaultWeight = {};
-    std::optional<Converter::FontWeightInt> weight = defaultWeight;
-    if (value->tag != INTEROP_TAG_UNDEFINED) {
-        weight = Converter::OptConvert<Converter::FontWeightInt>(value->value.weight).value_or(defaultWeight);
-    }
-    TextModelStatic::SetVariableFontWeight(frameNode, weight->variable);
-    TextModelStatic::SetFont(frameNode, convValue);
-}
-
-void Font0Impl(Ark_NativePointer node,
-               const Opt_Font* value)
-{
-    FontImplInternal(node, value);
-}
-void Font1Impl(Ark_NativePointer node,
-               const Opt_Font* fontValue,
-               const Opt_FontSettingOptions* options)
-{
-    std::optional<bool> enableVariableFontWeight;
-    if (options) {
-        if (auto settings = Converter::OptConvert<Converter::FontSettingOptions>(*options); settings) {
-            enableVariableFontWeight = settings->enableVariableFontWeight;
-        }
-    }
-    FontImplInternal(node, fontValue, enableVariableFontWeight);
-}
-void FontColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto color = Converter::OptConvert<Color>(*value);
+    auto color = Converter::OptConvertPtr<Color>(value);
     TextModelStatic::SetTextColor(frameNode, color);
 }
-void FontSizeImpl(Ark_NativePointer node,
-                  const Opt_Union_Number_String_Resource* value)
+void SetFontSizeImpl(Ark_NativePointer node,
+                     const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -314,8 +232,8 @@ void FontSizeImpl(Ark_NativePointer node,
     Validator::ValidateNonPercent(fontSize);
     TextModelStatic::SetFontSize(frameNode, fontSize);
 }
-void MinFontSizeImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_String_Resource* value)
+void SetMinFontSizeImpl(Ark_NativePointer node,
+                        const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -327,8 +245,8 @@ void MinFontSizeImpl(Ark_NativePointer node,
     Validator::ValidateNonPercent(fontSize);
     TextModelStatic::SetAdaptMinFontSize(frameNode, fontSize);
 }
-void MaxFontSizeImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_String_Resource* value)
+void SetMaxFontSizeImpl(Ark_NativePointer node,
+                        const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -340,82 +258,49 @@ void MaxFontSizeImpl(Ark_NativePointer node,
     Validator::ValidateNonPercent(fontSize);
     TextModelStatic::SetAdaptMaxFontSize(frameNode, fontSize);
 }
-
-void MinFontScaleImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_Resource* value)
+void SetMinFontScaleImpl(Ark_NativePointer node,
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto minFontScale = Converter::OptConvert<float>(*value);
-    Validator::ValidatePositive(minFontScale);
-    const auto maxValue = 1.f;
-    Validator::ValidateLessOrEqual(minFontScale, maxValue);
+    auto minFontScale = Converter::OptConvertPtr<float>(value);
     TextModelStatic::SetMinFontScale(frameNode, minFontScale);
 }
-void MaxFontScaleImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_Resource* value)
+void SetMaxFontScaleImpl(Ark_NativePointer node,
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto maxFontScale = Converter::OptConvert<float>(*value);
-    const auto minValue = 1.f;
-    Validator::ValidateGreatOrEqual(maxFontScale, minValue);
+    auto maxFontScale = Converter::OptConvertPtr<float>(value);
     TextModelStatic::SetMaxFontScale(frameNode, maxFontScale);
 }
-void FontStyleImpl(Ark_NativePointer node,
-                   const Opt_FontStyle* value)
+void SetFontStyleImpl(Ark_NativePointer node,
+                      const Opt_FontStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontStyle = Converter::OptConvert<Ace::FontStyle>(*value);
+    auto fontStyle = Converter::OptConvertPtr<Ace::FontStyle>(value);
     TextModelStatic::SetItalicFontStyle(frameNode, fontStyle);
 }
-void FontWeight0Impl(Ark_NativePointer node,
-                     const Opt_Union_Number_FontWeight_String* value)
+void SetLineSpacingImpl(Ark_NativePointer node,
+                        const Opt_LengthMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Converter::FontWeightInt defaultWeight = {};
-    auto weight = Converter::OptConvert<Converter::FontWeightInt>(*value).value_or(defaultWeight);
-    TextModelStatic::SetFontWeight(frameNode, weight.fixed);
-    TextModelStatic::SetVariableFontWeight(frameNode, weight.variable);
-}
-void FontWeight1Impl(Ark_NativePointer node,
-                     const Opt_Union_Number_FontWeight_String* weight,
-                     const Opt_FontSettingOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    FontWeight0Impl(node, weight);
-
-    std::optional<bool> enableVariableFontWeight;
-    if (options) {
-        auto settings = Converter::OptConvert<Converter::FontSettingOptions>(*options);
-        if (settings) {
-            enableVariableFontWeight = settings->enableVariableFontWeight;
-        }
-    }
-    TextModelStatic::SetEnableVariableFontWeight(frameNode, enableVariableFontWeight);
-}
-void LineSpacingImpl(Ark_NativePointer node,
-                     const Opt_LengthMetrics* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto lineSpacing = Converter::OptConvert<Dimension>(*value);
+    auto lineSpacing = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(lineSpacing);
     TextModelStatic::SetLineSpacing(frameNode, lineSpacing);
 }
-void TextAlignImpl(Ark_NativePointer node,
-                   const Opt_TextAlign* value)
+void SetTextAlignImpl(Ark_NativePointer node,
+                      const Opt_TextAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto textAlign = Converter::OptConvert<TextAlign>(*value);
+    auto textAlign = Converter::OptConvertPtr<TextAlign>(value);
     TextModelStatic::SetTextAlign(frameNode, textAlign);
 }
-void LineHeightImpl(Ark_NativePointer node,
-                    const Opt_Union_Number_String_Resource* value)
+void SetLineHeightImpl(Ark_NativePointer node,
+                       const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -426,8 +311,8 @@ void LineHeightImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(lineHeight);
     TextModelStatic::SetLineHeight(frameNode, lineHeight);
 }
-void TextOverflowImpl(Ark_NativePointer node,
-                      const Opt_TextOverflowOptions* value)
+void SetTextOverflowImpl(Ark_NativePointer node,
+                         const Opt_TextOverflowOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -438,28 +323,28 @@ void TextOverflowImpl(Ark_NativePointer node,
     }
     TextModelStatic::SetTextOverflow(frameNode, convValue);
 }
-void FontFamilyImpl(Ark_NativePointer node,
-                    const Opt_Union_String_Resource* value)
+void SetFontFamilyImpl(Ark_NativePointer node,
+                       const Opt_Union_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<StringArray> families;
-    if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
+    if (auto fontfamiliesOpt = Converter::OptConvertPtr<Converter::FontFamilies>(value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
     Validator::ValidateNonEmpty(families);
     TextModelStatic::SetFontFamily(frameNode, families);
 }
-void MaxLinesImpl(Ark_NativePointer node,
-                  const Opt_Number* value)
+void SetMaxLinesImpl(Ark_NativePointer node,
+                     const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<uint32_t>(*value);
+    auto convValue = Converter::OptConvertPtr<uint32_t>(value);
     TextModelStatic::SetMaxLines(frameNode, convValue);
 }
-void DecorationImpl(Ark_NativePointer node,
-                    const Opt_DecorationStyleInterface* value)
+void SetDecorationImpl(Ark_NativePointer node,
+                       const Opt_DecorationStyleInterface* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -476,224 +361,224 @@ void DecorationImpl(Ark_NativePointer node,
     TextModelStatic::SetTextDecorationColor(frameNode, color);
     TextModelStatic::SetTextDecorationStyle(frameNode, style);
 }
-void LetterSpacingImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_String* value)
+void SetLetterSpacingImpl(Ark_NativePointer node,
+                          const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto spacing = Converter::OptConvert<Dimension>(*value);
+    auto spacing = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonPercent(spacing);
     TextModelStatic::SetLetterSpacing(frameNode, spacing);
 }
-void TextCaseImpl(Ark_NativePointer node,
-                  const Opt_TextCase* value)
+void SetTextCaseImpl(Ark_NativePointer node,
+                     const Opt_TextCase* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto textCase = Converter::OptConvert<TextCase>(*value);
+    auto textCase = Converter::OptConvertPtr<TextCase>(value);
     TextModelStatic::SetTextCase(frameNode, textCase);
 }
-void BaselineOffsetImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String* value)
+void SetBaselineOffsetImpl(Ark_NativePointer node,
+                           const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto offset = Converter::OptConvert<Dimension>(*value);
+    auto offset = Converter::OptConvertPtr<Dimension>(value);
     TextModelStatic::SetBaselineOffset(frameNode, offset);
 }
-void CopyOptionImpl(Ark_NativePointer node,
-                    const Opt_CopyOptions* value)
+void SetCopyOptionImpl(Ark_NativePointer node,
+                       const Opt_CopyOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<CopyOptions>(*value);
+    auto convValue = Converter::OptConvertPtr<CopyOptions>(value);
     TextModelStatic::SetCopyOption(frameNode, convValue);
 }
-void DraggableImpl(Ark_NativePointer node,
-                   const Opt_Boolean* value)
+void SetDraggableImpl(Ark_NativePointer node,
+                      const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     ViewAbstract::SetDraggable(frameNode, convValue.value_or(false));
 }
-void TextShadowImpl(Ark_NativePointer node,
-                    const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
+void SetTextShadowImpl(Ark_NativePointer node,
+                       const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value);
     TextModelStatic::SetTextShadow(frameNode, shadowList);
 }
-void HeightAdaptivePolicyImpl(Ark_NativePointer node,
-                              const Opt_TextHeightAdaptivePolicy* value)
+void SetHeightAdaptivePolicyImpl(Ark_NativePointer node,
+                                 const Opt_TextHeightAdaptivePolicy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<TextHeightAdaptivePolicy>(*value);
+    auto convValue = Converter::OptConvertPtr<TextHeightAdaptivePolicy>(value);
     TextModelStatic::SetHeightAdaptivePolicy(frameNode, convValue);
 }
-void TextIndentImpl(Ark_NativePointer node,
-                    const Opt_Length* value)
+void SetTextIndentImpl(Ark_NativePointer node,
+                       const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<Dimension> indent = std::nullopt;
     if (value->tag != INTEROP_TAG_UNDEFINED) {
-        indent = Converter::OptConvertTextFromArkLength(value->value, DimensionUnit::FP);
+        indent = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(value->value, DimensionUnit::FP);
     }
     TextModelStatic::SetTextIndent(frameNode, indent);
 }
-void WordBreakImpl(Ark_NativePointer node,
-                   const Opt_WordBreak* value)
+void SetWordBreakImpl(Ark_NativePointer node,
+                      const Opt_WordBreak* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<WordBreak>(*value);
+    auto convValue = Converter::OptConvertPtr<WordBreak>(value);
     TextModelStatic::SetWordBreak(frameNode, convValue);
 }
-void LineBreakStrategyImpl(Ark_NativePointer node,
-                           const Opt_LineBreakStrategy* value)
+void SetLineBreakStrategyImpl(Ark_NativePointer node,
+                              const Opt_LineBreakStrategy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<LineBreakStrategy>(*value);
+    auto convValue = Converter::OptConvertPtr<LineBreakStrategy>(value);
     TextModelStatic::SetLineBreakStrategy(frameNode, convValue);
 }
-void OnCopyImpl(Ark_NativePointer node,
-                const Opt_Callback_String_Void* value)
+void SetOnCopyImpl(Ark_NativePointer node,
+                   const Opt_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onCopy = [arkCallback = CallbackHelper(*optValue)](const std::u16string& param) {
         Converter::ConvContext ctx;
-        arkCallback.Invoke(Converter::ArkValue<Ark_String>(param, &ctx));
+        arkCallback.InvokeSync(Converter::ArkValue<Ark_String>(param, &ctx));
     };
 
     TextModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
-void CaretColorImpl(Ark_NativePointer node,
-                    const Opt_ResourceColor* value)
+void SetCaretColorImpl(Ark_NativePointer node,
+                       const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     TextModelStatic::SetCaretColor(frameNode, convValue);
 }
-void SelectedBackgroundColorImpl(Ark_NativePointer node,
-                                 const Opt_ResourceColor* value)
+void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
+                                    const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     TextModelStatic::SetSelectedBackgroundColor(frameNode, convValue);
 }
-void EllipsisModeImpl(Ark_NativePointer node,
-                      const Opt_EllipsisMode* value)
+void SetEllipsisModeImpl(Ark_NativePointer node,
+                         const Opt_EllipsisMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<EllipsisMode>(*value);
+    auto convValue = Converter::OptConvertPtr<EllipsisMode>(value);
     TextModelStatic::SetEllipsisMode(frameNode, convValue);
 }
-void EnableDataDetectorImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
+void SetEnableDataDetectorImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     TextModelNG::SetTextDetectEnable(frameNode, convValue.value_or(false));
 }
-void DataDetectorConfigImpl(Ark_NativePointer node,
-                            const Opt_TextDataDetectorConfig* value)
+void SetDataDetectorConfigImpl(Ark_NativePointer node,
+                               const Opt_TextDataDetectorConfig* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<TextDetectConfig>(*value);
+    auto convValue = Converter::OptConvertPtr<TextDetectConfig>(value);
     if (!convValue) {
         return;
     }
     TextModelNG::SetTextDetectConfig(frameNode, *convValue);
 }
-void OnTextSelectionChangeImpl(Ark_NativePointer node,
-                               const Opt_Callback_Number_Number_Void* value)
+void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
+                                  const Opt_Callback_I32_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onSelectionChange = [arkCallback = CallbackHelper(*optValue)](int32_t start, int32_t end) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+        arkCallback.InvokeSync(Converter::ArkValue<Ark_Int32>(start), Converter::ArkValue<Ark_Int32>(end));
     };
 
     TextModelNG::SetOnTextSelectionChange(frameNode, std::move(onSelectionChange));
 }
-void FontFeatureImpl(Ark_NativePointer node,
-                     const Opt_String* value)
+void SetFontFeatureImpl(Ark_NativePointer node,
+                        const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<std::string>(*value);
+    auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
         return;
     }
     TextModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(*convValue));
 }
-void MarqueeOptionsImpl(Ark_NativePointer node,
-                        const Opt_TextMarqueeOptions* value)
+void SetMarqueeOptionsImpl(Ark_NativePointer node,
+                           const Opt_TextMarqueeOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<TextMarqueeOptions>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<TextMarqueeOptions>(value);
     TextModelNG::SetMarqueeOptions(frameNode, convValue.value_or(TextMarqueeOptions()));
 }
-void OnMarqueeStateChangeImpl(Ark_NativePointer node,
-                              const Opt_Callback_MarqueeState_Void* value)
+void SetOnMarqueeStateChangeImpl(Ark_NativePointer node,
+                                 const Opt_Callback_MarqueeState_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto modelCallback = [callbackHelper = CallbackHelper(*optValue)](int32_t marqueeState) {
         auto arkMarqueeState = Converter::ArkValue<Ark_MarqueeState>(marqueeState);
-        callbackHelper.Invoke(arkMarqueeState);
+        callbackHelper.InvokeSync(arkMarqueeState);
     };
     TextModelNG::SetOnMarqueeStateChange(frameNode, std::move(modelCallback));
 }
-void PrivacySensitiveImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+void SetPrivacySensitiveImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelStatic::SetPrivacySensitive(frameNode, Converter::OptConvert<bool>(*value));
+    ViewAbstractModelStatic::SetPrivacySensitive(frameNode, Converter::OptConvertPtr<bool>(value));
 }
-void TextSelectableImpl(Ark_NativePointer node,
-                        const Opt_TextSelectableMode* value)
+void SetTextSelectableImpl(Ark_NativePointer node,
+                           const Opt_TextSelectableMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<TextSelectableMode>(*value);
+    auto convValue = Converter::OptConvertPtr<TextSelectableMode>(value);
     TextModelStatic::SetTextSelectableMode(frameNode, convValue);
 }
-void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Opt_EditMenuOptions* value)
+void SetEditMenuOptionsImpl(Ark_NativePointer node,
+                            const Opt_EditMenuOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
@@ -714,50 +599,90 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
         };
     TextModelStatic::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
-void HalfLeadingImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
+void SetHalfLeadingImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    TextModelStatic::SetHalfLeading(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextModelStatic::SetHalfLeading(frameNode, Converter::OptConvertPtr<bool>(value));
 }
-void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                              const Opt_Boolean* value)
+void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     TextModelStatic::SetEnableHapticFeedback(frameNode, convValue);
 }
-void SelectionImpl(Ark_NativePointer node,
-                   const Opt_Number* selectionStart,
-                   const Opt_Number* selectionEnd)
+void SetFontImpl(Ark_NativePointer node,
+                 const Opt_Font* fontValue,
+                 const Opt_FontSettingOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto startIndex = Converter::OptConvert<int>(*selectionStart);
+    std::optional<bool> enableVariableFontWeight;
+    if (auto settings = Converter::OptConvertPtr<Converter::FontSettingOptions>(options); settings) {
+        enableVariableFontWeight = settings->enableVariableFontWeight;
+    }
+    auto convValue = Converter::OptConvertPtr<Font>(fontValue);
+    if (convValue.has_value()) {
+        convValue->enableVariableFontWeight = enableVariableFontWeight;
+    }
+    Converter::FontWeightInt defaultWeight = {};
+    std::optional<Converter::FontWeightInt> weight = defaultWeight;
+    if (fontValue->tag != INTEROP_TAG_UNDEFINED) {
+        weight = Converter::OptConvert<Converter::FontWeightInt>(fontValue->value.weight).value_or(defaultWeight);
+    }
+    TextModelStatic::SetVariableFontWeight(frameNode, weight->variable);
+    TextModelStatic::SetFont(frameNode, convValue);
+}
+void SetFontWeightImpl(Ark_NativePointer node,
+                       const Opt_Union_I32_FontWeight_String* weight,
+                       const Opt_FontSettingOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Converter::FontWeightInt defaultWeight = {};
+    auto convWeight = Converter::OptConvertPtr<Converter::FontWeightInt>(weight).value_or(defaultWeight);
+    TextModelStatic::SetFontWeight(frameNode, convWeight.fixed);
+    TextModelStatic::SetVariableFontWeight(frameNode, convWeight.variable);
+
+    std::optional<bool> enableVariableFontWeight;
+    auto settings = Converter::OptConvertPtr<Converter::FontSettingOptions>(options);
+    if (settings) {
+        enableVariableFontWeight = settings->enableVariableFontWeight;
+    }
+    TextModelStatic::SetEnableVariableFontWeight(frameNode, enableVariableFontWeight);
+}
+void SetSelectionImpl(Ark_NativePointer node,
+                      const Opt_Int32* selectionStart,
+                      const Opt_Int32* selectionEnd)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto startIndex = Converter::OptConvertPtr<int>(selectionStart);
     if (!startIndex) {
         startIndex = -1;
     }
-    auto endIndex = Converter::OptConvert<int>(*selectionEnd);
+    auto endIndex = Converter::OptConvertPtr<int>(selectionEnd);
     if (!endIndex) {
         endIndex = -1;
     }
     TextModelNG::SetTextSelection(frameNode, *startIndex, *endIndex);
 }
-void BindSelectionMenuImpl(Ark_NativePointer node,
-                           const Opt_TextSpanType* spanType,
-                           const Opt_CustomNodeBuilder* content,
-                           const Opt_TextResponseType* responseType,
-                           const Opt_SelectionMenuOptions* options)
+void SetBindSelectionMenuImpl(Ark_NativePointer node,
+                              const Opt_TextSpanType* spanType,
+                              const Opt_CustomNodeBuilder* content,
+                              const Opt_TextResponseType* responseType,
+                              const Opt_SelectionMenuOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     // TextSpanType
     NG::TextSpanType textSpanType = NG::TextSpanType::TEXT;
     bool isValidTextSpanType = false;
-    auto optSpanType = Converter::OptConvert<TextSpanType>(*spanType);
+    auto optSpanType = Converter::OptConvertPtr<TextSpanType>(spanType);
     if (optSpanType) {
         isValidTextSpanType = true;
     }
@@ -765,12 +690,12 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     auto optContent = Converter::GetOptPtr(content);
     CHECK_NULL_VOID(optContent);
     // TextResponseType
-    auto convResponseType = Converter::OptConvert<TextResponseType>(*responseType);
+    auto convResponseType = Converter::OptConvertPtr<TextResponseType>(responseType);
     if (!convResponseType) {
         convResponseType = NG::TextResponseType::LONG_PRESS;
     }
     // SelectionMenuOptions
-    auto convMenuParam = Converter::OptConvert<SelectMenuParam>(*options);
+    auto convMenuParam = Converter::OptConvertPtr<SelectMenuParam>(options);
     if (convMenuParam) {
         convMenuParam->isValid = isValidTextSpanType;
     } else {
@@ -791,51 +716,49 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
     static const GENERATED_ArkUITextModifier ArkUITextModifierImpl {
         TextModifier::ConstructImpl,
         TextInterfaceModifier::SetTextOptionsImpl,
-        TextAttributeModifier::Font0Impl,
-        TextAttributeModifier::Font1Impl,
-        TextAttributeModifier::FontColorImpl,
-        TextAttributeModifier::FontSizeImpl,
-        TextAttributeModifier::MinFontSizeImpl,
-        TextAttributeModifier::MaxFontSizeImpl,
-        TextAttributeModifier::MinFontScaleImpl,
-        TextAttributeModifier::MaxFontScaleImpl,
-        TextAttributeModifier::FontStyleImpl,
-        TextAttributeModifier::FontWeight0Impl,
-        TextAttributeModifier::FontWeight1Impl,
-        TextAttributeModifier::LineSpacingImpl,
-        TextAttributeModifier::TextAlignImpl,
-        TextAttributeModifier::LineHeightImpl,
-        TextAttributeModifier::TextOverflowImpl,
-        TextAttributeModifier::FontFamilyImpl,
-        TextAttributeModifier::MaxLinesImpl,
-        TextAttributeModifier::DecorationImpl,
-        TextAttributeModifier::LetterSpacingImpl,
-        TextAttributeModifier::TextCaseImpl,
-        TextAttributeModifier::BaselineOffsetImpl,
-        TextAttributeModifier::CopyOptionImpl,
-        TextAttributeModifier::DraggableImpl,
-        TextAttributeModifier::TextShadowImpl,
-        TextAttributeModifier::HeightAdaptivePolicyImpl,
-        TextAttributeModifier::TextIndentImpl,
-        TextAttributeModifier::WordBreakImpl,
-        TextAttributeModifier::LineBreakStrategyImpl,
-        TextAttributeModifier::OnCopyImpl,
-        TextAttributeModifier::CaretColorImpl,
-        TextAttributeModifier::SelectedBackgroundColorImpl,
-        TextAttributeModifier::EllipsisModeImpl,
-        TextAttributeModifier::EnableDataDetectorImpl,
-        TextAttributeModifier::DataDetectorConfigImpl,
-        TextAttributeModifier::OnTextSelectionChangeImpl,
-        TextAttributeModifier::FontFeatureImpl,
-        TextAttributeModifier::MarqueeOptionsImpl,
-        TextAttributeModifier::OnMarqueeStateChangeImpl,
-        TextAttributeModifier::PrivacySensitiveImpl,
-        TextAttributeModifier::TextSelectableImpl,
-        TextAttributeModifier::EditMenuOptionsImpl,
-        TextAttributeModifier::HalfLeadingImpl,
-        TextAttributeModifier::EnableHapticFeedbackImpl,
-        TextAttributeModifier::SelectionImpl,
-        TextAttributeModifier::BindSelectionMenuImpl,
+        TextAttributeModifier::SetFontColorImpl,
+        TextAttributeModifier::SetFontSizeImpl,
+        TextAttributeModifier::SetMinFontSizeImpl,
+        TextAttributeModifier::SetMaxFontSizeImpl,
+        TextAttributeModifier::SetMinFontScaleImpl,
+        TextAttributeModifier::SetMaxFontScaleImpl,
+        TextAttributeModifier::SetFontStyleImpl,
+        TextAttributeModifier::SetLineSpacingImpl,
+        TextAttributeModifier::SetTextAlignImpl,
+        TextAttributeModifier::SetLineHeightImpl,
+        TextAttributeModifier::SetTextOverflowImpl,
+        TextAttributeModifier::SetFontFamilyImpl,
+        TextAttributeModifier::SetMaxLinesImpl,
+        TextAttributeModifier::SetDecorationImpl,
+        TextAttributeModifier::SetLetterSpacingImpl,
+        TextAttributeModifier::SetTextCaseImpl,
+        TextAttributeModifier::SetBaselineOffsetImpl,
+        TextAttributeModifier::SetCopyOptionImpl,
+        TextAttributeModifier::SetDraggableImpl,
+        TextAttributeModifier::SetTextShadowImpl,
+        TextAttributeModifier::SetHeightAdaptivePolicyImpl,
+        TextAttributeModifier::SetTextIndentImpl,
+        TextAttributeModifier::SetWordBreakImpl,
+        TextAttributeModifier::SetLineBreakStrategyImpl,
+        TextAttributeModifier::SetOnCopyImpl,
+        TextAttributeModifier::SetCaretColorImpl,
+        TextAttributeModifier::SetSelectedBackgroundColorImpl,
+        TextAttributeModifier::SetEllipsisModeImpl,
+        TextAttributeModifier::SetEnableDataDetectorImpl,
+        TextAttributeModifier::SetDataDetectorConfigImpl,
+        TextAttributeModifier::SetOnTextSelectionChangeImpl,
+        TextAttributeModifier::SetFontFeatureImpl,
+        TextAttributeModifier::SetMarqueeOptionsImpl,
+        TextAttributeModifier::SetOnMarqueeStateChangeImpl,
+        TextAttributeModifier::SetPrivacySensitiveImpl,
+        TextAttributeModifier::SetTextSelectableImpl,
+        TextAttributeModifier::SetEditMenuOptionsImpl,
+        TextAttributeModifier::SetHalfLeadingImpl,
+        TextAttributeModifier::SetEnableHapticFeedbackImpl,
+        TextAttributeModifier::SetFontImpl,
+        TextAttributeModifier::SetFontWeightImpl,
+        TextAttributeModifier::SetSelectionImpl,
+        TextAttributeModifier::SetBindSelectionMenuImpl,
     };
     return &ArkUITextModifierImpl;
 }

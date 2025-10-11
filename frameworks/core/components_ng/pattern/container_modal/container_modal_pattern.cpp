@@ -22,7 +22,9 @@
 #include "core/components_ng/pattern/container_modal/container_modal_toolbar.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
+#endif
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -543,13 +545,27 @@ void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, co
     inactiveColor_ = inactiveColor;
     isCustomColor_ = true;
     renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
-
+    SetContainerWindowTransparent();
     CHECK_NULL_VOID(titleMgr_);
     if (IsContainerModalTransparent()) {
         titleMgr_->UpdateTargetNodesBarMargin();
     } else {
         titleMgr_->ResetExpandStackNode();
     }
+}
+
+void ContainerModalPattern::SetContainerWindowTransparent()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    auto containerNode = GetHost();
+    CHECK_NULL_VOID(containerNode);
+    auto pipeline = containerNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto reUiDirector = pipeline->GetRSUIDirector();
+    CHECK_NULL_VOID(reUiDirector);
+    auto color = GetContainerColor(isFocus_);
+    reUiDirector->SetContainerWindowTransparent(color.GetAlpha() == 0);
+#endif
 }
 
 Color ContainerModalPattern::GetContainerColor(bool isFocus)

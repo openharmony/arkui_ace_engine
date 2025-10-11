@@ -33,13 +33,13 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     // Construct text style.
     TextStyle textStyle;
-    ConstructTextStyles(frameNode, textStyle, textContent_, showPlaceHolder_);
+    direction_ = textFieldLayoutProperty->GetLayoutDirection();
+    ConstructTextStyles(layoutWrapper, textStyle, textContent_, showPlaceHolder_);
     std::replace(textContent_.begin(), textContent_.end(), u'\n', u' ');
 
     auto isInlineStyle = pattern->IsNormalInlineState();
     isInlineFocus_ = isInlineStyle && pattern->HasFocus();
-
-    direction_ = textFieldLayoutProperty->GetLayoutDirection();
+    auto isStyledPlacehodler = IsStyledPlaceholder(pattern);
 
     // Create paragraph.
     pattern->SetAdaptFontSize(std::nullopt);
@@ -53,16 +53,17 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
             return std::nullopt;
         }
         pattern->SetAdaptFontSize(textStyle.GetFontSize());
-    } else {
+    } else if (!isStyledPlacehodler) {
+        // placeHodler属性字符串样式,不需要创建paragraph
         CreateParagraphEx(textStyle, textContent_, contentConstraint, layoutWrapper);
     }
 
     autoWidth_ = textFieldLayoutProperty->GetWidthAutoValue(false);
     isFontSizeNonPositive_ = IsFontSizeNonPositive(textStyle);
 
-    if (textContent_.empty()) {
+    if (textContent_.empty() || isStyledPlacehodler) {
         // Used for empty text.
-        preferredHeight_ = pattern->PreferredLineHeight(true);
+        preferredHeight_ = pattern->PreferredLineHeight(true, isStyledPlacehodler);
     }
 
     // Paragraph layout.
@@ -73,7 +74,11 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
         return InlineMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
     } else if (showPlaceHolder_) {
-        return PlaceHolderMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
+        if (isStyledPlacehodler) {
+            return StyledPlaceHolderMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
+        } else {
+            return PlaceHolderMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
+        }
     } else {
         return TextInputMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
     }
@@ -205,6 +210,8 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         .contentOffset = content->GetRect().GetOffset()
     };
     UpdateTextRect(updateTextRectParams);
+
+    StyledPlaceHodlerLayout(layoutWrapper, pattern);
 
     bool isInlineStyle = pattern->IsNormalInlineState();
     if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength() && !isInlineStyle) {

@@ -966,9 +966,6 @@ bool NavigationPattern::IsForceSplitSupported(const RefPtr<PipelineContext>& con
 
 void NavigationPattern::NotifyForceFullScreenChangeIfNeeded(const std::vector<std::string>& allNames)
 {
-    if (allNames.empty()) {
-        return;
-    }
     auto context = Claim(GetContext());
     CHECK_NULL_VOID(context);
     if (!IsForceSplitSupported(context)) {
@@ -976,10 +973,16 @@ void NavigationPattern::NotifyForceFullScreenChangeIfNeeded(const std::vector<st
     }
     auto forceSplitMgr = context->GetForceSplitManager();
     CHECK_NULL_VOID(forceSplitMgr);
-    auto isCurTopFullScreenPage = forceSplitMgr->IsFullScreenPage(allNames.back());
+    auto isCurTopFullScreenPage = false;
+    if (!allNames.empty()) {
+        isCurTopFullScreenPage = forceSplitMgr->IsFullScreenPage(allNames.back());
+    }
     if (isTopFullScreenPage_ != isCurTopFullScreenPage) {
         isTopFullScreenPage_ = isCurTopFullScreenPage;
+        isTopFullScreenChanged_ = true;
         forceSplitMgr->NotifyForceFullScreenChange(isTopFullScreenPage_);
+    } else {
+        isTopFullScreenChanged_ = false;
     }
 }
 
@@ -1619,7 +1622,7 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
 
     if (isOnShow) {
         if (overlayManager && overlayManager->HasModalPage() &&
-            navigationPattern->GetEnableShowHideWithContentCover()) {
+            navigationPattern->GetEnableVisibilityLifecycleWithContentCover()) {
             return;
         }
         if (needHideOrShowPrimaryNodes) {
@@ -1724,7 +1727,7 @@ void NavigationPattern::FireNavigationLifecycleChange(
             auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
             CHECK_NULL_VOID(navigationPattern);
             if (reason == NavDestVisibilityChangeReason::CONTENT_COVER &&
-                !navigationPattern->GetEnableShowHideWithContentCover()) {
+                !navigationPattern->GetEnableVisibilityLifecycleWithContentCover()) {
                 continue;
             }
             navigationPattern->FireNavDestinationStateChange(lifecycle, reason);
@@ -2859,8 +2862,6 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "preDestination and topDestination is invalid");
         return;
     }
-    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition end");
-    PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     auto replaceValue = navigationStack_->GetReplaceValue();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -4063,8 +4064,6 @@ void NavigationPattern::RecoveryToLastStack(
 
     // update name index
     navigationStack_->RecoveryNavigationStack();
-    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page transition end");
-    PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     hostNode->SetIsOnAnimation(false);
     auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
     hostNode->OnAccessibilityEvent(
@@ -5285,41 +5284,14 @@ void NavigationPattern::TryForceSplitIfNeeded(const SizeF& frameSize)
     bool forceSplitUseNavBar = false;
     auto navManager = context->GetNavigationManager();
     CHECK_NULL_VOID(navManager);
+    UpdateCanForceSplitLayout(frameSize);
     if (navManager->IsForceSplitEnable() && !isTopFullScreenPage_) {
-        /**
-         * The force split mode must meet the following conditions to take effect:
-         *   1. Belonging to the main window of the application
-         *   2. Belonging to the main page of the application (excluding container model, popups, etc.)
-         *   3. The application is in landscape mode or ignore orientation
-         *   4. The application is not in split screen mode
-         *   5. Navigation width greater than 600vp
-         *   6. It belongs to the outermost Navigation or specified Navigation within the page
-         */
-        auto container = Container::GetContainer(context->GetInstanceId());
-        CHECK_NULL_VOID(container);
-        bool isMainWindow = container->IsMainWindow();
-        bool isInAppMainPage = pageNode_.Upgrade() != nullptr;
-        auto thresholdWidth = SPLIT_THRESHOLD_WIDTH.ConvertToPx();
-        auto dipScale = context->GetDipScale();
-        bool ignoreOrientation = navManager->GetIgnoreOrientation();
-        auto orientation = SystemProperties::GetDeviceOrientation();
-        auto windowManager = context->GetWindowManager();
-        CHECK_NULL_VOID(windowManager);
-        auto windowMode = windowManager->GetWindowMode();
-        bool isInSplitScreenMode = windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
-        forceSplitSuccess = isMainWindow && isInAppMainPage &&
-            (ignoreOrientation || orientation == DeviceOrientation::LANDSCAPE) &&
-            thresholdWidth < frameSize.Width() && !isInSplitScreenMode;
+        forceSplitSuccess = canForceSplitLayout_;
         bool isNavBarValid = IsNavBarValid();
         forceSplitUseNavBar = forceSplitSuccess && isNavBarValid && navBarIsHome_;
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "calc splitMode, isMainWindow:%{public}d, isInAppMainPage:%{public}d, "
-            "isInSplitScreenMode:%{public}d, ignoreOrientation:%{public}d, orientation: %{public}s, "
-            "dipScale: %{public}f, thresholdWidth: %{public}f, curWidth: %{public}f, isNavBarValid:%{public}d, "
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "calc splitMode, isNavBarValid:%{public}d, "
             "navBarIsHome:%{public}d, forceSplitSuccess:%{public}d, forceSplitUseNavBar:%{public}d",
-            isMainWindow, isInAppMainPage, isInSplitScreenMode, ignoreOrientation,
-            DeviceOrientationToString(orientation), dipScale, thresholdWidth, frameSize.Width(), isNavBarValid,
-            navBarIsHome_, forceSplitSuccess, forceSplitUseNavBar);
+            isNavBarValid, navBarIsHome_, forceSplitSuccess, forceSplitUseNavBar);
     }
     if (forceSplitSuccess == forceSplitSuccess_ && forceSplitUseNavBar_ == forceSplitUseNavBar) {
         return;
@@ -5733,7 +5705,7 @@ void NavigationPattern::RemoveRedundantPrimaryNavDestination()
     }
 }
 
-bool NavigationPattern::IsHomeDestinationVisible()
+bool NavigationPattern::IsHomeDestinationOrNavBarVisible()
 {
     auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(host, false);
@@ -5851,5 +5823,44 @@ bool NavigationPattern::CheckNeedCreate(int32_t index)
         uiNode = navigationStack_->Get(index);
     }
     return uiNode == nullptr;
+}
+
+void NavigationPattern::UpdateCanForceSplitLayout(const SizeF& frameSize)
+{
+    /**
+     * The force split mode must meet the following conditions to take effect:
+     *   1. Belonging to the main window of the application
+     *   2. Belonging to the main page of the application (excluding container model, popups, etc.)
+     *   3. The application is in landscape mode or ignore orientation
+     *   4. The application is not in split screen mode
+     *   5. Navigation width greater than 600vp
+     *   6. It belongs to the outermost Navigation or specified Navigation within the page
+     */
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto navManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navManager);
+    auto container = Container::GetContainer(context->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    bool isMainWindow = container->IsMainWindow();
+    bool isInAppMainPage = pageNode_.Upgrade() != nullptr;
+    auto thresholdWidth = SPLIT_THRESHOLD_WIDTH.ConvertToPx();
+    auto dipScale = context->GetDipScale();
+    bool ignoreOrientation = navManager->GetIgnoreOrientation();
+    auto orientation = SystemProperties::GetDeviceOrientation();
+    auto windowManager = context->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto windowMode = windowManager->GetWindowMode();
+    bool isInSplitScreenMode = windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+    canForceSplitLayout_ = isMainWindow && isInAppMainPage &&
+        (ignoreOrientation || orientation == DeviceOrientation::LANDSCAPE) &&
+        thresholdWidth < frameSize.Width() && !isInSplitScreenMode;
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Update canForceSplitLayout_, isMainWindow:%{public}d, "
+        "isInAppMainPage:%{public}d, isInSplitScreenMode:%{public}d, ignoreOrientation:%{public}d, "
+        "orientation: %{public}s, dipScale: %{public}f, thresholdWidth: %{public}f, curWidth: %{public}f, "
+        "canForceSplitLayout_:%{public}d", isMainWindow,
+        isInAppMainPage, isInSplitScreenMode, ignoreOrientation,
+        DeviceOrientationToString(orientation), dipScale, thresholdWidth, frameSize.Width(), canForceSplitLayout_);
 }
 } // namespace OHOS::Ace::NG

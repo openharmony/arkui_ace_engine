@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,11 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#ifdef CROSS_PLATFORM
+#include "core/common/ime/text_input_client.h"
+#include "core/common/ime/text_input_configuration.h"
+#include "core/common/ime/text_input_connection.h"
+#endif
 
 namespace OHOS::Ace {
 class InputMethodManager final {
@@ -42,6 +47,13 @@ public:
         return curFocusNode_;
     }
 
+#ifdef CROSS_PLATFORM
+    void ShowKeyboard(bool isFocusViewChanged, int32_t instanceId);
+    void SetEditingState(const TextEditingValue& value, int32_t instanceId, bool needFireChangeEvent = true);
+    void CloseKeyboard(int32_t instanceId);
+    void Attach(const WeakPtr<TextInputClient>& client, const TextInputConfiguration& config,
+        const RefPtr<TaskExecutor>& taskExecutor, int32_t instanceId);
+#endif
 private:
     InputMethodManager() = default;
     InputMethodManager(const InputMethodManager&) = delete;

@@ -64,16 +64,27 @@ static bool CheckInternalDragging(const RefPtr<Container>& container)
     return true;
 }
 
+double GetPixelMapScale(const RefPtr<PixelMap>& pixelMap, bool isScaleEnabled, bool textDraggable)
+{
+    double scale = 1.0;
+    CHECK_NULL_RETURN(pixelMap, scale);
+    auto width = pixelMap->GetWidth();
+    auto height = pixelMap->GetHeight();
+    if (width > 0 && height > 0 && isScaleEnabled) {
+        auto scaleData = DragDropManager::GetScaleInfo(width, height, textDraggable);
+        CHECK_NULL_RETURN(scaleData, scale);
+        scale = scaleData->scale;
+    }
+    return scale;
+}
+
 void GetShadowInfoArray(
     std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, std::vector<ShadowInfoCore>& shadowInfos)
 {
-    auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(dragAction->instanceId);
     for (auto& pixelMap : dragAction->pixelMapList) {
         double scale = 1.0;
         if (Referenced::RawPtr(pixelMap)) {
-            if (pixelMap->GetWidth() > minScaleWidth && dragAction->previewOption.isScaleEnabled) {
-                scale = minScaleWidth / pixelMap->GetWidth();
-            }
+            scale = GetPixelMapScale(pixelMap, dragAction->previewOption.isScaleEnabled, false);
             auto pixelMapScale = dragAction->windowScale * scale;
             pixelMap->Scale(pixelMapScale, pixelMapScale, AceAntiAliasingOption::HIGH);
         }

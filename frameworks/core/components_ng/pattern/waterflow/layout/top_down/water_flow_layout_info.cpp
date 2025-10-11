@@ -561,7 +561,7 @@ float WaterFlowLayoutInfo::JumpToTargetAlign(const std::pair<float, float>& item
         case ScrollAlign::AUTO:
             if (currentOffset_ + item.first < contentStartOffset_) {
                 targetPosition = -item.first + contentStartOffset_;
-            } else if (currentOffset_ + item.first + item.second > lastMainSize_ + contentEndOffset_) {
+            } else if (currentOffset_ + item.first + item.second > lastMainSize_ - contentEndOffset_) {
                 targetPosition = lastMainSize_ - (item.first + item.second) - contentEndOffset_;
             } else {
                 targetPosition = currentOffset_;
@@ -639,7 +639,12 @@ float WaterFlowLayoutInfo::EstimateTotalHeight() const
     if (childCount == 0) {
         return 0;
     }
-    auto estimateHeight = GetMaxMainHeight() / childCount * totalChildrenCount;
+    float maxMainHeight = GetMaxMainHeight();
+    if (footerIndex_ >= 0) {
+        maxMainHeight += footerHeight_;
+        childCount += 1;
+    }
+    auto estimateHeight = maxMainHeight / childCount * totalChildrenCount;
     return estimateHeight + contentEndOffset_;
 }
 

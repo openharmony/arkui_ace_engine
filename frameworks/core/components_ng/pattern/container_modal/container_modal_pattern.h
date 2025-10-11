@@ -316,6 +316,7 @@ protected:
     virtual void NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect) {}
 
     void UpdateContainerBgColor();
+    void SetContainerWindowTransparent();
     std::string appLabel_;
     RefPtr<PanEvent> panEvent_ = nullptr;
 

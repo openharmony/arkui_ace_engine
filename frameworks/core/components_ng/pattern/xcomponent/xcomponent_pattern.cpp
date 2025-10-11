@@ -692,6 +692,7 @@ void XComponentPattern::DumpAdvanceInfo()
         std::string("enableTransparentLayer: ").append(isTransparentLayer_ ? "true" : "false"));
     DumpLog::GetInstance().AddDesc(
         std::string("screenId: ").append(screenId_.has_value() ? std::to_string(screenId_.value()).c_str() : ""));
+    DumpLog::GetInstance().AddDesc(std::string("isOpaque: ").append(isOpaque_ ? "true" : "false"));
     if (renderSurface_) {
         renderSurface_->DumpInfo();
     }
@@ -2252,6 +2253,18 @@ void XComponentPattern::UnlockCanvasAndPost(RSCanvas* canvas)
     bool isUnlockOk = RSCanvasUtils::UnlockCanvas(canvas, reinterpret_cast<OHNativeWindow*>(nativeWindow_));
     if (!isUnlockOk) {
         TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] UnlockCanvasAndPost failed", GetId().c_str());
+    }
+}
+
+void XComponentPattern::SetSurfaceIsOpaque(bool isOpaque)
+{
+    isOpaque_ = isOpaque;
+    if (type_ == XComponentType::SURFACE) {
+        CHECK_NULL_VOID(renderContextForSurface_);
+        renderContextForSurface_->SetSurfaceBufferOpaque(isOpaque);
+    } else if (type_ == XComponentType::TEXTURE) {
+        CHECK_NULL_VOID(renderSurface_);
+        renderSurface_->SetSurfaceBufferOpaque(isOpaque);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -301,7 +301,7 @@ void OnDownloadStart(const CallbackHelper<Callback_OnDownloadStartEvent_Void>& a
     parameter.mimetype = Converter::ArkValue<Ark_String>(eventInfo->GetMimetype());
     parameter.contentDisposition = Converter::ArkValue<Ark_String>(eventInfo->GetContentDisposition());
     parameter.userAgent = Converter::ArkValue<Ark_String>(eventInfo->GetUserAgent());
-    parameter.contentLength = Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(eventInfo->GetContentLength()));
+    parameter.contentLength = static_cast<Ark_Int64>(eventInfo->GetContentLength());
     arkCallback.Invoke(parameter);
 }
 
@@ -318,25 +318,6 @@ void OnRefreshAccessedHistory(const CallbackHelper<Callback_OnRefreshAccessedHis
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetVisitedUrl());
     parameter.isRefreshed = Converter::ArkValue<Ark_Boolean>(eventInfo->IsRefreshed());
     arkCallback.Invoke(parameter);
-}
-
-bool OnUrlLoadIntercept(const CallbackHelper<Type_WebAttribute_onUrlLoadIntercept_callback>& arkCallback,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
-{
-    const auto refNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(refNode, false);
-    ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    pipelineContext->UpdateCurrentActiveNode(weakNode);
-    auto* eventInfo = TypeInfoHelper::DynamicCast<UrlLoadInterceptEvent>(info);
-    CHECK_NULL_RETURN(eventInfo, false);
-    Ark_Literal_Union_String_WebResourceRequest_data parameter;
-    parameter.data = Converter::ArkUnion<Ark_Union_String_WebResourceRequest, Ark_String>(
-        Converter::ArkValue<Ark_String>(eventInfo->GetData()));
-    auto optParam = Converter::ArkValue<Opt_Literal_Union_String_WebResourceRequest_data>(parameter);
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(optParam);
-    return result.value_or(false);
 }
 
 void OnRenderExited(const CallbackHelper<Callback_OnRenderExitedEvent_Void>& arkCallback,
@@ -428,8 +409,8 @@ void OnScaleChange(const CallbackHelper<Callback_OnScaleChangeEvent_Void>& arkCa
     auto* eventInfo = TypeInfoHelper::DynamicCast<ScaleChangeEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnScaleChangeEvent parameter;
-    parameter.newScale = Converter::ArkValue<Ark_Float32>(eventInfo->GetOnScaleChangeNewScale());
-    parameter.oldScale = Converter::ArkValue<Ark_Float32>(eventInfo->GetOnScaleChangeOldScale());
+    parameter.newScale = Converter::ArkValue<Ark_Float64>(eventInfo->GetOnScaleChangeNewScale());
+    parameter.oldScale = Converter::ArkValue<Ark_Float64>(eventInfo->GetOnScaleChangeOldScale());
     arkCallback.Invoke(parameter);
 }
 
@@ -550,10 +531,10 @@ void OnSearchResultReceive(const CallbackHelper<Callback_OnSearchResultReceiveEv
     auto* eventInfo = TypeInfoHelper::DynamicCast<SearchResultReceiveEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnSearchResultReceiveEvent parameter;
-    parameter.activeMatchOrdinal = Converter::ArkValue<Ark_Int32>(eventInfo->GetActiveMatchOrdinal());
-    parameter.numberOfMatches = Converter::ArkValue<Ark_Int32>(eventInfo->GetNumberOfMatches());
+    parameter.activeMatchOrdinal = static_cast<Ark_Int32>(eventInfo->GetActiveMatchOrdinal());
+    parameter.numberOfMatches = static_cast<Ark_Int32>(eventInfo->GetNumberOfMatches());
     parameter.isDoneCounting = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsDoneCounting());
-    arkCallback.InvokeSync(parameter);
+    arkCallback.Invoke(parameter);
 }
 
 void OnScroll(const CallbackHelper<Callback_OnScrollEvent_Void>& arkCallback,
@@ -566,8 +547,8 @@ void OnScroll(const CallbackHelper<Callback_OnScrollEvent_Void>& arkCallback,
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnScrollEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnScrollEvent parameter;
-    parameter.xOffset = Converter::ArkValue<Ark_Float32>(eventInfo->GetX());
-    parameter.yOffset = Converter::ArkValue<Ark_Float32>(eventInfo->GetY());
+    parameter.xOffset = Converter::ArkValue<Ark_Float64>(eventInfo->GetX());
+    parameter.yOffset = Converter::ArkValue<Ark_Float64>(eventInfo->GetY());
     arkCallback.Invoke(parameter);
 }
 
@@ -595,27 +576,29 @@ bool OnSslErrorEventReceive(const CallbackHelper<Callback_OnSslErrorEventReceive
 bool OnSslError(const CallbackHelper<OnSslErrorEventCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
-    // ContainerScope scope(instanceId);
-    // auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    // CHECK_NULL_RETURN(pipelineContext, false);
-    // pipelineContext->UpdateCurrentActiveNode(weakNode);
-    // auto* eventInfo = TypeInfoHelper::DynamicCast<WebAllSslErrorEvent>(info);
-    // CHECK_NULL_RETURN(eventInfo, false);
-    // Ark_SslErrorEvent parameter;
-    // parameter.error = Converter::ArkValue<Ark_SslError>(static_cast<Converter::SslError>(eventInfo->GetError()));
-    // parameter.isFatalError = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsFatalError());
-    // parameter.isMainFrame = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsMainFrame());
-    // auto original = eventInfo->GetOriginalUrl();
-    // parameter.originalUrl = Converter::ArkValue<Ark_String>(original);
-    // auto referrer = eventInfo->GetReferrer();
-    // parameter.referrer = Converter::ArkValue<Ark_String>(referrer);
-    // auto url = eventInfo->GetUrl();
-    // parameter.url = Converter::ArkValue<Ark_String>(url);
-    // auto peer = new SslErrorHandlerPeer();
-    // // need check
-    // peer->handler = eventInfo->GetResult();
-    // parameter.handler = peer;
-    // arkCallback.Invoke(parameter);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<WebAllSslErrorEvent>(info);
+    CHECK_NULL_RETURN(eventInfo, false);
+    Ark_SslErrorEvent parameter;
+    parameter.error = Converter::ArkValue<Ark_SslError>(static_cast<Converter::SslError>(eventInfo->GetError()));
+    parameter.isFatalError = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsFatalError());
+    parameter.isMainFrame = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsMainFrame());
+    auto original = eventInfo->GetOriginalUrl();
+    parameter.originalUrl = Converter::ArkValue<Ark_String>(original);
+    auto referrer = eventInfo->GetReferrer();
+    parameter.referrer = Converter::ArkValue<Ark_String>(referrer);
+    auto url = eventInfo->GetUrl();
+    parameter.url = Converter::ArkValue<Ark_String>(url);
+    auto peer = new SslErrorHandlerPeer();
+    // need check
+#ifdef WRONG_NEW_ACE
+    peer->handler = eventInfo->GetResult();
+#endif
+    parameter.handler = peer;
+    arkCallback.Invoke(parameter);
     return true;
 }
 
@@ -630,7 +613,7 @@ bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthentication
     CHECK_NULL_RETURN(eventInfo, false);
     Ark_OnClientAuthenticationEvent parameter;
     parameter.host = Converter::ArkValue<Ark_String>(eventInfo->GetHost());
-    parameter.port = Converter::ArkValue<Ark_Int32>(eventInfo->GetPort());
+    parameter.port = static_cast<Ark_Int32>(eventInfo->GetPort());
     std::vector<std::string> keyTypes = eventInfo->GetKeyTypes();
     Converter::ArkArrayHolder<Array_String> vecKeyTypes(keyTypes);
     parameter.keyTypes = vecKeyTypes.ArkValue();
@@ -640,7 +623,7 @@ bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthentication
         auto peer = new ClientAuthenticationHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
-    arkCallback.InvokeSync(parameter);
+    arkCallback.Invoke(parameter);
     return false;
 }
 
@@ -649,16 +632,20 @@ static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
     auto handler = eventInfo->GetWebWindowNewHandler();
     if ((handler) && (!handler->IsFrist())) {
         int32_t parentId = -1;
-        auto controllerInfo = ControllerHandlerPeer::PopController(handler->GetId(), &parentId);
-        if (controllerInfo.getWebIdFunc) {
-            handler->SetWebController(controllerInfo.getWebIdFunc());
+        auto controller = ControllerHandlerPeer::PopController(handler->GetId(), &parentId);
+        if (!controller) {
+            return false;
         }
-        if (controllerInfo.completeWindowNewFunc) {
-            controllerInfo.completeWindowNewFunc(parentId);
+        if (controller->getWebIdFunc) {
+            handler->SetWebController(controller->getWebIdFunc());
         }
-        if (controllerInfo.releaseRefFunc) {
-            controllerInfo.releaseRefFunc();
+        if (controller->completeWindowNewFunc) {
+            controller->completeWindowNewFunc(parentId);
         }
+        if (controller->releaseRefFunc) {
+            controller->releaseRefFunc();
+        }
+        delete controller;
         return false;
     }
     return true;
@@ -802,7 +789,7 @@ void OnFaviconReceived(const CallbackHelper<Callback_OnFaviconReceivedEvent_Void
         uint32_t stride = width << 2;
         uint64_t bufferSize = stride * height;
         pixelMap->WritePixels(static_cast<const uint8_t*>(data), bufferSize);
-        parameter.favicon = PeerUtils::CreatePeer<PixelMapPeer>();
+        parameter.favicon = PeerUtils::CreatePeer<image_PixelMapPeer>();
         CHECK_NULL_VOID(parameter.favicon);
         parameter.favicon->pixelMap = PixelMap::Create(std::move(pixelMap));
         CHECK_NULL_VOID(parameter.favicon->pixelMap);
@@ -930,7 +917,7 @@ void OnLargestContentfulPaint(const CallbackHelper<OnLargestContentfulPaintCallb
         auto* eventInfo = TypeInfoHelper::DynamicCast<LargestContentfulPaintEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
         Ark_LargestContentfulPaint parameter;
-        parameter.imageBPP = Converter::ArkValue<Opt_Float32>(static_cast<float>(eventInfo->GetImageBPP()));
+        parameter.imageBPP = Converter::ArkValue<Opt_Float64>(eventInfo->GetImageBPP());
         parameter.largestImageLoadEndTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetLargestImageLoadEndTime());
         parameter.largestImageLoadStartTime = Converter::ArkValue<Opt_Int64>(
             eventInfo->GetLargestImageLoadStartTime());
@@ -992,8 +979,8 @@ void OnOverScroll(const CallbackHelper<Callback_OnOverScrollEvent_Void>& arkCall
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnOverScrollEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnOverScrollEvent parameter;
-    parameter.xOffset = Converter::ArkValue<Ark_Float32>(eventInfo->GetX());
-    parameter.yOffset = Converter::ArkValue<Ark_Float32>(eventInfo->GetY());
+    parameter.xOffset = Converter::ArkValue<Ark_Float64>(eventInfo->GetX());
+    parameter.yOffset = Converter::ArkValue<Ark_Float64>(eventInfo->GetY());
     arkCallback.Invoke(parameter);
 }
 

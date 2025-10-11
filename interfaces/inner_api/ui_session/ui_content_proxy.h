@@ -25,7 +25,8 @@ namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentServiceProxy : public IRemoteProxy<IUiContentService> {
 public:
     explicit UIContentServiceProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<IUiContentService>(impl) {};
-    virtual int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) override;
+    virtual int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
+        ParamConfig config = ParamConfig()) override;
     virtual int32_t Connect(const EventCallback& eventCallback) override;
     virtual int32_t RegisterClickEventCallback(const EventCallback& eventCallback) override;
     virtual int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) override;
@@ -57,8 +58,8 @@ public:
     virtual int32_t GetCurrentImagesShowing(
         const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)
         override;
-    virtual int32_t GetVisibleInspectorTree(
-        const std::function<void(std::string, int32_t, bool)>& eventCallback) override;
+    virtual int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
+        ParamConfig config = ParamConfig()) override;
     virtual int32_t ExeAppAIFunction(
         const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
         override;

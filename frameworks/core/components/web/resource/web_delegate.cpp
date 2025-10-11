@@ -106,6 +106,8 @@ const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 const std::string RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
 const std::string RESOURCE_SENSOR = "TYPE_SENSOR";
 const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
+const int32_t DEFAULT_BACK_TO_TOP_TIME = 1000;
+const float DEFAULT_BACK_TO_TOP_OFFSET = 0.0;
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
 constexpr uint32_t DRAG_DELAY_MILLISECONDS = 300;
@@ -115,6 +117,8 @@ constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 constexpr uint32_t ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS = 200;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
 constexpr uint32_t TIMEOUT_SECONDS = 5;
+
+constexpr double WEB_SNAPSHOT_SIZE_TOLERANCE = 0.85;
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
@@ -306,10 +310,10 @@ void SslErrorResultOhos::HandleConfirm()
     }
 }
 
-void SslErrorResultOhos::HandleCancel()
+void SslErrorResultOhos::HandleCancel(bool abortLoading)
 {
     if (result_) {
-        result_->HandleCancel();
+        result_->HandleCancelV2(abortLoading);
     }
 }
 
@@ -3492,6 +3496,7 @@ void WebDelegate::InitWebViewWithSurface()
             auto pattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->InitDataDetector();
+            pattern->InitSelectDataDetector();
             pattern->InitAIDetectResult();
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebInitWebViewWithSurface");
@@ -3619,6 +3624,7 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
                 double offsetY = 0;
                 delegate->UpdateScreenOffSet(offsetX, offsetY);
                 delegate->nweb_->SetScreenOffSet(offsetX, offsetY);
+                delegate->RemoveSnapshotFrameNodeIfNeeded();
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebResize");
@@ -3787,6 +3793,26 @@ void WebDelegate::UpdateSupportZoom(const bool& isZoomAccessEnabled)
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateSupportZoom");
 }
+
+void WebDelegate::UpdateZoomControlAccess(bool zoomControlAccess)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), zoomControlAccess]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutZoomControlAccess(zoomControlAccess);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebPutZoomControlAccess");
+}
+
 void WebDelegate::UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled)
 {
     auto context = context_.Upgrade();
@@ -6248,18 +6274,8 @@ void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath, uint3
 
 void WebDelegate::RecordBlanklessFrameSize(uint32_t width, uint32_t height)
 {
-    CHECK_NULL_VOID(nweb_);
-    nweb_->RecordBlanklessFrameSize(width, height);
-}
-
-double WebDelegate::ResizeWidth() const
-{
-    return resizeWidth_;
-}
-
-double WebDelegate::ResizeHeight() const
-{
-    return resizeHeight_;
+    blanklessFrameWidth_ = width;
+    blanklessFrameHeight_ = height;
 }
 
 void WebDelegate::SetVisibility(bool isVisible)
@@ -6267,6 +6283,34 @@ void WebDelegate::SetVisibility(bool isVisible)
     isVisible_ = isVisible;
     CHECK_NULL_VOID(nweb_);
     nweb_->SetVisibility(isVisible);
+}
+
+bool WebDelegate::IsBlanklessFrameValid() const
+{
+    uint32_t resizeWidth = std::ceil(resizeWidth_);
+    uint32_t resizeHeight = std::ceil(resizeHeight_);
+    // A Blankless Frame is valid only if:
+    // 1. Web content dimensions and blankless frame dimensions are valid (non-zero)
+    // 2. Frame width exactly matches web content width
+    // 3. Frame height is at least the minimum allowed percentage of web content height
+    //    (As described, this should be at least 85%, defined by WEB_SNAPSHOT_SIZE_TOLERANCE)
+    bool valid = blanklessFrameWidth_ != 0 && blanklessFrameHeight_ != 0 && resizeWidth != 0 && resizeHeight != 0 &&
+                 blanklessFrameWidth_ == resizeWidth &&
+                 blanklessFrameHeight_ / resizeHeight_ >= WEB_SNAPSHOT_SIZE_TOLERANCE;
+    if (!valid) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "blankless IsBlanklessFrameValid False. "
+            "blankless frame size [%{public}u, %{public}u], while current size [%{public}u, %{public}u]",
+            blanklessFrameWidth_, blanklessFrameHeight_, resizeWidth, resizeHeight);
+    }
+    return valid;
+}
+
+void WebDelegate::RemoveSnapshotFrameNodeIfNeeded()
+{
+    if (blanklessFrameWidth_ != 0 && blanklessFrameHeight_ != 0 && !IsBlanklessFrameValid()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless RemoveSnapshotFrameNodeIfNeeded");
+        RemoveSnapshotFrameNode(0);
+    }
 }
 
 bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
@@ -8042,6 +8086,13 @@ void WebDelegate::EnableSecurityLayer(bool isNeedSecurityLayer)
     webPattern->EnableSecurityLayer(isNeedSecurityLayer);
 }
 
+void WebDelegate::UpdateTextFieldStatus(bool isShowKeyboard, bool isAttachIME)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateTextFieldStatus(isShowKeyboard, isAttachIME);
+}
+
 void WebDelegate::OnRootLayerChanged(int width, int height)
 {
     auto webPattern = webPattern_.Upgrade();
@@ -9007,6 +9058,20 @@ bool WebDelegate::OnNestedScroll(float& x, float& y, float& xVelocity, float& yV
     return webPattern->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable);
 }
 
+void WebDelegate::OnStatusBarClick()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnStatusBarClick");
+    CHECK_NULL_VOID(nweb_);
+    nweb_->ScrollToWithAnime(DEFAULT_BACK_TO_TOP_OFFSET, DEFAULT_BACK_TO_TOP_OFFSET, DEFAULT_BACK_TO_TOP_TIME);
+}
+
+void WebDelegate::WebScrollStopFling()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::WebScrollStopFling");
+    CHECK_NULL_VOID(nweb_);
+    nweb_->StopFling();
+}
+
 bool WebDelegate::IsNWebEx()
 {
     if (!nweb_) {
@@ -9146,6 +9211,43 @@ void WebDelegate::SetViewportScaleState()
 {
     CHECK_NULL_VOID(nweb_);
     nweb_->SetViewportScaleState();
+}
+
+void WebDelegate::OnDetectedBlankScreen(
+    const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), url, blankScreenReason, detectedContentfulNodesCount]() {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnDetectedBlankScreen, fire event task");
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnDetectedBlankScreenEvent(
+                std::make_shared<DetectedBlankScreenEvent>(url, blankScreenReason, detectedContentfulNodesCount));
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebDetectedBlankScreen");
+}
+
+void WebDelegate::UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
+    const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), enable, detectionTiming, detectionMethods, contentfulNodesCountThreshold]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                delegate->nweb_->SetBlankScreenDetectionConfig(
+                    enable, detectionTiming, detectionMethods, contentfulNodesCountThreshold);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateBlankScreenDetectionConfig");
 }
 
 void WebDelegate::OnPdfScrollAtBottom(const std::string& url)

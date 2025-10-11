@@ -1922,9 +1922,8 @@ HWTEST_F(TextPatternTestNg, OnVisibleChange003, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    bool isVisible = false;
     textPattern->textDetectEnable_ = false;
-    textPattern->OnVisibleChange(isVisible);
+    textPattern->OnVisibleChange(false);
     ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_EQ(textPattern->dataDetectorAdapter_->aiDetectDelayTask_.Cancel(), true);
 }

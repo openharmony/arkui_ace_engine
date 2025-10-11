@@ -86,15 +86,9 @@ void RegisterDragPreviewImpl(Ark_NativePointer node, const Opt_Union_CustomBuild
         },
         [node, frameNode, onlyForLifting, delayCreating](const CustomNodeBuilder& val) {
             CallbackHelper(val).BuildAsync([frameNode, onlyForLifting, delayCreating](const RefPtr<UINode>& uiNode) {
-#if !defined(PREVIEW)
-                ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = CreateProxyNode(uiNode),
-                                                                       .onlyForLifting = onlyForLifting,
-                                                                       .delayCreating = delayCreating  });
-#else
                 ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = uiNode,
                                                                        .onlyForLifting = onlyForLifting,
                                                                        .delayCreating = delayCreating  });
-#endif
                 }, node);
         },
         [node, frameNode, onlyForLifting, delayCreating](const Ark_DragItemInfo& value) {
@@ -106,11 +100,7 @@ void RegisterDragPreviewImpl(Ark_NativePointer node, const Opt_Union_CustomBuild
                 CallbackHelper(builder.value()).BuildAsync([frameNode, dragDropInfo = std::move(dragDropInfo)](
                     const RefPtr<UINode>& uiNode) {
                     DragDropInfo info;
-#if !defined(PREVIEW)
-                    info.customNode = CreateProxyNode(uiNode);
-#else
                     info.customNode = uiNode;
-#endif
                     info.onlyForLifting = dragDropInfo.onlyForLifting;
                     info.delayCreating = dragDropInfo.delayCreating;
                     ViewAbstract::SetDragPreview(frameNode, info);

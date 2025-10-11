@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PICKER_UTILS_TOSS_ANIMATION_CONTROLLER_H
 
 #include "core/components/picker/picker_animation.h"
+#include "core/components/picker/picker_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/memory/ace_type.h"
 
@@ -60,6 +61,12 @@ public:
     {
         return end_;
     }
+
+    RefPtr<PickerTheme> GetPickerTheme();
+
+    double GetPickerSpringMass();
+
+    int32_t GetPickerMaxSlidingDistance();
 
 private:
     double GetCurrentTime() const;

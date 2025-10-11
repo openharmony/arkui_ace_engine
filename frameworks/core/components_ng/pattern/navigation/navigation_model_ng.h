@@ -183,8 +183,8 @@ public:
     virtual bool UseHomeDestination() const override;
     virtual void SetHomePathInfoWithCallback(
         std::function<void(const RefPtr<NavigationStack>&)>&& setHomePathInfoCallback) override;
-    void SetEnableShowHideWithContentCover(bool isEnable) override;
-    static void SetEnableShowHideWithContentCover(FrameNode* frameNode, bool isEnable);
+    void SetEnableVisibilityLifecycleWithContentCover(bool isEnable) override;
+    static void SetEnableVisibilityLifecycleWithContentCover(FrameNode* frameNode, bool isEnable);
 
 private:
     bool CreatePrimaryContentIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

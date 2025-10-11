@@ -88,6 +88,7 @@ struct AxisEvent final : public PointerEvent {
     uint64_t modifierKeyState = 0;
 
     int32_t scrollStep = 0;
+    uint32_t axes = 0;
 
     AxisEvent()
     {
@@ -97,13 +98,13 @@ struct AxisEvent final : public PointerEvent {
         double verticalAxis, double horizontalAxis, double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent,
         AxisAction action, TimeStamp timestamp, int64_t deviceId, SourceType sourceType, SourceTool sourceTool,
         std::shared_ptr<const MMI::PointerEvent> pointerEvent, std::vector<KeyCode> pressedCodes,
-        int32_t targetDisplayId, int32_t originalId, bool isInjected, int32_t scrollStep)
+        int32_t targetDisplayId, int32_t originalId, bool isInjected, int32_t scrollStep, uint32_t axes)
         : PointerEvent(x, y, screenX, screenY, globalDisplayX, globalDisplayY, timestamp), id(id),
           verticalAxis(verticalAxis), horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale),
           rotateAxisAngle(rotateAxisAngle), isRotationEvent(isRotationEvent), action(action), deviceId(deviceId),
           sourceType(sourceType), sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)),
           pressedCodes(pressedCodes), targetDisplayId(targetDisplayId), originalId(originalId), isInjected(isInjected),
-          scrollStep(scrollStep)
+          scrollStep(scrollStep), axes(axes)
     {
         eventType = UIInputEventType::AXIS;
     }
@@ -138,6 +139,8 @@ public:
     float GetRotateAxisAngle() const;
     void SetIsRotationEvent(bool rotationFlag);
     bool GetIsRotationEvent() const;
+    bool HasAxis(AxisType axis);
+    uint32_t GetAxes() const;
     AxisInfo& SetGlobalLocation(const Offset& globalLocation);
     AxisInfo& SetLocalLocation(const Offset& localLocation);
     AxisInfo& SetScreenLocation(const Offset& screenLocation);
@@ -151,6 +154,7 @@ public:
 private:
     AxisAction action_ = AxisAction::NONE;
     int32_t scrollStep_ = 0;
+    uint32_t axes_ = 0;
     float rotateAxisAngle_ = 0.0;
     bool isRotationEvent_ = false;
     // global position at which the touch point contacts the screen.
@@ -163,7 +167,62 @@ private:
     Offset globalDisplayLocation_;
 };
 
+class CoastingAxisInfo {
+public:
+    CoastingAxisInfo() = default;
+    ~CoastingAxisInfo() = default;
+
+    const TimeStamp& GetTimeStamp() const
+    {
+        return timeStamp_;
+    }
+    void SetTimeStamp(const TimeStamp& timeStamp)
+    {
+        timeStamp_ = timeStamp;
+    }
+    void SetPhase(CoastingAxisPhase phase)
+    {
+        phase_ = phase;
+    }
+    CoastingAxisPhase GetPhase() const
+    {
+        return phase_;
+    }
+    bool IsStopPropagation() const
+    {
+        return stopPropagation_;
+    }
+    void SetStopPropagation(bool stopPropagation)
+    {
+        stopPropagation_ = stopPropagation;
+    }
+    float GetHorizontalAxis() const
+    {
+        return horizontalAxis_;
+    }
+    float GetVerticalAxis() const
+    {
+        return verticalAxis_;
+    }
+    void SetHorizontalAxis(float axis)
+    {
+        horizontalAxis_ = axis;
+    }
+    void SetVerticalAxis(float axis)
+    {
+        verticalAxis_ = axis;
+    }
+
+private:
+    TimeStamp timeStamp_;
+    float horizontalAxis_ = 0.0;
+    float verticalAxis_ = 0.0;
+    CoastingAxisPhase phase_ = CoastingAxisPhase::NONE;
+    bool stopPropagation_ = true;
+};
+
 using OnAxisEventFunc = std::function<void(AxisInfo&)>;
+using OnCoastingAxisEventFunc = std::function<void(CoastingAxisInfo&)>;
 using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
 
 class AxisEventTarget : public virtual AceType {
@@ -186,9 +245,12 @@ public:
     {
         return frameId_;
     }
+    void SetOnCoastingAxisCallback(OnCoastingAxisEventFunc&& onCoastingAxisCallback);
+    bool HandleCoastingAxisEvent(CoastingAxisInfo& info);
 
 private:
     OnAxisEventFunc onAxisCallback_;
+    OnCoastingAxisEventFunc onCoastingAxisCallback_;
     NG::OffsetF coordinateOffset_;
     GetEventTargetImpl getEventTargetImpl_;
     std::string frameName_ = "Unknown";

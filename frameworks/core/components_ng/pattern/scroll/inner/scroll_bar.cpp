@@ -763,8 +763,8 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
             .animationVelocity = 0,
             .dragDistance = CalcPatternOffset(GetDragOffset()),
             .snapDirection = SnapDirection::NONE,
-            .fromScrollBar = true,
             .source = SCROLL_FROM_BAR,
+            .fromScrollBar = true,
         };
         bool isWillFling = false;
         if (info.GetInputEventType() != InputEventType::AXIS) {

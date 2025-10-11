@@ -17,9 +17,9 @@ ace_unittest("checkboxgroup_test_ng") {
   type = "new"
   sources = [
     "checkboxgroup_layout_algorithm_test_ng.cpp",
+    "checkboxgroup_model_static_test_ng.cpp",
     "checkboxgroup_paint_property_test_ng.cpp",
     "checkboxgroup_pattern_test_ng.cpp",
     "checkboxgroup_test_ng.cpp",
-    "checkboxgroup_model_static_test_ng.cpp",
   ]
 }

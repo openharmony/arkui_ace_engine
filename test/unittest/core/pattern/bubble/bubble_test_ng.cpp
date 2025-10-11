@@ -2449,4 +2449,78 @@ HWTEST_F(BubbleTestNg, BorderLinearGradientColorsTest003, TestSize.Level1)
      */
     EXPECT_EQ(Color::BLUE.GetValue(), colorQuads[1]);
 }
+/**
+ * @tc.name: GetDoubleBorderWidthOffsetTest001
+ * @tc.desc: Test GetDoubleBorderWidthOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, GetDoubleBorderWidthOffsetTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the BubblePaintMethod.
+     */
+    BubblePaintMethod bubblePaintMethod;
+    /**
+     * @tc.steps: step2. Set condition.
+     */
+    PopupLinearGradientProperties outlineLinearGradient;
+    outlineLinearGradient.popupDirection = OHOS::Ace::GradientDirection::TOP;
+    outlineLinearGradient.gradientColors.push_back(PopupGradientColor { Color::GREEN, 0.1 });
+    outlineLinearGradient.gradientColors.push_back(PopupGradientColor { Color::BLUE, 0.9 });
+    bubblePaintMethod.SetOutlineLinearGradient(outlineLinearGradient);
+    PopupLinearGradientProperties innerBorderLinearGradient;
+    innerBorderLinearGradient.popupDirection = OHOS::Ace::GradientDirection::BOTTOM;
+    innerBorderLinearGradient.gradientColors.push_back(PopupGradientColor { Color::RED, 0.0 });
+    innerBorderLinearGradient.gradientColors.push_back(PopupGradientColor { Color::GRAY, 1.0 });
+    bubblePaintMethod.SetInnerBorderLinearGradient(innerBorderLinearGradient);
+    bubblePaintMethod.outerBorderWidthByUser_ = 5.0f;
+    bubblePaintMethod.innerBorderWidthByUser_ = 5.0f;
+    bubblePaintMethod.outerBorderWidth_ = 5.0f;
+    bubblePaintMethod.innerBorderWidth_ = 5.0f;
+    bubblePaintMethod.needPaintOuterBorder_ = true;
+    auto popupTheme = AceType::MakeRefPtr<PopupTheme>();
+    auto half = 2.0;
+    auto result = -(bubblePaintMethod.outerBorderWidthByUser_ / half);
+    /**
+     * @tc.steps: step3. execute GetDoubleBorderWidthOffset function get result.
+     */
+    float doubleBorderOffset = bubblePaintMethod.GetDoubleBorderWidthOffset(popupTheme);
+    /**
+     * @tc.steps: step4. Compare function return values.
+     */
+    EXPECT_EQ(doubleBorderOffset, result);
+}
+
+/**
+ * @tc.name: GetDoubleBorderWidthOffsetTest002
+ * @tc.desc: Test GetDoubleBorderWidthOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, GetDoubleBorderWidthOffsetTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the BubblePaintMethod.
+     */
+    BubblePaintMethod bubblePaintMethod;
+    /**
+     * @tc.steps: step2. Set condition.
+     */
+    PopupLinearGradientProperties innerBorderLinearGradient;
+    innerBorderLinearGradient.popupDirection = OHOS::Ace::GradientDirection::BOTTOM;
+    innerBorderLinearGradient.gradientColors.push_back(PopupGradientColor { Color::RED, 0.0 });
+    innerBorderLinearGradient.gradientColors.push_back(PopupGradientColor { Color::GRAY, 1.0 });
+    bubblePaintMethod.SetInnerBorderLinearGradient(innerBorderLinearGradient);
+    bubblePaintMethod.innerBorderWidthByUser_ = 5.0f;
+    bubblePaintMethod.innerBorderWidth_ = 5.0f;
+    auto popupTheme = AceType::MakeRefPtr<PopupTheme>();
+    auto result = 0.0f;
+    /**
+     * @tc.steps: step3. execute GetDoubleBorderWidthOffset function get result.
+     */
+    float doubleBorderOffset = bubblePaintMethod.GetDoubleBorderWidthOffset(popupTheme);
+    /**
+     * @tc.steps: step4. Compare function return values.
+     */
+    EXPECT_EQ(doubleBorderOffset, result);
+}
 } // namespace OHOS::Ace::NG

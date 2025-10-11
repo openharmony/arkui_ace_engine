@@ -30,6 +30,7 @@ static const std::unordered_set<std::string> supportedTargetsInCustomEnv = {
     "ScrollMotion",
     "Span",
     "NativeCustomSpan",
+    "NativeLeadingMarginSpan",
     "SpanString",
     "MutableSpanString",
     "TextStyle",

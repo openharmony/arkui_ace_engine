@@ -20,11 +20,13 @@
 #include "base/thread/frame_trace_adapter.h"
 #include "core/common/container.h"
 #include "core/common/xcollie/xcollieInterface.h"
+#include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/event/focus_axis_event.h"
 #include "core/event/crown_event.h"
+#include "core/event/coasting_axis_event_generator.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -783,19 +785,39 @@ void EventManager::PostEventFlushTouchEventEnd(const TouchEvent& touchEvent)
 void EventManager::CheckDownEvent(const TouchEvent& touchEvent)
 {
     auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
-    if (touchEvent.type == TouchType::DOWN) {
-        if (touchEventFindResult != downFingerIds_.end()) {
-            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-                "InputTracking id:%{public}d, eventManager receive DOWN event twice,"
-                " touchEvent id is %{public}d",
-                touchEvent.touchEventId, touchEvent.id);
-            FalsifyCancelEventAndDispatch(touchEvent);
-            refereeNG_->ForceCleanGestureReferee();
-            touchTestResults_.clear();
-            downFingerIds_.clear();
+    if (touchEvent.type != TouchType::DOWN)
+        return;
+    if (touchEventFindResult != downFingerIds_.end()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+            "InputTracking id:%{public}d, eventManager receive DOWN event twice,"
+            " touchEvent id is %{public}d",
+            touchEvent.touchEventId, touchEvent.id);
+        if (downEventErrorCnt_) {
+            std::stringstream oss;
+            oss << "id: " << touchEvent.id << ", receive DOWN event twice";
+            GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::DOWN_EVENT_ERROR,
+                touchEvent.touchEventId, touchEvent.id, oss.str() };
+            NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, instanceId_);
+            downEventErrorCnt_ = 0;
         }
-        downFingerIds_[touchEvent.id] = touchEvent.originalId;
+        ++downEventErrorCnt_;
+        FalsifyCancelEventAndDispatch(touchEvent);
+        refereeNG_->ForceCleanGestureReferee();
+        touchTestResults_.clear();
+        downFingerIds_.clear();
     }
+    for (const auto& [id, originalId] : downFingerIds_) {
+        if (originalId == touchEvent.originalId && id != touchEvent.id &&
+            downTargetDisplayIds_[id] == touchEvent.targetDisplayId) {
+            std::stringstream oss;
+            oss << "id: " << touchEvent.id << ", targetDisplayId not equal";
+            GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::INJECT_DOWN_EVENT_ERROR,
+                touchEvent.touchEventId, touchEvent.id, oss.str() };
+            NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, instanceId_);
+        }
+    }
+    downTargetDisplayIds_[touchEvent.id] = touchEvent.targetDisplayId;
+    downFingerIds_[touchEvent.id] = touchEvent.originalId;
 }
 
 void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
@@ -804,18 +826,27 @@ void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
         return;
     }
     auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
-    if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
-        if (touchEventFindResult == downFingerIds_.end()) {
-            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-                "InputTracking id:%{public}d, eventManager receive UP/CANCEL event "
-                "without receive DOWN event, touchEvent id is %{public}d",
-                touchEvent.touchEventId, touchEvent.id);
-            FalsifyCancelEventAndDispatch(touchEvent);
-            refereeNG_->ForceCleanGestureReferee();
-            downFingerIds_.clear();
-        } else {
-            downFingerIds_.erase(touchEvent.id);
+    if (touchEvent.type != TouchType::UP && touchEvent.type != TouchType::CANCEL)
+        return;
+    if (touchEventFindResult == downFingerIds_.end()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+            "InputTracking id:%{public}d, eventManager receive UP/CANCEL event "
+            "without receive DOWN event, touchEvent id is %{public}d",
+            touchEvent.touchEventId, touchEvent.id);
+        if (upEventErrorCnt_) {
+            std::stringstream oss;
+            oss << "id: " << touchEvent.id << ", receive UP/CANCEL event without receive DOWN event";
+            GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::UP_OR_CANCEL_EVENT_ERROR,
+                touchEvent.touchEventId, touchEvent.id, oss.str() };
+            NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, instanceId_);
+            upEventErrorCnt_ = 0;
         }
+        ++upEventErrorCnt_;
+        FalsifyCancelEventAndDispatch(touchEvent);
+        refereeNG_->ForceCleanGestureReferee();
+        downFingerIds_.clear();
+    } else {
+        downFingerIds_.erase(touchEvent.id);
     }
 }
 
@@ -1117,6 +1148,7 @@ void EventManager::DispatchTouchCancelToRecognizer(
     TouchEvent touchEvent;
     for (auto& item : items) {
         if (idToTouchPoints_.find(item.first) == idToTouchPoints_.end()) {
+            touchEvent.sourceType = lastTouchEvent_.sourceType;
             touchEvent.originalId = item.first;
             touchEvent.id = item.first;
         } else {
@@ -1963,6 +1995,7 @@ EventManager::EventManager()
     referee_ = AceType::MakeRefPtr<GestureReferee>();
     responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
     mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
+    InitCoastingAxisEventGenerator();
 
     auto callback = [weak = WeakClaim(this)](size_t touchId) -> bool {
         auto eventManager = weak.Upgrade();
@@ -2439,6 +2472,65 @@ void EventManager::FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent, boo
     falsifyEvent.id = static_cast<int32_t>(axisTouchTestResults_.begin()->first);
     DispatchTouchEvent(falsifyEvent, sendOnTouch);
 }
+
+void EventManager::FalsifyCancelEventWithDifferentDeviceId(
+    const AxisEvent& axisEvent, int32_t deviceId, bool sendOnTouch)
+{
+    if (axisTouchTestResults_.empty()) {
+        return;
+    }
+    AxisEvent falsifyEvent = axisEvent;
+    falsifyEvent.action = AxisAction::CANCEL;
+    falsifyEvent.deviceId = deviceId;
+    falsifyEvent.id = static_cast<int32_t>(axisTouchTestResults_.begin()->first);
+    DispatchTouchEvent(falsifyEvent, sendOnTouch);
+    DispatchAxisEventNG(falsifyEvent);
+}
+
+bool EventManager::HandleAxisEventWithDifferentDeviceId(
+    const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode)
+{
+    switch (event.action) {
+        case AxisAction::BEGIN: {
+            if (deviceIdChecker_.find(event.id) == deviceIdChecker_.end()) {
+                deviceIdChecker_[event.id] = event.deviceId;
+                return false;
+            }
+            if (deviceIdChecker_[event.id] != event.deviceId) {
+                AxisTest(event, frameNode);
+                FalsifyCancelEventWithDifferentDeviceId(event, deviceIdChecker_[event.id]);
+                deviceIdChecker_[event.id] = event.deviceId;
+                return false;
+            }
+            return false;
+        }
+        case AxisAction::UPDATE: {
+            auto iter = deviceIdChecker_.find(event.id);
+            if (iter == deviceIdChecker_.end()) {
+                return true;
+            }
+            if (iter->second != event.deviceId) {
+                return true;
+            }
+            return false;
+        }
+        case AxisAction::END:
+        case AxisAction::CANCEL: {
+            if (deviceIdChecker_.find(event.id) == deviceIdChecker_.end()) {
+                return true;
+            }
+            if (deviceIdChecker_[event.id] != event.deviceId) {
+                return true;
+            }
+            deviceIdChecker_.erase(event.id);
+            return false;
+        }
+        default: {
+            return false;
+        }
+    }
+}
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool EventManager::TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
@@ -2479,6 +2571,8 @@ bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
         return OnFocusAxisEvent(static_cast<const NG::FocusAxisEvent&>(event));
     } else if (event.eventType == UIInputEventType::CROWN) {
         return OnCrownEvent(static_cast<const CrownEvent&>(event));
+    } else if (event.eventType == UIInputEventType::TOUCHPAD_ACTIVE) {
+        return OnTouchpadInteractionBegin();
     } else {
         return false;
     }
@@ -2608,5 +2702,42 @@ void EventManager::DelegateTouchEvent(const TouchEvent& touchEvent)
     for (auto item : delegateVector) {
         item->DelegateTouchEvent(touchEvent);
     }
+}
+
+bool EventManager::OnTouchpadInteractionBegin() const
+{
+    CHECK_NULL_RETURN(coastingAxisEventGenerator_, true);
+    coastingAxisEventGenerator_->NotifyStop();
+    return true;
+}
+
+void EventManager::InitCoastingAxisEventGenerator()
+{
+    if (!coastingAxisEventGenerator_) {
+        coastingAxisEventGenerator_ = AceType::MakeRefPtr<CoastingAxisEventGenerator>();
+    }
+
+    coastingAxisEventGenerator_->SetAxisToTouchConverter(
+        [weak = WeakClaim(this)](const AxisEvent& event) -> TouchEvent {
+            auto eventManager = weak.Upgrade();
+            CHECK_NULL_RETURN(eventManager, {});
+            return eventManager->ConvertAxisEventToTouchEvent(event);
+        });
+}
+
+void EventManager::NotifyAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) const
+{
+    CHECK_NULL_VOID(coastingAxisEventGenerator_);
+    if (event.action == AxisAction::BEGIN) {
+        coastingAxisEventGenerator_->NotifyStop();
+    }
+    CHECK_NULL_VOID(node);
+    coastingAxisEventGenerator_->NotifyAxisEvent(event, node);
+}
+
+void EventManager::NotifyCoastingAxisEventStop() const
+{
+    CHECK_NULL_VOID(coastingAxisEventGenerator_);
+    coastingAxisEventGenerator_->NotifyStop();
 }
 } // namespace OHOS::Ace

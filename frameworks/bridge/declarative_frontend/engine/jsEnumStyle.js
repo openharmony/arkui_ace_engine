@@ -1552,6 +1552,7 @@ let WebKeyboardAvoidMode;
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_VISUAL = 0] = 'RESIZE_VISUAL';
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_CONTENT = 1] = 'RESIZE_CONTENT';
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.OVERLAYS_CONTENT = 2] = 'OVERLAYS_CONTENT';
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.RETURN_TO_UICONTEXT = 3] = 'RETURN_TO_UICONTEXT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
 let KeyboardAppearance;
@@ -3297,9 +3298,17 @@ globalThis.NavPathStackExtent = NavPathStackExtent;
 class WaterFlowSections {
   constructor() {
     this.sectionArray = [];
-    // indicate class has changed.
-    this.changeFlag = true;
+    // native waterflow section, implement in cpp
+    this.nativeSection = undefined;
     this.changeArray = [];
+  }
+
+  setNativeSection(section) {
+    UIUtilsImpl.instance().getTarget(this).nativeSection = section;
+  }
+
+  getNativeSection() {
+    return UIUtilsImpl.instance().getTarget(this).nativeSection;
   }
 
   isNonNegativeInt32(input) {
@@ -3353,8 +3362,11 @@ class WaterFlowSections {
     }
     intDeleteCount = intDeleteCount < 0 ? 0 : intDeleteCount;
 
-    this.changeArray.push({ start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : [] });
-    this.changeFlag = !this.changeFlag;
+    if (this.nativeSection) {
+      this.nativeSection.onSectionChanged({ start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : [] });
+    } else {
+      this.changeArray.push({ start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : [] });
+    }
     return true;
   }
 
@@ -3364,8 +3376,11 @@ class WaterFlowSections {
     }
     let oldLength = this.sectionArray.length;
     this.sectionArray.push(section);
-    this.changeArray.push({ start: oldLength, deleteCount: 0, sections: [section] });
-    this.changeFlag = !this.changeFlag;
+    if (this.nativeSection) {
+      this.nativeSection.onSectionChanged({ start: oldLength, deleteCount: 0, sections: [section] });
+    } else {
+      this.changeArray.push({ start: oldLength, deleteCount: 0, sections: [section] });
+    }
     return true;
   }
 
@@ -3377,8 +3392,11 @@ class WaterFlowSections {
     this.sectionArray.splice(sectionIndex, 1, section);
 
     let intStart = this.toArrayIndex(sectionIndex, oldLength);
-    this.changeArray.push({ start: intStart, deleteCount: 1, sections: [section] });
-    this.changeFlag = !this.changeFlag;
+    if (this.nativeSection) {
+      this.nativeSection.onSectionChanged({ start: intStart, deleteCount: 1, sections: [section] });
+    } else {
+      this.changeArray.push({ start: intStart, deleteCount: 1, sections: [section] });
+    }
     return true;
   }
 
@@ -3416,9 +3434,15 @@ class ChildrenMainSize {
     }
     this.defaultMainSize = childDefaultSize;
     this.sizeArray = [];
-    this.changeFlag = true;
-    // -1: represent newly created.
-    this.changeArray = [ { start: -1 } ];
+    this.nativeMainSize = undefined;
+  }
+
+  setNativeMainSize(value) {
+    this.nativeMainSize = value;
+  }
+
+  getNativeMainSize() {
+    return this.nativeMainSize;
   }
 
   set childDefaultSize(value) {
@@ -3426,6 +3450,9 @@ class ChildrenMainSize {
       throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
     }
     this.defaultMainSize = value;
+    if (this.nativeMainSize) {
+      this.nativeMainSize.updateDefaultMainSize(value);
+    }
   }
 
   get childDefaultSize() {
@@ -3442,10 +3469,14 @@ class ChildrenMainSize {
     let deleteCountValue = deleteCount && !(this.isInvalid(deleteCount)) ? Math.trunc(deleteCount) : 0;
     if (paramCount === 1) {
       this.sizeArray.splice(startValue);
-      this.changeArray.push({ start: startValue });
+      if (this.nativeMainSize) {
+        this.nativeMainSize.onStateChanged({ start: startValue });
+      }
     } else if (paramCount === 2) {
       this.sizeArray.splice(startValue, deleteCountValue);
-      this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
+      if (this.nativeMainSize) {
+        this.nativeMainSize.onStateChanged({ start: startValue, deleteCount: deleteCountValue });
+      }
     } else if (paramCount === 3) {
       let childrenSizeLength = childrenSize ? childrenSize.length : 0;
       if (childrenSizeLength === 0) {
@@ -3461,9 +3492,10 @@ class ChildrenMainSize {
         this.sizeArray.push(-1);
       }
       this.sizeArray.splice(startValue, deleteCountValue, ...childrenSize);
-      this.changeArray.push({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
+      if (this.nativeMainSize) {
+        this.nativeMainSize.onStateChanged({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
+      }
     }
-    this.changeFlag = !this.changeFlag;
   }
 
   update(index, childSize) {
@@ -3478,8 +3510,9 @@ class ChildrenMainSize {
       this.sizeArray.push(-1);
     }
     this.sizeArray.splice(startValue, 1, childSize);
-    this.changeArray.push({ start: startValue, deleteCount: 1, childrenSize: [childSize] });
-    this.changeFlag = !this.changeFlag;
+    if (this.nativeMainSize) {
+      this.nativeMainSize.onStateChanged({ start: startValue, deleteCount: 1, childrenSize: [childSize] });
+    }
   }
 
   isInvalid(input) {
@@ -3610,6 +3643,8 @@ let SaveButtonOnClickResult;
     'SUCCESS';
   SaveButtonOnClickResult[SaveButtonOnClickResult.TEMPORARY_AUTHORIZATION_FAILED = 1] =
     'TEMPORARY_AUTHORIZATION_FAILED ';
+  SaveButtonOnClickResult[SaveButtonOnClickResult.CANCELED_BY_USER = 2] =
+    'CANCELED_BY_USER';
 })(SaveButtonOnClickResult || (SaveButtonOnClickResult = {}));
 
 let ObscuredReasons;
@@ -4088,6 +4123,16 @@ class UserDataSpan {
   type_ = 'ExtSpan';
 }
 
+class LeadingMarginSpan extends NativeLeadingMarginSpan {
+  type_ = 'LeadingMarginSpan';
+}
+
+let TextDirection;
+(function (TextDirection) {
+  TextDirection[TextDirection.LTR = 0] = 'LTR';
+  TextDirection[TextDirection.RTL = 1] = 'RTL';
+})(TextDirection || (TextDirection = {}));
+
 let FocusPriority;
 (function (FocusPriority) {
   FocusPriority[FocusPriority.AUTO = 0] = 'AUTO';
@@ -4418,6 +4463,13 @@ let AxisAction;
   AxisAction[AxisAction.CANCEL = 4] = 'CANCEL';
 })(AxisAction || (AxisAction = {}));
 
+let AxisType;
+(function (AxisType) {
+  AxisType[AxisType.VERTICAL_AXIS = 0] = 'VERTICAL_AXIS';
+  AxisType[AxisType.HORIZONTAL_AXIS = 1] = 'HORIZONTAL_AXIS';
+  AxisType[AxisType.PINCH_AXIS = 2] = 'PINCH_AXIS';
+})(AxisType || (AxisType = {}));
+
 let WebBypassVsyncCondition;
 (function (WebBypassVsyncCondition) {
   WebBypassVsyncCondition[WebBypassVsyncCondition.NONE = 0] = 'NONE';
@@ -4519,8 +4571,33 @@ let IndicatorType;
   IndicatorType[IndicatorType.BACKGROUND = 1] = 'BACKGROUND';
 })(IndicatorType || (IndicatorType = {}));
 
+let BlankScreenDetectionMethod;
+(function (BlankScreenDetectionMethod) {
+  BlankScreenDetectionMethod[BlankScreenDetectionMethod.DETECTION_CONTENTFUL_NODES_SEVENTEEN = 0] =
+    'DETECTION_CONTENTFUL_NODES_SEVENTEEN';
+})(BlankScreenDetectionMethod || (BlankScreenDetectionMethod = {}));
+
 let ListItemSwipeActionDirection;
 (function (ListItemSwipeActionDirection) {
   ListItemSwipeActionDirection[ListItemSwipeActionDirection.START = 0] = 'START';
   ListItemSwipeActionDirection[ListItemSwipeActionDirection.END = 1] = 'END';
 })(ListItemSwipeActionDirection || (ListItemSwipeActionDirection = {}));
+
+let ScrollSnapAnimationSpeed;
+(function (ScrollSnapAnimationSpeed) {
+  ScrollSnapAnimationSpeed[ScrollSnapAnimationSpeed.NORMAL = 0] = 'NORMAL';
+  ScrollSnapAnimationSpeed[ScrollSnapAnimationSpeed.SLOW = 1] = 'SLOW';
+})(ScrollSnapAnimationSpeed || (ScrollSnapAnimationSpeed = {}));
+
+let NativeEmbedParamStatus;
+(function (NativeEmbedParamStatus) {
+  NativeEmbedParamStatus.ADD = 0;
+  NativeEmbedParamStatus.UPDATE = 1;
+  NativeEmbedParamStatus.DELETE = 2;
+})(NativeEmbedParamStatus || (NativeEmbedParamStatus = {}));
+
+let WebRotateEffect;
+(function (WebRotateEffect) {
+  WebRotateEffect[WebRotateEffect.TOPLEFT_EFFECT = 0] = 'TOPLEFT_EFFECT';
+  WebRotateEffect[WebRotateEffect.RESIZE_COVER_EFFECT = 1] = 'RESIZE_COVER_EFFECT';
+})(WebRotateEffect || (WebRotateEffect = {}));

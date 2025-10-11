@@ -20,6 +20,7 @@
 #include "base/error/error_code.h"
 #include "core/common/builder_util.h"
 #include "core/common/color_inverter.h"
+#include "base/utils/utils.h"
 #include "base/utils/multi_thread.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -181,6 +182,25 @@ void ClearChildrenInFrameNode(ArkUINodeHandle node)
     CHECK_NULL_VOID(currentNode);
     currentNode->Clean();
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+}
+
+ArkUI_Bool ConvertPoint(ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkUINodeHandle targetnode,
+    ArkUI_Float32 (*targetNodePositionOffset)[2])
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, false);
+    auto* targetNode = reinterpret_cast<FrameNode*>(targetnode);
+    CHECK_NULL_RETURN(targetNode, false);
+    auto sameParentNode =
+        FindSameParentComponent(Referenced::Claim<FrameNode>(currentNode), Referenced::Claim<FrameNode>(targetNode));
+    if (!sameParentNode) {
+        return false;
+    }
+    auto offset =
+        currentNode->ConvertPoint({ (*position)[0], (*position)[1] }, Referenced::Claim<FrameNode>(targetNode));
+    (*targetNodePositionOffset)[0] = offset.GetX();
+    (*targetNodePositionOffset)[1] = offset.GetY();
+    return true;
 }
 
 ArkUI_Uint32 GetChildrenCount(ArkUINodeHandle node, ArkUI_Bool isExpanded)
@@ -1103,6 +1123,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .removeChild = RemoveChildInFrameNode,
         .clearBuilderNode = ClearBuilderNodeInFrameNode,
         .clearChildren = ClearChildrenInFrameNode,
+        .convertPoint = ConvertPoint,
         .getChildrenCount = GetChildrenCount,
         .getChild = GetChild,
         .getFirstChildIndexWithoutExpand = GetFirstChildIndexWithoutExpand,

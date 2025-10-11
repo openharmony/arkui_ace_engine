@@ -46,10 +46,21 @@ const DOUBLE_LINE_NUM = 2;
 const RESOURCE_TYPE_SYMBOL = 40000;
 const LEFT_ICON_SIZE_NUMBER = 16;
 const LEFT_TEXT_NUMBER = 8;
-const OPERATE_ITEM_LENGTH = 24;
-const ARROW_ICON_WIDTH = 12;
-const SINGLE_ICON_ZONE_SIZE = 28;
-const RIGHT_SINGLE_ICON_SIZE = '24vp';
+const OPERATE_ITEM_LENGTH = lazyInit(() => {
+    return getResourceValue('sys.float.subheader_right_arrow_height');
+});
+const ARROW_ICON_WIDTH = lazyInit(() => {
+    return getResourceValue('sys.float.subheader_right_arrow_width');
+});
+const SINGLE_ICON_ZONE_SIZE = lazyInit(() => {
+    return getResourceValue('sys.float.subheader_right_icon_zone_size');
+});
+const RIGHT_SINGLE_ICON_SIZE = lazyInit(() => {
+    return getResourceValue('sys.float.subheader_right_icon_size');
+});
+const DEFAULT_FOCUS_STYLE = lazyInit(() => {
+    return getResourceValue('sys.float.subheader_right_button_default_focus_style');
+});
 const PADDING_LEVEL_2 = 4;
 const MAX_RIGHT_WIDTH = '34%';
 const MIN_FONT_SIZE = 1.75;
@@ -215,6 +226,38 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_select_padding', { resourceId: 12583
 RESOURCE_CACHE_MAP.set('sys.float.subheader_left_icon_end_margin', { resourceId: 125835684, defaultValue: 8 });
 RESOURCE_CACHE_MAP.set('sys.float.subheader_subtitle_font_weight', { resourceId: 125835685, defaultValue: 400 });
 RESOURCE_CACHE_MAP.set('sys.float.subheader_titles_space', { resourceId: 125835686, defaultValue: 2 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_padding_horizontal', { resourceId: 125835784, defaultValue: 2 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_padding_vertical', { resourceId: 125835785, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_x_offset', { resourceId: 125835786, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_radius', { resourceId: 125835787, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_default_focus_style', { resourceId: 125835788, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_margin_start', { resourceId: 125835789, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_button_margin_bottom', { resourceId: 125835790, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_right_button_margin_bottom', { resourceId: 125835791, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_padding_vertical', { resourceId: 125835792, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_padding_start', { resourceId: 125835793, defaultValue: 2 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_font_arrow_space', { resourceId: 125835794, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_arrow_padding_horizontal', { resourceId: 125835795, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_arrow_x_offset', { resourceId: 125835796, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_arrow_margin_start', { resourceId: 125835797, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_arrow_height', { resourceId: 125835798, defaultValue: 24 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_arrow_width', { resourceId: 125835799, defaultValue: 12 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_arrow_margin_bottom', { resourceId: 125835800, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_right_text_arrow_margin_bottom', { resourceId: 125835801, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_text_arrow_radius', { resourceId: 125835802, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_only_arrow_margin_bottom', { resourceId: 125835803, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_group_padding_start', { resourceId: 125835804, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_group_margin_bottom', { resourceId: 125835805, defaultValue: 6 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_right_icon_group_margin_bottom', { resourceId: 125835806, defaultValue: 6 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_group_x_offset', { resourceId: 125835807, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_radius', { resourceId: 125835808, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_image_radius', { resourceId: 125835809, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_image_padding', { resourceId: 125835810, defaultValue: 0 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_zone_size', { resourceId: 125835811, defaultValue: 28 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_size', { resourceId: 125835812, defaultValue: 24 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_loading_padding_bottom', { resourceId: 125835813, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_right_loading_padding_bottom', { resourceId: 125835814, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_right_loading_margin_start', { resourceId: 125835815, defaultValue: 8 });
 
 export class SubHeader extends ViewPU {
     constructor(c16, d16, e16, f16 = -1, g16 = undefined, h16) {
@@ -1133,16 +1176,16 @@ export class SubHeader extends ViewPU {
 
     getTextArrowPaddingLeft() {
         if (this.operationItem && this.operationItem.length > 0 && this.operationItem[0].value) {
-            return LengthMetrics.vp(getResourceValue('sys.float.padding_level1'));
+            return LengthMetrics.vp(getResourceValue('sys.float.subheader_right_text_padding_start'));
         }
         return LengthMetrics.vp(getResourceValue('sys.float.padding_level0'));
     }
 
     getTextArrowMarginRight() {
         if (this.operationItem && this.operationItem.length > 0 && this.operationItem[0].value) {
-            return LengthMetrics.vp(PADDING_LEVEL_2 + ARROW_ICON_WIDTH);
+            return LengthMetrics.vp(getResourceValue('sys.float.subheader_right_font_arrow_space') + ARROW_ICON_WIDTH());
         }
-        return LengthMetrics.vp(ARROW_ICON_WIDTH);
+        return LengthMetrics.vp(ARROW_ICON_WIDTH());
     }
 
     getAreaPadding() {
@@ -1459,24 +1502,47 @@ export class SubHeader extends ViewPU {
                             strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
                         });
                         Button.padding({
-                            start: LengthMetrics.vp(getResourceValue('sys.float.padding_level1')),
-                            end: LengthMetrics.vp(getResourceValue('sys.float.padding_level1')),
-                            top: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
-                            bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
+                            start: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_horizontal')),
+                            end: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_horizontal')),
+                            top: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_vertical')),
+                            bottom: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_vertical')),
                         });
                         Button.margin({
                             start: this.ageing ?
-                            LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.padding_level0')).value +
-                            this.leftIconMargin().value) :
-                            LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.padding_level4')).value +
-                            this.leftIconMargin().value),
+                                LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.padding_level0')).value +
+                                    this.leftIconMargin().value) :
+                                LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_margin_start')).value +
+                                    this.leftIconMargin().value),
                             bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-                            getResourceValue('sys.float.padding_level2')),
+                                (this.secondaryTitle && this.primaryTitle ?
+                                    getResourceValue('sys.float.subheader_right_button_margin_bottom') :
+                                    getResourceValue('sys.float.subheader_single_right_button_margin_bottom'))),
                         });
                         Button.backgroundColor(ObservedObject.GetRawObject(this.buttonBgColor));
-                        Button.constraintSize({ minHeight: OPERATE_ITEM_LENGTH });
+                        Button.constraintSize({ minHeight: OPERATE_ITEM_LENGTH() });
                         Button.align(Alignment.End);
-                        Button.borderRadius(getResourceValue('sys.float.corner_radius_level4'));
+                        Button.borderRadius(getResourceValue('sys.float.subheader_right_button_radius'));
+                        Button.offset({ x: getResourceValue('sys.float.subheader_right_button_x_offset') });
+                        Button.attributeModifier.bind(this)(!DEFAULT_FOCUS_STYLE() ? undefined :
+                            new DefaultFocusStyleModifier((isFocused) => {
+                                if (isFocused) {
+                                    this.buttonBgColor = {
+                                        'id': -1,
+                                        'type': 10001,
+                                        params: ['sys.color.comp_background_focus'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    };
+                                } else {
+                                    this.buttonBgColor = {
+                                        'id': -1,
+                                        'type': 10001,
+                                        params: ['sys.color.ohos_id_color_sub_background_transparent'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    };
+                                }
+                            }));
                         Button.onHover((o8) => {
                             if (o8) {
                                 this.buttonBgColor = this.subHeaderTheme.textArrowHoverBgColor;
@@ -1543,12 +1609,13 @@ export class SubHeader extends ViewPU {
             Row.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.subHeaderModifier));
             Row.alignItems(VerticalAlign.Center);
             Row.focusable(true);
-            Row.constraintSize({ minHeight: OPERATE_ITEM_LENGTH });
+            Row.constraintSize({ minHeight: OPERATE_ITEM_LENGTH() });
             Row.padding({
                 start: this.getTextArrowPaddingLeft(),
-                top: this.ageing ? LengthMetrics.vp(0) : LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
+                top: this.ageing ? LengthMetrics.vp(0) :
+                LengthMetrics.vp(getResourceValue('sys.float.subheader_right_text_padding_vertical')),
                 bottom: this.ageing ? LengthMetrics.vp(0) :
-                LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
+                LengthMetrics.vp(getResourceValue('sys.float.subheader_right_text_padding_vertical')),
             });
         }, Row);
         this.observeComponentCreation2((r7, s7) => {
@@ -1593,11 +1660,11 @@ export class SubHeader extends ViewPU {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__',
             });
-            SymbolGlyph.fontSize(RIGHT_SINGLE_ICON_SIZE);
+            SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH());
             SymbolGlyph.fontColor([this.subHeaderTheme.iconArrowColor]);
             SymbolGlyph.draggable(false);
-            SymbolGlyph.width(ARROW_ICON_WIDTH);
-            SymbolGlyph.height(OPERATE_ITEM_LENGTH);
+            SymbolGlyph.width(ARROW_ICON_WIDTH());
+            SymbolGlyph.height(OPERATE_ITEM_LENGTH());
         }, SymbolGlyph);
         Row.pop();
     }
@@ -1613,9 +1680,11 @@ export class SubHeader extends ViewPU {
                         Stack.align(this.ageing ? Alignment.Start : Alignment.End);
                         Stack.margin({
                             start: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-                            getResourceValue('sys.float.padding_level4')),
+                                getResourceValue('sys.float.subheader_right_text_arrow_margin_start')),
                             bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-                            getResourceValue('sys.float.padding_level2')),
+                                (this.secondaryTitle && this.primaryTitle ?
+                                    getResourceValue('sys.float.subheader_right_text_arrow_margin_bottom') :
+                                    getResourceValue('sys.float.subheader_single_right_text_arrow_margin_bottom'))),
                         });
                     }, Stack);
                     this.observeComponentCreation2((a7, b7) => {
@@ -1624,7 +1693,12 @@ export class SubHeader extends ViewPU {
                             buttonStyle: ButtonStyleMode.TEXTUAL,
                             stateEffect: false
                         });
-                        Button.padding(INDEX_ZERO);
+                        Button.padding({
+                            top: INDEX_ZERO,
+                            bottom: INDEX_ZERO,
+                            left: getResourceValue('sys.float.subheader_right_text_arrow_padding_horizontal'),
+                            right: getResourceValue('sys.float.subheader_right_text_arrow_padding_horizontal'),
+                        });
                         Button.margin({ start: this.leftIconMargin() });
                         Button.backgroundColor(ObservedObject.GetRawObject(this.textArrowBgColor));
                         Button.focusBox({
@@ -1632,7 +1706,28 @@ export class SubHeader extends ViewPU {
                             strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
                             strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
                         });
-                        Button.borderRadius(getResourceValue('sys.float.corner_radius_level4'));
+                        Button.borderRadius(getResourceValue('sys.float.subheader_right_text_arrow_radius'));
+                        Button.offset({ x: getResourceValue('sys.float.subheader_right_text_arrow_x_offset') });
+                        Button.attributeModifier.bind(this)(!DEFAULT_FOCUS_STYLE() ? undefined :
+                            new DefaultFocusStyleModifier((isFocused) => {
+                                if (isFocused) {
+                                    this.textArrowBgColor = {
+                                        'id': -1,
+                                        'type': 10001,
+                                        params: ['sys.color.comp_background_focus'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    };
+                                } else {
+                                    this.textArrowBgColor = {
+                                        'id': -1,
+                                        'type': 10001,
+                                        params: ['sys.color.ohos_id_color_sub_background_transparent'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    };
+                                }
+                            }));
                         ViewStackProcessor.visualState('disabled');
                         Button.opacity(getResourceValue('sys.float.interactive_disable'));
                         ViewStackProcessor.visualState('pressed');
@@ -1728,21 +1823,42 @@ export class SubHeader extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((q5, r5) => {
                         Row.create();
+                        Row.margin({ bottom: getResourceValue('sys.float.subheader_right_only_arrow_margin_bottom') });
                         Row.focusable(true);
                         Row.constraintSize({ minWidth: this.getRightAreaMinWidth() });
                         Row.justifyContent(FlexAlign.End);
                     }, Row);
                     this.observeComponentCreation2((m5, n5) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
-                        Button.width(ARROW_ICON_WIDTH);
-                        Button.height(OPERATE_ITEM_LENGTH);
+                        Button.width(ARROW_ICON_WIDTH());
+                        Button.height(OPERATE_ITEM_LENGTH());
                         Button.backgroundColor(ObservedObject.GetRawObject(this.textArrowBgColor));
                         Button.focusBox({
                             margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
                             strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
                             strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
                         });
-                        Button.borderRadius(getResourceValue('sys.float.corner_radius_level4'));
+                        Button.borderRadius(getResourceValue('sys.float.subheader_right_text_arrow_radius'));
+                        Button.attributeModifier.bind(this)(!DEFAULT_FOCUS_STYLE() ? undefined :
+                            new DefaultFocusStyleModifier((isFocused) => {
+                                if (isFocused) {
+                                    this.textArrowBgColor = {
+                                        'id': -1,
+                                        'type': 10001,
+                                        params: ['sys.color.comp_background_focus'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    };
+                                } else {
+                                    this.textArrowBgColor = {
+                                        'id': -1,
+                                        'type': 10001,
+                                        params: ['sys.color.ohos_id_color_sub_background_transparent'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    };
+                                }
+                            }));
                         ViewStackProcessor.visualState('disabled');
                         Button.opacity(getResourceValue('sys.float.interactive_disable'));
                         ViewStackProcessor.visualState('pressed');
@@ -1770,9 +1886,11 @@ export class SubHeader extends ViewPU {
                         Button.focusable(true);
                         Button.margin({
                             start: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-                            getResourceValue('sys.float.padding_level4')),
+                                getResourceValue('sys.float.subheader_right_text_arrow_margin_start')),
                             bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-                            getResourceValue('sys.float.padding_level2')),
+                                (this.secondaryTitle && this.primaryTitle ?
+                                    getResourceValue('sys.float.subheader_right_text_arrow_margin_bottom') :
+                                    getResourceValue('sys.float.subheader_single_right_text_arrow_margin_bottom'))),
                         });
                     }, Button);
                     this.observeComponentCreation2((k5, l5) => {
@@ -1783,12 +1901,12 @@ export class SubHeader extends ViewPU {
                             'bundleName': '__harDefaultBundleName__',
                             'moduleName': '__harDefaultModuleName__',
                         });
-                        SymbolGlyph.fontSize(RIGHT_SINGLE_ICON_SIZE);
+                        SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH());
                         SymbolGlyph.fontColor([this.subHeaderTheme.iconArrowColor]);
                         SymbolGlyph.draggable(false);
                         SymbolGlyph.focusable(true);
-                        SymbolGlyph.width(ARROW_ICON_WIDTH);
-                        SymbolGlyph.height(OPERATE_ITEM_LENGTH);
+                        SymbolGlyph.width(ARROW_ICON_WIDTH());
+                        SymbolGlyph.height(OPERATE_ITEM_LENGTH());
                     }, SymbolGlyph);
                     Button.pop();
                     Row.pop();
@@ -1815,9 +1933,12 @@ export class SubHeader extends ViewPU {
                             this.observeComponentCreation2((x4, y4) => {
                                 __Common__.create();
                                 __Common__.margin({
-                                    start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
-                                    bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level3')),
+                                    start: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_icon_group_padding_start')),
+                                    bottom: LengthMetrics.vp(this.secondaryTitle && this.primaryTitle ?
+                                        getResourceValue('sys.float.subheader_right_icon_group_margin_bottom') :
+                                        getResourceValue('sys.float.subheader_single_right_icon_group_margin_bottom')),
                                 });
+                                __Common__.offset({ x: getResourceValue('sys.float.subheader_right_icon_group_x_offset') });
                             }, __Common__);
                             {
                                 this.observeComponentCreation2((r4, s4) => {
@@ -1889,16 +2010,18 @@ export class SubHeader extends ViewPU {
             Row.justifyContent(FlexAlign.End);
             Row.padding({
                 top: getResourceValue('sys.float.padding_level2'),
-                bottom: getResourceValue('sys.float.padding_level2'),
+                bottom: this.secondaryTitle && this.primaryTitle ?
+                    getResourceValue('sys.float.subheader_right_loading_padding_bottom') :
+                    getResourceValue('sys.float.subheader_single_right_loading_padding_bottom'),
             });
             Row.margin({
-                start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                start: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_loading_margin_start')),
             });
         }, Row);
         this.observeComponentCreation2((v3, w3) => {
             LoadingProgress.create();
-            LoadingProgress.width(OPERATE_ITEM_LENGTH);
-            LoadingProgress.height(OPERATE_ITEM_LENGTH);
+            LoadingProgress.width(OPERATE_ITEM_LENGTH());
+            LoadingProgress.height(OPERATE_ITEM_LENGTH());
             LoadingProgress.color({
                 'id': -1,
                 'type': 10001,
@@ -2029,11 +2152,11 @@ class SingleIconStyle extends ViewPU {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
                         Button.focusable(true);
                         Button.defaultFocus(this.item.defaultFocus);
-                        Button.width(SINGLE_ICON_ZONE_SIZE);
-                        Button.height(SINGLE_ICON_ZONE_SIZE);
+                        Button.width(SINGLE_ICON_ZONE_SIZE());
+                        Button.height(SINGLE_ICON_ZONE_SIZE());
                         Button.align(Alignment.Center);
                         Button.backgroundColor(ObservedObject.GetRawObject(this.bgColor));
-                        Button.borderRadius(getResourceValue('sys.float.corner_radius_level4'));
+                        Button.borderRadius(getResourceValue('sys.float.subheader_right_icon_radius'));
                         Button.accessibilityLevel(this.getRightIconAccessibilityLevel());
                         Button.accessibilityText(this.getRightIconAccessibilityText());
                         Button.accessibilityDescription(this.getRightIconAccessibilityDescription());
@@ -2053,6 +2176,26 @@ class SingleIconStyle extends ViewPU {
                             'moduleName': '__harDefaultModuleName__',
                         });
                         ViewStackProcessor.visualState();
+                        Button.attributeModifier.bind(this)(!DEFAULT_FOCUS_STYLE() ? undefined :
+                            new DefaultFocusStyleModifier((isFocused) => {
+                                if (isFocused) {
+                                    this.bgColor = {
+                                        'id': -1,
+                                        'type': 10001,
+                                        params: ['sys.color.comp_background_focus'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    };
+                                } else {
+                                    this.bgColor = {
+                                        'id': -1,
+                                        'type': 10001,
+                                        params: ['sys.color.ohos_id_color_sub_background_transparent'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    };
+                                }
+                            }));
                         Button.onTouch((a3) => {
                             if (a3.type === TouchType.Down || TouchType.Cancel) {
                                 this.bgColor = {
@@ -2129,7 +2272,7 @@ class SingleIconStyle extends ViewPU {
 
     fontSizeValue(m2) {
         return m2.iconOptions?.symbolicIconOption?.fontSize ?
-        Util.symbolFontSize(m2.iconOptions?.symbolicIconOption?.fontSize) : RIGHT_SINGLE_ICON_SIZE;
+        Util.symbolFontSize(m2.iconOptions?.symbolicIconOption?.fontSize) : RIGHT_SINGLE_ICON_SIZE();
     }
 
     IconZone(v1 = null) {
@@ -2150,6 +2293,8 @@ class SingleIconStyle extends ViewPU {
                                     SymbolGlyph.fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight);
                                     SymbolGlyph.renderingStrategy(this.item.iconOptions?.symbolicIconOption?.renderingStrategy);
                                     SymbolGlyph.effectStrategy(this.item.iconOptions?.symbolicIconOption?.effectStrategy);
+                                    SymbolGlyph.borderRadius(getResourceValue('sys.float.subheader_right_image_radius'));
+                                    SymbolGlyph.padding(getResourceValue('sys.float.subheader_right_image_padding'));
                                 }, SymbolGlyph);
                             });
                         } else {
@@ -2157,10 +2302,12 @@ class SingleIconStyle extends ViewPU {
                                 this.observeComponentCreation2((g2, h2) => {
                                     Image.create(this.item?.iconOptions?.icon);
                                     Image.fillColor(this.subHeaderTheme.rightIconColor);
-                                    Image.width(RIGHT_SINGLE_ICON_SIZE);
-                                    Image.height(RIGHT_SINGLE_ICON_SIZE);
+                                    Image.width(RIGHT_SINGLE_ICON_SIZE());
+                                    Image.height(RIGHT_SINGLE_ICON_SIZE());
                                     Image.focusable(true);
                                     Image.draggable(false);
+                                    Image.borderRadius(getResourceValue('sys.float.subheader_right_image_radius'));
+                                    Image.padding(getResourceValue('sys.float.subheader_right_image_padding'));
                                 }, Image);
                             });
                         }
@@ -2303,8 +2450,8 @@ class TextArrowLayout extends ViewPU {
     }
 
     onMeasureSize(a, b, c) {
-        let d = ARROW_ICON_WIDTH;
-        let e = OPERATE_ITEM_LENGTH;
+        let d = ARROW_ICON_WIDTH();
+        let e = OPERATE_ITEM_LENGTH();
         let f = b[INDEX_ZERO];
         let g = {
             minWidth: Math.max(d, Number(c.minWidth)),
@@ -2332,6 +2479,41 @@ class TextArrowLayout extends ViewPU {
 
     rerender() {
         this.updateDirtyElements();
+    }
+}
+
+/**
+ * lazy init
+ * @param initializer lazy initializer
+ * @returns lazy init result
+ */
+function lazyInit(initializer) {
+    let value = null;
+    return () => {
+        if (value === null) {
+            value = initializer();
+        }
+        return value;
+    };
+}
+
+class DefaultFocusStyleModifier {
+    constructor(stateStyleAction) {
+        this.stateStyleAction = stateStyleAction;
+    }
+
+    applyNormalAttribute(instance) {
+        if (!instance) {
+            return;
+        }
+        instance.focusBox(undefined);
+        instance.scale(undefined);
+        instance.onFocus(() => {
+            this.stateStyleAction && this.stateStyleAction(true);
+        });
+        instance.onBlur(() => {
+            this.stateStyleAction && this.stateStyleAction(false);
+        });
     }
 }
 

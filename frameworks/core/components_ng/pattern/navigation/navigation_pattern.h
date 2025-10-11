@@ -570,27 +570,38 @@ public:
     }
 
     bool CreateHomeDestination(RefPtr<UINode>& customNode, RefPtr<NavDestinationGroupNode>& homeDest);
-    bool IsHomeDestinationVisible();
+    bool IsHomeDestinationOrNavBarVisible();
     void FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle lifecycle, bool isModeChange = false,
         NavDestLifecycleReason reason = NavDestinationActiveReason::TRANSITION);
 
     bool CheckNeedCreate(int32_t index);
 
-    void SetEnableShowHideWithContentCover(bool isEnable)
+    void SetEnableVisibilityLifecycleWithContentCover(bool isEnable)
     {
-        enableShowHideWithContentCover_ = isEnable;
+        enableVisibilityLifecycleWithContentCover_ = isEnable;
     }
 
-    bool GetEnableShowHideWithContentCover() const
+    bool GetEnableVisibilityLifecycleWithContentCover() const
     {
-        return enableShowHideWithContentCover_;
+        return enableVisibilityLifecycleWithContentCover_;
+    }
+
+    bool CanForceSplitLayout() const
+    {
+        return canForceSplitLayout_;
     }
 
     bool IsTopFullScreenPage() const
     {
         return isTopFullScreenPage_;
     }
+
+    bool IsTopFullScreenChanged() const
+    {
+        return isTopFullScreenPage_;
+    }
 private:
+    void UpdateCanForceSplitLayout(const SizeF& frameSize);
     void NotifyDialogLifecycle(NavDestinationLifecycle lifecycle, bool isFromStandard,
         NavDestVisibilityChangeReason reason = NavDestVisibilityChangeReason::TRANSITION);
     void ClearNavigationCustomTransition();
@@ -846,11 +857,13 @@ private:
     std::vector<WeakPtr<NavDestinationNodeBase>> preVisibleNodes_;
     int32_t runningTransitionCount_ = 0;
     bool isTransitionAnimationAborted_ = false;
-    bool enableShowHideWithContentCover_ = true;
+    bool enableVisibilityLifecycleWithContentCover_ = true;
 
     //-------for force split------- begin------
     bool forceSplitSuccess_ = false;
+    bool canForceSplitLayout_ = false;
     bool isTopFullScreenPage_ = false;
+    bool isTopFullScreenChanged_ = false;
     bool forceSplitUseNavBar_ = false;
     std::optional<bool> homeNodeTouched_;
     bool navBarIsHome_ = false;

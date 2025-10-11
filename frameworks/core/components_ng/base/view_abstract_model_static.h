@@ -45,6 +45,10 @@
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+namespace OHOS::Rosen {
+    class BrightnessBlender;
+}
+
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT ViewAbstractModelStatic {
 public:
@@ -53,7 +57,7 @@ public:
         if (width.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetWidth(frameNode, NG::CalcLength(width.CalcValue()));
         } else if (width.Unit() == DimensionUnit::NONE) {
-            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+            ViewAbstract::ClearWidthOrHeight(frameNode, true);
         } else {
             ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
         }
@@ -64,7 +68,7 @@ public:
         if (height.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetHeight(frameNode, NG::CalcLength(height.CalcValue()));
         } else if (height.Unit() == DimensionUnit::NONE) {
-            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+            ViewAbstract::ClearWidthOrHeight(frameNode, true);
         } else {
             ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
         }
@@ -97,7 +101,7 @@ public:
     {
         return ViewAbstract::GetWindowHeightBreakpoint();
     }
-    
+
     static void SetOpacity(FrameNode* frameNode, const std::optional<double>& opacity)
     {
         ViewAbstract::SetOpacity(frameNode, opacity.value_or(0));
@@ -217,6 +221,13 @@ public:
             sysOptions.value_or(DEFAULT_SYS_OPTIONS));
     }
 
+    static void SetBackgroundBlurStyle(
+        FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const std::optional<SysOptions>& sysOptions)
+    {
+        ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle,
+            sysOptions.value_or(DEFAULT_SYS_OPTIONS));
+    }
+
     static void SetBackgroundEffect(FrameNode* frameNode,
         const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions);
 
@@ -233,11 +244,16 @@ public:
             sysOptions.value_or(DEFAULT_SYS_OPTIONS));
     }
 
+    static void SetTabStop(FrameNode* frameNode, const std::optional<bool>& value)
+    {
+        ViewAbstract::SetTabStop(frameNode, value.value_or(false));
+    }
+
     static void SetVisualEffect(FrameNode* frameNode, const OHOS::Rosen::VisualEffect* visualEffect);
     static void SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter);
     static void SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter);
     static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter);
-    static void SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* blender);
+    static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender);
 
     static void BindBackground(FrameNode* frameNode,
         std::function<RefPtr<UINode>()>&& buildFunc, const std::optional<Alignment>& align);
@@ -274,7 +290,7 @@ public:
     static void SetAlignRules(FrameNode* frameNode,
         const std::optional<std::map<AlignDirection, AlignRule>>& alignRules);
     static void SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair);
-    static void SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
+    static void SetBias(FrameNode* frameNode, const std::optional<float>& horizontal,
         const std::optional<float>& vertical);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
@@ -300,8 +316,8 @@ public:
     static void SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style);
     static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId,
         const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut);
-    static void SetFocusScopePriority(
-        FrameNode* frameNode, const std::string& focusScopeId, const std::optional<uint32_t>& focusPriority);
+    static void SetFocusScopePriority(FrameNode* frameNode, const std::optional<std::string>& focusScopeId,
+        const std::optional<uint32_t>& focusPriority);
     static void SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale);
     static void SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend);
     static void SetUseShadowBatching(FrameNode* frameNode, std::optional<bool> useShadowBatching);
@@ -331,6 +347,8 @@ public:
     static void SetDragPreview(FrameNode* frameNode, const std::optional<DragDropInfo>& DragDropInfo);
     static void SetBackgroundImage(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
+    static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
+    static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
         .disableSystemAdaptation = false
     };

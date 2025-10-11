@@ -579,15 +579,18 @@ void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
         titleLayoutProperty->UpdateAdaptMaxFontSize(miniTitleFontSizeMin);
         titleLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
             TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+        titleLayoutProperty->UpdateAdaptMinFontSize(theme->NavigationMiniMinFontSize());
     } else if (titleMode == NavigationTitleMode::MINI) {
         auto hideBackButtonValid = titleBarLayoutProperty->HasHideBackButton() &&
             titleBarLayoutProperty->GetHideBackButtonValue();
         titleLayoutProperty->UpdateFontSize(hideBackButtonValid ? miniTitleFontSize : miniTitleFontSizeMin);
         titleLayoutProperty->UpdateAdaptMaxFontSize(hideBackButtonValid ? miniTitleFontSize : miniTitleFontSizeMin);
+        titleLayoutProperty->UpdateAdaptMinFontSize(theme->NavigationMiniMinFontSize());
         UpdateSubTitleOpacity(1.0);
     } else if (titleMode == NavigationTitleMode::FULL) {
         titleLayoutProperty->UpdateFontSize(titleFontSize);
         titleLayoutProperty->UpdateAdaptMaxFontSize(maxFontSize);
+        titleLayoutProperty->UpdateAdaptMinFontSize(theme->NavigationFullMinFontSize());
         UpdateSubTitleOpacity(1.0);
     } else {
         titleLayoutProperty->UpdateFontSize(fontSize_.has_value() ? fontSize_.value() : titleFontSize);

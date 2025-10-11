@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import { Finalizable } from '@koalaui/interop/Finalizable';
-
-export class NativePeerNode extends Finalizable {
+export declare class NativePeerNode {
+    ptr: long
 }

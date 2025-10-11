@@ -590,6 +590,12 @@ bool GridModelNG::GetAlwaysEnabled(FrameNode* frameNode)
     return static_cast<bool>(ScrollableModelNG::GetAlwaysEnabled(frameNode));
 }
 
+EffectEdge GridModelNG::GetEffectEdge(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, EffectEdge::ALL);
+    return ScrollableModelNG::GetEffectEdge(frameNode);
+}
+
 void GridModelNG::SetEdgeEffect(
     FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
     EffectEdge edge)

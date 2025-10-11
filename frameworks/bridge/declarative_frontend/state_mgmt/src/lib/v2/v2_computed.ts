@@ -46,6 +46,8 @@ class ComputedV2 {
 
   public static readonly COMPUTED_PREFIX = '___comp_';
   public static readonly COMPUTED_CACHED_PREFIX = '___comp_cached_';
+  // count of currently running @Computed functions
+  public static runningCount: number = 0;
 
   constructor(target: object, prop: string, func: (...args: any[]) => any) {
     this.target_ = target;
@@ -105,6 +107,7 @@ class ComputedV2 {
     let ret;
 
     try {
+        ComputedV2.runningCount++;
         ret = this.propertyComputeFunc_.call(this.target_);
     } catch (e) {
         stateMgmtConsole.applicationError(`@Computed Exception caught for ${this.propertyComputeFunc_.name}`, e.toString());
@@ -112,6 +115,7 @@ class ComputedV2 {
         throw e;
     } finally {
         ObserveV2.getObserve().stopRecordDependencies();
+        ComputedV2.runningCount--;
     }
 
     return ret;

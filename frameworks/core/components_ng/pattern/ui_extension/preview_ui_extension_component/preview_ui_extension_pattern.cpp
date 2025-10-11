@@ -24,6 +24,7 @@
 #include "ui/rs_surface_node.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/rs_adapter.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
@@ -108,6 +109,10 @@ void PreviewUIExtensionPattern::OnConnect()
         return;
     }
     context->SetRSNode(surfaceNode);
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        auto rsUIContext = RsAdapter::GetRSUIContext(host->GetContextRefPtr());
+        surfaceNode->SetRSUIContext(rsUIContext);
+    }
     RemovePlaceholderNode();
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

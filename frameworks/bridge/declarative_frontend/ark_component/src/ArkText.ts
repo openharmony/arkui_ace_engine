@@ -342,6 +342,57 @@ class TextLineHeightModifier extends ModifierWithKey<number | string | Resource>
   }
 }
 
+class TextMaxLineHeightModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textMaxLineHeight');
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetMaxLineHeight(node);
+    } else {
+      getUINativeModule().text.setMaxLineHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextMinLineHeightModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textMinLineHeight');
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetMinLineHeight(node);
+    } else {
+      getUINativeModule().text.setMinLineHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextLineHeightMultipleModifier extends ModifierWithKey<number> {
+  constructor(value) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textLineHeightMultiple');
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetLineHeightMultiple(node);
+    } else {
+      getUINativeModule().text.setLineHeightMultiple(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextCopyOptionModifier extends ModifierWithKey<CopyOptions> {
   constructor(value: CopyOptions) {
     super(value);
@@ -391,6 +442,23 @@ class TextMaxLinesModifier extends ModifierWithKey<number> {
       getUINativeModule().text.resetMaxLines(node);
     } else {
       getUINativeModule().text.setMaxLines(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextMinLinesModifier extends ModifierWithKey<number | undefined> {
+  constructor(value: number | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textMinLines');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetMinLines(node);
+    } else {
+      getUINativeModule().text.setMinLines(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -1041,6 +1109,18 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLineHeightModifier.identity, TextLineHeightModifier, value);
     return this;
   }
+  maxLineHeight(value: LengthMetrics): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextMaxLineHeightModifier.identity, TextMaxLineHeightModifier, value);
+    return this;
+  }
+  minLineHeight(value: LengthMetrics): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextMinLineHeightModifier.identity, TextMinLineHeightModifier, value);
+    return this;
+  }
+  lineHeightMultiple(value: number) {
+    modifierWithKey(this._modifiersWithKeys, TextLineHeightMultipleModifier.identity, TextLineHeightMultipleModifier, value);
+    return this;
+  }
   textOverflow(value: { overflow: TextOverflow }): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextTextOverflowModifier.identity, TextTextOverflowModifier, value);
     return this;
@@ -1051,6 +1131,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   maxLines(value: number): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMaxLinesModifier.identity, TextMaxLinesModifier, value);
+    return this;
+  }
+  minLines(value: number): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextMinLinesModifier.identity, TextMinLinesModifier, value);
     return this;
   }
   decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): TextAttribute {

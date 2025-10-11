@@ -150,6 +150,7 @@ struct TabContentInfo {
     int32_t index = 0;
     std::string id;
     int32_t uniqueId = 0;
+    std::optional<int32_t> lastIndex;
 
     TabContentInfo(std::string tabContentId, int32_t tabContentUniqueId, TabContentState state, int32_t index,
         std::string id, int32_t uniqueId)
@@ -177,6 +178,11 @@ struct TextChangeEventInfo {
     {}
 };
 
+struct WindowSizeBreakpoint {
+    WidthBreakpoint widthBreakpoint;
+    HeightBreakpoint heightBreakpoint;
+};
+
 enum class GestureListenerType { TAP = 0, LONG_PRESS, PAN, PINCH, SWIPE, ROTATION, UNKNOWN };
 
 enum class GestureActionPhase { WILL_START = 0, WILL_END = 1, UNKNOWN = 2 };
@@ -200,6 +206,7 @@ public:
         const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode,
         const PanGestureInfo& panGestureInfo);
     void NotifyTabContentStateUpdate(const TabContentInfo& info);
+    void NotifyTabChange(const TabContentInfo& info);
     void NotifyGestureStateChange(NG::GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
         const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode, NG::GestureActionPhase phase);
     std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
@@ -211,6 +218,7 @@ public:
     void NotifyNavDestinationSwitch(std::optional<NavDestinationInfo>&& from,
         std::optional<NavDestinationInfo>&& to, NavigationOperation operation);
     void NotifyTextChangeEvent(const TextChangeEventInfo& info);
+    void NotifyWinSizeLayoutBreakpointChangeFunc(int32_t instanceId, const WindowSizeBreakpoint& info);
     using NavigationHandleFunc = void (*)(const NavDestinationInfo& info);
     using ScrollEventHandleFunc = void (*)(const std::string&, int32_t, ScrollEventType, float, Ace::Axis);
     using RouterPageHandleFunc = void (*)(AbilityContextInfo&, const RouterPageInfoNG&);
@@ -228,6 +236,7 @@ public:
         const GestureEvent& gestureEventInfo, const RefPtr<NG::NGGestureRecognizer>& current,
         const RefPtr<NG::FrameNode>& frameNode, NG::GestureActionPhase phase);
     using TabContentStateHandleFunc = void (*)(const TabContentInfo&);
+    using TabChangeHandleFunc = void (*)(const TabContentInfo&);
     using NavigationHandleFuncForAni = std::function<void(const NG::NavDestinationInfo& info)>;
     using TextChangeEventHandleFunc = void (*)(const TextChangeEventInfo&);
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
@@ -237,9 +246,11 @@ public:
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
     void SetHandleRouterPageChangeFuncForAni(RouterPageHandleFuncForAni func);
     using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
+    using WinSizeLayoutBreakpointHandleFunc = void (*)(int32_t instanceId, const WindowSizeBreakpoint& info);
     using DensityHandleFuncForAni = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(DensityHandleFunc func);
     void SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func);
+    void SetWinSizeLayoutBreakpointChangeFunc(WinSizeLayoutBreakpointHandleFunc func);
     void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
     void HandleLayoutDoneCallBack();
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
@@ -249,6 +260,7 @@ public:
     void SetDidClickFunc(DidClickHandleFunc func);
     void SetPanGestureHandleFunc(PanGestureHandleFunc func);
     void SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func);
+    void SetHandleTabChangeFunc(TabChangeHandleFunc func);
     void SetHandleGestureHandleFunc(GestureHandleFunc func);
 
     using BeforePanStartHandleFuncForAni = std::function<void()>;
@@ -274,12 +286,14 @@ private:
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
     DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
     DensityHandleFunc densityHandleFunc_ = nullptr;
+    WinSizeLayoutBreakpointHandleFunc winSizeLayoutBreakpointHandleFunc_ = nullptr;
     DensityHandleFuncForAni densityHandleFuncForAni_ = nullptr;
     NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
     WillClickHandleFunc willClickHandleFunc_ = nullptr;
     DidClickHandleFunc didClickHandleFunc_ = nullptr;
     PanGestureHandleFunc panGestureHandleFunc_ = nullptr;
     TabContentStateHandleFunc tabContentStateHandleFunc_ = nullptr;
+    TabChangeHandleFunc tabChangeHandleFunc_ = nullptr;
     GestureHandleFunc gestureHandleFunc_ = nullptr;
     TextChangeEventHandleFunc textChangeEventHandleFunc_ = nullptr;
 

@@ -74,7 +74,7 @@ ani_object DragEventGetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_
     auto unifiedData_obj = OHOS::UDMF::AniConverter::WrapUnifiedData(env, unifiedData);
     ani_boolean isUnifiedData;
     ani_class dataClass;
-    env->FindClass("L@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;", &dataClass);
+    env->FindClass("@ohos.data.unifiedDataChannel.unifiedDataChannel.UnifiedData", &dataClass);
     env->Object_InstanceOf(unifiedData_obj, dataClass, &isUnifiedData);
     if (!isUnifiedData) {
         return result_obj;
@@ -101,7 +101,7 @@ ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     auto summary_obj = OHOS::UDMF::AniConverter::WrapSummary(env, summary);
     ani_boolean isSummary;
     ani_class summaryClass;
-    env->FindClass("L@ohos/data/unifiedDataChannel/unifiedDataChannel/Summary;", &summaryClass);
+    env->FindClass("@ohos.data.unifiedDataChannel.unifiedDataChannel.Summary", &summaryClass);
     env->Object_InstanceOf(summary_obj, summaryClass, &isSummary);
     if (!isSummary) {
         return result_obj;
@@ -197,7 +197,7 @@ void DragSetAllowDropNull([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_ob
 }
 
 void DragSetAllowDrop([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_array_ref array, [[maybe_unused]] ani_int length)
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_array array, [[maybe_unused]] ani_int length)
 {
     auto* frameNode = reinterpret_cast<ArkUINodeHandle>(pointer);
     if (!frameNode || length < 0) {
@@ -216,7 +216,7 @@ void DragSetAllowDrop([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object
     const char** allowDrops = new const char* [length];
     std::vector<std::string> allowDropsSave(length);
     for (int i = 0; i < length; i++) {
-        if (ANI_OK == env->Array_Get_Ref(array, i, &ref)) {
+        if (ANI_OK == env->Array_Get(array, i, &ref)) {
             ani_string stringValue = static_cast<ani_string>(ref);
             std::string dataType = AniUtils::ANIStringToStdString(env, stringValue);
             allowDropsSave[i] = dataType;
@@ -284,7 +284,7 @@ ani_object CreateImagePeer(ani_env* env, void* ptr)
 {
     CHECK_NULL_RETURN(env, nullptr);
     CHECK_NULL_RETURN(ptr, nullptr);
-    static const char* className = "Larkui/component/image/ArkImagePeer;";
+    static const char* className = "arkui.component.image.ImageUtils";
     ani_status status;
     ani_class cls;
     status = env->FindClass(className, &cls);
@@ -294,7 +294,7 @@ ani_object CreateImagePeer(ani_env* env, void* ptr)
     }
     ani_ref imagePeer;
     status = env->Class_CallStaticMethodByName_Ref(cls, "createImagePeerFromPtr",
-        "J:Larkui/component/image/ArkImagePeer;", &imagePeer, reinterpret_cast<ani_long>(ptr));
+        "l:C{arkui.component.image.ArkImagePeer}", &imagePeer, reinterpret_cast<ani_long>(ptr));
     if (ANI_OK != status) {
         HILOGE("AceDrag: create ArkImagePeer failed  status = %{public}d", static_cast<int32_t>(status));
         return nullptr;
@@ -305,7 +305,7 @@ ani_object CreateImagePeer(ani_env* env, void* ptr)
 ani_object CreateImageModifier(ani_env* env)
 {
     CHECK_NULL_RETURN(env, nullptr);
-    static const char* className = "Larkui/ImageModifier/ImageModifier;";
+    static const char* className = "arkui.ImageModifier.ImageModifier";
     ani_class cls;
     ani_status status = env->FindClass(className, &cls);
     if (ANI_OK != status) {
@@ -313,7 +313,7 @@ ani_object CreateImageModifier(ani_env* env)
         return nullptr;
     }
     ani_method method;
-    status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+    status = env->Class_FindMethod(cls, "<ctor>", ":", &method);
     if (ANI_OK != status) {
         HILOGE("AceDrag: Find ImageModifier constructor failed  status = %{public}d", static_cast<int32_t>(status));
         return nullptr;
@@ -380,7 +380,7 @@ bool ParseDragPreviewMode(ani_env* env, ArkUIDragPreviewOption& previewOptions, 
         return true;
     }
     bool isAuto = false;
-    if (AniUtils::IsClassObject(env, modeObj, "Lescompat/Array;")) {
+    if (AniUtils::IsClassObject(env, modeObj, "escompat.Array")) {
         ani_size length;
         ani_array arrayObj = static_cast<ani_array>(modeObj);
         if (ANI_OK != env->Array_GetLength(arrayObj, &length)) {
@@ -390,7 +390,7 @@ bool ParseDragPreviewMode(ani_env* env, ArkUIDragPreviewOption& previewOptions, 
         for (int32_t i = 0; i < lengthInt; i++) {
             ani_ref modeRef;
             if (ANI_OK != env->Object_CallMethodByName_Ref(
-                modeObj, "$_get", "I:Lstd/core/Object;", &modeRef, (ani_int)i)) {
+                modeObj, "$_get", "i:C{std.core.Object}", &modeRef, (ani_int)i)) {
                 return false;
             }
             if (AniUtils::IsUndefined(env, static_cast<ani_object>(modeRef))) {
@@ -423,12 +423,12 @@ bool ParseDragPreviewModifier(ani_env* env, ArkUIDragPreviewOption& previewOptio
     env->Object_GetType(modifier, &type);
     ani_method modifierFunc;
     if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(type), "applyModifierPatch",
-        "Larkui/component/image/ArkImagePeer;:V", &modifierFunc)) {
+        "C{arkui.component.image.ArkImagePeer}:", &modifierFunc)) {
         return false;
     }
     ani_method mergeFunc;
     if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(type), "mergeModifier",
-        "Larkui/ImageModifier/ImageModifier;:V", &mergeFunc)) {
+        "C{arkui.ImageModifier.ImageModifier}:", &mergeFunc)) {
         return false;
     }
 
@@ -473,7 +473,7 @@ bool ParseNumberBadge(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_
     if (AniUtils::IsUndefined(env, numberBadgeObj)) {
         return true;
     }
-    if (AniUtils::IsClassObject(env, numberBadgeObj, "Lstd/core/Boolean;")) {
+    if (AniUtils::IsClassObject(env, numberBadgeObj, "std.core.Boolean")) {
         previewOptions.isNumber = false;
         ani_boolean aniValue;
         if (ANI_OK == env->Object_CallMethodByName_Boolean(numberBadgeObj, "unboxed", nullptr, &aniValue)) {
@@ -481,11 +481,11 @@ bool ParseNumberBadge(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_
         }
         return true;
     }
-    if (!AniUtils::IsClassObject(env, numberBadgeObj, "Lstd/core/Numeric;")) {
+    if (!AniUtils::IsClassObject(env, numberBadgeObj, "std.core.Numeric")) {
         return false;
     }
     ani_double numberValue;
-    if ((ANI_OK != env->Object_CallMethodByName_Double(numberBadgeObj, "unboxed", ":D", &numberValue))) {
+    if ((ANI_OK != env->Object_CallMethodByName_Double(numberBadgeObj, "unboxed", ":d", &numberValue))) {
         return false;
     }
     auto number = static_cast<double>(numberValue);
@@ -551,6 +551,10 @@ void SetPropertyValueByName(ani_env* env, ani_object obj, std::string name, bool
 void ParseDragInteractionOptions(ani_env* env, ArkUIDragPreviewOption& previewOptions,
     ani_object dragInteractionOptions)
 {
+    CHECK_NULL_VOID(env);
+    if (AniUtils::IsUndefined(env, dragInteractionOptions)) {
+        return;
+    }
     SetPropertyValueByName(env, dragInteractionOptions, "isMultiSelectionEnabled",
         previewOptions.isMultiSelectionEnabled);
     SetPropertyValueByName(env, dragInteractionOptions, "defaultAnimationBeforeLifting",

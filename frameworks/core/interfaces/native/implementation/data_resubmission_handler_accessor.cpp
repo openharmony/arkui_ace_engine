@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_DataResubmissionHandler peer)
 {
     delete peer;
 }
-Ark_DataResubmissionHandler CtorImpl()
+Ark_DataResubmissionHandler ConstructImpl()
 {
     return new DataResubmissionHandlerPeer();
 }
@@ -47,7 +47,7 @@ const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandler
 {
     static const GENERATED_ArkUIDataResubmissionHandlerAccessor DataResubmissionHandlerAccessorImpl {
         DataResubmissionHandlerAccessor::DestroyPeerImpl,
-        DataResubmissionHandlerAccessor::CtorImpl,
+        DataResubmissionHandlerAccessor::ConstructImpl,
         DataResubmissionHandlerAccessor::GetFinalizerImpl,
         DataResubmissionHandlerAccessor::ResendImpl,
         DataResubmissionHandlerAccessor::CancelImpl,

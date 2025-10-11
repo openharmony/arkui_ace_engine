@@ -63,6 +63,7 @@
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ime/text_input_client.h"
+#include "core/event/statusbar/statusbar_click_listener.h"
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
@@ -134,6 +135,7 @@ using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS:
 class WebPattern : public NestableScrollContainer,
                    public TextBase,
                    public Magnifier,
+                   public virtual StatusBarClickListener,
                    public Recorder::WebEventRecorder {
     DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase, Magnifier, Recorder::WebEventRecorder);
 
@@ -517,6 +519,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ImageAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MixedMode, MixedModeContent);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ZoomAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ZoomControlAccess, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GeolocationAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, UserAgent, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CacheMode, WebCacheMode);
@@ -572,8 +575,11 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BlankScreenDetectionConfig, BlankScreenDetectionConfig);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GestureFocusMode, GestureFocusMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, RotateRenderEffect, WebRotateEffect);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceEnableZoom, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackToTop, bool);
 
     bool IsFocus() const
     {
@@ -652,6 +658,7 @@ public:
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
     void UpdateOnFocusTextField(bool isFocus);
+    void UpdateTextFieldStatus(bool isShowKeyboard, bool isAttachIME);
     bool OnBackPressed() override;
     bool OnBackPressedForFullScreen() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
@@ -728,10 +735,13 @@ public:
     bool IsRootNeedExportTexture();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     bool Backward();
+    void OnBlankScreenDetectionConfigUpdate(const BlankScreenDetectionConfig &config);
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     void UpdateDataDetectorConfig(const TextDetectConfig& config);
+    void UpdateEnableSelectDataDetector(bool isEnabled);
+    void UpdateSelectedDataDetectorConfig(const TextDetectConfig& config);
     void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
     void CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,
@@ -898,6 +908,7 @@ public:
 
     bool GetDataDetectorEnable();
     void InitDataDetector();
+    void InitSelectDataDetector();
     void InitAIDetectResult();
     void CloseDataDetectorMenu();
 
@@ -933,6 +944,8 @@ public:
     void GetHandleInfo(SelectOverlayInfo& infoHandle);
     void HandleOnAIWrite();
     void WindowMaximize(WebWindowMaximizeReason reason);
+    void OnStatusBarClick() override;
+    void OnBackToTopUpdate(bool isBackToTop);
 
 protected:
     void ModifyWebSrc(const std::string& webSrc)
@@ -972,6 +985,7 @@ private:
     bool ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoardShowAvoidMenu(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard, bool isCustomKeyboard = false);
+    bool JudgeWebKeyBoardAvoidMode(bool safeAreaEnabled);
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate = true);
     bool UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double keyboard);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
@@ -1002,6 +1016,7 @@ private:
     void OnImageAccessEnabledUpdate(bool value);
     void OnMixedModeUpdate(MixedModeContent value);
     void OnZoomAccessEnabledUpdate(bool value);
+    void OnZoomControlAccessUpdate(bool zoomControlAccess);
     void OnGeolocationAccessEnabledUpdate(bool value);
     void OnUserAgentUpdate(const std::string& value);
     void OnCacheModeUpdate(WebCacheMode value);
@@ -1057,6 +1072,8 @@ private:
     void OnEnableFollowSystemFontWeightUpdate(bool value);
     void OnEnableDataDetectorUpdate(bool enable);
     void OnGestureFocusModeUpdate(GestureFocusMode mode);
+    void OnRotateRenderEffectUpdate(WebRotateEffect effect);
+    void WebRotateRenderEffect(WindowSizeChangeReason type);
     void OnForceEnableZoomUpdate(bool value);
 
     int GetWebId();
@@ -1275,6 +1292,8 @@ private:
     OnWebNativeMessageConnectCallback onWebNativeMessageConnectCallback_ = nullptr;
     OnWebNativeMessageDisConnectCallback onWebNativeMessageDisConnectCallback_ = nullptr;
     RenderMode renderMode_;
+    bool backToTop_ = true;
+    bool isBackToTopRunning_ = false;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
@@ -1476,6 +1495,7 @@ private:
     WebBypassVsyncCondition webBypassVsyncCondition_ = WebBypassVsyncCondition::NONE;
     bool needSetDefaultBackgroundColor_ = false;
     GestureFocusMode gestureFocusMode_ = GestureFocusMode::DEFAULT;
+    RenderFit renderFit_ = RenderFit::TOP_LEFT;
 
     RectF firstInfoHandle_;
     RectF secondInfoHandle_;

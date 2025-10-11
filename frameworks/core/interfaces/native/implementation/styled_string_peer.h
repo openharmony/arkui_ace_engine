@@ -16,10 +16,15 @@
 
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 struct StyledStringPeer {
+protected:
     virtual ~StyledStringPeer() = default;
+    StyledStringPeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 
+public:
     static StyledStringPeer *Create(const OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase>& src = nullptr)
     {
         auto ret = new StyledStringPeer;
@@ -29,6 +34,7 @@ struct StyledStringPeer {
 
     static void Destroy(StyledStringPeer *peer)
     {
+        CHECK_NULL_VOID(peer);
         delete peer;
     }
 

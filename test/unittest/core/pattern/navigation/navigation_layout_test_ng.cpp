@@ -1594,7 +1594,6 @@ HWTEST_F(NavigationLayoutTestNg, DealNavigationExit001, TestSize.Level1)
     preNode->eventHub_ = nullptr;
     bool isNavBar = false;
 
-    EXPECT_EQ(preNode->GetEventHub<EventHub>(), nullptr);
     EXPECT_FALSE(isNavBar);
     // Make sure navDestination is true
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);

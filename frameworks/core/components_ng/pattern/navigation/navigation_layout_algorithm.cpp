@@ -573,7 +573,8 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
             navigationPattern->OnNavBarStateChange(false);
             SwitchModeWithAnimation(AceType::DynamicCast<NavigationGroupNode>(navigationPattern->GetHost()));
         } else {
-            if (navigationPattern->IsHomeDestinationVisible()) {
+            bool isHomeDestinationOrNavBarVisible = navigationPattern->IsHomeDestinationOrNavBarVisible();
+            if (isHomeDestinationOrNavBarVisible) {
                 navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_SHOW, true);
                 navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_ACTIVE, true);
             } else {
@@ -582,6 +583,11 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
             }
             navigationPattern->OnNavBarStateChange(modeChange);
             navigationPattern->OnNavigationModeChange(modeChange);
+            if (modeChange) {
+                auto hostNode = AceType::DynamicCast<NavigationGroupNode>(navigationPattern->GetHost());
+                CHECK_NULL_VOID(hostNode);
+                hostNode->SetNeedSetInvisible(!isHomeDestinationOrNavBarVisible);
+            }
         }
     });
 }

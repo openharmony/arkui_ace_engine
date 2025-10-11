@@ -679,6 +679,37 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0037, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DrawableDescTest038
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layeredDrawableDescriptor and call SetMaskPath
+     * @tc.expected:return path.
+     */
+    std::unique_ptr<uint8_t[]> jsonBuf1;
+    std::unique_ptr<uint8_t[]> jsonBuf2;
+    size_t len = 0;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr;
+    std::string path = "path";
+    uint32_t iconType = 1;
+    uint32_t density = 2;
+    auto layeredDrawableDescriptor1 =
+        Napi::LayeredDrawableDescriptor(std::move(jsonBuf1), len, std::move(resourceMgr), path, iconType, density);
+    EXPECT_FALSE(layeredDrawableDescriptor1.foregroundOverBackground_);
+
+    auto layeredDrawableDescriptor2 = Napi::LayeredDrawableDescriptor(
+        std::move(jsonBuf1), len, std::move(resourceMgr), path, iconType, density, true);
+    EXPECT_TRUE(layeredDrawableDescriptor2.foregroundOverBackground_);
+
+    auto layeredDrawableDescriptor3 = Napi::LayeredDrawableDescriptor(
+        std::move(jsonBuf1), len, std::move(resourceMgr), path, iconType, density, false);
+    EXPECT_FALSE(layeredDrawableDescriptor3.foregroundOverBackground_);
+}
+
+/**
  * @tc.name: DrawableDescTestItem001
  * @tc.desc: test DrawableItem's member functions;
  * @tc.type: FUNC

@@ -32,8 +32,8 @@ RefPtr<FrameNode> UIExtensionStatic::CreateFrameNode(
     return frameNode;
 }
 
-void UIExtensionStatic::UpdateUecConfig(
-    FrameNode* frameNode, bool isTransferringCaller, bool densityDpi)
+void UIExtensionStatic::UpdateUecConfig(FrameNode* frameNode, bool isTransferringCaller, bool densityDpi,
+    bool isWindowModeFollowHost, const std::map<PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap)
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(frameNode->GetPattern());
@@ -43,6 +43,8 @@ void UIExtensionStatic::UpdateUecConfig(
         pattern->SetIsTransferringCaller(isTransferringCaller);
     }
     pattern->SetDensityDpi(densityDpi);
+    pattern->SetIsWindowModeFollowHost(isWindowModeFollowHost);
+    pattern->SetPlaceholderMap(placeholderMap);
 }
 
 void UIExtensionStatic::UpdateWant(FrameNode* frameNode, const AAFwk::Want& want)
@@ -106,5 +108,13 @@ void UIExtensionStatic::SetOnTerminated(FrameNode* frameNode,
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnTerminatedCallback(std::move(onTerminated));
+}
+
+void UIExtensionStatic::SetOnDrawReady(FrameNode* frameNode, std::function<void()>&& OnDrawReady)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnDrawReadyCallback(std::move(OnDrawReady));
 }
 } // namespace OHOS::Ace::NG

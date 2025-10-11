@@ -19,8 +19,6 @@
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
 #include "core/components_ng/pattern/shape/path_model_static.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
-
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -61,8 +59,7 @@ void SetPathOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opt = Converter::OptConvert<PathOptions>(*options);
+    auto opt = Converter::OptConvertPtr<PathOptions>(options);
     if (opt && opt->width) {
         ShapeAbstractModelNG::SetWidth(frameNode, *(opt->width));
     }
@@ -75,13 +72,12 @@ void SetPathOptionsImpl(Ark_NativePointer node,
 }
 } // PathInterfaceModifier
 namespace PathAttributeModifier {
-void CommandsImpl(Ark_NativePointer node,
-                  const Opt_String* value)
+void SetCommandsImpl(Ark_NativePointer node,
+                     const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<std::string>(*value);
+    auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
         PathModelNG::SetCommands(frameNode, "");
         return;
@@ -94,7 +90,7 @@ const GENERATED_ArkUIPathModifier* GetPathModifier()
     static const GENERATED_ArkUIPathModifier ArkUIPathModifierImpl {
         PathModifier::ConstructImpl,
         PathInterfaceModifier::SetPathOptionsImpl,
-        PathAttributeModifier::CommandsImpl,
+        PathAttributeModifier::SetCommandsImpl,
     };
     return &ArkUIPathModifierImpl;
 }

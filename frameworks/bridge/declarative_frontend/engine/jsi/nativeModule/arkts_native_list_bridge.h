@@ -73,6 +73,8 @@ public:
     static ArkUINativeModuleValue ResetSpace(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetInitialScroller(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetInitialScroller(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetScrollSnapAnimationSpeed(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue resetScrollSnapAnimationSpeed(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
     static ArkUINativeModuleValue SetOnScrollIndex(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static Local<panda::ObjectRef> SetListItemIndex(const EcmaVM* vm, const ListItemIndex indexInfo);

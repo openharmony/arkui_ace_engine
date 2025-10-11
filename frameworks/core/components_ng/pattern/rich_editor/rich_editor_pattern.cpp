@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,12 +29,6 @@
 #include <utility>
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#ifdef ANDROID_PLATFORM
-#include "adapter/android/capability/java/jni/editing/text_input_client_handler.h"
-#endif
-#ifdef IOS_PLATFORM
-#include "adapter/ios/capability/editing/text_input_client_handler.h"
-#endif
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
@@ -93,6 +87,10 @@
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
+#endif
+
+#ifdef CROSS_PLATFORM
+#include "core/common/ime/input_method_manager.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -182,12 +180,18 @@ RichEditorPattern::~RichEditorPattern()
     if (isCustomKeyboardAttached_) {
         CloseCustomKeyboard();
     }
-#ifdef CROSS_PLATFORM
-    if (HasConnection()) {
-        connection_->Close(GetInstanceId());
-        connection_ = nullptr;
-    }
-#endif
+}
+
+void RichEditorPattern::RecreateUndoManager()
+{
+    undoManager_ = RichEditorUndoManager::Create(isSpanStringMode_, WeakClaim(this));
+}
+
+void RichEditorPattern::CreateStyledString()
+{
+    CHECK_NULL_VOID(isSpanStringMode_);
+    styledString_ = MakeRefPtr<MutableSpanString>(u"");
+    styledString_->SetSpanWatcher(WeakClaim(this));
 }
 
 void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
@@ -2174,6 +2178,7 @@ UpdateSpanStyle RichEditorPattern::GetUpdateSpanStyle()
 
 void RichEditorPattern::MarkAISpanStyleChanged()
 {
+    dataDetectorAdapter_->aiSpanMap_.clear();
     std::for_each(spans_.begin(), spans_.end(), [](const auto& span) {
         if (span->aiSpanResultCount != 0) {
             span->needReLayout = true;
@@ -3672,12 +3677,6 @@ void RichEditorPattern::HandleBlurEvent()
         ResetSelection();
         CloseKeyboard(false);
     }
-#ifdef ANDROID_PLATFORM
-    if (HasConnection()) {
-        connection_->Close(GetInstanceId());
-        connection_ = nullptr;
-    }
-#endif
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -3811,10 +3810,14 @@ bool RichEditorPattern::CloseKeyboard(bool forceClose)
     imeAttached_ = false;
 #endif
 #else
+#ifdef CROSS_PLATFORM
+    InputMethodManager::GetInstance()->CloseKeyboard(GetInstanceId());
+#else
     if (HasConnection()) {
         connection_->Close(GetInstanceId());
         connection_ = nullptr;
     }
+#endif
 #endif
     return true;
 }
@@ -5221,6 +5224,24 @@ bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartT
     return true;
 }
 
+IMEClient RichEditorPattern::GetIMEClientInfo()
+{
+    IMEClient clientInfo;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, clientInfo);
+    clientInfo.nodeId = host->GetId();
+    return clientInfo;
+}
+
+void RichEditorPattern::FireOnWillAttachIME(IMEClient& imeClient)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnWillAttachIME(imeClient);
+}
+
 #if defined(ENABLE_STANDARD_INPUT)
 #ifdef WINDOW_SCENE_SUPPORTED
 uint32_t RichEditorPattern::GetSCBSystemWindowId()
@@ -5265,6 +5286,7 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard, SourceTyp
     attachOptions.isShowKeyboard = needShowSoftKeyboard;
     attachOptions.requestKeyboardReason =
         static_cast<OHOS::MiscServices::RequestKeyboardReason>(static_cast<int32_t>(sourceType));
+    BeforeAttachInputMethod(textconfig);
     auto ret = inputMethod->Attach(richEditTextChangeListener_, attachOptions, textconfig);
     if (ret == MiscServices::ErrorCode::NO_ERROR) {
         std::unordered_map<std::string, MiscServices::PrivateDataValue> privateCommand;
@@ -5356,14 +5378,25 @@ float RichEditorPattern::CalcCursorHeight(float& caretHeight)
     return caretHeight;
 }
 
+void RichEditorPattern::BeforeAttachInputMethod(MiscServices::TextConfig& textConfig)
+{
+    auto clientInfo = GetIMEClientInfo();
+    FireOnWillAttachIME(clientInfo);
+    CHECK_NULL_VOID(clientInfo.extraInfo && clientInfo.extraInfo->GetExtraInfo());
+    textConfig.inputAttribute.extraConfig =
+        *reinterpret_cast<MiscServices::ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
+}
+
 #else
 bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
 {
+#ifdef CROSS_PLATFORM
+    return UnableStandardInputCrossPlatform(isFocusViewChanged);
+#endif
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
-#ifndef CROSS_PLATFORM
     if (HasConnection()) {
         connection_->Show(isFocusViewChanged, GetInstanceId());
         return true;
@@ -5372,12 +5405,6 @@ bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
     config.type = TextInputType::UNSPECIFIED;
     config.action = TextInputAction::DONE;
     config.obscureText = false;
-#else
-    TextInputConfiguration config;
-    if (UnableStandardInputCrossPlatform(config, isFocusViewChanged)) {
-        return true;
-    }
-#endif
     connection_ =
         TextInputProxy::GetInstance().Attach(WeakClaim(this), config, context->GetTaskExecutor(), GetInstanceId());
     if (!HasConnection()) {
@@ -5402,29 +5429,36 @@ bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
 }
 #endif
 #ifdef CROSS_PLATFORM
-bool RichEditorPattern::UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged)
+bool RichEditorPattern::UnableStandardInputCrossPlatform(bool isFocusViewChanged)
 {
-#ifdef ANDROID_PLATFORM
-    if (HasConnection()) {
-        auto isCurrentClient = Platform::TextInputClientHandler::GetInstance().ConnectionIsCurrent(GetInstanceId(),
-            AceType::RawPtr(connection_));
-        if (!isCurrentClient) {
-            connection_ = nullptr;
-        }
-    }
-#endif
-    if (HasConnection()) {
-#ifdef IOS_PLATFORM
-        Platform::TextInputClientHandler::GetInstance().SetCurrentConnection(connection_);
-#endif
-        connection_->Show(isFocusViewChanged, GetInstanceId());
-        return true;
-    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    TextInputConfiguration config;
     config.type = TextInputType::UNSPECIFIED;
     config.action = GetTextInputActionValue(GetDefaultTextInputAction());
     config.maxLength = maxLength_.value_or(INT_MAX);
     config.obscureText = false;
-    return false;
+    auto inputMethodManager = InputMethodManager::GetInstance();
+    CHECK_NULL_RETURN(inputMethodManager, false);
+    inputMethodManager->Attach(WeakClaim(this), config, context->GetTaskExecutor(), GetInstanceId());
+    TextEditingValue value;
+    if (spans_.empty()) {
+        value.text = UtfUtils::Str16ToStr8(textForDisplay_);
+    } else {
+        for (auto it = spans_.begin(); it != spans_.end(); it++) {
+            if ((*it)->placeholderIndex < 0) {
+                value.text.append(UtfUtils::Str16ToStr8((*it)->content));
+            } else {
+                value.text.append(" ");
+            }
+        }
+    }
+    value.selection.Update(caretPosition_, caretPosition_);
+    inputMethodManager->SetEditingState(value, GetInstanceId());
+    inputMethodManager->ShowKeyboard(isFocusViewChanged, GetInstanceId());
+    return true;
 }
 #endif
 
@@ -5546,6 +5580,13 @@ void RichEditorPattern::UpdateCaretInfoToController()
         cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height, caretPosition_,
         text.length(), start, end);
 #else
+#ifdef CROSS_PLATFORM
+    TextEditingValue editingValue;
+    editingValue.text = UtfUtils::Str16ToStr8(text);
+    editingValue.hint = "";
+    editingValue.selection.Update(start, end);
+    InputMethodManager::GetInstance()->SetEditingState(editingValue, GetInstanceId());
+#else
     if (HasConnection()) {
         TextEditingValue editingValue;
         editingValue.text = UtfUtils::Str16ToStr8(text);
@@ -5553,6 +5594,7 @@ void RichEditorPattern::UpdateCaretInfoToController()
         editingValue.selection.Update(start, end);
         connection_->SetEditingState(editingValue, GetInstanceId());
     }
+#endif
 #endif
 }
 
@@ -5580,10 +5622,14 @@ bool RichEditorPattern::RequestCustomKeyboard()
         inputMethod->Close();
     }
 #else
+#ifdef CROSS_PLATFORM
+    InputMethodManager::GetInstance()->CloseKeyboard(GetInstanceId());
+#else
     if (HasConnection()) {
         connection_->Close(GetInstanceId());
         connection_ = nullptr;
     }
+#endif
 #endif
 
     if (isCustomKeyboardAttached_) {
@@ -8423,7 +8469,7 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
     }
     auto lastCaretPosY = GetLastCaretPos();
     auto caretPosY = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
-    if (lastCaretPosY.has_value() && caretPosY > lastCaretPosY.value() && !CheckIfNeedAvoidOnCaretChange(caretPosY)
+    if (lastCaretPosY.has_value() && caretPosY < lastCaretPosY.value() && !CheckIfNeedAvoidOnCaretChange(caretPosY)
         && !isTriggerAvoidOnCaretAvoidMode_) {
         return;
     }
@@ -8496,6 +8542,7 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, T
     auto selectType = selectedType_.value_or(TextSpanType::NONE);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "textSpanType=%{public}d, responseType=%{public}d", selectType, responseType);
     std::shared_ptr<SelectionMenuParams> menuParams = GetMenuParams(selectType, responseType);
+    IF_TRUE(!menuParams, selectInfo.menuInfo.menuBuilder = nullptr);
     CHECK_NULL_VOID(menuParams);
 
     // long pressing on the image needs to set the position of the pop-up menu following the long pressing position
@@ -10620,6 +10667,7 @@ void RichEditorPattern::HandleOnCameraInput()
             textConfig.windowId = systemWindowId;
         }
 #endif
+        BeforeAttachInputMethod(textConfig);
         auto ret = inputMethod->Attach(richEditTextChangeListener_, false, textConfig);
         if (ret == MiscServices::ErrorCode::NO_ERROR) {
             auto pipeline = GetContext();
@@ -11203,10 +11251,6 @@ void RichEditorPattern::StopEditing()
 {
     CHECK_NULL_VOID(HasFocus());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "StopEditing");
-
-#ifdef IOS_PLATFORM
-    CloseKeyboard(false);
-#endif
     // In order to avoid the physical keyboard being able to type, you need to make sure that you lose focus
     FocusHub::LostFocusToViewRoot();
 }
@@ -11511,7 +11555,8 @@ void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info, int textIn
         info.SetOffsetInSpan(0);
         return;
     }
-    if ((*it)->content.back() == '\n' && (*it)->position == textIndex) { // next line/span begin
+    // next line/span begin
+    if (!(*it)->content.empty() && (*it)->content.back() == '\n' && (*it)->position == textIndex) {
         info.SetSpanIndex(std::distance(spans_.begin(), it) + 1);
         info.SetOffsetInSpan(0);
     } else {

@@ -1093,13 +1093,20 @@ void SetBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPt
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!SystemProperties::ConfigChangePerform() || !bgColorRawPtr) {
-        ViewAbstract::SetBackgroundColor(frameNode, Color(color));
-    } else {
-        auto* bgColor = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
-        auto backgroundColorResObj = AceType::Claim(bgColor);
-        ViewAbstract::SetBackgroundColor(frameNode, Color(color), backgroundColorResObj);
+    Color result = Color(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!bgColorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(bgColorRawPtr));
+        }
+        if (resObj) {
+            ViewAbstract::SetBackgroundColor(frameNode, result, resObj);
+            return;
+        }
     }
+    ViewAbstract::SetBackgroundColor(frameNode, result);
 }
 
 void SetBackgroundColorWithColorSpace(
@@ -1527,6 +1534,14 @@ void SetBorderColor(
     borderColors.multiValued = true;
     if (SystemProperties::ConfigChangePerform() && rawPtr) {
         auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
+        if (objs.empty()) {
+            objs.resize(NUM_4);
+            auto tag = frameNode->GetTag();
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_0], borderColors.topColor.value(), tag);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_1], borderColors.rightColor.value(), tag);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_2], borderColors.bottomColor.value(), tag);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_3], borderColors.leftColor.value(), tag);
+        }
         ParseBorderColor(borderColors, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
     }
 
@@ -5083,7 +5098,7 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::RemoveResObj(frameNode, "backgroundEffect");
     CalcDimension radius;
-    radius = CalcDimension(radiusArg, DimensionUnit::VP);
+    radius.SetValue(radiusArg);
     Color color(colorArg);
     BlurOption blurOption;
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
@@ -6716,13 +6731,14 @@ void CheckOuterBorderColorResObj(NG::BorderColorProperty& borderColors, RefPtr<R
 }
 
 void ProcessOptionalColorResources(FrameNode* frameNode, 
-    const std::optional<Color>& color, std::vector<RefPtr<ResourceObject>>& vectorResObj)
+    std::optional<Color>& color, std::vector<RefPtr<ResourceObject>>& vectorResObj)
 {
     if (color.has_value()) {
         RefPtr<ResourceObject> colorResObj;
         auto colorVal = color.value();
         ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, colorVal,
             frameNode->GetTag());
+        color = colorVal;
         vectorResObj.emplace_back(colorResObj);
     } else {
         vectorResObj.emplace_back(nullptr);
@@ -7939,7 +7955,7 @@ void ResetBias(ArkUINodeHandle node)
 }
 void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
     std::vector<double> ratioList(values, values + size);
@@ -8910,29 +8926,35 @@ void CreateClonedTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUIT
 
 void SetOnFocusExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onFocus = [node, eventReceiver]() {
-        eventReceiver(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onFocus = [node = AceType::WeakClaim(frameNode), eventReceiver]() {
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle);
     };
     ViewAbstract::SetOnFocus(reinterpret_cast<FrameNode*>(node), std::move(onFocus));
 }
 
 void SetOnBlurExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onBlur = [node, eventReceiver]() {
-        eventReceiver(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onBlur = [node = AceType::WeakClaim(frameNode), eventReceiver]() {
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle);
     };
     ViewAbstract::SetOnBlur(reinterpret_cast<FrameNode*>(node), std::move(onBlur));
 }
 
 void SetOnTouchExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onTouch = [node, eventReceiver](TouchEventInfo& eventInfo) {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onTouch = [node = AceType::WeakClaim(frameNode), eventReceiver](TouchEventInfo& eventInfo) {
         ArkUINodeEvent event;
         auto target = eventInfo.GetTarget();
         event.touchEvent.target.id = target.id.c_str();
@@ -8942,41 +8964,53 @@ void SetOnTouchExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle n
             TouchLocationInfo front = changeTouch.front();
             event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
         }
-        eventReceiver(node, event);
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle, event);
     };
     ViewAbstract::SetOnTouch(reinterpret_cast<FrameNode*>(node), std::move(onTouch));
 }
 
 void SetOnHoverExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isHover))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onHover = [node, eventReceiver](bool isHover, HoverInfo& info) {
-        eventReceiver(node, isHover);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onHover = [node = AceType::WeakClaim(frameNode), eventReceiver](bool isHover, HoverInfo& info) {
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle, isHover);
     };
     ViewAbstract::SetOnHover(reinterpret_cast<FrameNode*>(node), std::move(onHover));
 }
 
 void SetOnHoverMoveExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onHoverMove = [node, eventReceiver](HoverInfo& info) {
-        eventReceiver(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onHoverMove = [node = AceType::WeakClaim(frameNode), eventReceiver](HoverInfo& info) {
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle);
     };
     ViewAbstract::SetOnHoverMove(reinterpret_cast<FrameNode*>(node), std::move(onHoverMove));
 }
 
 void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isOn))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onChange = [node, eventReceiver](const bool isOn) {
-        eventReceiver(node, isOn);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [node = AceType::WeakClaim(frameNode), eventReceiver](const bool isOn) {
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle, isOn);
     };
-    if (uiNode->GetTag() == V2::SWITCH_ETS_TAG) {
+    if (frameNode->GetTag() == V2::SWITCH_ETS_TAG) {
         ToggleModelNG::OnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
-    } else if (uiNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
+    } else if (frameNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
         CheckBoxModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
     } else {
         RadioModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
@@ -8985,9 +9019,9 @@ void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
 
 void SetOnClickExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onClick = [node, eventReceiver](GestureEvent& info) {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onClick = [node = AceType::WeakClaim(frameNode), eventReceiver](GestureEvent& info) {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.componentAsyncEvent.subKind = ON_CLICK;
@@ -9018,11 +9052,14 @@ void SetOnClickExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle n
         event.componentAsyncEvent.data[6].f32 = screenOffset.GetX();
         // displayY
         event.componentAsyncEvent.data[7].f32 = screenOffset.GetY();
-        eventReceiver(node, event);
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle, event);
     };
-    if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
-        SpanModelNG::SetOnClick(uiNode, std::move(onClick));
-    } else if (uiNode->GetTag() == V2::TEXT_ETS_TAG) {
+    if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
+        SpanModelNG::SetOnClick(frameNode, std::move(onClick));
+    } else if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
         TextModelNG::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onClick));
     }  else {
         ViewAbstract::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onClick));
@@ -9072,7 +9109,10 @@ void SetOnAppearExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onAppear = [node, weak = AceType::WeakClaim(frameNode), eventReceiver]() {
-        eventReceiver(node);
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        eventReceiver(nodeHandle);
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
 }
@@ -10925,7 +10965,7 @@ void SetOnBlur(ArkUINodeHandle node, void* extraParam)
 
 void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
     auto onAreaChanged = [nodeId, node = AceType::WeakClaim(frameNode), extraParam](
@@ -11841,12 +11881,36 @@ void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.axisEvent.targetDisplayId = info.GetTargetDisplayId();
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         event.axisEvent.deviceId = info.GetDeviceId();
+        event.axisEvent.axes = info.GetAxes();
 
         SetOnAxisInfo(event, info, usePx);
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(!event.axisEvent.propagation);
     };
     ViewAbstract::SetOnAxisEvent(frameNode, onEvent);
+}
+
+void SetOnCoastingAxisEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](CoastingAxisInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = COASTING_AXIS_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.coastingAxisEvent.subKind = ON_COASTING_AXIS_EVENT;
+        event.coastingAxisEvent.phase = static_cast<int32_t>(info.GetPhase());
+        event.coastingAxisEvent.timeStamp = static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count());
+        event.coastingAxisEvent.deltaY = static_cast<float>(info.GetVerticalAxis());
+        event.coastingAxisEvent.deltaX = static_cast<float>(info.GetHorizontalAxis());
+        event.coastingAxisEvent.stopPropagation = info.IsStopPropagation();
+
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.coastingAxisEvent.stopPropagation);
+    };
+    ViewAbstract::SetOnCoastingAxisEvent(frameNode, onEvent);
 }
 
 void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
@@ -11911,14 +11975,14 @@ void ResetOnBlur(ArkUINodeHandle node)
 
 void ResetOnAreaChange(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ResetAreaChanged(frameNode);
 }
 
 void ResetOnVisibleAreaChange(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ResetVisibleChange(frameNode);
 }
@@ -11988,6 +12052,13 @@ void ResetOnAxisEvent(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::DisableOnAxisEvent(frameNode);
+}
+
+void ResetOnCoastingAxisEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnCoastingAxisEvent(frameNode);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

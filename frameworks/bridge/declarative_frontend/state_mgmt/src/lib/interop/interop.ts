@@ -59,10 +59,19 @@ class SubscribeInterop implements ISinglePropertyChangeSubscriber<Object>{
 type setValue<T> = (value: T) => void;
 type WatchFuncType = (propertyName: string) => void;
 
-function createStateVariable<T>(value: T, callback: setValue<T>): ObservedPropertyPU<T> {
+function createStateVariable<T>(value: T, setValueCallback: setValue<T>, notifyCallback: () => void): ObservedPropertyPU<T> {
     const proxy = new ObservedPropertyPU(value, undefined, 'proxy');
-    proxy._setInteropValueForStaticState = callback;
+    proxy._setInteropValueForStaticState = setValueCallback;
+    proxy._notifyInteropFireChange = notifyCallback;
     return proxy;
+}
+
+function updateSetValueCallback(observedProperty, setValueCallback): void {
+    observedProperty._setInteropValueForStaticState = setValueCallback;
+}
+
+function updateNotifyCallback(observedProperty, notifyCallback): void {
+    observedProperty._notifyInteropFireChange = notifyCallback;
 }
 
 function resetViewPUFindProvideInterop(): void {
@@ -89,16 +98,20 @@ function resetViewPUFindLocalStorageInterop(): void {
     ViewPU._resetFindLocalStorage_ViewPU_Interop();
 }
 
-function openInterop(): void {
-    InteropConfigureStateMgmt.instance.openInterop();
-}
-
-function closeInterop(): void {
-    InteropConfigureStateMgmt.instance.closeInterop();
-}
-
 function viewPUCreate(component: ViewPU): void {
     ViewPU.create(component);
+}
+
+function viewV2Create(component: ViewV2): void {
+    ViewV2.create(component);
+}
+
+function getRawObjectForInterop(value: Object): Object {
+    if ((Array.isArray(value) || value instanceof Set || value instanceof Date || value instanceof Map) &&
+        ObservedObject.IsObservedObject(value)) {
+        return ObservedObject.GetRawObject(value);
+    }
+    return value;
 }
 
 function staticStateBindObservedObject(value: Object, staticCallback: () => void): Object {
@@ -110,30 +123,41 @@ function staticStateBindObservedObject(value: Object, staticCallback: () => void
     return value;
 }
 
-function registerCallbackForCreateWatchID(callback: () => any): void {
-    InteropExtractorModule.createWatchFunc = callback;
+function __Interop_CreateStaticComponent_Internal(
+    factory: () => Object,
+    options?: () => Object,
+    content?: () => void
+): [() => void, number] {
+    if (InteropExtractorModule.compatibleStaticComponent === undefined) {
+        throw new Error('Non Method For Create StaticComponent');
+    }
+    return InteropExtractorModule.compatibleStaticComponent(factory, options, content);
 }
 
-function registerCallbackForMakeObserved(callback: (value: Object) => Object): void {
-    InteropExtractorModule.makeObserved = callback;
+function __Interop_UpdateInteropExtendableComponent_Internal(dynamicComponent: Object): void {
+    if (InteropExtractorModule.updateInteropExtendableComponent === undefined) {
+        throw new Error('Non Method For update InteropExtendableComponent');
+    }
+    return InteropExtractorModule.updateInteropExtendableComponent(dynamicComponent);
 }
 
-/**
- * 
- * @param staticBuilder ArkTS1.2builder, return the pointer of PeerNode
- * @returns  Creates a dynamic builder function that wraps a static builder
- */
-function createDynamicBuilder(
-    staticBuilder: (...args: any[]) => number
-): (...args: any[]) => void {
-    let func = function (...args: any[]): void {
-        this.observeComponentCreation2((elmtId: number, isInitialRender: boolean) => {
-            if (isInitialRender) {
-                let pointer = staticBuilder(...args);
-                ViewStackProcessor.push(pointer);
-            }
-        }, {});
-        ViewStackProcessor.pop();
-    };
-    return func;
+function __Interop_ResetInteropExtendableComponent_Internal(): void {
+    if (InteropExtractorModule.resetInteropExtendableComponent === undefined) {
+        throw new Error('Non Method For reset InteropExtendableComponent');
+    }
+    return InteropExtractorModule.resetInteropExtendableComponent();
+}
+
+function __Interop_TransferCompatibleBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleBuilder === undefined) {
+        throw new Error("Non Method For Transfer CompatibleBuilder");
+    }
+    return InteropExtractorModule.transferCompatibleBuilder(builder);
+}
+
+function __Interop_transferCompatibleDynamicBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder === undefined) {
+        throw new Error("Non Method For Transfer Compatible Dynamic Builder");
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder(builder);
 }

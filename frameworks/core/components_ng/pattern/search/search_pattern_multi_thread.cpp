@@ -43,6 +43,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TEXTFIELD_INDEX = 0;
 constexpr float MAX_FONT_SCALE = 2.0f;
+constexpr int32_t DIVIDER_INDEX = 5;
 
 void InitSearchMaxFontScale(const RefPtr<FrameNode>& frameNode)
 {
@@ -67,6 +68,36 @@ void SearchPattern::OnAttachToMainTreeMultiThread()
         processTextFieldDefaultStyleAndBehaviorsMultiThread_ = false;
         ProcessTextFieldDefaultStyleAndBehaviorsMultiThread();
     }
+    if (processDividerDefaultStyleAndBehaviorsMultiThread_) {
+        processDividerDefaultStyleAndBehaviorsMultiThread_ = false;
+        ProcessDividerDefaultStyleAndBehaviorsMultiThread();
+    }
+}
+
+void SearchPattern::ProcessDividerDefaultStyleAndBehaviors()
+{
+    processDividerDefaultStyleAndBehaviorsMultiThread_ = true;
+}
+
+void SearchPattern::ProcessDividerDefaultStyleAndBehaviorsMultiThread()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto dividerNode = DynamicCast<FrameNode>(host->GetChildAtIndex(DIVIDER_INDEX));
+    CHECK_NULL_VOID(dividerNode);
+    auto pipeline = dividerNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    auto searchDividerColor = searchTheme->GetSearchDividerColor();
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    dividerRenderProperty->UpdateDividerColor(searchDividerColor);
+    auto searchDividerWidth = Dimension(searchTheme->GetSearchDividerWidth().ConvertToPx());
+    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_VOID(dividerLayoutProperty);
+    dividerLayoutProperty->UpdateVertical(true);
+    dividerLayoutProperty->UpdateStrokeWidth(searchDividerWidth);
 }
 
 void SearchPattern::ProcessTextFieldDefaultStyleAndBehaviors()
@@ -91,12 +122,20 @@ void SearchPattern::ProcessTextFieldDefaultStyleAndBehaviorsMultiThread()
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);
     auto colorMode = pipeline->GetColorMode();
+    pattern->InitSurfaceChangedCallback();
+    pattern->RegisterWindowSizeCallback();
+    pattern->SetTextFadeoutCapacity(true);
+    pattern->InitSurfacePositionChangedCallback();
     pattern->SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
-    textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
-    textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
+    if (!textFieldPaintProperty->HasCaretColorFlagByUser()) {
+        textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+    }
+    if (!textFieldPaintProperty->HasCursorWidth()) {
+        textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
+    }
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     InitSearchMaxFontScale(frameNode);
 }

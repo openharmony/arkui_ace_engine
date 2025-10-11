@@ -1124,7 +1124,7 @@ void HandleSrcResource(const RefPtr<ResourceObject>& resObj, const RefPtr<ImageP
         std::string src =
             ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetMediaPath(resObj->GetId());
         auto params = resObj->GetParams();
-        if (src.empty() && params.size()) {
+        if (src.empty() && params.size() && params[0].value.has_value()) {
             if (resObj->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
                 src = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetRawfile(
                     params[0].value.value());
@@ -1153,7 +1153,7 @@ void HandleAltResource(const RefPtr<ResourceObject>& resObj, const RefPtr<ImageP
         std::string src =
             ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetMediaPath(resObj->GetId());
         auto params = resObj->GetParams();
-        if (src.empty() && params.size()) {
+        if (src.empty() && params.size() && params[0].value.has_value()) {
             if (resObj->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
                 src = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetRawfile(
                     params[0].value.value());
@@ -1211,8 +1211,8 @@ void HandleBorderRadiusResource(const RefPtr<ResourceObject>& resObj, const RefP
             BorderRadiusProperty borderRadius;
             borderRadius.SetRadius(borderRadiusValue);
             borderRadius.multiValued = false;
-            ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true);
-            ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, BorderRadius, borderRadius);
+            ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true, frameNode);
+            ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, BorderRadius, borderRadius, frameNode);
             pattern->SetNeedBorderRadius(true);
         }
     };
@@ -1300,6 +1300,107 @@ ContentTransitionType ImageModelNG::GetContentTransition(FrameNode* frameNode)
     CHECK_NULL_RETURN(paintProperty, ContentTransitionType::IDENTITY);
     CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), ContentTransitionType::IDENTITY);
     return paintProperty->GetImagePaintStyle()->GetContentTransition().value_or(ContentTransitionType::IDENTITY);
+}
+
+void ImageModelNG::SetAltError(const ImageSourceInfo& src)
+{
+    if (ImageSourceInfo::ResolveURIType(src.GetSrc()) == SrcType::NETWORK) {
+        ImageSourceInfo defaultSrcInfo("");
+        ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, AltError, defaultSrcInfo);
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, AltError, src);
+}
+
+void ImageModelNG::SetAltError(FrameNode* frameNode, const ImageSourceInfo& src)
+{
+    if (ImageSourceInfo::ResolveURIType(src.GetSrc()) == SrcType::NETWORK) {
+        ImageSourceInfo defaultSrcInfo("");
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltError, defaultSrcInfo, frameNode);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltError, src, frameNode);
+}
+
+void ImageModelNG::SetAltErrorResource(FrameNode* frameNode, void* resource)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto res = reinterpret_cast<ArkUI_Resource*>(resource);
+    CHECK_NULL_VOID(res);
+    RefPtr<PixelMap> pixMapPtr = nullptr;
+    auto srcInfo = CreateSourceInfo(res->src, pixMapPtr, res->bundleName, res->moduleName);
+    srcInfo.SetIsUriPureNumber(res->resId == -1);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltError, srcInfo, frameNode);
+}
+
+void ImageModelNG::SetAltErrorPixelMap(FrameNode* frameNode, void* pixelMap)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(pixelMap);
+#ifndef ACE_UNITTEST
+    RefPtr<PixelMap> pixelMapPtr = PixelMap::GetFromDrawable(pixelMap);
+    auto srcInfo = CreateSourceInfo("", pixelMapPtr, "", "");
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltError, srcInfo, frameNode);
+#endif
+}
+
+ImageSourceInfo ImageModelNG::GetAltError(FrameNode* frameNode)
+{
+    ImageSourceInfo defaultImageSourceInfo;
+    CHECK_NULL_RETURN(frameNode, defaultImageSourceInfo);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultImageSourceInfo);
+    return layoutProperty->GetAltError().value_or(defaultImageSourceInfo);
+}
+
+void ImageModelNG::SetAltPlaceholder(const ImageSourceInfo& src)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, AltPlaceholder, src);
+}
+
+void ImageModelNG::SetAltPlaceholder(FrameNode* frameNode, const ImageSourceInfo& src)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltPlaceholder, src, frameNode);
+}
+
+void ImageModelNG::SetAltPlaceholderResource(FrameNode* frameNode, void* resource)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto res = reinterpret_cast<ArkUI_Resource*>(resource);
+    CHECK_NULL_VOID(res);
+    RefPtr<PixelMap> pixMapPtr = nullptr;
+    auto srcInfo = CreateSourceInfo(res->src, pixMapPtr, res->bundleName, res->moduleName);
+    srcInfo.SetIsUriPureNumber(res->resId == -1);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltPlaceholder, srcInfo, frameNode);
+}
+
+void ImageModelNG::SetAltPlaceholderPixelMap(FrameNode* frameNode, void* pixelMap)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(pixelMap);
+#ifndef ACE_UNITTEST
+    RefPtr<PixelMap> pixelMapPtr = PixelMap::GetFromDrawable(pixelMap);
+    auto srcInfo = CreateSourceInfo("", pixelMapPtr, "", "");
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltPlaceholder, srcInfo, frameNode);
+#endif
+}
+
+ImageSourceInfo ImageModelNG::GetAltPlaceholder(FrameNode* frameNode)
+{
+    ImageSourceInfo defaultImageSourceInfo;
+    CHECK_NULL_RETURN(frameNode, defaultImageSourceInfo);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultImageSourceInfo);
+    return layoutProperty->GetAltPlaceholder().value_or(defaultImageSourceInfo);
+}
+
+void ImageModelNG::ResetImageAltError(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ImageSourceInfo sourceInfo("");
+    sourceInfo.SetIsFromReset(true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltError, sourceInfo, frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetAltImageError();
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

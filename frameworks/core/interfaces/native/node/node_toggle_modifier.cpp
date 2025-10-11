@@ -14,6 +14,7 @@
  */
 #include "node_toggle_modifier.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
@@ -65,14 +66,19 @@ void SetToggleSelectedColor(ArkUINodeHandle node, ArkUI_Uint32 selectedColor)
 void SetToggleSelectedColorPtr(ArkUINodeHandle node, ArkUI_Uint32 selectedColor, void* colorRawPtr)
 {
     CHECK_NULL_VOID(node);
-    SetToggleSelectedColor(node, selectedColor);
+    Color result = Color(selectedColor);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleColorType::SELECTED_COLOR, colorResObj);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleColorType::SELECTED_COLOR, resObj);
     }
+    SetToggleSelectedColor(node, result.GetValue());
 }
 
 void ResetToggleSelectedColor(ArkUINodeHandle node)
@@ -97,14 +103,19 @@ void SetToggleSwitchPointColor(ArkUINodeHandle node, ArkUI_Uint32 switchPointCol
 void SetToggleSwitchPointColorPtr(ArkUINodeHandle node, ArkUI_Uint32 switchPointColor, void* colorRawPtr)
 {
     CHECK_NULL_VOID(node);
-    SetToggleSwitchPointColor(node, switchPointColor);
+    Color result = Color(switchPointColor);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleColorType::SWITCH_POINT_COLOR, colorResObj);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleColorType::SWITCH_POINT_COLOR, resObj);
     }
+    SetToggleSwitchPointColor(node, result.GetValue());
 }
 
 void ResetToggleSwitchPointColor(ArkUINodeHandle node)
@@ -341,14 +352,19 @@ void SetToggleUnselectedColor(ArkUINodeHandle node, ArkUI_Uint32 unselectedColor
 void SetToggleUnselectedColorPtr(ArkUINodeHandle node, ArkUI_Uint32 unselectedColor, void* colorRawPtr)
 {
     CHECK_NULL_VOID(node);
-    SetToggleUnselectedColor(node, unselectedColor);
+    Color result = Color(unselectedColor);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleColorType::UN_SELECTED_COLOR, colorResObj);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleColorType::UN_SELECTED_COLOR, resObj);
     }
+    SetToggleUnselectedColor(node, result.GetValue());
 }
 
 void ResetToggleUnselectedColor(ArkUINodeHandle node)

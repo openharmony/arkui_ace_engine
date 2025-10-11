@@ -41,7 +41,7 @@ public:
  * @tc.desc: Test AddForm() funtion.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_001, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_001, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_001 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_001");
@@ -65,7 +65,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_001, TestSize.Level1)
  * @tc.desc: Test OnUnlock() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_002, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_002, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_002 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_002");
@@ -81,7 +81,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_002, TestSize.Level1)
  * @tc.desc: Test UpdateForm() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_003, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_003, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_003 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_003");
@@ -102,7 +102,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_003, TestSize.Level1)
  * @tc.desc: Test DeleteForm() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_004, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_004, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_004 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_004");
@@ -119,7 +119,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_004, TestSize.Level1)
  * @tc.desc: Test DeleteForm() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_005, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_005, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_005 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_005");
@@ -140,7 +140,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_005, TestSize.Level1)
  * @tc.desc: Test ReloadForm() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_006, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_006, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_006 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_006");
@@ -161,7 +161,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_006, TestSize.Level1)
  * @tc.desc: Test UpdateConfiguration() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_007, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_007, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_007 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_007");
@@ -178,7 +178,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_007, TestSize.Level1)
  * @tc.desc: Test IsFormRequestsEmpty() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_008, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_008, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_008 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_008");
@@ -194,7 +194,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_008, TestSize.Level1)
  * @tc.desc: Test GetAllRendererFormRequests() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_009, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_009, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_009 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_009");
@@ -210,7 +210,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_009, TestSize.Level1)
  * @tc.desc: Test RecycleForm() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_010, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_010, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_010 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_010");
@@ -227,7 +227,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_010, TestSize.Level1)
  * @tc.desc: Test FormRendererGroup() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_011, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_011, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_011 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_011");
@@ -242,7 +242,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_011, TestSize.Level1)
 * @tc.desc: Test SetVisibleChange() function.
 * @tc.type: FUNC
 */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_012, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_012, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_012 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_012");
@@ -259,7 +259,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_012, TestSize.Level1)
  * @tc.desc: Test OnUnlock() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_014, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_014, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_0014 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_014");
@@ -284,7 +284,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_014, TestSize.Level1)
  * @tc.desc: Test DeleteForm() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_015, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_015, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_015 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_015");
@@ -307,7 +307,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_015, TestSize.Level1)
  * @tc.desc: Test DeleteForm() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_016, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_016, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_016 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_016");
@@ -334,7 +334,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_016, TestSize.Level1)
  * @tc.desc: Test DeleteForm() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_017, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_017, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_017 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_017");
@@ -361,7 +361,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_017, TestSize.Level1)
  * @tc.desc: Test UpdateConfiguration() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_018, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_018, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_018 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_018");
@@ -397,7 +397,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_018, TestSize.Level1)
  * @tc.desc: Test RecycleForm() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_019, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_019, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_019 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_019");
@@ -427,7 +427,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_019, TestSize.Level1)
  * @tc.desc: Test PreInitAddForm() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_020, TestSize.Level1)
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_020, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_020 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_020");

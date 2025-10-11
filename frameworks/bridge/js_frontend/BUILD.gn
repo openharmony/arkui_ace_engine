@@ -40,7 +40,7 @@ template("js_frontend") {
       sources += [ "engine/common/js_engine_loader.cpp" ]
     }
 
-    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    deps = []
     if (use_hilog) {
       external_deps = [ "hilog:libhilog" ]
     }

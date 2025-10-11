@@ -34,7 +34,7 @@ template("card_frontend") {
       "js_card_parser.cpp",
     ]
 
-    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    deps = []
     if (use_hilog) {
       external_deps = [ "hilog:libhilog" ]
     }

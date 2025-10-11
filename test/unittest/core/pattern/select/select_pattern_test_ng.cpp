@@ -2689,6 +2689,205 @@ HWTEST_F(SelectPatternTestNg, SetOptionTextModifierByUser, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ResetParams001
+ * @tc.desc: Test SelectPattern ResetParams.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, ResetParams001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+
+    selectPattern->controlSize_ = ControlSize::NORMAL;
+    selectTheme->isTV_ = true;
+    selectTheme->spinnerSymbolSize_ = Dimension(100.0, DimensionUnit::FP);
+
+    selectPattern->ResetParams();
+    auto spinnerId = selectPattern->GetSpinnerId();
+    RefPtr<FrameNode> spinner_ = FrameNode::GetOrCreateFrameNode(
+        V2::SYMBOL_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(spinner_);
+    auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(spinnerLayoutProperty);
+    auto fontSize = spinnerLayoutProperty->GetFontSize();
+    EXPECT_EQ(fontSize, Dimension(100.0, DimensionUnit::FP));
+}
+
+/**
+ * @tc.name: ResetParams002
+ * @tc.desc: Test SelectPattern ResetParams.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, ResetParams002, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+
+    selectPattern->controlSize_ = ControlSize::NORMAL;
+    selectTheme->isTV_ = false;
+    selectTheme->fontSize_ = Dimension(100.0, DimensionUnit::FP);
+
+    selectPattern->ResetParams();
+    auto spinnerId = selectPattern->GetSpinnerId();
+    RefPtr<FrameNode> spinner_ = FrameNode::GetOrCreateFrameNode(
+        V2::SYMBOL_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(spinner_);
+    auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(spinnerLayoutProperty);
+    auto fontSize = spinnerLayoutProperty->GetFontSize();
+    EXPECT_EQ(fontSize, Dimension(100.0, DimensionUnit::FP));
+}
+
+/**
+ * @tc.name: ResetParams003
+ * @tc.desc: Test SelectPattern ResetParams.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, ResetParams003, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+
+    selectPattern->controlSize_ = ControlSize::SMALL;
+    selectTheme->selectLeftMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL, 8.0_px));
+    selectTheme->selectLeftMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::SMALL, 4.0_px));
+    selectTheme->selectRightMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL, 8.0_px));
+    selectTheme->selectRightMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::SMALL, 4.0_px));
+
+    selectPattern->ResetParams();
+    auto padding = ViewAbstract::GetPadding(select);
+    EXPECT_EQ(padding.left.value().GetDimension().ConvertToPx(), 4.0);
+    EXPECT_EQ(padding.right.value().GetDimension().ConvertToPx(), 4.0);
+}
+
+/**
+ * @tc.name: ResetParams004
+ * @tc.desc: Test SelectPattern ResetParams.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, ResetParams004, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+
+    selectPattern->controlSize_ = ControlSize::NORMAL;
+    selectTheme->selectLeftMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL, 8.0_px));
+    selectTheme->selectLeftMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::SMALL, 4.0_px));
+    selectTheme->selectRightMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL, 8.0_px));
+    selectTheme->selectRightMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::SMALL, 4.0_px));
+
+    selectPattern->ResetParams();
+    auto padding = ViewAbstract::GetPadding(select);
+    EXPECT_EQ(padding.left.value().GetDimension().ConvertToPx(), 8.0);
+    EXPECT_EQ(padding.right.value().GetDimension().ConvertToPx(), 8.0);
+}
+
+/**
+ * @tc.name: GetSelectLeftMargin
+ * @tc.desc: Test SelectPattern GetSelectLeftMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, GetSelectLeftMargin, TestSize.Level1)
+{
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+
+    selectPattern->controlSize_ = ControlSize::NORMAL;
+    selectTheme->selectLeftMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL, 8.0_px));
+    selectTheme->selectLeftMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::SMALL, 4.0_px));
+
+    auto result = selectPattern->GetSelectLeftMargin(ControlSize::NORMAL);
+    EXPECT_EQ(result.ConvertToPx(), 8.0);
+    result = selectPattern->GetSelectLeftMargin(ControlSize::SMALL);
+    EXPECT_EQ(result.ConvertToPx(), 4.0);
+}
+
+/**
+ * @tc.name: GetSelectRightMargin
+ * @tc.desc: Test SelectPattern GetSelectRightMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, GetSelectRightMargin, TestSize.Level1)
+{
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+
+    selectPattern->controlSize_ = ControlSize::NORMAL;
+    selectTheme->selectRightMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL, 8.0_px));
+    selectTheme->selectRightMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::SMALL, 4.0_px));
+
+    auto result = selectPattern->GetSelectRightMargin(ControlSize::NORMAL);
+    EXPECT_EQ(result.ConvertToPx(), 8.0);
+    result = selectPattern->GetSelectRightMargin(ControlSize::SMALL);
+    EXPECT_EQ(result.ConvertToPx(), 4.0);
+}
+
+/**
+ * @tc.name: InitSpinner003
+ * @tc.desc: Test SelectPattern InitSpinner with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, InitSpinner003, TestSize.Level1)
+{
+    auto spinner = AceType::MakeRefPtr<FrameNode>("spinner", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(spinner, nullptr);
+
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+
+    selectTheme->isTV_ = true;
+    selectTheme->spinnerSymbolSize_ = Dimension(16.0, DimensionUnit::PX);
+
+    SelectPattern selectPattern;
+    selectPattern.InitSpinner(spinner, selectTheme);
+    auto spinnerLayoutProperty = spinner->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(spinnerLayoutProperty, nullptr);
+
+    auto fontSize = spinnerLayoutProperty->GetFontSize();
+    EXPECT_EQ(fontSize.value(), Dimension(16.0, DimensionUnit::PX));
+}
+
+/**
  * @tc.name: SetSelectedOptionTextModifierByUser
  * @tc.desc: Test SelectPattern SetSelectedOptionTextModifierByUser.
  * @tc.type: FUNC

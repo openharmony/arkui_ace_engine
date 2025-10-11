@@ -914,6 +914,7 @@ DataReadyNotifyTask RosenRenderContext::CreateBgImageDataReadyCallback()
         if (imageSourceInfo != sourceInfo) {
             return;
         }
+        CHECK_NULL_VOID(rosenRenderContext->bgLoadingCtx_);
         rosenRenderContext->bgLoadingCtx_->MakeCanvasImage(SizeF(), true, ImageFit::NONE);
     };
     return task;
@@ -958,6 +959,7 @@ void RosenRenderContext::PaintBackground()
         }
         return;
     }
+    CHECK_NULL_VOID(bgLoadingCtx_);
     auto srcSize = bgLoadingCtx_->GetImageSize();
     SizeF renderSize = ImagePainter::CalculateBgImageSize(paintRect_.GetSize(), srcSize, GetBackgroundImageSize());
     OffsetF positionOffset =
@@ -5700,6 +5702,14 @@ void RosenRenderContext::SetTransparentLayer(bool isTransparentLayer)
     auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     CHECK_NULL_VOID(rsSurfaceNode);
     rsSurfaceNode->SetHardwareEnableHint(isTransparentLayer);
+}
+
+void RosenRenderContext::SetSurfaceBufferOpaque(bool isOpaque)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetSurfaceBufferOpaque(isOpaque);
 }
 
 void RosenRenderContext::SetScreenId(uint64_t screenId)

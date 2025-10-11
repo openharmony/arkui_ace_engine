@@ -20,6 +20,8 @@
 #include "base/image/drawing_color_filter.h"
 #include "base/log/log.h"
 #include "core/components_ng/pattern/image/image_model_static.h"
+#include "core/interfaces/native/implementation/color_filter_peer.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -50,6 +52,41 @@ void SetDrawingColorFilter(ArkUINodeHandle node, void* aniColorFilter)
     ImageModelStatic::SetDrawingColorFilter(frameNode, colorFilter);
 }
 
+void* GetPixelMapPeer(void* pixelMapPtr)
+{
+    return reinterpret_cast<void*>(image_PixelMapPeer::Create(PixelMap::CreatePixelMap(pixelMapPtr)));
+}
+
+ani_long CreateColorFilterPeer(ani_long colorFilter)
+{
+    CHECK_EQUAL_RETURN(colorFilter, 0, 0);
+    auto* rawPtr = reinterpret_cast<OHOS::Ace::ImageColorFilter*>(colorFilter);
+    auto imageColorFilter = Referenced::Claim<OHOS::Ace::ImageColorFilter>(rawPtr);
+    if (!imageColorFilter) {
+        return 0;
+    }
+    auto* peer = new ColorFilterPeer();
+    CHECK_NULL_RETURN(peer, 0);
+    peer->SetColorFilter(imageColorFilter);
+    auto pointer = reinterpret_cast<ani_long>(peer);
+    return pointer;
+}
+
+ani_long GetColorFilter(ani_long colorFilterPeer)
+{
+    if (colorFilterPeer == 0) {
+        return 0;
+    }
+    auto* peer = reinterpret_cast<ColorFilterPeer*>(colorFilterPeer);
+    auto imageColorFilter = peer->GetColorFilter();
+    if (!imageColorFilter) {
+        return 0;
+    }
+    auto* rawPtr = Referenced::RawPtr(imageColorFilter);
+    auto pointer = reinterpret_cast<ani_long>(rawPtr);
+    return pointer;
+}
+
 const ArkUIAniImageModifier* GetImageAniModifier()
 {
     static const ArkUIAniImageModifier impl = {
@@ -57,6 +94,9 @@ const ArkUIAniImageModifier* GetImageAniModifier()
         .setDrawableDescriptor = OHOS::Ace::NG::SetDrawableDescriptor,
         .setResizableLattice = OHOS::Ace::NG::SetResizableLattice,
         .setDrawingColorFilter = OHOS::Ace::NG::SetDrawingColorFilter,
+        .getPixelMapPeer = OHOS::Ace::NG::GetPixelMapPeer,
+        .createColorFilterPeer = OHOS::Ace::NG::CreateColorFilterPeer,
+        .getColorFilter = OHOS::Ace::NG::GetColorFilter,
     };
     return &impl;
 }

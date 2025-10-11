@@ -124,6 +124,8 @@ XComponentControllerErrorCode XComponentControllerNG::ResetExtController(
 void XComponentControllerNG::SetPattern(const RefPtr<XComponentPattern>& pattern)
 {
     pattern_ = pattern;
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSurfaceIsOpaque(isOpaque_);
 }
 
 RefPtr<XComponentPattern> XComponentControllerNG::GetPattern()
@@ -232,5 +234,13 @@ void XComponentControllerNG::UnlockCanvasAndPost(RSCanvas* canvas)
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     pattern->UnlockCanvasAndPost(canvas);
+}
+
+void XComponentControllerNG::SetSurfaceConfig(bool isOpaque)
+{
+    isOpaque_ = isOpaque;
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSurfaceIsOpaque(isOpaque);
 }
 } // namespace OHOS::Ace::NG

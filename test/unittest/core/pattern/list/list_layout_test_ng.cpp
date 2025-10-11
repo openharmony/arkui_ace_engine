@@ -2415,15 +2415,13 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount005, TestSize.Level1)
     auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
     EXPECT_NE(repeat, nullptr);
     auto listPattern = frameNode_->GetPattern<ListPattern>();
-    FlushUITasks();
     const int64_t time = GetSysTimestamp();
     auto pipeline = listPattern->GetContext();
     pipeline->OnIdle(time + 16 * 1000000); // 16 * 1000000: 16ms
-
     int32_t childrenCount = repeat->GetChildren().size();
     EXPECT_EQ(childrenCount, 5);
     auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
-    EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(cachedItem->IsActive(), true);
 
     /**
      * @tc.steps: step2. Update item4 size
@@ -2435,13 +2433,11 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount005, TestSize.Level1)
     cachedItem->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(150)));
     cachedItem->SetLayoutDirtyMarked(true);
-    cachedItem->CreateLayoutTask();
-    EXPECT_EQ(sizeChanged, false);
-    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameOffset().GetY(), 0);
-
     FlushUITasks();
+    FlushIdleTask(listPattern);
     EXPECT_EQ(sizeChanged, true);
     EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameOffset().GetY(), 400);
+    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameSize().Height(), 150);
 }
 
 /**
@@ -2690,7 +2686,7 @@ HWTEST_F(ListLayoutTestNg, ListCacheCount002, TestSize.Level1)
     ListModelNG::SetCacheRange(AceType::RawPtr(frameNode_), 1, 3);
     auto listPattern = frameNode_->GetPattern<ListPattern>();
     FlushIdleTask(listPattern);
-    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 1);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 3);
 
     /**
      * @tc.steps: step2. ResetCacheRange
@@ -2726,7 +2722,7 @@ HWTEST_F(ListLayoutTestNg, ListCacheCount002, TestSize.Level1)
     UpdateCurrentOffset(-250);
     FlushUITasks(frameNode_);
     FlushIdleTask(listPattern);
-    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 3);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 5);
     EXPECT_EQ(listPattern->cachedItemPosition_.count(0), 1);
     EXPECT_EQ(listPattern->cachedItemPosition_.count(1), 1);
     EXPECT_EQ(listPattern->cachedItemPosition_.count(7), 1);

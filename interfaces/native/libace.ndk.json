@@ -304,6 +304,10 @@
         "name": "OH_ArkUI_AxisEvent_GetAxisAction"
     },
     {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_AxisEvent_HasAxis"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_NativeXComponent_SetNeedSoftKeyboard"
     },
@@ -4222,5 +4226,133 @@
     {
         "first_introduced": "20",
         "name": "OH_ArkUI_NativeModule_GetNavDestinationAniParam"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_UIInputEvent_GetCoastingAxisEvent"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_CoastingAxisEvent_GetEventTime"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_CoastingAxisEvent_GetPhase"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_CoastingAxisEvent_GetDeltaX"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_CoastingAxisEvent_GetDeltaY"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_CoastingAxisEvent_SetPropagation"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_Swiper_FinishAnimation"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_SetAnimationFrameDurations"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_GetAnimationFrameDurations"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_SetAnimationAutoPlay"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_GetAnimationAutoPlay"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_CreateAnimationController"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_DisposeAnimationController"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_StartAnimation"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_StopAnimation"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_ResumeAnimation"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_PauseAnimation"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_DrawableDescriptor_GetAnimationStatus"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_XComponentSurfaceConfig_Create"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_XComponentSurfaceConfig_Dispose"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_XComponentSurfaceConfig_SetIsOpaque"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_SurfaceHolder_SetSurfaceConfig"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_ShowCounterConfig_Create"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_ShowCounterConfig_Dispose"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_ShowCounterConfig_SetCounterTextColor"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_ShowCounterConfig_SetCounterTextOverflowColor"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_ShowCounterConfig_GetCounterTextColor"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_SelectedDataDetectorConfig_Create"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_SelectedDataDetectorConfig_Dispose"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_SelectedDataDetectorConfig_SetTypes"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_SelectedDataDetectorConfig_GetTypes"
     }
 ]

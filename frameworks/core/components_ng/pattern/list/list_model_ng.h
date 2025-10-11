@@ -47,6 +47,7 @@ public:
     void SetLaneGutter(const Dimension& laneGutter) override;
     void SetListItemAlign(V2::ListItemAlign listItemAlign) override;
     void SetCachedCount(int32_t cachedCount, bool show = false) override;
+    void SetCacheRange(NG::CacheRange cacheRange, bool show = false) override;
     void SetMultiSelectable(bool selectable) override;
     void SetHasWidth(bool hasWidth) override {}
     void SetHasHeight(bool hasHeight) override {}
@@ -87,6 +88,7 @@ public:
     void CreateWithResourceObjLaneConstrain(const RefPtr<ResourceObject>& resObjMinLengthValue,
         const RefPtr<ResourceObject>& resObjMaxLengthValue) override;
     void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
+    void SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed speed) override;
 
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
@@ -100,6 +102,7 @@ public:
     static bool GetShowCached(FrameNode* frameNode);
     static void SetCacheRange(FrameNode* frameNode, int32_t min, int32_t max);
     static void ResetCacheRange(FrameNode* frameNode);
+    static CacheRange GetCacheRange(FrameNode* frameNode);
     static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
     static int32_t GetSticky(FrameNode* frameNode);
@@ -199,6 +202,8 @@ public:
         const RefPtr<ResourceObject>& resObjMinLengthValue, const RefPtr<ResourceObject>& resObjMaxLengthValue);
     static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor);
+    static void SetScrollSnapAnimationSpeed(FrameNode* frameNode, ScrollSnapAnimationSpeed speed);
+    static ScrollSnapAnimationSpeed GetScrollSnapAnimationSpeed(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

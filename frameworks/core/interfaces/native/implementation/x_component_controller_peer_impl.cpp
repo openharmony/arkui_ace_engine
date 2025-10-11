@@ -62,6 +62,7 @@ void XComponentControllerPeerImpl::TriggerStartImageAnalyzer(Ark_VMContext vmCon
 }
 void XComponentControllerPeerImpl::SetOnSurfaceCreatedEvent(const Callback_String_Void& callback)
 {
+    arkOnSurfaceCreated = callback;
     onSurfaceCreatedEvent_ = [arkCallback = CallbackHelper(callback)]
         (const std::string& surfaceId, const std::string& xcomponentId) {
         auto arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId);
@@ -70,19 +71,21 @@ void XComponentControllerPeerImpl::SetOnSurfaceCreatedEvent(const Callback_Strin
 }
 void XComponentControllerPeerImpl::SetOnSurfaceChangedEvent(const Callback_String_SurfaceRect_Void& callback)
 {
+    arkOnSurfaceChanged = callback;
     onSurfaceChangedEvent_ = [arkCallback = CallbackHelper(callback)]
         (const std::string& surfaceId, const RectF& rect) {
         auto arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId);
         Ark_SurfaceRect arkSurfaceRect;
-        arkSurfaceRect.offsetX = Converter::ArkValue<Opt_Number>(rect.Left());
-        arkSurfaceRect.offsetY = Converter::ArkValue<Opt_Number>(rect.Top());
-        arkSurfaceRect.surfaceWidth = Converter::ArkValue<Ark_Number>(rect.Width());
-        arkSurfaceRect.surfaceHeight = Converter::ArkValue<Ark_Number>(rect.Height());
+        arkSurfaceRect.offsetX = Converter::ArkValue<Opt_Float64>(rect.Left());
+        arkSurfaceRect.offsetY = Converter::ArkValue<Opt_Float64>(rect.Top());
+        arkSurfaceRect.surfaceWidth = Converter::ArkValue<Ark_Float64>(rect.Width());
+        arkSurfaceRect.surfaceHeight = Converter::ArkValue<Ark_Float64>(rect.Height());
         arkCallback.InvokeSync(arkSurfaceId, arkSurfaceRect);
     };
 }
 void XComponentControllerPeerImpl::SetOnSurfaceDestroyedEvent(const Callback_String_Void& callback)
 {
+    arkOnSurfaceDestroyed = callback;
     onSurfaceDestroyedEvent_ = [arkCallback = CallbackHelper(callback)]
         (const std::string& surfaceId, const std::string& xcomponentId) {
         auto arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId);

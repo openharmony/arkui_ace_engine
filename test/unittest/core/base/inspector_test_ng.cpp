@@ -1698,7 +1698,8 @@ HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
     ASSERT_NE(context, nullptr);
 
     auto id = ElementRegister::GetInstance()->MakeUniqueId();
-    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("sageNode", id, AceType::MakeRefPtr<Pattern>(), true);
+    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode(
+        "sageNode", id, AceType::MakeRefPtr<Pattern>(), true);
     context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
     stageNode->children_.clear();
 
@@ -1734,6 +1735,18 @@ HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
     ASSERT_TRUE(children->IsArray());
     hasInternalIds = HasInternalIds(children);
     ASSERT_TRUE(hasInternalIds);
+}
+
+/**
+ * @tc.name: InspectorTestNg028
+ * @tc.desc: Test GetInspectorOfNode when nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg028, TestSize.Level1)
+{
+    auto resultFrameNode = Inspector::GetInspectorOfNode(nullptr);
+    std::string emptyString = "";
+    EXPECT_NE(resultFrameNode, emptyString);
 }
 
 /**

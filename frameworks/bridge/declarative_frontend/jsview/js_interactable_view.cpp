@@ -260,14 +260,13 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
     Dimension distanceThreshold = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
     if (info.Length() > 1 && info[1]->IsNumber()) {
         double jsDistanceThreshold = info[1]->ToNumber<double>();
+        if (jsDistanceThreshold < 0) {
+            distanceThreshold = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+        }
         distanceThreshold = Dimension(jsDistanceThreshold, DimensionUnit::VP);
     }
 
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick), distanceThreshold);
-    CHECK_NULL_VOID(frameNode);
-    auto focusHub = frameNode->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusable(true, false);
 }
 
 void JSInteractableView::SetFocusable(bool focusable)

@@ -54,6 +54,7 @@ public:
     MOCK_METHOD2(Seek, int32_t(int32_t, SeekMode));
     MOCK_METHOD2(SetVolume, void(float, float));
     MOCK_METHOD1(SetRenderFirstFrame, int32_t(bool));
+    MOCK_METHOD1(SetRenderSurface, void(const RefPtr<RenderSurface>& renderSurface));
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_MEDIA_PLAYER_H

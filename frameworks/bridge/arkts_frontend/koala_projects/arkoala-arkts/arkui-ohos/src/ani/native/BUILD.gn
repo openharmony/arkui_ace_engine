@@ -22,9 +22,7 @@ group("ace_ani_native_package") {
   ]
 }
 config("ani_utils_common_config") {
-  include_dirs = [
-    "./"
-  ]
+  include_dirs = [ "./" ]
 }
 ohos_source_set("ani_utils_common") {
   subsystem_name = ace_engine_subsystem
@@ -32,13 +30,9 @@ ohos_source_set("ani_utils_common") {
 
   configs = [ "$ace_root:ace_config" ]
   public_configs = [ ":ani_utils_common_config" ]
-  sources = [
-    "utils/ani_utils.cpp",
-  ]
+  sources = [ "utils/ani_utils.cpp" ]
 
-  external_deps = [
-    "runtime_core:ani",
-  ]
+  external_deps = [ "runtime_core:ani" ]
 }
 ohos_shared_library("arkoala_native_ani") {
   shlib_type = "ani"
@@ -56,31 +50,36 @@ ohos_shared_library("arkoala_native_ani") {
   }
 
   sources = [
+    "UINode/uinode_module_methods.cpp",
     "animation/animation_ani_impl.cpp",
     "canvas/canvas_module.cpp",
     "common/common_module.cpp",
+    "component3d/component3d_module_methods.cpp",
     "componentSnapshot/componentSnapshot_module.cpp",
     "condition_scope/condition_scope.cpp",
     "content_slot/content_slot_module.cpp",
     "custom_node/custom_node_module.cpp",
-
-    #"dragController/drag_controller_module.cpp",
-    #"drag_and_drop/native_drag_drop_global.cpp",
+    "dragController/drag_controller_module.cpp",
+    "drag_and_drop/native_drag_drop_global.cpp",
     "image/image_module.cpp",
     "image_span/image_span_module.cpp",
     "interop/interop_module.cpp",
     "list/list_children_main_size_module.cpp",
     "load.cpp",
     "module.cpp",
+    "node_adapter/node_adapter_module.cpp",
     "rich_editor/rich_editor_module.cpp",
     "search/search_module.cpp",
     "shape/shape_module_methods.cpp",
     "stateMgmt/stateMgmt_module.cpp",
     "styled_string/styled_string_module.cpp",
+    "utils/ani_trace.cpp",
     "utils/convert_utils.cpp",
     "video/video_module_methods.cpp",
-    "water_flow/waterFlowSection_module.cpp",
+    "visual_effect/visual_effect_module.cpp",
+    "water_flow/water_flow_module.cpp",
     "web/web_module_methods.cpp",
+    "xbar/xbar_module_methods.cpp",
     "xcomponent/xcomponent_module_methods.cpp",
   ]
   if (ace_engine_feature_wearable) {
@@ -89,6 +88,7 @@ ohos_shared_library("arkoala_native_ani") {
       "module.cpp",
     ]
   }
+
   external_deps = [
     "graphic_2d:drawing_ani",
     "hilog:libhilog",
@@ -99,9 +99,17 @@ ohos_shared_library("arkoala_native_ani") {
     "runtime_core:ani_helpers",
     "udmf:libudmf",
     "udmf:udmf_client",
-
-    #"udmf:udmf_taihe_native",
+    "udmf:udmf_taihe_native",
   ]
+  if (!build_ohos_sdk) {
+    external_deps += [
+      "ability_runtime:abilitykit_native",
+      "ability_runtime:ani_base_context",
+    ]
+  }
+  if (defined(model_component_support) && model_component_support) {
+    external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
+  }
 
   configs = [ "$ace_root:ace_config" ]
   defines = []
@@ -112,4 +120,55 @@ ohos_shared_library("arkoala_native_ani") {
     defines += [ "ENABLE_ROSEN_BACKEND" ]
   }
   output_extension = "so"
+}
+
+if (use_linux) {
+  ohos_shared_library("arkoala_native_ani_linux") {
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+
+    include_dirs = [
+      "./",
+      "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/",
+    ]
+
+    sources = [
+      "animation/animation_ani_impl.cpp",
+      "common/common_module.cpp",
+      "condition_scope/condition_scope.cpp",
+      "content_slot/content_slot_module.cpp",
+      "custom_node/custom_node_module.cpp",
+      "interop/interop_module.cpp",
+      "list/list_children_main_size_module.cpp",
+      "load.cpp",
+      "module_linux.cpp",
+      "stateMgmt/stateMgmt_module.cpp",
+      "utils/ani_utils.cpp",
+      "water_flow/water_flow_module.cpp",
+      "xcomponent/xcomponent_module_methods.cpp",
+    ]
+
+    external_deps = [
+      "hilog:libhilog",
+      "napi:ace_napi",
+      "runtime_core:ani",
+    ]
+    if (!build_ohos_sdk) {
+      external_deps += [
+        "ability_runtime:abilitykit_native",
+        "ability_runtime:ani_base_context",
+      ]
+    }
+
+    configs = [ "$ace_root:ace_config" ]
+    defines = []
+    if (pixel_map_support) {
+      defines += [ "PIXEL_MAP_SUPPORTED" ]
+    }
+    if (enable_rosen_backend) {
+      defines += [ "ENABLE_ROSEN_BACKEND" ]
+    }
+    output_name = "arkoala_native_ani"
+    output_extension = "so"
+  }
 }

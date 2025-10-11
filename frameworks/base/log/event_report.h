@@ -188,6 +188,21 @@ struct RichEditorInfo {
     int32_t spanIndex = -1;
 };
 
+enum class GeneralInteractionErrorType {
+    DOWN_EVENT_ERROR = 0,
+    UP_OR_CANCEL_EVENT_ERROR,
+    INJECT_DOWN_EVENT_ERROR,
+    FOCUS_VIEW_STACK_EMPTY_ERROR,
+    FOCUS_VIEW_STACK_TOP_UNFOCUSABLE_ERROR,
+};
+
+struct GeneralInteractionErrorInfo {
+    GeneralInteractionErrorType errorType;
+    int32_t touchEventId = -1;
+    int32_t fingerId = -1;
+    std::string tag = "";
+};
+
 struct FRCSceneFpsInfo {
     int64_t duration_120 = 0;
     int64_t duration_90 = 0;
@@ -250,6 +265,7 @@ public:
     static void SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_);
     static void FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status);
     static void AddFrameRateDuration(int32_t frameRate, int64_t duration);
+    static void ReportGeneralInteractionError(const GeneralInteractionErrorInfo& generalEventErrorInfo);
 
     static void StartFormModifyTimeoutReportTimer(int64_t formId, const std::string &bundleName,
         const std::string &formName);

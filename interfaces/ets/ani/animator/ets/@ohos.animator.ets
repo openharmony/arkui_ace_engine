@@ -60,7 +60,7 @@ export interface AnimatorResult {
     pause(): void;
     finish(): void;
     update(options: AnimatorOptions): void;
-    reset(options: AnimatorOptions): void;
+    reset(options: AnimatorOptions | SimpleAnimatorOptions): void;
     onFinish: () => void;
     onCancel: () => void;
     onRepeat: () => void;
@@ -86,7 +86,7 @@ class AnimatorResultInner implements AnimatorResult {
     public native pause(): void;
     public native finish(): void;
     public native update(options: AnimatorOptions): void;
-    public native reset(options: AnimatorOptions): void;
+    public native reset(options: AnimatorOptions | SimpleAnimatorOptions): void;
     public native setExpectedFrameRateRange(rateRange: ExpectedFrameRateRange) : void;
 
     static animatorTransferStatic(input: Any): Object {

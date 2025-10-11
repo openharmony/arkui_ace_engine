@@ -19,8 +19,7 @@
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
-#include "core/interfaces/native/implementation/level_order_peer.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "ui/base/referenced.h"
 
@@ -55,7 +54,7 @@ static bool IsUndefinedObject(ani_env *env, ani_ref object_ref)
 static bool IsOverlayManagerOptionsObject(ani_env *env, ani_object object)
 {
     ani_class optionsClass = nullptr;
-    if (ANI_OK != env->FindClass("L@ohos/arkui/UIContext/OverlayManagerOptions;", &optionsClass)) {
+    if (ANI_OK != env->FindClass("@ohos.arkui.UIContext.OverlayManagerOptions", &optionsClass)) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "Cannot find class OverlayManagerOptions.");
         return false;
     }
@@ -142,12 +141,12 @@ static ani_status CreateAniBoolean(ani_env* env, bool value, ani_object& result)
 {
     ani_status state;
     ani_class booleanClass;
-    if ((state = env->FindClass("Lstd/core/Boolean;", &booleanClass)) != ANI_OK) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY, "FindClass std/core/Boolean failed, %{public}d", state);
+    if ((state = env->FindClass("std.core.Boolean", &booleanClass)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "FindClass std.core.Boolean failed, %{public}d", state);
         return state;
     }
     ani_method booleanClassCtor;
-    if ((state = env->Class_FindMethod(booleanClass, "<ctor>", "Z:V", &booleanClassCtor)) != ANI_OK) {
+    if ((state = env->Class_FindMethod(booleanClass, "<ctor>", "z:", &booleanClassCtor)) != ANI_OK) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "Class_FindMethod Boolean ctor failed, %{public}d", state);
         return state;
     }
@@ -209,7 +208,7 @@ static ani_object GetOverlayManagerOptions(ani_env* env)
 static void AddComponentContent(ani_env* env, ani_long aniNode, ani_int aniIndex)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "ani AddComponentContent enter: index: %{public}d", (int32_t)aniIndex);
-    Ark_FrameNode peerNode = (Ark_FrameNode)aniNode;
+    FrameNodePeer* peerNode = (FrameNodePeer*)aniNode;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_VOID(frameNode);
     auto index = static_cast<int>(aniIndex);
@@ -231,7 +230,7 @@ static void AddComponentContentWithOrder(ani_env* env, ani_long aniNode, ani_obj
     std::optional<double> orderNumber = std::nullopt;
     if (aniLevelOrder != 0) {
         ani_class levelOrderCls;
-        ani_status status = env->FindClass("L@ohos/promptAction/LevelOrder;", &levelOrderCls);
+        ani_status status = env->FindClass("@ohos.promptAction.LevelOrder", &levelOrderCls);
         if (status != ANI_OK) {
             TAG_LOGE(AceLogTag::ACE_OVERLAY, "Find LevelOrder failed(%{public}d)", status);
             return;
@@ -253,7 +252,7 @@ static void AddComponentContentWithOrder(ani_env* env, ani_long aniNode, ani_obj
         orderNumber = std::make_optional(orderValue);
     }
 
-    Ark_FrameNode peerNode = (Ark_FrameNode)aniNode;
+    FrameNodePeer* peerNode = (FrameNodePeer*)aniNode;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();
@@ -266,7 +265,7 @@ static void AddComponentContentWithOrder(ani_env* env, ani_long aniNode, ani_obj
 static void RemoveComponentContent(ani_env* env, ani_long aniNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "ani RemoveComponentContent enter");
-    Ark_FrameNode peerNode = (Ark_FrameNode)aniNode;
+    FrameNodePeer* peerNode = (FrameNodePeer*)aniNode;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();
@@ -284,7 +283,7 @@ static void RemoveComponentContent(ani_env* env, ani_long aniNode)
 static void ShowComponentContent(ani_env* env, ani_long aniNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "ani ShowComponentContent enter");
-    Ark_FrameNode peerNode = (Ark_FrameNode)aniNode;
+    FrameNodePeer* peerNode = (FrameNodePeer*)aniNode;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();
@@ -302,7 +301,7 @@ static void ShowComponentContent(ani_env* env, ani_long aniNode)
 static void HideComponentContent(ani_env* env, ani_long aniNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "ani HideComponentContent enter");
-    Ark_FrameNode peerNode = (Ark_FrameNode)aniNode;
+    FrameNodePeer* peerNode = (FrameNodePeer*)aniNode;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();
@@ -350,7 +349,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/overlayManager/overlayManager;", &ns)) {
+    if (ANI_OK != env->FindNamespace("@ohos.overlayManager.overlayManager", &ns)) {
         return ANI_ERROR;
     }
     std::array methods = {

@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_RotationRecognizer peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_RotationRecognizer CtorImpl()
+Ark_RotationRecognizer ConstructImpl()
 {
     return PeerUtils::CreatePeer<RotationRecognizerPeer>();
 }
@@ -44,7 +44,7 @@ const GENERATED_ArkUIRotationRecognizerAccessor* GetRotationRecognizerAccessor()
 {
     static const GENERATED_ArkUIRotationRecognizerAccessor RotationRecognizerAccessorImpl {
         RotationRecognizerAccessor::DestroyPeerImpl,
-        RotationRecognizerAccessor::CtorImpl,
+        RotationRecognizerAccessor::ConstructImpl,
         RotationRecognizerAccessor::GetFinalizerImpl,
         RotationRecognizerAccessor::GetAngleImpl,
     };

@@ -28,6 +28,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavExtenderAccessor {
+void SetNavigationOptionsImpl(Ark_NativePointer ptr,
+                              Ark_NavPathStack pathStack)
+{
+}
 void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
                                 const NavExtender_OnUpdateStack* callback)
 {
@@ -36,6 +40,9 @@ void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
     CHECK_NULL_VOID(navigationStack);
     auto updater = [callback = CallbackHelper(*callback)]() {
         callback.Invoke();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(context);
+        context->RequestFrame();
     };
     navigationStack->SetOnStateChangedCallback(std::move(updater));
 }
@@ -63,15 +70,6 @@ Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation,
     auto isCreated = pattern->CheckNeedCreate(index);
     return Converter::ArkValue<Ark_Boolean>(isCreated);
 }
-Ark_NativePointer NavigationCreateImpl(Ark_Int32 peer,
-                                       Ark_Int32 flag)
-{
-    return {};
-}
-void SetNavigationOptionsImpl(Ark_NativePointer navigation,
-                              Ark_NavPathStack stack)
-{
-}
 void SetNavDestinationNodeImpl(Ark_NavPathStack peer,
                                Ark_Int32 index,
                                Ark_NativePointer node)
@@ -80,7 +78,7 @@ void SetNavDestinationNodeImpl(Ark_NavPathStack peer,
     auto stack = peer->GetNavPathStack();
     CHECK_NULL_VOID(stack);
     int32_t curIndex = Converter::Convert<int32_t>(index);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto instanceId = container->GetInstanceId();
@@ -91,49 +89,6 @@ void SetNavDestinationNodeImpl(Ark_NavPathStack peer,
 #else
     stack->AddCustomNode(curIndex, Referenced::Claim(reinterpret_cast<UINode*>(node)));
 #endif
-}
-void SetNavigationModeImpl(Ark_NativePointer navigation,
-                           Ark_NavigationMode mode)
-{
-}
-void HideTitleBarImpl(Ark_NativePointer navigation,
-                      Ark_Boolean isHide,
-                      Ark_Boolean isAnimated)
-{
-}
-void HideToolBarImpl(Ark_NativePointer navigation,
-                     Ark_Boolean isHide,
-                     Ark_Boolean isAnimated)
-{
-}
-void HideNavBarImpl(Ark_NativePointer navigation,
-                    Ark_Boolean hide)
-{
-}
-void HideBackButtonImpl(Ark_NativePointer navigation,
-                        Ark_Boolean hide)
-{
-}
-void SetNavBarStateChangeImpl(Ark_NativePointer navigation,
-                              const Callback_Boolean_Void* stateCallback)
-{
-}
-void SetTitleModeChangeImpl(Ark_NativePointer navigation,
-                            const Callback_NavigationTitleMode_Void* titleCallback)
-{
-}
-void SetTitleModeImpl(Ark_NativePointer navigation,
-                      Ark_NavigationTitleMode titleMode)
-{
-}
-void TitleImpl(Ark_NativePointer navigation,
-               const Ark_String* title,
-               Ark_Boolean hasSubTitle)
-{
-}
-void SubTitleImpl(Ark_NativePointer navigation,
-                  const Ark_String* subTitle)
-{
 }
 void PushPathImpl(Ark_NavPathStack pathStack,
                   Ark_NavPathInfo info,
@@ -162,18 +117,30 @@ void ReplacePathImpl(Ark_NavPathStack pathStack,
     auto navOptions = Converter::Convert<NavigationOptions>(*options);
     navStack->NavigationContext::PathStack::ReplacePath(navInfo, navOptions);
 }
-
-Ark_String PopImpl(Ark_NavPathStack pathStack, Ark_Boolean isAnimated)
+Ark_String PopImpl(Ark_NavPathStack pathStack,
+                   Ark_Boolean animated)
 {
     auto invalidVal = Converter::ArkValue<Ark_String>("", Converter::FC);
     CHECK_NULL_RETURN(pathStack, invalidVal);
     auto navStack = pathStack->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
-    auto animated = Converter::Convert<bool>(isAnimated);
-    auto info = navStack->NavigationContext::PathStack::Pop(animated);
+    auto isAnimated = Converter::Convert<bool>(animated);
+    auto info = navStack->NavigationContext::PathStack::Pop(isAnimated);
     return Converter::ArkValue<Ark_String>(info.navDestinationId_.value_or(""), Converter::FC);
 }
-
+void SetOnPopCallbackImpl(Ark_NavPathStack pathStack,
+                          const Callback_String_Void* popCallback)
+{
+    auto stack = pathStack;
+    CHECK_NULL_VOID(stack);
+    auto navigationStack = stack->GetNavPathStack();
+    CHECK_NULL_VOID(navigationStack);
+    auto callback = [callback = CallbackHelper(*popCallback)](const std::string& navDestinationId) {
+        auto idVal = Converter::ArkValue<Ark_String>(navDestinationId);
+        callback.Invoke(idVal);
+    };
+    navigationStack->SetOnPopCallback(std::move(callback));
+}
 Ark_String GetIdByIndexImpl(Ark_NavPathStack pathStack,
                             Ark_Int32 index)
 {
@@ -186,7 +153,6 @@ Ark_String GetIdByIndexImpl(Ark_NavPathStack pathStack,
     CHECK_NULL_RETURN(pathInfo, invalidVal);
     return Converter::ArkValue<Ark_String>(pathInfo->navDestinationId_.value_or(""), Converter::FC);
 }
-
 Array_String GetIdByNameImpl(Ark_NavPathStack pathStack,
                              const Ark_String* name)
 {
@@ -197,27 +163,6 @@ Array_String GetIdByNameImpl(Ark_NavPathStack pathStack,
     auto ids = navStack->GetIdByName(nameVal);
     return Converter::ArkValue<Array_String>(ids, Converter::FC);
 }
-
-void SetOnPopCallbackImpl(Ark_NavPathStack pathStack, const Callback_String_Void* callback)
-{
-    auto stack = pathStack;
-    CHECK_NULL_VOID(stack);
-    auto navigationStack = stack->GetNavPathStack();
-    CHECK_NULL_VOID(navigationStack);
-    auto popCallback = [callback = CallbackHelper(*callback)](const std::string& navDestinationId) {
-        auto idVal = Converter::ArkValue<Ark_String>(navDestinationId);
-        callback.Invoke(idVal);
-    };
-    navigationStack->SetOnPopCallback(std::move(popCallback));
-}
-
-Ark_String GetNavDestinationIdImpl(Ark_NavPathInfo info)
-{
-    auto invalidVal = Converter::ArkValue<Ark_String>("", Converter::FC);
-    CHECK_NULL_RETURN(info, invalidVal);
-    return Converter::ArkValue<Ark_String>(info->data.navDestinationId_.value_or(""), Converter::FC);
-}
-
 void PopToIndexImpl(Ark_NavPathStack pathStack,
                     Ark_Int32 index,
                     Ark_Boolean animated)
@@ -229,10 +174,9 @@ void PopToIndexImpl(Ark_NavPathStack pathStack,
     auto animatedVal = Converter::Convert<bool>(animated);
     navStack->NavigationContext::PathStack::PopToIndex(indexVal, animatedVal);
 }
-
 Ark_Number PopToNameImpl(Ark_NavPathStack pathStack,
-                     const Ark_String* name,
-                     Ark_Boolean animated)
+                         const Ark_String* name,
+                         Ark_Boolean animated)
 {
     static Ark_Number invalidVal = Converter::ArkValue<Ark_Number>(-1);
     CHECK_NULL_RETURN(pathStack, invalidVal);
@@ -247,29 +191,17 @@ Ark_Number PopToNameImpl(Ark_NavPathStack pathStack,
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
 {
     static const GENERATED_ArkUINavExtenderAccessor NavExtenderAccessorImpl {
+        NavExtenderAccessor::SetNavigationOptionsImpl,
         NavExtenderAccessor::SetUpdateStackCallbackImpl,
         NavExtenderAccessor::SyncStackImpl,
         NavExtenderAccessor::CheckNeedCreateImpl,
-        NavExtenderAccessor::NavigationCreateImpl,
-        NavExtenderAccessor::SetNavigationOptionsImpl,
         NavExtenderAccessor::SetNavDestinationNodeImpl,
-        NavExtenderAccessor::SetNavigationModeImpl,
-        NavExtenderAccessor::HideTitleBarImpl,
-        NavExtenderAccessor::HideToolBarImpl,
-        NavExtenderAccessor::HideNavBarImpl,
-        NavExtenderAccessor::HideBackButtonImpl,
-        NavExtenderAccessor::SetNavBarStateChangeImpl,
-        NavExtenderAccessor::SetTitleModeChangeImpl,
-        NavExtenderAccessor::SetTitleModeImpl,
-        NavExtenderAccessor::TitleImpl,
-        NavExtenderAccessor::SubTitleImpl,
         NavExtenderAccessor::PushPathImpl,
         NavExtenderAccessor::ReplacePathImpl,
         NavExtenderAccessor::PopImpl,
+        NavExtenderAccessor::SetOnPopCallbackImpl,
         NavExtenderAccessor::GetIdByIndexImpl,
         NavExtenderAccessor::GetIdByNameImpl,
-        NavExtenderAccessor::SetOnPopCallbackImpl,
-        NavExtenderAccessor::GetNavDestinationIdImpl,
         NavExtenderAccessor::PopToIndexImpl,
         NavExtenderAccessor::PopToNameImpl,
     };

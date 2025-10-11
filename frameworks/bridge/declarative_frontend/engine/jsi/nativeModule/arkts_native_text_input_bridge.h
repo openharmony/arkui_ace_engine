@@ -71,6 +71,10 @@ public:
     static ArkUINativeModuleValue ResetMaxLength(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSelectedBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSelectedBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSelectDetectorEnable(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSelectDetectorEnable(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSelectDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSelectDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetShowError(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetShowError(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetPlaceholderFont(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -173,7 +177,13 @@ public:
     static ArkUINativeModuleValue ResetEnableAutoSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnSecurityStateChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnSecurityStateChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetCustomKeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetCustomKeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static bool ParseLayoutPolicy(EcmaVM* vm, const Local<JSValueRef> value, bool isWidth);
+    static ArkUINativeModuleValue SetOnWillAttachIME(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnWillAttachIME(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static IMEAttachCallback ParseAndCreateIMEAttachCallback(
+        EcmaVM* vm, Local<JSValueRef> callbackArg, FrameNode* frameNode);
 
 private:
     static void SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t style);

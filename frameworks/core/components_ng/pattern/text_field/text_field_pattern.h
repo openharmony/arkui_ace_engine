@@ -34,6 +34,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "base/view_data/hint_to_type_wrap.h"
+#include "core/common/ai/data_detector_adapter.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -86,6 +87,10 @@ struct TextConfig;
 } // namespace OHOS::MiscServices
 #endif
 #endif
+
+namespace OHOS::Ace {
+class SpanString;
+}
 
 namespace OHOS::Ace::NG {
 
@@ -503,6 +508,7 @@ public:
     bool CloseKeyboard(bool forceClose, bool isStopTwinkling);
 
     FocusPattern GetFocusPattern() const override;
+    FocusPattern GetFocusPatternMultiThread() const;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void UpdateInputFilterErrorText(const std::u16string& errorText) override;
@@ -769,7 +775,7 @@ public:
         return connection_;
 #endif
     }
-    float PreferredLineHeight(bool isAlgorithmMeasure = false);
+    float PreferredLineHeight(bool isAlgorithmMeasure = false, bool isStyelPlaceholder = false);
 
     void SearchRequestKeyboard();
 
@@ -1245,6 +1251,8 @@ public:
     void EditingValueFilterChange();
 
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder);
+    void SetCustomKeyboardMultiThread(const std::function<void()>&& keyboardBuilder);
+    void SetCustomKeyboardMultiThreadAction(const std::function<void()>&& keyboardBuilder);
 
     void SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder);
     void SetCustomKeyboardWithNodeMultiThread(const RefPtr<UINode>& keyboardBuilder);
@@ -1302,6 +1310,11 @@ public:
     const RefPtr<TextInputResponseArea>& GetCleanNodeResponseArea()
     {
         return cleanNodeResponseArea_;
+    }
+
+    const RefPtr<TextInputResponseArea>& GetPlaceholderResponseArea()
+    {
+        return placeholderResponseArea_;
     }
 
     bool IsShowUnit() const;
@@ -1742,6 +1755,30 @@ public:
     {
         contentScroller_.scrollingCallback = std::move(callback);
     }
+    void SetPlaceholderStyledString(const RefPtr<SpanString>& value);
+    bool IsShowAIMenuOption() const
+    {
+        return isShowAIMenuOption_;
+    }
+    RefPtr<DataDetectorAdapter> GetSelectDetectorAdapter()
+    {
+        if (!selectDetectorAdapter_) {
+            selectDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
+        }
+        return selectDetectorAdapter_;
+    }
+    const std::unordered_map<TextDataDetectType, AISpan>& GetAIItemOption() const
+    {
+        return aiMenuOptions_;
+    }
+    void SetSelectDetectEnable(bool value);
+    bool GetSelectDetectEnable();
+    void ResetSelectDetectEnable();
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types);
+    std::vector<TextDataDetectType> GetSelectDetectConfig();
+    void ResetSelectDetectConfig();
+    void SelectAIDetect();
+    void HandleAIMenuOption(const std::string& labelInfo = "");
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1788,6 +1825,14 @@ protected:
     RefPtr<AutoFillController> autoFillController_;
     virtual IMEClient GetIMEClientInfo();
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
+    /* --------- select AI detect ---------- */
+    bool isShowAIMenuOption_;
+    RefPtr<DataDetectorAdapter> selectDetectorAdapter_;
+    std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
+    bool selectDetectEnabledIsUserSet_ = false;
+    bool selectDetectEnabled_ = true;
+    bool selectDetectTypesIsUserSet_ = false;
+    std::vector<TextDataDetectType> selectDataDetectorTypes_;
 
 private:
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
@@ -1826,6 +1871,7 @@ private:
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
     bool HasStateStyle(UIState state) const;
+    bool IsStyledPlaceholder();
 
     void OnTextInputScroll(float offset);
     void OnTextAreaScroll(float offset);
@@ -2058,12 +2104,13 @@ private:
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
-    void FireOnWillAttachIME();
+    void FireOnWillAttachIME(IMEClient& imeClient);
     Offset GetCaretClickLocalOffset(const Offset& offset);
     void MoveCaretToContentRectMultiThread(const MoveCaretToContentRectData& value);
     bool ShouldSkipUpdateParagraph();
     void UpdateParagraphForDragNode(bool skipUpdate);
     void UpdateMagnifierWithFloatingCaretPos();
+    void ApplyInnerBorderColor();
 
     RectF frameRect_;
     RectF textRect_;
@@ -2209,6 +2256,7 @@ private:
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
     RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
+    RefPtr<TextInputResponseArea> placeholderResponseArea_;
     std::string lastAutoFillTextValue_;
     std::function<void()> processOverlayDelayTask_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
@@ -2276,6 +2324,7 @@ private:
     PreviewText callbackOldPreviewText_;
     bool isFilterChanged_ = false;
     std::optional<bool> showPasswordState_;
+    bool textFieldInitTheme_ = false;
     bool cancelButtonTouched_ = false;
     KeyboardGradientMode imeGradientMode_ = KeyboardGradientMode::NONE;
     KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
@@ -2302,6 +2351,8 @@ private:
     bool setSelectionFlagMultiThread_ = false;
     bool setCustomKeyboardWithNodeMultiThread_ = false;
     RefPtr<UINode> setCustomKeyboardWithNodeMultiThreadValue_;
+    bool setCustomKeyboardMultiThread_ = false;
+    std::function<void()> setCustomKeyboardMultiThreadValue_;
     bool moveCaretToContentRectMultiThread_ = false;
     MoveCaretToContentRectData moveCaretToContentRectMultiThreadValue_;
     // ----- multi thread state variables end -----

@@ -21,6 +21,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -55,12 +56,12 @@ void AssignCast(std::optional<SaveButtonSaveDescription>& dst, const Ark_SaveDes
     }
 }
 template<>
-SaveButtonStyle Convert(const Ark_SaveButtonOptions& src)
+SaveButtonStyle Convert(const Opt_SaveButtonOptions& src)
 {
     SaveButtonStyle style;
-    style.text = OptConvert<SaveButtonSaveDescription>(src.text);
-    style.icon = OptConvert<SaveButtonIconStyle>(src.icon);
-    style.backgroundType = OptConvert<ButtonType>(src.buttonType);
+    style.text = OptConvert<SaveButtonSaveDescription>(src.value.text);
+    style.icon = OptConvert<SaveButtonIconStyle>(src.value.icon);
+    style.backgroundType = OptConvert<ButtonType>(src.value.buttonType);
     return style;
 }
 } // namespace OHOS::Ace::NG::Converter
@@ -79,14 +80,8 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // SaveButtonModifier
 namespace SaveButtonInterfaceModifier {
-void SetSaveButtonOptions0Impl(Ark_NativePointer node)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SaveButtonModelNG::InitSaveButton(frameNode, SaveButtonStyle(), false);
-}
-void SetSaveButtonOptions1Impl(Ark_NativePointer node,
-                               const Ark_SaveButtonOptions* options)
+void SetSaveButtonOptionsImpl(Ark_NativePointer node,
+                              const Opt_SaveButtonOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -96,12 +91,16 @@ void SetSaveButtonOptions1Impl(Ark_NativePointer node,
 }
 } // SaveButtonInterfaceModifier
 namespace SaveButtonAttributeModifier {
-void OnClickImpl(Ark_NativePointer node,
-                 const Opt_SaveButtonCallback* value)
+void SetOnClickImpl(Ark_NativePointer node,
+                    const Opt_SaveButtonCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
     auto onEvent = [arkCallback = CallbackHelper(value->value)](GestureEvent& info) {
         auto res = SecurityComponentHandleResult::CLICK_GRANT_FAILED;
         std::string message;
@@ -120,24 +119,64 @@ void OnClickImpl(Ark_NativePointer node,
 #endif
         const auto event = Converter::ArkClickEventSync(info);
         Ark_SaveButtonOnClickResult arkResult = Converter::ArkValue<Ark_SaveButtonOnClickResult>(res);
-        arkCallback.InvokeSync(event.ArkValue(), arkResult, Opt_BusinessError{
-            .value = Ark_BusinessError{
-                .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
-                .code = Converter::ArkValue<Ark_Number>(code)
-            }
-        });
+        auto error = Converter::ArkValue<Opt_BusinessError>();
+        arkCallback.InvokeSync(event.ArkValue(), arkResult, error);
     };
 
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+}
+void SetSetIconImpl(Ark_NativePointer node,
+                    const Opt_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // SaveButtonModelNG::SetSetSetIcon(frameNode, convValue);
+}
+void SetSetTextImpl(Ark_NativePointer node,
+                    const Opt_Union_String_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // SaveButtonModelNG::SetSetSetText(frameNode, convValue);
+}
+void SetIconSizeImpl(Ark_NativePointer node,
+                     const Opt_Union_Dimension_SizeOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // SaveButtonModelNG::SetSetIconSize(frameNode, convValue);
+}
+void SetIconBorderRadiusImpl(Ark_NativePointer node,
+                             const Opt_Union_Dimension_BorderRadiuses* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // SaveButtonModelNG::SetSetIconBorderRadius(frameNode, convValue);
+}
+void SetStateEffectImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // SaveButtonModelNG::SetSetStateEffect(frameNode, convValue);
 }
 } // SaveButtonAttributeModifier
 const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()
 {
     static const GENERATED_ArkUISaveButtonModifier ArkUISaveButtonModifierImpl {
         SaveButtonModifier::ConstructImpl,
-        SaveButtonInterfaceModifier::SetSaveButtonOptions0Impl,
-        SaveButtonInterfaceModifier::SetSaveButtonOptions1Impl,
-        SaveButtonAttributeModifier::OnClickImpl,
+        SaveButtonInterfaceModifier::SetSaveButtonOptionsImpl,
+        SaveButtonAttributeModifier::SetOnClickImpl,
+        SaveButtonAttributeModifier::SetSetIconImpl,
+        SaveButtonAttributeModifier::SetSetTextImpl,
+        SaveButtonAttributeModifier::SetIconSizeImpl,
+        SaveButtonAttributeModifier::SetIconBorderRadiusImpl,
+        SaveButtonAttributeModifier::SetStateEffectImpl,
     };
     return &ArkUISaveButtonModifierImpl;
 }

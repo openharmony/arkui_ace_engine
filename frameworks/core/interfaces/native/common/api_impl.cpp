@@ -173,6 +173,7 @@ Ark_Int32 InsertChildAfter(Ark_NodeHandle parentNode, Ark_NodeHandle childNode, 
     CHECK_NULL_RETURN(childNode, result);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
+
     if (auto* groupNode = AceType::DynamicCast<GroupNode>(parent); groupNode) {
         groupNode->AddChildToGroup(AceType::Claim(child));
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -211,6 +212,7 @@ Ark_Int32 InsertChildBefore(Ark_NodeHandle parentNode, Ark_NodeHandle childNode,
     CHECK_NULL_RETURN(childNode, result);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
+
     if (auto* groupNode = AceType::DynamicCast<GroupNode>(parent); groupNode) {
         groupNode->AddChildToGroup(AceType::Claim(child));
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

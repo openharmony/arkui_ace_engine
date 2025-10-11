@@ -1229,7 +1229,7 @@ HWTEST_F(WebPatternTestHandle, OnTakeFocus001, TestSize.Level1)
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern->delegate_, nullptr);
 
-    auto event = std::make_shared<OHOS::NWeb::MockNWebKeyEvent>();
+    auto event = std::make_shared<OHOS::NWeb::MockNWebKeyEventBe>();
     EXPECT_NE(event, nullptr);
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<NWeb::MockTaskExecutorTest>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();

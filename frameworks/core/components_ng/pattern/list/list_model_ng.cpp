@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#include "list_layout_property.h"
 
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
@@ -241,6 +242,12 @@ void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
         count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count);
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show);
+}
+
+void ListModelNG::SetCacheRange(NG::CacheRange cacheRange, bool show)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, cacheRange);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show);
 }
 
@@ -616,6 +623,13 @@ void ListModelNG::ResetCacheRange(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, frameNode);
 }
 
+CacheRange ListModelNG::GetCacheRange(FrameNode* frameNode)
+{
+    CacheRange value { -1, -1 };
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, CacheRange, value, frameNode, value);
+    return value;
+}
+
 void ListModelNG::SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, enableScrollInteraction, frameNode);
@@ -749,6 +763,15 @@ void ListModelNG::CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObjec
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
+
+void ListModelNG::SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed speed)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSnapSpeed(speed);
 }
 
 void ListModelNG::SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled)
@@ -1541,5 +1564,21 @@ void ListModelNG::CreateWithResourceObjLaneConstrain(FrameNode* frameNode,
 void ListModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
     ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
+
+void ListModelNG::SetScrollSnapAnimationSpeed(FrameNode* frameNode, ScrollSnapAnimationSpeed speed)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSnapSpeed(speed);
+}
+
+ScrollSnapAnimationSpeed ListModelNG::GetScrollSnapAnimationSpeed(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ScrollSnapAnimationSpeed::NORMAL);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, ScrollSnapAnimationSpeed::NORMAL);
+    return pattern->GetSnapSpeed();
 }
 } // namespace OHOS::Ace::NG

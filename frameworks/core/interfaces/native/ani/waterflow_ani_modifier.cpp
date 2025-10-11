@@ -14,25 +14,119 @@
  */
 #include "waterflow_ani_modifier.h"
 
-#include <memory>
-#include <vector>
-
-#include "frameworks/bridge/arkts_frontend/ani_water_flow_module.h"
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/waterflow/water_flow_model_static.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/water_flow_scroller_peer_impl.h"
 
 namespace OHOS::Ace::NG {
-void SetWaterFlowOptions(ani_env* env, ani_long ptr, ani_object fnObj)
+Dimension ConvertLengthToDimension(const ArkUIWaterFlowSectionGap &src)
 {
-    auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
+    auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
+    auto value = src.value;
+    if (unit == OHOS::Ace::DimensionUnit::PERCENT) {
+        value /= 100.0f;
+    }
+    return Dimension(value, unit);
+}
+
+MarginProperty ConvertToMargin(const ArkUIWaterFlowSectionPadding& src)
+{
+    MarginProperty padding;
+    padding.left = CalcLength(ConvertLengthToDimension(src.left));
+    padding.top = CalcLength(ConvertLengthToDimension(src.top));
+    padding.right = CalcLength(ConvertLengthToDimension(src.right));
+    padding.bottom = CalcLength(ConvertLengthToDimension(src.bottom));
+    return padding;
+}
+
+std::vector<NG::WaterFlowSections::Section> ConvertToSection(const std::vector<ArkUIWaterFlowSection> &sections)
+{
+    std::vector<NG::WaterFlowSections::Section> res;
+    for (size_t i = 0; i < sections.size(); i++) {
+        NG::WaterFlowSections::Section curSection;
+        curSection.itemsCount = sections[i].itemsCount;
+        curSection.crossCount = sections[i].crossCount;
+        curSection.columnsGap = ConvertLengthToDimension(sections[i].columnsGap);
+        curSection.rowsGap = ConvertLengthToDimension(sections[i].rowsGap);
+        curSection.margin = ConvertToMargin(sections[i].margin);
+        curSection.onGetItemMainSizeByIndex = sections[i].onGetItemMainSizeByIndex;
+        res.emplace_back(curSection);
+    }
+    return res;
+}
+
+void SetWaterFlowFooterContent(ArkUINodeHandle node, ArkUINodeHandle footerPtr)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Framework::AniWaterFlowModule::SetWaterFlowSection(env, ptr, fnObj);
+    auto* footerContentPtr = reinterpret_cast<FrameNodePeer*>(footerPtr);
+    CHECK_NULL_VOID(footerContentPtr);
+
+    auto footerContentNodePtr = FrameNodePeer::GetFrameNodeByPeer(footerContentPtr);
+    CHECK_NULL_VOID(footerContentNodePtr);
+    NG::WaterFlowModelStatic::SetFooter(frameNode, footerContentNodePtr);
+}
+
+void SetWaterFlowFooter(ArkUINodeHandle node, ArkUINodeHandle footerPtr)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    auto uiNode = AceType::Claim(reinterpret_cast<UINode*>(footerPtr));
+    CHECK_NULL_VOID(uiNode);
+
+    NG::WaterFlowModelStatic::SetFooter(frameNode, uiNode);
+}
+
+void SetWaterFlowSection(ArkUINodeHandle node, int32_t start, int32_t deleteCount, void* section, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    std::vector<ArkUIWaterFlowSection> sections(static_cast<ArkUIWaterFlowSection*>(section),
+        static_cast<ArkUIWaterFlowSection*>(section) + size);
+    std::vector<NG::WaterFlowSections::Section> newSections = ConvertToSection(sections);
+    auto waterFlowSections = NG::WaterFlowModelStatic::GetOrCreateWaterFlowSections(frameNode);
+    CHECK_NULL_VOID(waterFlowSections);
+    waterFlowSections->ChangeData(start, deleteCount, newSections);
+}
+
+void SetWaterFlowScroller(ArkUINodeHandle node, void *scrollerPtr)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* scroller = reinterpret_cast<Ark_Scroller>(scrollerPtr);
+    CHECK_NULL_VOID(scroller);
+
+    RefPtr<ScrollControllerBase> positionController = WaterFlowModelStatic::GetOrCreateController(frameNode);
+    RefPtr<ScrollProxy> scrollBarProxy = WaterFlowModelStatic::GetOrCreateScrollBarProxy(frameNode);
+    scroller->SetController(positionController);
+    scroller->SetScrollBarProxy(scrollBarProxy);
+}
+
+void SetWaterFlowLayoutMode(ArkUINodeHandle node, int32_t mode)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    auto layoutMode = NG::WaterFlowLayoutMode::TOP_DOWN;
+    layoutMode = static_cast<NG::WaterFlowLayoutMode>(mode);
+    if (layoutMode < NG::WaterFlowLayoutMode::TOP_DOWN || layoutMode > NG::WaterFlowLayoutMode::SLIDING_WINDOW) {
+        layoutMode = NG::WaterFlowLayoutMode::TOP_DOWN;
+    }
+    WaterFlowModelStatic::SetLayoutMode(frameNode, layoutMode);
 }
 
 const ArkUIAniWaterFlowModifier* GetArkUIAniWaterFlowModifier()
 {
     static const ArkUIAniWaterFlowModifier impl = {
-        .setWaterFlowOptions = OHOS::Ace::NG::SetWaterFlowOptions,
+        .setWaterFlowSection = OHOS::Ace::NG::SetWaterFlowSection,
+        .setWaterFlowFooterContent = OHOS::Ace::NG::SetWaterFlowFooterContent,
+        .setWaterFlowFooter = OHOS::Ace::NG::SetWaterFlowFooter,
+        .setWaterFlowScroller = OHOS::Ace::NG::SetWaterFlowScroller,
+        .setWaterFlowLayoutMode = OHOS::Ace::NG::SetWaterFlowLayoutMode,
     };
     return &impl;
 }

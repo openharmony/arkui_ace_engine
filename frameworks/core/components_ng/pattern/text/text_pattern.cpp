@@ -218,6 +218,7 @@ void TextPattern::ResetSelection()
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        MarkContentNodeForRender();
     }
 }
 
@@ -1349,6 +1350,9 @@ RefPtr<RenderContext> TextPattern::GetRenderContext()
 bool TextPattern::PrepareAIMenuOptions(
         std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions)
 {
+    if (selectDetectEnabledIsUserSet_ || selectDetectTypesIsUserSet_) {
+        return false;
+    }
     aiMenuOptions.clear();
     CHECK_NULL_RETURN(IsSelected(), false);
     CHECK_NULL_RETURN(GetDataDetectorAdapter(), false);
@@ -1403,6 +1407,7 @@ void TextPattern::UpdateAIMenuOptions()
 
 void TextPattern::ProcessOverlay(const OverlayRequest& request)
 {
+    SelectAIDetect();
     selectOverlay_->ProcessOverlay(request);
 }
 
@@ -3880,6 +3885,10 @@ void TextPattern::OnModifyDone()
     RecoverCopyOption();
     RegisterFormVisibleChangeCallback();
     RegisterVisibleAreaChangeCallback();
+    CHECK_NULL_VOID(GetDataDetectorAdapter());
+    if (dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
+        dataDetectorAdapter_->GetAIEntityMenu();
+    }
 }
 
 void TextPattern::UpdateMarqueeStartPolicy()
@@ -4432,7 +4441,8 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
     if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
         ParseOriText(textLayoutProperty->GetContent().value_or(u""));
         if (!dataDetectorAdapter_->aiDetectInitialized_) {
-            dataDetectorAdapter_->StartAITask();
+            bool needClearAISpanMap = NeedClearAISpanMap(textForAICache);
+            dataDetectorAdapter_->StartAITask(needClearAISpanMap);
         }
     }
 }
@@ -4978,6 +4988,26 @@ void TextPattern::DumpSpanItem()
             continue;
         }
         item->SpanDumpInfo();
+    }
+}
+
+void TextPattern::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetTextDetectConfig, textDetectConfig);
+    CHECK_NULL_VOID(GetDataDetectorAdapter());
+    dataDetectorAdapter_->SetTextDetectTypes(textDetectConfig.types);
+    dataDetectorAdapter_->onResult_ = std::move(textDetectConfig.onResult);
+    dataDetectorAdapter_->entityColor_ = textDetectConfig.entityColor;
+    dataDetectorAdapter_->entityDecorationType_ = textDetectConfig.entityDecorationType;
+    dataDetectorAdapter_->entityDecorationColor_ = textDetectConfig.entityDecorationColor;
+    dataDetectorAdapter_->entityDecorationStyle_ = textDetectConfig.entityDecorationStyle;
+    auto textDetectConfigCache = dataDetectorAdapter_->textDetectConfigStr_;
+    dataDetectorAdapter_->enablePreviewMenu_ = textDetectConfig.enablePreviewMenu;
+    dataDetectorAdapter_->textDetectConfigStr_ = textDetectConfig.ToString();
+    if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
+        MarkAISpanStyleChanged();
     }
 }
 
@@ -5643,10 +5673,153 @@ void TextPattern::RemoveAreaChangeInner()
     pipeline->RemoveOnAreaChangeNode(host->GetId());
 }
 
+void TextPattern::SetSelectDetectEnable(bool value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(GetSelectDetectorAdapter());
+    selectDetectorAdapter_->frameNode_ = host;
+    selectDetectEnabledIsUserSet_ = true;
+    selectDetectEnabled_ = value;
+}
+
+bool TextPattern::GetSelectDetectEnable()
+{
+    return selectDetectEnabled_;
+}
+
+void TextPattern::ResetSelectDetectEnable()
+{
+    selectDetectEnabledIsUserSet_ = false;
+    selectDetectEnabled_ = true;
+}
+
+void TextPattern::SetSelectDetectConfig(std::vector<TextDataDetectType>& types)
+{
+    if (types.empty()) {
+        types = TEXT_DETECT_ALL_TYPES_VECTOR;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(GetSelectDetectorAdapter());
+    selectDetectorAdapter_->frameNode_ = host;
+    selectDetectTypesIsUserSet_ = true;
+    if (types == selectDataDetectorTypes_) {
+        return;
+    }
+    selectDataDetectorTypes_ = types;
+}
+
+std::vector<TextDataDetectType> TextPattern::GetSelectDetectConfig()
+{
+    return selectDataDetectorTypes_;
+}
+
+void TextPattern::ResetSelectDetectConfig()
+{
+    selectDetectTypesIsUserSet_ = false;
+    selectDataDetectorTypes_.clear();
+}
+
+void TextPattern::SelectAIDetect()
+{
+    auto [start, end] = GetSelectedStartAndEnd();
+    auto value = GetSelectedText(start, end, false, false, true);
+    CHECK_NULL_VOID(GetSelectDetectorAdapter());
+    selectDetectorAdapter_->textForAI_ = value;
+    selectDetectorAdapter_->SetTextDetectTypes("");
+    auto resultTask = [weak = WeakClaim(this)]() -> void {
+        auto textPattern = weak.Upgrade();
+        CHECK_NULL_VOID(textPattern->GetSelectDetectorAdapter());
+        CHECK_NULL_VOID(textPattern->GetDataDetectorAdapter());
+        CHECK_NULL_VOID(textPattern->IsSelected());
+        auto detectorAdapter = textPattern->GetSelectDetectorAdapter();
+        auto dataDetectorAdapter = textPattern->GetDataDetectorAdapter();
+        int selectedAiEntityNum = 0;
+        auto spanIter = detectorAdapter->aiSpanMap_.begin();
+        std::unordered_map<TextDataDetectType, bool> typeMap;
+        // First. Use DataDetectorConfig
+        if (textPattern->textDetectEnable_) {
+            std::set<std::string> newTypesSet;
+            std::istringstream iss(dataDetectorAdapter->textDetectTypes_);
+            std::string type;
+            while (std::getline(iss, type, ',')) {
+                newTypesSet.insert(type);
+            }
+            for (auto& typeStr : newTypesSet) {
+                if (TEXT_DETECT_MAP_REVERSE.find(typeStr) == TEXT_DETECT_MAP_REVERSE.end()) {
+                    continue;
+                }
+                typeMap[TEXT_DETECT_MAP_REVERSE.at(typeStr)] = true;
+            }
+            if (dataDetectorAdapter->hasUrlType_) {
+                typeMap[TextDataDetectType::URL] = true;
+            }
+        } else {
+            for (auto& mapItr : TEXT_DETECT_MAP) {
+                typeMap[mapItr.first] = true;
+            }
+        }
+        // Second. Use User Set Config
+        if (textPattern->selectDetectEnabled_) {
+            if (textPattern->selectDetectEnabledIsUserSet_) {
+                for (auto& mapItr : TEXT_DETECT_MAP) {
+                    typeMap[mapItr.first] = true;
+                }
+            }
+            if (textPattern->selectDetectTypesIsUserSet_ && !textPattern->selectDataDetectorTypes_.empty()) {
+                typeMap.clear();
+                for (auto typeItr : textPattern->selectDataDetectorTypes_) {
+                    typeMap[typeItr] = true;
+                }
+            }
+        } else {
+            typeMap.clear();
+        }
+        textPattern->aiMenuOptions_.clear();
+        for (; spanIter != detectorAdapter->aiSpanMap_.end(); spanIter++) {
+            if (typeMap.find(spanIter->second.type) == typeMap.end()) {
+                continue;
+            }
+            selectedAiEntityNum++;
+            if (selectedAiEntityNum > MAX_SELECTED_AI_ENTITY) {
+                break;
+            } else {
+                textPattern->aiMenuOptions_[spanIter->second.type] = spanIter->second;
+            }
+        }
+        textPattern->isShowAIMenuOption_ = selectedAiEntityNum == MAX_SELECTED_AI_ENTITY;
+    };
+    selectDetectorAdapter_->SetParseSelectAIResCallBack(std::move(resultTask));
+    auto updateTask = [isShowAIMenuOptionOld = isShowAIMenuOption_, weak = WeakClaim(this)]() -> void {
+        auto textPattern = weak.Upgrade();
+        CHECK_NULL_VOID(textPattern);
+        if (!(textPattern->copyOption_ == CopyOptions::Local || textPattern->copyOption_ == CopyOptions::Distributed)) {
+            textPattern->isShowAIMenuOption_ = false;
+        }
+        if (textPattern->copyOption_ == CopyOptions::Local || textPattern->copyOption_ == CopyOptions::Distributed) {
+            if (textPattern->NeedShowAIDetect() || textPattern->GetSelectDetectEnable()) {
+                textPattern->SetIsAskCeliaEnabled(!textPattern->isShowAIMenuOption_);
+            } else {
+                textPattern->SetIsAskCeliaEnabled(true);
+            }
+        } else {
+            textPattern->SetIsAskCeliaEnabled(false);
+        }
+        if (isShowAIMenuOptionOld == false && isShowAIMenuOptionOld == textPattern->isShowAIMenuOption_) {
+            return;
+        }
+        auto selectOverlay = textPattern->selectOverlay_;
+        CHECK_NULL_VOID(selectOverlay);
+        selectOverlay->UpdateAISelectMenu();
+    };
+    selectDetectorAdapter_->SetUpdateAISelectMenuCallBack(std::move(updateTask));
+    selectDetectorAdapter_->StartAITask(true);
+}
+
 void TextPattern::SetTextDetectEnable(bool enable)
 {
     auto host = GetHost();
-    // call SetTextDetectEnableMultiThread() by multi thread
     FREE_NODE_CHECK(host, SetTextDetectEnable, enable);
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(GetDataDetectorAdapter());
@@ -6846,6 +7019,9 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
             }
         },
         DEFINE_PROP_HANDLER(LetterSpacing, CalcDimension, UpdateLetterSpacing),
+        DEFINE_PROP_HANDLER(LineHeightMultiply, double, UpdateLineHeightMultiply),
+        DEFINE_PROP_HANDLER(MinimumLineHeight, CalcDimension, UpdateMinimumLineHeight),
+        DEFINE_PROP_HANDLER(MaximumLineHeight, CalcDimension, UpdateMaximumLineHeight),
     };
     auto it = handlers.find(key);
     if (it != handlers.end()) {

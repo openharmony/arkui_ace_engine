@@ -620,10 +620,12 @@ void WaterFlowLayoutSW::ClearFront()
 ScrollAlign WaterFlowLayoutSW::ParseAutoAlign(int32_t jumpIdx, bool inView)
 {
     if (inView) {
-        if (Negative(info_->DistanceToTop(jumpIdx, mainGaps_[info_->GetSegment(jumpIdx)]))) {
+        if (LessNotEqual(info_->DistanceToTop(jumpIdx, mainGaps_[info_->GetSegment(jumpIdx)]),
+                         info_->contentStartOffset_)) {
             return ScrollAlign::START;
         }
-        if (Negative(info_->DistanceToBottom(jumpIdx, mainLen_, mainGaps_[info_->GetSegment(jumpIdx)]))) {
+        if (LessNotEqual(info_->DistanceToBottom(jumpIdx, mainLen_, mainGaps_[info_->GetSegment(jumpIdx)]),
+                         info_->contentEndOffset_)) {
             return ScrollAlign::END;
         }
         // item is already fully in viewport
@@ -681,12 +683,12 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
     switch (align) {
         case ScrollAlign::START: {
             if (noSkip) {
-                ApplyDelta(
-                    -info_->DistanceToTop(jumpIdx, mainGaps_[info_->GetSegment(jumpIdx)]) + info_->contentStartOffset_);
+                ApplyDelta(-info_->DistanceToTop(jumpIdx, mainGaps_[info_->GetSegment(jumpIdx)]));
             } else {
                 info_->ResetWithLaneOffset(info_->contentStartOffset_);
                 FillBack(mainLen_, jumpIdx, itemCnt_ - 1);
             }
+            info_->delta_ += info_->contentStartOffset_;
             break;
         }
         case ScrollAlign::CENTER: {
@@ -717,12 +719,12 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
         }
         case ScrollAlign::END: {
             if (noSkip) {
-                ApplyDelta(info_->DistanceToBottom(jumpIdx, mainLen_, mainGaps_[info_->GetSegment(jumpIdx)]) -
-                           info_->contentEndOffset_);
+                ApplyDelta(info_->DistanceToBottom(jumpIdx, mainLen_, mainGaps_[info_->GetSegment(jumpIdx)]));
             } else {
                 info_->ResetWithLaneOffset(mainLen_);
                 FillFront(info_->contentStartOffset_, jumpIdx, 0);
             }
+            info_->delta_ -= info_->contentEndOffset_;
             break;
         }
         default:

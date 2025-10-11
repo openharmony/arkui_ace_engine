@@ -27,11 +27,11 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
@@ -128,9 +128,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         auto updateTsNodeConfig = info[BUILD_PARAM_INDEX_THREE];
         EcmaVM* vm = info.GetVm();
         auto updateTsConfig = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(updateTsNodeConfig));
-        auto updateNodeConfig = [updateTsConfig, vm]() mutable {
-            updateTsConfig->ExecuteJS();
-        };
+        auto updateNodeConfig = [updateTsConfig, vm]() mutable { updateTsConfig->ExecuteJS(); };
         newNode->SetUpdateNodeConfig(std::move(updateNodeConfig));
     }
     if (parent) {
@@ -167,9 +165,10 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 void JSBaseNode::ProccessNode(bool isSupportExportTexture, bool isSupportLazyBuild)
 {
     CHECK_NULL_VOID(viewNode_);
-    CHECK_NULL_VOID(realNode_);
+    auto node = realNode_.Upgrade();
+    CHECK_NULL_VOID(node);
     viewNode_->SetIsRootBuilderNode(true);
-    realNode_->SetJsBuilderNodeId(viewNode_->GetId());
+    node->SetJsBuilderNodeId(viewNode_->GetId());
     if (isSupportExportTexture) {
         viewNode_->CreateExportTextureInfoIfNeeded();
         auto exportTextureInfo = viewNode_->GetExportTextureInfo();
@@ -187,8 +186,8 @@ void JSBaseNode::Create(const JSCallbackInfo& info)
     if (info.Length() >= 1 && !info[0]->IsFunction()) {
         return;
     }
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) && info.Length() >= INFO_LENGTH_LIMIT
-        && !(info[1]->IsObject() || info[1]->IsUndefined() || info[1]->IsNull())) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) && info.Length() >= INFO_LENGTH_LIMIT &&
+        !(info[1]->IsObject() || info[1]->IsUndefined() || info[1]->IsNull())) {
         return;
     }
     BuildNode(info);
@@ -351,7 +350,8 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
 
 void JSBaseNode::PostInputEvent(const JSCallbackInfo& info)
 {
-    if (!realNode_ || info.Length() < 1 || !info[0]->IsObject()) {
+    auto node = realNode_.Upgrade();
+    if (!node || info.Length() < 1 || !info[0]->IsObject()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostInputEvent params invalid");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
@@ -382,7 +382,7 @@ void JSBaseNode::PostInputEvent(const JSCallbackInfo& info)
             info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
             return;
         }
-        result = postEventManager->PostTouchEvent(realNode_, std::move(touchEvent));
+        result = postEventManager->PostTouchEvent(node, std::move(touchEvent));
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
         return;
     }
@@ -393,7 +393,7 @@ void JSBaseNode::PostInputEvent(const JSCallbackInfo& info)
             info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
             return;
         }
-        result = postEventManager->PostAxisEvent(realNode_, std::move(axisEvent));
+        result = postEventManager->PostAxisEvent(node, std::move(axisEvent));
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
         return;
     }
@@ -402,7 +402,7 @@ void JSBaseNode::PostInputEvent(const JSCallbackInfo& info)
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
-    result = postEventManager->PostMouseEvent(realNode_, std::move(mouseEvent));
+    result = postEventManager->PostMouseEvent(node, std::move(mouseEvent));
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
@@ -422,7 +422,9 @@ bool JSBaseNode::GetTouches(const JSCallbackInfo& info, TouchEvent& touchEvent)
         JSRef<JSArray> touchesArray = JSRef<JSArray>::Cast(touchesJsVal);
         for (auto index = 0; index < static_cast<int32_t>(touchesArray->Length()); index++) {
             JSRef<JSVal> item = touchesArray->GetValueAt(index);
-            if (!item->IsObject()) { continue; }
+            if (!item->IsObject()) {
+                continue;
+            }
             JSRef<JSObject> itemObj = JSRef<JSObject>::Cast(item);
             TouchPoint point;
             point.id = itemObj->GetPropertyValue<int32_t>("id", 0);
@@ -872,9 +874,10 @@ void JSBaseNode::UpdateEnd(const JSCallbackInfo& info)
 
 void JSBaseNode::OnReuseWithBindThis(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(realNode_);
+    auto node = realNode_.Upgrade();
+    CHECK_NULL_VOID(node);
     std::queue<RefPtr<NG::UINode>> elements;
-    elements.push(realNode_);
+    elements.push(node);
     void* data = static_cast<void*>(info.GetJsiRuntimeCallInfo());
     while (!elements.empty()) {
         auto currentNode = elements.front();
@@ -895,9 +898,10 @@ void JSBaseNode::OnReuseWithBindThis(const JSCallbackInfo& info)
 
 void JSBaseNode::OnRecycleWithBindThis(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(realNode_);
+    auto node = realNode_.Upgrade();
+    CHECK_NULL_VOID(node);
     std::queue<RefPtr<NG::UINode>> elements;
-    elements.push(realNode_);
+    elements.push(node);
     while (!elements.empty()) {
         auto currentNode = elements.front();
         elements.pop();

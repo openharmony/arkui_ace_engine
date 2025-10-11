@@ -382,6 +382,7 @@ protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
 private:
+    bool IsHomeNodeAndShouldShow(const RefPtr<NavDestinationGroupNode>& navDestination) const;
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize,
         const RefPtr<UINode>& preLastStandardNode);

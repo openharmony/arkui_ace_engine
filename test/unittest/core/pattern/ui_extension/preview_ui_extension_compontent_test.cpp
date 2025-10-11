@@ -254,7 +254,8 @@ HWTEST_F(PreviewUIExtensionComponentTestNg, PreviewUIExtensionCallbackTest, Test
     /**
      * @tc.steps: step2. check sessionWrapper
      */
-    auto sessionWrapper = AceType::DynamicCast<PreviewSessionWrapperImpl>(pattern->sessionWrapper_);
+    auto sessionWrapper =
+        AceType::DynamicCast<PreviewSessionWrapperImpl>(pattern->sessionWrapper_);
     ASSERT_NE(sessionWrapper, nullptr);
     EXPECT_EQ(pattern->instanceId_, Container::CurrentId());
     EXPECT_EQ(pattern->instanceId_, sessionWrapper->instanceId_);

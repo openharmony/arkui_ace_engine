@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,6 +157,8 @@ const RefPtr<Curve> MOVE_MAGNIFIER_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
 constexpr int32_t LAND_DURATION = 100;
 constexpr int32_t ENTER_OFFSET = 1;
+
+constexpr int MAX_SELECTED_AI_ENTITY = 1;
 
 static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap_ = {
     { AceAutoFillType::ACE_PASSWORD, TextInputType::VISIBLE_PASSWORD},
@@ -580,6 +582,30 @@ void TextFieldPattern::BeforeCreateLayoutWrapper()
     selectOverlay_->MarkOverlayDirty();
 }
 
+void TextFieldPattern::SetPlaceholderStyledString(const RefPtr<SpanString>& value)
+{
+    if (!placeholderResponseArea_) {
+        placeholderResponseArea_ = AceType::MakeRefPtr<PlaceholderResponseArea>(WeakClaim(this));
+        placeholderResponseArea_->InitResponseArea();
+    }
+    CHECK_NULL_VOID(placeholderResponseArea_);
+    auto placeholder = DynamicCast<PlaceholderResponseArea>(placeholderResponseArea_);
+    CHECK_NULL_VOID(placeholder);
+    placeholder->SetStyleString(value);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+bool TextFieldPattern::IsStyledPlaceholder()
+{
+    CHECK_NULL_RETURN(placeholderResponseArea_, false);
+    auto textNode = placeholderResponseArea_->GetFrameNode();
+    CHECK_NULL_RETURN(textNode, false);
+    auto value = textNode->GetParent() ? true : false;
+    return value;
+}
+
 bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
@@ -598,6 +624,8 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         skipUpdateParagraph = ShouldSkipUpdateParagraph();
         paragraph_ = paragraph;
         paragraphWidth = std::max(paragraph->GetLongestLine(), 0.0f);
+    } else if (IsStyledPlaceholder()) {
+        paragraph_ = nullptr;
     }
     UpdateParagraphForDragNode(skipUpdateParagraph);
     auto textRect = textFieldLayoutAlgorithm->GetTextRect();
@@ -851,7 +879,13 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
         "%{public}d, end %{public}d",
         cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height, selectController_->GetStartIndex(),
         selectController_->GetEndIndex());
-
+#else
+#ifdef CROSS_PLATFORM
+    TextEditingValue value;
+    value.text = contentController_->GetTextValue();
+    value.hint = UtfUtils::Str16DebugToStr8(GetPlaceHolder());
+    value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+    InputMethodManager::GetInstance()->SetEditingState(value, GetInstanceId());
 #else
     if (HasConnection()) {
         TextEditingValue value;
@@ -860,6 +894,7 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
         value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         connection_->SetEditingState(value, GetInstanceId());
     }
+#endif
 #endif
 }
 
@@ -1566,6 +1601,9 @@ void TextFieldPattern::ModifyInnerStateInBlurEvent()
 
 void TextFieldPattern::HandleCrossPlatformInBlurEvent()
 {
+#ifdef CROSS_PLATFORM
+    return;
+#endif
 #ifndef OHOS_PLATFORM
     if (HasConnection()) {
         CloseKeyboard(true);
@@ -1918,10 +1956,15 @@ void TextFieldPattern::HandleOnCameraInput()
     if (imeShown_) {
         inputMethod->StartInputTypeAsync(MiscServices::InputType::CAMERA_INPUT);
     } else {
-        FireOnWillAttachIME();
+        auto clientInfo = GetIMEClientInfo();
+        FireOnWillAttachIME(clientInfo);
         auto optionalTextConfig = GetMiscTextConfig();
         CHECK_NULL_VOID(optionalTextConfig.has_value());
         MiscServices::TextConfig textConfig = optionalTextConfig.value();
+        if (clientInfo.extraInfo && clientInfo.extraInfo->GetExtraInfo()) {
+            textConfig.inputAttribute.extraConfig =
+                *reinterpret_cast<MiscServices::ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
+        }
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnCameraInput set calling window id is : %{public}u",
             textConfig.windowId);
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -3096,6 +3139,91 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void TextFieldPattern::HandleAIMenuOption(const std::string& labelInfo)
+{
+    CHECK_NE_VOID(isShowAIMenuOption_, true);
+    CHECK_NE_VOID(aiMenuOptions_.size(), 1);
+    auto aiSpan = aiMenuOptions_.begin()->second;
+    auto aiEntityType = aiSpan.type;
+    CHECK_NULL_VOID(selectDetectorAdapter_);
+    auto menuOptionAndActions = selectDetectorAdapter_->textDetectResult_.
+                                menuOptionAndAction[TEXT_DETECT_MAP.at(aiEntityType)];
+    CHECK_EQUAL_VOID(menuOptionAndActions.empty(), true);
+    selectDetectorAdapter_->OnClickAIMenuOption(aiSpan, *menuOptionAndActions.begin(), nullptr);
+}
+
+void TextFieldPattern::SelectAIDetect()
+{
+    CHECK_NULL_VOID(GetSelectDetectorAdapter());
+    auto start = selectController_->GetStartIndex();
+    auto end = selectController_->GetEndIndex();
+    auto value = contentController_->GetSelectedValue(start, end);
+    CHECK_NULL_VOID(GetSelectDetectorAdapter());
+    selectDetectorAdapter_->textForAI_ = value;
+    selectDetectorAdapter_->SetTextDetectTypes("");
+    auto resultTask = [weak = WeakClaim(this)]() -> void {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern->GetSelectDetectorAdapter());
+        CHECK_NULL_VOID(pattern->IsSelected());
+        auto detectorAdapter = pattern->GetSelectDetectorAdapter();
+        int selectedAiEntityNum = 0;
+        auto spanIter = detectorAdapter->aiSpanMap_.begin();
+        std::unordered_map<TextDataDetectType, bool> typeMap;
+        // Default. All Detect Types
+        for (auto& mapItr : TEXT_DETECT_MAP) {
+            typeMap[mapItr.first] = true;
+        }
+        // First. Use DataDetectorConfig
+        if (pattern->selectDetectEnabled_) {
+            if (pattern->selectDetectEnabledIsUserSet_) {
+                for (auto& mapItr : TEXT_DETECT_MAP) {
+                    typeMap[mapItr.first] = true;
+                }
+            }
+            if (pattern->selectDetectTypesIsUserSet_ && !pattern->selectDataDetectorTypes_.empty()) {
+                typeMap.clear();
+                for (auto typeItr : pattern->selectDataDetectorTypes_) {
+                    typeMap[typeItr] = true;
+                }
+            }
+        } else {
+            typeMap.clear();
+        }
+        pattern->aiMenuOptions_.clear();
+        for (; spanIter != detectorAdapter->aiSpanMap_.end(); spanIter++) {
+            if (typeMap.find(spanIter->second.type) == typeMap.end()) {
+                continue;
+            }
+            selectedAiEntityNum++;
+            if (selectedAiEntityNum > MAX_SELECTED_AI_ENTITY) {
+                break;
+            } else {
+                pattern->aiMenuOptions_[spanIter->second.type] = spanIter->second;
+            }
+        }
+        pattern->isShowAIMenuOption_ = selectedAiEntityNum == MAX_SELECTED_AI_ENTITY;
+    };
+    selectDetectorAdapter_->SetParseSelectAIResCallBack(std::move(resultTask));
+    auto updateTask = [isShowAIMenuOptionOld = isShowAIMenuOption_, weak = WeakClaim(this)]() -> void {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        if (!(layoutProperty->GetCopyOptionsValue(CopyOptions::Local) == CopyOptions::Local ||
+                layoutProperty->GetCopyOptionsValue(CopyOptions::Local) == CopyOptions::Distributed)) {
+            pattern->isShowAIMenuOption_ = false;
+        }
+        if (isShowAIMenuOptionOld == false && isShowAIMenuOptionOld == pattern->isShowAIMenuOption_) {
+            return;
+        }
+        auto selectOverlay = pattern->selectOverlay_;
+        CHECK_NULL_VOID(selectOverlay);
+        selectOverlay->UpdateAISelectMenu();
+    };
+    selectDetectorAdapter_->SetUpdateAISelectMenuCallBack(std::move(updateTask));
+    selectDetectorAdapter_->StartAITask(true);
+}
+
 void TextFieldPattern::HandleTripleClickEvent(GestureEvent& info)
 {
     if (GetIsPreviewText()) {
@@ -3503,6 +3631,10 @@ void TextFieldPattern::OnModifyDone()
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         InitCancelButtonMouseEvent();
         InitPasswordButtonMouseEvent();
+    }
+    CHECK_NULL_VOID(GetSelectDetectorAdapter());
+    if (selectDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
+        selectDetectorAdapter_->GetAIEntityMenu();
     }
 }
 
@@ -4046,7 +4178,56 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 
 void TextFieldPattern::ProcessOverlay(const OverlayRequest& request)
 {
+    SelectAIDetect();
     selectOverlay_->ProcessOverlay(request);
+}
+
+void TextFieldPattern::SetSelectDetectEnable(bool value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(GetSelectDetectorAdapter());
+    selectDetectorAdapter_->frameNode_ = host;
+    selectDetectEnabledIsUserSet_ = true;
+    selectDetectEnabled_ = value;
+}
+
+bool TextFieldPattern::GetSelectDetectEnable()
+{
+    return selectDetectEnabled_;
+}
+
+void TextFieldPattern::ResetSelectDetectEnable()
+{
+    selectDetectEnabledIsUserSet_ = false;
+    selectDetectEnabled_ = true;
+}
+
+void TextFieldPattern::SetSelectDetectConfig(std::vector<TextDataDetectType>& types)
+{
+    if (types.empty()) {
+        types = TEXT_DETECT_ALL_TYPES_VECTOR;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(GetSelectDetectorAdapter());
+    selectDetectorAdapter_->frameNode_ = host;
+    selectDetectTypesIsUserSet_ = true;
+    if (types == selectDataDetectorTypes_) {
+        return;
+    }
+    selectDataDetectorTypes_ = types;
+}
+
+std::vector<TextDataDetectType> TextFieldPattern::GetSelectDetectConfig()
+{
+    return selectDataDetectorTypes_;
+}
+
+void TextFieldPattern::ResetSelectDetectConfig()
+{
+    selectDetectTypesIsUserSet_ = false;
+    selectDataDetectorTypes_.clear();
 }
 
 void TextFieldPattern::DelayProcessOverlay(const OverlayRequest& request)
@@ -4705,10 +4886,15 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "RequestKeyboard, inputMethod is null");
         return false;
     }
-    FireOnWillAttachIME();
+    auto clientInfo = GetIMEClientInfo();
+    FireOnWillAttachIME(clientInfo);
     auto optionalTextConfig = GetMiscTextConfig();
     CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
     MiscServices::TextConfig textConfig = optionalTextConfig.value();
+    if (clientInfo.extraInfo && clientInfo.extraInfo->GetExtraInfo()) {
+        textConfig.inputAttribute.extraConfig =
+            *reinterpret_cast<MiscServices::ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
+    }
     ACE_LAYOUT_SCOPED_TRACE("RequestKeyboard[id:%d][WId:%u]", tmpHost->GetId(), textConfig.windowId);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
         " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d, sourceType:%{public}u"
@@ -4767,6 +4953,25 @@ bool TextFieldPattern::RequestKeyboardCrossPlatForm(bool isFocusViewChanged)
     CHECK_NULL_RETURN(tmpHost, false);
     auto context = tmpHost->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
+#ifdef CROSS_PLATFORM
+    TextInputConfiguration config;
+    config.type = keyboard_;
+    config.action = GetTextInputActionValue(GetDefaultTextInputAction());
+    config.inputFilter = GetInputFilter();
+    config.maxLength = GetMaxLength();
+    if (keyboard_ == TextInputType::VISIBLE_PASSWORD || keyboard_ == TextInputType::NEW_PASSWORD) {
+        config.obscureText = textObscured_;
+    }
+    TextEditingValue value;
+    value.text = contentController_->GetTextValue();
+    value.hint = UtfUtils::Str16DebugToStr8(GetPlaceHolder());
+    value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+    auto inputMethodManager = InputMethodManager::GetInstance();
+    CHECK_NULL_RETURN(inputMethodManager, false);
+    inputMethodManager->Attach(WeakClaim(this), config, context->GetTaskExecutor(), GetInstanceId());
+    inputMethodManager->SetEditingState(value, GetInstanceId());
+    inputMethodManager->ShowKeyboard(isFocusViewChanged, GetInstanceId());
+#else
     if (!HasConnection()) {
         TextInputConfiguration config;
         config.type = keyboard_;
@@ -4789,6 +4994,7 @@ bool TextFieldPattern::RequestKeyboardCrossPlatForm(bool isFocusViewChanged)
     value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
     connection_->SetEditingState(value, GetInstanceId());
     connection_->Show(isFocusViewChanged, GetInstanceId());
+#endif
 #endif
     return true;
 }
@@ -4931,10 +5137,14 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose, bool isStopTwinkling)
         }
         inputMethod->Close();
 #else
+#ifdef CROSS_PLATFORM
+        InputMethodManager::GetInstance()->CloseKeyboard(GetInstanceId());
+#else
         if (HasConnection()) {
             connection_->Close(GetInstanceId());
             connection_ = nullptr;
         }
+#endif
 #endif
         return true;
     }
@@ -4956,10 +5166,14 @@ bool TextFieldPattern::RequestCustomKeyboard()
         inputMethod->Close();
     }
 #else
+#ifdef CROSS_PLATFORM
+    InputMethodManager::GetInstance()->CloseKeyboard(GetInstanceId());
+#else
     if (HasConnection()) {
         connection_->Close(GetInstanceId());
         connection_ = nullptr;
     }
+#endif
 #endif
 
     if (isCustomKeyboardAttached_) {
@@ -5422,9 +5636,9 @@ float TextFieldPattern::FontSizeConvertToPx(const Dimension& fontSize)
     return fontSize.ConvertToPx();
 }
 
-float TextFieldPattern::PreferredLineHeight(bool isAlgorithmMeasure)
+float TextFieldPattern::PreferredLineHeight(bool isAlgorithmMeasure, bool isStyelPlaceholder)
 {
-    return PreferredTextHeight(contentController_->IsEmpty(), isAlgorithmMeasure);
+    return PreferredTextHeight(contentController_->IsEmpty() && !isStyelPlaceholder, isAlgorithmMeasure);
 }
 
 void TextFieldPattern::OnCursorMoveDone(TextAffinity textAffinity, std::optional<Offset> offset)
@@ -5858,14 +6072,7 @@ void TextFieldPattern::HandleCounterBorder()
             underlineWidth_ = ERROR_UNDERLINE_WIDTH;
             SetUnderlineColor(userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor()));
         } else {
-            if (!paintProperty->HasBorderWidthFlagByUser()) {
-                paintProperty->UpdateInnerBorderWidth(OVER_COUNT_BORDER_WIDTH);
-                paintProperty->UpdateInnerBorderColor(theme->GetOverCounterColor());
-            } else {
-                BorderColorProperty overCountBorderColor;
-                overCountBorderColor.SetColor(theme->GetOverCounterColor());
-                renderContext->UpdateBorderColor(overCountBorderColor);
-            }
+            ApplyInnerBorderColor();
         }
     } else {
         if (IsUnderlineMode() && !IsShowError()) {
@@ -5875,6 +6082,35 @@ void TextFieldPattern::HandleCounterBorder()
         } else {
             SetThemeBorderAttr();
         }
+    }
+}
+
+void TextFieldPattern::ApplyInnerBorderColor()
+{
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    if (!paintProperty->HasBorderWidthFlagByUser()) {
+        paintProperty->UpdateInnerBorderWidth(OVER_COUNT_BORDER_WIDTH);
+        if (layoutProperty && layoutProperty->HasCounterTextOverflowColor()) {
+            paintProperty->UpdateInnerBorderColor(layoutProperty->GetCounterTextOverflowColorValue());
+        } else {
+            paintProperty->UpdateInnerBorderColor(theme->GetOverCounterColor());
+        }
+    } else {
+        BorderColorProperty overCountBorderColor;
+        if (layoutProperty->HasCounterTextOverflowColor()) {
+            overCountBorderColor.SetColor(layoutProperty->GetCounterTextOverflowColorValue());
+        } else {
+            overCountBorderColor.SetColor(theme->GetOverCounterColor());
+        }
+        renderContext->UpdateBorderColor(overCountBorderColor);
     }
 }
 
@@ -7103,12 +7339,14 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
 
 void TextFieldPattern::InitTheme()
 {
+    CHECK_NULL_VOID(!textFieldInitTheme_);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto context = tmpHost->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
     textFieldTheme_ = theme;
+    textFieldInitTheme_ = true;
     // for normal app add version protection, enable keyboard as default start from API 10 or higher
     if (context->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
         if (theme) {
@@ -7932,8 +8170,12 @@ void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, co
     auto jsonShowCounter = JsonUtil::Create(true);
     jsonShowCounter->Put("value", layoutProperty->GetShowCounterValue(false));
     auto jsonShowCounterOptions = JsonUtil::Create(true);
+    auto counterTextColor = layoutProperty->GetCounterTextColor();
+    auto counterTextOverflowColor = layoutProperty->GetCounterTextOverflowColor();
     jsonShowCounterOptions->Put("thresholdPercentage", layoutProperty->GetSetCounterValue(DEFAULT_MODE));
     jsonShowCounterOptions->Put("highlightBorder", layoutProperty->GetShowHighlightBorderValue(true));
+    jsonShowCounterOptions->Put("counterTextColor", counterTextColor->ColorToString().c_str());
+    jsonShowCounterOptions->Put("counterTextOverflowColor", counterTextOverflowColor->ColorToString().c_str());
     jsonShowCounter->Put("options", jsonShowCounterOptions);
     json->PutExtAttr("showCounter", jsonShowCounter, filter);
     json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(keyboardAppearance_), filter);
@@ -8311,13 +8553,16 @@ void TextFieldPattern::DumpAdvanceInfo()
                                        .append(", height:")
                                        .append(std::to_string(cursorInfo.height)));
 #endif
-    DumpLog::GetInstance().AddDesc(std::string("textRect: ").append(contentRect_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("textRect: ").append(textRect_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("contentRect: ").append(contentRect_.ToString()));
 }
 
 void TextFieldPattern::DumpPlaceHolderInfo()
 {
-    DumpLog::GetInstance().AddDesc(std::string("placeholder: ").append(UtfUtils::Str16DebugToStr8(GetPlaceHolder())));
+    DumpLog::GetInstance().AddDesc(std::string("placeholder: ")
+                                       .append(UtfUtils::Str16DebugToStr8(GetPlaceHolder()))
+                                       .append(" [IsStyledPlaceholder:")
+                                       .append(IsStyledPlaceholder() ? "true]" : "false]"));
     DumpLog::GetInstance().AddDesc(std::string("placeholderColor: ").append(GetPlaceholderColor()));
     DumpLog::GetInstance().AddDesc(std::string("placeholderFont: ").append(GetPlaceholderFont()));
 }
@@ -8602,8 +8847,7 @@ void TextFieldPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
-        auto host = GetHost();
-        fontManager->AddFontNodeNG(host);
+        fontManager->AddFontNodeNG(frameNode);
     }
     auto onTextSelectorChange = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -8612,6 +8856,7 @@ void TextFieldPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(frameNode);
         frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
     };
+    CHECK_NULL_VOID(selectController_);
     selectController_->SetOnAccessibility(std::move(onTextSelectorChange));
 }
 
@@ -10790,9 +11035,10 @@ SelectionInfo TextFieldPattern::GetSelection()
 
 FocusPattern TextFieldPattern::GetFocusPattern() const
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, GetFocusPattern);
     FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
     focusPattern.SetIsFocusActiveWhenFocused(true);
-    auto host = GetHost();
     CHECK_NULL_RETURN(host, focusPattern);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, focusPattern);
@@ -11293,6 +11539,9 @@ void TextFieldPattern::SetUnitNode(const RefPtr<NG::UINode>& unitNode)
 
 void TextFieldPattern::SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, SetCustomKeyboard,
+        std::move(keyboardBuilder));  // call SetCustomKeyboardWithNodeMultiThread() by multi thread
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
         // close customKeyboard and request system keyboard
         CloseCustomKeyboard();
@@ -11483,13 +11732,13 @@ IMEClient TextFieldPattern::GetIMEClientInfo()
     return clientInfo;
 }
 
-void TextFieldPattern::FireOnWillAttachIME()
+void TextFieldPattern::FireOnWillAttachIME(IMEClient& imeClient)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnWillAttachIME(GetIMEClientInfo());
+    eventHub->FireOnWillAttachIME(imeClient);
 }
 
 void TextFieldPattern::OnColorModeChange(uint32_t colorMode)
@@ -11526,6 +11775,8 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
         DEFINE_PROP_HANDLER(lineHeight, CalcDimension, UpdateLineHeight),
         DEFINE_PROP_HANDLER(lineHeight, CalcDimension, UpdateLineHeight),
         DEFINE_PROP_HANDLER(cancelButtonIconSrc, std::string, UpdateIconSrc),
+        DEFINE_PROP_HANDLER(counterTextColor, Color, UpdateCounterTextColor),
+        DEFINE_PROP_HANDLER(counterTextOverflowColor, Color, UpdateCounterTextOverflowColor),
         
         {"placeholder", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 if (auto realValue = std::get_if<std::u16string>(&(value->GetValue()))) {

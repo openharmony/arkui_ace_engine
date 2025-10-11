@@ -58,6 +58,8 @@ public:
     void ResetPlaceholderColor() override;
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
+    void SetSelectDetectEnable(bool value) override;
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& color) override;
@@ -84,6 +86,7 @@ public:
     void SetOnChangeEvent(std::function<void(const std::u16string&)>&& onChangeEvent) override;
     void SetSelectionMenuHidden(bool selectionMenuHidden) override;
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override;
+    void SetCustomKeyboardWithNode(FrameNode* customKeyboard, bool supportAvoidance = false) override;
     void SetSearchEnterKeyType(TextInputAction value) override;
     void SetSearchCapitalizationMode(AutoCapitalizationMode value) override;
     void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>& onError) override;
@@ -117,7 +120,7 @@ public:
     void SetStrokeColor(const Color& value) override;
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
-    void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) override;
+    void SetOnWillAttachIME(IMEAttachCallback&& func) override;
     void SetUserMargin() override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
@@ -131,6 +134,10 @@ public:
     static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetPlaceholderFont(FrameNode* frameNode, const Font& font);
+    static void SetCustomKeyboard(
+        FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance = false);
+    static void SetCustomKeyboardWithNode(
+        FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance = false);
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchSrcPath(FrameNode* frameNode, const std::string& src);
     static void SetSearchIconColor(FrameNode* frameNode, const Color& color);
@@ -186,6 +193,12 @@ public:
     static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetShowCounter(FrameNode* frameNode, bool value);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
+    static void SetSelectDetectEnable(FrameNode* frameNode, bool value);
+    static bool GetSelectDetectEnable(FrameNode* frameNode);
+    static void ResetSelectDetectEnable(FrameNode* frameNode);
+    static void SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types);
+    static std::vector<TextDataDetectType> GetSelectDetectConfig(FrameNode* frameNode);
+    static void ResetSelectDetectConfig(FrameNode* frameNode);
     static void SetShowCounterBorder(FrameNode* frameNode, bool value);
     static RefPtr<TextFieldControllerBase> GetSearchController(FrameNode* frameNode);
     static void SetOnWillInsertValueEvent(FrameNode* frameNode, std::function<bool(const InsertValueInfo&)>&& func);
@@ -210,6 +223,7 @@ public:
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
     static void SetKeyboardAppearanceConfig(FrameNode* frameNode, KeyboardAppearanceConfig config);
     static void SetUserMargin(FrameNode* frameNode);
+    static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
 
 private:
     static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);
@@ -234,6 +248,7 @@ private:
     static void TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode);
     static void TextFieldUpdateContextMultiThread(const RefPtr<FrameNode>& frameNode);
     static void CreateDivider(const RefPtr<SearchNode>& parentNode, bool hasDividerNode);
+    static void CreateDividerMultiThread(const RefPtr<SearchNode>& parentNode, bool hasDividerNode);
 };
 
 } // namespace OHOS::Ace::NG

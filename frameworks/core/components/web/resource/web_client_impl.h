@@ -234,6 +234,7 @@ public:
     void OnOverScrollFlingEnd() override;
     void OnScrollState(bool scrollState) override;
     void EnableSecurityLayer(bool isNeedSecurityLayer) override;
+    void UpdateTextFieldStatus(bool isShowKeyboard, bool isAttachIME) override;
     void OnRootLayerChanged(int width, int height) override;
     void ReleaseResizeHold() override;
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity) override;
@@ -334,7 +335,8 @@ public:
     void OnRemoveBlanklessFrame(int delayTime) override;
     bool OnBeforeUnloadByJSV2(const std::string& url, const std::string& message, bool isReload,
         std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
-
+    void OnDetectedBlankScreen(
+        const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount) override;
     void OnPdfScrollAtBottom(const std::string& url) override;
     void OnPdfLoadEvent(int32_t result, const std::string& url) override;
     void OnInsertBlanklessFrameWithSize(const std::string& pathToFrame,

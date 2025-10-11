@@ -17,10 +17,10 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { FrameNode } from "arkui/FrameNode"
-import { FontOptions, FontInfo } from "@ohos/font"
+import { default as font } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
-import { SizeOptions } from "arkui/component/units"
-import { AnimateParam } from "arkui/component"
+import { SizeOptions } from 'arkui/framework'
+import { AnimateParam } from 'arkui/framework'
 import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from "@ohos/animator"
 import { Context, PointerStyle, PixelMap } from "#external"
 import { componentUtils } from "@ohos/arkui/componentUtils"
@@ -28,33 +28,27 @@ import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { dragController } from "@ohos/arkui/dragController"
 import { focusController } from "@ohos/arkui/focusController"
 import { Frame } from "arkui/Graphics"
-import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions, ExpectedFrameRateRange } from "arkui/component/common"
-import { TextMenuOptions } from "arkui/component/textCommon"
-import { Nullable, WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
-import { KeyProcessingMode } from "arkui/component/focus"
-import { uiObserver } from "@ohos/arkui/observer"
-import { mediaquery } from '@ohos/mediaquery'
-import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
-    AlertDialogParamWithOptions }from "arkui/component/alertDialog"
-import { ActionSheet, ActionSheetOptions} from "arkui/component/actionSheet"
-import {TimePickerDialog, TimePickerDialogOptions} from "arkui/component/timePicker"
-import {DatePickerDialog, DatePickerDialogOptions} from "arkui/component/datePicker"
-import {TextPickerDialog, TextPickerDialogOptions} from "arkui/component/textPicker"
+import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions } from 'arkui/framework'
+import { TextMenuOptions } from 'arkui/framework'
+import { Nullable, WidthBreakpoint, HeightBreakpoint } from 'arkui/framework'
+import { KeyProcessingMode } from 'arkui/framework'
+import { default as uiObserver } from "@ohos/arkui/observer"
+import { default as mediaquery } from '@ohos/mediaquery'
+import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
+    AlertDialogParamWithOptions }from 'arkui/framework'
+import { ActionSheetOptions} from 'arkui/framework'
 import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import { ComponentContent } from 'arkui/ComponentContent'
 import overlayManager from '@ohos/overlayManager'
 import promptAction, { LevelOrder } from '@ohos/promptAction'
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
-import { AsyncCallback, CustomBuilder, CustomBuilderT, DragItemInfo, Callback } from 'arkui/component'
-import { Router as RouterExt } from 'arkui/handwritten';
-import { ComponentContent } from "arkui/ComponentContent"
+import { CustomBuilder, CustomBuilderT, DragItemInfo, Callback } from 'arkui/framework'
+import { Router as RouterExt, AsyncCallback } from 'arkui/base';
 import { ComputableState, IncrementalNode } from '@koalaui/runtime'
 import { PeerNode } from 'arkui/PeerNode'
 import { ArkUIAniModule } from 'arkui.ani';
-import { UIContextUtil } from 'arkui/handwritten/UIContextUtil';
-import { int32 } from "@koalaui/common"
-import { KPointer } from "@koalaui/interop"
+import { UIContextUtil } from 'arkui/base/UIContextUtil';
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
@@ -67,49 +61,14 @@ export interface TargetInfo {
     componentId?: number;
 }
 
-export class DynamicSyncScene {
-    private range: ExpectedFrameRateRange;
-    constructor(range: ExpectedFrameRateRange) {
-        this.range = range;
-    }
-
-    setFrameRateRange(range: ExpectedFrameRateRange): void {
-        this.range = range;
-    }
-
-    getFrameRateRange(): ExpectedFrameRateRange {
-        return this.range;
-    }
-}
-
-export const enum SwiperDynamicSyncSceneType {
-    GESTURE = 0,
-    ANIMATION = 1,
-}
-
-export class SwiperDynamicSyncScene extends DynamicSyncScene {
-    readonly type: SwiperDynamicSyncSceneType;
-    nodePtr: KPointer;
-    constructor(type: SwiperDynamicSyncSceneType, nodePtr: KPointer) {
-        super({ min: 0, max: 120, expected: 120 } as ExpectedFrameRateRange);
-        this.type = type;
-        this.nodePtr = nodePtr;
-    }
-
-    setFrameRateRange(range: ExpectedFrameRateRange): void {
-        super.setFrameRateRange(range);
-        ArkUIAniModule._Common_SetFrameRateRange(this.nodePtr, range, this.type);
-    }
-}
-
 export class Font {
-    public registerFont(options: FontOptions) : void {
+    public registerFont(options: font.FontOptions) : void {
         throw Error("registerFont not implemented in Font!")
     }
     public getSystemFontList() : Array<string> {
         throw Error("getSystemFontList not implemented in Font!")
     }
-    public getFontByName(fontName : string) : FontInfo {
+    public getFontByName(fontName : string) : font.FontInfo {
         throw Error("getFontByName not implemented in Font!")
     }
 }
@@ -121,7 +80,7 @@ export class MediaQuery {
 }
 
 export class MeasureUtils {
-    public measureText(options: MeasureOptions) : number {
+    public measureText(options: MeasureOptions) : double {
         throw Error("measureText not implemented in MeasureUtils!")
     }
     public measureTextSize(options: MeasureOptions) : SizeOptions {
@@ -170,7 +129,7 @@ export class Router {
         throw Error("getState not implemented in Router!");
     }
 
-    public getStateByIndex(index: number): router.RouterState | undefined {
+    public getStateByIndex(index: int): router.RouterState | undefined {
         throw Error("getStateByIndex not implemented in Router!");
     }
 
@@ -178,7 +137,7 @@ export class Router {
         throw Error("getStateByUrl not implemented in Router!");
     }
 
-    public getStateRoot(): ComputableState<IncrementalNode> {
+    public getStateRoot(): ComputableState<IncrementalNode> | undefined {
         throw Error("getStateRoot not implemented in Router!");
     }
 
@@ -266,16 +225,16 @@ export class ComponentSnapshot {
 
 export class DragController {
     //@ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo,
+    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo,
         callback: AsyncCallback<dragController.DragEventParam>): void {
         throw Error("executeDrag with callback not implemented in DragController!")
     }
     //@ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo):
+    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
         Promise<dragController.DragEventParam> {
         throw Error("executeDrag with promise not implemented in DragController!")
     }
-    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo> | undefined,
+    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
         dragInfo: dragController.DragInfo): dragController.DragAction {
         throw Error("createDragAction not implemented in DragController!")
     }
@@ -608,18 +567,6 @@ export class UIContext {
     public showActionSheet(options: ActionSheetOptions): void {
         throw Error("showActionSheet not implemented in UIContext!")
     }
-
-    public showTimePickerDialog(options: TimePickerDialogOptions): void {
-        throw Error("showTimePickerDialog not implemented in UIContext!")
-    }
-
-    public showDatePickerDialog(options: DatePickerDialogOptions): void {
-        throw Error("showDatePickerDialog not implemented in UIContext!")
-    }
-
-    public showTextPickerDialog(options: TextPickerDialogOptions): void {
-        throw Error("showTextPickerDialog not implemented in UIContext!")
-    }
     // @ts-ignore
     public freezeUINode(id: number, isFrozen: boolean): void {
         throw Error("freezeUINode not implemented in UIContext!")
@@ -658,24 +605,15 @@ export class UIContext {
         throw Error("px2lpx not implemented in UIContext!")
     }
 
-    public getId() : int32 {
-        throw Error("getId not implemented in UIContext!")
-    }
-
     public setUIStates(callback: () => void): void {
         throw Error("setUIStates not implemented in UIContext!")
     }
-    
-    public getFilteredInspectorTree(filters?: Array<string>): string {
-        throw Error("getFilteredInspectorTree not implemented in UIContext!")
-    }
- 
-    public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
-        throw Error("getFilteredInspectorTreeById not implemented in UIContext!")
+    public setImageCacheCount(value: int): void {
+        throw Error("setImageCacheCount not implemented in UIContext!")
     }
 
-    public requireDynamicSyncScene(id: string): Array<DynamicSyncScene> {
-        throw Error("requireDynamicSyncScene not implemented in UIContext!");
+    public setImageRawDataCacheSize(value: int): void {
+        throw Error("setImageRawDataCacheSize not implemented in UIContext!")
     }
 }
 export abstract class FrameCallback {
@@ -721,3 +659,6 @@ export class UIObserver {
         }
     }
 }
+export interface PageInfo {}
+export interface ContentCoverController {}
+export declare class DynamicSyncScene {}

@@ -19,9 +19,32 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
+
+namespace OHOS::Ace::NG {
+namespace {
+std::optional<bool> ProcessBindableChecked(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+{
+    std::optional<bool> result;
+    Converter::VisitUnionPtr(value,
+        [&result](const Ark_Boolean& src) {
+            result = Converter::OptConvert<bool>(src);
+        },
+        [&result, frameNode](const Ark_Bindable_Boolean& src) {
+            result = Converter::OptConvert<bool>(src.value);
+            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+            auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](bool check) {
+                PipelineContext::SetCallBackNode(weakNode);
+                arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(check));
+            };
+            RadioModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
+        },
+        [] {});
+    return result;
+}
+} // namespace
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -74,36 +97,16 @@ void SetRadioOptionsImpl(Ark_NativePointer node,
 }
 } // RadioInterfaceModifier
 namespace RadioAttributeModifier {
-void Checked0Impl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
+void SetCheckedImpl(Ark_NativePointer node,
+                    const Opt_Union_Boolean_Bindable* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto isChecked = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    auto isChecked = ProcessBindableChecked(frameNode, value);
     RadioModelStatic::SetChecked(frameNode, isChecked);
 }
-void Checked1Impl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
-{
-    Checked0Impl(node, value);
-}
-void OnChange0Impl(Ark_NativePointer node,
-                   const Opt_Callback_Boolean_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    ChangeEvent onEvent{};
-    if (optValue) {
-        onEvent = [arkCallback = CallbackHelper(*optValue)](const bool param) {
-            auto arkValue = Converter::ArkValue<Ark_Boolean>(param);
-            arkCallback.Invoke(arkValue);
-        };
-    }
-    RadioModelNG::SetOnChange(frameNode, std::move(onEvent));
-}
-void OnChange1Impl(Ark_NativePointer node,
-                   const Opt_OnRadioChangeCallback* value)
+void SetOnChangeImpl(Ark_NativePointer node,
+                     const Opt_OnRadioChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -117,12 +120,12 @@ void OnChange1Impl(Ark_NativePointer node,
     }
     RadioModelNG::SetOnChange(frameNode, std::move(onEvent));
 }
-void RadioStyleImpl(Ark_NativePointer node,
-                    const Opt_RadioStyle* value)
+void SetRadioStyleImpl(Ark_NativePointer node,
+                       const Opt_RadioStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto style = value ? Converter::OptConvert<Converter::RadioStyle>(*value) : std::nullopt;
+    auto style = Converter::OptConvertPtr<Converter::RadioStyle>(value);
     if (style) {
         RadioModelStatic::SetCheckedBackgroundColor(frameNode, style->checkedBackgroundColor);
         RadioModelStatic::SetUncheckedBorderColor(frameNode, style->uncheckedBorderColor);
@@ -133,50 +136,15 @@ void RadioStyleImpl(Ark_NativePointer node,
         RadioModelStatic::SetIndicatorColor(frameNode, std::nullopt);
     }
 }
-void ContentModifier0Impl(Ark_NativePointer node,
-                          const Opt_ContentModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not implemented.");
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RadioModelNG::SetContentModifier0(frameNode, convValue);
-}
-void ContentModifier1Impl(Ark_NativePointer node,
-                          const Opt_ContentModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RadioModelNG::SetContentModifier1(frameNode, convValue);
-}
-void _onChangeEvent_checkedImpl(Ark_NativePointer node,
-                                const Callback_Opt_Boolean_Void* callback)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](bool check) {
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Opt_Boolean>(check));
-    };
-    RadioModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
-}
 } // RadioAttributeModifier
 const GENERATED_ArkUIRadioModifier* GetRadioModifier()
 {
     static const GENERATED_ArkUIRadioModifier ArkUIRadioModifierImpl {
         RadioModifier::ConstructImpl,
         RadioInterfaceModifier::SetRadioOptionsImpl,
-        RadioAttributeModifier::Checked0Impl,
-        RadioAttributeModifier::Checked1Impl,
-        RadioAttributeModifier::OnChange0Impl,
-        RadioAttributeModifier::OnChange1Impl,
-        RadioAttributeModifier::RadioStyleImpl,
-        RadioAttributeModifier::ContentModifier0Impl,
-        RadioAttributeModifier::ContentModifier1Impl,
-        RadioAttributeModifier::_onChangeEvent_checkedImpl,
+        RadioAttributeModifier::SetCheckedImpl,
+        RadioAttributeModifier::SetOnChangeImpl,
+        RadioAttributeModifier::SetRadioStyleImpl,
     };
     return &ArkUIRadioModifierImpl;
 }

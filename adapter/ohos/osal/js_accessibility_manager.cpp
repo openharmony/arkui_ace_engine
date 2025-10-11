@@ -939,6 +939,9 @@ RefPtr<NG::FrameNode> GetAccessibilityPrevFocusNode(
     }
     auto it = nextFocusIdMap.find(currentInspectorId);
     if (it != nextFocusIdMap.end()) {
+        if (currentFrameNode->GetAccessibilityId() == it->second) {
+            return nullptr;
+        }
         return NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, it->second);
     }
     return nullptr;
@@ -958,6 +961,9 @@ void SetRootAccessibilityPreFocusId(const RefPtr<NG::UINode>& currentNode, const
     auto it = nextFocusIdMap.find(currentInspectorId);
     if (it != nextFocusIdMap.end()) {
         int64_t preAccessibilityId = it->second;
+        if (currentFrameNode->GetAccessibilityId() == preAccessibilityId) {
+            return;
+        }
         if (nodeInfo.GetBelongTreeId() > 0) {
             AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(nodeInfo.GetBelongTreeId(), preAccessibilityId);
         }
@@ -1233,77 +1239,6 @@ void UpdateElementInfoPageIdWithTreeId(Accessibility::AccessibilityElementInfo& 
         uint32_t unsignedTreeId = static_cast<uint32_t>(treeId);
         info.SetPageId((unsignedTreeId << SUB_TREE_OFFSET_IN_PAGE_ID) | unsignedPageId);
     }
-}
-
-bool ScrollByOffsetToParent(const RefPtr<NG::FrameNode>& curFrameNode, const RefPtr<NG::FrameNode>& parentFrameNode)
-{
-    CHECK_NULL_RETURN(curFrameNode, false);
-    CHECK_NULL_RETURN(parentFrameNode, false);
-    auto parentPattern = parentFrameNode->GetPattern<NG::ScrollablePattern>();
-    CHECK_NULL_RETURN(parentPattern, false);
-
-    auto scrollAbility = parentPattern->GetScrollOffsetAbility();
-    auto scrollFunc = scrollAbility.scrollFunc;
-    auto scrollAxis = scrollAbility.axis;
-    if (!scrollFunc || scrollAxis == Axis::NONE) {
-        return false;
-    }
-    if (parentFrameNode->GetTag() == V2::SCROLL_ETS_TAG) {
-        return false;
-    }
-    NG::MoveOffsetParam param {
-        scrollAxis == Axis::VERTICAL,
-        scrollAbility.contentStartOffset,
-        scrollAbility.contentEndOffset,
-        true
-    };
-    auto moveOffset = NG::ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
-    if (!NearZero(moveOffset)) {
-        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
-            moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
-        auto ret = scrollFunc(parentPattern->IsReverse() ? -moveOffset : moveOffset);
-        auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
-        if (pipeline) {
-            pipeline->FlushUITasks();
-        }
-        return ret;
-    }
-    return false;
-}
-
-bool ScrollByOffset(const RefPtr<NG::FrameNode>& curFrameNode)
-{
-    CHECK_NULL_RETURN(curFrameNode, false);
-    bool ret = false;
-    auto parentFrameNode = curFrameNode->GetParentFrameNode();
-
-    while (parentFrameNode) {
-        auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        if (accessibilityProperty && !accessibilityProperty->IsUserScrollTriggerable()) {
-            return false;
-        }
-        if (ScrollByOffsetToParent(curFrameNode, parentFrameNode)) {
-            ret = true;
-        }
-        parentFrameNode = parentFrameNode->GetParentFrameNode();
-    }
-    return ret;
-}
-
-void ProcessFocusScroll(const RefPtr<NG::FrameNode>& curFrameNode, RefPtr<NG::PipelineContext>& context)
-{
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [node = AceType::WeakClaim(AceType::RawPtr(curFrameNode))] {
-            auto focusNode = node.Upgrade();
-            CHECK_NULL_VOID(focusNode);
-            auto accessibilityProperty = focusNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-            CHECK_NULL_VOID(accessibilityProperty);
-            if (accessibilityProperty->GetAccessibilityFocusState()) {
-                ScrollByOffset(focusNode);
-            }
-        },
-        TaskExecutor::TaskType::UI, "ArkUIAccessibilityProcessFocusScroll");
 }
 
 int32_t GetLastPageId(const RefPtr<NG::PipelineContext>& ngPipeline)
@@ -2512,7 +2447,6 @@ bool ActAccessibilityFocus(int64_t elementId, const RefPtr<NG::FrameNode>& frame
     CHECK_NULL_RETURN(accessibilityProperty, false);
     accessibilityProperty->OnAccessibilityFocusCallback(true);
     accessibilityProperty->SetAccessibilityFocusState(true);
-    ProcessFocusScroll(frameNode, context);
     return true;
 }
 

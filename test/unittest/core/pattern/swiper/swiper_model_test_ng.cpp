@@ -2598,4 +2598,21 @@ HWTEST_F(SwiperModelTestNg, ProcessBackgroundSizeWithResourceObjTest001, TestSiz
     g_isConfigChangePerform = false;
     ResetMockResourceData();
 }
+
+/**
+ * @tc.name: SetSwiperFinishAnimation001
+ * @tc.desc: Test SwiperModelTestNg::SetSwiperFinishAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, SetSwiperFinishAnimation001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    SwiperParameters swiperParameters;
+    pattern_->SetSwiperParameters(swiperParameters);
+    pattern_->translateAnimationIsRunning_ = true;
+
+    model.SetSwiperFinishAnimation(Referenced::RawPtr(frameNode_));
+    EXPECT_FALSE(pattern_->translateAnimationIsRunning_);
+}
 } // namespace OHOS::Ace::NG

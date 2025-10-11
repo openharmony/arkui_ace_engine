@@ -496,6 +496,42 @@ ArkUINativeModuleValue FrameNodeBridge::ApplyAttributesFinish(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue FrameNodeBridge::ConvertPoint(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    ArkUI_Float32 position[2];
+    Local<JSValueRef> x = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> y = runtimeCallInfo->GetCallArgRef(2);
+    position[0] = x->ToNumber(vm)->Value();
+    position[1] = y->ToNumber(vm)->Value();
+
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(3);
+    CHECK_NULL_RETURN(!thirdArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto targetNativeNode = nodePtr(thirdArg->ToNativePointer(vm)->Value());
+
+    Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 2);
+    ArkUI_Float32 targetNodePositionOffset[2];
+    if (!nativeNode || !targetNativeNode) {
+        return valueArray;
+    }
+    auto success = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPoint(
+        nativeNode, &position, targetNativeNode, &targetNodePositionOffset);
+    if (!success) {
+        ArkTSUtils::ThrowError(
+            vm, "The current FrameNode and the target FrameNode do not have a common ancestor node.", 100024);
+        return valueArray;
+    }
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, targetNodePositionOffset[0]));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, targetNodePositionOffset[1]));
+    return valueArray;
+}
+
 void FrameNodeBridge::SetDrawFunc(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     CHECK_NULL_VOID(frameNode);

@@ -39,6 +39,17 @@ constexpr int32_t LAYERED_TYPE = 1;
 constexpr int32_t ANIMATED_TYPE = 2;
 constexpr int32_t PIXELMAP_TYPE = 3;
 } // namespace
+
+void ImageModelStatic::SetSrc(FrameNode* frameNode, const std::optional<ImageSourceInfo>& info)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (info) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, info.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, frameNode);
+    }
+}
+
 void ImageModelStatic::SetSmoothEdge(FrameNode* frameNode, const std::optional<float>& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -131,7 +142,7 @@ void ImageModelStatic::SetImageFill(FrameNode* frameNode, const std::optional<Co
         ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color.value(), frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color.value(), frameNode);
     } else {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<ImageTheme>();
         CHECK_NULL_VOID(theme);
@@ -161,7 +172,7 @@ void ImageModelStatic::SetImageInterpolation(
 
 void ImageModelStatic::SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation)
 {
-    const auto orientationValue = orientation.value_or(ImageRotateOrientation::AUTO);
+    const auto orientationValue = orientation.value_or(ImageRotateOrientation::UP);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientationValue, frameNode);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
@@ -218,51 +229,49 @@ void ImageModelStatic::SetDrawableDescriptor(FrameNode* frameNode, void* drawabl
 void ImageModelStatic::SetPixelMapList(
     FrameNode* frameNode, const std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t duration, int32_t iteration)
 {
-#ifdef ACE_STATIC
-    std::vector<ImageProperties> imageList;
-    for (int i = 0; i < static_cast<int32_t>(pixelMaps.size()); i++) {
-        ImageProperties image;
-        image.pixelMap = pixelMaps[i];
-        imageList.push_back(image);
-    }
-    if (frameNode->GetChildren().empty()) {
-        auto imageNode = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        CHECK_NULL_VOID(imageNode);
-        auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
-        CHECK_NULL_VOID(imageLayoutProperty);
-        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-        frameNode->AddChild(imageNode);
-    }
-    auto pattern = frameNode->GetPattern<ImagePattern>();
-    CHECK_NULL_VOID(pattern);
-    if (!pattern->GetIsAnimation()) {
-        auto castImageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
-        CHECK_NULL_VOID(castImageLayoutProperty);
-        castImageLayoutProperty->Reset();
-        auto castImageRenderProperty = frameNode->GetPaintPropertyPtr<ImageRenderProperty>();
-        CHECK_NULL_VOID(castImageRenderProperty);
-        castImageRenderProperty->Reset();
-        pattern->ResetImageAndAlt();
-        pattern->ResetImageProperties();
-    }
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto draggable = pipeline->GetDraggable<ImageTheme>();
-    if (draggable && !frameNode->IsDraggable()) {
-        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->InitDragDropEvent();
-    }
-    pattern->SetSrcUndefined(false);
-    pattern->StopAnimation();
-    pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
-    pattern->SetImages(std::move(imageList));
-    pattern->SetDuration(duration);
-    pattern->SetIteration(iteration);
-    pattern->StartAnimation();
-#endif
+    // std::vector<ImageProperties> imageList;
+    // for (int i = 0; i < static_cast<int32_t>(pixelMaps.size()); i++) {
+    //     ImageProperties image;
+    //     image.pixelMap = pixelMaps[i];
+    //     imageList.push_back(image);
+    // }
+    // if (frameNode->GetChildren().empty()) {
+    //     auto imageNode = FrameNode::CreateFrameNode(
+    //         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    //     CHECK_NULL_VOID(imageNode);
+    //     auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
+    //     CHECK_NULL_VOID(imageLayoutProperty);
+    //     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    //     frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    //     frameNode->AddChild(imageNode);
+    // }
+    // auto pattern = frameNode->GetPattern<ImagePattern>();
+    // CHECK_NULL_VOID(pattern);
+    // if (!pattern->GetIsAnimation()) {
+    //     auto castImageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
+    //     CHECK_NULL_VOID(castImageLayoutProperty);
+    //     castImageLayoutProperty->Reset();
+    //     auto castImageRenderProperty = frameNode->GetPaintPropertyPtr<ImageRenderProperty>();
+    //     CHECK_NULL_VOID(castImageRenderProperty);
+    //     castImageRenderProperty->Reset();
+    //     pattern->ResetImageAndAlt();
+    //     pattern->ResetImageProperties();
+    // }
+    // auto pipeline = frameNode->GetContext();
+    // CHECK_NULL_VOID(pipeline);
+    // auto draggable = pipeline->GetDraggable<ImageTheme>();
+    // if (draggable && !frameNode->IsDraggable()) {
+    //     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    //     CHECK_NULL_VOID(gestureHub);
+    //     gestureHub->InitDragDropEvent();
+    // }
+    // pattern->SetSrcUndefined(false);
+    // pattern->StopAnimation();
+    // pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
+    // pattern->SetImages(std::move(imageList));
+    // pattern->SetDuration(duration);
+    // pattern->SetIteration(iteration);
+    // pattern->StartAnimation();
 }
 
 void ImageModelStatic::SetDrawingColorFilter(FrameNode* frameNode, const RefPtr<DrawingColorFilter>& colorFilter)

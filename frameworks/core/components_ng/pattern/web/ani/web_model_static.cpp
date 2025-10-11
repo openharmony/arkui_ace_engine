@@ -25,7 +25,7 @@
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/ani/web_pattern_static.h"
 #else
-#include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
 #endif // !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "nweb_helper.h"
 #endif // ARKUI_CAPI_UNITTEST
@@ -74,6 +74,14 @@ void WebModelStatic::SetHapPathCallback(FrameNode* frameNode, std::function<void
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->SetSetHapPathCallback(std::move(hapPathCallback));
+}
+
+void WebModelStatic::SetWebDetachCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webDetachCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetSetWebDetachCallback(std::move(webDetachCallback));
 }
 
 void WebModelStatic::SetWebSrc(FrameNode* frameNode, const std::optional<std::string>& webSrc)
@@ -264,21 +272,55 @@ void WebModelStatic::SetEnabledHapticFeedback(FrameNode* frameNode, bool isEnabl
 
 void WebModelStatic::SetOptimizeParserBudgetEnabled(FrameNode *frameNode, const std::optional<bool>& enable)
 {
-    (void)frameNode;
-    (void)enable;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    if (enable) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebModelStatic::SetOptimizeParserBudgetEnabled: %{public}d",
+            enable.value());
+        webPatternStatic->UpdateOptimizeParserBudgetEnabled(enable.value());
+    } else {
+        webPatternStatic->ResetOptimizeParserBudgetEnabled();
+    }
 }
 
 void WebModelStatic::SetEnableFollowSystemFontWeight(FrameNode *frameNode,
     const std::optional<bool>& enableFollowSystemFontWeight)
 {
-    (void)frameNode;
-    (void)enableFollowSystemFontWeight;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    if (enableFollowSystemFontWeight) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebModelStatic::SetEnableFollowSystemFontWeight: %{public}d",
+            enableFollowSystemFontWeight.value());
+        webPatternStatic->UpdateEnableFollowSystemFontWeight(enableFollowSystemFontWeight.value());
+    } else {
+        webPatternStatic->ResetEnableFollowSystemFontWeight();
+    }
 }
 
 void WebModelStatic::SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std::optional<bool>& enable)
 {
-    (void)frameNode;
-    (void)enable;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateWebMediaAVSessionEnabled(enable.value_or(true));
+}
+
+void WebModelStatic::SetEnableDataDetector(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEnableDataDetector(isEnabled);
+}
+
+void WebModelStatic::SetDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateDataDetectorConfig(config);
 }
 
 void WebModelStatic::JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems)
@@ -305,8 +347,10 @@ void WebModelStatic::JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems
 
 void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode, bool supportDefaultIntrinsicSize)
 {
-    (void)frameNode;
-    (void)supportDefaultIntrinsicSize;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateIntrinsicSizeEnabled(supportDefaultIntrinsicSize);
 }
 
 void WebModelStatic::SetMixedMode(FrameNode* frameNode, const std::optional<MixedModeContent>& mixedContentMode)
@@ -415,8 +459,14 @@ void WebModelStatic::SetAudioExclusive(FrameNode* frameNode, const std::optional
 
 void WebModelStatic::SetBlurOnKeyboardHideMode(FrameNode* frameNode, const std::optional<BlurOnKeyboardHideMode>& mode)
 {
-    (void)frameNode;
-    (void)mode;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    if (mode) {
+        webPatternStatic->UpdateBlurOnKeyboardHideMode(mode.value());
+    } else {
+        webPatternStatic->ResetBlurOnKeyboardHideMode();
+    }
 }
 
 void WebModelStatic::SetTextZoomRatio(FrameNode* frameNode, int32_t textZoomRatioNum)
@@ -424,6 +474,7 @@ void WebModelStatic::SetTextZoomRatio(FrameNode* frameNode, int32_t textZoomRati
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebModelStatic::SetTextZoomRatio：%{public}d", textZoomRatioNum);
     webPatternStatic->UpdateTextZoomRatio(textZoomRatioNum);
 }
 
@@ -1278,13 +1329,5 @@ void WebModelStatic::SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllow
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
-}
-
-void WebModelStatic::SetForceEnableZoom(FrameNode* frameNode, bool isEnabled)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPatternStatic);
-    webPatternStatic->UpdateForceEnableZoom(isEnabled);
 }
 } // namespace OHOS::Ace::NG

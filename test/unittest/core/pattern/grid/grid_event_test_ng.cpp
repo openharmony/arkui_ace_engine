@@ -620,4 +620,27 @@ HWTEST_F(GridEventTestNg, GetOutOfScrollableOffset002, TestSize.Level1)
 
     EXPECT_FLOAT_EQ(outOffset, -10.f);
 }
+
+/**
+ * @tc.name: OnReachStartWithContentStartOffset
+ * @tc.desc: Test Grid OnReachStart with contentStartOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEventTestNg, OnReachStartWithContentStartOffset, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Grid
+     * @tc.expected: onReachStart called once
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    ScrollableModelNG::SetContentStartOffset(20.0f);
+    int32_t reachStartCount = 0;
+    auto event = [&reachStartCount]() { ++reachStartCount; };
+    model.SetOnReachStart(event);
+    CreateGridItems(10);
+    CreateDone();
+
+    EXPECT_EQ(reachStartCount, 1);
+}
 } // namespace OHOS::Ace::NG

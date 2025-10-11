@@ -12,17 +12,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { WatchIdType } from '../decorator';
+import { int32 } from '@koalaui/common';
+import { WatchFunc } from '../decoratorImpl/decoratorWatch';
+
 export class StateUpdateLoop {
     private static callbacks: Array<() => void> = new Array<() => void>();
+    // This task is for freezing the watch
+    private static activeTasks: Map<int32, Set<WatchIdType>> = new Map<int32, Set<WatchIdType>>();
     public static canRequestFrame: boolean = true;
     public static add(callback: () => void): void {
         StateUpdateLoop.callbacks.push(callback);
+    }
+    public static addFreezeTask(peerId: int32, watchId: WatchIdType): void {
+        let taskSet = StateUpdateLoop.activeTasks.get(peerId);
+        if (!taskSet) {
+            taskSet = new Set<WatchIdType>();
+        }
+        taskSet.add(watchId);
+        StateUpdateLoop.activeTasks.set(peerId, taskSet);
     }
     public static consume(): void {
         StateUpdateLoop.callbacks.forEach((callback: () => void) => {
             callback();
         });
         StateUpdateLoop.callbacks.length = 0;
+    }
+    public static consumeFreezeTasks(peerId: int32): void {
+        const taskSet = StateUpdateLoop.activeTasks.get(peerId);
+        if (!taskSet) {
+            return;
+        }
+        taskSet.forEach((watchId: WatchIdType) => {
+            // This property name does not affect the actual property name.
+            WatchFunc.execWatchById(watchId, '');
+        });
+        taskSet.clear();
+        StateUpdateLoop.activeTasks.delete(peerId);
     }
     public static get len(): number {
         return StateUpdateLoop.callbacks.length;

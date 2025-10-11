@@ -24,6 +24,7 @@
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/common/resource/resource_object.h"
@@ -59,6 +60,7 @@ public:
     virtual void SetListItemAlign(V2::ListItemAlign listItemAlign) = 0;
     virtual void SetMultiSelectable(bool selectable) = 0;
     virtual void SetCachedCount(int32_t cachedCount, bool show = false) = 0;
+    virtual void SetCacheRange(NG::CacheRange cacheRange, bool show = false) {};
     virtual void SetHasWidth(bool hasWidth) = 0;
     virtual void SetHasHeight(bool hasHeight) = 0;
     virtual void SetSticky(V2::StickyStyle stickyStyle) = 0;
@@ -108,6 +110,7 @@ public:
     virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
 #endif
     virtual void ResetListChildrenMainSize() {}
+    virtual void SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed speed) {}
 private:
     static std::unique_ptr<ListModel> instance_;
     static std::mutex mutex_;

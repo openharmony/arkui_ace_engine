@@ -78,6 +78,7 @@ public:
     virtual void SetImageAccessEnabled(bool isImageAccessEnabled) = 0;
     virtual void SetMixedMode(MixedModeContent mixedMode) = 0;
     virtual void SetZoomAccessEnabled(bool isZoomAccessEnabled) = 0;
+    virtual void SetZoomControlAccess(bool zoomControlAccess) {}
     virtual void SetGeolocationAccessEnabled(bool isGeolocationAccessEnabled) = 0;
     virtual void SetJsProxyCallback(std::function<void()>&& jsProxyCallback) = 0;
     virtual void SetUserAgent(const std::string& userAgent) = 0;
@@ -226,14 +227,21 @@ public:
     virtual void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetEnableDataDetector(bool isEnabled) {};
     virtual void SetDataDetectorConfig(const TextDetectConfig& config) {};
+    virtual void SetEnableSelectedDataDetector(bool isEnabled) {};
+    virtual void SetSelectedDataDetectorConfig(const TextDetectConfig& config) {};
     virtual void SetBypassVsyncCondition(WebBypassVsyncCondition condition) {}
     virtual void SetDefaultBackgroundColor() {};
     virtual void SetGestureFocusMode(GestureFocusMode mode) {}
+    virtual void SetRotateRenderEffect(WebRotateEffect effect) {}
+    virtual void SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
+    virtual void SetBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
+        const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold) {}
     virtual void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetForceEnableZoom(bool isEnabled) {}
     virtual void SetSafeBrowsingCheckFinishId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId) {};
+    virtual void SetBackToTop(bool isBackToTop) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

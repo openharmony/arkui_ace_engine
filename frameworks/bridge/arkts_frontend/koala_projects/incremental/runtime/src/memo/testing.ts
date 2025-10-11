@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,13 +45,17 @@ export class TestNode extends IncrementalNode {
         /** @memo */
         content: (node: TestNode) => void
     ) {
-        NodeAttach(() => new TestNode(), content)
+        NodeAttach(():TestNode => new TestNode(), content)
     }
 
 }
 
 /* parent node that has a Reusable pool */
 export class ReusableTestNode extends TestNode {
+    constructor() {
+        super()
+    }
+
     reusePool = new Map<string, Array<Disposable>>()
 
     override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {

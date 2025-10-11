@@ -1,9 +1,0 @@
-{
-    "extends": "./tsconfig.json",
-    "include": [ "src/**/*.ts", "test/**/*.ts" ],
-    "references": [
-        { "path": "../compiler-plugin" },
-        { "path": "../common" },
-        { "path": "../harness" }
-    ]
-}

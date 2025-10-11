@@ -426,6 +426,16 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj002, TestSize.Level1)
     richEditorPattern->moveLength_ = 2;
     richEditorPattern->CalcInsertValueObj(info, richEditorPattern->caretPosition_, true);
     EXPECT_EQ(info.spanIndex_, 0);
+
+    ClearSpan();
+    AddSpan(u"");
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    it = richEditorPattern->spans_.front();
+    it->content = u"";
+    it->position = 0;
+    int textIndex = 0;
+    richEditorPattern->CalcInsertValueObj(info, textIndex, false);
+    EXPECT_NE(info.GetSpanIndex(), richEditorPattern->spans_.size());
 }
 
 /**

@@ -34,6 +34,7 @@
 
 struct PromptActionAsyncContext {
     ani_env* env = nullptr;
+    ani_vm* vm = nullptr;
     ani_resolver deferred = nullptr;
     ani_fn_object callback = nullptr;
     int32_t instanceId = -1;

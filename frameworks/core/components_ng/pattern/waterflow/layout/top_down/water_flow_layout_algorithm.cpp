@@ -163,7 +163,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureToTarget(layoutWrapper, layoutInfo_->endIndex_, std::nullopt);
     }
     if (matchChildren) {
-        mainSize_ = std::min(mainSize_, layoutInfo_->GetMaxMainHeight() + footerMainSize_);
+        mainSize_ = std::min(mainSize_, layoutInfo_->GetMaxMainHeight() + layoutInfo_->footerHeight_);
         idealSize.SetMainSize(mainSize_, axis_);
         AddPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
@@ -355,7 +355,7 @@ void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const 
         auto footerOffset = childFrameOffset;
         auto mainOffset = layoutInfo_->GetMaxMainHeight() + layoutInfo_->currentOffset_;
         if (reverse) {
-            mainOffset = mainSize_ - footerMainSize_ - mainOffset;
+            mainOffset = mainSize_ - layoutInfo_->footerHeight_ - mainOffset;
         }
         footerOffset += (axis_ == Axis::VERTICAL) ? OffsetF(0, mainOffset) : OffsetF(mainOffset, 0);
         footer->GetGeometryNode()->SetMarginFrameOffset(footerOffset);
@@ -469,8 +469,8 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
     auto maxItemHeight = layoutInfo_->GetMaxMainHeight();
     if (layoutInfo_->footerIndex_ >= 0) {
         footerMainStartPos_ = maxItemHeight;
-        footerMainSize_ = WaterFlowLayoutUtils::MeasureFooter(layoutWrapper, axis_);
-        maxItemHeight += footerMainSize_;
+        layoutInfo_->footerHeight_ = WaterFlowLayoutUtils::MeasureFooter(layoutWrapper, axis_);
+        maxItemHeight += layoutInfo_->footerHeight_;
     }
     maxItemHeight += layoutInfo_->contentEndOffset_;
     if (layoutInfo_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {

@@ -742,6 +742,18 @@ class UIContext {
         Context.setDynamicDimming(nodePtr, number);
     }
 
+    setImageCacheCount(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.setImageCacheCount(value, this.instanceId_);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setImageRawDataCacheSize(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.setImageRawDataCacheSize(value, this.instanceId_);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
     getCursorController() {
         if (this.cursorController_ == null) {
             this.cursorController_ = new CursorController(this.instanceId_);
@@ -891,6 +903,13 @@ class UIContext {
         let nodePtr = frameNode.getNodePtr();
         getUINativeModule().list.setCacheRange(nodePtr, range);
         __JSScopeUtil__.restoreInstanceId();
+    }
+
+    getMagnifier() {
+        if (this.magnifier_ == null) {
+            this.magnifier_ = new Magnifier(this.instanceId_);
+        }
+        return this.magnifier_;
     }
 }
 
@@ -1722,6 +1741,36 @@ class TextMenuController {
     }
 }
 
+class Magnifier {
+    /**
+     * Construct new instance of Magnifier.
+     * initialize with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 22
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+    }
+
+    bind(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        MagnifierController.bind(id);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    show(x, y) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        MagnifierController.show(x, y);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    unbind() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        MagnifierController.unbind();
+        __JSScopeUtil__.restoreInstanceId();
+    }
+}
+
 /**
  * Get UIContext instance.
  * @param instanceId obtained on the c++ side.
@@ -1774,4 +1823,17 @@ function __addAvailableInstanceId__(instanceId) {
  */
 function __removeAvailableInstanceId__(instanceId) {
     __availableInstanceIds__.delete(instanceId);
+}
+
+function __getResourceId__(params) {
+    let resName = "";
+    if (params.params.length > 0) {
+        resName = params.params[0];
+    }
+    let bundleName = params.bundleName;
+    let moduleName = params.moduleName;
+
+    const re = new RegExp('^\\[\\S+]');
+    resName = resName.replace(re, 'app'); // Process [hsp].type.name. GetResId only accept app or sys format.
+    return getUINativeModule().resource.getResourceId(resName, bundleName, moduleName);
 }

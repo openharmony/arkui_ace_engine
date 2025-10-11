@@ -95,6 +95,8 @@ private:
 
     OffsetF AdjustChildPosition(
         OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard);
+    void DialogOverflowAdjust(
+        OffsetF& childOffset, const SizeF& childSize, bool dialogCorrectionEnabled);
 
     SizeF UpdateHeightWithSafeArea(SizeF size);
     void UpdateSafeArea(const RefPtr<FrameNode>& frameNode);

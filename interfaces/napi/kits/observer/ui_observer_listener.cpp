@@ -26,6 +26,7 @@ constexpr int32_t PARAM_SIZE_ONE = 1;
 constexpr int32_t PARAM_SIZE_TWO = 2;
 constexpr int32_t PARAM_SIZE_THREE = 3;
 constexpr int32_t PARAM_SIZE_SIX = 6;
+constexpr int32_t PARAM_SIZE_SEVEN = 7;
 
 bool CheckKeysPressed(const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes)
 {
@@ -269,6 +270,33 @@ void UIObserverListener::OnDensityChange(double density)
     napi_value napiDensity = nullptr;
     napi_create_double(env_, density, &napiDensity);
     napi_set_named_property(env_, objValue, "density", napiDensity);
+    napi_value argv[] = { objValue };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::OnWinSizeLayoutBreakpointChange(const NG::WindowSizeBreakpoint info)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER,
+            "Handle winSizeLayoutBreakpoint change failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value objValue = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_value widthValue;
+    napi_create_int32(env_, static_cast<int32_t>(info.widthBreakpoint), &widthValue);
+    napi_set_named_property(env_, objValue, "widthBreakpoint", widthValue);
+    napi_value heightValue;
+    napi_create_int32(env_, static_cast<int32_t>(info.heightBreakpoint), &heightValue);
+    napi_set_named_property(env_, objValue, "heightBreakpoint", heightValue);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
     napi_close_handle_scope(env_, scope);
@@ -617,6 +645,50 @@ void UIObserverListener::OnTabContentStateChange(const NG::TabContentInfo& tabCo
         param6,
     };
     napi_create_object_with_named_properties(env_, &objValue, PARAM_SIZE_SIX, keys, values);
+    napi_value argv[] = { objValue };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::OnTabChange(const NG::TabContentInfo& tabContentInfo)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER,
+            "Handle tab change failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value objValue = nullptr;
+    napi_value param1 = nullptr;
+    napi_value param2 = nullptr;
+    napi_value param3 = nullptr;
+    napi_value param4 = nullptr;
+    napi_value param5 = nullptr;
+    napi_value param6 = nullptr;
+    napi_value param7 = nullptr;
+    napi_create_string_utf8(env_, tabContentInfo.tabContentId.c_str(), tabContentInfo.tabContentId.length(), &param1);
+    napi_create_int32(env_, tabContentInfo.tabContentUniqueId, &param2);
+    napi_create_int32(env_, static_cast<int32_t>(tabContentInfo.state), &param3);
+    napi_create_int32(env_, tabContentInfo.index, &param4);
+    napi_create_string_utf8(env_, tabContentInfo.id.c_str(), tabContentInfo.id.length(), &param5);
+    napi_create_int32(env_, tabContentInfo.uniqueId, &param6);
+    if (tabContentInfo.lastIndex.has_value()) {
+        napi_create_int32(env_, tabContentInfo.lastIndex.value(), &param7);
+    }
+    const char *keys[] = {
+        "tabContentId", "tabContentUniqueId", "state", "index", "id", "uniqueId", "lastIndex",
+    };
+    const napi_value values[] = {
+        param1, param2, param3, param4, param5, param6, param7,
+    };
+    const int32_t paramSize = tabContentInfo.lastIndex.has_value() ? PARAM_SIZE_SEVEN : PARAM_SIZE_SIX;
+    napi_create_object_with_named_properties(env_, &objValue, paramSize, keys, values);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
     napi_close_handle_scope(env_, scope);

@@ -573,6 +573,7 @@ public:
     static void DisableOnFocusAxisEvent();
     static void DisableOnAxisEvent();
     static void DisableOnAxisEvent(FrameNode* frameNode);
+    static void DisableOnCoastingAxisEvent(FrameNode* frameNode);
     static void DisableOnFocusAxisEvent(FrameNode* frameNode);
     static void DisableOnClick(FrameNode* frameNode);
     static void DisableOnDragStart(FrameNode* frameNode);
@@ -873,6 +874,7 @@ public:
         std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave);
     static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnAxisEvent(FrameNode* frameNode, OnAxisEventFunc&& onAxisEventFunc);
+    static void SetOnCoastingAxisEvent(FrameNode* frameNode, OnCoastingAxisEventFunc&& onCoastingAxisEventFunc);
     static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
     static void SetOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc &&onHoverMoveEventFunc);
     static void SetOnAccessibilityHover(FrameNode* frameNode, OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
@@ -1122,6 +1124,8 @@ void SetOnVisibleAreaApproximateChangeMultiThread(FrameNode* frameNode,
 void ResetAreaChangedMultiThread(FrameNode* frameNode);
 void ResetVisibleChangeMultiThread(FrameNode* frameNode);
 void SetNeedFocusMultiThread(FrameNode* frameNode, bool value);
+void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold);
+void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, Dimension distanceThreshold);
 // multi thread function end
 } // namespace OHOS::Ace::NG
 

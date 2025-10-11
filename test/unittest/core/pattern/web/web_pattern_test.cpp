@@ -471,6 +471,94 @@ HWTEST_F(WebPatternTest, ProcessVirtualKeyBoardHideAvoidMenu, TestSize.Level1)
 }
 
 /**
+ * @tc.name: VirtualKeyBoard UpdateTextFieldStatus
+ * @tc.desc: Test UpdateTextFieldStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, UpdateTextFieldStatus, TestSize.Level1)
+{
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
+    g_webPattern->UpdateTextFieldStatus(true, true);
+    EXPECT_TRUE(g_webPattern->isVirtualKeyBoardShow_ == WebPattern::VkState::VK_SHOW);
+
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    g_webPattern->UpdateTextFieldStatus(false, false);
+    EXPECT_TRUE(g_webPattern->isVirtualKeyBoardShow_ == WebPattern::VkState::VK_HIDE);
+}
+
+/**
+ * @tc.name: ProcessVirtualKeyBoardShow
+ * @tc.desc: Test ProcessVirtualKeyBoardShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, ProcessVirtualKeyBoardShow, TestSize.Level1)
+{
+    bool result;
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    g_webPattern->keyBoardAvoidMode_ = WebKeyboardAvoidMode::DEFAULT;
+    result = g_webPattern->ProcessVirtualKeyBoardShow(0, 200, 300, false);
+    EXPECT_TRUE(result);
+
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    g_webPattern->keyBoardAvoidMode_ = WebKeyboardAvoidMode::RETURN_TO_UICONTEXT;
+    result = g_webPattern->ProcessVirtualKeyBoardShow(0, 200, 300, false);
+    EXPECT_FALSE(result);
+
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    g_webPattern->keyBoardAvoidMode_ = WebKeyboardAvoidMode::RETURN_TO_UICONTEXT;
+    result = g_webPattern->ProcessVirtualKeyBoardShow(0, 200, 300, true);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ProcessVirtualKeyBoardHide
+ * @tc.desc: Test ProcessVirtualKeyBoardHide.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, ProcessVirtualKeyBoardHide, TestSize.Level1)
+{
+    bool result;
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    g_webPattern->keyBoardAvoidMode_ = WebKeyboardAvoidMode::DEFAULT;
+    result = g_webPattern->ProcessVirtualKeyBoardHide(0, 200, false);
+    EXPECT_TRUE(result);
+
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    g_webPattern->keyBoardAvoidMode_ = WebKeyboardAvoidMode::RETURN_TO_UICONTEXT;
+    result = g_webPattern->ProcessVirtualKeyBoardHide(0, 200, false);
+    EXPECT_FALSE(result);
+
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    g_webPattern->keyBoardAvoidMode_ = WebKeyboardAvoidMode::RETURN_TO_UICONTEXT;
+    result = g_webPattern->ProcessVirtualKeyBoardHide(0, 200, true);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: JudgeWebKeyBoardAvoidMode
+ * @tc.desc: Test JudgeWebKeyBoardAvoidMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, JudgeWebKeyBoardAvoidMode, TestSize.Level1)
+{
+    bool result;
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    g_webPattern->keyBoardAvoidMode_ = WebKeyboardAvoidMode::DEFAULT;
+    result = g_webPattern->JudgeWebKeyBoardAvoidMode(false);
+    EXPECT_TRUE(result);
+
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    g_webPattern->keyBoardAvoidMode_ = WebKeyboardAvoidMode::RETURN_TO_UICONTEXT;
+    result = g_webPattern->JudgeWebKeyBoardAvoidMode(false);
+    EXPECT_FALSE(result);
+
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    g_webPattern->keyBoardAvoidMode_ = WebKeyboardAvoidMode::RETURN_TO_UICONTEXT;
+    result = g_webPattern->JudgeWebKeyBoardAvoidMode(true);
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.name: UpdateScrollBarWithBorderRadius
  * @tc.desc: Test UpdateScrollBarWithBorderRadius.
  * @tc.type: FUNC

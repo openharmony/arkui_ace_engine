@@ -63,6 +63,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
@@ -96,6 +97,7 @@ constexpr int32_t USED_JSON_PARAM = 4;
 constexpr int32_t MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION = 100;
 constexpr int32_t RATIO_OF_VSYNC_PERIOD = 2;
 constexpr int32_t MAX_DVSYNC_TIME_USE_COUNT = 5;
+constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 6;
 #ifndef IS_RELEASE_VERSION
 constexpr int32_t SINGLE_FRAME_TIME_MICROSEC = 16600;
 #endif
@@ -803,7 +805,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 #endif
     ReloadNodesResource();
     ProcessDelayTasks();
-    DispatchDisplaySync(nanoTimestamp);
+    if (frameCount != UINT64_MAX) {
+        DispatchDisplaySync(nanoTimestamp);
+    }
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp, frameCount);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
@@ -2660,8 +2664,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             height = rootSize.Height() - positionY;
         }
         auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
-        float newKeyboardOffset = context->CalcNewKeyboardOffset(keyboardHeight,
-            positionY, height, rootSize, onFocusField && manager->GetIfFocusTextFieldIsInline());
+        float newKeyboardOffset = !manager->CheckInRichEditor() ?
+            context->CalcAvoidOffset(keyboardHeight, positionY, height, rootSize) :
+            context->CalcNewKeyboardOffset(keyboardHeight, positionY, height, rootSize,
+                onFocusField && manager->GetIfFocusTextFieldIsInline());
         newKeyboardOffset = round(newKeyboardOffset);
         if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
             manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId()) {
@@ -3719,6 +3725,11 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-compname" && params.size() >= PARAM_NUM) {
         rootNode_->DumpTreeByComponentName(params[1]);
         DumpLog::GetInstance().OutPutDefault();
+    } else if (params[0] == "-allInfoWithParamConfigTotal" && params.size() == SIMPLIFYTREE_WITH_PARAMCONFIG) {
+        auto root = JsonUtil::CreateSharedPtrJson(true);
+        rootNode_->DumpSimplifyTreeWithParamConfig(
+            0, root, params[1] == "1", { params[2] == "1", params[3] == "1", params[4] == "1" });
+        DumpLog::GetInstance().Print(root->ToString());
     }
     return true;
 }
@@ -4494,6 +4505,7 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node)
 {
+    eventManager_->NotifyAxisEvent(event);
     if (!axisEventChecker_.IsAxisEventSequenceCorrect(event)) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
             "AxisEvent error occurred, the currentAction is %{public}d, the preAction is %{public}d", event.action,
@@ -4502,6 +4514,9 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::CANCEL || event.action == AxisAction::END) {
         eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddAxis(scaleEvent);
+    }
+    if (eventManager_->HandleAxisEventWithDifferentDeviceId(scaleEvent, node)) {
+        return;
     }
     auto formEventMgr = this->GetFormEventManager();
     SerializedGesture etsSerializedGesture;
@@ -4528,22 +4543,14 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     if (event.action == AxisAction::BEGIN && formEventMgr) {
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
     }
-    if (scaleEvent.action == AxisAction::BEGIN) {
-        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Begin");
-        ResSchedReport::GetInstance().OnAxisEvent(scaleEvent);
-    } else if (scaleEvent.verticalAxis == 0 && scaleEvent.horizontalAxis == 0) {
-        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis End");
-        ResSchedReport::GetInstance().ResSchedDataReport("axis_off");
-    } else {
-        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Update");
-        ResSchedReport::GetInstance().OnAxisEvent(scaleEvent);
-    }
+    ResSchedReportAxisEvent(scaleEvent);
     auto mouseEvent = ConvertAxisToMouse(event);
     OnMouseMoveEventForAxisEvent(mouseEvent, node);
     if (formEventMgr && ((scaleEvent.action == AxisAction::END) || (scaleEvent.action == AxisAction::CANCEL))) {
         formEventMgr->RemoveEtsCardAxisEventCallback(event.id);
         formEventMgr->RemoveEtsCardTouchEventCallback(event.id);
     }
+    eventManager_->NotifyAxisEvent(event, node);
 }
 
 void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node,
@@ -4735,6 +4742,7 @@ void PipelineContext::OnHide()
 {
     CHECK_RUN_ON(UI);
     NotifyDragOnHide();
+    NotifyCoastingAxisEventOnHide();
     onShow_ = false;
     isNeedCallbackAreaChange_ = true;
     window_->OnHide();
@@ -5248,6 +5256,12 @@ void PipelineContext::NotifyDragOnHide()
     manager->OnDragEnd();
 }
 
+void PipelineContext::NotifyCoastingAxisEventOnHide()
+{
+    CHECK_NULL_VOID(eventManager_);
+    eventManager_->NotifyCoastingAxisEventStop();
+}
+
 void PipelineContext::CompensatePointerMoveEvent(const DragPointerEvent& event, const RefPtr<FrameNode>& node)
 {
     auto manager = GetDragDropManager();
@@ -5429,17 +5443,27 @@ void PipelineContext::OnIdle(int64_t deadline)
     canUseLongPredictTask_ = false;
     currentTime = GetSysTimestamp();
     if (currentTime < deadline) {
-        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(deadline - currentTime);
+        auto frontend = GetFrontend();
+        if (frontend) {
+            frontend->CallStateMgmtCleanUpIdleTaskFunc(deadline - currentTime);
+        } else {
+            LOGW("Fail to Call JSCleanUpIdleTaskFunc for frontend is null.");
+        }
         frameCountForNotCallJSCleanUp_ = 0;
     } else {
         frameCountForNotCallJSCleanUp_++;
     }
 
-    // Check if there is more than 100 frame which does not execute the CallJSCleanUpIdleTaskFunc
-    // Force to invoke CallJSCleanUpIdleTaskFunc to make sure no OOM in JS side
+    // Check if there is more than 100 frame which does not execute the CallStateMgmtCleanUpIdleTaskFunc
+    // Force to invoke CallStateMgmtCleanUpIdleTaskFunc to make sure no OOM in JS side
     if (frameCountForNotCallJSCleanUp_ >= MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION) {
         // The longest execution time is half of vsync period
-        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(window_->GetVSyncPeriod() / RATIO_OF_VSYNC_PERIOD);
+        auto frontend = GetFrontend();
+        if (frontend) {
+            frontend->CallStateMgmtCleanUpIdleTaskFunc(window_->GetVSyncPeriod() / RATIO_OF_VSYNC_PERIOD);
+        } else {
+            LOGW("Fail to Call JSCleanUpIdleTaskFunc for frontend is null.");
+        }
         frameCountForNotCallJSCleanUp_ = 0;
     }
 
@@ -6195,32 +6219,31 @@ void PipelineContext::RegisterFocusCallback()
     });
 }
 
-void PipelineContext::GetInspectorTree(bool onlyNeedVisible)
+void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
 {
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    auto cb = [root, onlyNeedVisible]() {
+        auto json = root->ToString();
+        json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
+        auto res = JsonUtil::Create(true);
+        res->Put("0", json.c_str());
+        UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
+        if (!onlyNeedVisible) {
+            UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
+        }
+    };
     if (onlyNeedVisible) {
-        auto root = JsonUtil::CreateSharedPtrJson(true);
         RefPtr<NG::FrameNode> topNavNode;
         uiTranslateManager_->FindTopNavDestination(rootNode_, topNavNode);
         if (topNavNode != nullptr) {
-            topNavNode->DumpSimplifyTree(0, root);
+            topNavNode->DumpSimplifyTreeWithParamConfig(0, root, true, config);
         } else {
-            rootNode_->DumpSimplifyTree(0, root);
+            rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, config);
         }
-        auto cb = [root]() {
-            auto json = root->ToString();
-            json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
-            auto res = JsonUtil::Create(true);
-            res->Put("0", json.c_str());
-            UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
-        };
-        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
+        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
     } else {
-        bool needThrow = false;
-        NG::InspectorFilter filter;
-        filter.AddFilterAttr("content");
-        auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
-        UiSessionManager::GetInstance()->AddValueForTree(0, nodeInfos);
-        rootNode_->GetInspectorValue();
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, config);
+        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
     }
 }
 
@@ -6832,4 +6855,27 @@ void PipelineContext::OnDumpBindAICaller(const std::vector<std::string>& params)
     }
 }
 
+void PipelineContext::SetMagnifierController(const RefPtr<MagnifierController>& magnifierController)
+{
+    magnifierController_ = magnifierController;
+}
+
+RefPtr<MagnifierController> PipelineContext::GetMagnifierController() const
+{
+    return magnifierController_;
+}
+
+void PipelineContext::ResSchedReportAxisEvent(const AxisEvent& event) const
+{
+    if (event.action == AxisAction::BEGIN) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Begin");
+        ResSchedReport::GetInstance().OnAxisEvent(event);
+    } else if (event.verticalAxis == 0 && event.horizontalAxis == 0) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis End");
+        ResSchedReport::GetInstance().ResSchedDataReport("axis_off");
+    } else {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Update");
+        ResSchedReport::GetInstance().OnAxisEvent(event);
+    }
+}
 } // namespace OHOS::Ace::NG

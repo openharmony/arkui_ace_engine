@@ -26,7 +26,7 @@ void DestroyPeerImpl(Ark_TextClockController peer)
         delete peer;
     }
 }
-Ark_TextClockController CtorImpl()
+Ark_TextClockController ConstructImpl()
 {
     return new TextClockControllerPeer();
 }
@@ -49,7 +49,7 @@ const GENERATED_ArkUITextClockControllerAccessor* GetTextClockControllerAccessor
 {
     static const GENERATED_ArkUITextClockControllerAccessor TextClockControllerAccessorImpl {
         TextClockControllerAccessor::DestroyPeerImpl,
-        TextClockControllerAccessor::CtorImpl,
+        TextClockControllerAccessor::ConstructImpl,
         TextClockControllerAccessor::GetFinalizerImpl,
         TextClockControllerAccessor::StartImpl,
         TextClockControllerAccessor::StopImpl,

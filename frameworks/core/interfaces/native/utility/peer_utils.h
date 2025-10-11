@@ -44,7 +44,9 @@ public:
     template<typename T>
     static void DestroyPeer(T *peer)
     {
-        CHECK_NULL_VOID(peer);
+        if (!peer) {
+            return;
+        }
 #ifdef ARKUI_CAPI_UNITTEST
         auto pos = peerMap_.find(peer);
         if (pos == peerMap_.end()) {

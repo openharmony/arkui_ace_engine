@@ -50,6 +50,7 @@ void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     auto&& paragraphs = pManager_->GetParagraphs();
     pManager_->CalPosyRange();
+    pManager_->CalLineIndex();
     auto offset = contentPattern->GetTextRect().GetOffset(); // relative to component
 
     auto clipOffset = clipOffset_->Get();
@@ -74,6 +75,7 @@ void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
         float x = AdjustParagraphX(info, contentRect);
         float y = info.topPos + offset.GetY();
         info.paragraph->Paint(drawingContext.canvas, x, y);
+        pManager_->PaintLeadingMarginSpan(info, offset, drawingContext);
     }
 
     PaintCustomSpan(drawingContext);

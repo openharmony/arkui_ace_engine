@@ -73,8 +73,6 @@ constexpr Dimension CALIBERATE_X = 4.0_vp;
 
 constexpr Dimension CALIBERATE_Y = 4.0_vp;
 
-constexpr Dimension SELECT_SMALL_PADDING_VP = 4.0_vp;
-
 constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
 
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
@@ -168,7 +166,17 @@ void SelectPattern::OnModifyDone()
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
     } else {
-        renderContext->UpdateBackgroundColor(theme->GetButtonBackgroundColor());
+        if (theme->IsTV() && !eventHub->IsEnabled()) {
+            renderContext->UpdateBackgroundColor(
+                theme->GetButtonBackgroundColor().BlendOpacity(theme->GetDisabledBackgroundColorAlpha()));
+            BorderColorProperty disabledBorderColorProperty;
+            const Color& disabledBorderColor = theme->GetSelectNormalBorderColor();
+            disabledBorderColorProperty.SetColor(
+                disabledBorderColor.BlendOpacity(theme->GetDisabledBackgroundColorAlpha()));
+            renderContext->UpdateBorderColor(disabledBorderColorProperty);
+        } else {
+            renderContext->UpdateBackgroundColor(theme->GetButtonBackgroundColor());
+        }
     }
 }
 
@@ -1510,7 +1518,11 @@ void SelectPattern::InitSpinner(
     uint32_t symbolId = selectTheme->GetSpinnerSource();
     spinnerLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo{symbolId});
     spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerSymbolColor()});
-    spinnerLayoutProperty->UpdateFontSize(selectTheme->GetFontSize());
+    if (selectTheme->IsTV()) {
+        spinnerLayoutProperty->UpdateFontSize(selectTheme->GetSpinnerSymbolSize());
+    } else {
+        spinnerLayoutProperty->UpdateFontSize(selectTheme->GetFontSize());
+    }
     spinnerLayoutProperty->UpdateSymbolRenderingStrategy(RENDERINGSTRATEGY_MULTIPLE_COLOR);
 }
 
@@ -2204,21 +2216,34 @@ void SelectPattern::ResetParams()
     SetFontSize(selectTheme->GetFontSize(controlSize_));
     auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
-    spinnerLayoutProperty->UpdateFontSize(selectTheme->GetFontSize(controlSize_));
+    if (selectTheme->IsTV()) {
+        spinnerLayoutProperty->UpdateFontSize(selectTheme->GetSpinnerSymbolSize(controlSize_));
+    } else {
+        spinnerLayoutProperty->UpdateFontSize(selectTheme->GetFontSize(controlSize_));
+    }
     auto renderContext = select->GetRenderContext();
     BorderRadiusProperty border;
     border.SetRadius(selectTheme->GetSelectDefaultBorderRadius(controlSize_));
     renderContext->UpdateBorderRadius(border);
+    if (!select->GetChildren().empty()) {
+        auto row = FrameNode::GetFrameNode(select->GetFirstChild()->GetTag(), select->GetFirstChild()->GetId());
+        CHECK_NULL_VOID(row);
+        auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+        CHECK_NULL_VOID(rowProps);
+        rowProps->UpdateSpace(selectTheme->GetContentSpinnerPadding(controlSize_));
+        row->MarkModifyDone();
+        row->MarkDirtyNode();
+    }
 
     NG::PaddingProperty paddings;
     paddings.top = std::nullopt;
     paddings.bottom = std::nullopt;
     if (controlSize_ == ControlSize::SMALL) {
-        paddings.left = NG::CalcLength(SELECT_SMALL_PADDING_VP);
-        paddings.right = NG::CalcLength(SELECT_SMALL_PADDING_VP);
+        paddings.left = NG::CalcLength(selectTheme->GetSelectLeftMargin(ControlSize::SMALL));
+        paddings.right = NG::CalcLength(selectTheme->GetSelectRightMargin(ControlSize::SMALL));
     } else {
-        paddings.left = NG::CalcLength(selectTheme->GetSelectNormalLeftRightMargin());
-        paddings.right = NG::CalcLength(selectTheme->GetSelectNormalLeftRightMargin());
+        paddings.left = NG::CalcLength(selectTheme->GetSelectLeftMargin(ControlSize::NORMAL));
+        paddings.right = NG::CalcLength(selectTheme->GetSelectRightMargin(ControlSize::NORMAL));
     }
     ViewAbstract::SetPadding(paddings);
 }
@@ -2259,7 +2284,7 @@ ControlSize SelectPattern::GetControlSize()
     return controlSize_;
 }
 
-Dimension SelectPattern::GetSelectLeftRightMargin() const
+Dimension SelectPattern::GetSelectLeftMargin(ControlSize controlSize) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, SELECT_MARGIN_VP);
@@ -2267,7 +2292,18 @@ Dimension SelectPattern::GetSelectLeftRightMargin() const
     CHECK_NULL_RETURN(pipeline, SELECT_MARGIN_VP);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(selectTheme, SELECT_MARGIN_VP);
-    return selectTheme->GetSelectNormalLeftRightMargin();
+    return selectTheme->GetSelectLeftMargin(controlSize);
+}
+
+Dimension SelectPattern::GetSelectRightMargin(ControlSize controlSize) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SELECT_MARGIN_VP);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, SELECT_MARGIN_VP);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, SELECT_MARGIN_VP);
+    return selectTheme->GetSelectRightMargin(controlSize);
 }
 
 bool SelectPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)

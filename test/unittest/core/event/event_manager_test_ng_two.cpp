@@ -1350,4 +1350,120 @@ HWTEST_F(EventManagerTestNg, CleanRefereeBeforeTouchTest001, TestSize.Level1)
     eventManager->CleanRefereeBeforeTouchTest(event, true);
     EXPECT_EQ(eventManager->refereeNG_->gestureScopes_.empty(), true);
 }
+
+/**
+ *
+ * @tc.name: FalsifyCancelEventWithDifferentDeviceId001
+ * @tc.desc: Test FalsifyCancelEventWithDifferentDeviceId function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, FalsifyCancelEventWithDifferentDeviceId001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    AxisEvent axisEventFirst;
+    eventManager->FalsifyCancelEventWithDifferentDeviceId(axisEventFirst, true);
+
+    std::vector<AxisAction> actionVec = { AxisAction::NONE, AxisAction::BEGIN, AxisAction::UPDATE, AxisAction::END,
+        AxisAction::CANCEL };
+    const int nodeId = 10004;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    TouchRestrict touchRestrict;
+    ASSERT_NE(frameNode, nullptr);
+    for (auto i = 0; i < actionVec.size(); ++i) {
+        AxisEvent axisEvent;
+        axisEvent.sourceType = SourceType::TOUCH;
+        axisEvent.action = actionVec[i];
+        eventManager->TouchTest(axisEvent, frameNode, touchRestrict);
+    }
+
+    eventManager->FalsifyCancelEventWithDifferentDeviceId(axisEventFirst, true);
+    auto result = eventManager->axisTestResultsMap_.find(axisEventFirst.id);
+    EXPECT_EQ(result, eventManager->axisTestResultsMap_.end());
+}
+
+struct AxisEventTestCase {
+    int32_t eventId;
+    int32_t deviceId;
+    AxisAction action;
+    bool result;
+};
+
+/**
+ *
+ * @tc.name: HandleAxisEventWithDifferentDeviceId001
+ * @tc.desc: Test HandleAxisEventWithDifferentDeviceId function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, HandleAxisEventWithDifferentDeviceId001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    const int nodeId = 10086;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    std::vector<AxisEventTestCase> testCases = { { 0, 0, AxisAction::BEGIN, false }, { 0, 1, AxisAction::BEGIN, false },
+        { 0, 1, AxisAction::UPDATE, false }, { 0, 0, AxisAction::UPDATE, true }, { 1, 0, AxisAction::BEGIN, false },
+        { 1, 1, AxisAction::UPDATE, true }, { 0, 1, AxisAction::END, false }, { 0, 1, AxisAction::CANCEL, true },
+        { 1, 0, AxisAction::CANCEL, false }, { 1, 0, AxisAction::CANCEL, true } };
+    for (auto& testCase : testCases) {
+        AxisEvent axisEvent;
+        axisEvent.id = testCase.eventId;
+        axisEvent.deviceId = testCase.deviceId;
+        axisEvent.action = testCase.action;
+        EXPECT_EQ(eventManager->HandleAxisEventWithDifferentDeviceId(axisEvent.CreateScaleEvent(0), frameNode),
+            testCase.result);
+    }
+}
+
+/**
+ * @tc.name: InitCoastingAxisEventGenerator001
+ * @tc.desc: Test InitCoastingAxisEventGenerator function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, InitCoastingAxisEventGenerator001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->InitCoastingAxisEventGenerator();
+    ASSERT_NE(eventManager->coastingAxisEventGenerator_, nullptr);
+    ASSERT_NE(eventManager->coastingAxisEventGenerator_->axisToTouchConverter_, nullptr);
+    AxisEvent axisEvent;
+    axisEvent.action = AxisAction::BEGIN;
+    auto touchEvent = eventManager->coastingAxisEventGenerator_->axisToTouchConverter_(axisEvent);
+    EXPECT_EQ(touchEvent.type, TouchType::DOWN);
+
+    eventManager->coastingAxisEventGenerator_ = nullptr;
+    eventManager->InitCoastingAxisEventGenerator();
+    ASSERT_NE(eventManager->coastingAxisEventGenerator_, nullptr);
+}
+
+/**
+ * @tc.name: NotifyAxisEvent001
+ * @tc.desc: Test NotifyAxisEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, NotifyAxisEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    ASSERT_NE(eventManager->coastingAxisEventGenerator_, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 0, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    AxisEvent axisEvent;
+    axisEvent.action = AxisAction::UPDATE;
+    axisEvent.sourceType = SourceType::MOUSE;
+    axisEvent.sourceTool = SourceTool::TOUCHPAD;
+    axisEvent.verticalAxis = 30.0;
+    axisEvent.horizontalAxis = 40.0;
+    eventManager->NotifyAxisEvent(axisEvent, frameNode);
+    EXPECT_EQ(eventManager->coastingAxisEventGenerator_->velocityTracker_.GetMainAxisPos(), 50);
+}
 } // namespace OHOS::Ace::NG

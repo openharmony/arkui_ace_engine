@@ -143,8 +143,7 @@ std::optional<IndexType> RepeatVirtualScroll2Caches::GetL1Index4Rid(RIDType rid)
     return std::nullopt;
 }
 
-void RepeatVirtualScroll2Caches::UpdateL1Rid4Index(std::map<int32_t, uint32_t> l1Rd4Index,
-    std::unordered_set<uint32_t> ridNeedToRecycle)
+void RepeatVirtualScroll2Caches::UpdateL1Rid4Index(std::map<int32_t, uint32_t> l1Rd4Index)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT, "UpdateL1Rid4Index");
 
@@ -152,9 +151,6 @@ void RepeatVirtualScroll2Caches::UpdateL1Rid4Index(std::map<int32_t, uint32_t> l
     TAG_LOGD(AceLogTag::ACE_REPEAT, "L1Rid4Index: %{public}s", DumpL1Rid4Index().c_str());
 
     ForEachCacheItem([&](RIDType rid, const CacheItem& cacheItem) {
-        if (ridNeedToRecycle.find(rid) != ridNeedToRecycle.end()) {
-            UpdateIsL1(cacheItem, false);
-        }
         UpdateIsL1(cacheItem, GetL1Index4RID(rid) != std::nullopt);
         TAG_LOGD(AceLogTag::ACE_REPEAT, "DumpCacheItem: %{public}s", DumpCacheItem(cacheItem).c_str());
     });

@@ -30,6 +30,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/event/touch_event.h"
@@ -42,7 +43,7 @@
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/interfaces/native/ani/ani_theme.h"
 #include "core/interfaces/native/ani/ani_theme_module.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/node/extension_custom_node.h"
 #include "core/interfaces/native/node/theme_modifier.h"
 #include "core/pipeline/base/element_register.h"
@@ -53,13 +54,16 @@
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/scrollable_target_info_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "frameworks/core/common/container.h"
+#include "frameworks/core/common/window_free_container.h"
+#include "frameworks/core/common/container_scope.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
 #include "core/components_ng/token_theme/token_colors.h"
 #include "ui/base/geometry/ng/size_t.h"
-
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -91,19 +95,20 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 
 static thread_local std::vector<int32_t> restoreInstanceIds_;
 
-ani_ref* GetHostContext()
+ani_ref* GetHostContext(ArkUI_Int32 key)
 {
-    auto context = NG::PipelineContext::GetCurrentContextSafely();
-    if (context == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current context.");
-        return nullptr;
-    }
-    auto frontend = context->GetFrontend();
-    if (frontend == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current frontend.");
-        return nullptr;
-    }
-    return frontend->GetHostContext();
+    // auto context = NG::PipelineContext::GetCurrentContextSafely();
+    // if (context == nullptr) {
+    //     TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current context.");
+    //     return nullptr;
+    // }
+    // auto frontend = context->GetFrontend();
+    // if (frontend == nullptr) {
+    //     TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current frontend.");
+    //     return nullptr;
+    // }
+    // return frontend->GetHostContext(key);
+    return nullptr;
 }
 
 void SetFrameRateRange(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_Int32 type)
@@ -155,8 +160,7 @@ void SetDrawCallback(ani_env* env, ani_long ptr, void* fnDrawCallbackFun)
         return;
     }
     auto* drawCallbackFuncPtr =
-        static_cast<std::function<void(NG::DrawingContext & drawingContext)>*>(fnDrawCallbackFun);
-
+        static_cast<std::function<void(NG::DrawingContext& drawingContext)>*>(fnDrawCallbackFun);
     auto* renderNodePeer = reinterpret_cast<RenderNodePeer*>(ptr);
     CHECK_NULL_VOID(renderNodePeer);
     auto renderNode = renderNodePeer->GetFrameNode();
@@ -166,18 +170,34 @@ void SetDrawCallback(ani_env* env, ani_long ptr, void* fnDrawCallbackFun)
     }
 }
 
+void SetFrameNodeDrawCallback(ani_env* env, ani_long ptr, void* fnDrawCallbackFun)
+{
+    if (fnDrawCallbackFun == nullptr) {
+        LOGE("Draw callback is undefined.");
+        return;
+    }
+    auto* drawCallbackFuncPtr =
+        static_cast<std::function<void(NG::DrawingContext & drawingContext)>*>(fnDrawCallbackFun);
+
+    auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(ptr);
+    CHECK_NULL_VOID(frameNodePeer);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NG::CustomFrameNodePattern>();
+    if (pattern) {
+        pattern->SetDrawCallback(std::move(*drawCallbackFuncPtr));
+    }
+}
+
 ArkUI_Int32 GetCurrentInstanceId()
 {
-    return ContainerScope::CurrentId();
+    return Container::CurrentIdSafely();
 }
 
 ArkUI_Int32 GetFocusedInstanceId()
 {
-    auto container = Container::GetFocused();
-    auto currentInstance = -1;
-    if (container) {
-        currentInstance = container->GetInstanceId();
-    } else if (ContainerScope::RecentActiveId() == -1) {
+    auto currentInstance = ContainerScope::RecentActiveId();
+    if (currentInstance == -1) {
         currentInstance = ContainerScope::SingletonId();
     }
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
@@ -295,9 +315,26 @@ ani_long CreateRenderNodePeerWithNodePtr(ani_long ptr)
 {
     FrameNode* node = reinterpret_cast<FrameNode*>(ptr);
     auto nodePtr = AceType::Claim(node);
-    auto peerPtr = RenderNodePeer::Create(nodePtr);
+    auto peerPtr = PeerUtils::CreatePeer<RenderNodePeer>(nodePtr);
     ani_long ret = reinterpret_cast<ani_long>(peerPtr);
     return ret;
+}
+
+ani_int CreateWindowFreeContainer(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::Context> nativeContext)
+{
+    // auto container = Platform::WindowFreeContainer::CreateWindowFreeContainer(env,
+    //     &nativeContext, FrontendType::ARK_TS);
+    // CHECK_NULL_RETURN(container, -1);
+    // int32_t instanceId = container->GetInstanceId();
+    // ContainerScope::Add(instanceId);
+    // return instanceId;
+    return -1;
+}
+
+void DestroyWindowFreeContainer(ani_int id)
+{
+    Platform::WindowFreeContainer::DestroyWindowFreeContainer();
+    ContainerScope::RemoveAndCheck(static_cast<int32_t>(id));
 }
 
 ani_boolean CheckIsUIThread(ArkUI_Int32 instanceId)
@@ -631,24 +668,24 @@ void* TransferScrollableTargetInfoPointer(ani_long nativePtr)
     return reinterpret_cast<void*>(nativePointer);
 }
 
-ani_long TransferDragEventPointer(ani_long ptr)
+void* CreateDragEventAccessor(ani_long ptr)
 {
     CHECK_NULL_RETURN(ptr, 0);
     auto weak = OHOS::Ace::AceType::WeakClaim(reinterpret_cast<OHOS::Ace::DragEvent*>(ptr));
     auto dragEvent = weak.Upgrade();
     CHECK_NULL_RETURN(dragEvent, 0);
     auto peer = DragEventPeer::Create(dragEvent);
-    return reinterpret_cast<ani_long>(peer);
+    return reinterpret_cast<void*>(peer);
 }
 
-ani_long GetDragEventPointer(ani_long ptr)
+void* GetDragEventPointer(ani_long ptr)
 {
     CHECK_NULL_RETURN(ptr, 0);
     auto peer = reinterpret_cast<DragEventPeer*>(ptr);
     CHECK_NULL_RETURN(peer, 0);
     auto dragInfo = peer->dragInfo;
     CHECK_NULL_RETURN(dragInfo, 0);
-    return reinterpret_cast<ani_long>(AceType::RawPtr(dragInfo));
+    return reinterpret_cast<void*>(AceType::RawPtr(dragInfo));
 }
 
 void* TransferTouchEventPointer(ani_long nativePtr)
@@ -721,6 +758,13 @@ void* GetHoverEventPointer(ani_long nativePtr)
     return reinterpret_cast<void*>(peer->GetEventInfo());
 }
 
+void FrameNodeMarkDirtyNode(ani_env* env, ani_long ptr)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_DIFF);
+}
+
 ArkUI_Uint32 GetColorValueByString(const std::string& src)
 {
     Color color;
@@ -762,8 +806,9 @@ void SetDefaultTheme(ani_env* env, const std::vector<Ark_ResourceColor>& colorAr
 {
     auto isDarkValue = static_cast<bool>(isDark);
     std::vector<uint32_t> colors;
-    AniThemeModule::ConvertToColorArray(colorArray, colors);
-    // NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue, nullptr);
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    AniThemeModule::ConvertToColorArray(colorArray, colors, resObjs);
+    NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue, static_cast<void*>(&resObjs));
 }
 
 void UpdateColorMode(ani_int colorMode)
@@ -792,12 +837,11 @@ void SetThemeScopeId(ani_env* env, ani_int themeScopeId)
 void CreateAndBindTheme(ani_env* env, ani_int themeScopeId, ani_int themeId,
     const std::vector<Ark_ResourceColor>& colorArray, ani_int colorMode, void* func)
 {
-    int32_t themeScopeIdValue = static_cast<int32_t>(themeScopeId);
     int32_t colorModeValue = static_cast<int32_t>(colorMode);
 
     std::vector<uint32_t> colors;
     std::vector<RefPtr<ResourceObject>> resObjs;
-    AniThemeModule::ConvertToColorArray(colorArray, colors);
+    AniThemeModule::ConvertToColorArray(colorArray, colors, resObjs);
 
     if (!func) {
         return;
@@ -829,16 +873,38 @@ void ApplyParentThemeScopeId(ani_env* env, ani_long self, ani_long parent)
         }
     }
 }
-void FrameNodeMarkDirtyNode(ani_env* env, ani_long ptr)
-{
-    auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
-    CHECK_NULL_VOID(frameNode);
-    frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_DIFF);
-}
 
 float GetPx2VpWithCurrentDensity(float px)
 {
     return PipelineBase::Px2VpWithCurrentDensity(px);
+}
+
+void SetImageCacheCount(ani_int value, ani_int instanceId)
+{
+    int32_t count = static_cast<int32_t>(value);
+    if (count < 0) {
+        return;
+    }
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto imageCache = pipelineContext->GetImageCache();
+    imageCache->SetCapacity(count);
+}
+
+void SetImageRawDataCacheSize(ani_int value, ani_int instanceId)
+{
+    int32_t cacheSize = static_cast<int32_t>(value);
+    if (cacheSize < 0) {
+        return;
+    }
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto imageCache = pipelineContext->GetImageCache();
+    imageCache->SetDataCacheLimit(cacheSize);
 }
 
 const ArkUIAniCommonModifier* GetCommonAniModifier()
@@ -849,6 +915,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .syncInstanceId = OHOS::Ace::NG::SyncInstanceId,
         .restoreInstanceId = OHOS::Ace::NG::RestoreInstanceId,
         .setDrawCallback = OHOS::Ace::NG::SetDrawCallback,
+        .setFrameNodeDrawCallback = OHOS::Ace::NG::SetFrameNodeDrawCallback,
         .getCurrentInstanceId = OHOS::Ace::NG::GetCurrentInstanceId,
         .getFocusedInstanceId = OHOS::Ace::NG::GetFocusedInstanceId,
         .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct,
@@ -860,6 +927,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getNodeIdWithNodePtr = OHOS::Ace::NG::GetNodeIdWithNodePtr,
         .getNodeIdWithPeerPtr = OHOS::Ace::NG::GetNodeIdWithPeerPtr,
         .createRenderNodePeerWithNodePtr = OHOS::Ace::NG::CreateRenderNodePeerWithNodePtr,
+        .createWindowFreeContainer = OHOS::Ace::NG::CreateWindowFreeContainer,
+        .destroyWindowFreeContainer = OHOS::Ace::NG::DestroyWindowFreeContainer,
         .checkIsUIThread = OHOS::Ace::NG::CheckIsUIThread,
         .isDebugMode =  OHOS::Ace::NG::IsDebugMode,
         .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,
@@ -882,7 +951,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .scrollableTargetInfoAccessorWithId = OHOS::Ace::NG::ScrollableTargetInfoAccessorWithId,
         .scrollableTargetInfoAccessorWithPointer = OHOS::Ace::NG::ScrollableTargetInfoAccessorWithPointer,
         .transferScrollableTargetInfoPointer = OHOS::Ace::NG::TransferScrollableTargetInfoPointer,
-        .transferDragEventPointer = OHOS::Ace::NG::TransferDragEventPointer,
+        .createDragEventAccessor = OHOS::Ace::NG::CreateDragEventAccessor,
         .getDragEventPointer = OHOS::Ace::NG::GetDragEventPointer,
         .transferTouchEventPointer = OHOS::Ace::NG::TransferTouchEventPointer,
         .transferMouseEventPointer = OHOS::Ace::NG::TransferMouseEventPointer,
@@ -894,6 +963,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getAxisEventPointer = OHOS::Ace::NG::GetAxisEventPointer,
         .getClickEventPointer = OHOS::Ace::NG::GetClickEventPointer,
         .getHoverEventPointer = OHOS::Ace::NG::GetHoverEventPointer,
+        .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode,
         .getColorValueByNumber = OHOS::Ace::NG::GetColorValueByNumber,
         .sendThemeToNative = OHOS::Ace::NG::SendThemeToNative,
         .removeThemeInNative = OHOS::Ace::NG::RemoveThemeInNative,
@@ -903,14 +973,14 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .setThemeScopeId = OHOS::Ace::NG::SetThemeScopeId,
         .createAndBindTheme = OHOS::Ace::NG::CreateAndBindTheme,
         .applyParentThemeScopeId = OHOS::Ace::NG::ApplyParentThemeScopeId,
-        .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode,
-        .getPx2VpWithCurrentDensity = OHOS::Ace::NG::GetPx2VpWithCurrentDensity
-
+        .getPx2VpWithCurrentDensity = OHOS::Ace::NG::GetPx2VpWithCurrentDensity,
+        .setImageCacheCount = OHOS::Ace::NG::SetImageCacheCount,
+        .setImageRawDataCacheSize = OHOS::Ace::NG::SetImageRawDataCacheSize
     };
     return &impl;
 }
 
-void SetDrawModifier(ani_long ptr, ani_int flag,
+void SetDrawModifier(ani_long ptr, uint32_t flag,
     void* fnDrawBehindFun, void* fnDrawContentFun, void* fnDrawFrontFun)
 {
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);

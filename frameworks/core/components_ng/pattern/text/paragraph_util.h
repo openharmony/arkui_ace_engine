@@ -35,6 +35,7 @@ public:
     static TextDirection GetTextDirectionByContent(const std::u16string& content);
     static void GetSpanParagraphStyle(LayoutWrapper* layoutWrapper,
         const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle);
+    static void SetDrawableLeadingMargin(ParagraphStyle& pStyle, const std::unique_ptr<TextLineStyle>& lineStyle);
     static void ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spans,
         std::vector<std::list<RefPtr<SpanItem>>>& spanGroupVec,
         bool& spanStringHasMaxLines);

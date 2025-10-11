@@ -102,6 +102,7 @@ public:
     void SetImageAccessEnabled(bool isImageAccessEnabled) override;
     void SetMixedMode(MixedModeContent mixedMode) override;
     void SetZoomAccessEnabled(bool isZoomAccessEnabled) override;
+    void SetZoomControlAccess(bool zoomControlAccess) override;
     void SetGeolocationAccessEnabled(bool isGeolocationAccessEnabled) override;
     void SetJsProxyCallback(std::function<void()>&& jsProxyCallback) override;
     void SetUserAgent(const std::string& userAgent) override;
@@ -247,21 +248,29 @@ public:
     void SetWebMediaAVSessionEnabled(bool isEnabled) override;
     void SetEnableDataDetector(bool isEnabled) override;
     void SetDataDetectorConfig(const TextDetectConfig& config) override;
+    void SetEnableSelectedDataDetector(bool isEnabled) override;
+    void SetSelectedDataDetectorConfig(const TextDetectConfig& config) override;
     void SetBypassVsyncCondition(WebBypassVsyncCondition condition) override;
     void SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetGestureFocusMode(GestureFocusMode mode) override;
+    void SetRotateRenderEffect(WebRotateEffect effect) override;
+    void SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo *info)> &&jsCallback) override;
+    void SetBlankScreenDetectionConfig(bool enable, const std::vector<double> &detectionTiming,
+        const std::vector<int32_t> &detectionMethods, int32_t contentfulNodesCountThreshold) override;
     void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetForceEnableZoom(bool isEnabled) override;
     void SetSafeBrowsingCheckFinishId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId) override;
+    void SetBackToTop(bool isBackToTop) override;
 
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
     static void SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled);
     static void SetMixedMode(FrameNode* frameNode, MixedModeContent mixedMode);
     static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
+    static void SetZoomControlAccess(FrameNode* frameNode, bool zoomControlAccess);
     static void SetCacheMode(FrameNode* frameNode, WebCacheMode cacheMode);
     static void SetDarkMode(FrameNode* frameNode, WebDarkMode mode);
     static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
@@ -301,6 +310,8 @@ public:
     static void SetNativeEmbedLifecycleChangeId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetNativeEmbedGestureEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetNativeEmbedObjectParamChangeId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void RegisterNativeEmbedRule(FrameNode* frameNode, const std::string& tag, const std::string& type);
     static void SetIntrinsicSizeEnabled(FrameNode* frameNode, bool isIntrinsicSizeEnabled);
@@ -356,6 +367,10 @@ public:
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType);
     static void SetOnShowFileSelector(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnDetectedBlankScreen(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetBlankScreenDetectionConfig(
+        FrameNode* frameNode, const BlankScreenDetectionConfig& detectConfig);
     static void SetOnContextMenuShow(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnSafeBrowsingCheckResult(FrameNode* frameNode,
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResult);
@@ -375,7 +390,10 @@ public:
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& dataResubmittedId);
     static void SetEnableDataDetector(FrameNode* frameNode, bool isEnabled);
     static void SetDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config);
+    static void SetEnableSelectedDataDetector(FrameNode* frameNode, bool isEnabled);
+    static void SetSelectedDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config);
     static void SetGestureFocusMode(FrameNode* frameNode, GestureFocusMode mode);
+    static void SetRotateRenderEffect(FrameNode* frameNode, WebRotateEffect effect);
     static void SetOnSslErrorRequest(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnClientAuthenticationRequest(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
@@ -389,6 +407,7 @@ public:
     static void SetForceEnableZoom(FrameNode* frameNode, bool isEnabled);
     static void SetOnSafeBrowsingCheckFinish(FrameNode* frameNode,
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinish);
+    static void SetBackToTop(FrameNode* frameNode, bool isBackToTop);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

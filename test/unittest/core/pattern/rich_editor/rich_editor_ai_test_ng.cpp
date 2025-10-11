@@ -715,4 +715,20 @@ HWTEST_F(RichEditorAITestOneNg, NeedAiAnalysis001, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
+/**
+ * @tc.name: NeedClearAISpanMap001
+ * @tc.desc: test NeedClearAISpanMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, NeedClearAISpanMap001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->dataDetectorAdapter_->textForAI_ = u"hello";
+    EXPECT_FALSE(richEditorPattern->NeedClearAISpanMap(u"hell"));
+    EXPECT_FALSE(richEditorPattern->NeedClearAISpanMap(u"hello"));
+    EXPECT_TRUE(richEditorPattern->NeedClearAISpanMap(u"hello1"));
+}
+
 }

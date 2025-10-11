@@ -14,6 +14,7 @@
  */
 #include "grid_modifier.h"
 #include <memory>
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
@@ -165,6 +166,23 @@ void SetGridScrollBarColor(ArkUINodeHandle node, uint32_t scrollBarColor)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetScrollBarColor(frameNode, Color(scrollBarColor));
+}
+
+void SetGridScrollBarColorPtr(ArkUINodeHandle node, ArkUI_Int32 color, void* colorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        GridModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
+    }
+    GridModelNG::SetScrollBarColor(frameNode, result);
 }
 
 void ResetGridScrollBarColor(ArkUINodeHandle node)
@@ -651,6 +669,7 @@ const ArkUIGridModifier* GetGridModifier()
         .resetGridScrollBarWidth = ResetGridScrollBarWidth,
         .getGridScrollBarWidth = GetGridScrollBarWidth,
         .setGridScrollBarColor = SetGridScrollBarColor,
+        .setGridScrollBarColorPtr = SetGridScrollBarColorPtr,
         .resetGridScrollBarColor = ResetGridScrollBarColor,
         .getGridScrollBarColor = GetGridScrollBarColor,
         .setGridCachedCount = SetGridCachedCount,

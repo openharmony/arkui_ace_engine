@@ -23,7 +23,6 @@ Ark_NativePointer RegisterBindSheetShowCallbackImpl(Ark_NativePointer node, Ark_
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, node);
-    CHECK_NULL_RETURN(builder, node);
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto changeEvent = [arkCallback = CallbackHelper(*callback), weakNode](const std::string& param) {
         PipelineContext::SetCallBackNode(weakNode);
@@ -39,10 +38,10 @@ Ark_NativePointer RegisterBindSheetShowCallbackImpl(Ark_NativePointer node, Ark_
     sheetStyle.showCloseIcon = true;
     sheetStyle.showInPage = false;
     BindSheetUtil::SheetCallbacks cbs;
-    auto sheetOptions = options ? Converter::OptConvert<Ark_SheetOptions>(*options) : std::nullopt;
+    auto sheetOptions = Converter::OptConvertPtr<Ark_SheetOptions>(options);
     if (sheetOptions) {
         BindSheetUtil::ParseLifecycleCallbacks(cbs, sheetOptions.value());
-        BindSheetUtil::ParseFuntionalCallbacks(cbs, sheetOptions.value());
+        BindSheetUtil::ParseFunctionalCallbacks(cbs, sheetOptions.value());
         Converter::VisitUnion(sheetOptions->title,
             [&sheetStyle](const Ark_SheetTitleOptions& value) {
                 sheetStyle.isTitleBuilder = false;
@@ -108,7 +107,7 @@ Ark_NativePointer RegisterContentCoverShowCallbackImpl(Ark_NativePointer node, A
     std::function<void()> onWillDismissCallback;
     std::function<void(const int32_t&)> onWillDismissFunc;
     ContentCoverParam contentCoverParam;
-    auto coverOption = options ? Converter::OptConvert<Ark_ContentCoverOptions>(*options) : std::nullopt;
+    auto coverOption = Converter::OptConvertPtr<Ark_ContentCoverOptions>(options);
     if (coverOption) {
         BindSheetUtil::ParseContentCoverCallbacks(weakNode, coverOption.value(), onShowCallback,
             onDismissCallback, onWillShowCallback, onWillDismissCallback, onWillDismissFunc);

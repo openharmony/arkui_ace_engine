@@ -1894,6 +1894,70 @@ HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnGetSelectedObject001, TestSi
 }
 
 /**
+ * @tc.name: GetPickerSpringMass001
+ * @tc.desc: Test GetPickerSpringMass.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, GetPickerSpringMass001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+    TextPickerModelNG::GetInstance()->SetSelected(1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto testImpl = columnPattern->CreateItemTouchEventListener();
+    ASSERT_NE(testImpl, nullptr);
+    columnPattern->tossAnimationController_->SetColumn(columnPattern);
+    EXPECT_EQ(columnPattern->tossAnimationController_->GetPickerSpringMass(), 1.f);
+}
+
+/**
+ * @tc.name: GetPickerMaxSlidingDistance001
+ * @tc.desc: Test GetPickerMaxSlidingDistance.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, GetPickerMaxSlidingDistance001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+    TextPickerModelNG::GetInstance()->SetSelected(1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto testImpl = columnPattern->CreateItemTouchEventListener();
+    ASSERT_NE(testImpl, nullptr);
+    columnPattern->tossAnimationController_->SetColumn(columnPattern);
+    EXPECT_EQ(columnPattern->tossAnimationController_->GetPickerMaxSlidingDistance(), 30);
+}
+
+/**
  * @tc.name: TextPickerColumnGetSelectedObject002
  * @tc.desc: Test GetSelectedObject when isDeclarative_ and isColumnChange are false.
  * @tc.type: FUNC

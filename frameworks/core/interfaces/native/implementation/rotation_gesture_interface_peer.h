@@ -16,8 +16,7 @@
 #pragma once
 
 #include "core/components_ng/gestures/rotation_gesture.h"
- 
-struct RotationGestureInterfacePeer final {
+
+struct RotationGesturePeer final {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::RotationGesture> gesture;
 };
- 

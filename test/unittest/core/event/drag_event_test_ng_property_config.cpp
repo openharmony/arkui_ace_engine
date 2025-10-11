@@ -1817,7 +1817,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest028, TestSize.Leve
     auto eventHubp = parentNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHubp, nullptr);
     auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
-    eventHubp->onDragStart_ = func;
+    eventHubp->SetOnDragStart(std::move(func));
     dragEventActuator->IsBelongToMultiItemNode(frameNode);
     auto childNode = FrameNode::CreateFrameNode(V2::GRID_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(childNode, nullptr);

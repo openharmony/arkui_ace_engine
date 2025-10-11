@@ -18,6 +18,7 @@
 #include <regex>
 
 #include "base/i18n/localization.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "core/components/text/render_text.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/font_collection.h"
@@ -387,13 +388,28 @@ bool FontManager::RegisterCallbackNG(
     // Register callbacks for non-system fonts that are loaded through the graphic2d.
     FontInfo fontInfo;
     if (!hasRegistered) {
-        externalLoadCallbacks_.emplace(node, std::make_pair(familyName, callback));
+        RegisterTextEngineLoadCallback(node, familyName, callback);
     }
     if (!hasRegisterLoadFontCallback_) {
         RegisterLoadFontCallbacks();
         hasRegisterLoadFontCallback_ = true;
     }
     return false;
+}
+
+void FontManager::RegisterTextEngineLoadCallback(
+    const WeakPtr<NG::UINode>& node, const std::string& familyName, const std::function<void()>& callback)
+{
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto isFormRender = context && context->IsFormRender();
+    if (isFormRender) {
+        auto engine = EngineHelper::GetCurrentEngine();
+        NativeEngine* nativeEngine = engine ? engine->GetNativeEngine() : nullptr;
+        uint64_t runtimeId = nativeEngine ? static_cast<uint64_t>(reinterpret_cast<uintptr_t>(nativeEngine)) : 0;
+        FormLoadFontCallbackInfo formCallbackInfo = { std::make_pair(familyName, callback), runtimeId };
+        formLoadCallbacks_.emplace(node, formCallbackInfo);
+    }
+    externalLoadCallbacks_.emplace(node, std::make_pair(familyName, callback));
 }
 
 void FontManager::AddFontNodeNG(const WeakPtr<NG::UINode>& node)
@@ -414,6 +430,7 @@ void FontManager::UnRegisterCallbackNG(const WeakPtr<NG::UINode>& node)
         fontLoader->RemoveCallbackNG(node);
     }
     externalLoadCallbacks_.erase(node);
+    formLoadCallbacks_.erase(node);
 }
 
 void FontManager::AddVariationNodeNG(const WeakPtr<NG::UINode>& node)
@@ -450,36 +467,58 @@ void FontManager::RegisterLoadFontCallbacks()
     auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     NG::FontCollection::Current()->RegisterLoadFontFinishCallback(
-        [weakContext = WeakPtr(context), weak = WeakClaim(this)](const std::string& fontName) {
+        [weakContext = WeakPtr(context), weak = WeakClaim(this)](
+            const std::string& fontName, uint64_t runtimeId) {
             auto fontManager = weak.Upgrade();
             CHECK_NULL_VOID(fontManager);
-            fontManager->OnLoadFontChanged(weakContext, fontName);
+            fontManager->OnLoadFontChanged(weakContext, fontName, runtimeId);
         });
     NG::FontCollection::Current()->RegisterUnloadFontFinishCallback(
-        [weakContext = WeakPtr(context), weak = WeakClaim(this)](const std::string& fontName) {
+        [weakContext = WeakPtr(context), weak = WeakClaim(this)](
+            const std::string& fontName, uint64_t runtimeId) {
             auto fontManager = weak.Upgrade();
             CHECK_NULL_VOID(fontManager);
-            fontManager->OnLoadFontChanged(weakContext, fontName);
+            fontManager->OnLoadFontChanged(weakContext, fontName, runtimeId);
         });
 }
 
-void FontManager::OnLoadFontChanged(const WeakPtr<PipelineBase>& weakContext, const std::string& fontName)
+void FontManager::OnLoadFontChanged(
+    const WeakPtr<PipelineBase>& weakContext, const std::string& fontName, uint64_t runtimeId)
 {
     auto context = weakContext.Upgrade();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [weak = WeakClaim(this), fontName] {
+        [weak = WeakClaim(this), fontName, runtimeId] {
             auto fontManager = weak.Upgrade();
             CHECK_NULL_VOID(fontManager);
-            for (const auto& element : fontManager->externalLoadCallbacks_) {
-                if (element.second.first == fontName && element.second.second) {
-                    element.second.second();
-                }
-            }
+            fontManager->NotifyFontChange(fontName, runtimeId);
         },
         TaskExecutor::TaskType::UI, "NotifyFontLoadUITask");
+}
+
+void FontManager::NotifyFontChange(const std::string& fontName, uint64_t runtimeId)
+{
+    // form font change event.
+    if (runtimeId > 0) {
+        for (const auto& element : formLoadCallbacks_) {
+            FormLoadFontCallbackInfo callbackInfo = element.second;
+            auto formFontName = callbackInfo.fontCallbackPair.first;
+            auto callback = callbackInfo.fontCallbackPair.second;
+            if (formFontName == fontName && callback && callbackInfo.formRuntimeId > 0 &&
+                callbackInfo.formRuntimeId == runtimeId) {
+                callback();
+            }
+        }
+        return;
+    }
+    // global font change event.
+    for (const auto& element : externalLoadCallbacks_) {
+        if (element.second.first == fontName && element.second.second) {
+            element.second.second();
+        }
+    }
 }
 
 void FontManager::StartAbilityOnJumpBrowser(const std::string& address) const

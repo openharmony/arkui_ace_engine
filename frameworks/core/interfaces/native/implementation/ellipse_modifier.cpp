@@ -53,7 +53,7 @@ void SetEllipseOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opt = options ? Converter::OptConvert<Converter::EllipseOptions>(*options) : std::nullopt;
+    auto opt = Converter::OptConvertPtr<Converter::EllipseOptions>(options);
 
     if (opt && opt->width) {
         ShapeAbstractModelNG::SetWidth(frameNode, *opt->width);

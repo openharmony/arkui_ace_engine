@@ -17,12 +17,12 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
+#include "core/components/list/list_theme.h"
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components/list/list_theme.h"
-
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -652,9 +652,20 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int6
     CHECK_NULL_VOID(listPattern);
     auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
-    auto cacheCountForward = listLayoutProperty->GetCachedCountWithDefault() - forwardCached;
-    auto cacheCountBackward = listLayoutProperty->GetCachedCountWithDefault() - backwardCached;
+    bool isMainThreadBusy = ScrollableUtils::IsMainThreadBusy(GetHost());
+    auto minCacheCount = listLayoutProperty->GetMinCacheCount();
+    auto maxCacheCount = listLayoutProperty->GetCachedCountWithDefault();
+    auto cacheCountForward = isMainThreadBusy ? minCacheCount - forwardCached : maxCacheCount - forwardCached;
+    auto cacheCountBackward = isMainThreadBusy ? minCacheCount - backwardCached : maxCacheCount - backwardCached;
     if (cacheCountForward < 1 && cacheCountBackward < 1) {
+        return;
+    }
+    int32_t startIndex = itemPosition_.empty() ? itemTotalCount_ : itemPosition_.begin()->first;
+    int32_t backwardCachedCount = (startIndex - backwardCachedIndex_ + lanes_ - 1) / lanes_;
+    int32_t endIndex = itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
+    int32_t forwardCachedCount = (forwardCachedIndex_ - endIndex + lanes_ - 1) / lanes_;
+    if (!(listSizeValues.forward && cacheCountForward > forwardCachedCount) &&
+        !(listSizeValues.backward && cacheCountBackward > backwardCachedCount)) {
         return;
     }
     auto host = GetHost();

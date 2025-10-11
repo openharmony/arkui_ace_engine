@@ -20,8 +20,13 @@
 #include "base/log/log.h"
 
 namespace OHOS::Ace::NG {
-    void SetListChildrenMainSize(ani_env* env, ani_long ptr, ani_object obj);
 const ArkUIAniListModifier* GetArkUIAniListModifier();
+bool UpdateDefaultSizeAndGetNeedSync(ArkUINodeHandle node, double defaultSize);
+void SyncChildrenSize(ArkUINodeHandle node, double size);
+void NotifyChange(ArkUINodeHandle node, ArkUI_Int32 start,
+    ArkUI_Int32 deleteCount, std::vector<float>& newSizeArr);
+void ResizeChildrenSize(ArkUINodeHandle node, int32_t size);
+void SyncChildrenSizeOver(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_LIST_ANI_MODIFIER

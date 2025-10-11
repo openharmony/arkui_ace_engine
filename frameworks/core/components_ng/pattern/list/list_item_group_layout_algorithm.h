@@ -390,7 +390,8 @@ public:
 
     bool ReachResponseDeadline(LayoutWrapper* layoutWrapper) const
     {
-        return !itemPosition_.empty() && !isNeedSyncLoad_ && layoutWrapper->ReachResponseDeadline();
+        return (static_cast<int32_t>(itemPosition_.size()) > prevItemPosCount_) && !isNeedSyncLoad_ &&
+            layoutWrapper->ReachResponseDeadline();
     }
 
     ListItemGroupLayoutInfo GetLayoutInfo() const;
@@ -564,6 +565,7 @@ private:
     bool measureInNextFrame_ = false;
     bool prevMeasureBreak_ = false;
     int32_t pauseMeasureCacheItem_ = -1;
+    int32_t prevItemPosCount_ = 0;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;

@@ -1133,7 +1133,8 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest017, TestSize.Level1)
     CHECK_NULL_VOID(imageNode);
     frameNode->AddChild(imageNode);
     frameNode->tag_ = V2::IMAGE_ANIMATOR_ETS_TAG;
-    ElementRegister::GetInstance()->itemMap_[nodeId] = frameNode;
+    ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
+    ElementRegister::GetInstance()->AddReferenced(nodeId, frameNode);
     imageAnimatorModelNG.Create();
     EXPECT_FALSE(frameNode->GetChildren().empty());
 }

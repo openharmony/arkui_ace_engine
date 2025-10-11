@@ -44,6 +44,5 @@ export type Curve = curves.Curve
 export type PointerStyle = pointer.PointerStyle
 export type UnifiedData = unifiedDataChannel.UnifiedData
 export type Summary = unifiedDataChannel.Summary
-// export type DataSyncOptions = unifiedDataChannel.GetDataParams
-export type DataSyncOptions = Object // change this when udmf merged
+export type DataSyncOptions = unifiedDataChannel.GetDataParams
 export type UniformDataType = uniformTypeDescriptor.UniformDataType

@@ -24,6 +24,8 @@ const int32_t DEFAULT_LONG_PRESS_DURATION = 500;
 const bool DEFAULT_REPEAT = false;
 
 struct LongPressRecognizerPeer : public MultiFingerRecognizerPeer {
+    DECLARE_ACE_TYPE(LongPressRecognizerPeer, MultiFingerRecognizerPeer);
+public:
     void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::LongPressRecognizer>& recognizer)
     {
         MultiFingerRecognizerPeer::Update(recognizer);

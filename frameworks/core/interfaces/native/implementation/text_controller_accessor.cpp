@@ -27,7 +27,7 @@ void DestroyPeerImpl(Ark_TextController peer)
 {
     delete peer;
 }
-Ark_TextController CtorImpl()
+Ark_TextController ConstructImpl()
 {
     return new TextControllerPeer();
 }
@@ -43,8 +43,12 @@ void CloseSelectionMenuImpl(Ark_TextController peer)
 void SetStyledStringImpl(Ark_TextController peer,
                          Ark_StyledString value)
 {
-    CHECK_NULL_VOID(peer && peer->controller);
+    CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(value);
+    if (!peer->controller) {
+        peer->SetStyledStringCache(value->spanString);
+        return;
+    }
     peer->controller->SetStyledString(value->spanString);
 }
 Ark_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)
@@ -52,7 +56,7 @@ Ark_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)
     CHECK_NULL_RETURN(peer && peer->controller, nullptr);
     auto layoutManagerAccessor = GetLayoutManagerAccessor();
     CHECK_NULL_RETURN(layoutManagerAccessor, nullptr);
-    auto layoutManagerPeer = layoutManagerAccessor->ctor();
+    auto layoutManagerPeer = layoutManagerAccessor->construct();
     CHECK_NULL_RETURN(layoutManagerPeer, nullptr);
     layoutManagerPeer->handler = peer->controller->GetLayoutInfoInterface();
     return layoutManagerPeer;
@@ -62,7 +66,7 @@ const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor()
 {
     static const GENERATED_ArkUITextControllerAccessor TextControllerAccessorImpl {
         TextControllerAccessor::DestroyPeerImpl,
-        TextControllerAccessor::CtorImpl,
+        TextControllerAccessor::ConstructImpl,
         TextControllerAccessor::GetFinalizerImpl,
         TextControllerAccessor::CloseSelectionMenuImpl,
         TextControllerAccessor::SetStyledStringImpl,

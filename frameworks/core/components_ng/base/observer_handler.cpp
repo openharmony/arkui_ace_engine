@@ -291,6 +291,12 @@ void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
     tabContentStateHandleFunc_(info);
 }
 
+void UIObserverHandler::NotifyTabChange(const TabContentInfo& info)
+{
+    CHECK_NULL_VOID(tabChangeHandleFunc_);
+    tabChangeHandleFunc_(info);
+}
+
 UIObserverHandler::NavDestinationSwitchHandleFunc UIObserverHandler::GetHandleNavDestinationSwitchFunc()
 {
     return navDestinationSwitchHandleFunc_;
@@ -467,6 +473,13 @@ void UIObserverHandler::NotifyTextChangeEvent(const TextChangeEventInfo& info)
     textChangeEventHandleFunc_(info);
 }
 
+void UIObserverHandler::NotifyWinSizeLayoutBreakpointChangeFunc(
+    int32_t instanceId, const WindowSizeBreakpoint& breakpoint)
+{
+    CHECK_NULL_VOID(winSizeLayoutBreakpointHandleFunc_);
+    winSizeLayoutBreakpointHandleFunc_(instanceId, breakpoint);
+}
+
 void UIObserverHandler::SetHandleNavigationChangeFunc(NavigationHandleFunc func)
 {
     navigationHandleFunc_ = func;
@@ -495,6 +508,11 @@ void UIObserverHandler::SetHandleRouterPageChangeFuncForAni(RouterPageHandleFunc
 void UIObserverHandler::SetHandleDensityChangeFunc(DensityHandleFunc func)
 {
     densityHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetWinSizeLayoutBreakpointChangeFunc(WinSizeLayoutBreakpointHandleFunc func)
+{
+    winSizeLayoutBreakpointHandleFunc_ = std::move(func);
 }
 
 void UIObserverHandler::SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func)
@@ -570,6 +588,11 @@ void UIObserverHandler::SetDidClickHandleFuncForAni(DidClickHandleFuncForAni fun
 void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func)
 {
     tabContentStateHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleTabChangeFunc(TabChangeHandleFunc func)
+{
+    tabChangeHandleFunc_ = func;
 }
 
 void UIObserverHandler::SetHandleTextChangeEventFunc(TextChangeEventHandleFunc&& func)

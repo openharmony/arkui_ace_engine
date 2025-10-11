@@ -174,4 +174,26 @@ void SetNeedFocusMultiThread(FrameNode* frameNode, bool value)
         }
     });
 }
+
+void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode), clickEventFunc,
+        distanceThreshold]() mutable {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ViewAbstract::SetOnClick(frameNode.GetRawPtr(), std::move(clickEventFunc), distanceThreshold);
+    });
+}
+
+void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, Dimension distanceThreshold)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode), clickEventFunc,
+        distanceThreshold]() mutable {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ViewAbstract::SetOnClick(frameNode.GetRawPtr(), std::move(clickEventFunc), distanceThreshold);
+    });
+}
 } // namespace OHOS::Ace::NG

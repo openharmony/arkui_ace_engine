@@ -51,15 +51,15 @@ void SetRichTextOptionsImpl(Ark_NativePointer node,
 }
 } // RichTextInterfaceModifier
 namespace RichTextAttributeModifier {
-void OnStartImpl(Ark_NativePointer node,
-                 const Opt_Callback_Void* value)
+void SetOnStartImpl(Ark_NativePointer node,
+                    const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef WEB_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onCallback = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* event) {
@@ -68,15 +68,15 @@ void OnStartImpl(Ark_NativePointer node,
     RichTextModelStatic::SetOnPageStart(frameNode, std::move(onCallback));
 #endif
 }
-void OnCompleteImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+void SetOnCompleteImpl(Ark_NativePointer node,
+                       const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef WEB_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onCallback = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* event) {
@@ -91,8 +91,8 @@ const GENERATED_ArkUIRichTextModifier* GetRichTextModifier()
     static const GENERATED_ArkUIRichTextModifier ArkUIRichTextModifierImpl {
         RichTextModifier::ConstructImpl,
         RichTextInterfaceModifier::SetRichTextOptionsImpl,
-        RichTextAttributeModifier::OnStartImpl,
-        RichTextAttributeModifier::OnCompleteImpl,
+        RichTextAttributeModifier::SetOnStartImpl,
+        RichTextAttributeModifier::SetOnCompleteImpl,
     };
     return &ArkUIRichTextModifierImpl;
 }

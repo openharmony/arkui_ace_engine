@@ -80,25 +80,60 @@ static FillMode StringToFillMode(const std::string &fillMode)
     }
 }
 
-class AnimatorResult final {
+static bool IsInstanceOfCls(ani_env *env, [[maybe_unused]] ani_object object, const char* className)
+{
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        return false;
+    }
+    ani_boolean isInstance;
+    if (env->Object_InstanceOf(object, cls, &isInstance)) {
+        return false;
+    }
+    return (bool)isInstance;
+}
+
+static std::string FillModeToString(const FillMode& fillMode)
+{
+    switch (fillMode) {
+        case FillMode::NONE:
+            return ANIMATOR_FILLMODE_NONE;
+        case FillMode::BACKWARDS:
+            return ANIMATOR_FILLMODE_BACKWARDS;
+        case FillMode::BOTH:
+            return ANIMATOR_FILLMODE_BOTH;
+        case FillMode::FORWARDS:
+            [[fallthrough]];
+        default:
+            return ANIMATOR_FILLMODE_FORWARDS;
+    }
+}
+
+static std::string AnimationDirectionToString(const AnimationDirection& direction)
+{
+    switch (direction) {
+        case AnimationDirection::ALTERNATE:
+            return ANIMATOR_DIRECTION_ALTERNATE;
+        case AnimationDirection::REVERSE:
+            return ANIMATOR_DIRECTION_REVERSE;
+        case AnimationDirection::ALTERNATE_REVERSE:
+            return ANIMATOR_DIRECTION_ALTERNATE_REVERSE;
+        case AnimationDirection::NORMAL:
+            [[fallthrough]];
+        default:
+            return ANIMATOR_DIRECTION_NORMAL;
+    }
+}
+
+class AnimatorResult final: public Napi::AnimatorResultBase {
 public:
     AnimatorResult() = default;
     AnimatorResult(RefPtr<Animator> &animator, std::shared_ptr<Napi::AnimatorOption> &option)
-        : animator_(animator), option_(option)
+        : Napi::AnimatorResultBase(animator, option)
     {
         ApplyOption();
     }
-    ~AnimatorResult() = default;
-
-    RefPtr<Animator> GetAnimator() const
-    {
-        return animator_;
-    }
-
-    std::shared_ptr<Napi::AnimatorOption> GetAnimatorOption() const
-    {
-        return option_;
-    }
+    ~AnimatorResult() override = default;
 
     ani_ref GetOnframeRef() const
     {
@@ -140,26 +175,6 @@ public:
         onrepeat_ = onrepeat;
     }
 
-    const RefPtr<Motion> &GetMotion() const
-    {
-        return motion_;
-    }
-
-    void SetMotion(const RefPtr<Motion> &motion)
-    {
-        motion_ = motion;
-    }
-
-    void SetAnimatorOption(std::shared_ptr<Napi::AnimatorOption> &animatorOption)
-    {
-        option_ = animatorOption;
-    }
-
-    void SetAnimator(RefPtr<Animator> &animator)
-    {
-        animator_ = animator;
-    }
-
     void ApplyOption()
     {
         CHECK_NULL_VOID(animator_);
@@ -179,9 +194,6 @@ public:
     }
 
 private:
-    RefPtr<Animator> animator_;
-    RefPtr<Motion> motion_;
-    std::shared_ptr<Napi::AnimatorOption> option_;
     ani_ref onframe_ = nullptr;
     ani_ref onfinish_ = nullptr;
     ani_ref oncancel_ = nullptr;
@@ -419,7 +431,25 @@ static void ParseAnimatorOption(ani_env *env, ani_object obj, std::shared_ptr<Na
     ani_ref directionAni;
     ani_double beginAni;
     ani_double endAni;
-
+    if (IsInstanceOfCls(env, obj, "@ohos.animator.SimpleAnimatorOptions")) {
+        auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, obj);
+        CHECK_NULL_VOID(simpleAnimatorOption);
+        option->begin = simpleAnimatorOption->GetBegin();
+        option->end = simpleAnimatorOption->GetEnd();
+        option->duration = simpleAnimatorOption->GetDuration().has_value() ?
+            simpleAnimatorOption->GetDuration().value() : ANIMATOR_DEFALUT_DURATION;
+        option->easing = simpleAnimatorOption->GetEasing().has_value() ?
+            simpleAnimatorOption->GetEasing().value() : ANIMATOR_DEFALUT_EASING;
+        option->delay = simpleAnimatorOption->GetDelay().has_value() ?
+            simpleAnimatorOption->GetDelay().value() : ANIMATOR_DEFALUT_DELAY;
+        option->fill = simpleAnimatorOption->GetFill().has_value() ?
+            FillModeToString(simpleAnimatorOption->GetFill().value()) : ANIMATOR_FILLMODE_FORWARDS;
+        option->direction = simpleAnimatorOption->GetDirection().has_value() ?
+            AnimationDirectionToString(simpleAnimatorOption->GetDirection().value()) : ANIMATOR_DIRECTION_NORMAL;
+        option->iterations = simpleAnimatorOption->GetIterations().has_value() ?
+            simpleAnimatorOption->GetIterations().value() : ANIMATOR_DEFALUT_ITERATIONS;
+        return;
+    }
     env->Object_GetPropertyByName_Double(obj, "duration", &durationAni);
     env->Object_GetPropertyByName_Double(obj, "iterations", &iterationsAni);
     env->Object_GetPropertyByName_Double(obj, "delay", &delayAni);
@@ -428,13 +458,9 @@ static void ParseAnimatorOption(ani_env *env, ani_object obj, std::shared_ptr<Na
     env->Object_GetPropertyByName_Ref(obj, "easing", &easingAni);
     env->Object_GetPropertyByName_Ref(obj, "fill", &fillAni);
     env->Object_GetPropertyByName_Ref(obj, "direction", &directionAni);
-    std::string easing = "ease";
-    std::string fill = "none";
-    std::string direction = "normal";
-    easing = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(easingAni));
-    fill = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(fillAni));
-    direction = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(directionAni));
-
+    std::string easing = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(easingAni));
+    std::string fill = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(fillAni));
+    std::string direction = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(directionAni));
     option->duration = durationAni > 0 ? durationAni : 0;
     option->iterations = iterationsAni >= -1 ? iterationsAni : 1;
     option->begin = beginAni;
@@ -518,13 +544,13 @@ static RefPtr<Motion> ParseOptionToMotion(const std::shared_ptr<Napi::AnimatorOp
 
 static ani_object createDouble(ani_env *env, double value)
 {
-    static const char *className = "Lstd/core/Double;";
+    static const char *className = "std.core.Double";
     ani_class persion_cls;
     if (ANI_OK != env->FindClass(className, &persion_cls)) {
         return nullptr;
     }
     ani_method personInfoCtor;
-    if (ANI_OK != env->Class_FindMethod(persion_cls, "<ctor>", "D:V", &personInfoCtor)) {
+    if (ANI_OK != env->Class_FindMethod(persion_cls, "<ctor>", "d:", &personInfoCtor)) {
         return nullptr;
     }
     ani_object personInfoObj;
@@ -648,7 +674,7 @@ static void SetOnrepeat([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_obje
 static ani_object AnimatorTransferStatic(ani_env *aniEnv, ani_object, ani_object input)
 {
     ani_object animatorObj = {};
-    static const char *className = "L@ohos/animator/AnimatorResultInner;";
+    static const char *className = "@ohos.animator.AnimatorResultInner";
     ani_class cls;
     if (ANI_OK != aniEnv->FindClass(className, &cls)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] find class fail");
@@ -688,17 +714,14 @@ static ani_object AnimatorTransferStatic(ani_env *aniEnv, ani_object, ani_object
     animatorResult->SetMotion(motion);
     animatorResult->SetAnimatorOption(option);
     animatorResult->SetAnimator(animator);
-    if (ANI_OK != aniEnv->Object_New(cls, ctor, &animatorObj, reinterpret_cast<ani_long>(animatorResult))) {
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] create animatorResult fail");
-        return animatorObj;
-    }
+    aniEnv->Object_New(cls, ctor, &animatorObj, reinterpret_cast<ani_long>(animatorResult));
     return animatorObj;
 }
 
 void ParseExpectedFrameRateRange(ani_env *env, ani_object objOption,
     FrameRateRange& frameRateRange)
 {
-    static const char *className = "L@ohos/arkui/component/Common/ExpectedFrameRateRange;";
+    static const char *className = "@ohos.arkui.component.Common.ExpectedFrameRateRange";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return;
@@ -748,49 +771,10 @@ static void JSSetExpectedFrameRateRange(ani_env *env, ani_object obj, ani_object
     animator->SetExpectedFrameRateRange(frameRateRange);
 }
 
-bool IsInstanceOfCls(ani_env *env, [[maybe_unused]] ani_object object, const char* className)
-{
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return false;
-    }
-    ani_boolean isInstance;
-    if (env->Object_InstanceOf(object, cls, &isInstance)) {
-        return false;
-    }
-    return (bool)isInstance;
-}
-
-std::string FillModeToString(const FillMode& fillMode)
-{
-    if (fillMode == FillMode::NONE) {
-        return ANIMATOR_FILLMODE_NONE;
-    } else if (fillMode == FillMode::BACKWARDS) {
-        return ANIMATOR_FILLMODE_BACKWARDS;
-    } else if (fillMode == FillMode::BOTH) {
-        return ANIMATOR_FILLMODE_BOTH;
-    } else {
-        return ANIMATOR_FILLMODE_FORWARDS;
-    }
-}
-
-std::string AnimationDirectionToString(const AnimationDirection& direction)
-{
-    if (direction == AnimationDirection::ALTERNATE) {
-        return ANIMATOR_DIRECTION_ALTERNATE;
-    } else if (direction == AnimationDirection::REVERSE) {
-        return ANIMATOR_DIRECTION_REVERSE;
-    } else if (direction == AnimationDirection::ALTERNATE_REVERSE) {
-        return ANIMATOR_DIRECTION_ALTERNATE_REVERSE;
-    } else {
-        return ANIMATOR_DIRECTION_NORMAL;
-    }
-}
-
 ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_unused]] ani_object aniOption)
 {
     ani_object animatorObj = {};
-    static const char *className = "L@ohos/animator/AnimatorResultInner;";
+    static const char *className = "@ohos.animator.AnimatorResultInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] find class fail");
@@ -805,28 +789,7 @@ ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
 
     // create animatot and construct animatorResult
     auto option = std::make_shared<Napi::AnimatorOption>();
-    if (IsInstanceOfCls(env, aniOption, "L@ohos/animator/SimpleAnimatorOptions;")) {
-        auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, aniOption);
-        if (simpleAnimatorOption == nullptr) {
-            return animatorObj;
-        }
-        option->begin = simpleAnimatorOption->GetBegin();
-        option->end = simpleAnimatorOption->GetEnd();
-        option->duration = simpleAnimatorOption->GetDuration().has_value() ?
-            simpleAnimatorOption->GetDuration().value() : ANIMATOR_DEFALUT_DURATION;
-        option->easing = simpleAnimatorOption->GetEasing().has_value() ?
-            simpleAnimatorOption->GetEasing().value() : ANIMATOR_DEFALUT_EASING;
-        option->delay = simpleAnimatorOption->GetDelay().has_value() ?
-            simpleAnimatorOption->GetDelay().value() : ANIMATOR_DEFALUT_DELAY;
-        option->fill = simpleAnimatorOption->GetFill().has_value() ?
-            FillModeToString(simpleAnimatorOption->GetFill().value()) : ANIMATOR_FILLMODE_FORWARDS;
-        option->direction = simpleAnimatorOption->GetDirection().has_value() ?
-            AnimationDirectionToString(simpleAnimatorOption->GetDirection().value()) : ANIMATOR_DIRECTION_NORMAL;
-        option->iterations = simpleAnimatorOption->GetIterations().has_value() ?
-            simpleAnimatorOption->GetIterations().value() : ANIMATOR_DEFALUT_ITERATIONS;
-    } else {
-        ParseAnimatorOption(env, aniOption, option);
-    }
+    ParseAnimatorOption(env, aniOption, option);
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] option is %{public}s", option->ToString().c_str());
     auto animator = CREATE_ANIMATOR("ohos.animator");
     animator->AttachSchedulerOnContainer();
@@ -848,12 +811,15 @@ static void ANIReset(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
     if (!animatorResult) {
         return;
     }
-    auto option = std::make_shared<Napi::AnimatorOption>();
-    ParseAnimatorOption(env, options, option);
+    auto option = animatorResult->GetAnimatorOption();
+    if (!option) {
+        return;
+    }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
         return;
     }
+    ParseAnimatorOption(env, options, option);
     animator->ClearInterpolators();
     animator->ResetIsReverse();
     animatorResult->ApplyOption();
@@ -906,11 +872,8 @@ void ANICreateSimpleAnimatorOptionsWithParam(ani_env* env, [[maybe_unused]] ani_
     JsSimpleAnimatorOption* simpleAnimatorOption = new JsSimpleAnimatorOption();
     simpleAnimatorOption->SetBegin(static_cast<double>(start));
     simpleAnimatorOption->SetEnd(static_cast<double>(end));
-    if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "SimpleAnimatorOptionsResult",
-            reinterpret_cast<ani_long>(simpleAnimatorOption))) {
-        return;
-    }
+    env->Object_SetPropertyByName_Long(
+        object, "SimpleAnimatorOptionsResult", reinterpret_cast<ani_long>(simpleAnimatorOption));
 }
 
 ani_object ANISetSimpleAnimatorDuration(ani_env* env, [[maybe_unused]] ani_object object,
@@ -955,7 +918,7 @@ ani_object ANISetSimpleAnimatorFill(ani_env* env, [[maybe_unused]] ani_object ob
         return object;
     }
     ani_enum fillModerEnum;
-    if (ANI_OK != env->FindEnum("Larkui/component/enums/FillMode;", &fillModerEnum)) {
+    if (ANI_OK != env->FindEnum("arkui.component.enums.FillMode", &fillModerEnum)) {
         return object;
     }
     ani_boolean isEnum;
@@ -979,7 +942,7 @@ ani_object ANISetSimpleAnimatorDirection(ani_env* env, [[maybe_unused]] ani_obje
         return object;
     }
     ani_enum PlayModeEnum;
-    if (ANI_OK != env->FindEnum("Larkui/component/enums/PlayMode;", &PlayModeEnum)) {
+    if (ANI_OK != env->FindEnum("arkui.component.enums.PlayMode", &PlayModeEnum)) {
         return object;
     }
     ani_boolean isEnum;
@@ -1024,7 +987,7 @@ ani_object ANISetSimpleAnimatorIterations(ani_env* env, [[maybe_unused]] ani_obj
 
 ani_status BindAnimator(ani_env *env)
 {
-    static const char *className = "L@ohos/animator/Animator;";
+    static const char *className = "@ohos.animator.Animator";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] Bind Animator fail");
@@ -1037,8 +1000,8 @@ ani_status BindAnimator(ani_env *env)
             reinterpret_cast<void *>(ANICreate)},
     };
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] Bind Animator method fail");
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size())) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] Bind Animator static method fail");
         return ANI_ERROR;
     };
     return ANI_OK;
@@ -1046,7 +1009,7 @@ ani_status BindAnimator(ani_env *env)
 
 ani_status BindAnimatorResult(ani_env *env)
 {
-    static const char *className = "L@ohos/animator/AnimatorResultInner;";
+    static const char *className = "@ohos.animator.AnimatorResultInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] bind animator result fail");
@@ -1054,19 +1017,23 @@ ani_status BindAnimatorResult(ani_env *env)
     }
 
     std::array methods = {
-        ani_native_function{"play", ":V", reinterpret_cast<void *>(JSPlay)},
-        ani_native_function{"reverse", ":V", reinterpret_cast<void *>(JSReverse)},
-        ani_native_function{"cancel", ":V", reinterpret_cast<void *>(JSCancel)},
-        ani_native_function{"pause", ":V", reinterpret_cast<void *>(JSPause)},
-        ani_native_function{"finish", ":V", reinterpret_cast<void *>(JSFinish)},
+        ani_native_function{"play", ":", reinterpret_cast<void *>(JSPlay)},
+        ani_native_function{"reverse", ":", reinterpret_cast<void *>(JSReverse)},
+        ani_native_function{"cancel", ":", reinterpret_cast<void *>(JSCancel)},
+        ani_native_function{"pause", ":", reinterpret_cast<void *>(JSPause)},
+        ani_native_function{"finish", ":", reinterpret_cast<void *>(JSFinish)},
         ani_native_function{"setOnFinish", nullptr, reinterpret_cast<void *>(SetOnfinish)},
         ani_native_function{"setOnCancel", nullptr, reinterpret_cast<void *>(SetOncancel)},
         ani_native_function{"setOnRepeat", nullptr, reinterpret_cast<void *>(SetOnrepeat)},
         ani_native_function{"setOnFrame", nullptr, reinterpret_cast<void *>(SetOnframe)},
-        ani_native_function{"update", "L@ohos/animator/AnimatorOptions;:V", reinterpret_cast<void *>(ANIUpdate)},
-        ani_native_function{"reset", "L@ohos/animator/AnimatorOptions;:V", reinterpret_cast<void *>(ANIReset)},
+        ani_native_function{"update", "C{@ohos.animator.AnimatorOptions}:", reinterpret_cast<void *>(ANIUpdate)},
+        ani_native_function{"reset", "X{C{@ohos.animator.AnimatorOptions}C{@ohos.animator.SimpleAnimatorOptions}}:",
+            reinterpret_cast<void *>(ANIReset)},
         ani_native_function{"setExpectedFrameRateRange", nullptr,
             reinterpret_cast<void *>(JSSetExpectedFrameRateRange)},
+    };
+
+    std::array staticMethods = {
         ani_native_function{ "nativeTransferStatic", nullptr, reinterpret_cast<void*>(AnimatorTransferStatic)}
     };
 
@@ -1074,12 +1041,16 @@ ani_status BindAnimatorResult(ani_env *env)
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] bind native method fail");
         return ANI_ERROR;
     };
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] bind static native static method fail");
+        return ANI_ERROR;
+    };
     return ANI_OK;
 }
 
 ani_status BindSimpleAnimatorOptions(ani_env *env)
 {
-    static const char *className = "L@ohos/animator/SimpleAnimatorOptions;";
+    static const char *className = "@ohos.animator.SimpleAnimatorOptions";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] bind SimpleAnimatorOptions result fail");
@@ -1088,7 +1059,7 @@ ani_status BindSimpleAnimatorOptions(ani_env *env)
 
     std::array methods = {
         ani_native_function {
-            "<ctor>", "DD:V", reinterpret_cast<void*>(ANICreateSimpleAnimatorOptionsWithParam) },
+            "<ctor>", "dd:", reinterpret_cast<void*>(ANICreateSimpleAnimatorOptionsWithParam) },
         ani_native_function {
             "duration", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorDuration) },
         ani_native_function {

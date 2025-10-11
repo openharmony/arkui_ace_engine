@@ -28,10 +28,7 @@ template("bridge_accessibility") {
 
     sources = [ "accessibility_node_manager.cpp" ]
 
-    deps = [
-      "$ace_root/frameworks/core/accessibility/js_inspector:js_inspector_$platform",
-      "$ace_root/frameworks/core/components/theme:build_theme_code",
-    ]
+    deps = [ "$ace_root/frameworks/core/accessibility/js_inspector:js_inspector_$platform" ]
     if (use_hilog) {
       external_deps = [ "hilog:libhilog" ]
     }

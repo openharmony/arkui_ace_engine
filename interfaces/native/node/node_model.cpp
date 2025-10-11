@@ -521,6 +521,12 @@ void HandleClickEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
     uiEvent.inputEvent = &(innerEvent->clickEvent);
 }
 
+void HandleCoastingAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.eventTypeId = C_COASTING_AXIS_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->coastingAxisEvent);
+}
+
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -564,6 +570,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             {NODE_ON_CLICK_EVENT, HandleClickEvent},
             {NODE_ON_HOVER_EVENT, HandleHoverEvent},
             {NODE_ON_HOVER_MOVE, HandleTouchEvent},
+            {NODE_ON_COASTING_AXIS_EVENT, HandleCoastingAxisEvent},
         };
 
         auto it = eventHandlers.find(eventType);
@@ -635,6 +642,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent, bool isCommonEvent)
             break;
         case HOVER_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->hoverEvent.subKind);
+            break;
+        case COASTING_AXIS_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->coastingAxisEvent.subKind);
             break;
         default:
             break; /* Empty */
@@ -1007,6 +1017,276 @@ int32_t GetIterations(void* object)
     }
     iterations = getFunc(object);
     return iterations;
+}
+
+int32_t SetFrameDurations(void* object, uint32_t* durations, size_t size)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    uint32_t (*getFunc)(void* object) = nullptr;
+    getFunc = reinterpret_cast<uint32_t (*)(void*)>(
+        FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_GetFrameCount"));
+    if (!getFunc) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_GetFrameCount");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto count = static_cast<size_t>(getFunc(object));
+    if (count != size || size == 0 || count == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    std::vector<int32_t> frameVec;
+    for (size_t i = 0; i < size; i++) {
+        frameVec.emplace_back(durations[i]);
+    }
+    void (*setFunc)(void* object, std::vector<int32_t> durations) = nullptr;
+    setFunc = reinterpret_cast<void (*)(void*, std::vector<int32_t>)>(
+        FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_SetDurations"));
+    if (!setFunc) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_SetDurations");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    setFunc(object, frameVec);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t GetFrameDurations(void* object, uint32_t* durations, size_t* size)
+{
+    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "GetFrameDurations 0");
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    int32_t (*getFunc)(void* object, uint32_t* durations, size_t* size) = nullptr;
+    getFunc = reinterpret_cast<int32_t (*)(void*, uint32_t*, size_t*)>(
+        FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_GetDurations"));
+    if (!getFunc) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_GetDurations");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return getFunc(object, durations, size);
+}
+
+int32_t SetAutoPlay(void* object, uint32_t autoPlay)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    bool isAutoPlay = (autoPlay != 0);
+    void (*setFunc)(void* object, bool autoPlay) = nullptr;
+    setFunc = reinterpret_cast<void (*)(void*, bool)>(
+        FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_SetAutoPlay"));
+    if (!setFunc) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_SetAutoPlay");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    setFunc(object, isAutoPlay);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t GetAutoPlay(void* object, uint32_t* autoPlay)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    int32_t (*getFunc)(void* object, uint32_t* autoPlay) = nullptr;
+    getFunc = reinterpret_cast<int32_t (*)(void*, uint32_t*)>(
+        FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_GetAutoPlay"));
+    if (!getFunc) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_GetAutoPlay");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return getFunc(object, autoPlay);
+}
+
+int32_t CreateAnimationController(
+    void* object, ArkUI_NodeHandle node, ArkUI_DrawableDescriptor_AnimationController** controller)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = GetFullImpl();
+    int32_t nodeId = impl->getNodeModifiers()->getCommonModifier()->getNodeUniqueId(node->uiNodeHandle);
+    void* (*getFunc)(void* object, const int32_t id) = nullptr;
+    getFunc = reinterpret_cast<void* (*)(void*, const int32_t)>(
+        FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_GetAnimationControllerById"));
+    if (!getFunc) {
+        TAG_LOGE(
+            AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_GetAnimationControllerById");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    *controller = new ArkUI_DrawableDescriptor_AnimationController();
+    if (!controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    (*controller)->drawableDescriptor = object;
+    (*controller)->controller = getFunc(object, nodeId);
+    if (!(*controller)->controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get real animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    void (*increase)(void* object) = nullptr;
+    increase = reinterpret_cast<void (*)(void*)>(FindFunction(module, "OHOS_ACE_IncreaseRefDrawableDescriptor"));
+    if (!increase) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_IncreaseRefDrawableDescriptor");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    increase(object);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void DisposeAnimationController(ArkUI_DrawableDescriptor_AnimationController* controller)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return;
+    }
+    if (!controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        return;
+    }
+    void (*decrease)(void* object) = nullptr;
+    decrease = reinterpret_cast<void (*)(void*)>(FindFunction(module, "OHOS_ACE_DecreaseRefDrawableDescriptor"));
+    if (!decrease) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_DecreaseRefDrawableDescriptor");
+        return;
+    }
+    decrease(controller->drawableDescriptor);
+    delete controller;
+    controller = nullptr;
+}
+
+int32_t StartAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto func = reinterpret_cast<void (*)(void*)>(FindFunction(module, "OHOS_ACE_AnimationController_Start"));
+    if (!func) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimationController_Start");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!controller->controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get real animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    func(controller->controller);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t StopAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto func = reinterpret_cast<void (*)(void*)>(FindFunction(module, "OHOS_ACE_AnimationController_Stop"));
+    if (!func) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimationController_Stop");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!controller->controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get real animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    func(controller->controller);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t ResumeAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto func = reinterpret_cast<void (*)(void*)>(FindFunction(module, "OHOS_ACE_AnimationController_Resume"));
+    if (!func) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimationController_Resume");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!controller->controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get real animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    func(controller->controller);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t PauseAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto func = reinterpret_cast<void (*)(void*)>(FindFunction(module, "OHOS_ACE_AnimationController_Pause"));
+    if (!func) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimationController_Pause");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!controller->controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get real animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    func(controller->controller);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t GetAnimationStatus(
+    ArkUI_DrawableDescriptor_AnimationController* controller, DrawableDescriptor_AnimationStatus* status)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    int32_t (*getFunc)(void* object) = nullptr;
+    getFunc = reinterpret_cast<int32_t (*)(void*)>(FindFunction(module, "OHOS_ACE_AnimationController_GetStatus"));
+    if (!getFunc) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimationController_GetStatus");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!controller->controller) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get real animated controller");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    *status = static_cast<DrawableDescriptor_AnimationStatus>(getFunc(controller->controller));
+    return ERROR_CODE_NO_ERROR;
 }
 
 bool CheckIsCNode(ArkUI_NodeHandle node)

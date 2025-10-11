@@ -104,12 +104,12 @@ ohos_source_set("ace_kit_mock") {
     "$ace_root/test/mock/core/render/mock_media_player_creator.cpp",
     "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
     "$ace_root/test/mock/core/render/mock_paragraph.cpp",
-    "$ace_root/test/mock/core/render/mock_texteffect.cpp",
     "$ace_root/test/mock/core/render/mock_path_painter.cpp",
     "$ace_root/test/mock/core/render/mock_pixmap_image.cpp",
     "$ace_root/test/mock/core/render/mock_render_context.cpp",
     "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
     "$ace_root/test/mock/core/render/mock_render_surface_creator.cpp",
+    "$ace_root/test/mock/core/render/mock_texteffect.cpp",
     "$ace_root/test/mock/core/rosen/testing_typography_style.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "$ace_root/test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.cpp",
@@ -117,10 +117,7 @@ ohos_source_set("ace_kit_mock") {
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
   ]
-  deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "$ace_root/test/unittest:ace_unittest_log",
-  ]
+  deps = [ "$ace_root/test/unittest:ace_unittest_log" ]
   external_deps = [
     "googletest:gmock",
     "googletest:gtest_main",
@@ -179,9 +176,9 @@ ohos_unittest("ace_kit_test") {
     "property_test.cpp",
     "resource_parser_test.cpp",
     "token_theme_test.cpp",
+    "ui_context_impl_test.cpp",
     "view_stack_processor_test.cpp",
     "view_test.cpp",
-    "ui_context_impl_test.cpp",
   ]
 
   cflags = [ "-fno-access-control" ]

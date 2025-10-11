@@ -32,6 +32,7 @@ InputEventActuator::InputEventActuator(const WeakPtr<InputEventHub>& inputEventH
     penHoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
     penHoverMoveEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
     axisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag(), frameNode->GetId());
+    coastingAxisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag(), frameNode->GetId());
 }
 
 void InputEventActuator::OnCollectMouseEvent(
@@ -298,4 +299,21 @@ void InputEventActuator::OnCollectAxisEvent(
     onAxisResult.emplace_back(axisEventTarget_);
 }
 
+void InputEventActuator::OnCollectCoastingAxisEvent(AxisTestResult& onAxisResult)
+{
+    if (!userCallback_) {
+        return;
+    }
+
+    auto onCoastingAxisCallback = [weak = WeakClaim(this)](CoastingAxisInfo& info) {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        auto userEvent = actuator->userCallback_;
+        if (userEvent) {
+            (*userEvent)(info);
+        }
+    };
+    coastingAxisEventTarget_->SetOnCoastingAxisCallback(onCoastingAxisCallback);
+    onAxisResult.emplace_back(coastingAxisEventTarget_);
+}
 } // namespace OHOS::Ace::NG

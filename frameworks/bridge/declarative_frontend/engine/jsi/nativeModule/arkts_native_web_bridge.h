@@ -31,6 +31,8 @@ public:
     static ArkUINativeModuleValue ResetMixedMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetZoomAccessEnabled(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetZoomAccessEnabled(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetZoomControlAccess(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetZoomControlAccess(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCacheMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCacheMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDarkMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -179,6 +181,10 @@ public:
     static ArkUINativeModuleValue ResetOnPrompt(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnShowFileSelector(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnShowFileSelector(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnDetectedBlankScreen(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnDetectedBlankScreen(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBlankScreenDetectionConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBlankScreenDetectionConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnContextMenuShow(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnContextMenuShow(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static Local<panda::ObjectRef> CreateTouchEventInfoObj(EcmaVM* vm, TouchEventInfo& info);
@@ -210,10 +216,16 @@ public:
     static ArkUINativeModuleValue ResetOnDataResubmitted(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetGestureFocusMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetGestureFocusMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetRotateRenderEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetRotateRenderEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableDataDetector(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnableDataDetector(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDataDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetDataDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetEnableSelectedDataDetector(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetEnableSelectedDataDetector(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSelectedDataDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSelectedDataDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnSslErrorEventReceive(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnSslErrorEventReceive(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnClientAuthenticationRequest(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -228,6 +240,10 @@ public:
     static ArkUINativeModuleValue ResetJavaScriptProxy(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetForceEnableZoom(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetForceEnableZoom(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBackToTop(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBackToTop(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnNativeEmbedObjectParamChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnNativeEmbedObjectParamChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 #endif

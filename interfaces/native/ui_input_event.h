@@ -55,6 +55,20 @@ extern "C" {
 typedef struct ArkUI_UIInputEvent ArkUI_UIInputEvent;
 
 /**
+ * @brief Defines the coasting axis event.
+ * When a user swipes with two fingers on the touchpad, the system constructs
+ * sliding events based on the speed at the moment the fingers are lifted according to
+ * a certain decay curve. You can listen for such events to handle the flick effect
+ * immediately after the regular axis events.
+ *
+ * It only can be received when user flings on the touchpad with two fingers and any components register
+ * NODE_ON_COASTING_AXIS_EVENT through {@link registerNodeEvent} exist under the pointer location.
+ *
+ * @since 21
+ */
+typedef struct ArkUI_CoastingAxisEvent ArkUI_CoastingAxisEvent;
+
+/**
  * @brief Enumerates the UI input event types.
  *
  * @since 12
@@ -253,6 +267,20 @@ enum {
 };
 
 /**
+ * @brief Defines an enum for the axis types for axis events.
+ *
+ * @since 21
+ */
+enum {
+    /** Vertical scroll axis. */
+    UI_AXIS_TYPE_VERTICAL_AXIS = 0,
+    /** Horizontal scroll axis. */
+    UI_AXIS_TYPE_HORIZONTAL_AXIS = 1,
+    /** Pinch axis. */
+    UI_AXIS_TYPE_PINCH_AXIS = 2,
+};
+
+/**
  * @brief Enumerates the action types for axis events.
  *
  * @since 15
@@ -283,6 +311,22 @@ typedef enum {
     /** Right hand. */
     ARKUI_EVENT_HAND_RIGHT = 2,
 } ArkUI_InteractionHand;
+
+/**
+ * @brief Enumerates the coasting axis event phases.
+ *
+ * @since 21
+ */
+typedef enum {
+    /** Idle phase, indicating no-coasting phase. */
+    ARKUI_COASTING_AXIS_EVENT_PHASE_NONE = 0,
+    /** Coasting begin, this is the first coasting event. */
+    ARKUI_COASTING_AXIS_EVENT_PHASE_BEGIN = 1,
+    /** Coasting ongoing. */
+    ARKUI_COASTING_AXIS_EVENT_PHASE_UPDATE = 2,
+    /** Coasting end, this is the last coasting event. */
+    ARKUI_COASTING_AXIS_EVENT_PHASE_END = 3,
+} ArkUI_CoastingAxisEventPhase;
 
 /**
  * @brief Obtains the type of this UI input event.
@@ -908,6 +952,16 @@ double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event
 int32_t OH_ArkUI_AxisEvent_GetAxisAction(const ArkUI_UIInputEvent* event);
 
 /**
+ * @brief Checks whether this event contains a specified axis type.
+ *
+ * @param event Indicates the pointer to the current UI input event.
+ * @param axis Axis type of the axis event.
+ * @return Returns <b>true</b> if the event contains the specified axis type; returns <b>false</b> otherwise.
+ * @since 21
+ */
+int32_t OH_ArkUI_AxisEvent_HasAxis(const ArkUI_UIInputEvent* event, int32_t axis);
+
+/**
  * @brief Sets how the component behaves during hit testing.
  *
  * @param event Indicates the pointer to the current UI input event.
@@ -1281,6 +1335,71 @@ int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI
  * @since 20
  */
 ArkUI_ErrorCode OH_ArkUI_UIInputEvent_GetLatestStatus();
+
+/**
+ * @brief Obtains the coasting axis event from a component event, valid event only can be
+ * fetched only when user flings on the touchpad with two fingers and any components register
+ * NODE_ON_COASTING_AXIS_EVENT exist under the pointer location.
+ * Call this method after the {@link ArkUI_UIInputEvent} object is obtained from the {@link ArkUI_NodeEvent} object.
+ *
+ * @param event Indicates the pointer to the UI input event.
+ * @return Returns the pointer to the coasting axis event, return null if no any coasting axis event occurs.
+ * @since 21
+ */
+ArkUI_CoastingAxisEvent* OH_ArkUI_UIInputEvent_GetCoastingAxisEvent(ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Obtains the time when this coasting event occurs.
+ *
+ * @param event Indicates the pointer to the coasting axis event.
+ * @return Returns the time when the UI input event occurs; returns <b>0</b> if any parameter error occurs.
+ *
+ * @since 21
+ */
+int64_t OH_ArkUI_CoastingAxisEvent_GetEventTime(ArkUI_CoastingAxisEvent* event);
+
+/**
+ * @brief Obtains the coasting phase when this coasting event occurs.
+ *
+ * @param event Indicates the pointer to the coasting axis event.
+ * @return Returns the event phase, see {@link ArkUI_CoastingAxisEventPhase};
+ *     returns <b>ARKUI_COASTING_AXIS_EVENT_PHASE_NONE</b> if any parameter error occurs.
+ *
+ * @since 21
+ */
+ArkUI_CoastingAxisEventPhase OH_ArkUI_CoastingAxisEvent_GetPhase(ArkUI_CoastingAxisEvent* event);
+
+/**
+ * @brief Obtains the horizontal delta value.
+ *
+ * @param event Indicates the pointer to the coasting axis event.
+ * @return Returns delta X value, count in PX; returns <b>0</b> if any parameter error occurs.
+ *
+ * @since 21
+ */
+float OH_ArkUI_CoastingAxisEvent_GetDeltaX(ArkUI_CoastingAxisEvent* event);
+
+/**
+ * @brief Obtains the vertical delta value.
+ *
+ * @param event Indicates the pointer to the coasting axis event.
+ * @return Returns delta Y value, count in PX; returns <b>0</b> if any parameter error occurs.
+ *
+ * @since 21
+ */
+float OH_ArkUI_CoastingAxisEvent_GetDeltaY(ArkUI_CoastingAxisEvent* event);
+
+/**
+ * @brief Sets whether to enable coasting axis event propagation.
+ *
+ * @param event Pointer to the coasting axis event.
+ * @param propagation Whether to enable event propagation.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 21
+ */
+int32_t OH_ArkUI_CoastingAxisEvent_SetPropagation(ArkUI_CoastingAxisEvent* event, bool propagation);
 
 #ifdef __cplusplus
 };

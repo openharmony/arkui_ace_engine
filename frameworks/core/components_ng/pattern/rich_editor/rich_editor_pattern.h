@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -554,7 +554,8 @@ public:
     {
         caretChangeListener_ = listener;
     }
-
+    void RecreateUndoManager();
+    void CreateStyledString();
     void SetStyledString(const RefPtr<SpanString>& value);
 
     RefPtr<MutableSpanString> GetStyledString() const
@@ -887,6 +888,11 @@ public:
     std::vector<ParagraphManager::ParagraphInfo> GetParagraphs() const override
     {
         return paragraphs_.GetParagraphs();
+    }
+
+    RichEditorParagraphManager& GetRichEditorParagraphManager()
+    {
+        return paragraphs_;
     }
 
     std::optional<SelectHandleInfo> GetFirstHandleInfo() const
@@ -1364,6 +1370,12 @@ public:
         return dataDetectorAdapter_->aiSpanMap_;
     }
 
+    bool NeedClearAISpanMap(const std::u16string& textForAICache) override
+    {
+        bool isAppendContent = dataDetectorAdapter_->textForAI_.rfind(textForAICache, 0) == 0;
+        return !isAppendContent;
+    }
+
     void SetTextDetectEnable(bool enable) override
     {
         auto currentEnable = textDetectEnable_;
@@ -1554,9 +1566,12 @@ private:
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
         SourceType sourceType = SourceType::NONE);
     void UpdateCaretInfoToController();
+    IMEClient GetIMEClientInfo();
+    void FireOnWillAttachIME(IMEClient& imeClient);
 #if defined(ENABLE_STANDARD_INPUT)
     bool EnableStandardInput(bool needShowSoftKeyboard, SourceType sourceType = SourceType::NONE);
     std::optional<MiscServices::TextConfig> GetMiscTextConfig();
+    void BeforeAttachInputMethod(MiscServices::TextConfig& textConfig);
     float CalcCursorHeight(float& caretHeight);
 #else
     bool UnableStandardInput(bool isFocusViewChanged);
@@ -1768,7 +1783,7 @@ private:
     std::pair<int32_t, int32_t> GetSpanRangeByResultObject(const ResultObject& result);
     std::list<RefPtr<SpanItem>> CopySpansForClipboard(const std::list<RefPtr<SpanItem>>& spans);
 #ifdef CROSS_PLATFORM
-    bool UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged);
+    bool UnableStandardInputCrossPlatform(bool isFocusViewChanged);
 #endif
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
     void ReportComponentChangeEvent();

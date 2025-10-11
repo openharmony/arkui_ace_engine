@@ -743,6 +743,9 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     fontWeight(value: number | FontWeight | string): TextAttribute;
     textAlign(value: TextAlign): TextAttribute;
     lineHeight(value: number | string | Resource): TextAttribute;
+    lineHeightMultiple(value: number): TextAttribute;
+    minLineHeight(value: LengthMetrics): TextAttribute;
+    maxLineHeight(value: LengthMetrics): TextAttribute;
     textOverflow(value: {
         overflow: TextOverflow;
     }): TextAttribute;
@@ -1394,6 +1397,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     imageAccess(imageAccess: boolean): this;
     mixedMode(mixedMode: MixedMode): this;
     zoomAccess(zoomAccess: boolean): this;
+    zoomControlAccess(zoomControlAccess: boolean): this;
     geolocationAccess(geolocationAccess: boolean): this;
     javaScriptProxy(javaScriptProxy: {
         object: object;
@@ -1603,6 +1607,8 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
         xOffset: number;
         yOffset: number;
     }) => void): this;
+    enableDataDetector(enable: boolean): this;
+    dataDetectorConfig(config: any): this;
     javaScriptOnDocumentStart(scripts: ScriptItem[]): this;
     layoutMode(mode: WebLayoutMode): this;
     nestedScroll(value: NestedScrollOptions): this;
@@ -1616,6 +1622,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     onAdsBlocked(callback: (details?: AdsBlockedDetails | undefined) => void): this;
     onActivateContent(callback: () => void): this;
     forceEnableZoom(forceEnableZoom: boolean): this;
+    backToTop(backToTop: boolean): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;

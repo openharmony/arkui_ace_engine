@@ -70,6 +70,9 @@ public:
 
     void LockCanvas(const JSCallbackInfo& args);
     void UnlockCanvasAndPost(const JSCallbackInfo& args);
+
+    void SetXComponentSurfaceConfig(const JSCallbackInfo& args);
+
 private:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     std::shared_ptr<InnerXComponentController> xcomponentController_;

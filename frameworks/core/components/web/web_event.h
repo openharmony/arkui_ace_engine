@@ -21,6 +21,9 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/event/ace_events.h"
+#ifdef DELETE
+#undef DELETE
+#endif
 
 namespace OHOS {
 namespace Media {
@@ -528,7 +531,7 @@ public:
     SslErrorResult() = default;
     ~SslErrorResult() = default;
     virtual void HandleConfirm() = 0;
-    virtual void HandleCancel() = 0;
+    virtual void HandleCancel(bool abortLoading) = 0;
 };
 
 class ACE_EXPORT WebSslErrorEvent : public BaseEventInfo {
@@ -881,6 +884,38 @@ public:
 
 private:
     std::string url_;
+};
+
+class ACE_EXPORT DetectedBlankScreenEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(DetectedBlankScreenEvent, BaseEventInfo);
+
+public:
+    explicit DetectedBlankScreenEvent(
+        const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount)
+        : BaseEventInfo("DetectedBlankScreenEvent"), url_(url), blankScreenReason_(blankScreenReason),
+          detectedContentfulNodesCount_(detectedContentfulNodesCount)
+    {}
+    ~DetectedBlankScreenEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+    int32_t GetBlankScreenReason() const
+    {
+        return blankScreenReason_;
+    }
+
+    int32_t GetDetectedContentfulNodesCount() const
+    {
+        return detectedContentfulNodesCount_;
+    }
+
+private:
+    std::string url_;
+    int32_t blankScreenReason_ = 0;
+    int32_t detectedContentfulNodesCount_ = 0;
 };
 
 class ACE_EXPORT PdfLoadEvent : public BaseEventInfo {

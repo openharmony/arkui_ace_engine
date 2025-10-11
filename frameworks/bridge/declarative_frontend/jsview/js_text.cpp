@@ -93,6 +93,8 @@ const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMod
     TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
+constexpr uint32_t MIN_LINES = 0;
+const int32_t DEFAULT_LINE_HEIGHT = 28;
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -473,6 +475,21 @@ void JSText::SetMaxLines(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetMaxLines(value);
 }
 
+void JSText::SetMinLines(const JSCallbackInfo& info)
+{
+    auto minLines = MIN_LINES;
+    if (info.Length() == 1) {
+        auto tmpInfo = info[0];
+        if (tmpInfo->IsNumber() && tmpInfo->ToNumber<int32_t>() > 0) {
+            minLines = tmpInfo->ToNumber<uint32_t>();
+        } else {
+            TextModel::GetInstance()->ResetMinLines();
+            return;
+        }
+    }
+    TextModel::GetInstance()->SetMinLines(minLines);
+}
+
 void JSText::SetTextIndent(const JSCallbackInfo& info)
 {
     CalcDimension value;
@@ -558,6 +575,60 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
         value.Reset();
     }
     TextModel::GetInstance()->SetLineHeight(value);
+}
+
+void JSText::SetLineHeightMultiply(const JSCallbackInfo& info)
+{
+    double value;
+    JSRef<JSVal> args = info[0];
+    RefPtr<ResourceObject> resObj;
+
+    if (!ParseJsDouble(args, value, resObj) || LessNotEqual(value, 0.0)) {
+        TextModel::GetInstance()->ResetLineHeightMultiply();
+        UnRegisterResource("LineHeightMultiply");
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("LineHeightMultiply", resObj, value);
+    }
+    TextModel::GetInstance()->SetLineHeight(CalcDimension(DEFAULT_LINE_HEIGHT, DimensionUnit::PX));
+    TextModel::GetInstance()->SetLineHeightMultiply(value);
+}
+
+void JSText::SetMinimumLineHeight(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    JSRef<JSVal> args = info[0];
+    RefPtr<ResourceObject> resObj;
+
+    if (!ParseLengthMetricsToDimension(args, value, resObj) || value.IsNegative()) {
+        value.Reset();
+        TextModel::GetInstance()->ResetMinimumLineHeight();
+        UnRegisterResource("MinimumLineHeight");
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("MinimumLineHeight", resObj, value);
+    }
+    TextModel::GetInstance()->SetMinimumLineHeight(value);
+}
+
+void JSText::SetMaximumLineHeight(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    JSRef<JSVal> args = info[0];
+    RefPtr<ResourceObject> resObj;
+
+    if (!ParseLengthMetricsToDimension(args, value, resObj) || value.IsNegative()) {
+        value.Reset();
+        TextModel::GetInstance()->ResetMaximumLineHeight();
+        UnRegisterResource("MaximumLineHeight");
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("MaximumLineHeight", resObj, value);
+    }
+    TextModel::GetInstance()->SetMaximumLineHeight(value);
 }
 
 void JSText::SetLineSpacing(const JSCallbackInfo& info)
@@ -997,6 +1068,36 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetDraggable(tmpInfo->ToBoolean());
 }
 
+void JSText::SetSelectDetectEnable(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        auto enabled = info[0]->ToBoolean();
+        TextModel::GetInstance()->SetSelectDetectEnable(enabled);
+    }
+}
+
+void JSText::SetSelectDetectConfig(const JSCallbackInfo& info)
+{
+    std::vector<TextDataDetectType> typesList;
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto args = info[0];
+    auto paramObject = JSRef<JSObject>::Cast(args);
+    auto getTypes = paramObject->GetProperty("types");
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(getTypes);
+    if (!array->IsArray()) {
+        return;
+    }
+    for (size_t i = 0; i < array->Length(); ++i) {
+        JSRef<JSVal> type = array->GetValueAt(i);
+        if (type->IsNumber()) {
+            typesList.push_back(static_cast<TextDataDetectType>(type->ToNumber<int32_t>()));
+        }
+    }
+    TextModel::GetInstance()->SetSelectDetectConfig(typesList);
+}
+
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1284,6 +1385,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("copyOption", &JSText::SetCopyOption);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
     JSClass<JSText>::StaticMethod("onCopy", &JSText::SetOnCopy);
+    JSClass<JSText>::StaticMethod("minLines", &JSText::SetMinLines);
     JSClass<JSText>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
@@ -1293,6 +1395,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
     JSClass<JSText>::StaticMethod("dataDetectorConfig", &JSText::JsDataDetectorConfig);
+    JSClass<JSText>::StaticMethod("enableSelectedDataDetector", &JSText::SetSelectDetectEnable);
+    JSClass<JSText>::StaticMethod("selectedDataDetectorConfig", &JSText::SetSelectDetectConfig);
     JSClass<JSText>::StaticMethod("bindSelectionMenu", &JSText::BindSelectionMenu);
     JSClass<JSText>::StaticMethod("onTextSelectionChange", &JSText::SetOnTextSelectionChange);
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);
@@ -1308,6 +1412,9 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("enableAutoSpacing", &JSText::SetEnableAutoSpacing);
     JSClass<JSText>::StaticMethod("textVerticalAlign", &JSText::SetTextVerticalAlign);
     JSClass<JSText>::StaticMethod("shaderStyle", &JSText::SetShaderStyle);
+    JSClass<JSText>::StaticMethod("lineHeightMultiple", &JSText::SetLineHeightMultiply);
+    JSClass<JSText>::StaticMethod("maxLineHeight", &JSText::SetMaximumLineHeight);
+    JSClass<JSText>::StaticMethod("minLineHeight", &JSText::SetMinimumLineHeight);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

@@ -82,6 +82,32 @@ std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec
     return res;
 }
 
+RefPtr<FrameNode> GetFirstFrameNodeChild(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    std::list<RefPtr<UINode>> queue;
+    auto children = node->GetChildren();
+    for (const auto& child : children) {
+        queue.push_back(child);
+    }
+
+    while (!queue.empty()) {
+        auto current = queue.front();
+        queue.pop_front();
+
+        auto currentFrameNode = AceType::DynamicCast<FrameNode>(current);
+        if (currentFrameNode) {
+            return currentFrameNode;
+        }
+
+        auto currentChildren = current->GetChildren();
+        for (const auto& child : currentChildren) {
+            queue.push_back(child);
+        }
+    }
+
+    return nullptr;
+}
 } // namespace
 
 void ViewAbstract::RemoveResObj(const std::string& key)
@@ -2370,6 +2396,13 @@ void ViewAbstract::DisableOnAxisEvent(FrameNode* frameNode)
     eventHub->ClearUserOnAxisEvent();
 }
 
+void ViewAbstract::DisableOnCoastingAxisEvent(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnCoastingAxisEvent();
+}
+
 void ViewAbstract::DisableOnAppear(FrameNode* frameNode)
 {
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -3091,13 +3124,13 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    AceType::Claim(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty();
+    auto node = AceType::Claim(frameNode);
+    auto layoutProperty = node->GetLayoutProperty();
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(visible, true, true);
     }
 
-    auto focusHub = frameNode->GetOrCreateFocusHub();
+    auto focusHub = node->GetOrCreateFocusHub();
     if (focusHub) {
         focusHub->SetShow(visible == VisibleType::VISIBLE);
     }
@@ -5308,9 +5341,9 @@ void ViewAbstract::SetColorBlend(FrameNode* frameNode, const Color& colorBlend, 
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode();
         };
-        updateFunc(resObj);
         pattern->AddResObj("viewAbstract.colorBlend", resObj, std::move(updateFunc));
     }
+    SetColorBlend(frameNode, colorBlend);
 }
 
 void ViewAbstract::CreateWithColorBlendResourceObj(const RefPtr<ResourceObject>& resObj)
@@ -5511,9 +5544,12 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
         auto node = buildNodeFunc();
         auto overlayNode = AceType::DynamicCast<FrameNode>(node);
         if (!overlayNode && node) {
+            auto firstFrame = GetFirstFrameNodeChild(node);
+            CHECK_NULL_VOID(firstFrame);
             auto* stack = ViewStackProcessor::GetInstance();
             auto nodeId = stack->ClaimNodeId();
             auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
+            stackNode->SetHitTestMode(firstFrame->GetHitTestMode());
             stackNode->AddChild(node);
             overlayNode = stackNode;
         }
@@ -5533,10 +5569,13 @@ void ViewAbstract::SetOverlayBuilder(FrameNode* frameNode, const RefPtr<NG::UINo
     }
     auto overlayNode = AceType::DynamicCast<FrameNode>(customNode);
     if (!overlayNode && customNode) {
+        auto firstFrame = GetFirstFrameNodeChild(customNode);
+        CHECK_NULL_VOID(firstFrame);
         auto* stack = ViewStackProcessor::GetInstance();
         auto nodeId = stack->ClaimNodeId();
         auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
         if (stackNode) {
+            stackNode->SetHitTestMode(firstFrame->GetHitTestMode());
             stackNode->AddChild(customNode);
         }
         overlayNode = stackNode;
@@ -6702,7 +6741,6 @@ void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color, 
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode();
         };
-        updateFunc(resObj);
         pattern->AddResObj("foregroundColor", resObj, std::move(updateFunc));
     }
     SetForegroundColor(frameNode, color);
@@ -7248,13 +7286,13 @@ void ViewAbstract::MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& va
 void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
 {
     CHECK_NULL_VOID(frameNode);
-    AceType::Claim(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty();
+    auto node = AceType::Claim(frameNode);
+    auto layoutProperty = node->GetLayoutProperty();
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(visible, true, true);
     }
 
-    auto focusHub = frameNode->GetOrCreateFocusHub();
+    auto focusHub = node->GetOrCreateFocusHub();
     if (focusHub) {
         focusHub->SetShow(visible == VisibleType::VISIBLE);
     }
@@ -7961,6 +7999,8 @@ void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback)
 
 void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold)
 {
+    FREE_NODE_CHECK(frameNode, SetOnClick, frameNode, std::move(clickEventFunc), distanceThreshold);
+    CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
@@ -7976,6 +8016,8 @@ void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEven
 
 void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, Dimension distanceThreshold)
 {
+    FREE_NODE_CHECK(frameNode, SetOnClick, frameNode, std::move(clickEventFunc), distanceThreshold);
+    CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
@@ -8008,6 +8050,13 @@ void ViewAbstract::SetOnAxisEvent(FrameNode* frameNode, OnAxisEventFunc&& onAxis
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetAxisEvent(std::move(onAxisEventFunc));
+}
+
+void ViewAbstract::SetOnCoastingAxisEvent(FrameNode* frameNode, OnCoastingAxisEventFunc&& onCoastingAxisEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCoastingAxisEvent(std::move(onCoastingAxisEventFunc));
 }
 
 void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc)

@@ -20,6 +20,7 @@
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_performance_monitor.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/properties/text_style.h"
@@ -38,6 +39,8 @@ constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 constexpr int32_t HEIGHT_HALF = 2;
 const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+constexpr uint32_t DEFAULT_MIN_LINES = 1;
+constexpr uint32_t DEFAULT_LINE_HEIGHT = 28;
 float GetContentOffsetY(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, 0.0f);
@@ -126,6 +129,9 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     FontRegisterCallback(frameNode, textStyle);
     textStyle.SetTextDirection(ParagraphUtil::GetTextDirection(content, layoutWrapper));
     textStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
+    textStyle.SetLineHeightMultiply(textLayoutProperty->GetLineHeightMultiply());
+    textStyle.SetMinimumLineHeight(textLayoutProperty->GetMinimumLineHeight());
+    textStyle.SetMaximumLineHeight(textLayoutProperty->GetMaximumLineHeight());
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle, textColor);
     inheritTextStyle_ = textStyle;
@@ -242,6 +248,7 @@ void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // child constraint has already been calculated by the UpdateParagraphBySpan method when triggering MeasureContent
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
     MeasureWidthLayoutCalPolicy(layoutWrapper);
+    MeasureHeightLayoutCalPolicy(layoutWrapper);
     auto baselineDistance = 0.0f;
     auto paragraph = GetSingleParagraph();
     if (paragraph) {
@@ -989,5 +996,50 @@ SizeF MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(const LayoutConstraint
     auto maxSize = contentConstraint.selfIdealSize;
     maxSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
     return maxSize.ConvertToSizeT();
+}
+
+void MultipleParagraphLayoutAlgorithm::CalcHeightWithMinLines(TextStyle& textStyle, LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& contentConstraint)
+{
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    if (textLayoutProperty->HasMinLines() && textLayoutProperty->GetMinLines().value() >= DEFAULT_MIN_LINES) {
+        auto minLines = textLayoutProperty->GetMinLines().value();
+        if (textLayoutProperty->HasMaxLines()) {
+            minLines = std::min(minLines, textLayoutProperty->GetMaxLines().value());
+        }
+        auto lineCount = static_cast<uint32_t>(paragraphManager_->GetLineCount());
+        if (lineCount >= minLines) {
+            return;
+        }
+        auto paragraphHeight = paragraphManager_->GetHeight();
+        float perLineHeight = DEFAULT_LINE_HEIGHT;
+        if (spans_.empty() && lineCount != 0) {
+            perLineHeight = paragraphHeight / lineCount;
+        }
+        if (!spans_.empty()) {
+            if (textLayoutProperty->HasLineHeight() &&
+                textLayoutProperty->GetLineHeight()->Unit() != DimensionUnit::PERCENT &&
+                textLayoutProperty->GetLineHeight()->Value() != 0) {
+                perLineHeight = textLayoutProperty->GetLineHeight()->ConvertToPx();
+            } else {
+                std::string data = "";
+                perLineHeight = MeasureUtil::MeasureTextSize(textStyle, data).Height();
+            }
+        }
+        auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+        float finalMinHeight = paragraphHeight + perLineHeight * (minLines - lineCount);
+        finalMinHeight =
+            std::clamp(finalMinHeight, contentConstraint.minSize.Height(), contentConstraint.maxSize.Height());
+        if (GreatNotEqual(finalMinHeight, frameSize.Height())) {
+            const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+            float paddingTop = padding.top.value_or(0.0f);
+            float paddingBottom = padding.bottom.value_or(0.0f);
+            float paddingTotal = paddingTop + paddingBottom;
+            frameSize.SetHeight(finalMinHeight + paddingTotal);
+        }
+        layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+    }
 }
 } // namespace OHOS::Ace::NG

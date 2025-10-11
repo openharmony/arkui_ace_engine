@@ -205,6 +205,10 @@ void SearchModelImpl::SetMinFontScale(const float value) {}
 
 void SearchModelImpl::SetMaxFontScale(const float value) {}
 
+void SearchModelImpl::SetSelectDetectEnable(bool value) {};
+
+void SearchModelImpl::SetSelectDetectConfig(std::vector<TextDataDetectType>& types) {};
+
 void SearchModelImpl::SetBackBorder()
 {
     auto stack = ViewStackProcessor::GetInstance();

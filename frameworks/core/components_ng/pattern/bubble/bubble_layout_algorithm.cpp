@@ -565,7 +565,16 @@ SizeF BubbleLayoutAlgorithm::GetPopupMaxWidthAndHeight(bool showInSubWindow, con
     auto top = safeAreaInsets.top_.Length();
     auto maxHeight = windowGlobalRect.Height();
     if (showInSubWindow) {
-        maxHeight = SystemProperties::GetDeviceHeight();
+        pipelineContext = frameNode->GetContextRefPtr();
+        CHECK_NULL_RETURN(pipelineContext, SizeF());
+        auto currentSubwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+            pipelineContext->GetInstanceId(), SubwindowType::TYPE_POPUP);
+        if (currentSubwindow) {
+            auto subwindowRect = currentSubwindow->GetRect();
+            maxHeight = subwindowRect.Height();
+        } else {
+            maxHeight = SystemProperties::GetDeviceHeight();
+        }
     }
     auto popupMaxWidth = GetMaxWith(maxColumns_).Value();
     if (useCustom_) {

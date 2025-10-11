@@ -16,15 +16,14 @@
 #include "shape.h"
 
 namespace OHOS::Ace {
-struct EllipsePeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::Ellipse> ellipseShape;
-};
+namespace {
+const char* ANI_SHAPE_NAME = "@ohos.arkui.shape.EllipseShape";
+} // namespace
 
 void ANICreateEllipseShape(ani_env* env, [[maybe_unused]] ani_object object)
 {
-    static const char* className = "L@ohos/arkui/shape/EllipseShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return;
     }
     EllipsePeer* shapePeer = new EllipsePeer();
@@ -43,23 +42,24 @@ void ANICreateEllipseShapeWithParam(
     if (GetIsUndefinedObject(env, aniOption)) {
         return;
     }
-    static const char* className = "L@ohos/arkui/shape/EllipseShape;";
-    if (!IsInstanceOfCls(env, object, className)) {
+    if (!IsInstanceOfCls(env, object, ANI_SHAPE_NAME)) {
         return;
     }
 
     EllipsePeer* shapePeer = new EllipsePeer();
     auto ellipse = AceType::MakeRefPtr<Ellipse>();
 
-    OHOS::Ace::CalcDimension width;
-    ParseStringAndNumberOption(
-        env, aniOption, width, "width", "L@ohos/arkui/shape/ShapeSize;");
-    ellipse->SetWidth(width);
+    std::optional<OHOS::Ace::CalcDimension> width;
+    ParseStringNumberUndefinedOption(env, aniOption, width, "width", "@ohos.arkui.shape.ShapeSize");
+    if (width.has_value() && width->IsValid()) {
+        ellipse->SetWidth(width.value());
+    }
 
-    OHOS::Ace::CalcDimension height;
-    ParseStringAndNumberOption(
-        env, aniOption, height, "height", "L@ohos/arkui/shape/ShapeSize;");
-    ellipse->SetHeight(height);
+    std::optional<OHOS::Ace::CalcDimension> height;
+    ParseStringNumberUndefinedOption(env, aniOption, height, "height", "@ohos.arkui.shape.ShapeSize");
+    if (height.has_value() && height->IsValid()) {
+        ellipse->SetHeight(height.value());
+    }
     shapePeer->ellipseShape = ellipse;
     if (ANI_OK !=
         env->Object_SetPropertyByName_Long(object, "ellipseShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
@@ -83,9 +83,8 @@ ani_object ANIEllipseShapeWidth(ani_env* env, [[maybe_unused]] ani_object object
     if (GetIsUndefinedObject(env, aniOption)) {
         return object;
     }
-    static const char* className = "L@ohos/arkui/shape/EllipseShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return nullptr;
     }
     EllipsePeer* ellipseObj = GetEllipseShape(env, object);
@@ -108,9 +107,8 @@ ani_object ANIEllipseShapeHeight(
     if (GetIsUndefinedObject(env, aniOption)) {
         return object;
     }
-    static const char* className = "L@ohos/arkui/shape/EllipseShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return nullptr;
     }
     EllipsePeer* ellipseObj = GetEllipseShape(env, object);
@@ -137,12 +135,12 @@ ani_object ANIEllipseShapeSize(ani_env* env, [[maybe_unused]] ani_object object,
         return object;
     }
     CalcDimension width;
-    ParseOption(env, aniOption, width, "width", "Larkui/component/units/SizeOptions;");
+    ParseOption(env, aniOption, width, "width", "arkui.component.units.SizeOptions");
     if (ellipseObj->ellipseShape) {
         ellipseObj->ellipseShape->SetWidth(width);
     }
     CalcDimension height;
-    ParseOption(env, aniOption, height, "height", "Larkui/component/units/SizeOptions;");
+    ParseOption(env, aniOption, height, "height", "arkui.component.units.SizeOptions");
     if (ellipseObj->ellipseShape) {
         ellipseObj->ellipseShape->SetHeight(height);
     }
@@ -160,9 +158,9 @@ ani_object ANIEllipseShapePosition(
         return object;
     }
     CalcDimension dx;
-    ParseOption(env, aniOption, dx, "x", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dx, "x", "arkui.component.units.Position");
     CalcDimension dy;
-    ParseOption(env, aniOption, dy, "y", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dy, "y", "arkui.component.units.Position");
     DimensionOffset position(dx, dy);
     if (ellipseObj->ellipseShape) {
         ellipseObj->ellipseShape->SetPosition(position);
@@ -181,9 +179,9 @@ ani_object ANIEllipseShapeOffset(
         return object;
     }
     CalcDimension dx;
-    ParseOption(env, aniOption, dx, "x", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dx, "x", "arkui.component.units.Position");
     CalcDimension dy;
-    ParseOption(env, aniOption, dy, "y", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dy, "y", "arkui.component.units.Position");
     DimensionOffset position(dx, dy);
     if (ellipseObj->ellipseShape) {
         ellipseObj->ellipseShape->SetOffset(position);
@@ -210,18 +208,22 @@ ani_object ANIEllipseShapeColor(ani_env* env, ani_object object, [[maybe_unused]
     return object;
 }
 
+ani_object EllipseShape::ANIEllipseShapeFromPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
+{
+    return ANIShapeFromPtr<EllipsePeer>(env, ptr, ANI_SHAPE_NAME, "ellipseShapeResult");
+}
+
 ani_status EllipseShape::BindEllipseShape(ani_env* env)
 {
-    static const char* className = "L@ohos/arkui/shape/EllipseShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return ANI_ERROR;
     }
 
     std::array methods = {
-        ani_native_function { "<ctor>", ":V", reinterpret_cast<void*>(ANICreateEllipseShape) },
+        ani_native_function { "<ctor>", ":", reinterpret_cast<void*>(ANICreateEllipseShape) },
         ani_native_function {
-            "<ctor>", "L@ohos/arkui/shape/ShapeSize;:V", reinterpret_cast<void*>(ANICreateEllipseShapeWithParam) },
+            "<ctor>", "C{@ohos.arkui.shape.ShapeSize}:", reinterpret_cast<void*>(ANICreateEllipseShapeWithParam) },
         ani_native_function { "width", nullptr, reinterpret_cast<void*>(ANIEllipseShapeWidth) },
         ani_native_function { "height", nullptr, reinterpret_cast<void*>(ANIEllipseShapeHeight) },
         ani_native_function { "size", nullptr, reinterpret_cast<void*>(ANIEllipseShapeSize) },

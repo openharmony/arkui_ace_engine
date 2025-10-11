@@ -35,6 +35,7 @@ typedef enum {
     C_FOCUS_AXIS_EVENT_ID = 6, // defined in ace_engine/frameworks/core/interfaces/arkoala/arkoala_api.h
     C_CLICK_EVENT_ID = 7, // defined in ace_engine/frameworks/core/interfaces/arkoala/arkoala_api.h
     C_HOVER_EVENT_ID = 8, // defined in ace_engine/frameworks/core/interfaces/arkoala/arkoala_api.h
+    C_COASTING_AXIS_EVENT_ID = 9, // defined in ace_engine/frameworks/core/interfaces/arkoala/arkoala_api.h
 } ArkUIEventTypeId;
 
 struct ArkUI_UIInputEvent {
@@ -64,6 +65,7 @@ typedef enum {
     S_GESTURE_CLICK_EVENT = 1 << 14,     // 0x00004000 click or tap gesture triggered by keyboard
     S_NXC_ON_TOUCH_INTERCEPT = 1 << 15,  // 0x00008000 nativeXComponent OnTouchIntercept
     S_NXC_DISPATCH_AXIS_EVENT = 1 << 16, // 0x00010000 nativeXComponent UIAxisEventCallback
+    S_NODE_ON_COASTING_AXIS_EVENT = 1 << 17, // 0x00020000 callback of NODE_ON_COASTING_AXIS_EVENT
     S_ALL_C_MOUSE_EVENT = S_NODE_ON_MOUSE | S_GESTURE_MOUSE_EVENT, // 0x00002004 2 scenarios give c mouse event
     S_ALL_C_TOUCH_EVENT = S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT |
                           S_NODE_ON_HOVER_EVENT, // 0x00000203 3 scenarios give c touch event

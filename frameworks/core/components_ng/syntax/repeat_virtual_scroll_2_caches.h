@@ -204,7 +204,7 @@ public:
 
     //  TS call JS to update l1Rid4Index_ following a
     // Repeat.rerender
-    void UpdateL1Rid4Index(std::map<int32_t, uint32_t> l1Rd4Index, std::unordered_set<uint32_t> ridNeedToRecycle);
+    void UpdateL1Rid4Index(std::map<int32_t, uint32_t> l1Rd4Index);
 
     void UpdateIsL1(const CacheItem& cacheItem, bool isL1, bool shouldTriggerRecycleOrReuse = true);
 

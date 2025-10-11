@@ -16,15 +16,14 @@
 #include "shape.h"
 
 namespace OHOS::Ace {
-struct CirclePeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::Circle> circleShape;
-};
+namespace {
+const char* ANI_SHAPE_NAME = "@ohos.arkui.shape.CircleShape";
+} // namespace
 
 void ANICreateCircleShape(ani_env* env, [[maybe_unused]] ani_object object)
 {
-    static const char* className = "L@ohos/arkui/shape/CircleShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return;
     }
     CirclePeer* shapePeer = new CirclePeer();
@@ -43,20 +42,21 @@ void ANICreateCircleShapeWithParam(ani_env* env, [[maybe_unused]] ani_object obj
     if (GetIsUndefinedObject(env, aniOption)) {
         return;
     }
-    static const char* className = "L@ohos/arkui/shape/CircleShape;";
-    if (!IsInstanceOfCls(env, object, className)) {
+    if (!IsInstanceOfCls(env, object, ANI_SHAPE_NAME)) {
         return;
     }
     CirclePeer* shapePeer = new CirclePeer();
     auto circle = AceType::MakeRefPtr<Circle>();
-    OHOS::Ace::CalcDimension width;
-    ParseStringAndNumberOption(
-        env, aniOption, width, "width", "L@ohos/arkui/shape/ShapeSize;");
-    circle->SetWidth(width);
-    OHOS::Ace::CalcDimension height;
-    ParseStringAndNumberOption(
-        env, aniOption, height, "height", "L@ohos/arkui/shape/ShapeSize;");
-    circle->SetHeight(height);
+    std::optional<OHOS::Ace::CalcDimension> width;
+    ParseStringNumberUndefinedOption(env, aniOption, width, "width", "@ohos.arkui.shape.ShapeSize");
+    if (width.has_value() && width->IsValid()) {
+        circle->SetWidth(width.value());
+    }
+    std::optional<OHOS::Ace::CalcDimension> height;
+    ParseStringNumberUndefinedOption(env, aniOption, height, "height", "@ohos.arkui.shape.ShapeSize");
+    if (height.has_value() && height->IsValid()) {
+        circle->SetHeight(height.value());
+    }
     shapePeer->circleShape = circle;
 
     if (ANI_OK !=
@@ -81,9 +81,8 @@ ani_object ANICircleShapeWidth(ani_env* env, [[maybe_unused]] ani_object object,
     if (GetIsUndefinedObject(env, aniOption)) {
         return object;
     }
-    static const char* className = "L@ohos/arkui/shape/CircleShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return nullptr;
     }
     CirclePeer* circleObj = GetCircleShape(env, object);
@@ -105,9 +104,8 @@ ani_object ANICircleShapeHeight(ani_env* env, [[maybe_unused]] ani_object object
     if (GetIsUndefinedObject(env, aniOption)) {
         return object;
     }
-    static const char* className = "L@ohos/arkui/shape/CircleShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return nullptr;
     }
     CirclePeer* circleObj = GetCircleShape(env, object);
@@ -134,12 +132,12 @@ ani_object ANICircleShapeSize(ani_env* env, [[maybe_unused]] ani_object object, 
         return object;
     }
     CalcDimension width;
-    ParseOption(env, aniOption, width, "width", "Larkui/component/units/SizeOptions;");
+    ParseOption(env, aniOption, width, "width", "arkui.component.units.SizeOptions");
     if (circleObj->circleShape) {
         circleObj->circleShape->SetWidth(width);
     }
     CalcDimension height;
-    ParseOption(env, aniOption, height, "height", "Larkui/component/units/SizeOptions;");
+    ParseOption(env, aniOption, height, "height", "arkui.component.units.SizeOptions");
     if (circleObj->circleShape) {
         circleObj->circleShape->SetHeight(height);
     }
@@ -157,9 +155,9 @@ ani_object ANICircleShapePosition(
         return object;
     }
     CalcDimension dx;
-    ParseOption(env, aniOption, dx, "x", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dx, "x", "arkui.component.units.Position");
     CalcDimension dy;
-    ParseOption(env, aniOption, dy, "y", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dy, "y", "arkui.component.units.Position");
     DimensionOffset position(dx, dy);
     if (circleObj->circleShape) {
         circleObj->circleShape->SetPosition(position);
@@ -177,9 +175,9 @@ ani_object ANICircleShapeOffset(ani_env* env, [[maybe_unused]] ani_object object
         return object;
     }
     CalcDimension dx;
-    ParseOption(env, aniOption, dx, "x", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dx, "x", "arkui.component.units.Position");
     CalcDimension dy;
-    ParseOption(env, aniOption, dy, "y", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dy, "y", "arkui.component.units.Position");
     DimensionOffset position(dx, dy);
     if (circleObj->circleShape) {
         circleObj->circleShape->SetOffset(position);
@@ -206,18 +204,24 @@ ani_object ANICircleShapeColor(ani_env* env, ani_object object, [[maybe_unused]]
     return object;
 }
 
+ani_object CircleShape::ANICircleShapeFromPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
+{
+    return ANIShapeFromPtr<CirclePeer>(env, ptr, ANI_SHAPE_NAME, "circleShapeResult");
+}
+
 ani_status CircleShape::BindCircleShape(ani_env* env)
 {
-    static const char* className = "L@ohos/arkui/shape/CircleShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    ani_status status;
+    if ((status = env->FindClass(ANI_SHAPE_NAME, &cls)) != ANI_OK) {
+        LOGW("find CircleShape class error, status:%{public}d", status);
         return ANI_ERROR;
     }
 
     std::array methods = {
-        ani_native_function { "<ctor>", ":V", reinterpret_cast<void*>(ANICreateCircleShape) },
+        ani_native_function { "<ctor>", ":", reinterpret_cast<void*>(ANICreateCircleShape) },
         ani_native_function {
-            "<ctor>", "L@ohos/arkui/shape/ShapeSize;:V", reinterpret_cast<void*>(ANICreateCircleShapeWithParam) },
+            "<ctor>", "C{@ohos.arkui.shape.ShapeSize}:", reinterpret_cast<void*>(ANICreateCircleShapeWithParam) },
         ani_native_function { "width", nullptr, reinterpret_cast<void*>(ANICircleShapeWidth) },
         ani_native_function { "height", nullptr, reinterpret_cast<void*>(ANICircleShapeHeight) },
         ani_native_function { "size", nullptr, reinterpret_cast<void*>(ANICircleShapeSize) },
@@ -225,10 +229,11 @@ ani_status CircleShape::BindCircleShape(ani_env* env)
         ani_native_function { "offset", nullptr, reinterpret_cast<void*>(ANICircleShapeOffset) },
         ani_native_function { "fill", nullptr, reinterpret_cast<void*>(ANICircleShapeColor) },
     };
-    ani_status tmp = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
-    if (ANI_OK != tmp) {
+    status = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
+    if (ANI_OK != status) {
+        LOGW("bind CircleShape methods error, status:%{public}d", status);
         return ANI_ERROR;
-    };
+    }
     return ANI_OK;
 }
 } // namespace OHOS::Ace

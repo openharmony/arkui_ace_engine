@@ -26,6 +26,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline/pipeline_context.h"
@@ -159,6 +160,8 @@ public:
     virtual void SetTabBarWithContent(const RefPtr<NG::UINode>& content) = 0;
     virtual void SetTabBarStyle(TabBarStyle tabBarStyle) = 0;
     virtual void SetIndicator(const IndicatorStyle& indicator) = 0;
+    virtual void SetDrawableIndicatorConfig(const ImageInfoConfig& config) = 0;
+    virtual void SetDrawableIndicatorFlag(bool isDrawableIndicator) = 0;
     virtual void SetIndicatorColorByUser(bool isByUser) = 0;
     virtual void SetBoard(const BoardStyle& board) = 0;
     virtual void SetSelectedMode(SelectedMode selectedMode) = 0;

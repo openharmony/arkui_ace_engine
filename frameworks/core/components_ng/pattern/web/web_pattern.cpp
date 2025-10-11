@@ -86,12 +86,15 @@
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/event/event_info_convertor.h"
+#include "core/event/statusbar/statusbar_event_proxy.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "common_event_manager.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
 #include "oh_window_pip.h"
 #include "oh_window_comm.h"
 #include "web_accessibility_session_adapter.h"
+#include "web_statusbar_click.h"
 #include "web_pattern.h"
 #include "nweb_handler.h"
 
@@ -109,6 +112,7 @@ const std::string WEB_INFO_DEFAULT = "1";
 const std::string WEB_SNAPSHOT_PATH_PREFIX = "/data/storage/el2/base/cache/web/snapshot/web_frame_";
 const std::string WEB_SNAPSHOT_PATH_PNG_SUFFIX = ".png";
 const std::string WEB_SNAPSHOT_PATH_HEIC_SUFFIX = ".heic";
+const Matrix4 WEB_SNAPSHOT_IMAGE_SCALE_MATRIX = Matrix4::CreateScale(2.0, 2.0, 1.0); // scale width and height
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
 constexpr int32_t SNAPSHOT_DURATION_TIME = 300;
@@ -881,14 +885,12 @@ void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, u
         return;
     }
 
-    if (delegate_ && (width != 0) && (height != 0)) {
-        uint32_t resizeWidth = static_cast<uint32_t>(std::ceil(delegate_->ResizeWidth()));
-        uint32_t resizeHeight = static_cast<uint32_t>(std::ceil(delegate_->ResizeHeight()));
-        if ((width != resizeWidth) || (height != resizeHeight)) {
-            TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot size:[%{public}u, %{public}u] is invalid", width, height);
+    if (delegate_) {
+        delegate_->RecordBlanklessFrameSize(width, height);
+        if (!delegate_->IsBlanklessFrameValid()) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot size is invalid!");
             return;
         }
-        delegate_->RecordBlanklessFrameSize(width, height);
     }
     snapshotImageNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto snapshotNode = FrameNode::GetOrCreateFrameNode(
@@ -909,9 +911,14 @@ void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, u
     gesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
 
     auto imageLayoutProperty = snapshotNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageRenderProperty = snapshotNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
+    CHECK_NULL_VOID(imageRenderProperty);
     ImageSourceInfo sourceInfo = ImageSourceInfo("file://" + snapshotPath);
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+    imageLayoutProperty->UpdateImageFit(ImageFit::MATRIX);
+    imageRenderProperty->UpdateImageFit(ImageFit::MATRIX);
+    imageRenderProperty->UpdateImageMatrix(WEB_SNAPSHOT_IMAGE_SCALE_MATRIX);
     snapshotNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     snapshotNode->MarkModifyDone();
 }
@@ -933,6 +940,7 @@ void WebPattern::RemoveSnapshotFrameNode(bool isAnimate)
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "blankless RemoveSnapshotFrameNode with animation");
     auto snapshotNode = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value());
+    CHECK_NULL_VOID(snapshotNode);
     isSnapshotImageAnimating_ = true;
     auto webPattern = WeakClaim(this);
     AnimationOption option;
@@ -2117,6 +2125,9 @@ int32_t WebPattern::HandleMouseClickEvent(const MouseInfo& info)
         mouseClickQueue_.push(clickInfo);
         return SINGLE_CLICK_NUM;
     }
+    if (isBackToTopRunning_) {
+        isBackToTopRunning_ = false;
+    }
     std::chrono::duration<float> timeout_ = clickInfo.start - mouseClickQueue_.back().start;
     double offsetX = clickInfo.x - mouseClickQueue_.back().x;
     double offsetY = clickInfo.y - mouseClickQueue_.back().y;
@@ -3073,8 +3084,6 @@ void WebPattern::KeyboardReDispatch(
 void WebPattern::OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event)
 {
     CHECK_NULL_VOID(event);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -3087,9 +3096,9 @@ void WebPattern::OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& ev
     }
     taskExecutor->PostTask([context = AceType::WeakClaim(pipelineContext),
         event = tabKeyEvent_] () {
-        auto pipelineContext = context.Upgrade();
-        CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->ReDispatch(const_cast<KeyEvent&>(event));
+            auto pipelineContext = context.Upgrade();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->ReDispatch(const_cast<KeyEvent&>(event));
         },
         TaskExecutor::TaskType::UI, "ArkUIWebKeyboardReDispatch");
 }
@@ -3414,6 +3423,15 @@ void WebPattern::OnZoomAccessEnabledUpdate(bool value)
     }
     if (delegate_) {
         delegate_->UpdateSupportZoom(value);
+    }
+}
+
+void WebPattern::OnZoomControlAccessUpdate(bool zoomControlAccess)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    if (delegate_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ZoomControlAccess :%{public}d", zoomControlAccess);
+        delegate_->UpdateZoomControlAccess(zoomControlAccess);
     }
 }
 
@@ -4001,6 +4019,7 @@ void WebPattern::OnModifyDone()
         } else {
             delegate_->UpdateSupportZoom(GetZoomAccessEnabledValue(true));
         }
+        delegate_->UpdateZoomControlAccess(GetZoomControlAccessValue(true));
         delegate_->UpdateDomStorageEnabled(GetDomStorageAccessEnabledValue(false));
         delegate_->UpdateGeolocationEnabled(GetGeolocationAccessEnabledValue(true));
         delegate_->UpdateCacheMode(GetCacheModeValue(WebCacheMode::DEFAULT));
@@ -4069,6 +4088,12 @@ void WebPattern::OnModifyDone()
         if (GetInitialScale()) {
             delegate_->UpdateInitialScale(GetInitialScale().value());
         }
+        if (GetBlankScreenDetectionConfig()) {
+            delegate_->UpdateBlankScreenDetectionConfig(GetBlankScreenDetectionConfig().value().enable,
+                GetBlankScreenDetectionConfig().value().detectionTiming,
+                GetBlankScreenDetectionConfig().value().detectionMethods,
+                GetBlankScreenDetectionConfig().value().contentfulNodesCountThreshold);
+        }
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
@@ -4084,6 +4109,7 @@ void WebPattern::OnModifyDone()
             delegate_->UpdateEnableFollowSystemFontWeight(GetEnableFollowSystemFontWeight().value());
         }
         UpdateScrollBarWithBorderRadius();
+        OnBackToTopUpdate(backToTop_);
     }
 
     // Set the default background color when the component did not set backgroundColor()
@@ -4321,7 +4347,7 @@ bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool 
 {
     isResizeContentAvoid_ = false;
     isKeyboardInSafeArea_ = false;
-    if (safeAreaEnabled) {
+    if (safeAreaEnabled || keyBoardAvoidMode_ == WebKeyboardAvoidMode::RETURN_TO_UICONTEXT) {
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
         return false;
     }
@@ -4367,6 +4393,31 @@ bool WebPattern::UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double
     return true;
 }
 
+bool WebPattern::JudgeWebKeyBoardAvoidMode(bool safeAreaEnabled)
+{
+    if (keyBoardAvoidMode_ == WebKeyboardAvoidMode::RETURN_TO_UICONTEXT) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "JudgeWebKeyBoardAvoidMode, web avoid mode is return uicontext.");
+        if (safeAreaEnabled) {
+            return false;
+        }
+        auto host = GetHost();
+        auto context = PipelineContext::GetCurrentContext();
+        if (host && context) {
+            auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+            auto safeAreaManager = context->GetSafeAreaManager();
+            if (textFieldManager && safeAreaManager) {
+                auto offset = GetCoordinatePoint();
+                textFieldManager->SetClickPosition({offset->GetX() + GetCaretRect().GetX(),
+                                                    offset->GetY() + GetCaretRect().GetY()});
+                textFieldManager->SetHeight(GetCaretRect().Height());
+                textFieldManager->SetClickPositionOffset(safeAreaManager->GetKeyboardOffset());
+            }
+        }
+        return false;
+    }
+    return true;
+}
+
 bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled)
 {
     if (IsDialogNested()) {
@@ -4383,11 +4434,7 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
         lastKeyboardHeight_ = keyboard;
         return !safeAreaEnabled;
     }
-    if (height - GetCoordinatePoint()->GetY() < keyboard) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow Complete occlusion");
-        isVirtualKeyBoardShow_ = VkState::VK_SHOW;
-        return true;
-    }
+
     if (!delegate_->NeedSoftKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow not NeedSoftKeyboard");
         return false;
@@ -4398,6 +4445,17 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
         lastKeyboardHeight_ = keyboard;
         return true;
     }
+    if (!JudgeWebKeyBoardAvoidMode(safeAreaEnabled)) {
+        isKeyboardInSafeArea_ = true;
+        lastKeyboardHeight_ = keyboard;
+        return false;
+    }
+    if (height - GetCoordinatePoint()->GetY() < keyboard) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow Complete occlusion");
+        isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+        return true;
+    }
+
     if (safeAreaEnabled) {
         isKeyboardInSafeArea_ = true;
         lastKeyboardHeight_ = keyboard;
@@ -4548,6 +4606,9 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         }
         if (overlayCreating_) {
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
+        }
+        if (isBackToTopRunning_) {
+            isBackToTopRunning_ = false;
         }
     }
     if (IsDefaultGestureFocusMode() && !touchInfos.empty() && !GetNativeEmbedModeEnabledValue(false)) {
@@ -4856,6 +4917,14 @@ void  WebPattern::OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMen
     }
 }
 
+void WebPattern::OnBlankScreenDetectionConfigUpdate(const BlankScreenDetectionConfig& config)
+{
+    if (delegate_) {
+        delegate_->UpdateBlankScreenDetectionConfig(
+            config.enable, config.detectionTiming, config.detectionMethods, config.contentfulNodesCountThreshold);
+    }
+}
+
 void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
     const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
@@ -4880,10 +4949,27 @@ void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreate
 
 void WebPattern::UpdateDataDetectorConfig(const TextDetectConfig& config)
 {
+    RETURN_IF_CALLING_FROM_M114();
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::UpdateDataDetectorConfig");
     auto adapter = GetDataDetectorAdapter();
     CHECK_NULL_VOID(adapter);
     adapter->SetDataDetectorConfig(config);
+}
+
+void WebPattern::UpdateEnableSelectDataDetector(bool isEnabled)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::UpdateEnableSelectDataDetector");
+    auto adapter = GetDataDetectorAdapter();
+    CHECK_NULL_VOID(adapter);
+    adapter->SetSelectDataDetectorEnable(isEnabled);
+}
+
+void WebPattern::UpdateSelectedDataDetectorConfig(const TextDetectConfig& config)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::UpdateSelectDataDetectorConfig");
+    auto adapter = GetDataDetectorAdapter();
+    CHECK_NULL_VOID(adapter);
+    adapter->SetSelectedDataDetectorConfig(config);
 }
 
 void WebPattern::HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll)
@@ -6313,6 +6399,43 @@ void WebPattern::OnWindowHide()
     isWindowShow_ = false;
 }
 
+void WebPattern::WebRotateRenderEffect(WindowSizeChangeReason type)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebRotateRenderEffect , type: %{public}d renderFit_: %{public}d",
+             type, renderFit_);
+    if (type != WindowSizeChangeReason::ROTATION ||
+        renderFit_ == RenderFit::TOP_LEFT) {
+        return;
+    }
+
+    if (renderContextForSurface_) {
+        renderContextForSurface_->SetRenderFit(renderFit_);
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    std::string taskName = "ArkUIWebRotateRenderEffectDelayTask_" + std::to_string(GetWebId());
+    taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, taskName);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this), taskName]() {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WebRotateRenderEffect DelayedTask, task: %{public}s",
+            taskName.c_str());
+        if (webPattern->renderContextForSurface_) {
+            TAG_LOGD(AceLogTag::ACE_WEB, "WebRotateRenderEffect reset");
+            webPattern->renderContextForSurface_->SetRenderFit(RenderFit::TOP_LEFT);
+        }
+        }, TaskExecutor::TaskType::UI, MAXIMUM_ROTATION_DELAY_TIME, taskName);
+}
+
 void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     if (contextSelectOverlay_ && contextSelectOverlay_->SelectOverlayIsOn()) {
@@ -6325,6 +6448,7 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
         return;
     }
     AdjustRotationRenderFit(type);
+    WebRotateRenderEffect(type);
     bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
     if (!isSmoothDragResizeEnabled) {
         return;
@@ -6472,6 +6596,16 @@ void WebPattern::UpdateOnFocusTextField(bool isFocus)
             : textFieldManager->ClearOnFocusTextField(host->GetId());
 }
 
+void WebPattern::UpdateTextFieldStatus(bool isShowKeyboard, bool isAttachIME)
+{
+    UpdateOnFocusTextField(isAttachIME);
+    if (isShowKeyboard) {
+        isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+    } else {
+        isVirtualKeyBoardShow_ = VkState::VK_HIDE;
+    }
+}
+
 bool WebPattern::OnBackPressed()
 {
     auto host = GetHost();
@@ -6484,10 +6618,10 @@ bool WebPattern::OnBackPressed()
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         CHECK_NULL_RETURN(inputMethod, false);
         inputMethod->HideTextInput();
-        inputMethod->Close();
         CHECK_NULL_RETURN(delegate_, true);
         delegate_->CloseCustomKeyboard();
         delegate_->GestureBackBlur();
+        UpdateOnFocusTextField(false);
         return true;
     }
     return false;
@@ -8407,6 +8541,7 @@ void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool enable)
 
 void WebPattern::OnEnableDataDetectorUpdate(bool enable)
 {
+    RETURN_IF_CALLING_FROM_M114();
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnEnableDataDetectorUpdate enable:%{public}d", enable);
     auto adapter = GetDataDetectorAdapter();
     CHECK_NULL_VOID(adapter);
@@ -8605,7 +8740,7 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
         return;
     }
 
-    if (delegate_ &&
+    if (delegate_ && renderFit_ == RenderFit::TOP_LEFT &&
         renderMode_ == RenderMode::ASYNC_RENDER && layoutMode_ != WebLayoutMode::FIT_CONTENT) {
         delegate_->MaximizeResize();
     }
@@ -8713,6 +8848,14 @@ void WebPattern::InitDataDetector()
     CHECK_NULL_VOID(webDataDetectorAdapter_);
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::InitDataDetector");
     webDataDetectorAdapter_->Init();
+}
+
+void WebPattern::InitSelectDataDetector()
+{
+    auto adapter = GetDataDetectorAdapter();
+    CHECK_NULL_VOID(adapter);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::InitSelectDataDetector");
+    adapter->InitSelectDataDetector();
 }
 
 void WebPattern::InitAIDetectResult()
@@ -9099,6 +9242,23 @@ void WebPattern::OnGestureFocusModeUpdate(GestureFocusMode mode)
     }
 }
 
+void WebPattern::OnRotateRenderEffectUpdate(WebRotateEffect effect)
+{
+    switch (effect) {
+        case WebRotateEffect::TOPLEFT_EFFECT:
+            renderFit_ = RenderFit::TOP_LEFT;
+            break;
+        case WebRotateEffect::RESIZE_COVER_EFFECT:
+            renderFit_ = RenderFit::RESIZE_COVER;
+            break;
+        default:
+            renderFit_ = RenderFit::TOP_LEFT;
+            break;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "Update rotate effect, effect: %{public}d renderFit_: %{public}d",
+             effect, renderFit_);
+}
+
 void WebPattern::UpdateSingleHandleVisible(bool isVisible)
 {
     if (delegate_) {
@@ -9161,5 +9321,32 @@ void WebPattern::SetImeShow(bool visible)
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipelineContext->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->SetImeShow(visible);
+}
+
+void WebPattern::OnBackToTopUpdate(bool isBackToTop)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnBackToTopUpdate = %{public}d", isBackToTop);
+    backToTop_ = isBackToTop;
+    if (backToTop_) {
+        WebStatusBarEventProxy::GetWebInstance()->Register(WeakClaim(this));
+    } else {
+        WebStatusBarEventProxy::GetWebInstance()->UnRegister(WeakClaim(this));
+    }
+}
+
+void WebPattern::OnStatusBarClick()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnStatusBarClick");
+    if (!backToTop_ || isBackToTopRunning_) {
+        isBackToTopRunning_ = false;
+        return;
+    }
+
+    CHECK_NULL_VOID(delegate_);
+    if (IsFocus()) {
+        isBackToTopRunning_ = true;
+        delegate_->WebScrollStopFling();
+        delegate_->OnStatusBarClick();
+    }
 }
 } // namespace OHOS::Ace::NG

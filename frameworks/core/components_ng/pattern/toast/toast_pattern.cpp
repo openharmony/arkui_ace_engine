@@ -438,7 +438,9 @@ void ToastPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto containerId = Container::CurrentId();
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-    auto pipeline = parentContainerId < 0 ? host->GetContextRefPtr() : PipelineContext::GetMainPipelineContext();
+    auto pipeline = parentContainerId < 0 || parentContainerId >= MIN_PA_SERVICE_ID
+                        ? host->GetContextRefPtr()
+                        : PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowSizeChangeCallback(host->GetId());
     auto callbackId =
@@ -472,7 +474,9 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
     auto containerId = Container::CurrentId();
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
     auto current_context = PipelineContext::GetCurrentContextSafelyWithCheck();
-    auto pipeline = parentContainerId < 0 ? current_context : PipelineContext::GetMainPipelineContext();
+    auto pipeline = parentContainerId < 0 || parentContainerId >= MIN_PA_SERVICE_ID
+                        ? current_context
+                        : PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));

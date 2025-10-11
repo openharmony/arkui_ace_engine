@@ -37,6 +37,8 @@ std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::infosForRouterP
 
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedDensityListeners_;
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedWinSizeLayoutBreakpointListeners_;
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> UIObserver::specifiedDrawListeners_;
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> UIObserver::specifiedLayoutListeners_;
 
@@ -59,6 +61,10 @@ std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::didClickInfos_;
 std::list<std::shared_ptr<UIObserverListener>> UIObserver::tabContentStateListeners_;
 std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedTabContentStateListeners_;
+
+std::list<std::shared_ptr<UIObserverListener>> UIObserver::tabChangeListeners_;
+std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedTabChangeListeners_;
 
 std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::abilityContextBeforePanStartListeners_;
@@ -611,6 +617,58 @@ void UIObserver::HandleDensityChange(NG::AbilityContextInfo& info, double densit
         return;
     }
     SafeIterateListeners(iter->second, &UIObserverListener::OnDensityChange, density);
+}
+
+void UIObserver::RegisterWinSizeLayoutBreakpointCallback(
+    int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    auto iter = specifiedWinSizeLayoutBreakpointListeners_.find(uiContextInstanceId);
+    if (iter == specifiedWinSizeLayoutBreakpointListeners_.end()) {
+        specifiedWinSizeLayoutBreakpointListeners_.emplace(
+            uiContextInstanceId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+        return;
+    }
+    auto& holder = iter->second;
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+void UIObserver::UnRegisterWinSizeLayoutBreakpointCallback(int32_t uiContextInstanceId, napi_value callback)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    auto iter = specifiedWinSizeLayoutBreakpointListeners_.find(uiContextInstanceId);
+    if (iter == specifiedWinSizeLayoutBreakpointListeners_.end()) {
+        return;
+    }
+    auto& holder = iter->second;
+    if (callback == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }),
+        holder.end());
+}
+
+void UIObserver::HandleWinSizeLayoutBreakpointChange(int32_t instanceId, const NG::WindowSizeBreakpoint& info)
+{
+    auto iter = specifiedWinSizeLayoutBreakpointListeners_.find(instanceId);
+    if (iter == specifiedWinSizeLayoutBreakpointListeners_.end()) {
+        return;
+    }
+    SafeIterateListeners(iter->second, &UIObserverListener::OnWinSizeLayoutBreakpointChange, info);
 }
 
 void UIObserver::HandDrawCommandSendChange()
@@ -1825,6 +1883,83 @@ void UIObserver::HandleTabContentStateChange(const NG::TabContentInfo& tabConten
 
     for (const auto& listener : holder) {
         listener->OnTabContentStateChange(tabContentInfo);
+    }
+}
+
+void UIObserver::RegisterTabChangeCallback(const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (std::find(tabChangeListeners_.begin(), tabChangeListeners_.end(), listener) != tabChangeListeners_.end()) {
+        return;
+    }
+    tabChangeListeners_.emplace_back(listener);
+}
+
+void UIObserver::RegisterTabChangeCallback(
+    const std::string& id, const std::shared_ptr<UIObserverListener>& listener)
+{
+    auto iter = specifiedTabChangeListeners_.find(id);
+    if (iter == specifiedTabChangeListeners_.end()) {
+        specifiedTabChangeListeners_.emplace(id, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+        return;
+    }
+    auto& holder = iter->second;
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+void UIObserver::UnRegisterTabChangeCallback(napi_value cb)
+{
+    if (cb == nullptr) {
+        tabChangeListeners_.clear();
+        return;
+    }
+    tabChangeListeners_.erase(
+        std::remove_if(
+            tabChangeListeners_.begin(),
+            tabChangeListeners_.end(),
+            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(cb);
+            }),
+        tabChangeListeners_.end()
+    );
+}
+
+void UIObserver::UnRegisterTabChangeCallback(const std::string& id, napi_value cb)
+{
+    auto iter = specifiedTabChangeListeners_.find(id);
+    if (iter == specifiedTabChangeListeners_.end()) {
+        return;
+    }
+    auto& holder = iter->second;
+    if (cb == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(cb);
+            }),
+        holder.end()
+    );
+}
+
+void UIObserver::HandleTabChange(const NG::TabContentInfo& tabContentInfo)
+{
+    for (const auto& listener : tabChangeListeners_) {
+        listener->OnTabChange(tabContentInfo);
+    }
+    auto iter = specifiedTabChangeListeners_.find(tabContentInfo.id);
+    if (iter == specifiedTabChangeListeners_.end()) {
+        return;
+    }
+    auto& holder = iter->second;
+    for (const auto& listener : holder) {
+        listener->OnTabChange(tabContentInfo);
     }
 }
 

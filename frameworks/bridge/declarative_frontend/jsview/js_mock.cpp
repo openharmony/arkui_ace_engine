@@ -71,6 +71,12 @@ void JSMockNativeCustomSpan::JSBind(BindingTarget globalObj)
     JSClass<JSMockNativeCustomSpan>::Bind(globalObj);
 }
 
+void JSMockNativeLeadingMarginSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSMockNativeLeadingMarginSpan>::Declare("NativeLeadingMarginSpan");
+    JSClass<JSMockNativeLeadingMarginSpan>::Bind(globalObj);
+}
+
 void JSMockViewBuildNodeBase::JSBind(BindingTarget globalObj)
 {
     JSClass<JSMockViewBuildNodeBase>::Declare("ViewBuildNodeBase");
@@ -107,6 +113,7 @@ void JSMock::JSBind(BindingTarget globalObj)
     JSMockScopeUtil::JSBind(globalObj);
     MockCustomDialogController::JSBind(globalObj);
     JSMockNativeCustomSpan::JSBind(globalObj);
+    JSMockNativeLeadingMarginSpan::JSBind(globalObj);
     JSMockViewBuildNodeBase::JSBind(globalObj);
 }
 

@@ -3408,7 +3408,7 @@ void MenuItemPattern::ApplyOptionThemeStyles()
     SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
     SetFontSize(selectTheme->GetMenuFontSize());
     SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
-    SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
+    SetFontWeight(selectTheme->GetMenuFontWeight());
     SetBorderColor(GetBorderColor());
     SetBorderWidth(GetBorderWidth());
     if (IsSelectOption() && showDefaultSelectedIcon_ && !selectTheme->GetMenuBlendBgColor()) {

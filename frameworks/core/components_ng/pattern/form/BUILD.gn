@@ -35,9 +35,9 @@ build_component_ng("form_pattern_ng") {
       "form_fwk:form_manager",
       "graphic_2d:librender_service_client",
       "i18n:intl_util",
+      "image_framework:image_native",
       "input:libmmi-client",
       "ipc:ipc_core",
-      "image_framework:image_native",
     ]
   }
 }

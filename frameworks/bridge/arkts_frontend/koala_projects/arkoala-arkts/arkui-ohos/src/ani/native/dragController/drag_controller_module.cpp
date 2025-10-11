@@ -20,7 +20,7 @@
 #include "udmf_ani_converter_utils.h"
 #include "utils/ani_utils.h"
 #include "drag_preview.h"
-#include "arkoala/framework/native/src/resource_color_helper.h"
+#include "bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/resource_color_helper.h"
 
 #include "core/common/ace_engine.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
@@ -76,7 +76,7 @@ public:
             return;
         }
         ani_method method;
-        if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK) {
+        if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK) {
             HILOGE("AceDrag, find constructor method failed. status = %{public}d", status);
             return;
         }
@@ -266,7 +266,7 @@ ani_object CreateDragEventObject(ani_env* env, const ArkUIDragNotifyMessage& dra
     ani_object dragEventObj = {};
     CHECK_NULL_RETURN(env, dragEventObj);
     ani_status status = ANI_OK;
-    static const char* className = "Larkui/component/common/DragEventInternal;";
+    static const char* className = "arkui.component.common.DragEventInternal";
     ani_class cls;
     if ((status = env->FindClass(className, &cls)) != ANI_OK) {
         HILOGE("AceDrag, find DragEventInner calss fail. status = %{public}d", status);
@@ -274,7 +274,7 @@ ani_object CreateDragEventObject(ani_env* env, const ArkUIDragNotifyMessage& dra
     }
 
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) != ANI_OK) {
         HILOGE("AceDrag, find constructor method fail. status = %{public}d", status);
         return dragEventObj;
     }
@@ -458,7 +458,7 @@ bool ParseDragItemInfoParam(ani_env* env, ArkUIDragControllerAsync& asyncCtx, an
         HILOGE("AceDrag, get extraInfo failed.");
         return false;
     }
-    if (AniUtils::IsClassObject(env, extraInfoAni, "Lstd/core/String;")) {
+    if (AniUtils::IsClassObject(env, extraInfoAni, "std.core.String")) {
         std::string extraParamsStr = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(extraInfoAni));
         std::string extraInfoLimited = extraParamsStr.size() > EXTRA_INFO_MAX_LENGTH
                                     ? extraParamsStr.substr(0, EXTRA_INFO_MAX_LENGTH)
@@ -568,8 +568,8 @@ bool CheckAndParseFirstParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx, 
         asyncCtx.customBuilderNode = builderNode;
         return true;
     }
-    if (AniUtils::IsClassObject(env, dragItemInfo, "Lescompat/Array;") ||
-        AniUtils::IsClassObject(env, builderNodeArray, "Lescompat/Array;")) {
+    if (AniUtils::IsClassObject(env, dragItemInfo, "escompat.Array") ||
+        AniUtils::IsClassObject(env, builderNodeArray, "escompat.Array")) {
         asyncCtx.isArray = true;
         HILOGI("AceDrag, drag controller is multi object drag.");
         return ParseDragItemListInfoParam(env, asyncCtx, dragItemInfo, builderNodeArray);
@@ -612,17 +612,17 @@ std::optional<Dimension> ConvertDimensionType(ani_env* env, ani_ref touchPoint)
         return std::nullopt;
     }
     Dimension parameter;
-    if (AniUtils::IsClassObject(env, touchPoint, "Lstd/core/Numeric;")) {
+    if (AniUtils::IsClassObject(env, touchPoint, "std.core.Numeric")) {
         ani_double numberValue;
         if (ANI_OK !=
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(touchPoint), "unboxed", ":D", &numberValue)) {
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(touchPoint), "unboxed", ":d", &numberValue)) {
             HILOGW("Failed to call unboxed method on Numeric object");
         }
         parameter.SetValue(static_cast<double>(numberValue));
         parameter.SetUnit(DimensionUnit::VP);
         return parameter;
     }
-    if (AniUtils::IsClassObject(env, touchPoint, "Lstd/core/String;")) {
+    if (AniUtils::IsClassObject(env, touchPoint, "std.core.String")) {
         auto parameterStr = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(touchPoint));
         parameter = StringUtils::StringToDimensionWithUnit(parameterStr, DimensionUnit::VP);
         return parameter;
@@ -663,7 +663,7 @@ bool CheckAndParseSecondParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx,
 
     asyncCtx.dragPointerEvent.pointerId = static_cast<int32_t>(pointerIdAni);
     HILOGI("AceDrag, pointerId = %{public}d", asyncCtx.dragPointerEvent.pointerId);
-    if (AniUtils::IsClassObject(env, extraParamsAni, "Lstd/core/String;")) {
+    if (AniUtils::IsClassObject(env, extraParamsAni, "std.core.String")) {
         std::string extraParamsStr = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(extraParamsAni));
         std::string extraInfoLimited = extraParamsStr.size() > EXTRA_INFO_MAX_LENGTH
                                     ? extraParamsStr.substr(0, EXTRA_INFO_MAX_LENGTH)
@@ -710,7 +710,7 @@ bool CheckAndParseSecondParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx,
 bool CreateCallbackFunc(
     ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_object callback, ani_object& result)
 {
-    if (AniUtils::IsClassObject(env, callback, "Lstd/core/Function2;")) {
+    if (AniUtils::IsClassObject(env, callback, "std.core.Function2")) {
         HILOGI("AceDrag, Create async callback");
         ani_ref fnObjGlobalRef = nullptr;
         if (ANI_OK != env->GlobalReference_Create(callback, &fnObjGlobalRef)) {
@@ -866,6 +866,7 @@ ani_object ANIGetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani
     CHECK_NULL_RETURN(dragPreview, nullptr);
     ani_object dragPreviewObj = {};
     dragPreview->AniSerializer(env, dragPreviewObj);
+    delete dragPreview;
     env->DestroyEscapeLocalScope(dragPreviewObj, &escapedObj);
     return dragPreviewObj;
 }

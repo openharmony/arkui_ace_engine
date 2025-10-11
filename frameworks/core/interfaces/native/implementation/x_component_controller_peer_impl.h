@@ -35,6 +35,9 @@ struct XComponentControllerPeerImpl : public Referenced {
     SurfaceCreatedEvent GetOnSurfaceCreatedEvent();
     SurfaceChangedEvent GetOnSurfaceChangedEvent();
     SurfaceDestroyedEvent GetOnSurfaceDestroyedEvent();
+    Callback_String_Void arkOnSurfaceCreated = {};
+    Callback_String_SurfaceRect_Void arkOnSurfaceChanged = {};
+    Callback_String_Void arkOnSurfaceDestroyed = {};
 
 private:
     SurfaceCreatedEvent onSurfaceCreatedEvent_ = nullptr;

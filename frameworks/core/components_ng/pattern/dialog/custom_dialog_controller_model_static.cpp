@@ -14,7 +14,7 @@
  */
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_static.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/overlay/dialog_manager.h"
+#include "core/components_ng/pattern/overlay/dialog_manager_static.h"
 
 namespace OHOS::Ace::NG {
 TaskExecutor::Task CustomDialogControllerModelStatic::ParseOpenDialogTask(int32_t currentId,
@@ -151,6 +151,13 @@ void CustomDialogControllerModelStatic::SetOpenDialog(
     if (!executor) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Task executor is null.");
         return;
+    }
+    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = NG::DialogManagerStatic::GetEmbeddedOverlay(
+            dialogProperties.dialogLevelUniqueId, context);
+        if (embeddedOverlay) {
+            overlayManager = embeddedOverlay;
+        }
     }
     auto task = ParseOpenDialogTask(
         currentId, controller, dialogProperties, dialogs, std::move(buildFunc), overlayManager);

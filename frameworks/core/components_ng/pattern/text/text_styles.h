@@ -283,6 +283,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HeightAdaptivePolicy, TextHeightAdaptivePolicy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextIndent, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LeadingMargin, LeadingMargin);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DrawableLeadingMargin, DrawableLeadingMargin);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WordBreak, WordBreak);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EllipsisMode, EllipsisMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineSpacing, Dimension);

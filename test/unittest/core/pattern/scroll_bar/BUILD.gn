@@ -23,8 +23,6 @@ ace_unittest("scroll_bar_test_ng") {
   ]
 
   if (ace_engine_enable_circle_feature) {
-    sources += [
-      "arc_scroll_bar_test_ng.cpp",
-    ]
+    sources += [ "arc_scroll_bar_test_ng.cpp" ]
   }
 }

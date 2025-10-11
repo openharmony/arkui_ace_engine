@@ -2629,6 +2629,87 @@ typedef enum {
      * @since 21
      */
      NODE_TEXT_CONTENT_ALIGN = 1036,
+     
+    /**
+     * @brief Sets the minimum number of lines in the text.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: minimum number of lines in the text.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: minimum number of lines in the text.\n
+     *
+     */
+    NODE_TEXT_MIN_LINES = 1037,
+
+    /**
+     * @brief Enables the selected data detector.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Enable selected text recognition, default value true.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether selected text recognition is enabled.\n
+     *
+     * @since 22
+     */
+    NODE_TEXT_ENABLE_SELECTED_DATA_DETECTOR = 1038,
+
+    /**
+     * @brief Configs selected data detector.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the configuration of selected data detector. The parameter type is {@link ArkUI_SelectedDataDetectorConfig}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: the configuration of selected data detector. The parameter type is {@link ArkUI_SelectedDataDetectorConfig}.\n
+     *
+     * @since 22
+     */
+    NODE_TEXT_SELECTED_DATA_DETECTOR_CONFIG = 1039,
+
+    /**
+     * @brief Defines the minimum text line height attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: minimum line height.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: minimum line height.\n
+     *
+     * @since 22
+     *
+     */
+    NODE_TEXT_MIN_LINE_HEIGHT = 1040,
+
+    /**
+     * @brief Defines the maximum text line height attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: maximum line height.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: maximum line height.\n
+     *
+     * @since 22
+     *
+     */
+    NODE_TEXT_MAX_LINE_HEIGHT = 1041,
+
+    /**
+     * @brief Defines line height multiple value of text, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: line height multiple value of text.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: line height multiple value of text.\n
+     *
+     * @since 22
+     *
+     */
+    NODE_TEXT_LINE_HEIGHT_MULTIPLE = 1042,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -3632,6 +3713,56 @@ typedef enum {
     NODE_TEXT_INPUT_LINE_HEIGHT = 7037,
 
     /**
+     * @brief Enables selected data detector.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Enable selected text recognition, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether selected text recognition is enabled.\n
+     *
+     * @since 22
+     */
+    NODE_TEXT_INPUT_ENABLE_SELECTED_DATA_DETECTOR = 7038,
+
+    /**
+     * @brief Configs selected data detector.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the configuration of selected data detector. The parameter type is {@link ArkUI_SelectedDataDetectorConfig}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: the configuration of selected data detector. The parameter type is {@link ArkUI_SelectedDataDetectorConfig}.\n
+     *
+     * @since 22
+     */
+    NODE_TEXT_INPUT_SELECTED_DATA_DETECTOR_CONFIG = 7039,
+
+    /**
+     * @brief Defines the counter settings. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to show a character counter. The value <b>true</b> means to show a character counter. \n
+     * .value[1]?.f32: threshold percentage for displaying the character counter. The character counter is displayed
+     * when the number of characters that have been entered is greater than the maximum number of characters multiplied
+     * by the threshold percentage value. The value range is 1 to 100. If the value is a decimal, it is rounded down. \n
+     * .value[2]?.i32: whether to highlight the border when the number of entered characters reaches the maximum. \n
+     * .object: counter configuration. The parameter type is {@link ArkUI_ShowCounterConfig}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to show a character counter. \n
+     * .value[1].f32: threshold percentage for displaying the character counter. The character counter is displayed
+     * when the number of characters that have been entered is greater than the maximum number of characters multiplied
+     * by the threshold percentage value. The value range is 1 to 100. \n
+     * .value[2].i32: whether to highlight the border when the number of entered characters reaches the maximum.
+     * The default value is <b>true</b>. \n
+     * .object: counter configuration. The parameter type is {@link ArkUI_ShowCounterConfig}.\n
+     * 
+     * @since 22
+     */
+    NODE_TEXT_INPUT_SHOW_COUNTER = 7040,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3747,6 +3878,7 @@ typedef enum {
      * when the number of characters that have been entered is greater than the maximum number of characters multiplied
      * by the threshold percentage value. The value range is 1 to 100. If the value is a decimal, it is rounded down. \n
      * .value[2]?.i32: whether to highlight the border when the number of entered characters reaches the maximum. \n
+     * .object: counter configuration. The parameter type is {@link ArkUI_ShowCounterConfig}. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: whether to show a character counter. \n
@@ -3755,7 +3887,8 @@ typedef enum {
      * by the threshold percentage value. The value range is 1 to 100. \n
      * .value[2].i32: whether to highlight the border when the number of entered characters reaches the maximum.
      * The default value is <b>true</b>. \n
-     *
+     * .object: counter configuration. The parameter type is {@link ArkUI_ShowCounterConfig}. \n
+     * 
      */
     NODE_TEXT_AREA_SHOW_COUNTER,
 
@@ -4069,22 +4202,62 @@ typedef enum {
      *
      * @since 22
      */
-     NODE_TEXT_AREA_BAR_STATE = 8032,
+    NODE_TEXT_AREA_BAR_STATE = 8032,
+
+    /**
+     * @brief Enables selected data detector.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Enable selected text recognition, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether selected text recognition is enabled.\n
+     *
+     * @since 22
+     */
+    NODE_TEXT_AREA_ENABLE_SELECTED_DATA_DETECTOR = 8033,
+    
+    /**
+     * @brief Configs selected data detector.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the configuration of selected data detector. The parameter type is {@link ArkUI_SelectedDataDetectorConfig}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: the configuration of selected data detector. The parameter type is {@link ArkUI_SelectedDataDetectorConfig}.\n
+     *
+     * @since 22
+     */
+    NODE_TEXT_AREA_SELECTED_DATA_DETECTOR_CONFIG = 8034,
 
     /**
      * @brief Defines the color of the scrollbar. This attribute can be set, reset, and obtained as required
      * through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .data[0].u32: The color of the scroll bar text area is represented in 0xARGB format. \n
+     * .data[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .data[0].u32: The color of the scroll bar text area is represented in 0xARGB format. \n
+     * .data[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
      *
      * @since 22
      */
-    NODE_TEXT_AREA_SCROLL_BAR_COLOR = 8033,
+    NODE_TEXT_AREA_SCROLL_BAR_COLOR = 8035,
 
+    /**
+     * @brief Sets up a custom keyboard.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: custom keyboard,The parameter type is {@Link ArkUI_NodeHandle}.\n
+     * .value[0]?.i32: Sets whether the custom keyboard supports the avoidance feature, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object:custom keyboard,The parameter type is {@Link ArkUI_NodeHandle}.\n
+     * .value[0].i32: Set whether the custom keyboard supports the avoidance function.\n
+     *
+     * @since 22
+     */
+    NODE_TEXT_AREA_CUSTOM_KEYBOARD = 8036,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
@@ -6067,6 +6240,23 @@ typedef enum {
     NODE_LIST_SYNC_LOAD = 1003016,
 
     /**
+     * @brief Defines the scroll snap animation speed for the <b>List</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     *.value[0].i32: scroll snap animation speed for the <b>List</b> component.
+     * The parameter type is {@link ArkUI_ScrollSnapAnimationSpeed}.
+     * Default value: <b>ARKUI_SCROLL_SNAP_ANIMATION_NORMAL</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     *.value[0].i32: scroll snap animation speed for the <b>List</b> component.
+     * The parameter type is {@link ArkUI_ScrollSnapAnimationSpeed}. \n
+     *
+     * @since 22
+     */
+    NODE_LIST_SCROLL_SNAP_ANIMATION_SPEED = 1003017,
+
+    /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
      * as required through APIs.
      *
@@ -7603,6 +7793,22 @@ typedef enum {
     NODE_ON_SIZE_CHANGE = 30,
 
     /**
+     * @brief Defines the coasting axis event.
+     *
+     * The event is triggered when user swipes with two fingers on the touchpad, the system constructs
+     * sliding events based on the speed at the moment the fingers are lifted, according to a certain
+     * decay curve. You can listen for such events to handle the flick effect immediately after the
+     * regular axis events. \n
+     * When the event callback occurs, the {@link ArkUI_UIInputEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object through {@link OH_ArkUI_NodeEvent_GetInputEvent}.
+     * And the {@link ArkUI_CoastingAxisEvent} object can be obtained from the {@link ArkUI_UIInputEvent}
+     * object through {@link OH_ArkUI_UIInputEvent_GetCoastingAxisEvent}. \n
+     *
+     * @since 21
+     */
+    NODE_ON_COASTING_AXIS_EVENT = 31,
+
+    /**
      * @brief Triggers onDetectResultUpdate callback
      * when the text is set to TextDataDetectorConfig and recognized successfully.
      *
@@ -8452,6 +8658,48 @@ typedef enum {
      * @since 20
      */
     NODE_SCROLL_EVENT_ON_ZOOM_STOP,
+    /**
+     * @brief Defines the callback for when the scrollable will start dragging.
+     *
+     * This event is triggered when the scrollable will start dragging. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains no parameters: \n
+     * @since 22
+     */
+    NODE_SCROLL_EVENT_ON_WILL_START_DRAGGING = 1002013,
+    /**
+     * @brief Defines the callback for when the scrollable did end dragging.
+     *
+     * This event is triggered when the scrollable did end dragging. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: whether start fling animation. \n
+     *
+     * @since 22
+     */
+    NODE_SCROLL_EVENT_ON_DID_STOP_DRAGGING = 1002014,
+    /**
+     * @brief Defines the callback for when the scrollable will start fling.
+     *
+     * This event is triggered when the scrollable will start fling. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains no parameters: \n
+     * @since 22
+     */
+    NODE_SCROLL_EVENT_ON_WILL_START_FLING = 1002015,
+    /**
+     * @brief Defines the callback for when the scrollable did end fling.
+     *
+     * This event is triggered when the scrollable did end fling. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains no parameters: \n
+     * @since 22
+     */
+    NODE_SCROLL_EVENT_ON_DID_STOP_FLING = 1002016,
 
     /**
      * @brief Defines the event triggered when a child component enters or leaves the list display area.
@@ -10528,6 +10776,17 @@ int32_t OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent(Ar
  * @since 21
  */
 int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(ArkUI_NodeHandle node);
+
+/** 
+ * @brief Stop the animation being executed by the Swiper node.
+ * 
+ * @param node ArkUI_NodeHandle pointer.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 22
+ */
+int32_t OH_ArkUI_Swiper_FinishAnimation(ArkUI_NodeHandle node);
 
 #ifdef __cplusplus
 }

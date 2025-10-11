@@ -15,6 +15,7 @@
 #include "node_loading_progress_modifier.h"
 
 #include "base/error/error_code.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -41,13 +42,19 @@ void SetLoadingProgressColorPtr(ArkUINodeHandle node, uint32_t colorValue, void*
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     LoadingProgressModelNG::SetColorParseFailed(frameNode, false);
-    LoadingProgressModelNG::SetColor(frameNode, Color(colorValue));
+    Color setColor = Color(colorValue);
 
     if (SystemProperties::ConfigChangePerform()) {
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
+        RefPtr<ResourceObject> colorResObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, setColor, frameNode->GetTag());
+        } else {
+            auto* color = static_cast<ResourceObject*>(colorRawPtr);
+            colorResObj = AceType::Claim(color);
+        }
         LoadingProgressModelNG::CreateWithResourceObj(frameNode, LoadingProgressResourceType::COLOR, colorResObj);
     }
+    LoadingProgressModelNG::SetColor(frameNode, setColor);
 }
 
 void ResetLoadingProgressColor(ArkUINodeHandle node)

@@ -526,6 +526,13 @@ void WebModelNG::SetZoomAccessEnabled(bool isZoomAccessEnabled)
     webPattern->UpdateZoomAccessEnabled(isZoomAccessEnabled);
 }
 
+void WebModelNG::SetZoomControlAccess(bool zoomControlAccess)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateZoomControlAccess(zoomControlAccess);
+}
+
 void WebModelNG::SetGeolocationAccessEnabled(bool isGeolocationAccessEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1467,6 +1474,22 @@ void WebModelNG::SetDataDetectorConfig(const TextDetectConfig& config)
     webPattern->UpdateDataDetectorConfig(config);
 }
 
+void WebModelNG::SetEnableSelectedDataDetector(bool isEnabled)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableSelectDataDetector(isEnabled);
+}
+
+void WebModelNG::SetSelectedDataDetectorConfig(const TextDetectConfig& config)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateSelectedDataDetectorConfig(config);
+}
+
 void WebModelNG::SetForceEnableZoom(bool isEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1512,6 +1535,14 @@ void WebModelNG::SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEna
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateZoomAccessEnabled(isZoomAccessEnabled);
+}
+
+void WebModelNG::SetZoomControlAccess(FrameNode* frameNode, bool zoomControlAccess)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateZoomControlAccess(zoomControlAccess);
 }
 
 void WebModelNG::SetCacheMode(FrameNode* frameNode, WebCacheMode cacheMode)
@@ -1858,6 +1889,16 @@ void WebModelNG::SetNativeEmbedGestureEventId(
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnNativeEmbedGestureEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetNativeEmbedObjectParamChangeId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnNativeEmbedObjectParamChangeEvent(std::move(uiCallback));
 }
 
 void WebModelNG::RegisterNativeEmbedRule(FrameNode* frameNode, const std::string& tag, const std::string& type)
@@ -2429,6 +2470,24 @@ void WebModelNG::SetDataDetectorConfig(FrameNode* frameNode, const TextDetectCon
     webPattern->UpdateDataDetectorConfig(config);
 }
 
+void WebModelNG::SetEnableSelectedDataDetector(FrameNode* frameNode, bool isEnabled)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableDataDetector(isEnabled);
+}
+
+void WebModelNG::SetSelectedDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateSelectedDataDetectorConfig(config);
+}
+
 void WebModelNG::SetGestureFocusMode(GestureFocusMode mode)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -2442,6 +2501,21 @@ void WebModelNG::SetGestureFocusMode(FrameNode* frameNode, GestureFocusMode mode
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateGestureFocusMode(mode);
+}
+
+void WebModelNG::SetRotateRenderEffect(WebRotateEffect effect)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateRotateRenderEffect(effect);
+}
+
+void WebModelNG::SetRotateRenderEffect(FrameNode* frameNode, WebRotateEffect effect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateRotateRenderEffect(effect);
 }
 
 void WebModelNG::SetOnSslErrorRequest(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback)
@@ -2507,6 +2581,47 @@ void WebModelNG::SetOnBeforeUnload(
     webEventHub->SetOnCommonDialogEvent(std::move(uiCallback), static_cast<DialogEventType>(dialogEventType));
 }
 
+void WebModelNG::SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo *info)> &&jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo> &info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnDetectedBlankScreenEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetBlankScreenDetectionConfig(bool enable, const std::vector<double> &detectionTiming,
+    const std::vector<int32_t> &detectionMethods, int32_t contentfulNodesCountThreshold)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    BlankScreenDetectionConfig config{enable, detectionTiming, detectionMethods, contentfulNodesCountThreshold};
+    webPattern->UpdateBlankScreenDetectionConfig(config);
+}
+
+void WebModelNG::SetOnDetectedBlankScreen(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo> &info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnDetectedBlankScreenEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetBlankScreenDetectionConfig(FrameNode* frameNode, const BlankScreenDetectionConfig& detectConfig)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateBlankScreenDetectionConfig(detectConfig);
+}
+
 void WebModelNG::SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
@@ -2561,5 +2676,20 @@ void WebModelNG::SetOnSafeBrowsingCheckFinish(
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnSafeBrowsingCheckFinishEvent(std::move(safeBrowsingCheckFinish));
+}
+
+void WebModelNG::SetBackToTop(bool isBackToTop)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateBackToTop(isBackToTop);
+}
+
+void WebModelNG::SetBackToTop(FrameNode* frameNode, bool isBackToTop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateBackToTop(isBackToTop);
 }
 } // namespace OHOS::Ace::NG

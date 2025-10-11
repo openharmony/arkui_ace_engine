@@ -16,15 +16,14 @@
 #include "shape.h"
 
 namespace OHOS::Ace {
-struct PathPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::Path> pathShape;
-};
+namespace {
+const char* ANI_SHAPE_NAME = "@ohos.arkui.shape.PathShape";
+} // namespace
 
 void ANICreatePathShape(ani_env* env, [[maybe_unused]] ani_object object)
 {
-    static const char* className = "L@ohos/arkui/shape/PathShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return;
     }
     PathPeer* shapePeer = new PathPeer();
@@ -43,8 +42,7 @@ void ANICreatePathShapeWithParam(
     if (GetIsUndefinedObject(env, aniOption)) {
         return;
     }
-    static const char* className = "L@ohos/arkui/shape/PathShape;";
-    if (!IsInstanceOfCls(env, object, className)) {
+    if (!IsInstanceOfCls(env, object, ANI_SHAPE_NAME)) {
         return;
     }
     std::string commands = ParseCommands(env, aniOption);
@@ -80,9 +78,9 @@ ani_object ANIPathShapePosition(ani_env* env, [[maybe_unused]] ani_object object
         return object;
     }
     CalcDimension dx;
-    ParseOption(env, aniOption, dx, "x", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dx, "x", "arkui.component.units.Position");
     CalcDimension dy;
-    ParseOption(env, aniOption, dy, "y", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dy, "y", "arkui.component.units.Position");
     DimensionOffset position(dx, dy);
     if (pathObj->pathShape) {
         pathObj->pathShape->SetPosition(position);
@@ -100,9 +98,9 @@ ani_object ANIPathShapeOffset(ani_env* env, [[maybe_unused]] ani_object object, 
         return object;
     }
     CalcDimension dx;
-    ParseOption(env, aniOption, dx, "x", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dx, "x", "arkui.component.units.Position");
     CalcDimension dy;
-    ParseOption(env, aniOption, dy, "y", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dy, "y", "arkui.component.units.Position");
     DimensionOffset position(dx, dy);
     if (pathObj->pathShape) {
         pathObj->pathShape->SetOffset(position);
@@ -153,18 +151,22 @@ ani_object ANIPathShapeCommands(ani_env* env, [[maybe_unused]] ani_object object
     return object;
 }
 
+ani_object PathShape::ANIPathShapeFromPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
+{
+    return ANIShapeFromPtr<PathPeer>(env, ptr, ANI_SHAPE_NAME, "pathShapeResult");
+}
+
 ani_status PathShape::BindPathShape(ani_env* env)
 {
-    static const char* className = "L@ohos/arkui/shape/PathShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return ANI_ERROR;
     }
 
     std::array methods = {
-        ani_native_function { "<ctor>", ":V", reinterpret_cast<void*>(ANICreatePathShape) },
+        ani_native_function { "<ctor>", ":", reinterpret_cast<void*>(ANICreatePathShape) },
         ani_native_function {
-            "<ctor>", "L@ohos/arkui/shape/PathShapeOptions;:V", reinterpret_cast<void*>(ANICreatePathShapeWithParam) },
+            "<ctor>", "C{@ohos.arkui.shape.PathShapeOptions}:", reinterpret_cast<void*>(ANICreatePathShapeWithParam) },
         ani_native_function { "commands", nullptr, reinterpret_cast<void*>(ANIPathShapeCommands) },
         ani_native_function { "position", nullptr, reinterpret_cast<void*>(ANIPathShapePosition) },
         ani_native_function { "offset", nullptr, reinterpret_cast<void*>(ANIPathShapeOffset) },

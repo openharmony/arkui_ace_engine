@@ -25,6 +25,7 @@
 namespace OHOS::Ace {
 
 constexpr int32_t AI_TEXT_MAX_LENGTH = 500;
+constexpr int32_t AI_TEXT_SELECT_DETECT_MAX_LENGTH = 255;
 constexpr int32_t AI_TEXT_GAP = 100;
 constexpr int32_t AI_DELAY_TIME = 100;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
@@ -342,6 +343,8 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
                     return;
                 }
                 dataDetectorAdapter->ParseAIResult(result, startPos);
+                dataDetectorAdapter->ParseSelectAIResult();
+                dataDetectorAdapter->UpdateAISelectMenu();
                 dataDetectorAdapter->MarkDirtyNode();
             },
             "ArkUITextParseAIResult");
@@ -355,6 +358,32 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
             DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
         },
         "ArkUITextInitDataDetect");
+}
+
+void DataDetectorAdapter::SetParseSelectAIResCallBack(std::function<void()>&& task)
+{
+    parseSelectAIResCallBack_ = std::move(task);
+}
+
+void DataDetectorAdapter::ParseSelectAIResult()
+{
+    if (parseSelectAIResCallBack_ != nullptr) {
+        parseSelectAIResCallBack_();
+        parseSelectAIResCallBack_ = nullptr;
+    }
+}
+
+void DataDetectorAdapter::SetUpdateAISelectMenuCallBack(std::function<void()>&& task)
+{
+    updateAISelectMenuCallBack_ = std::move(task);
+}
+
+void DataDetectorAdapter::UpdateAISelectMenu()
+{
+    if (updateAISelectMenuCallBack_ != nullptr) {
+        updateAISelectMenuCallBack_();
+        updateAISelectMenuCallBack_ = nullptr;
+    }
 }
 
 void DataDetectorAdapter::HandleTextUrlDetect()
@@ -566,18 +595,21 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
     };
 }
 
-void DataDetectorAdapter::StartAITask()
+void DataDetectorAdapter::StartAITask(bool clearAISpanMap, bool isSelectDetect)
 {
-    if (textForAI_.empty() || (!typeChanged_ && lastTextForAI_ == textForAI_)) {
+    if (textForAI_.empty() || (!typeChanged_ && lastTextForAI_ == textForAI_) ||
+        (isSelectDetect && textForAI_.size() > AI_TEXT_SELECT_DETECT_MAX_LENGTH)) {
         MarkDirtyNode();
         return;
     }
     std::map<int32_t, AISpan> aiSpanMapCopy;
-    if (!typeChanged_) {
+    if (!typeChanged_ && !isSelectDetect) {
         aiSpanMapCopy = aiSpanMap_;
     }
     detectTexts_.clear();
-    aiSpanMap_.clear();
+    if (clearAISpanMap) {
+        aiSpanMap_.clear();
+    }
     typeChanged_ = false;
     startDetectorTimeStamp_ = std::chrono::high_resolution_clock::now();
     auto context = PipelineContext::GetCurrentContextSafely();
@@ -589,7 +621,7 @@ void DataDetectorAdapter::StartAITask()
     TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::StartAITask, post whole task, id: %{public}i",
         GetHost() ? GetHost()->GetId() : -1);
     taskExecutor->PostDelayedTask(
-        aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME, "ArkUITextStartAIDetect");
+        aiDetectDelayTask_, TaskExecutor::TaskType::UI, isSelectDetect ? 0 : AI_DELAY_TIME, "ArkUITextStartAIDetect");
 }
 
 void DataDetectorAdapter::MarkDirtyNode() const

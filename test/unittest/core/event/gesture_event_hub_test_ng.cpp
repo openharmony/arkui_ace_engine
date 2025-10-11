@@ -934,7 +934,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest014, TestSize.Level1)
 
     frameNode->userSet_ = false;
     auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
-    eventHub->onDragStart_ = func;
+    eventHub->SetOnDragStart(std::move(func));
     result = guestureEventHub->IsAllowedDrag(eventHub);
     EXPECT_TRUE(result);
 
@@ -945,7 +945,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest014, TestSize.Level1)
     EXPECT_TRUE(result);
 
     frameNode->draggable_ = true;
-    eventHub->onDragStart_ = nullptr;
+    eventHub->SetOnDragStart(std::move(nullptr));
     result = guestureEventHub->IsAllowedDrag(eventHub);
     EXPECT_FALSE(result);
 }
@@ -983,7 +983,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest015, TestSize.Level1)
 
     frameNode->userSet_ = false;
     auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
-    event->onDragStart_ = func;
+    event->SetOnDragStart(std::move(func));
     guestureEventHub->HandleOnDragStart(GestureEvent());
 
     guestureEventHub->HandleNotAllowDrag(GestureEvent());
@@ -1539,7 +1539,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest024, TestSize.Level1)
      */
     auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
     eventHub->SetOnDrop(func);
-    eventHub->customerOnDrop_ = func;
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_DROP, std::move(func));
 
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);
@@ -1589,7 +1589,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest025, TestSize.Level1)
      */
     auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
     eventHub->SetOnDrop(func);
-    eventHub->customerOnDrop_ = func;
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_DROP, std::move(func));
 
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);
@@ -1609,8 +1609,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest025, TestSize.Level1)
     gestureEventHub->HandleOnDragEnd(info);
     EXPECT_FALSE(gestureEventHub->dragDropProxy_);
 
-    eventHub->onDrop_ = nullptr;
-    eventHub->customerOnDrop_ = nullptr;
+    eventHub->SetOnDrop(nullptr);
+    eventHub->ClearCustomerOnDrop();
     gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
 
     /**

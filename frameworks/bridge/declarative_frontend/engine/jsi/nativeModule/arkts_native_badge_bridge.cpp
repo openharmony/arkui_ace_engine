@@ -34,6 +34,7 @@ bool InitBadgeParam(const RefPtr<BadgeTheme>& badgeTheme, ArkUIBadgeParam& param
     auto fontSize = badgeTheme->GetBadgeFontSize();
     auto circleSize = badgeTheme->GetBadgeCircleSize();
     auto borderWidth = badgeTheme->GetBadgeBorderWidth();
+    auto outerBorderWidth = badgeTheme->GetBadgeOuterBorderWidth();
     auto themeColors = Framework::JSThemeUtils::GetThemeColors();
     param.position = DEFAULT_BADGE_POSITION;
     param.isPositionXy = false;
@@ -53,8 +54,12 @@ bool InitBadgeParam(const RefPtr<BadgeTheme>& badgeTheme, ArkUIBadgeParam& param
     param.badgeSize.value = circleSize.Value();
     param.badgeSize.units = static_cast<int32_t>(fontSize.Unit());
     param.borderColor = themeColors ? themeColors->Warning().GetValue() : badgeTheme->GetBadgeBorderColor().GetValue();
+    param.outerBorderColor = badgeTheme->GetBadgeOuterBorderColor().GetValue();
     param.borderWidth.value = borderWidth.Value();
     param.borderWidth.units = static_cast<int32_t>(borderWidth.Unit());
+    param.outerBorderWidth.value = outerBorderWidth.Value();
+    param.outerBorderWidth.units = static_cast<int32_t>(outerBorderWidth.Unit());
+    param.enableAutoAvoidance = false;
     param.fontWeight = static_cast<int32_t>(FontWeight::NORMAL);
     param.isDefaultFontSize = true;
     param.isDefaultBadgeSize = true;
@@ -121,6 +126,25 @@ void ParseBadgeSize(const EcmaVM* vm, const ArkUIRuntimeCallInfo* runtimeCallInf
     }
 }
 
+void ParseBadgeOuterBorder(const EcmaVM* vm, const Local<JSValueRef>& outerBorderColor,
+    const Local<JSValueRef>& outerBorderWidth, const Local<JSValueRef>& enableAutoAvoidance, ArkUIBadgeParam& param)
+{
+    Color outerBorderColorVal;
+    if (!(outerBorderColor->IsNull() || outerBorderColor->IsUndefined()) &&
+        ArkTSUtils::ParseJsColorAlpha(vm, outerBorderColor, outerBorderColorVal)) {
+        param.outerBorderColor = outerBorderColorVal.GetValue();
+    }
+    CalcDimension outerBorderWidthVal;
+    if (!(outerBorderWidth->IsNull() || outerBorderWidth->IsUndefined()) &&
+        ArkTSUtils::ParseJsLengthMetrics(vm, outerBorderWidth, outerBorderWidthVal)) {
+        param.outerBorderWidth.value = outerBorderWidthVal.Value();
+        param.outerBorderWidth.units = static_cast<int32_t>(outerBorderWidthVal.Unit());
+    }
+    if (enableAutoAvoidance->IsBoolean()) {
+        param.enableAutoAvoidance = enableAutoAvoidance->ToBoolean(vm)->Value();
+    }
+}
+
 bool ParseBadgeBaseParam(const EcmaVM* vm, const ArkUIRuntimeCallInfo* runtimeCallInfo,
     const RefPtr<BadgeTheme>& badgeTheme, ArkUIBadgeParam& param)
 {
@@ -174,6 +198,9 @@ ArkUINativeModuleValue BadgeBridge::SetBadgeParamWithNumber(ArkUIRuntimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> countArg = runtimeCallInfo->GetCallArgRef(12);    // 12: parameter index
     Local<JSValueRef> maxCountArg = runtimeCallInfo->GetCallArgRef(13); // 13: parameter index
+    Local<JSValueRef> outerBorderColor = runtimeCallInfo->GetCallArgRef(14); // 14: parameter index
+    Local<JSValueRef> outerBorderWidth = runtimeCallInfo->GetCallArgRef(15); // 15: parameter index
+    Local<JSValueRef> enableAutoAvoidance = runtimeCallInfo->GetCallArgRef(16); // 16: parameter index
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
@@ -196,6 +223,7 @@ ArkUINativeModuleValue BadgeBridge::SetBadgeParamWithNumber(ArkUIRuntimeCallInfo
         maxCount = badgeTheme->GetMaxCount();
     }
     auto nodeModifiers = GetArkUINodeModifiers();
+    ParseBadgeOuterBorder(vm, outerBorderColor, outerBorderWidth, enableAutoAvoidance, style);
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getBadgeModifier()->setBadgeParamWithNumber(nativeNode, &style, count, hasValue, maxCount);
     return panda::JSValueRef::Undefined(vm);
@@ -207,6 +235,9 @@ ArkUINativeModuleValue BadgeBridge::SetBadgeParamWithString(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(12); // 12: parameter index
+    Local<JSValueRef> outerBorderColor = runtimeCallInfo->GetCallArgRef(13); // 13: parameter index
+    Local<JSValueRef> outerBorderWidth = runtimeCallInfo->GetCallArgRef(14); // 14: parameter index
+    Local<JSValueRef> enableAutoAvoidance = runtimeCallInfo->GetCallArgRef(15); // 15: parameter index
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
@@ -228,6 +259,7 @@ ArkUINativeModuleValue BadgeBridge::SetBadgeParamWithString(ArkUIRuntimeCallInfo
         value = valueResult.c_str();
     }
 
+    ParseBadgeOuterBorder(vm, outerBorderColor, outerBorderWidth, enableAutoAvoidance, style);
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getBadgeModifier()->setBadgeParamWithString(nativeNode, &style, value);

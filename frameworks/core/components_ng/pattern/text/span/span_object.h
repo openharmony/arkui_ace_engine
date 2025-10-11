@@ -58,6 +58,7 @@ struct SpanParagraphStyle {
     std::optional<NG::LeadingMargin> leadingMargin;
     std::optional<Dimension> textIndent;
     std::optional<Dimension> paragraphSpacing;
+    std::optional<NG::DrawableLeadingMargin> drawableLeadingMargin;
 
     bool Equal(const SpanParagraphStyle& other) const
     {
@@ -366,7 +367,11 @@ public:
     ParagraphStyleSpan() = default;
     explicit ParagraphStyleSpan(SpanParagraphStyle paragraphStyle);
     ParagraphStyleSpan(SpanParagraphStyle paragraphStyle, int32_t start, int32_t end);
-    SpanParagraphStyle GetParagraphStyle() const;
+    SpanParagraphStyle GetParagraphStyle() const
+    {
+        return paragraphStyle_;
+    }
+    void SetParagraphStyle(const SpanParagraphStyle& paragraphStyle);
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;

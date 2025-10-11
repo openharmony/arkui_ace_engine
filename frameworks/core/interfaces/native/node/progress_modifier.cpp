@@ -16,10 +16,11 @@
 
 #include "core/interfaces/native/node/progress_modifier.h"
 
-#include "core/components_ng/pattern/progress/progress_paint_property.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
-#include "core/components/select/select_theme.h"
+#include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -178,8 +179,20 @@ void SetProgressColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr
     gradient.AddColor(beginSideColor);
     ProgressModelNG::SetGradientColor(frameNode, gradient);
     ProgressModelNG::SetModifierInitiatedColor(frameNode, true);
-    ProgressModelNG::SetColor(frameNode, Color(color));
-    CreateWithResourceObjIfNeeded(frameNode, JsProgressResourceType::COLOR, colorRawPtr, false);
+    Color colorValue = Color(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, colorValue, frameNode->GetTag());
+        } else {
+            auto* resourceObj = static_cast<ResourceObject*>(colorRawPtr);
+            resObj = AceType::Claim(resourceObj);
+        }
+        if (resObj) {
+            ProgressModelNG::CreateWithResourceObj(frameNode, JsProgressResourceType::COLOR, resObj);
+        }
+    }
+    ProgressModelNG::SetColor(frameNode, colorValue);
     ProgressModelNG::SetGradientColorByUser(frameNode, true);
 }
 
@@ -204,6 +217,14 @@ void ResetProgressColor(ArkUINodeHandle node)
         isGradientColor = true;
     } else if (progresstype == ProgressType::CAPSULE) {
         colorVal = progressTheme->GetCapsuleParseFailedSelectColor();
+        endColor = colorVal;
+        beginColor = colorVal;
+        isGradientColor = true;
+    } else if (progresstype == ProgressType::LINEAR) {
+        colorVal = progressTheme->GetTrackParseFailedSelectedColor();
+        endColor = colorVal;
+        beginColor = colorVal;
+        isGradientColor = true;
     } else {
         colorVal = progressTheme->GetTrackParseFailedSelectedColor();
     }

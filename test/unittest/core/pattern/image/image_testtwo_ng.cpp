@@ -651,7 +651,8 @@ HWTEST_F(ImageTestTwoNg, ImagePatternMethods, TestSize.Level0)
     EXPECT_EQ(testData, 1);
     imagePattern->EnableDrag();
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    eventHub->defaultOnDragStart_(dragEvent, string(""));
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->
+        defaultOnDragStart_(dragEvent, string(""));
     EXPECT_EQ(dragEvent->GetData(), nullptr);
     std::vector<float> matrix = { 1.1f };
     ImageModelNG::SetColorFilterMatrix(AceType::RawPtr(frameNode), matrix);

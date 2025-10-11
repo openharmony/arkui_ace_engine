@@ -2829,6 +2829,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest015, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_TEXT_AREA_LETTER_SPACING, &item);
     value[0].i32 = false;
     nodeAPI->setAttribute(rootNode, NODE_TEXT_AREA_ENABLE_PREVIEW_TEXT, &item);
+    item.object = rootNode;
+    nodeAPI->setAttribute(rootNode, NODE_TEXT_AREA_CUSTOM_KEYBOARD, &item);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_AREA_PLACEHOLDER), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_AREA_TEXT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_AREA_MAX_LENGTH), ARKUI_ERROR_CODE_NO_ERROR);
@@ -2868,6 +2870,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest015, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_FONT_FEATURE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_AREA_LETTER_SPACING), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_AREA_ENABLE_PREVIEW_TEXT), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_AREA_CUSTOM_KEYBOARD), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_AREA_PLACEHOLDER), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_AREA_TEXT), nullptr);
@@ -2912,6 +2915,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest015, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_FONT_FEATURE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_AREA_LETTER_SPACING), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_AREA_ENABLE_PREVIEW_TEXT), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_AREA_CUSTOM_KEYBOARD), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -4735,6 +4739,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest039, TestSize.Level1)
     value4[1].f32 = 1.0f;
     value4[2].i32 = negativeInt;
     EXPECT_EQ(nodeAPI->setAttribute(textarea, NODE_TEXT_AREA_SHOW_COUNTER, &item4), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(textarea, NODE_TEXT_AREA_CUSTOM_KEYBOARD, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(
         textarea, NODE_TEXT_AREA_SELECTION_MENU_HIDDEN, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(
@@ -8937,6 +8942,7 @@ HWTEST_F(NativeNodeTest, NativeNodeOverlayTest001, TestSize.Level1)
     item4.string = "";
     item4.object = overlayNode;
     item4.size = 4;
+
     nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
     auto overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
     EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_TOP_START));
@@ -9328,6 +9334,63 @@ HWTEST_F(NativeNodeTest, NativeNodeSetClipShapeTest007, TestSize.Level1)
     ArkUI_AttributeItem item3 = { value3, sizeof(value3) / sizeof(ArkUI_NumberValue), pathCommands };
     result = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item3);
     EXPECT_EQ(result, ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: BorderColorInvertTest001
+ * @tc.desc: Test NODE_BORDER_COLOR function in invert color.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, BorderColorInvertTest001, TestSize.Level1)
+{
+    bool store = g_isConfigChangePerform;
+    /**
+     * @tc.steps: step1. Turn on the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = true;
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+
+    /**
+     * @tc.steps: step3. Initialize the color value of the border.
+     */
+    uint32_t topColor = 0xFF254FF7;
+    uint32_t rightColor = 0xFFF1F3F5;
+    uint32_t bottomColor = 0xFF0A59F7;
+    uint32_t leftColor = 0xff007dff;
+
+    /**
+     * @tc.steps: step4. Test "NODE_BORDER_COLOR", when only a single color is set.
+     */
+    ArkUI_NumberValue singleValue[] = {{.u32 = leftColor}};
+    ArkUI_AttributeItem singleItem = {singleValue, sizeof(singleValue) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(rootNode, NODE_BORDER_COLOR, &singleItem);
+    auto singleBorderColor = nodeAPI->getAttribute(rootNode, NODE_BORDER_COLOR);
+    /**
+     * @tc.expected: singleBorderColor should not be nullptr.
+     */
+    ASSERT_NE(singleBorderColor, nullptr);
+    EXPECT_EQ(singleBorderColor->value[0].u32, leftColor);
+
+    /**
+     * @tc.steps: step5. Test "NODE_BORDER_COLOR", when the four sides are set to different colors.
+     */
+    ArkUI_NumberValue multiValue[] = {{.u32 = topColor}, {.u32 = rightColor}, {.u32 = bottomColor}, {.u32 = leftColor}};
+    ArkUI_AttributeItem multiItem = {multiValue, sizeof(multiValue) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(rootNode, NODE_BORDER_COLOR, &multiItem);
+    auto multiBorderColorVal = nodeAPI->getAttribute(rootNode, NODE_BORDER_COLOR);
+    EXPECT_EQ(multiBorderColorVal->value[0].u32, topColor);
+    EXPECT_EQ(multiBorderColorVal->value[1].u32, rightColor);
+    EXPECT_EQ(multiBorderColorVal->value[2].u32, bottomColor);
+    EXPECT_EQ(multiBorderColorVal->value[3].u32, leftColor);
+    nodeAPI->disposeNode(rootNode);
+    g_isConfigChangePerform = store;
 }
 
 /**

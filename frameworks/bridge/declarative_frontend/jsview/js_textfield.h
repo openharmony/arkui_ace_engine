@@ -17,6 +17,8 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTFIELD_H
 
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
@@ -25,7 +27,6 @@
 #include "frameworks/core/components/text_field/textfield_theme.h"
 #include "frameworks/core/components_ng/pattern/text/text_menu_extension.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h"
-#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -41,6 +42,8 @@ public:
     static void SetPlaceholderFont(const JSCallbackInfo& info);
     static void SetEnterKeyType(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
+    static void SetSelectDetectEnable(const JSCallbackInfo& info);
+    static void SetSelectDetectConfig(const JSCallbackInfo& info);
     static void SetLineBreakStrategy(const JSCallbackInfo& info);
     static void SetCaretColor(const JSCallbackInfo& info);
     static void SetCaretStyle(const JSCallbackInfo& info);
@@ -77,6 +80,7 @@ public:
         JSRef<JSObject>& object, std::optional<CalcDimension>& radius);
     static bool ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft,
         CalcDimension& topRight, CalcDimension& bottomLeft, CalcDimension& bottomRight);
+    static void ParseShowCounterColor(const JSRef<JSObject>& paramObject);
     static void ParseBorderRadius(const JSRef<JSVal>& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void JsHoverEffect(const JSCallbackInfo& info);
@@ -117,8 +121,8 @@ public:
     static void SetUnderlineColor(const JSCallbackInfo& info);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
     static void SetSelectionMenuHidden(const JSCallbackInfo& info);
-    static bool ParseJsCustomKeyboardBuilder(
-        const JSCallbackInfo& info, int32_t index, std::function<void()>& buildFunc);
+    static bool ParseJsCustomKeyboardBuilder(const JSCallbackInfo& info, int32_t index,
+        std::function<void()>& buildFunc, NG::FrameNode*& contentNode, bool& isBuilder);
     static void SetCustomKeyboard(const JSCallbackInfo& info);
 
     static void SetPasswordRules(const JSCallbackInfo& info);
@@ -156,12 +160,16 @@ public:
     static void SetUnderlineColorObject(const JSRef<JSObject>& jsValue);
     static void UnregisterResource(const std::string& key);
     static void SetScrollBarColor(const JSCallbackInfo& info);
+    static Local<JSValueRef> JsSetIMEExtraInfo(panda::JsiRuntimeCallInfo* info);
+    static IMEAttachCallback ParseAndCreateAttachCallback(const JSCallbackInfo& info);
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);
     static void SetCancelDefaultIcon();
     static void SetCancelSymbolIcon(const JSCallbackInfo& info);
     static void SetLayoutPolicy(const JSRef<JSVal>& jsValue, bool isWidth);
+    static void SetController(
+        JSTextEditableController* jsController, const RefPtr<TextFieldControllerBase>& controller);
 };
 
 } // namespace OHOS::Ace::Framework

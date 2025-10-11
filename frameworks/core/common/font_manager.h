@@ -80,6 +80,10 @@ typedef struct FontConfigJsonInfo {
 } FontConfigJsonInfo;
 
 using ExternalLoadFontPair = std::pair<std::string, std::function<void()>>;
+struct FormLoadFontCallbackInfo {
+    ExternalLoadFontPair fontCallbackPair;
+    uint64_t formRuntimeId = 0;
+};
 
 class FontManager : public virtual AceType {
     DECLARE_ACE_TYPE(FontManager, AceType);
@@ -171,7 +175,11 @@ protected:
 private:
     void FontNodeChangeStyleNG();
     void RegisterLoadFontCallbacks();
-    void OnLoadFontChanged(const WeakPtr<PipelineBase>& context, const std::string& fontName);
+    void OnLoadFontChanged(
+        const WeakPtr<PipelineBase>& context, const std::string& fontName, uint64_t runtimeId);
+    void NotifyFontChange(const std::string& fontName, uint64_t runtimeId);
+    void RegisterTextEngineLoadCallback(
+        const WeakPtr<NG::UINode>& node, const std::string& familyName, const std::function<void()>& callback);
 
     std::list<RefPtr<FontLoader>> fontLoaders_;
     std::vector<std::string> fontNames_;
@@ -182,6 +190,7 @@ private:
     std::set<WeakPtr<NG::UINode>> variationNodesNG_;
     std::set<WeakPtr<FontChangeObserver>> observers_;
     std::map<WeakPtr<NG::UINode>, ExternalLoadFontPair> externalLoadCallbacks_;
+    std::map<WeakPtr<NG::UINode>, FormLoadFontCallbackInfo> formLoadCallbacks_;
     bool hasRegisterLoadFontCallback_ = false;
 
     StartAbilityOnInstallAppInStoreHandler startAbilityOnInstallAppInStoreHandler_;

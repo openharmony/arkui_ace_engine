@@ -21,7 +21,7 @@
 #include "base/log/log_wrapper.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_adapter.h"
-#include "frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer_base.h"
 #endif //WINDOW_SCENE_SUPPORTED
@@ -68,7 +68,7 @@ ani_status NativeUiExtension::BindNativeUiExtensionComponent(ani_env *env)
 {
     ani_class cls;
     static const char *className =
-        "Larkui/ani/arkts/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUiextensionModal;";
+        "arkui.ani.arkts.ui_extension.ArkUIAniUiextensionModal.ArkUIAniUiextensionModal";
     auto ani_status = env->FindClass(className, &cls);
     if (ani_status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
@@ -76,10 +76,10 @@ ani_status NativeUiExtension::BindNativeUiExtensionComponent(ani_env *env)
         return ANI_ERROR;
     }
 
-    std::array methods = {
+    std::array staticMethods = {
         ani_native_function {
             "_Uiextension_Set_Option",
-            nullptr, reinterpret_cast<void *>(SetUiextensionOption)},
+            nullptr, reinterpret_cast<void*>(SetUiextensionOption)},
         ani_native_function {
             "_Uiextension_Set_Want",
             nullptr, reinterpret_cast<void *>(SetUiextensionWant)},
@@ -103,9 +103,9 @@ ani_status NativeUiExtension::BindNativeUiExtensionComponent(ani_env *env)
             nullptr, reinterpret_cast<void *>(SetOnDrawReady)},
     };
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "BindNativeUiExtensionComponent Class_BindNativeMethods failed,"
+            "BindNativeUiExtensionComponent Class_BindStaticNativeMethods failed,"
             " className: %{public}s", className);
         return ANI_ERROR;
     };
@@ -115,7 +115,7 @@ ani_status NativeUiExtension::BindNativeUiExtensionComponent(ani_env *env)
 ani_status NativeUiExtension::BindNativeUiExtensionProxy(ani_env *env)
 {
     static const char *className =
-        "Larkui/ani/arkts/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUiextensionProxyModal;";
+        "arkui.ani.arkts.ui_extension.ArkUIAniUiextensionModal.ArkUIAniUiextensionProxyModal";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
@@ -128,7 +128,7 @@ ani_status NativeUiExtension::BindNativeUiExtensionProxy(ani_env *env)
         ani_native_function{"_Send_Data_Sync", nullptr, reinterpret_cast<void *>(SendDataSync)},
     };
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size())) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "BindNativeUiExtensionProxy Class_BindNativeMethods failed,"
             " className: %{public}s", className);
@@ -150,7 +150,7 @@ ani_status NativeUiExtension::SetUiextensionOption(
     }
 
     std::string optionClassName =
-        "Larkui/ani/arkts/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUIExtensionOptions;";
+        "arkui.ani.arkts.ui_extension.ArkUIAniUiextensionModal.ArkUIAniUIExtensionOptions";
     if (!AniUtils::CheckType(env, obj, optionClassName)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "CheckType %{public}s failed when SetUiextensionOption",
@@ -216,7 +216,7 @@ ani_status NativeUiExtension::SetUiextensionWant(
     }
 
     std::string wantClassName =
-        "L@ohos/app/ability/Want/Want;";
+        "@ohos.app.ability.Want.Want";
     if (!AniUtils::CheckType(env, obj, wantClassName)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "CheckType failed when SetUiextensionWant");

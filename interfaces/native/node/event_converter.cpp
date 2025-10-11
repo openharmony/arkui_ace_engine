@@ -334,6 +334,14 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_SCROLL_ZOOM_START;
         case NODE_SCROLL_EVENT_ON_ZOOM_STOP:
             return ON_SCROLL_ZOOM_STOP;
+        case NODE_SCROLL_EVENT_ON_WILL_START_DRAGGING:
+            return ON_SCROLL_WILL_START_DRAGGING;
+        case NODE_SCROLL_EVENT_ON_DID_STOP_DRAGGING:
+            return ON_SCROLL_DID_STOP_DRAGGING;
+        case NODE_SCROLL_EVENT_ON_WILL_START_FLING:
+            return ON_SCROLL_WILL_START_FLING;
+        case NODE_SCROLL_EVENT_ON_DID_STOP_FLING:
+            return ON_SCROLL_DID_STOP_FLING;
         case NODE_WATER_FLOW_ON_DID_SCROLL:
             return ON_WATER_FLOW_DID_SCROLL;
         case NODE_LIST_ON_SCROLL_INDEX:
@@ -400,6 +408,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_GRID_DID_SCROLL;
         case NODE_GRID_ON_SCROLL_BAR_UPDATE:
             return ON_GRID_SCROLL_BAR_UPDATE;
+        case NODE_ON_COASTING_AXIS_EVENT:
+            return ON_COASTING_AXIS_EVENT;
         default:
             return -1;
     }
@@ -608,6 +618,14 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SCROLL_EVENT_ON_ZOOM_START;
         case ON_SCROLL_ZOOM_STOP:
             return NODE_SCROLL_EVENT_ON_ZOOM_STOP;
+        case ON_SCROLL_WILL_START_DRAGGING:
+            return NODE_SCROLL_EVENT_ON_WILL_START_DRAGGING;
+        case ON_SCROLL_DID_STOP_DRAGGING:
+            return NODE_SCROLL_EVENT_ON_DID_STOP_DRAGGING;
+        case ON_SCROLL_WILL_START_FLING:
+            return NODE_SCROLL_EVENT_ON_WILL_START_FLING;
+        case ON_SCROLL_DID_STOP_FLING:
+            return NODE_SCROLL_EVENT_ON_DID_STOP_FLING;
         case ON_LIST_REACH_START:
             return NODE_SCROLL_EVENT_ON_REACH_START;
         case ON_DETECT_RESULT_UPDATE:
@@ -670,6 +688,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_GRID_ON_DID_SCROLL;
         case ON_GRID_SCROLL_BAR_UPDATE:
             return NODE_GRID_ON_SCROLL_BAR_UPDATE;
+        case ON_COASTING_AXIS_EVENT:
+            return NODE_ON_COASTING_AXIS_EVENT;
         default:
             return -1;
     }
@@ -773,6 +793,12 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case HOVER_EVENT: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->hoverEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case COASTING_AXIS_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->coastingAxisEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }

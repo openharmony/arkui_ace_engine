@@ -21,6 +21,9 @@
 namespace OHOS::Ace::Ani {
 ani_long ConvertFromPixelMapAni(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_object pixelMapObj);
 ani_object ConvertToPixelMapAni(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long pixelMapPtr);
+ani_long ExtractorsToDrawingCanvasPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object drawingCanvasObj);
+ani_object ExtractorsFromDrawingCanvasPtr(
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long drawingCanvasPtr);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UTILS_CONVERT_UTILS

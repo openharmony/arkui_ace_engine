@@ -105,6 +105,7 @@ public:
     static void SetSupportAnimation(FrameNode* frameNode, bool supportAnimation);
     static EdgeEffect GetEdgeEffect(FrameNode* frameNode);
     static bool GetAlwaysEnabled(FrameNode* frameNode);
+    static EffectEdge GetEffectEdge(FrameNode* frameNode);
     static void SetEdgeEffect(
         FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
         EffectEdge edge = EffectEdge::ALL);

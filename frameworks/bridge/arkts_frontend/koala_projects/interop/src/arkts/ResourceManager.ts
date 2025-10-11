@@ -22,10 +22,17 @@ interface ResourceInfo {
     holdersCount: int32
 }
 
+export interface Disposable {
+    dispose(): void;
+}
+
 export class ResourceHolder {
     private static nextResourceId: ResourceId = 100 
     private resources: Map<ResourceId, ResourceInfo> = new Map<ResourceId, ResourceInfo>()
     private static _instance: ResourceHolder|undefined = undefined
+    private static disposables = new Array<Disposable>();
+    private static disposablesSize = 0
+
     static instance(): ResourceHolder {
         if (ResourceHolder._instance == undefined) {
             ResourceHolder._instance = new ResourceHolder()
@@ -65,5 +72,35 @@ export class ResourceHolder {
 
     public has(resourceId: ResourceId): boolean {
         return this.resources.has(resourceId)
+    }
+
+    static register(resource: Disposable) {
+        if (ResourceHolder.disposablesSize < ResourceHolder.disposables.length) {
+            ResourceHolder.disposables[ResourceHolder.disposablesSize] = resource
+        } else {
+            ResourceHolder.disposables.push(resource)
+        }
+        ResourceHolder.disposablesSize++
+    }
+
+    static unregister(resource: Disposable) {
+        const index = ResourceHolder.disposables.indexOf(resource);
+        if (index !== -1 && index < ResourceHolder.disposablesSize) {
+            if (index !== ResourceHolder.disposablesSize - 1) {
+                ResourceHolder.disposables[index] = ResourceHolder.disposables[ResourceHolder.disposablesSize - 1];
+            }
+            ResourceHolder.disposablesSize--;
+        }
+    }
+
+    static disposeAll() {
+        for (let i = 0; i < ResourceHolder.disposablesSize; ++i) {
+            ResourceHolder.disposables[i].dispose()
+        }
+        ResourceHolder.disposablesSize = 0
+    }
+
+    static compactDisposables() {
+        ResourceHolder.disposables = ResourceHolder.disposables.slice(0, ResourceHolder.disposablesSize);
     }
 }

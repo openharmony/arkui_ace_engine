@@ -243,6 +243,26 @@ public:
         return indicatorStyle_;
     }
 
+    void SetDrawableIndicatorConfig(const ImageInfoConfig& config)
+    {
+        drawableIndicatorConfig_ = config;
+    }
+
+    const ImageInfoConfig& GetDrawableIndicatorConfig() const
+    {
+        return drawableIndicatorConfig_;
+    }
+
+    void SetDrawableIndicatorFlag(bool isDrawableIndicator)
+    {
+        isDrawableIndicator_ = isDrawableIndicator;
+    }
+
+    bool IsDrawableIndicator() const
+    {
+        return isDrawableIndicator_;
+    }
+
     void SetSelectedMode(SelectedMode selectedMode)
     {
         selectedMode_ = selectedMode;
@@ -520,6 +540,8 @@ private:
     BottomTabBarStyle bottomTabBarStyle_;
     RefPtr<FrameNode> customStyleNode_ = nullptr;
     TabBarSymbol symbol_;
+    ImageInfoConfig drawableIndicatorConfig_;
+    bool isDrawableIndicator_ = false;
 
     bool firstTimeLayout_ = true;
     bool secondTimeLayout_ = false;

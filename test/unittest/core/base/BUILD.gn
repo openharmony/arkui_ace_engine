@@ -34,9 +34,9 @@ ace_unittest("frame_node_test_ng") {
     "frame_node_test_ng.cpp",
     "frame_node_test_ng_coverage.cpp",
     "frame_node_test_ng_coverage_new.cpp",
+    "frame_node_test_ng_dump.cpp",
     "frame_node_test_ng_new.cpp",
     "frame_node_test_ng_v3.cpp",
-    "frame_node_test_ng_dump.cpp",
   ]
 }
 
@@ -84,6 +84,7 @@ ace_unittest("view_abstract_test_ng") {
     "view_abstract_test_ng_for_property_config.cpp",
     "view_abstract_test_ng_for_visual_effect.cpp",
     "view_abstract_test_ng_new.cpp",
+    "view_abstract_test_ng_two.cpp",
   ]
 }
 
@@ -172,12 +173,13 @@ group("core_base_unittest") {
     ":ui_node_test_ng",
     ":view_abstract_model_test_ng",
     ":view_abstract_test_ng",
+    ":view_abstract_test_resetposition_ng",
     ":view_full_update_model_ng_test",
     ":view_partial_update_model_test_ng",
     ":view_stack_processor_test_ng",
   ]
 
   if (ace_engine_feature_enable_split_mode) {
-    deps += [":force_split_base_test_ng"]
+    deps += [ ":force_split_base_test_ng" ]
   }
 }

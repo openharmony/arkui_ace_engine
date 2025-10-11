@@ -2130,6 +2130,7 @@ HWTEST_F(TextTestThreeNg, TextModelNgProperty001, TestSize.Level1)
     TextModelNG::SetTextDecorationStyle(node, TextDecorationStyle::SOLID);
     TextModelNG::SetTextCase(node, TextCase::UPPERCASE);
     TextModelNG::SetMaxLines(node, 10); // 10 means maxlines.
+    TextModelNG::SetMinLines(node, 2); // 2 means minlines.
     TextModelNG::SetLineSpacing(node, ADAPT_LINE_SPACING_VALUE, true);
 
     /**
@@ -2148,6 +2149,7 @@ HWTEST_F(TextTestThreeNg, TextModelNgProperty001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetTextDecorationStyle().value(), TextDecorationStyle::SOLID);
     EXPECT_EQ(layoutProperty->GetTextCase().value(), TextCase::UPPERCASE);
     EXPECT_EQ(layoutProperty->GetMaxLines().value(), 10);
+    EXPECT_EQ(layoutProperty->GetMinLines().value(), 2);
     EXPECT_EQ(layoutProperty->GetLineSpacing().value(), ADAPT_LINE_SPACING_VALUE);
     EXPECT_EQ(layoutProperty->GetIsOnlyBetweenLines().value(), true);
 }
@@ -2721,5 +2723,205 @@ HWTEST_F(TextTestThreeNg, TextModelGetShaderStyleInJson001, TestSize.Level1)
     textLayoutProperty->UpdateGradientShaderStyle(gradient);
     std::string json = pattern->GetShaderStyleInJson()->ToString();
     EXPECT_EQ(json, "{}");
+}
+
+/**
+ * @tc.name: TextModelNGMinLines001
+ * @tc.desc: Test TextModelNGMinLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextMinLines001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetMinLines(5);
+    EXPECT_EQ(textLayoutProperty->GetMinLines().value(), 5);
+    textLayoutProperty->UpdateMinLines(9);
+    EXPECT_EQ(textLayoutProperty->GetMinLines().value(), 9);
+    textModelNG.ResetMinLines();
+    EXPECT_EQ(textLayoutProperty->HasMinLines(), false);
+}
+
+/**
+ * @tc.name: TextModelNGMinLines002
+ * @tc.desc: Test TextModelNGMinLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextMinLines002, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetMinLines(frameNode, 5);
+    EXPECT_EQ(textModelNG.GetMinLines(frameNode), 5U);
+    textLayoutProperty->UpdateMinLines(9);
+    EXPECT_EQ(textLayoutProperty->GetMinLines().value(), 9);
+    textModelNG.ResetMinLines(frameNode);
+    EXPECT_EQ(textLayoutProperty->HasMinLines(), false);
+}
+
+/**
+ * @tc.name: TextModelNGMinLineHeight001
+ * @tc.desc: Test TextModelNGMinLineHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextMinLineHeight001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetMinimumLineHeight(Dimension(5));
+    EXPECT_EQ(textLayoutProperty->GetMinimumLineHeight().value(), Dimension(5));
+    textLayoutProperty->UpdateMinimumLineHeight(Dimension(9));
+    EXPECT_EQ(textLayoutProperty->GetMinimumLineHeight().value(), Dimension(9));
+    textModelNG.ResetMinimumLineHeight();
+    EXPECT_EQ(textLayoutProperty->HasMinimumLineHeight(), false);
+}
+
+/**
+ * @tc.name: TextModelNGMinLineHeight002
+ * @tc.desc: Test TextModelNGMinLineHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextMinLineHeight002, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetMinimumLineHeight(frameNode, Dimension(5));
+    EXPECT_EQ(textModelNG.GetTextMinimumLineHeight(frameNode), 5.0);
+    textLayoutProperty->UpdateMinimumLineHeight(Dimension(9));
+    EXPECT_EQ(textLayoutProperty->GetMinimumLineHeight().value(), Dimension(9));
+    textModelNG.ResetMinimumLineHeight(frameNode);
+    EXPECT_EQ(textLayoutProperty->HasMinimumLineHeight(), false);
+}
+
+/**
+ * @tc.name: TextModelNGMaxLineHeight001
+ * @tc.desc: Test TextModelNGMaxLineHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextMaxLineHeight001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetMaximumLineHeight(Dimension(5));
+    EXPECT_EQ(textLayoutProperty->GetMaximumLineHeight().value(), Dimension(5));
+    textLayoutProperty->UpdateMaximumLineHeight(Dimension(9));
+    EXPECT_EQ(textLayoutProperty->GetMaximumLineHeight().value(), Dimension(9));
+    textModelNG.ResetMaximumLineHeight();
+    EXPECT_EQ(textLayoutProperty->HasMaximumLineHeight(), false);
+}
+
+/**
+ * @tc.name: TextModelNGMaxLineHeight002
+ * @tc.desc: Test TextModelNGMaxLineHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextMaxLineHeight002, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetMaximumLineHeight(frameNode, Dimension(5));
+    EXPECT_EQ(textModelNG.GetTextMaximumLineHeight(frameNode), 5.0);
+    textLayoutProperty->UpdateMaximumLineHeight(Dimension(9));
+    EXPECT_EQ(textLayoutProperty->GetMaximumLineHeight().value(), Dimension(9));
+    textModelNG.ResetMaximumLineHeight(frameNode);
+    EXPECT_EQ(textLayoutProperty->HasMaximumLineHeight(), false);
+}
+
+/**
+ * @tc.name: TextModelNGLineHeightMultiply001
+ * @tc.desc: Test TextModelNGLineHeightMultiply
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextLineHeightMultiply001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetLineHeightMultiply(5.0);
+    EXPECT_EQ(textLayoutProperty->GetLineHeightMultiply().value(), 5.0);
+    textLayoutProperty->UpdateLineHeightMultiply(9.0);
+    EXPECT_EQ(textLayoutProperty->GetLineHeightMultiply().value(), 9.0);
+    textModelNG.ResetLineHeightMultiply();
+    EXPECT_EQ(textLayoutProperty->HasLineHeightMultiply(), false);
+}
+
+/**
+ * @tc.name: TextModelNGLineHeightMultiply002
+ * @tc.desc: Test TextModelNGLineHeightMultiply
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextLineHeightMultiply002, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetLineHeightMultiply(frameNode, 5.0);
+    EXPECT_EQ(textModelNG.GetTextLineHeightMultiply(frameNode), 5.0);
+    textLayoutProperty->UpdateLineHeightMultiply(9.0);
+    EXPECT_EQ(textLayoutProperty->GetLineHeightMultiply().value(), 9.0);
+    textModelNG.ResetLineHeightMultiply(frameNode);
+    EXPECT_EQ(textLayoutProperty->HasLineHeightMultiply(), false);
 }
 } // namespace OHOS::Ace::NG

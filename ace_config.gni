@@ -135,8 +135,6 @@ c_utils_header_path = "//commonlibrary/c_utils/base/include"
 ace_graphic_surface = "//foundation/graphic/graphic_surface"
 
 # arkui-x
-flutter_root = "//third_party/flutter"
-ace_flutter_engine_root = "$flutter_root/build"
 ark_toolchain_path = "//arkcompiler/toolchain"
 ace_drag = "//base/msdp/device_status"
 acd_input = "//foundation/multimodalinput/input"
@@ -257,7 +255,7 @@ if (defined(global_parts_info)) {
 }
 
 if (defined(global_parts_info) &&
-  defined(global_parts_info.resourceschedule_ffrt) && current_os == "ohos") {
+    defined(global_parts_info.resourceschedule_ffrt) && current_os == "ohos") {
   ffrt_support = true
 } else {
   ffrt_support = false

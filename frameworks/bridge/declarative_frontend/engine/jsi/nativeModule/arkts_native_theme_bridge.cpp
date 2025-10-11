@@ -156,7 +156,8 @@ ArkUINativeModuleValue ThemeBridge::SetDefaultTheme(ArkUIRuntimeCallInfo* runtim
     }
     std::vector<ArkUI_Uint32> colors;
     std::vector<RefPtr<ResourceObject>> resObjs;
-    auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
+    auto basisTheme =
+        TokenThemeStorage::GetInstance()->ObtainSystemTheme(isDark ? ColorMode::DARK : ColorMode::LIGHT);
     for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, colorsArg, i);

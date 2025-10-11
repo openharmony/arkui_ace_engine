@@ -176,6 +176,15 @@ void NavDestinationModelStatic::SetOnInactive(FrameNode* frameNode, std::functio
     eventHub->SetOnInactive(onInactive);
 }
 
+void NavDestinationModelStatic::SetCustomTransition(FrameNode* frameNode,
+    NG::NavDestinationTransitionDelegate transitionDelegate)
+{
+    CHECK_NULL_VOID(frameNode && transitionDelegate);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavDestinationTransitionDelegate(std::move(transitionDelegate));
+}
+
 void NavDestinationModelStatic::SetMenuOptions(FrameNode* frameNode, NavigationMenuOptions&& opt)
 {
     CHECK_NULL_VOID(frameNode);
@@ -232,7 +241,7 @@ void NavDestinationModelStatic::CreateBackButton(const RefPtr<NavDestinationGrou
         backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(theme->GetCornerRadius()));
         renderContext->UpdateBackgroundColor(theme->GetCompBackgroundColor());
         PaddingProperty padding;
-        padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
+        padding.SetEdges(CalcLength(theme->GetMenuButtonPadding()));
         backButtonLayoutProperty->UpdatePadding(padding);
     } else {
         backButtonLayoutProperty->UpdateUserDefinedIdealSize(
@@ -344,20 +353,20 @@ void NavDestinationModelStatic::SetHideTitleBar(FrameNode* frameNode, bool hideT
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, IsAnimatedTitleBar, animated, frameNode);
 }
 
-void NavDestinationModelStatic::SetOnShown(FrameNode* frameNode, std::function<void(int32_t)>&& onShow)
+void NavDestinationModelStatic::SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow)
 {
     CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
-    navDestinationEventHub->SetOnShown(onShow);
+    // navDestinationEventHub->SetOnShown(onShow);
 }
 
-void NavDestinationModelStatic::SetOnHidden(FrameNode* frameNode, std::function<void(int32_t)>&& onHidden)
+void NavDestinationModelStatic::SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden)
 {
     CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
-    navDestinationEventHub->SetOnHidden(onHidden);
+    // navDestinationEventHub->SetOnHidden(onHidden);
 }
 
 void NavDestinationModelStatic::SetOnBackPressed(FrameNode* frameNode, std::function<bool()>&& onBackPressed)
@@ -626,5 +635,30 @@ void NavDestinationModelStatic::SetEnableStatusBar(
     auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
     CHECK_NULL_VOID(node);
     node->SetStatusBarConfig(statusBar);
+}
+
+void NavDestinationModelStatic::SetEnableNavigationIndicator(FrameNode* frameNode,
+    const std::optional<bool>& navigationIndicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavigationIndicatorConfig(navigationIndicator);
+}
+
+void NavDestinationModelStatic::SetHideItemText(FrameNode* frameNode, bool isHideItemText)
+{
+    auto navDestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    NavigationToolbarUtil::SetHideItemText(navDestinationGroupNode, isHideItemText);
+}
+
+void NavDestinationModelStatic::SetPreferredOrientation(FrameNode* frameNode, const std::optional<Orientation>& ori)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetOrientation(ori);
 }
 } // namespace OHOS::Ace::NG

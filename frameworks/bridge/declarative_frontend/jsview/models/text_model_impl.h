@@ -48,6 +48,8 @@ public:
     void SetTextAlign(TextAlign value) override;
     void SetTextOverflow(TextOverflow value) override;
     void SetMaxLines(uint32_t value) override;
+    void SetMinLines(uint32_t value) override {};
+    void ResetMinLines() override {};
     void SetTextIndent(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     void SetLineSpacing(const Dimension& value) override;
@@ -69,6 +71,8 @@ public:
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     void SetTextDetectEnable(bool value) override;
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override;
+    void SetSelectDetectEnable(bool value) override;
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void OnSetHeight() override;
     void OnSetWidth() override;
     void OnSetAlign() override;

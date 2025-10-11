@@ -19,16 +19,17 @@
 #include <functional>
 
 #include "base/utils/macros.h"
-#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-class ArkoalaForEachNode : public UINode {
-    DECLARE_ACE_TYPE(ArkoalaForEachNode, UINode);
+class ArkoalaForEachNode : public ForEachBaseNode {
+    DECLARE_ACE_TYPE(ArkoalaForEachNode, ForEachBaseNode);
 
 public:
-    explicit ArkoalaForEachNode(int32_t id);
+    explicit ArkoalaForEachNode(int32_t id, bool isRepeat = false);
     ~ArkoalaForEachNode() override = default;
 
     bool IsAtomicNode() const final
@@ -36,8 +37,24 @@ public:
         return false;
     }
 
+    void FinishRender();
+
+    // used for drag move operation.
+    RefPtr<FrameNode> GetFrameNode(int32_t index) final;
+    void MoveData(int32_t from, int32_t to) final;
+    void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
+    void SetItemDragEvent(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
+    void FireOnMove(int32_t from, int32_t to) override;
+    void InitDragManager(const RefPtr<FrameNode>& childNode);
+    void InitAllChildrenDragManager(bool init);
+
+    void DumpInfo() override;
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ArkoalaForEachNode);
+
+    bool isRepeat_ = false;
 };
 
 } // namespace OHOS::Ace::NG

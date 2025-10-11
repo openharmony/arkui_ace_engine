@@ -18,6 +18,8 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
@@ -25,8 +27,6 @@
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
-#include "core/components_ng/event/pan_event.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
@@ -42,7 +42,6 @@ enum class ContainerPickerDirection {
     UP = 0,
     DOWN,
 };
-
 
 class ACE_EXPORT ContainerPickerPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ContainerPickerPattern, NestableScrollContainer);
@@ -81,9 +80,28 @@ public:
             index = 0;
         }
         if (index != selectedIndex_) {
-            selectedIndex_ = index;
-            itemPosition_.clear();
+            targetIndex_ = index;
         }
+    }
+
+    const std::vector<int32_t>& GetOffScreemItems() const
+    {
+        return offScreenItemsIndex_;
+    }
+
+    void SetOffScreemItems(const std::vector<int32_t>& offScreenItemsIndex)
+    {
+        offScreenItemsIndex_ = offScreenItemsIndex;
+    }
+
+    LayoutConstraintF GetLayoutConstraint() const
+    {
+        return layoutConstraint_;
+    }
+
+    bool GetRequestLongPredict() const
+    {
+        return requestLongPredict_;
     }
 
     void OnAttachToFrameNode() override;
@@ -92,10 +110,25 @@ public:
     void FireScrollStopEvent();
 
 protected:
+    bool ChildPreMeasureHelperEnabled() override
+    {
+        return true;
+    }
+
     bool NeedCustomizeSafeAreaPadding() override
     {
         return true;
     }
+
+    PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate) override;
+
+    bool ChildTentativelyLayouted() override
+    {
+        return true;
+    }
+
+    bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
+        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -129,6 +162,7 @@ private:
     void ProcessDelta(float& delta, float mainSize, float deltaSum);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity, float mainDelta = 0.0f);
+    void HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const RefPtr<ContainerPickerLayoutAlgorithm>& algo);
     void CalcEndOffset(float& endOffset, double velocity);
     bool Play(double dragVelocity);
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
@@ -145,13 +179,17 @@ private:
     void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
     void CreateSnapProperty();
     void CreateAnimation(double from, double to);
-    void PickerMarkDirty(PropertyChangeFlag extraFlag);
-    void FireEvent();
+    void CreateSwipeToTargetAnimation(double from, double to);
+    void PickerMarkDirty();
+    void PostIdleTask(const RefPtr<FrameNode>& frameNode);
+    void SwipeTo(int32_t index);
     void UpdateClipEdge();
+    float ShortestDistanceBetweenCurrentAndTarget();
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
+    void CreateChildrenClickEvent(RefPtr<UINode>& host);
 
     int32_t containerPickerId_ = -1;
-    int32_t displayCount_ = 9;
+    int32_t displayCount_ = 7;
     int32_t totalItemCount_ = 0;
     bool isDragging_ = false;
     bool isItemClickEventCreated_ = false;
@@ -160,7 +198,11 @@ private:
     LayoutConstraintF layoutConstraint_;
     bool isFirstAxisAction_ = true;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
+    std::vector<int32_t> offScreenItemsIndex_;
     int32_t selectedIndex_ = 0;
+    std::optional<int32_t> targetIndex_ = 0;
+    std::optional<int32_t> runningTargetIndex_ = 0;
+
     bool crossMatchChild_ = false;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
@@ -173,6 +215,8 @@ private:
     ContainerPickerUtils::PositionMap itemPosition_;
 
     bool animationCreated_ = false;
+    bool isTargetAnimationRunning_ = false;
+    bool requestLongPredict_ = true;
     bool isLoop_ = true;
     double timeStart_ = 0.0;
     double timeEnd = 0.0;

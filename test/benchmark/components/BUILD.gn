@@ -19,11 +19,10 @@ ohos_benchmarktest("ace_components") {
   sources = [
     "grid_benchmark.cpp",
     "main.cpp",
-    "text_benchmark.cpp"
+    "text_benchmark.cpp",
   ]
 
   deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",

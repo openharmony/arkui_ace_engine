@@ -24,7 +24,6 @@
 #include "core/components/swiper/render_swiper.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace {

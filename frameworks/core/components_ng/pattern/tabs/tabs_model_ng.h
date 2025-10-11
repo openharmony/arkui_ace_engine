@@ -155,6 +155,7 @@ private:
         const RefPtr<SwiperController>& swiperController);
     static void InitSelectedMaskNode(const RefPtr<FrameNode>& maskNode);
     static void InitUnselectedMaskNode(const RefPtr<FrameNode>& maskNode);
+    static void InitImageIndicatorNode(const RefPtr<FrameNode>& indicatorNode);
     static RefPtr<TabBarLayoutProperty> GetTabBarLayoutProperty();
     static RefPtr<TabBarPaintProperty> GetTabBarPaintProperty();
     static RefPtr<SwiperLayoutProperty> GetSwiperLayoutProperty();

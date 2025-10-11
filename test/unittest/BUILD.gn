@@ -234,7 +234,7 @@ ohos_source_set("ace_components_base") {
   if (ace_engine_feature_enable_static_instructive_code) {
     source += [ "$ace_root/frameworks/core/components_ng/base/interop/view_stack_processor_interop.cpp" ]
   }
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = []
   configs = [ ":ace_unittest_config" ]
   external_deps = [ "cJSON:cjson" ]
   if (current_os == "ohos") {
@@ -256,6 +256,7 @@ ohos_source_set("ace_components_event") {
     "$ace_root/frameworks/core/components_ng/event/click_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/drag_drop_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/drag_event.cpp",
+    "$ace_root/frameworks/core/components_ng/event/error_reporter/general_interaction_error_reporter.cpp",
     "$ace_root/frameworks/core/components_ng/event/event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/event/focus_box.cpp",
     "$ace_root/frameworks/core/components_ng/event/focus_event_handler.cpp",
@@ -275,13 +276,14 @@ ohos_source_set("ace_components_event") {
     "$ace_root/frameworks/core/components_ng/manager/focus/focus_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/focus/focus_view.cpp",
     "$ace_root/frameworks/core/event/axis_event.cpp",
+    "$ace_root/frameworks/core/event/coasting_axis_event_generator.cpp",
     "$ace_root/frameworks/core/event/event_info_convertor.cpp",
     "$ace_root/frameworks/core/event/mouse_event.cpp",
     "$ace_root/frameworks/core/event/touch_event.cpp",
     "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
   ]
   configs = [ ":ace_unittest_config" ]
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = []
   if (current_os == "ohos") {
     external_deps = [ "c_utils:utils" ]
   }
@@ -315,7 +317,7 @@ ohos_source_set("ace_components_gestures") {
     "$ace_root/frameworks/core/components_ng/gestures/swipe_gesture.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/tap_gesture.cpp",
   ]
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = []
   configs = [ ":ace_unittest_config" ]
   if (current_os == "ohos") {
     external_deps = [ "c_utils:utils" ]
@@ -337,7 +339,7 @@ ohos_source_set("ace_components_layout") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
     "$ace_root/frameworks/core/components_ng/layout/vertical_overflow_handler.cpp",
   ]
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = []
   configs = [ ":ace_unittest_config" ]
   if (current_os == "ohos") {
     external_deps = [ "c_utils:utils" ]
@@ -364,7 +366,7 @@ ohos_source_set("ace_components_property") {
     "$ace_root/frameworks/core/components_ng/property/safe_area_insets.cpp",
     "$ace_root/frameworks/core/components_ng/property/templates_parser.cpp",
   ]
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = []
   configs = [ ":ace_unittest_config" ]
   if (current_os == "ohos") {
     external_deps = [ "c_utils:utils" ]
@@ -420,7 +422,7 @@ ohos_source_set("ace_components_manager") {
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_transition_effect.cpp",
     "$ace_root/frameworks/core/components_ng/manager/toolbar/toolbar_manager.cpp",
   ]
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = []
   configs = [ ":ace_unittest_config" ]
   if (current_os == "ohos") {
     external_deps = [ "c_utils:utils" ]
@@ -452,7 +454,7 @@ ohos_source_set("ace_components_syntax") {
     "$ace_root/frameworks/core/components_ng/syntax/repeat_virtual_scroll_node.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/with_theme_node.cpp",
   ]
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = []
   configs = [ ":ace_unittest_config" ]
   if (current_os == "ohos") {
     external_deps = [ "c_utils:utils" ]
@@ -495,7 +497,7 @@ ohos_source_set("ace_components_render") {
     "$ace_root/frameworks/core/components_ng/render/render_property.cpp",
     "$ace_root/frameworks/core/components_ng/render/shape_painter.cpp",
   ]
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = []
   configs = [ ":ace_unittest_config" ]
   if (current_os == "ohos") {
     external_deps = [ "c_utils:utils" ]
@@ -538,7 +540,7 @@ ohos_source_set("ace_base") {
     "$ace_root/frameworks/base/utils/utils.cpp",
   ]
 
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = []
   external_deps = [
     "bounds_checking_function:libsec_static",
     "cJSON:cjson_static",
@@ -577,7 +579,7 @@ ohos_source_set("ace_core_animation") {
     "$ace_root/test/mock/core/animation/mock_animator.cpp",
     "$ace_root/test/mock/core/animation/mock_scheduler.cpp",
   ]
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = []
   configs = [ ":ace_unittest_config" ]
   if (current_os == "ohos") {
     external_deps = [ "c_utils:utils" ]
@@ -663,7 +665,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/test/mock/core/common/mock_icon_theme.cpp",
   ]
 
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = []
   external_deps = [
     "bounds_checking_function:libsec_static",
     "googletest:gmock",
@@ -790,10 +792,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
   ]
-  deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "$ace_root/test/unittest:ace_unittest_log",
-  ]
+  deps = [ "$ace_root/test/unittest:ace_unittest_log" ]
   external_deps = [
     "googletest:gmock",
     "googletest:gtest_main",
@@ -1185,7 +1184,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/radio/radio_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/radio/radio_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/radio/radio_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/radio/radio_model_static.cpp",    
+    "$ace_root/frameworks/core/components_ng/pattern/radio/radio_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/radio/radio_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/radio/radio_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/radio/radio_pattern.cpp",
@@ -1481,6 +1480,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/toggle/switch_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/toggle/switch_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/toggle/switch_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/toggle/toggle_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/toggle/toggle_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/toggle/toggle_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/toolbaritem/toolbar_row_pattern.cpp",
@@ -1520,6 +1520,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern_multithread.cpp",
@@ -1538,7 +1539,7 @@ ohos_source_set("ace_components_pattern") {
     ]
   }
 
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = []
   external_deps = [
     "bounds_checking_function:libsec_static",
     "icu:shared_icui18n",

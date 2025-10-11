@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,5 +164,81 @@ bool JSWaterFlowSections::ParseSectionOptions(
     };
     section.onGetItemMainSizeByIndex = std::move(onGetItemMainSizeByIndex);
     return true;
+}
+
+void JSWaterFlowSections::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSWaterFlowSections>::Declare("NativeWaterFlowSection");
+    JSClass<JSWaterFlowSections>::CustomMethod("onSectionChanged", &JSWaterFlowSections::OnSectionChanged);
+    JSClass<JSWaterFlowSections>::Bind(globalObj, &JSWaterFlowSections::Constructor, &JSWaterFlowSections::Destructor);
+}
+
+void JSWaterFlowSections::SetNativeWaterFlowSection(JSRef<JSObject> jsSection, JSRef<JSObject> nativeSection)
+{
+    if (jsSection->IsEmpty() || nativeSection->IsEmpty()) {
+        return;
+    }
+
+    auto property = jsSection->GetProperty("setNativeSection");
+    if (!property->IsFunction()) {
+        return;
+    }
+
+    auto setNativeSetionFunc = JSRef<JSFunc>::Cast(property);
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Cast(nativeSection);
+    setNativeSetionFunc->Call(jsSection, 1, params);
+}
+
+void JSWaterFlowSections::Constructor(const JSCallbackInfo& info)
+{
+    auto section = Referenced::MakeRefPtr<JSWaterFlowSections>();
+    section->IncRefCount();
+    info.SetReturnValue(Referenced::RawPtr(section));
+}
+
+void JSWaterFlowSections::Destructor(JSWaterFlowSections* section)
+{
+    if (section != nullptr) {
+        section->DecRefCount();
+    }
+}
+
+void JSWaterFlowSections::OnSectionChanged(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto changeObject = JSRef<JSObject>::Cast(info[0]);
+    auto sectionValue = changeObject->GetProperty("sections");
+    if (!sectionValue->IsArray()) {
+        return;
+    }
+    auto sectionArray = JSRef<JSArray>::Cast(sectionValue);
+    auto sectionsCount = sectionArray->Length();
+    std::vector<NG::WaterFlowSections::Section> newSections;
+    for (size_t j = 0; j < sectionsCount; ++j) {
+        NG::WaterFlowSections::Section section;
+        auto newSection = sectionArray->GetValueAt(j);
+        if (JSWaterFlowSections::ParseSectionOptions(info, newSection, section)) {
+            newSections.emplace_back(section);
+        }
+    }
+
+    auto start = changeObject->GetProperty("start");
+    auto deleteCount = changeObject->GetProperty("deleteCount");
+    if (!start->IsNumber() || !deleteCount->IsNumber()) {
+        return;
+    }
+    for (auto it = callbacks_.begin(); it != callbacks_.end();) {
+        if (!it->first.Upgrade()) {
+            it = callbacks_.erase(it);
+        } else {
+            if (it->second) {
+                it->second(start->ToNumber<int32_t>(), deleteCount->ToNumber<int32_t>(), newSections);
+            }
+            ++it;
+        }
+    }
 }
 } // namespace OHOS::Ace::Framework

@@ -197,7 +197,7 @@ public:
     explicit SslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result) : result_(result) {}
 
     void HandleConfirm() override;
-    void HandleCancel() override;
+    void HandleCancel(bool abortLoading) override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result_;
@@ -996,6 +996,7 @@ public:
     void UpdateLoadsImagesAutomatically(const bool& isImageAccessEnabled);
     void UpdateMixedContentMode(const MixedModeContent& mixedMode);
     void UpdateSupportZoom(const bool& isZoomAccessEnabled);
+    void UpdateZoomControlAccess(bool zoomControlAccess);
     void UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled);
     void UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled);
     void UpdateCacheMode(const WebCacheMode& mode);
@@ -1231,6 +1232,7 @@ public:
     void OnScrollState(bool scrollState);
     void OnScrollStart(const float x, const float y);
     void EnableSecurityLayer(bool isNeedSecurityLayer);
+    void UpdateTextFieldStatus(bool isShowKeyboard, bool isAttachIME);
     void OnRootLayerChanged(int width, int height);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     void OnNativeEmbedAllDestory();
@@ -1445,8 +1447,8 @@ public:
     void CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width = 0, uint32_t height = 0);
     void SetVisibility(bool isVisible);
     void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
-    double ResizeWidth() const;
-    double ResizeHeight() const;
+    bool IsBlanklessFrameValid() const;
+    void RemoveSnapshotFrameNodeIfNeeded();
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
     void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);
@@ -1468,7 +1470,9 @@ public:
         double borderRadiusBottomRight);
 
     void SetViewportScaleState();
-
+    void OnDetectedBlankScreen(const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount);
+    void UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
+        const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold);
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);
     void SetImeShow(bool visible);
@@ -1486,6 +1490,8 @@ public:
     void OnSafeBrowsingCheckFinish(int threat_type);
     bool IsPcMode();
     void OnSwitchFreeMultiWindow(bool enable);
+    void OnStatusBarClick();
+    void WebScrollStopFling();
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1733,6 +1739,9 @@ private:
     bool isVisible_ = false;
 
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
+
+    uint32_t blanklessFrameWidth_ = 0;
+    uint32_t blanklessFrameHeight_ = 0;
 #endif
 };
 

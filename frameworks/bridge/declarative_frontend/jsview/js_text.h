@@ -43,12 +43,16 @@ public:
     static void SetTextShadow(const JSCallbackInfo& info);
     static void SetTextOverflow(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
+    static void SetMinLines(const JSCallbackInfo& info);
     static void SetTextIndent(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
     static void SetAlign(const JSCallbackInfo& info);
     static void SetTextContentAlign(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetLineHeightMultiply(const JSCallbackInfo& info);
+    static void SetMinimumLineHeight(const JSCallbackInfo& info);
+    static void SetMaximumLineHeight(const JSCallbackInfo& info);
     static void SetLineSpacing(const JSCallbackInfo& info);
     static void SetOptimizeTrailingSpace(const JSCallbackInfo& info);
     static void SetShaderStyle(const JSCallbackInfo& info);
@@ -77,6 +81,8 @@ public:
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsDraggable(const JSCallbackInfo& info);
     static void JsEnableDataDetector(const JSCallbackInfo& info);
+    static void SetSelectDetectEnable(const JSCallbackInfo& info);
+    static void SetSelectDetectConfig(const JSCallbackInfo& info);
     static void JsDataDetectorConfig(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);

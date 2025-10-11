@@ -275,7 +275,6 @@ bool JSViewStackProcessor::JsCheckIsPrebuildTimeout()
     return ViewStackModel::GetInstance()->CheckIsPrebuildTimeout();
 }
 
-#ifdef ACE_STATIC
 void JSViewStackProcessor::JsPush(const JSCallbackInfo &info)
 {
     if (info.Length() < 1) {
@@ -292,5 +291,4 @@ void JSViewStackProcessor::JsPop()
 {
     return ViewStackModel::GetInstance()->Pop();
 }
-#endif
 } // namespace OHOS::Ace::Framework

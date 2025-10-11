@@ -210,6 +210,15 @@ void ResetCacheRange(ArkUINodeHandle node)
     ListModelNG::ResetCacheRange(frameNode);
 }
 
+void GetCacheRange(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto cacheRange = ListModelNG::GetCacheRange(frameNode);
+    (*values)[0] = static_cast<ArkUI_Int32>(cacheRange.min);
+    (*values)[1] = static_cast<ArkUI_Int32>(cacheRange.max);
+}
+
 ArkUI_Bool GetEnableScrollInteraction(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -889,6 +898,27 @@ ArkUI_Bool GetShowCached(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, false);
     return ListModelNG::GetShowCached(frameNode);
 }
+
+void SetScrollSnapAnimationSpeed(ArkUINodeHandle node, ArkUI_Int32 speed)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetScrollSnapAnimationSpeed(frameNode, static_cast<ScrollSnapAnimationSpeed>(speed));
+}
+
+void ResetScrollSnapAnimationSpeed(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetScrollSnapAnimationSpeed(frameNode, ScrollSnapAnimationSpeed::NORMAL);
+}
+
+ArkUI_Int32 GetScrollSnapAnimationSpeed(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<ArkUI_Int32>(ListModelNG::GetScrollSnapAnimationSpeed(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -915,6 +945,7 @@ const ArkUIListModifier* GetListModifier()
         .resetCachedIsShown = ResetCachedIsShown,
         .setCacheRange = SetCacheRange,
         .resetCacheRange = ResetCacheRange,
+        .getCacheRange = GetCacheRange,
         .getListFocusWrapMode = GetListFocusWrapMode,
         .setListFocusWrapMode = SetListFocusWrapMode,
         .resetListFocusWrapMode = ResetListFocusWrapMode,
@@ -989,6 +1020,9 @@ const ArkUIListModifier* GetListModifier()
         .setShowCached = SetShowCached,
         .resetShowCached = ResetShowCached,
         .getShowCached = GetShowCached,
+        .setScrollSnapAnimationSpeed = SetScrollSnapAnimationSpeed,
+        .resetScrollSnapAnimationSpeed = ResetScrollSnapAnimationSpeed,
+        .getScrollSnapAnimationSpeed = GetScrollSnapAnimationSpeed,
         .setOnListScrollIndexCallBack = SetOnListScrollIndexCallBack,
         .setOnScrollVisibleContentChange = SetOnScrollVisibleContentChange,
         .setOnItemMove = SetOnItemMove,

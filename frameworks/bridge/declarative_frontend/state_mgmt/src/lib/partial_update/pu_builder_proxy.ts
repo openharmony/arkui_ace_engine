@@ -40,8 +40,15 @@
           object. The scenario is to use to init a @Link source.
   */
 function makeBuilderParameterProxy(builderName: string, source: Object): Object {
+    // for interop
+    let staticHook: StaticInteropHook | undefined = InteropConfigureStateMgmt.instance.needsInterop() ? new StaticInteropHook() : undefined;
     return new Proxy(source, {
         set(target, prop, val) {
+            //for interop
+            if (InteropConfigureStateMgmt.instance.needsInterop() && prop === '__static_interop_hook') {
+                staticHook!.addRef = val;
+                return true;
+            }
             throw Error(`@Builder '${builderName}': Invalid attempt to set(write to) parameter '${prop.toString()}' error!`);
         },
         get(target, prop) {
@@ -57,6 +64,10 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
                 stateMgmtConsole.debug(`      - no fun`);
                 return value;
             }
+            //for interop
+            if (InteropConfigureStateMgmt.instance.needsInterop() && staticHook.addRef) {
+                staticHook!.addRef();
+            }
             const funcRet = value();
             if (funcRet && (typeof funcRet === 'object') && ('get' in funcRet)) {
                 if (prop1 !== prop) {
@@ -71,6 +82,12 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
 
             stateMgmtConsole.debug(`      - func - no ObservedPropertybstract - ret value ${funcRet}`);
             return funcRet;
-        } // get
+        }, // get
+        has(target, prop) :boolean {
+            if (InteropConfigureStateMgmt.instance.needsInterop() && prop === '__static_interop_hook') {
+                return true;
+            }
+            return prop in target;
+        }
     }); // new Proxy
 }

@@ -73,6 +73,10 @@ public:
         int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_value callback);
     static void HandleDensityChange(NG::AbilityContextInfo& info, double density);
+    static void RegisterWinSizeLayoutBreakpointCallback(
+        int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterWinSizeLayoutBreakpointCallback(int32_t uiContextInstanceId, napi_value callback);
+    static void HandleWinSizeLayoutBreakpointChange(int32_t instanceId, const NG::WindowSizeBreakpoint& info);
     static void RegisterDrawCallback(int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterDrawCallback(int32_t uiContextInstanceId, napi_value callback);
     static void RegisterLayoutCallback(
@@ -118,6 +122,13 @@ public:
     static void UnRegisterTabContentStateCallback(napi_value cb);
     static void UnRegisterTabContentStateCallback(const std::string& id, napi_value cb);
     static void HandleTabContentStateChange(const NG::TabContentInfo& tabContentInfo);
+
+    static void RegisterTabChangeCallback(const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterTabChangeCallback(
+        const std::string& id, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterTabChangeCallback(napi_value cb);
+    static void UnRegisterTabChangeCallback(const std::string& id, napi_value cb);
+    static void HandleTabChange(const NG::TabContentInfo& tabContentInfo);
 
     static void RegisterBeforePanStartCallback(
         napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener);
@@ -192,6 +203,8 @@ private:
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> infosForRouterPage_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedDensityListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedWinSizeLayoutBreakpointListeners_;
 
     static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
         abilityContextWillClickListeners_;
@@ -204,6 +217,9 @@ private:
     static std::list<std::shared_ptr<UIObserverListener>> tabContentStateListeners_;
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedTabContentStateListeners_;
+    static std::list<std::shared_ptr<UIObserverListener>> tabChangeListeners_;
+    static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedTabChangeListeners_;
     static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
         abilityContextBeforePanStartListeners_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>

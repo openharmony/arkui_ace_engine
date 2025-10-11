@@ -1202,8 +1202,15 @@ void WebSelectOverlay::OnHandleMarkInfoChange(
         manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     if ((flag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE || (flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
+        auto pattern = GetPattern<WebPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto delegate = pattern->delegate_;
+        CHECK_NULL_VOID(delegate);
+        auto copyOption = delegate->GetCopyOptionMode();
+        bool canCopyOut = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
+                          (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
         if (info->menuInfo.showShare != (IsSupportMenuShare() && IsNeedMenuShare())) {
-            info->menuInfo.showShare = !info->menuInfo.showShare;
+            info->menuInfo.showShare = !info->menuInfo.showShare && canCopyOut;
             manager->NotifyUpdateToolBar(true);
         }
         if (info->menuInfo.aiMenuOptionType != aiMenuType_) {

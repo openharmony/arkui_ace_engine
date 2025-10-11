@@ -68,7 +68,8 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
     public addRef(): void {
         if (
             ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingMonitor ||
-            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed
+            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed ||
+            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingPersistentStorage
         ) {
             this.bindingRefs_.add(ObserveSingleton.instance.renderingComponentRef!.weakThis);
             ObserveSingleton.instance.renderingComponentRef!.reverseBindings.add(this.weakThis);

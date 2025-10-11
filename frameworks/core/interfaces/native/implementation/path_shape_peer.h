@@ -16,8 +16,7 @@
 #pragma once
 
 #include "arkoala_api_generated.h"
-#include "base/geometry/shape.h"
+#include "interfaces/ets/ani/shape/src/shape_peer.h"
 
-struct PathShapePeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::Path> shape;
+struct PathShapePeer: public OHOS::Ace::PathPeer {
 };

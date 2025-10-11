@@ -310,7 +310,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest015, TestSize.Level1)
 
 /**
  * @tc.name: RosenRenderContextTest017
- * @tc.desc: OnBackgroundImageUpdate().
+ * @tc.desc: OnBackgroundImageUpdate()
  * @tc.type: FUNC
  */
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest017, TestSize.Level1)

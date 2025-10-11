@@ -220,6 +220,13 @@ int32_t ScrollableController::GetItemIndex(double x, double y) const
     return pattern->GetItemIndex(x, y);
 }
 
+SizeF ScrollableController::ContentSize() const
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_RETURN(pattern, SizeF());
+    return pattern->GetChildrenExpandedSize();
+}
+
 void ScrollableController::StopAnimate()
 {
     auto pattern = scroll_.Upgrade();

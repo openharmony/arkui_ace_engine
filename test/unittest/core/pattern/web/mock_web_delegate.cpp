@@ -34,6 +34,7 @@ std::map<std::string, std::string> surfaceToHtmlElementMap = { { "existSurfaceId
     { "existSurfaceIdOther", "existhtmlElementIdOther" } };
 std::map<std::string, int64_t> surfaceToWebAccessibilityMap = { { "existSurfaceId", 123 },
     { "existSurfaceIdOther", 456 } };
+constexpr double WEB_SNAPSHOT_SIZE_TOLERANCE = 0.85;
 class MockNWebAccessibilityNodeInfoOnlyForReturn : public NWeb::NWebAccessibilityNodeInfo {
 public:
     std::string GetHint() override
@@ -269,7 +270,7 @@ bool AuthResultOhos::IsHttpAuthInfoSaved()
 }
 void AuthResultOhos::Cancel() {}
 void SslErrorResultOhos::HandleConfirm() {}
-void SslErrorResultOhos::HandleCancel() {}
+void SslErrorResultOhos::HandleCancel(bool abortLoading) {}
 void AllSslErrorResultOhos::HandleConfirm() {}
 void AllSslErrorResultOhos::HandleCancel(bool abortLoading) {}
 void SslSelectCertResultOhos::HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile) {}
@@ -634,7 +635,11 @@ void WebDelegate::SetKeepScreenOn(bool key) {}
 void WebDelegate::UpdateUserAgent(const std::string& userAgent) {}
 void WebDelegate::UpdateBackgroundColor(const int backgroundColor) {}
 void WebDelegate::UpdateInitialScale(float scale) {}
-void WebDelegate::Resize(const double& width, const double& height, bool isKeyboard) {}
+void WebDelegate::Resize(const double& width, const double& height, bool isKeyboard)
+{
+    resizeWidth_ = width;
+    resizeHeight_ = height;
+}
 void WebDelegate::UpdateJavaScriptEnabled(const bool& isJsEnabled) {}
 void WebDelegate::UpdateAllowFileAccess(const bool& isFileAccessEnabled) {}
 void WebDelegate::UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled) {}
@@ -733,6 +738,7 @@ void WebDelegate::Reload()
 #else
 #endif
 }
+void WebDelegate::UpdateZoomControlAccess(bool zoomControlAccess) {}
 void WebDelegate::UpdateUrl(const std::string& url) {}
 void WebDelegate::CallWebRouterBack() {}
 void WebDelegate::CallPopPageSuccessPageUrl(const std::string& url) {}
@@ -1395,9 +1401,21 @@ void WebDelegate::SetVisibility(bool isVisible)
 {
     isVisible_ = isVisible;
 }
-void WebDelegate::RecordBlanklessFrameSize(uint32_t width, uint32_t height) {}
-double WebDelegate::ResizeWidth() const { return 1.0; }
-double WebDelegate::ResizeHeight() const { return 1.0; }
+void WebDelegate::RecordBlanklessFrameSize(uint32_t width, uint32_t height)
+{
+    blanklessFrameWidth_ = width;
+    blanklessFrameHeight_ = height;
+}
+
+bool WebDelegate::IsBlanklessFrameValid() const
+{
+    uint32_t resizeWidth = std::ceil(resizeWidth_);
+    uint32_t resizeHeight = std::ceil(resizeHeight_);
+    return blanklessFrameWidth_ != 0 && blanklessFrameHeight_ != 0 && resizeWidth != 0 && resizeHeight != 0 &&
+           blanklessFrameWidth_ == resizeWidth && blanklessFrameHeight_ / resizeHeight_ >= WEB_SNAPSHOT_SIZE_TOLERANCE;
+}
+
+void WebDelegate::RemoveSnapshotFrameNodeIfNeeded() {}
 
 void WebDelegate::OnPip(int status, int delegate_id,
     int child_id, int frame_routing_id,  int width, int height) {}
@@ -1413,11 +1431,17 @@ void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
 void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
+void WebDelegate::OnStatusBarClick() {}
+void WebDelegate::WebScrollStopFling() {}
 bool WebDelegate::IsShowHandle() { return false; }
 bool WebDelegate::IsPcMode()
 {
     return g_setReturnStatus == STATUS_TRUE;
 }
+void WebDelegate::OnDetectedBlankScreen(
+    const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount) {}
+void WebDelegate::UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
+    const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold) {}
 void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
 void WebDelegate::RegisterFreeMultiWindowListener() {}
 void WebDelegate::UnregisterFreeMultiWindowListener() {}

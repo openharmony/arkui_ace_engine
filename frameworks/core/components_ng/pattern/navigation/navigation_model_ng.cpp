@@ -890,9 +890,15 @@ bool NavigationModelNG::UpdateBackButtonProperty(const RefPtr<FrameNode>& backBu
         backButtonWidth = theme->GetIconBackgroundWidth();
         backButtonHeight = theme->GetIconBackgroundHeight();
         backButtonRadiusSize = theme->GetCornerRadius();
-        backButtonPadding = MENU_BUTTON_PADDING;
+        backButtonPadding = theme->GetMenuButtonPadding();
         backButtonColor = theme->GetCompBackgroundColor();
     }
+    BorderWidthProperty borderWidthProperty;
+    borderWidthProperty.SetBorderWidth(theme->GetIconBorderWidth());
+    backButtonLayoutProperty->UpdateBorderWidth(borderWidthProperty);
+    BorderColorProperty borderColorProperty;
+    borderColorProperty.SetColor(theme->GetIconBorderColor());
+    renderContext->UpdateBorderColor(borderColorProperty);
     backButtonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(backButtonWidth), CalcLength(backButtonHeight)));
     backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(backButtonRadiusSize));
@@ -3135,18 +3141,18 @@ void NavigationModelNG::SetBeforeCreateLayoutWrapperCallBack(
     navBarEventHub->SetBeforeCreateLayoutWrapperCallBack(std::move(beforeCreateLayoutWrapper));
 }
 
-void NavigationModelNG::SetEnableShowHideWithContentCover(bool isEnable)
+void NavigationModelNG::SetEnableVisibilityLifecycleWithContentCover(bool isEnable)
 {
-    NavigationModelNG::SetEnableShowHideWithContentCover(
+    NavigationModelNG::SetEnableVisibilityLifecycleWithContentCover(
         ViewStackProcessor::GetInstance()->GetMainFrameNode(), isEnable);
 }
 
-void NavigationModelNG::SetEnableShowHideWithContentCover(FrameNode* frameNode, bool isEnable)
+void NavigationModelNG::SetEnableVisibilityLifecycleWithContentCover(FrameNode* frameNode, bool isEnable)
 {
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigation);
     auto pattern = navigation->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetEnableShowHideWithContentCover(isEnable);
+    pattern->SetEnableVisibilityLifecycleWithContentCover(isEnable);
 }
 } // namespace OHOS::Ace::NG

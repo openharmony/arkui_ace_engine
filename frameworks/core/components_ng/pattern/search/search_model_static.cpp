@@ -44,6 +44,7 @@ const auto DEFAULT_KEYBOARD_APPERANCE = KeyboardAppearance::NONE_IMMERSIVE;
 constexpr int32_t TEXTFIELD_INDEX = 0;
 constexpr int32_t BUTTON_INDEX = 4;
 constexpr double DEFAULT_OPACITY = 0.2;
+constexpr float MAX_FONT_SCALE = 2.0;
 constexpr int32_t DEFAULT_ALPHA = 255;
 } // namespace
 
@@ -130,6 +131,20 @@ void SearchModelStatic::SetSearchDefaultIcon(FrameNode *frameNode)
     CHECK_NULL_VOID(pattern);
     pattern->InitSearchIconColorSize();
     pattern->CreateSearchIcon("");
+}
+
+void SearchModelStatic::SetAutoCapitalizationMode(
+    FrameNode* frameNode, const std::optional<AutoCapitalizationMode>& value)
+{
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (value) {
+        pattern->UpdateAutoCapitalizationMode(*value);
+    } else {
+        pattern->ResetAutoCapitalizationMode();
+    }
 }
 
 void SearchModelStatic::SetSearchImageIcon(FrameNode *frameNode, std::optional<IconOptions>& iconOptions)
@@ -372,32 +387,20 @@ void SearchModelStatic::SetSearchEnterKeyType(FrameNode* frameNode, const std::o
 
 void SearchModelStatic::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& valueOpt)
 {
+    float minFontScale = 0.0f;
     if (valueOpt.has_value()) {
-        SearchModelNG::SetMinFontScale(frameNode, valueOpt.value());
-        return;
+        minFontScale = std::clamp(valueOpt.value(), 0.0f, 1.0f);
     }
-    CHECK_NULL_VOID(frameNode);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textFieldChild);
-    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    textFieldLayoutProperty->ResetMinFontScale();
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    SearchModelNG::SetMinFontScale(frameNode, minFontScale);
 }
 
 void SearchModelStatic::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& valueOpt)
 {
+    float maxFontScale = MAX_FONT_SCALE;
     if (valueOpt.has_value()) {
-        SearchModelNG::SetMaxFontScale(frameNode, valueOpt.value());
-        return;
+        maxFontScale = std::max(valueOpt.value(), 1.0f);
     }
-    CHECK_NULL_VOID(frameNode);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textFieldChild);
-    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    textFieldLayoutProperty->ResetMaxFontScale();
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    SearchModelNG::SetMaxFontScale(frameNode, maxFontScale);
 }
 
 void SearchModelStatic::SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)

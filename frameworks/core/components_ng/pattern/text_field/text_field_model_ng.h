@@ -46,6 +46,8 @@ public:
     void SetLineBreakStrategy(LineBreakStrategy value) override;
     void SetCaretColor(const Color& value) override;
     void ResetCaretColor() override;
+    void SetSelectDetectEnable(bool value) override;
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void SetCaretStyle(const CaretStyle& value) override;
     void SetCaretPosition(const int32_t& value) override;
     void SetSelectedBackgroundColor(const Color& value) override;
@@ -102,6 +104,10 @@ public:
     void ResetDisableUnderlineColor() override;
     void SetUserUnderlineColor(UserUnderlineColor userColor) override;
     void SetShowCounter(bool value) override;
+    void SetCounterTextColor(const Color& value) override;
+    void ResetCounterTextColor() override;
+    void SetCounterTextOverflowColor(const Color& value) override;
+    void ResetCounterTextOverflowColor() override;
     void SetCounterType(int32_t value) override;
     void SetShowCounterBorder(bool value) override;
     void SetOnChangeEvent(std::function<void(const std::u16string&)>&& func) override;
@@ -113,6 +119,7 @@ public:
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetSelectionMenuHidden(bool contextMenuHidden) override;
     void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) override;
+    void SetCustomKeyboardWithNode(FrameNode* customKeyboard, bool supportAvoidance = false) override;
     void SetPasswordRules(const std::string& passwordRules) override;
     void SetEnableAutoFill(bool enableAutoFill) override;
     void SetEnableAutoFillAnimation(bool enableAutoFillAnimation) override;
@@ -153,7 +160,7 @@ public:
     void SetStrokeColor(const Color& value) override;
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
-    void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) override;
+    void SetOnWillAttachIME(IMEAttachCallback&& func) override;
     void SetTextAreaScrollBarColor(const Color& value) override;
     void ResetTextAreaScrollBarColor() override;
 
@@ -180,6 +187,12 @@ public:
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);
+    static void SetSelectDetectEnable(FrameNode* frameNode, bool value);
+    static bool GetSelectDetectEnable(FrameNode* frameNode);
+    static void ResetSelectDetectEnable(FrameNode* frameNode);
+    static void SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types);
+    static std::vector<TextDataDetectType> GetSelectDetectConfig(FrameNode* frameNode);
+    static void ResetSelectDetectConfig(FrameNode* frameNode);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool contextMenuHidden);
     static bool GetSelectionMenuHidden(FrameNode* frameNode);
     static void SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules);
@@ -220,6 +233,10 @@ public:
     static void SetCaretColor(FrameNode* frameNode, const Color& value);
     static void ResetCaretColor(FrameNode* frameNode);
     static void SetShowCounter(FrameNode* frameNode, bool value);
+    static void SetCounterTextColor(FrameNode* frameNode, const Color& value);
+    static void SetCounterTextOverflowColor(FrameNode* frameNode, const Color& value);
+    static void ResetCounterTextColor(FrameNode* frameNode);
+    static void ResetCounterTextOverflowColor(FrameNode* frameNode);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
     static void SetShowError(FrameNode* frameNode, const std::u16string& errorText, bool visible);
     static void SetOnWillChangeEvent(FrameNode* frameNode, std::function<bool(const ChangeValueInfo&)>&& func);
@@ -272,6 +289,8 @@ public:
     static CleanNodeStyle GetCleanNodeStyle(FrameNode* frameNode);
     static void SetShowCounterBorder(FrameNode* frameNode, bool value);
     static bool GetShowCounter(FrameNode* frameNode);
+    static Color GetCounterTextColor(FrameNode* frameNode);
+    static Color GetCounterTextOverflowColor(FrameNode* frameNode);
     static int GetCounterType(FrameNode* frameNode);
     static uint32_t GetMinLines(FrameNode* frameNode);
     static bool GetShowCounterBorder(FrameNode* frameNode);
@@ -293,7 +312,10 @@ public:
     static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func);
-    static void SetCustomKeyboard(FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance = false);
+    static void SetCustomKeyboard(
+        FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance = false);
+    static void SetCustomKeyboardWithNode(
+        FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance = false);
     static void SetInputFilter(FrameNode* frameNode, const std::string& value);
     static void SetInputFilterError(FrameNode* frameNode, const std::function<void(const std::u16string&)>& onError);
     static Ace::WordBreak GetWordBreak(FrameNode* frameNode);
@@ -361,6 +383,7 @@ public:
     static void SetTextAreaScrollBarColor(FrameNode* frameNode, const Color& value);
     static Color GetTextAreaScrollBarColor(FrameNode* frameNode);
     static void ResetTextAreaScrollBarColor(FrameNode* frameNode);
+    static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
 
 private:
     void AddDragFrameNodeToManager() const;
@@ -368,6 +391,9 @@ private:
     void SetTextRectWillChange();
     void SetDefaultPadding();
     void SetBackBorderRadius();
+
+    static void SetOnWillInsertValueEventMultiThread(FrameNode* frameNode,
+        std::function<bool(const InsertValueInfo&)>&& func);
 };
 
 } // namespace OHOS::Ace::NG

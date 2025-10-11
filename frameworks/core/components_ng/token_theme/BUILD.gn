@@ -23,9 +23,7 @@ template("ace_core_components_token_theme_set") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
 
-    sources = [
-      "token_theme_storage.cpp",
-    ]
+    sources = [ "token_theme_storage.cpp" ]
 
     if (use_hilog) {
       external_deps = [ "hilog:libhilog" ]

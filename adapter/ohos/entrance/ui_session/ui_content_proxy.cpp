@@ -20,7 +20,8 @@
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 
 namespace OHOS::Ace {
-int32_t UIContentServiceProxy::GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback)
+int32_t UIContentServiceProxy::GetInspectorTree(
+    const std::function<void(std::string, int32_t, bool)>& eventCallback, ParamConfig config)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -34,6 +35,11 @@ int32_t UIContentServiceProxy::GetInspectorTree(const std::function<void(std::st
         return FAILED;
     }
     report_->RegisterGetInspectorTreeCallback(eventCallback);
+
+    data.WriteBool(config.interactionInfo);
+    data.WriteBool(config.accessibilityInfo);
+    data.WriteBool(config.cacheNodes);
+
     if (Remote()->SendRequest(UI_CONTENT_SERVICE_GET_TREE, data, reply, option) != ERR_NONE) {
         LOGW("GetInspectorTree send request failed");
         return REPLY_ERROR;
@@ -42,7 +48,7 @@ int32_t UIContentServiceProxy::GetInspectorTree(const std::function<void(std::st
 }
 
 int32_t UIContentServiceProxy::GetVisibleInspectorTree(
-    const std::function<void(std::string, int32_t, bool)>& eventCallback)
+    const std::function<void(std::string, int32_t, bool)>& eventCallback, ParamConfig config)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -56,6 +62,11 @@ int32_t UIContentServiceProxy::GetVisibleInspectorTree(
         return FAILED;
     }
     report_->RegisterGetInspectorTreeCallback(eventCallback);
+
+    data.WriteBool(config.interactionInfo);
+    data.WriteBool(config.accessibilityInfo);
+    data.WriteBool(config.cacheNodes);
+
     if (Remote()->SendRequest(GET_VISIBLE_TREE, data, reply, option) != ERR_NONE) {
         LOGW("GetVisibleInspectorTree send request failed");
         return REPLY_ERROR;

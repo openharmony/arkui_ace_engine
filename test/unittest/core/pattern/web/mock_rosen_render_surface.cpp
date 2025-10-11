@@ -47,4 +47,5 @@ namespace OHOS::Ace::NG {
     void RosenRenderSurface::Disconnect() const {}
     void RosenRenderSurface::RegisterBufferCallback() {}
     void RosenRenderSurface::OnWindowStateChange(bool isShow) {}
+    void RosenRenderSurface::SetSurfaceBufferOpaque(bool isOpaque) {}
 }

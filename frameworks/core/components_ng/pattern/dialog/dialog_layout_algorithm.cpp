@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/feature_param.h"
 #include "core/common/ace_engine.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -32,6 +33,8 @@ namespace {
 constexpr double DIALOG_HEIGHT_RATIO = 0.8;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
+// Using UX spec: Limit dialog to 9/10 of viewport height, centered.
+constexpr double DIALOG_VIEWPORT_HEIGHT_RATIO = 0.9;
 constexpr Dimension DIALOG_MIN_HEIGHT = 70.0_vp;
 constexpr Dimension FULLSCREEN = 100.0_pct;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_X = 48.0_vp;
@@ -151,6 +154,13 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
         childLayoutConstraint.maxSize.SetWidth(LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
     }
+    // remove the height of the floating button
+    auto childMaxSize = childLayoutConstraint.maxSize;
+    auto maxHeightWithoutFloatButton = layoutConstraint->maxSize.Height() - floatButtonsHeight_;
+    childMaxSize.SetHeight(std::min(childMaxSize.Height(), maxHeightWithoutFloatButton));
+    childLayoutConstraint.UpdateMaxSizeWithCheck(childMaxSize);
+    childLayoutConstraint.percentReference.SetHeight(
+        std::min(childLayoutConstraint.percentReference.Height(), maxHeightWithoutFloatButton));
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
     if (!layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetCustomNode()) {
@@ -919,7 +929,7 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
         needAvoidKeyboard = false;
     }
     auto childOffset = AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
-    AvoidScreen(childOffset, prop, childSize);
+    AvoidScreen(childOffset, prop, dialogChildSize_);
     return childOffset;
 }
 
@@ -1076,11 +1086,16 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     auto childOffset = topLeftPoint + dialogOffset;
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
+    auto dialogCorrectionEnabled = FeatureParam::IsDialogCorrectionEnabled();
+    DialogOverflowAdjust(childOffset, childSize, dialogCorrectionEnabled);
     auto childBottom = childOffset.GetY() + childSize.Height() + embeddedDialogOffsetY_ + stackRootDialogOffsetY_;
     auto paddingBottom = static_cast<float>(GetPaddingBottom());
     if (needAvoidKeyboard && keyboardInsert.Length() > 0 && childBottom > (keyboardInsert.start - paddingBottom)) {
         auto limitPos = std::min(childOffset.GetY(),
             static_cast<float>(safeAreaInsets_.top_.Length() + AVOID_LIMIT_PADDING.ConvertToPx()));
+        if (dialogCorrectionEnabled) {
+            limitPos = static_cast<float>(safeAreaInsets_.top_.Length() + AVOID_LIMIT_PADDING.ConvertToPx());
+        }
         childOffset.SetY(childOffset.GetY() - (childBottom - (keyboardInsert.start - paddingBottom)));
 
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && childOffset.GetY() < limitPos) {
@@ -1095,6 +1110,55 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
         }
     }
     return childOffset;
+}
+
+void DialogLayoutAlgorithm::DialogOverflowAdjust(
+    OffsetF& childOffset, const SizeF& childSize, bool dialogCorrectionEnabled)
+{
+    if (!dialogCorrectionEnabled) {
+        return;
+    }
+
+    auto viewTop = GreatNotEqual(safeAreaInsets_.top_.Length(), 0) ? safeAreaInsets_.top_.end : 0;
+    auto viewBottom =
+        GreatNotEqual(safeAreaInsets_.bottom_.Length(), 0) ? safeAreaInsets_.bottom_.start : wrapperSize_.Height();
+    auto limitAreaPadding = ((1 - DIALOG_VIEWPORT_HEIGHT_RATIO) / HALF) * (viewBottom - viewTop);
+    auto limitTop = viewTop + limitAreaPadding;
+    auto limitBottom = viewBottom - limitAreaPadding;
+    if (GreatNotEqual(limitTop, limitBottom)) {
+        return;
+    }
+
+    float childBottom = 0.0f;
+    if (LessNotEqual(childOffset.GetY(), limitTop)) {
+        childOffset.SetY(limitTop);
+        childBottom = childOffset.GetY() + childSize.Height() + embeddedDialogOffsetY_ + stackRootDialogOffsetY_;
+        if (GreatNotEqual(childBottom, limitBottom)) {
+            resizeFlag_ = true;
+            dialogChildSize_ = childSize;
+            if (GreatNotEqual(childBottom - limitBottom, dialogChildSize_.Height())) {
+                dialogChildSize_.MinusHeight(dialogChildSize_.Height());
+            } else {
+                dialogChildSize_.MinusHeight(childBottom - limitBottom);
+            }
+        }
+        return;
+    }
+
+    childBottom = childOffset.GetY() + childSize.Height() + embeddedDialogOffsetY_ + stackRootDialogOffsetY_;
+    if (GreatNotEqual(childBottom, limitBottom)) {
+        childOffset.SetY(childOffset.GetY() - (childBottom - limitBottom));
+        if (LessNotEqual(childOffset.GetY(), limitTop)) {
+            resizeFlag_ = true;
+            dialogChildSize_ = childSize;
+            if (GreatNotEqual(limitTop - childOffset.GetY(), dialogChildSize_.Height())) {
+                dialogChildSize_.MinusHeight(dialogChildSize_.Height());
+            } else {
+                dialogChildSize_.MinusHeight(limitTop - childOffset.GetY());
+            }
+            childOffset.SetY(limitTop);
+        }
+    }
 }
 
 void DialogLayoutAlgorithm::UpdateSafeArea(const RefPtr<FrameNode>& frameNode)

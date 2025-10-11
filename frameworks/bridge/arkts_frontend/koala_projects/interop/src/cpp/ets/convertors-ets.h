@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef CONVERTORS_ETS_H
+#define CONVERTORS_ETS_H
 
 #ifdef KOALA_ETS_NAPI
 
-#include <assert.h>
 #include <memory>
 #include <vector>
 #include <string>
@@ -27,7 +27,7 @@
 
 #include "etsapi.h"
 #include "koala-types.h"
-#include "securec.h"
+#include "interop-utils.h"
 
 template<class T>
 struct InteropTypeConverter {
@@ -79,6 +79,14 @@ struct InteropTypeConverter<KFloat> {
 };
 
 template<>
+struct InteropTypeConverter<KDouble> {
+    using InteropType = ets_double;
+    static KDouble convertFrom(EtsEnv* env, InteropType value) { return value; }
+    static InteropType convertTo(EtsEnv* env, InteropFloat64 value) { return value; }
+    static void release(EtsEnv* env, InteropType value, KDouble converted) {}
+};
+
+template<>
 struct InteropTypeConverter<KSerializerBuffer> {
     using InteropType = ets_long;
     static KSerializerBuffer convertFrom(EtsEnv* env, InteropType value) {
@@ -111,11 +119,10 @@ struct InteropTypeConverter<KInteropBuffer> {
       return result;
     }
     static InteropType convertTo(EtsEnv* env, KInteropBuffer value) {
-      ets_byteArray array = env->NewByteArray(value.length);
+      int bufferLength = value.length;
+      ets_byteArray array = env->NewByteArray(bufferLength);
       KByte* data = (KByte*)env->PinByteArray(array);
-      if (memcpy_s(data, value.length, value.data, value.length) != 0) {
-        return array;
-      }
+      interop_memcpy(data, bufferLength, (KByte*)value.data, bufferLength);
       env->UnpinByteArray(array);
       value.dispose(value.resourceId);
       return array;
@@ -210,13 +217,12 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
     using InteropType = ets_byteArray;
     static KInteropReturnBuffer convertFrom(EtsEnv* env, InteropType value) = delete;
     static InteropType convertTo(EtsEnv* env, KInteropReturnBuffer value) {
-      ets_byteArray array = env->NewByteArray(value.length);
+      int bufferLength = value.length;
+      ets_byteArray array = env->NewByteArray(bufferLength);
       KByte* data = (KByte*)env->PinByteArray(array);
-      if (memcpy_s(data, value.length, value.data, value.length) != 0) {
-        return array;
-      }
+      interop_memcpy(data, bufferLength, (KByte*)value.data, bufferLength);
       env->UnpinByteArray(array);
-      value.dispose(value.data, value.length);
+      value.dispose(value.data, bufferLength);
       return array;
     };
     static void release(EtsEnv* env, InteropType value, KInteropReturnBuffer converted) {}
@@ -244,40 +250,6 @@ template <> struct InteropTypeConverter<KInteropNumber> {
     return value.asDouble();
   }
   static void release(EtsEnv *env, InteropType value, KInteropNumber converted) {}
-};
-
-template<>
-struct InteropTypeConverter<KLength> {
-  using InteropType = ets_object;
-  static KLength convertFrom(EtsEnv* env, InteropType value) {
-    const static ets_class double_class = reinterpret_cast<ets_class>(env->NewGlobalRef(env->FindClass("std/core/Double")));
-    const static ets_class int_class = reinterpret_cast<ets_class>(env->NewGlobalRef(env->FindClass("std/core/Int")));
-    const static ets_class string_class = reinterpret_cast<ets_class>(env->NewGlobalRef(env->FindClass("std/core/String")));
-    const static ets_class resource_class = reinterpret_cast<ets_class>(
-      env->NewGlobalRef(env->FindClass("arkui/generated/ArkResourceInterfaces/Resource")));
-
-    if (env->IsInstanceOf(value, double_class)) {
-      const static ets_method double_p = env->Getp_method(double_class, "unboxed", ":D");
-      return KLength{ 1, (KFloat)env->CallDoubleMethod(value, double_p), 1, 0 };
-    } else if (env->IsInstanceOf(value, int_class)) {
-      const static ets_method int_p = env->Getp_method(int_class, "unboxed", ":I");
-      return KLength{ 1, (KFloat)env->CallIntMethod(value, int_p), 1, 0 };
-    } else if (env->IsInstanceOf(value, string_class)) {
-      KStringPtr ptr = InteropTypeConverter<KStringPtr>::convertFrom(env, reinterpret_cast<ets_string>(value));
-      KLength length { 0 };
-      parseKLength(ptr, &length);
-      length.type = 2;
-      length.resource = 0;
-      return length;
-    } else if (env->IsInstanceOf(value, resource_class)) {
-      const static ets_method resource_p = env->Getp_method(resource_class, "<get>id", ":D");
-      return KLength{ 3, 0, 1, (KInt)env->CallDoubleMethod(value, resource_p) };
-    } else {
-      return KLength( { 0, 0, 0, 0});
-    }
-  }
-  static InteropType convertTo(EtsEnv* env, KLength value) = delete;
-  static void release(EtsEnv* env, InteropType value, const KLength& converted) {}
 };
 
 template <typename Type>
@@ -1800,8 +1772,7 @@ void getKoalaEtsNapiCallbackDispatcher(ets_class* clazz, ets_method* method);
   getKoalaEtsNapiCallbackDispatcher(&clazz, &method);                                 \
   EtsEnv* etsEnv = reinterpret_cast<EtsEnv*>(vmContext);                              \
   etsEnv->PushLocalFrame(1);                                                          \
-  long long args_casted = reinterpret_cast<long long>(args);                          \
-  etsEnv->CallStaticIntMethod(clazz, method, id, args_casted, length);                \
+  etsEnv->CallStaticIntMethod(clazz, method, id, args, length);                   \
   etsEnv->PopLocalFrame(nullptr);                                                     \
 }
 
@@ -1810,10 +1781,9 @@ void getKoalaEtsNapiCallbackDispatcher(ets_class* clazz, ets_method* method);
   ets_class clazz = nullptr;                                                          \
   ets_method method = nullptr;                                                        \
   getKoalaEtsNapiCallbackDispatcher(&clazz, &method);                                 \
-  EtsEnv* etsEnv = reinterpret_cast<EtsEnv*>(venv);                                   \
-  etsEnv->PushLocalFrame(1);                                                          \
-  long long args_casted = reinterpret_cast<long long>(args);                          \
-  int32_t rv = etsEnv->CallStaticIntMethod(clazz, method, id, args_casted, length);   \
+  EtsEnv* etsEnv = reinterpret_cast<EtsEnv*>(venv);                              \
+  etsEnv->PushLocalFrame(1);                                                      \
+  int32_t rv = etsEnv->CallStaticIntMethod(clazz, method, id, args, length);      \
   etsEnv->PopLocalFrame(nullptr);                                                     \
   return rv;                                                                          \
 }
@@ -1836,3 +1806,5 @@ void getKoalaEtsNapiCallbackDispatcher(ets_class* clazz, ets_method* method);
   } while (0)
 
 #endif // KOALA_ETS_NAPI
+
+#endif // CONVERTORS_ETS_H

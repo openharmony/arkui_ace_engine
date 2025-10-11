@@ -851,7 +851,7 @@ HWTEST_F(WebPatternAddTestNg, InitWebEventHubDragMove_001, TestSize.Level1)
     std::string extraParams = "123";
     webPattern->isDragging_ = false;
     EXPECT_FALSE(webPattern->isDragging_);
-    eventHub->onDragMove_(info, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragMove_(info, extraParams);
     EXPECT_FALSE(webPattern->isDragging_);
 #endif
 }
@@ -882,7 +882,7 @@ HWTEST_F(WebPatternAddTestNg, InitWebEventHubDragMove_002, TestSize.Level1)
     webPattern->isDragging_ = true;
     EXPECT_TRUE(webPattern->isDragging_);
     for (uint32_t i = 0; i < 30; ++i) {
-        eventHub->onDragMove_(info, extraParams);
+        eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDragMove_(info, extraParams);
     }
     EXPECT_TRUE(webPattern->isDragging_);
 #endif
@@ -913,7 +913,7 @@ HWTEST_F(WebPatternAddTestNg, InitWebEventHubDragDropEnd_001, TestSize.Level1)
     std::string extraParams = "123";
     webPattern->isDragging_ = false;
     EXPECT_FALSE(webPattern->isDragging_);
-    eventHub->onDrop_(info, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDrop_(info, extraParams);
     EXPECT_FALSE(webPattern->isDragging_);
 #endif
 }
@@ -943,7 +943,7 @@ HWTEST_F(WebPatternAddTestNg, InitWebEventHubDragDropEnd_002, TestSize.Level1)
     std::string extraParams = "123";
     webPattern->isDragging_ = true;
     EXPECT_TRUE(webPattern->isDragging_);
-    eventHub->onDrop_(info, extraParams);
+    eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->onDrop_(info, extraParams);
     EXPECT_EQ(webPattern->dropX_, 0);
     EXPECT_EQ(webPattern->dropY_, 0);
 #endif

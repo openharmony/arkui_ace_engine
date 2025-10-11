@@ -76,21 +76,27 @@ public:
         }
         auto middlePos = height / 2;
         for (const auto& item : itemPosition) {
+            // find middle index
             auto index = GetLoopIndex(item.first, totalItemCount);
             auto startPos = item.second.startPos;
             auto endPos = item.second.endPos;
             if (LessOrEqual(startPos, middlePos) && GreatOrEqual(endPos, middlePos)) {
                 return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
             }
-            if (LessOrEqual(startPos, middlePos) && LessOrEqual(endPos, middlePos) && !isLoop &&
-                index == totalItemCount - 1) {
+        }
+        for (const auto& item : itemPosition) {
+            // find middle index when loop is false and overscrolled middle index
+            auto index = GetLoopIndex(item.first, totalItemCount);
+            auto startPos = item.second.startPos;
+            auto endPos = item.second.endPos;
+            if (LessOrEqual(endPos, middlePos) && !isLoop && index == totalItemCount - 1) {
                 return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
             }
-            if (GreatOrEqual(startPos, middlePos) && GreatOrEqual(endPos, middlePos) && !isLoop && index == 0) {
+            if (GreatOrEqual(startPos, middlePos) && !isLoop && index == 0) {
                 return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
             }
         }
-        return std::make_pair(itemPosition.begin()->first,
+        return std::make_pair(GetLoopIndex(itemPosition.begin()->first, totalItemCount),
             PickerItemInfo { itemPosition.begin()->second.startPos, itemPosition.begin()->second.endPos });
     }
 };

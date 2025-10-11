@@ -26,7 +26,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "arkoala_api_generated.h"
 
 
@@ -51,7 +50,15 @@ void AssignCast(std::optional<Dimension>& dst, const Ark_FadingEdgeOptions& src)
 template<>
 ScrollFrameResult Convert<ScrollFrameResult>(const Ark_OffsetResult& src)
 {
-    return { .offset = Convert<Dimension>(src.xOffset) };
+    return { .offset = Convert<Dimension>(src.xOffset)
+    };
+}
+
+template<>
+RefPtr<ShapeRect> Convert(const Ark_RectShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->rectShape;
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -62,54 +69,54 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 {
     return {};
 }
-void ScrollBarImpl(Ark_NativePointer node,
-                   const Opt_BarState* value)
+void SetScrollBarImpl(Ark_NativePointer node,
+                      const Opt_BarState* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<DisplayMode>(*value);
+    auto convValue = Converter::OptConvertPtr<DisplayMode>(value);
     ScrollableModelStatic::SetScrollBarMode(frameNode, convValue);
 }
-void ScrollBarColorImpl(Ark_NativePointer node,
-                        const Opt_Union_Color_Number_String* value)
+void SetScrollBarColorImpl(Ark_NativePointer node,
+                           const Opt_Union_Color_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     ScrollableModelStatic::SetScrollBarColor(frameNode, convValue);
 }
-void ScrollBarWidthImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String* value)
+void SetScrollBarWidthImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Dimension>(*value);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
     ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
 }
-void NestedScrollImpl(Ark_NativePointer node,
-                      const Opt_NestedScrollOptions* value)
+void SetNestedScrollImpl(Ark_NativePointer node,
+                         const Opt_NestedScrollOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::GetOptPtr(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto forward = Converter::OptConvert<NestedScrollMode>(convValue->scrollForward);
     auto backward = Converter::OptConvert<NestedScrollMode>(convValue->scrollBackward);
     ScrollableModelStatic::SetNestedScroll(frameNode, forward, backward);
 }
-void EnableScrollInteractionImpl(Ark_NativePointer node,
-                                 const Opt_Boolean* value)
+void SetEnableScrollInteractionImpl(Ark_NativePointer node,
+                                    const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto scrollEnabled = *convValue;
@@ -126,65 +133,22 @@ void EnableScrollInteractionImpl(Ark_NativePointer node,
         WaterFlowModelNG::SetScrollEnabled(frameNode, scrollEnabled);
     }
 }
-void FrictionImpl(Ark_NativePointer node,
-                  const Opt_Union_Number_Resource* value)
+void SetFrictionImpl(Ark_NativePointer node,
+                     const Opt_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     ScrollableModelStatic::SetFriction(frameNode, convValue);
 }
-void OnScrollImpl(Ark_NativePointer node,
-                  const Opt_Callback_Number_Number_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LOGE("ScrollableCommonMethodModifier::OnScrollImpl is not implemented");
-}
-void OnWillScrollImpl(Ark_NativePointer node,
-                      const Opt_ScrollOnWillScrollCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-
-    std::optional<ScrollOnWillScrollCallback> arkCallback;
-    if (value) {
-        arkCallback = Converter::OptConvert<ScrollOnWillScrollCallback>(*value);
-    }
-    if (arkCallback) {
-        auto modelCallback = [callback = CallbackHelper(*arkCallback)]
-            (const Dimension& scrollOffset, const ScrollState& scrollState, const ScrollSource& scrollSource) ->
-                ScrollFrameResult {
-            auto arkScrollOffset = Converter::ArkValue<Ark_Number>(scrollOffset);
-            auto arkScrollState = Converter::ArkValue<Ark_ScrollState>(scrollState);
-            auto arkScrollSource = Converter::ArkValue<Ark_ScrollSource>(scrollSource);
-            auto resultOpt =
-                callback.InvokeWithOptConvertResult<ScrollFrameResult, Ark_OffsetResult, Callback_OffsetResult_Void>(
-                    arkScrollOffset, arkScrollOffset, arkScrollState, arkScrollSource);
-            return resultOpt.value_or(ScrollFrameResult());
-        };
-        ScrollableModelStatic::SetOnWillScroll(frameNode, std::move(modelCallback));
-    } else {
-        ScrollableModelStatic::SetOnWillScroll(frameNode, nullptr);
-    }
-}
-
-void OnDidScrollImpl(Ark_NativePointer node,
-                     const ScrollOnScrollCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    LOGE("ScrollableCommonMethodModifier::OnDidScrollImpl is not implemented");
-}
-void OnReachStartImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
+void SetOnReachStartImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
@@ -192,14 +156,14 @@ void OnReachStartImpl(Ark_NativePointer node,
     };
     ScrollableModelStatic::SetOnReachStart(frameNode, std::move(modelCallback));
 }
-void OnReachEndImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+void SetOnReachEndImpl(Ark_NativePointer node,
+                       const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
@@ -207,14 +171,14 @@ void OnReachEndImpl(Ark_NativePointer node,
     };
     ScrollableModelStatic::SetOnReachEnd(frameNode, std::move(modelCallback));
 }
-void OnScrollStartImpl(Ark_NativePointer node,
-                       const Opt_Callback_Void* value)
+void SetOnScrollStartImpl(Ark_NativePointer node,
+                          const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
@@ -222,14 +186,14 @@ void OnScrollStartImpl(Ark_NativePointer node,
     };
     ScrollableModelStatic::SetOnScrollStart(frameNode, std::move(modelCallback));
 }
-void OnScrollStopImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
+void SetOnScrollStopImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
@@ -237,24 +201,23 @@ void OnScrollStopImpl(Ark_NativePointer node,
     };
     ScrollableModelStatic::SetOnScrollStop(frameNode, std::move(modelCallback));
 }
-void FlingSpeedLimitImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+void SetFlingSpeedLimitImpl(Ark_NativePointer node,
+                            const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<double>(*value);
+    auto convValue = Converter::OptConvertPtr<double>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     ScrollableModelStatic::SetMaxFlingSpeed(frameNode, *convValue);
 }
-void ClipContentImpl(Ark_NativePointer node,
-                     const Opt_Union_ContentClipMode_RectShape* value)
+void SetClipContentImpl(Ark_NativePointer node,
+                        const Opt_Union_ContentClipMode_RectShape* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     Converter::VisitUnion(*value,
         [frameNode](const Ark_ContentClipMode& arkMode) {
             auto mode = Converter::OptConvert<ContentClipMode>(arkMode);
@@ -262,8 +225,9 @@ void ClipContentImpl(Ark_NativePointer node,
             ScrollableModelStatic::SetContentClip(frameNode, mode.value_or(ContentClipMode::DEFAULT), nullptr);
         },
         [frameNode](const Ark_RectShape& value) {
-            if (value && value->shape) {
-                ScrollableModelStatic::SetContentClip(frameNode, ContentClipMode::CUSTOM, value->shape);
+            auto rectShape = Converter::Convert<RefPtr<ShapeRect>>(value);
+            if (rectShape) {
+                ScrollableModelStatic::SetContentClip(frameNode, ContentClipMode::CUSTOM, rectShape);
             } else {
                 ScrollableModelStatic::SetContentClip(frameNode, ContentClipMode::DEFAULT, nullptr);
             }
@@ -272,36 +236,36 @@ void ClipContentImpl(Ark_NativePointer node,
             ScrollableModelStatic::SetContentClip(frameNode, ContentClipMode::DEFAULT, nullptr);
         });
 }
-void DigitalCrownSensitivityImpl(Ark_NativePointer node,
-                                 const Opt_CrownSensitivity* value)
+void SetDigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                    const Opt_CrownSensitivity* value)
 {
 #ifdef SUPPORT_DIGITAL_CROWN
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<CrownSensitivity>(value);
     ScrollableModelStatic::SetDigitalCrownSensitivity(frameNode, convValue);
 #endif
 }
-void BackToTopImpl(Ark_NativePointer node,
-                   const Opt_Boolean* value)
+void SetBackToTopImpl(Ark_NativePointer node,
+                      const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     ScrollableModelStatic::SetBackToTop(frameNode, *convValue);
 }
-void EdgeEffectImpl(Ark_NativePointer node,
-                    const Opt_EdgeEffect* edgeEffect,
-                    const Opt_EdgeEffectOptions* options)
+void SetEdgeEffectImpl(Ark_NativePointer node,
+                       const Opt_EdgeEffect* edgeEffect,
+                       const Opt_EdgeEffectOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convEdgeEffect = Converter::OptConvert<EdgeEffect>(*edgeEffect);
-        
+
     bool alwaysEnabled = true;
     EffectEdge edge = EffectEdge::ALL;
     auto edgeEffectOptions = options ? Converter::GetOpt(*options) : std::nullopt;
@@ -314,24 +278,15 @@ void EdgeEffectImpl(Ark_NativePointer node,
     }
     ScrollableModelStatic::SetEdgeEffect(frameNode, convEdgeEffect, alwaysEnabled, edge);
 }
-void FadingEdgeImpl(Ark_NativePointer node,
-                    const Opt_Boolean* enabled,
-                    const Opt_FadingEdgeOptions* options)
+void SetFadingEdgeImpl(Ark_NativePointer node,
+                       const Opt_Boolean* enabled,
+                       const Opt_FadingEdgeOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-
-    std::optional<bool> fadingEdge;
-    if (enabled) {
-        fadingEdge = Converter::OptConvert<bool>(*enabled);
-    }
-
-    std::optional<Dimension> fadingEdgeLength;
-    if (options) {
-        fadingEdgeLength = Converter::OptConvert<Dimension>(*options);
-    }
+    auto fadingEdge = Converter::OptConvertPtr<bool>(enabled);
+    auto fadingEdgeLength = Converter::OptConvertPtr<Dimension>(options);
     Validator::ValidateNonNegative(fadingEdgeLength);
-
     ScrollableModelStatic::SetFadingEdge(frameNode, fadingEdge, fadingEdgeLength);
 }
 } // ScrollableCommonMethodModifier
@@ -339,23 +294,22 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
 {
     static const GENERATED_ArkUIScrollableCommonMethodModifier ArkUIScrollableCommonMethodModifierImpl {
         ScrollableCommonMethodModifier::ConstructImpl,
-        ScrollableCommonMethodModifier::ScrollBarImpl,
-        ScrollableCommonMethodModifier::ScrollBarColorImpl,
-        ScrollableCommonMethodModifier::ScrollBarWidthImpl,
-        ScrollableCommonMethodModifier::NestedScrollImpl,
-        ScrollableCommonMethodModifier::EnableScrollInteractionImpl,
-        ScrollableCommonMethodModifier::FrictionImpl,
-        ScrollableCommonMethodModifier::OnScrollImpl,
-        ScrollableCommonMethodModifier::OnReachStartImpl,
-        ScrollableCommonMethodModifier::OnReachEndImpl,
-        ScrollableCommonMethodModifier::OnScrollStartImpl,
-        ScrollableCommonMethodModifier::OnScrollStopImpl,
-        ScrollableCommonMethodModifier::FlingSpeedLimitImpl,
-        ScrollableCommonMethodModifier::ClipContentImpl,
-        ScrollableCommonMethodModifier::DigitalCrownSensitivityImpl,
-        ScrollableCommonMethodModifier::BackToTopImpl,
-        ScrollableCommonMethodModifier::EdgeEffectImpl,
-        ScrollableCommonMethodModifier::FadingEdgeImpl,
+        ScrollableCommonMethodModifier::SetScrollBarImpl,
+        ScrollableCommonMethodModifier::SetScrollBarColorImpl,
+        ScrollableCommonMethodModifier::SetScrollBarWidthImpl,
+        ScrollableCommonMethodModifier::SetNestedScrollImpl,
+        ScrollableCommonMethodModifier::SetEnableScrollInteractionImpl,
+        ScrollableCommonMethodModifier::SetFrictionImpl,
+        ScrollableCommonMethodModifier::SetOnReachStartImpl,
+        ScrollableCommonMethodModifier::SetOnReachEndImpl,
+        ScrollableCommonMethodModifier::SetOnScrollStartImpl,
+        ScrollableCommonMethodModifier::SetOnScrollStopImpl,
+        ScrollableCommonMethodModifier::SetFlingSpeedLimitImpl,
+        ScrollableCommonMethodModifier::SetClipContentImpl,
+        ScrollableCommonMethodModifier::SetDigitalCrownSensitivityImpl,
+        ScrollableCommonMethodModifier::SetBackToTopImpl,
+        ScrollableCommonMethodModifier::SetEdgeEffectImpl,
+        ScrollableCommonMethodModifier::SetFadingEdgeImpl,
     };
     return &ArkUIScrollableCommonMethodModifierImpl;
 }

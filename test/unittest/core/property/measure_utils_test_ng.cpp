@@ -54,6 +54,8 @@ const CalcLength CALC_LENGTH_WIDTH_PX { 20.0, DimensionUnit::PX };
 const CalcLength CALC_LENGTH_CALC { 10.0, DimensionUnit::CALC };
 const CalcLength PADDING_LENGTH_PX { 10.0, DimensionUnit::PX };
 const CalcLength PADDING_LENGTH_VP { 10.0, DimensionUnit::VP };
+const CalcLength PADDING_LENGTH_ZERO { 0.0, DimensionUnit::VP };
+const CalcLength PADDING_LENGTH_NEGATIVE { -10.0, DimensionUnit::VP };
 const SizeF TEST_SIZE { 50.0, 50.0 };
 const SizeF TEST_MIN_SIZE { 10.0, 10.0 };
 const SizeF TEST_SELF_SIZE = { 1.0, 1.0 };
@@ -1185,6 +1187,75 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg034, TestSize.Level0)
      */
     BorderWidthPropertyF retProperty = ConvertToBorderWidthPropertyF(testPropertyT, scaleProperty, PERCENT_REFERENCE);
     EXPECT_EQ(retProperty, PRECISION_LOW_BORDER_WIDTH_PROPERTY);
+}
+
+/**
+ * @tc.name: MeasureUtilsTestNg035
+ * @tc.desc: Test cast to MeasureUtilsTestNg.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg035, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create paddingIn and paddingOut.
+     */
+    PaddingProperty paddingIn, paddingOut;
+
+    /**
+     * @tc.steps: step2. call ConstraintPaddingPropertyNonNegative and set paddingIn to have no value.
+     * @tc.expected: the paddingOut equals paddingIn.
+     */
+    paddingOut = paddingIn;
+    PaddingProperty res = ConstraintPaddingPropertyNonNegative(paddingIn);
+    EXPECT_EQ(paddingOut, res);
+
+    /**
+     * @tc.steps: step3. call ConstraintPaddingPropertyNonNegative and set paddingIn to have positive value.
+     * @tc.expected: step1. the paddingOut equals paddingIn.
+     */
+    paddingIn.left = PADDING_LENGTH_VP;
+    paddingIn.right = PADDING_LENGTH_VP;
+    paddingIn.top = PADDING_LENGTH_VP;
+    paddingIn.bottom = PADDING_LENGTH_VP;
+    paddingIn.start = PADDING_LENGTH_VP;
+    paddingIn.end = PADDING_LENGTH_VP;
+    paddingOut = paddingIn;
+    res = ConstraintPaddingPropertyNonNegative(paddingIn);
+    EXPECT_EQ(paddingOut, res);
+
+    /**
+     * @tc.steps: step4. call ConstraintPaddingPropertyNonNegative and set paddingIn to have zero value.
+     * @tc.expected: step1. the paddingOut equals paddingIn.
+     */
+    paddingIn.left = PADDING_LENGTH_ZERO;
+    paddingIn.right = PADDING_LENGTH_ZERO;
+    paddingIn.top = PADDING_LENGTH_ZERO;
+    paddingIn.bottom = PADDING_LENGTH_ZERO;
+    paddingIn.start = PADDING_LENGTH_ZERO;
+    paddingIn.end = PADDING_LENGTH_ZERO;
+    paddingOut = paddingIn;
+    res = ConstraintPaddingPropertyNonNegative(paddingIn);
+    EXPECT_EQ(paddingOut, res);
+
+    /**
+     * @tc.steps: step3. call ConstraintPaddingPropertyNonNegative and set paddingIn to have negative value.
+     * @tc.expected: step1. the paddingOut are set to zero.
+     */
+    paddingIn.left = PADDING_LENGTH_NEGATIVE;
+
+    paddingIn.right = PADDING_LENGTH_NEGATIVE;
+    paddingIn.top = PADDING_LENGTH_NEGATIVE;
+    paddingIn.bottom = PADDING_LENGTH_NEGATIVE;
+    paddingIn.start = PADDING_LENGTH_NEGATIVE;
+    paddingIn.end = PADDING_LENGTH_NEGATIVE;
+    paddingOut.left = PADDING_LENGTH_ZERO;
+    paddingOut.right = PADDING_LENGTH_ZERO;
+    paddingOut.top = PADDING_LENGTH_ZERO;
+    paddingOut.bottom = PADDING_LENGTH_ZERO;
+    paddingOut.start = PADDING_LENGTH_ZERO;
+    paddingOut.end = PADDING_LENGTH_ZERO;
+    res = ConstraintPaddingPropertyNonNegative(paddingIn);
+    EXPECT_EQ(paddingOut, res);
 }
 
 /**

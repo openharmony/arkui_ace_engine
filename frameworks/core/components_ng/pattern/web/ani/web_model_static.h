@@ -28,6 +28,7 @@ public:
     static void SetPopup(FrameNode* frameNode, bool isPopup, int32_t parentWebId);
     static void SetWebIdCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webIdCallback);
     static void SetHapPathCallback(FrameNode* frameNode, std::function<void(const std::string&)>&& hapPathCallback);
+    static void SetWebDetachCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webDetachCallback);
     static void SetWebSrc(FrameNode* frameNode, const std::optional<std::string>& webSrc);
     static void SetRenderMode(FrameNode* frameNode, const std::optional<RenderMode>& renderMode);
     static void SetIncognitoMode(FrameNode* frameNode, const std::optional<bool>& incognitoMode);
@@ -54,6 +55,8 @@ public:
     static void SetEnableFollowSystemFontWeight(FrameNode *frameNode,
         const std::optional<bool>& enableFollowSystemFontWeight);
     static void SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std::optional<bool>& enable);
+    static void SetEnableDataDetector(FrameNode* frameNode, bool isEnabled);
+    static void SetDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config);
     static void JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems& scriptItems);
@@ -198,7 +201,6 @@ public:
     static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
     static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
-    static void SetForceEnableZoom(FrameNode* frameNode, bool isEnabled);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_ANI_WEB_MODEL_STATIC_H

@@ -174,6 +174,7 @@ public:
         std::vector<PopupGradientColor> popupBorderGradientColor);
     void PaintOuterBorderGradient(RSPen& paint);
     void PaintInnerBorderGradient(RSPen& paint);
+    float GetDoubleBorderWidthOffset(const RefPtr<PopupTheme>& popupTheme);
 
 private:
     void PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* paintWrapper);

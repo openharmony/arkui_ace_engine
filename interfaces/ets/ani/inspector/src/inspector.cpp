@@ -15,6 +15,7 @@
 #include <ani.h>
 #include <string>
 #include <unistd.h>
+#include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "bridge/arkts_frontend/arkts_frontend.h"
@@ -26,10 +27,10 @@ namespace {
 const char LAYOUT_TYPE[] = "layout";
 const char DRAW_TYPE[] = "draw";
 const char DRAW_CHILDREN_TYPE[] = "drawChildren";
-const char ANI_INSPECTOR_NS[] = "L@ohos/arkui/inspector/inspector;";
-const char ANI_COMPONENT_OBSERVER_CLS[] = "L@ohos/arkui/inspector/inspector/ComponentObserverImpl;";
-const char KOALA_INSPECTOR_CLS[] = "L@koalaui/arkts-arkui/generated/arkts/ohos/arkui/inspector/Inspector;";
-const char KOALA_COMPONENT_CLS[] = "L@koalaui/arkts-arkui/generated/arkts/ohos/arkui/inspector/ComponentObserver;";
+const char ANI_INSPECTOR_NS[] = "@ohos.arkui.inspector.inspector";
+const char ANI_COMPONENT_OBSERVER_CLS[] = "@ohos.arkui.inspector.inspector.ComponentObserverImpl";
+const char KOALA_INSPECTOR_CLS[] = "@koalaui.arkts-arkui.generated.arkts.ohos.arkui.inspector.Inspector";
+const char KOALA_COMPONENT_CLS[] = "@koalaui.arkts-arkui.generated.arkts.ohos.arkui.inspector.ComponentObserver";
 } // namespace
  
 namespace OHOS::Ace {
@@ -268,7 +269,7 @@ static ani_string AniGetInspectorTree(ani_env *env)
     return aniResult;
 }
 
-static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array_ref filters)
+static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array filters)
 {
     bool isLayoutInspector = false;
     const NG::InspectorFilter& inspectorFilter = GetInspectorFilter(env, filters, isLayoutInspector);
@@ -276,7 +277,7 @@ static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array_ref filter
     bool needThrow = false;
     auto nodeInfos = NG::Inspector::GetInspector(isLayoutInspector, inspectorFilter, needThrow);
     if (needThrow) {
-        AniThrow(env, "get inspector failed");
+        AniThrow(env, "Unable to obtain current ui context", ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED);
         return nullptr;
     }
     ani_string result;
@@ -287,10 +288,11 @@ static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array_ref filter
     return result;
 }
  
-static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_double depth, ani_array_ref filters)
+static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_double depth, ani_array filters)
 {
     if (depth < 0) {
-        AniThrow(env, "invalid filter depth");
+        // AniThrow(env, "The parameter depth must be greater than 0.",
+        //     ERROR_CODE_INSPECTOR_PARAM_DEPTH_INVALID);
         return nullptr;
     }
     bool isLayoutInspector = false;
@@ -306,7 +308,7 @@ static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, a
     bool needThrow = false;
     auto nodeInfos = NG::Inspector::GetInspector(false, inspectorFilter, needThrow);
     if (needThrow) {
-        AniThrow(env, "get inspector failed");
+        AniThrow(env, "Unable to obtain current UI context", ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED);
         return nullptr;
     }
     ani_string result;

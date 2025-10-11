@@ -669,6 +669,7 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/web/web_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_select_overlay.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_statusbar_click.cpp",
     "../mock_rosen_render_surface.cpp",
     "../mock_web_delegate.cpp",
     "richtext_model_static_test.cpp",
@@ -677,7 +678,6 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
 
   deps = [
     "$ace_root/frameworks/core/components/custom_paint:ace_core_components_custom_paint_ohos",
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",

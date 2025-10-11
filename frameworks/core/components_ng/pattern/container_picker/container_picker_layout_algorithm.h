@@ -43,6 +43,11 @@ public:
         return std::move(itemPosition_);
     }
 
+    const std::vector<int32_t>& GetOffScreemItems()
+    {
+        return std::move(offScreenItemsIndex_);
+    }
+
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
@@ -125,6 +130,11 @@ public:
         return childLayoutConstraint_;
     }
 
+    bool IsCrossMatchChild() const
+    {
+        return crossMatchChild_;
+    }
+
 private:
     void LayoutItem(LayoutWrapper* layoutWrapper, OffsetF offset, std::pair<int32_t, PickerItemInfo> pos);
     void MeasureSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
@@ -132,6 +142,7 @@ private:
     void MeasureWidth(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     float GetChildMaxWidth(LayoutWrapper* layoutWrapper) const;
     void MeasurePickerItems(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
+    void ResetOffscreenItemPosition(LayoutWrapper* layoutWrapper, int32_t index) const;
     void SetPatternContentMainSize(LayoutWrapper* layoutWrapper);
     void MeasureBelow(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex,
         float startPos, bool cachedLayout = false);
@@ -147,6 +158,7 @@ private:
     void AdjustOffsetOnAbove(float currentStartPos);
     float GetChildMainAxisSize(const RefPtr<LayoutWrapper>& childWrapper);
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
+    void TranslateAndRotate(RefPtr<FrameNode> node, OffsetF& offset);
 
     LayoutConstraintF childLayoutConstraint_;
     LayoutCalPolicy widthLayoutPolicy = LayoutCalPolicy::NO_MATCH;
@@ -155,9 +167,9 @@ private:
     ContainerPickerUtils::PositionMap itemPositionInAnimation_;
     Axis axis_ = Axis::VERTICAL;
 
-    std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
     std::set<int32_t> measuredItems_;
+    std::vector<int32_t> offScreenItemsIndex_;
 
     int32_t totalItemCount_ = 0;
     int32_t selectedIndex_ = 0;
@@ -172,6 +184,7 @@ private:
     float currentOffset_ = 0.0f;
     float dividerSpacingFontScale_ = 1.0f;
     float gradientFontScale_ = 1.0f;
+    bool crossMatchChild_ = false;
     bool mainSizeIsMeasured_ = false;
     bool measured_ = false;
     bool isLoop_ = false;

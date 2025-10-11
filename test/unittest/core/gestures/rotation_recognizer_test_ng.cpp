@@ -946,7 +946,6 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(rotationRecognizerPtr->disposal_, GestureDisposal::REJECT);
 }
-
 /**
  * @tc.name: RotationRecognizerHandleTouchDownEventTest001
  * @tc.desc: Test RotationRecognizer function with axis event input: Down

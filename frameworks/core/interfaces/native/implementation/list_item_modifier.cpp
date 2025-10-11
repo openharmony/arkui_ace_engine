@@ -19,12 +19,10 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
+#include "core/interfaces/native/implementation/lazy_build_accessor.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
-using ListItemEditableType = std::variant<bool, uint32_t>;
-
 namespace {
 void AssignVoidCallback(std::function<void()>& dst, const Opt_Callback_Void& src)
 {
@@ -96,28 +94,39 @@ void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isSt
         []() {}
     );
 }
+
+std::optional<bool> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+{
+    std::optional<bool> result;
+    Converter::VisitUnionPtr(value,
+        [&result](const Ark_Boolean& src) {
+            result = Converter::OptConvert<bool>(src);
+        },
+        [&result, frameNode](const Ark_Bindable_Boolean& src) {
+            result = Converter::OptConvert<bool>(src.value);
+            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+            auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](const bool value) {
+                PipelineContext::SetCallBackNode(weakNode);
+                arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
+            };
+            ListItemModelStatic::SetSelectChangeEvent(frameNode, std::move(onEvent));
+        },
+        [] {});
+    return result;
+}
 } // namespace
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
+struct ListItemOptions {
+    std::optional<V2::ListItemStyle> style;
+};
 template<>
 inline Converter::ListItemOptions Convert(const Ark_ListItemOptions& src)
 {
     return {
         .style = OptConvert<V2::ListItemStyle>(src.style)
     };
-}
-
-template<>
-inline ListItemEditableType Convert(const Ark_Boolean& src)
-{
-    return Converter::Convert<bool>(src);
-}
-
-template<>
-inline ListItemEditableType Convert(const Ark_EditMode& src)
-{
-    return static_cast<uint32_t>(src);
 }
 }
 
@@ -126,96 +135,58 @@ namespace ListItemModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ListItemModelStatic::CreateFrameNode(id);
+    auto frameNode = ListItemModelStatic::CreateFrameNode(id, false, LazyBuild::IsLazyBuild());
+    LazyBuild::ResetLazyBuild();
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
 } // ListItemModifier
 namespace ListItemInterfaceModifier {
-void SetListItemOptions0Impl(Ark_NativePointer node,
-                             const Opt_ListItemOptions* value)
+void SetListItemOptionsImpl(Ark_NativePointer node,
+                            const Opt_ListItemOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto options = Converter::OptConvert<Converter::ListItemOptions>(*value);
+    auto options = Converter::OptConvertPtr<Converter::ListItemOptions>(value);
     if (options.has_value()) {
         ListItemModelStatic::SetStyle(frameNode, options.value().style);
     }
 }
-void SetListItemOptions1Impl(Ark_NativePointer node,
-                             const Opt_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto optionsOpt = Converter::OptConvert<std::string>(*value);
-    if (optionsOpt.has_value()) {
-        LOGE("ListItemModifier::SetListItemOptions1Impl is not implemented yet!");
-    }
-}
 } // ListItemInterfaceModifier
 namespace ListItemAttributeModifier {
-void StickyImpl(Ark_NativePointer node,
-                const Opt_Sticky* value)
+void SetSelectableImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ListItemModelStatic::SetSticky(frameNode, Converter::OptConvert<V2::StickyMode>(*value));
-}
-void EditableImpl(Ark_NativePointer node,
-                  const Opt_Union_Boolean_EditMode* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    // V2::EditMode non-standard enum so set default values in modifier
-    auto editable = static_cast<uint32_t>(V2::EditMode::NONE);
-    if (value != nullptr) {
-        auto editableOpt = Converter::OptConvert<ListItemEditableType>(*value);
-        if (editableOpt.has_value()) {
-            if (editableOpt.value().index() == 0) {
-                editable = std::get<0>(editableOpt.value()) == true ?
-                    V2::EditMode::DELETABLE | V2::EditMode::MOVABLE : V2::EditMode::NONE;
-            } else if (editableOpt.value().index() == 1) {
-                editable = std::get<1>(editableOpt.value());
-            }
-        }
-    }
-    ListItemModelStatic::SetEditMode(frameNode, editable);
-}
-void SelectableImpl(Ark_NativePointer node,
-                    const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     ListItemModelStatic::SetSelectable(frameNode, *convValue);
 }
-void SelectedImpl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
+void SetSelectedImpl(Ark_NativePointer node,
+                     const Opt_Union_Boolean_Bindable* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = ProcessBindableSelected(frameNode, value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     ListItemModelStatic::SetSelected(frameNode, *convValue);
 }
-void SwipeActionImpl(Ark_NativePointer node,
-                     const Opt_SwipeActionOptions* value)
+void SetSwipeActionImpl(Ark_NativePointer node,
+                        const Opt_SwipeActionOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
 
@@ -236,14 +207,14 @@ void SwipeActionImpl(Ark_NativePointer node,
     ListItemModelStatic::SetSwiperAction(frameNode, nullptr, nullptr,
         std::move(onOffsetChangeCallback), edgeEffect);
 }
-void OnSelectImpl(Ark_NativePointer node,
-                  const Opt_Callback_Boolean_Void* value)
+void SetOnSelectImpl(Ark_NativePointer node,
+                     const Opt_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onSelect = [arkCallback = CallbackHelper(*optValue)](bool param) {
@@ -251,34 +222,18 @@ void OnSelectImpl(Ark_NativePointer node,
     };
     ListItemModelStatic::SetSelectCallback(frameNode, onSelect);
 }
-void _onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                 const Callback_Opt_Boolean_Void* callback)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const bool value) {
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Opt_Boolean>(value));
-    };
-    ListItemModelStatic::SetSelectChangeEvent(frameNode, std::move(onEvent));
-}
 } // ListItemAttributeModifier
 const GENERATED_ArkUIListItemModifier* GetListItemModifier()
 {
     static const GENERATED_ArkUIListItemModifier ArkUIListItemModifierImpl {
         ListItemModifier::ConstructImpl,
-        ListItemInterfaceModifier::SetListItemOptions0Impl,
-        ListItemInterfaceModifier::SetListItemOptions1Impl,
-        ListItemAttributeModifier::StickyImpl,
-        ListItemAttributeModifier::EditableImpl,
-        ListItemAttributeModifier::SelectableImpl,
-        ListItemAttributeModifier::SelectedImpl,
-        ListItemAttributeModifier::SwipeActionImpl,
-        ListItemAttributeModifier::OnSelectImpl,
-        ListItemAttributeModifier::_onChangeEvent_selectedImpl,
+        ListItemInterfaceModifier::SetListItemOptionsImpl,
+        ListItemAttributeModifier::SetSelectableImpl,
+        ListItemAttributeModifier::SetSelectedImpl,
+        ListItemAttributeModifier::SetSwipeActionImpl,
+        ListItemAttributeModifier::SetOnSelectImpl,
     };
     return &ArkUIListItemModifierImpl;
 }
+
 }

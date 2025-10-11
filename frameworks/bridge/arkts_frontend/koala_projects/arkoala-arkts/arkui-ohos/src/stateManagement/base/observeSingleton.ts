@@ -23,6 +23,7 @@ import { StateManagerImpl } from '@koalaui/runtime';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { MonitorFunctionDecorator, MonitorValueInternal } from '../decoratorImpl/decoratorMonitor';
 import { ComputedDecoratedVariable, IComputedDecoratorRef } from '../decoratorImpl/decoratorComputed';
+import { PersistenceV2Impl } from '../storage/persistenceV2';
 
 type TaskType<T> = () => T;
 
@@ -40,6 +41,7 @@ export class ObserveSingleton implements IObserve {
     public static readonly RenderingComponentV2: int = 2;
     public static readonly RenderingMonitor: int = 3;
     public static readonly RenderingComputed: int = 4;
+    public static readonly RenderingPersistentStorage: int = 5;
 
     public _renderingComponent: int = ObserveSingleton.RenderingComponent;
     private mutateMutableStateMode_: NotifyMutableStateMode = NotifyMutableStateMode.normal;
@@ -47,6 +49,7 @@ export class ObserveSingleton implements IObserve {
     private monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
     private computedPropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
     private queuedMutableStateChanges_ = new Set<WeakRef<IBindingSource>>();
+    private persistencePropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
     private finalizationRegistry = new FinalizationRegistry<WeakRef<ITrackedDecoratorRef>>(
         this.finalizeComputedAndMonitorPath
     );
@@ -115,6 +118,10 @@ export class ObserveSingleton implements IObserve {
     }
 
     public addDirtyRef(trackedRef: ITrackedDecoratorRef): void {
+        if (trackedRef.id >= PersistenceV2Impl.MIN_PERSISTENCE_ID) {
+            this.persistencePropRefsChanged_.add(trackedRef.weakThis);
+            return;
+        }
         if (trackedRef.id >= MonitorFunctionDecorator.MIN_MONITOR_ID) {
             this.monitorPathRefsChanged_.add(trackedRef.weakThis);
         } else if (trackedRef.id >= ComputedDecoratedVariable.MIN_COMPUTED_ID) {
@@ -144,6 +151,11 @@ export class ObserveSingleton implements IObserve {
                 this.computedPropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
                 this.updateDirtyComputedProps(computedProps);
             }
+            if (this.persistencePropRefsChanged_.size) {
+                const persistenceProps = this.persistencePropRefsChanged_;
+                this.persistencePropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+                PersistenceV2Impl.instance().onChangeObserved(persistenceProps);
+            }
             if (this.monitorPathRefsChanged_.size > 0) {
                 const monitors = this.monitorPathRefsChanged_;
                 this.monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
@@ -154,7 +166,12 @@ export class ObserveSingleton implements IObserve {
                     });
                 }
             }
-        } while (this.monitorPathRefsChanged_.size + this.computedPropRefsChanged_.size > 0);
+        } while (
+            this.monitorPathRefsChanged_.size +
+                this.computedPropRefsChanged_.size +
+                this.persistencePropRefsChanged_.size >
+            0
+        );
     }
 
     private updateDirtyComputedProps(computedProps: Set<WeakRef<ITrackedDecoratorRef>>): void {

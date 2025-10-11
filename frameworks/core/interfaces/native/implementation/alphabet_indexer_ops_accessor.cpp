@@ -31,7 +31,7 @@ Ark_NativePointer RegisterIndexerSelectedCallbackImpl(Ark_NativePointer node,
     IndexerModelStatic::SetSelected(frameNode, Converter::Convert<int32_t>(*index));
     auto onEvent = [arkCallback = CallbackHelper(*callback)](
                        const int32_t selected) { arkCallback.Invoke(Converter::ArkValue<Ark_Number>(selected)); };
-    IndexerModelStatic::SetCreatChangeEvent(frameNode, std::move(onEvent));
+    IndexerModelStatic::SetCreateChangeEvent(frameNode, std::move(onEvent));
     return node;
 }
 } // AlphabetIndexerOpsAccessor

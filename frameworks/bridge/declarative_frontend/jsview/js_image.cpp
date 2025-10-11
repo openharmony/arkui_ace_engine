@@ -59,6 +59,9 @@ constexpr float DEFAULT_SMOOTHEDGE_VALUE = 0.0f;
 constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
 constexpr float HDR_BRIGHTNESS_MIN = 0.0f;
 constexpr float HDR_BRIGHTNESS_MAX = 1.0f;
+constexpr int32_t IMAGE_ALT_PLACEHOLDER = 1;
+constexpr int32_t IMAGE_ALT_ERROR = 2;
+constexpr int32_t IMAGE_ALT_NORMAL = 3;
 constexpr uint32_t FIT_MATRIX = 16;
 constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
 constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
@@ -148,42 +151,19 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     CHECK_NULL_VOID(context);
     bool isCard = context->IsFormRender();
 
-    std::string src;
-    bool srcValid = false;
-    RefPtr<ResourceObject> resObj;
-    if (args[0]->IsString()) {
-        src = args[0]->ToString();
-    } else {
-        srcValid = ParseJsMedia(args[0], src, resObj);
-    }
-    if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
-        return;
-    }
-    int32_t resId = 0;
-    if (args[0]->IsObject()) {
+    if (args[0]->IsObject() && IsImageAltObject(args[0])) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args[0]);
-        JSRef<JSVal> tmp = jsObj->GetProperty("id");
-        if (!tmp->IsNull() && tmp->IsNumber()) {
-            resId = tmp->ToNumber<int32_t>();
+        if (jsObj->HasProperty("placeholder")) {
+            JSRef<JSVal> placeholderVal = jsObj->GetProperty("placeholder");
+            ParseAltImageAlt(placeholderVal, isCard, IMAGE_ALT_PLACEHOLDER);
         }
-    }
-    std::string bundleName;
-    std::string moduleName;
-    GetJsMediaBundleInfo(args[0], bundleName, moduleName);
-    RefPtr<PixelMap> pixmap = nullptr;
-
-    // input is Drawable
-    if (!srcValid && !isCard) {
-#if defined(PIXEL_MAP_SUPPORTED)
-        pixmap = CreatePixelMapFromNapiValue(args[0]);
-#endif
-    }
-    auto srcRef = std::make_shared<std::string>(src);
-    auto srcInfo = CreateSourceInfo(srcRef, pixmap, bundleName, moduleName);
-    srcInfo.SetIsUriPureNumber((resId == -1));
-    ImageModel::GetInstance()->SetAlt(srcInfo);
-    if (SystemProperties::ConfigChangePerform()) {
-        ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::ALT, resObj);
+        if (jsObj->HasProperty("error")) {
+            JSRef<JSVal> errorVal = jsObj->GetProperty("error");
+            ParseAltImageAlt(errorVal, isCard, IMAGE_ALT_ERROR);
+        }
+        return;
+    } else {
+        ParseAltImageAlt(args[0], isCard, IMAGE_ALT_NORMAL);
     }
 }
 
@@ -1263,6 +1243,74 @@ void JSImage::SetContentTransition(const JSCallbackInfo& info)
         ImageModel::GetInstance()->SetContentTransition(contentTransitionType);
     } else {
         ImageModel::GetInstance()->SetContentTransition(ContentTransitionType::IDENTITY);
+    }
+}
+
+void JSImage::ParseAltImageAlt(JSRef<JSVal> val, bool isCard, int32_t type)
+{
+    std::string src;
+    bool srcValid = false;
+    RefPtr<ResourceObject> resObj;
+    if (val->IsString()) {
+        src = val->ToString();
+    } else {
+        srcValid = ParseJsMedia(val, src, resObj);
+    }
+
+    if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK && type != IMAGE_ALT_ERROR) {
+        return;
+    }
+    int32_t resId = 0;
+    if (val->IsObject() && !IsImageAltObject(val)) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(val);
+        JSRef<JSVal> tmp = jsObj->GetProperty("id");
+        if (!tmp->IsNull() && tmp->IsNumber()) {
+            resId = tmp->ToNumber<int32_t>();
+        }
+    }
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(val, bundleName, moduleName);
+    RefPtr<PixelMap> pixmap = nullptr;
+
+    if (!srcValid && !isCard) {
+#if defined(PIXEL_MAP_SUPPORTED)
+        pixmap = CreatePixelMapFromNapiValue(val);
+#endif
+    }
+    auto srcRef = std::make_shared<std::string>(src);
+    auto srcInfo = CreateSourceInfo(srcRef, pixmap, bundleName, moduleName);
+    srcInfo.SetIsUriPureNumber((resId == -1));
+    HandleAltType(type, srcInfo);
+    if (SystemProperties::ConfigChangePerform()) {
+        ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::ALT, resObj);
+    }
+}
+
+bool JSImage::IsImageAltObject(JSRef<JSVal> val)
+{
+    if (!val->IsObject()) {
+        return false;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(val);
+    return jsObj->HasProperty("placeholder") || jsObj->HasProperty("error");
+}
+
+void JSImage::HandleAltType(int32_t type, const ImageSourceInfo& srcInfo)
+{
+    switch (type) {
+        case IMAGE_ALT_PLACEHOLDER:
+            ImageModel::GetInstance()->SetAltPlaceholder(srcInfo);
+            break;
+        case IMAGE_ALT_ERROR:
+            ImageModel::GetInstance()->SetAltError(srcInfo);
+            break;
+        case IMAGE_ALT_NORMAL:
+            ImageModel::GetInstance()->SetAlt(srcInfo);
+            break;
+        default:
+            break;
     }
 }
 } // namespace OHOS::Ace::Framework

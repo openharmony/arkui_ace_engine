@@ -23,9 +23,21 @@
 
 namespace OHOS::Ace::Framework {
 
-void JSContainerPicker::Create()
+void JSContainerPicker::Create(const JSCallbackInfo& info)
 {
     NG::ContainerPickerModel::Create();
+    JSRef<JSObject> paramObj;
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        paramObj = JSRef<JSObject>::Cast(info[0]);
+    }
+    JSRef<JSVal> selectedIndex;
+    if (!paramObj->IsUndefined()) {
+        selectedIndex = paramObj->GetProperty("selectedIndex");
+    }
+    if (!selectedIndex->IsNull() && selectedIndex->IsNumber()) {
+        auto parseIndex = selectedIndex->ToNumber<int32_t>();
+        NG::ContainerPickerModel::SetSelectedIndex(parseIndex);
+    }
 }
 
 void JSContainerPicker::SetCanLoop(const JSCallbackInfo& info)

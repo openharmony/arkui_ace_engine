@@ -34,27 +34,31 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/calc_dimension.h"
 #include "shapeUtil.h"
-
+#include "shape_peer.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT CircleShape final {
 public:
     static ani_status BindCircleShape(ani_env *env);
+    static ani_object ANICircleShapeFromPtr(ani_env* env, ani_object aniClass, ani_long ptr);
 };
 
 class ACE_FORCE_EXPORT EllipseShape final {
 public:
     static ani_status BindEllipseShape(ani_env *env);
+    static ani_object ANIEllipseShapeFromPtr(ani_env* env, ani_object aniClass, ani_long ptr);
 };
 
 class ACE_FORCE_EXPORT PathShape final {
 public:
     static ani_status BindPathShape(ani_env *env);
+    static ani_object ANIPathShapeFromPtr(ani_env* env, ani_object aniClass, ani_long ptr);
 };
 
 class ACE_FORCE_EXPORT RectShape final {
 public:
     static ani_status BindRectShape(ani_env *env);
+    static ani_object ANIRectShapeFromPtr(ani_env* env, ani_object aniClass, ani_long ptr);
 };
 
 } // namespace OHOS::Ace

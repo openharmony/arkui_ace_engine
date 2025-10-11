@@ -67,6 +67,8 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr uint32_t GRID_COUNTS = 8;
+constexpr uint32_t TV_MIN_GRID_COUNTS = 3;
 constexpr int32_t DEFAULT_CHILD_COUNT = 5;
 constexpr int32_t TARGET_ID = 3;
 constexpr int32_t TARGET = 0;
@@ -80,6 +82,7 @@ constexpr int32_t MENU_Y_TOP = 100;
 constexpr int32_t MENU_Y_BOTTOM = 1400;
 constexpr int32_t MENU_Y_MIDDLE = 1100;
 constexpr int32_t NODE_ID = 1;
+constexpr float TV_MAX_WIDTH = 1000.0f;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float TARGET_SIZE_WIDTH = 50.0f;
@@ -116,6 +119,8 @@ constexpr float MAX_SIZE_HEIGHT = -100.0f;
 constexpr float OFFSET_X = -10.0f;
 constexpr float OFFSET_X_NEW = -20.0f;
 constexpr float ONE_HUNDRED = 100.0f;
+const std::string EMPTY_TEXT = "";
+const std::string TEXT_TAG = "text";
 const std::string MENU_TAG = "menu";
 } // namespace
 
@@ -492,6 +497,7 @@ HWTEST_F(MenuLayout3TestNg, ModifyPositionToWrapper001, TestSize.Level1)
     ASSERT_NE(menuNode, nullptr);
 
     auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
     menuNode->instanceId_ = container->GetInstanceId();
     AceEngine::Get().AddContainer(container->GetInstanceId(), container);
 
@@ -516,6 +522,70 @@ HWTEST_F(MenuLayout3TestNg, ModifyPositionToWrapper001, TestSize.Level1)
     menuAlgorithm->ModifyPositionToWrapper(AceType::RawPtr(menuNode), result);
     EXPECT_FALSE(NearZero(result.GetX()));
     EXPECT_TRUE(NearZero(result.GetY()));
+
+    menuNode->instanceId_ = MIN_SUBCONTAINER_ID;
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetIsSelectMenu(false);
+    menuAlgorithm->ModifyPositionToWrapper(AceType::RawPtr(menuNode), result);
+    EXPECT_FALSE(NearZero(result.GetX()));
+    EXPECT_TRUE(NearZero(result.GetY()));
+}
+
+/**
+ * @tc.name: ModifyPositionToWrapper002
+ * @tc.desc: Test InitTargetSizeAndPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, ModifyPositionToWrapper002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuLayoutAlgorithm
+     */
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(nodeId, TEXT_TAG, MenuType::CONTEXT_MENU);
+    ASSERT_NE(menuPattern, nullptr);
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(nodeId, "menu");
+    ASSERT_NE(menuLayoutAlgorithm, nullptr);
+    
+    menuLayoutAlgorithm->targetNodeId_ = nodeId;
+    menuLayoutAlgorithm->targetTag_ = "text";
+    menuLayoutAlgorithm->canExpandCurrentWindow_ = true;
+    menuPattern->SetIsSelectMenu(false);
+    auto target = FrameNode::GetOrCreateFrameNode("text", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(target, nullptr);
+
+    /**
+     * @tc.steps: step2. layoutWrapper, target node and the geometry node of target is not null
+     */
+    std::vector<SelectParam> params;
+    params.push_back({ "MenuItem", "Icon" });
+    auto frameNode = MenuView::Create(params, 1, EMPTY_TEXT);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    layoutProp->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto menuGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode* layoutWrapper =
+        new LayoutWrapperNode(frameNode, menuGeometryNode, layoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    GeometryProperty geometryProperty;
+    geometryProperty.rect_ = RectF(0.0f, 0.0f, 0.0f, 0.0f);
+    geometryNode->frame_ = geometryProperty;
+    target->geometryNode_ = geometryNode;
+
+    /**
+     * @tc.steps: step3. execute InitTargetSizeAndPosition that isSelectMenu is false
+     * @tc.expected: result as expected
+     */
+    menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, false, menuPattern);
+    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, OffsetF(0.0f, 0.0f));
 }
 
 /**
@@ -2064,5 +2134,76 @@ HWTEST_F(MenuLayout3TestNg, CalcSubMenuMaxHeightConstraint001, TestSize.Level1)
     menuPattern->UpdateLastPlacement(Placement::RIGHT);
     menuAlgorithm->CalcSubMenuMaxHeightConstraint(parentLayoutConstraint, menuItem);
     EXPECT_EQ(menuPattern->GetLastPlacement(), Placement::RIGHT);
+}
+ 
+/**
+ * @tc.name: GetMaxGridCounts001
+ * @tc.desc: Verify GetMaxGridCounts.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, GetMaxGridCounts001, TestSize.Level1)
+{
+    auto menuAlgorithm = CreateMenuLayoutAlgorithm(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuAlgorithm, nullptr);
+    auto menuNode = GetOrCreateMenu(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto props = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+
+    auto geometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    LayoutWrapperNode layoutWrapper(menuNode, geometryNode, props);
+
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    selectTheme->isTV_ = true;
+    auto childConstraint = props->CreateChildConstraint();
+
+    auto columnInfo = AceType::MakeRefPtr<GridColumnInfo>();
+    ASSERT_NE(columnInfo, nullptr);
+    auto parent = AceType::MakeRefPtr<GridContainerInfo>();
+    parent->columns_ = GRID_COUNTS;
+    columnInfo->parent_ = parent;
+    childConstraint.maxSize.SetWidth(TV_MAX_WIDTH);
+    menuAlgorithm->UpdateConstraintWidth(&layoutWrapper, childConstraint);
+    EXPECT_TRUE(selectTheme->IsTV());
+}
+
+/**
+ * @tc.name: UpdateConstraintBaseOnOptions001
+ * @tc.desc: Verify UpdateConstraintBaseOnOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, UpdateConstraintBaseOnOptions001, TestSize.Level1)
+{
+    auto menuAlgorithm = CreateMenuLayoutAlgorithm(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuAlgorithm, nullptr);
+    auto menuNode = GetOrCreateMenu(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto props = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+
+    auto geometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    LayoutWrapperNode layoutWrapper(menuNode, geometryNode, props);
+
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    selectTheme->isTV_ = true;
+    auto childConstraint = props->CreateChildConstraint();
+
+    menuAlgorithm->optionPadding_ = 0.0f;
+    auto columnInfo = AceType::MakeRefPtr<GridColumnInfo>();
+    ASSERT_NE(columnInfo, nullptr);
+    auto parent = AceType::MakeRefPtr<GridContainerInfo>();
+    parent->columns_ = TV_MIN_GRID_COUNTS;
+    columnInfo->parent_ = parent;
+    childConstraint.maxSize.SetWidth(TV_MAX_WIDTH);
+    menuAlgorithm->UpdateConstraintBaseOnOptions(&layoutWrapper, childConstraint);
+    EXPECT_TRUE(selectTheme->IsTV());
 }
 } // namespace OHOS::Ace::NG

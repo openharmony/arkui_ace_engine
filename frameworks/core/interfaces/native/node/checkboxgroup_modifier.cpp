@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -34,14 +35,19 @@ void SetCheckboxGroupSelectedColor(ArkUINodeHandle node, uint32_t color)
 void SetCheckboxGroupSelectedColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
     CHECK_NULL_VOID(node);
-    SetCheckboxGroupSelectedColor(node, color);
+    Color result = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::SELECTED_COLOR, colorResObj);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::SELECTED_COLOR, resObj);
     }
+    SetCheckboxGroupSelectedColor(node, result.GetValue());
 }
 
 void ResetCheckboxGroupSelectedColor(ArkUINodeHandle node)
@@ -70,14 +76,19 @@ void SetCheckboxGroupUnSelectedColor(ArkUINodeHandle node, uint32_t color)
 void SetCheckboxGroupUnSelectedColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
     CHECK_NULL_VOID(node);
-    SetCheckboxGroupUnSelectedColor(node, color);
+    Color result = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::UN_SELECTED_COLOR, colorResObj);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::UN_SELECTED_COLOR, resObj);
     }
+    SetCheckboxGroupUnSelectedColor(node, result.GetValue());
 }
 
 void ResetCheckboxGroupUnSelectedColor(ArkUINodeHandle node)

@@ -740,6 +740,7 @@ void WaterFlowPattern::SetLayoutMode(LayoutMode mode)
 {
     if (!layoutInfo_ || mode != layoutInfo_->Mode()) {
         layoutInfo_ = WaterFlowLayoutInfoBase::Create(mode);
+        isInitialized_ = false; // for contentStartOffset when mode is changed
         MarkDirtyNodeSelf();
     }
 }

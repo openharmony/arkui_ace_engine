@@ -35,6 +35,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MixedMode, MixedModeContent);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BypassVsyncCondition, WebBypassVsyncCondition);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ZoomAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ZoomControlAccess, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(GeolocationAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(UserAgent, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CacheMode, WebCacheMode);
@@ -89,9 +90,13 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeParserBudgetEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebMediaAVSessionEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableDataDetector, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableSelectedDataDetector, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableFollowSystemFontWeight, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlankScreenDetectionConfig, BlankScreenDetectionConfig);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(GestureFocusMode, GestureFocusMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(RotateRenderEffect, WebRotateEffect);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForceEnableZoom, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackToTop, bool);
 };
 
 } // namespace OHOS::Ace::NG

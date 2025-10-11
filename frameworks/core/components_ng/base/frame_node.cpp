@@ -997,6 +997,26 @@ void FrameNode::DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json)
 {
     json->Put("$rect", GetTransformRectRelativeToWindow().ToBounds().c_str());
     json->Put("$debugLine", "");
+    if (!propInspectorId_->empty()) {
+        json->Put("compid", propInspectorId_.value_or("").c_str());
+    }
+}
+
+void FrameNode::DumpSimplifyCommonInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
+{
+    auto eventHub = eventHub_ ? eventHub_->GetOrCreateGestureEventHub() : nullptr;
+    if (eventHub && config.interactionInfo) {
+        json->Put(TreeKey::CLICKABLE, eventHub->IsAccessibilityClickable());
+        json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsAccessibilityLongClickable());
+    }
+    if (accessibilityProperty_) {
+        if (!accessibilityProperty_->GetAccessibilityText().empty() && config.accessibilityInfo) {
+            json->Put("accessibilityContent", accessibilityProperty_->GetAccessibilityText().c_str());
+        }
+        if (config.interactionInfo) {
+            json->Put(TreeKey::SCROLLABLE, accessibilityProperty_->IsScrollable());
+        }
+    }
 }
 
 void FrameNode::DumpPadding(const std::unique_ptr<NG::PaddingProperty>& padding, std::string label,
@@ -1088,6 +1108,33 @@ void FrameNode::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
         auto child = JsonUtil::CreateSharedPtrJson();
         pattern_->DumpSimplifyInfo(child);
         json->Put("$attrs", std::move(child));
+    }
+}
+
+void FrameNode::MergeAttributesIntoJson(std::shared_ptr<JsonValue>& json, const std::shared_ptr<JsonValue>& child)
+{
+    if (json->Contains("$attrs") && json->GetValue("$attrs")->IsObject()) {
+        auto attrs = json->GetObject("$attrs");
+        JsonValue& attrsRef = *attrs;
+        auto childObj = child->GetChild();
+        while (childObj && childObj->IsValid()) {
+            auto key = childObj->GetKey();
+            attrsRef.Put(key.c_str(), child->GetValue(key));
+            childObj = childObj->GetNext();
+        }
+    } else {
+        json->Put("$attrs", std::move(child));
+    }
+}
+
+void FrameNode::DumpSimplifyInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
+{
+    CHECK_NULL_VOID(json);
+    DumpSimplifyCommonInfoOnlyForParamConfig(json, config);
+    if (pattern_) {
+        auto child = JsonUtil::CreateSharedPtrJson();
+        pattern_->DumpSimplifyInfoOnlyForParamConfig(child, config);
+        MergeAttributesIntoJson(json, child);
     }
 }
 
@@ -3469,9 +3516,10 @@ void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseReg
     }
 }
 
-bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList)
+bool FrameNode::InResponseRegionList(
+    const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList, bool needForCheckTransformValid)
 {
-    if (IsPaintRectWithTransformValid()) {
+    if (needForCheckTransformValid && IsPaintRectWithTransformValid()) {
         return false;
     }
     for (const auto& rect : responseRegionList) {
@@ -3629,7 +3677,7 @@ void FrameNode::CollectSelfAxisResult(const PointF& globalPoint, const PointF& l
         auto inputHub = eventHub_ ? eventHub_->GetInputEventHub() : nullptr;
         if (inputHub) {
             const auto coordinateOffset = globalPoint - localPoint;
-            inputHub->ProcessAxisTestHit(coordinateOffset, axisResult);
+            inputHub->ProcessAxisTestHit(coordinateOffset, axisResult, touchRestrict.isCoastingAxisEvent);
         }
     }
 }
@@ -4012,6 +4060,57 @@ OffsetF FrameNode::GetPaintRectOffsetNG(bool excludeSelf, bool checkBoundary) co
         parent = parent->GetAncestorNodeOfFrame(checkBoundary);
     }
     return OffsetF(point.GetX(), point.GetY());
+}
+
+OffsetF FrameNode::ConvertPoint(OffsetF position, const RefPtr<FrameNode>& targetNode)
+{
+    if (!targetNode || targetNode == this) {
+        return position;
+    }
+    std::vector<RefPtr<FrameNode>> historyNodes;
+    auto sameParentNode = FindSameParentComponent(Claim(this), targetNode);
+    auto targetNodeParent = targetNode;
+    while (targetNodeParent) {
+        if (targetNodeParent->CheckTopWindowBoundary()) {
+            break;
+        }
+        historyNodes.push_back(targetNodeParent);
+        if (targetNodeParent == sameParentNode) {
+            break;
+        }
+        targetNodeParent = targetNodeParent->GetAncestorNodeOfFrame(false);
+    }
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    Point point = Point(position.GetX(), position.GetY());
+    auto parent = Claim(this);
+    while (parent) {
+        if (parent->CheckTopWindowBoundary()) {
+            break;
+        }
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        auto parentMatrix = Matrix4::Invert(renderContext->GetRevertMatrix());
+        point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
+        point = parentMatrix * point;
+        if (parent == sameParentNode) {
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame(false);
+    }
+    Point targetNodePoint = point;
+    while (!historyNodes.empty()) {
+        auto node = historyNodes.back();
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        auto revertMatrix = renderContext->GetRevertMatrix();
+        targetNodePoint = revertMatrix * targetNodePoint;
+        targetNodePoint = targetNodePoint - Offset(parentOffset.GetX(), parentOffset.GetY());
+        historyNodes.pop_back();
+    }
+    return OffsetF(targetNodePoint.GetX(), targetNodePoint.GetY());
 }
 
 std::vector<Point> GetRectPoints(SizeF& frameSize)

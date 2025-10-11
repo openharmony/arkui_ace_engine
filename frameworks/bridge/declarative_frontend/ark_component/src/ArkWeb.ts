@@ -84,6 +84,20 @@ class WebZoomAccessModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class WebZoomControlAccessModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webZoomControlAccess');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetZoomControlAccess(node);
+    } else {
+      getUINativeModule().web.setZoomControlAccess(node, this.value);
+    }
+  }
+}
+
 class WebCacheModeModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -613,6 +627,20 @@ class WebNativeEmbedOptionsModifier extends ModifierWithKey<EmbedOptions> {
   }
 }
 
+class WebOnNativeEmbedObjectParamChangeModifier extends ModifierWithKey<(DataInfo: NativeEmbedParamDataInfo) => void> {
+  constructor (value: (DataInfo: NativeEmbedParamDataInfo) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnNativeEmbedObjectParamChangeModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnNativeEmbedObjectParamChange(node);
+    } else {
+      getUINativeModule().web.setOnNativeEmbedObjectParamChange(node, this.value);
+    }
+  }
+}
+
 class WebOnFirstContentfulPaintModifier extends ModifierWithKey<(navigationStartTick: number, firstContentfulPaintMs: number) => void> {
   constructor(value: (navigationStartTick: number, firstContentfulPaintMs: number) => void) {
     super(value);
@@ -1121,6 +1149,38 @@ class WebOnShowFileSelectorModifier extends ModifierWithKey<(result: FileSelecto
   }
 }
 
+class WebOnDetectedBlankScreenModifier extends ModifierWithKey<OnDetectBlankScreenCallback> {
+  constructor (value: OnDetectBlankScreenCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnDetectedBlankScreenModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnDetectedBlankScreen(node);
+    } else {
+      getUINativeModule().web.setOnDetectedBlankScreen(node, this.value);
+    }
+  }
+}
+
+class WebBlankScreenDetectionConfigModifier extends ModifierWithKey<BlankScreenDetectionConfig> {
+  constructor(value: BlankScreenDetectionConfig) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webBlankScreenDetectionConfigModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetBlankScreenDetectionConfig(node);
+    } else {
+      getUINativeModule().web.setBlankScreenDetectionConfig(node,
+                                                            this.value.enable,
+                                                            this.value.detectionTiming,
+                                                            this.value.detectionMethods,
+                                                            this.value.contentfulNodesCountThreshold);
+    }
+  }
+}
+
 class WebOnContextMenuShowModifier extends ModifierWithKey<(param: WebContextMenuParam, result: WebContextMenuResult) => boolean> {
   constructor(value: (param: WebContextMenuParam, result: WebContextMenuResult) => boolean) {
     super(value);
@@ -1320,6 +1380,34 @@ class WebDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorConf
   }
 }
 
+class WebEnableSelectedDataDetectorModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('WebEnableSelectedDataDetectorModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableSelectedDataDetector(node);
+    } else {
+      getUINativeModule().web.setEnableSelectedDataDetector(node, this.value);
+    }
+  }
+}
+
+class WebSelectedDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorConfig> {
+  constructor(value: TextDataDetectorConfig) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webSelectedDataDetectorConfigModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetSelectedDataDetectorConfig(node);
+    } else {
+      getUINativeModule().web.setSelectedDataDetectorConfig(node, this.value.types);
+    }
+  }
+}
+
 class WebGestureFocusModeModifier extends ModifierWithKey<GestureFocusMode> {
   constructor(value: GestureFocusMode) {
     super(value);
@@ -1330,6 +1418,20 @@ class WebGestureFocusModeModifier extends ModifierWithKey<GestureFocusMode> {
       getUINativeModule().web.resetGestureFocusMode(node);
     } else {
       getUINativeModule().web.setGestureFocusMode(node, this.value);
+    }
+  }
+}
+
+class WebRotateRenderEffectModifier extends ModifierWithKey<WebRotateEffect> {
+  constructor(value: WebRotateEffect) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webRotateRenderEffectModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetRotateRenderEffect(node);
+    } else {
+      getUINativeModule().web.setRotateRenderEffect(node, this.value);
     }
   }
 }
@@ -1435,6 +1537,20 @@ class WebForceEnableZoomModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class WebBackToTopModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webBackToTopModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetBackToTop(node);
+    } else {
+      getUINativeModule().web.setBackToTop(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1465,6 +1581,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   zoomAccess(zoomAccess: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebZoomAccessModifier.identity, WebZoomAccessModifier, zoomAccess);
+    return this;
+  }
+  zoomControlAccess(zoomControlAccess: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebZoomControlAccessModifier.identity, WebZoomControlAccessModifier, zoomControlAccess);
     return this;
   }
   geolocationAccess(geolocationAccess: boolean): this {
@@ -1613,6 +1733,14 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   onFileSelectorShow(callback: (event?: { callback: Function; fileSelector: object; } | undefined) => void): this {
     throw new Error('Method not implemented.');
+  }
+  onDetectedBlankScreen(callback: OnDetectBlankScreenCallback): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnDetectedBlankScreenModifier.identity, WebOnDetectedBlankScreenModifier, callback);
+    return this;
+  }
+  blankScreenDetectionConfig(config: BlankScreenDetectionConfig): this {
+    modifierWithKey(this._modifiersWithKeys, WebBlankScreenDetectionConfigModifier.identity, WebBlankScreenDetectionConfigModifier, config);
+    return this;
   }
   onResourceLoad(callback: (event: { url: string; }) => void): this {
     modifierWithKey(this._modifiersWithKeys, WebOnResourceLoadModifier.identity, WebOnResourceLoadModifier, callback);
@@ -1836,6 +1964,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedGestureEventModifier.identity, WebOnNativeEmbedGestureEventModifier, callback);
     return this;
   }
+  onNativeEmbedObjectParamChange(callback: (event: NativeEmbedParamDataInfo) => void): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedObjectParamChangeModifier.identity, WebOnNativeEmbedObjectParamChangeModifier, callback);
+    return this;
+  }
   registerNativeEmbedRule(tag: string, type: string): this {
     let arkRegisterNativeEmbedRule = new ArkRegisterNativeEmbedRule();
     if (!isUndefined(tag) && !isNull(tag)) {
@@ -1931,12 +2063,28 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebDataDetectorConfigModifier.identity, WebDataDetectorConfigModifier, config);
     return this;
   }
+  enableSelectedDataDetector(enabled: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableSelectedDataDetectorModifier.identity, WebEnableSelectedDataDetectorModifier, enabled);
+    return this;
+  }
+  SelecteddataDetectorConfig(config: TextDataDetectorConfig): this {
+    modifierWithKey(this._modifiersWithKeys, WebSelectedDataDetectorConfigModifier.identity, WebSelectedDataDetectorConfigModifier, config);
+    return this;
+  }
   gestureFocusMode(mode: GestureFocusMode): this {
     modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
     return this;
   }
   forceEnableZoom(forceEnableZoom: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebForceEnableZoomModifier.identity, WebForceEnableZoomModifier, forceEnableZoom);
+    return this;
+  }
+  rotateRenderEffect(effect: WebRotateEffect): this {
+    modifierWithKey(this._modifiersWithKeys, WebRotateRenderEffectModifier.identity, WebRotateRenderEffectModifier, effect);
+    return this;
+  }
+  backToTop(backToTop: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebBackToTopModifier.identity, WebBackToTopModifier, backToTop);
     return this;
   }
 }

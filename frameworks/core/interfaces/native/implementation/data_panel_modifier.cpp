@@ -21,7 +21,6 @@
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace {
 constexpr float DATA_PANEL_VALUE_MIN = 0.0;
@@ -144,7 +143,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     // CHECK_NULL_RETURN(frameNode, nullptr);
     // frameNode->IncRefCount();
     // return AceType::RawPtr(frameNode);
-    return {};
+    return nullptr;
 }
 } // DataPanelModifier
 namespace DataPanelInterfaceModifier {
@@ -154,7 +153,7 @@ void SetDataPanelOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    auto panelOptions = Converter::OptConvert<Converter::DataPanelOptions>(*options);
+    auto panelOptions = Converter::OptConvertPtr<Converter::DataPanelOptions>(options);
     if (panelOptions.has_value()) {
         DataPanelModelStatic::SetValues(frameNode, panelOptions.value().values);
         DataPanelModelStatic::SetMax(frameNode, panelOptions.value().max);
@@ -167,20 +166,20 @@ void SetDataPanelOptionsImpl(Ark_NativePointer node,
 }
 } // DataPanelInterfaceModifier
 namespace DataPanelAttributeModifier {
-void CloseEffectImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
+void SetCloseEffectImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     DataPanelModelNG::SetCloseEffect(frameNode, *convValue);
 }
-void ValueColorsImpl(Ark_NativePointer node,
-                     const Opt_Array_Union_ResourceColor_LinearGradient* value)
+void SetValueColorsImpl(Ark_NativePointer node,
+                        const Opt_Array_Union_ResourceColor_LinearGradient* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -196,16 +195,16 @@ void ValueColorsImpl(Ark_NativePointer node,
         DataPanelModelStatic::SetValueColors(frameNode, std::nullopt);
     }
 }
-void TrackBackgroundColorImpl(Ark_NativePointer node,
-                              const Opt_ResourceColor* value)
+void SetTrackBackgroundColorImpl(Ark_NativePointer node,
+                                 const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto color = value ? Converter::OptConvert<Color>(*value) : std::nullopt;
+    auto color = Converter::OptConvertPtr<Color>(value);
     DataPanelModelStatic::SetTrackBackground(frameNode, color);
 }
-void StrokeWidthImpl(Ark_NativePointer node,
-                     const Opt_Length* value)
+void SetStrokeWidthImpl(Ark_NativePointer node,
+                        const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -214,26 +213,17 @@ void StrokeWidthImpl(Ark_NativePointer node,
     Validator::ValidateNonPercent(width);
     DataPanelModelStatic::SetStrokeWidth(frameNode, width);
 }
-void TrackShadowImpl(Ark_NativePointer node,
-                     const Opt_DataPanelShadowOptions* value)
+void SetTrackShadowImpl(Ark_NativePointer node,
+                        const Opt_DataPanelShadowOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<DataPanelShadow>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<DataPanelShadow>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     DataPanelModelNG::SetShadowOption(frameNode, *convValue);
-}
-void ContentModifierImpl(Ark_NativePointer node,
-                         const Opt_ContentModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //DataPanelModelNG::SetContentModifier(frameNode, convValue);
-    LOGE("DataPanel::ContentModifierImpl isn't implemented. Ark_CustomObject isn't supported.");
 }
 } // DataPanelAttributeModifier
 const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier()
@@ -241,12 +231,11 @@ const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier()
     static const GENERATED_ArkUIDataPanelModifier ArkUIDataPanelModifierImpl {
         DataPanelModifier::ConstructImpl,
         DataPanelInterfaceModifier::SetDataPanelOptionsImpl,
-        DataPanelAttributeModifier::CloseEffectImpl,
-        DataPanelAttributeModifier::ValueColorsImpl,
-        DataPanelAttributeModifier::TrackBackgroundColorImpl,
-        DataPanelAttributeModifier::StrokeWidthImpl,
-        DataPanelAttributeModifier::TrackShadowImpl,
-        DataPanelAttributeModifier::ContentModifierImpl,
+        DataPanelAttributeModifier::SetCloseEffectImpl,
+        DataPanelAttributeModifier::SetValueColorsImpl,
+        DataPanelAttributeModifier::SetTrackBackgroundColorImpl,
+        DataPanelAttributeModifier::SetStrokeWidthImpl,
+        DataPanelAttributeModifier::SetTrackShadowImpl,
     };
     return &ArkUIDataPanelModifierImpl;
 }

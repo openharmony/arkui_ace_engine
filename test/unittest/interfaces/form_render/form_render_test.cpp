@@ -88,7 +88,7 @@ std::shared_ptr<FormRenderer> GetInstance(std::string eventName)
  * @tc.desc: test AddForm -> UpdateForm -> ReloadForm -> DeleteForm(comp_id) -> DeleteForm
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create formRenderGroup and prepare want
@@ -209,7 +209,7 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
  * @tc.desc: delegate & dispatcher is not null
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create formRenderGroup and add new formRenderer with delegate & dispatcher
@@ -339,7 +339,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
  **@tc.desc: 1. system running normally
  *           2. test FormRendererDelegateImpl
  */
-HWTEST_F(FormRenderTest, FormRenderTest003, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest003, TestSize.Level0)
 {
     std::string action = "action";
     auto fun = [](const std::string&) {};
@@ -357,7 +357,7 @@ HWTEST_F(FormRenderTest, FormRenderTest003, TestSize.Level1)
  **@tc.desc: 1. system running normally
  *           2. test FormRendererDelegateImpl
  */
-HWTEST_F(FormRenderTest, FormRenderTest004, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest004, TestSize.Level0)
 {
     std::string code = "code";
     std::string msg = "msg";
@@ -376,7 +376,7 @@ HWTEST_F(FormRenderTest, FormRenderTest004, TestSize.Level1)
  **@tc.desc: 1. system running normally
  *           2. test FormRendererDelegateImpl
  */
-HWTEST_F(FormRenderTest, FormRenderTest005, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest005, TestSize.Level0)
 {
     float width = 1.1;
     float height = 2.2;
@@ -395,7 +395,7 @@ HWTEST_F(FormRenderTest, FormRenderTest005, TestSize.Level1)
  **@tc.desc: 1. system running normally
  *           2. test FormRendererDelegateImpl
  */
-HWTEST_F(FormRenderTest, FormRenderTest006, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest006, TestSize.Level0)
 {
     uint64_t surfaceId = 1;
     auto fun = []() {};
@@ -413,7 +413,7 @@ HWTEST_F(FormRenderTest, FormRenderTest006, TestSize.Level1)
  **@tc.desc: 1. system running normally
  *           2. test FormRendererDelegateImpl
  */
-HWTEST_F(FormRenderTest, FormRenderTest007, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest007, TestSize.Level0)
 {
     std::vector<std::string> formLinkInfos;
     auto fun = [](const std::vector<std::string>&) {};
@@ -431,7 +431,7 @@ HWTEST_F(FormRenderTest, FormRenderTest007, TestSize.Level1)
  **@tc.desc: 1. system running normally
  *           2. test FormRendererDelegateImpl
  */
-HWTEST_F(FormRenderTest, FormRenderTest008, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest008, TestSize.Level0)
 {
     AccessibilityParentRectInfo parentRectInfo;
     parentRectInfo.top = 50;
@@ -449,7 +449,7 @@ HWTEST_F(FormRenderTest, FormRenderTest008, TestSize.Level1)
  * @tc.desc: test RunFormPage
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest010, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest010, TestSize.Level0)
 {
     auto formRenderer = GetInstance("formRenderTest010");
     ASSERT_TRUE(formRenderer);
@@ -473,7 +473,7 @@ HWTEST_F(FormRenderTest, FormRenderTest010, TestSize.Level1)
  * @tc.desc: test OnFormLinkInfoUpdate
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest011, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest011, TestSize.Level0)
 {
     auto formRenderer = GetInstance("formRenderTest011");
     ASSERT_TRUE(formRenderer);
@@ -492,7 +492,7 @@ HWTEST_F(FormRenderTest, FormRenderTest011, TestSize.Level1)
  * @tc.desc: test ResetRenderDelegate
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest012, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest012, TestSize.Level0)
 {
     auto formRenderer = GetInstance("formRenderTest012");
     ASSERT_TRUE(formRenderer);
@@ -505,7 +505,7 @@ HWTEST_F(FormRenderTest, FormRenderTest012, TestSize.Level1)
  * @tc.desc: test UpdateConfiguration
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest013, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest013, TestSize.Level0)
 {
     auto formRenderer = GetInstance("formRenderTest013");
     ASSERT_TRUE(formRenderer);
@@ -519,7 +519,7 @@ HWTEST_F(FormRenderTest, FormRenderTest013, TestSize.Level1)
  * @tc.desc: test OnRemoteDied
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest014, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest014, TestSize.Level0)
 {
     auto formRenderer = GetInstance("formRenderTest014");
     ASSERT_TRUE(formRenderer);
@@ -537,7 +537,7 @@ HWTEST_F(FormRenderTest, FormRenderTest014, TestSize.Level1)
  * @tc.desc: test GetRectRelativeToWindow
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest015, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest015, TestSize.Level0)
 {
     auto formRenderer = GetInstance("formRenderTest015");
     ASSERT_TRUE(formRenderer);
@@ -558,7 +558,7 @@ HWTEST_F(FormRenderTest, FormRenderTest015, TestSize.Level1)
  * @tc.desc: test RecycleForm
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest016, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest016, TestSize.Level0)
 {
     auto formRenderer = GetInstance("formRenderTest016");
     ASSERT_TRUE(formRenderer);
@@ -574,7 +574,7 @@ HWTEST_F(FormRenderTest, FormRenderTest016, TestSize.Level1)
  * @tc.desc: test RecoverForm
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest017, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest017, TestSize.Level0)
 {
     auto formRenderer = GetInstance("formRenderTest017");
     ASSERT_TRUE(formRenderer);
@@ -616,7 +616,7 @@ HWTEST_F(FormRenderTest, FormRenderTest018, TestSize.Level1)
  * @tc.desc: test AttachForm
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest019, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest019, TestSize.Level0)
 {
     auto formRenderer = GetInstance("formRenderTest019");
     ASSERT_TRUE(formRenderer);
@@ -638,7 +638,7 @@ HWTEST_F(FormRenderTest, FormRenderTest019, TestSize.Level1)
  * @tc.desc: test AttachUIContent
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest020, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest020, TestSize.Level0)
 {
     auto formRenderer = GetInstance("formRenderTest020");
     ASSERT_TRUE(formRenderer);
@@ -668,7 +668,7 @@ HWTEST_F(FormRenderTest, FormRenderTest020, TestSize.Level1)
  * @tc.desc: test OnSurfaceReuse
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest021, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest021, TestSize.Level0)
 {
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest021");
     ASSERT_TRUE(eventRunner);
@@ -749,7 +749,7 @@ HWTEST_F(FormRenderTest, FormRenderTest022, TestSize.Level1)
 * @tc.desc: test SetVisibleChange
 * @tc.type: FUNC
 */
-HWTEST_F(FormRenderTest, FormRenderTest023, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest023, TestSize.Level0)
 {
     auto formRenderer = GetInstance("formRenderTest023");
     ASSERT_TRUE(formRenderer);

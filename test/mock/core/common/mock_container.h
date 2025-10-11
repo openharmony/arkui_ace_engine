@@ -113,6 +113,11 @@ public:
         return isFreeMultiWindow_;
     }
 
+    bool GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback) override
+    {
+        return true;
+    }
+
     void ResetContainer()
     {
         CHECK_NULL_VOID(container_);

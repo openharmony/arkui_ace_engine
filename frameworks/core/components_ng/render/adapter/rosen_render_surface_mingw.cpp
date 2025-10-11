@@ -112,6 +112,8 @@ void RosenRenderSurface::RegisterBufferCallback() {}
 
 void RosenRenderSurface::OnWindowStateChange(bool isShow) {}
 
+void RosenRenderSurface::SetSurfaceBufferOpaque(bool isOpaque) {}
+
 void SetKeyBoardAvoidRect(RectF keyBoardAvoidRect) {}
 
 void SetIsNeedSyncGeometryProperties(bool isNeedSyncGeometryProperties) {}

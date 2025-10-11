@@ -16,6 +16,7 @@
 #include "node_extened.h"
 #include "node_model.h"
 
+#include "base/error/error_code.h"
 #include "base/utils/utils.h"
 
 #ifdef __cplusplus
@@ -114,6 +115,88 @@ int32_t OH_ArkUI_DrawableDescriptor_GetAnimationIteration(ArkUI_DrawableDescript
     CHECK_NULL_RETURN(drawableDescriptor, 1);
     CHECK_NULL_RETURN(drawableDescriptor->newDrawableDescriptor, 1);
     return OHOS::Ace::NodeModel::GetIterations(drawableDescriptor->newDrawableDescriptor);
+}
+
+int32_t OH_ArkUI_DrawableDescriptor_SetAnimationFrameDurations(
+    ArkUI_DrawableDescriptor* drawableDescriptor, uint32_t* durations, size_t size)
+{
+    CHECK_NULL_RETURN(drawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(drawableDescriptor->newDrawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(durations, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return OHOS::Ace::NodeModel::SetFrameDurations(drawableDescriptor->newDrawableDescriptor, durations, size);
+}
+
+int32_t OH_ArkUI_DrawableDescriptor_GetAnimationFrameDurations(
+    ArkUI_DrawableDescriptor* drawableDescriptor, uint32_t* durations, size_t* size)
+{
+    CHECK_NULL_RETURN(drawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(drawableDescriptor->newDrawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(durations, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return OHOS::Ace::NodeModel::GetFrameDurations(drawableDescriptor->newDrawableDescriptor, durations, size);
+}
+
+int32_t OH_ArkUI_DrawableDescriptor_SetAnimationAutoPlay(
+    ArkUI_DrawableDescriptor* drawableDescriptor, uint32_t autoPlay)
+{
+    CHECK_NULL_RETURN(drawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(drawableDescriptor->newDrawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return OHOS::Ace::NodeModel::SetAutoPlay(drawableDescriptor->newDrawableDescriptor, autoPlay);
+}
+
+int32_t OH_ArkUI_DrawableDescriptor_GetAnimationAutoPlay(
+    ArkUI_DrawableDescriptor* drawableDescriptor, uint32_t* autoPlay)
+{
+    CHECK_NULL_RETURN(drawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(drawableDescriptor->newDrawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(autoPlay, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return OHOS::Ace::NodeModel::GetAutoPlay(drawableDescriptor->newDrawableDescriptor, autoPlay);
+}
+
+int32_t OH_ArkUI_DrawableDescriptor_CreateAnimationController(ArkUI_DrawableDescriptor* drawableDescriptor,
+    ArkUI_NodeHandle node, ArkUI_DrawableDescriptor_AnimationController** controller)
+{
+    CHECK_NULL_RETURN(drawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(drawableDescriptor->newDrawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(controller, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return OHOS::Ace::NodeModel::CreateAnimationController(drawableDescriptor->newDrawableDescriptor, node, controller);
+}
+
+void OH_ArkUI_DrawableDescriptor_DisposeAnimationController(ArkUI_DrawableDescriptor_AnimationController* controller)
+{
+    CHECK_NULL_VOID(controller);
+    OHOS::Ace::NodeModel::DisposeAnimationController(controller);
+}
+
+int32_t OH_ArkUI_DrawableDescriptor_StartAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
+{
+    CHECK_NULL_RETURN(controller, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return OHOS::Ace::NodeModel::StartAnimation(controller);
+}
+
+int32_t OH_ArkUI_DrawableDescriptor_StopAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
+{
+    CHECK_NULL_RETURN(controller, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return OHOS::Ace::NodeModel::StopAnimation(controller);
+}
+
+int32_t OH_ArkUI_DrawableDescriptor_ResumeAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
+{
+    CHECK_NULL_RETURN(controller, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return OHOS::Ace::NodeModel::ResumeAnimation(controller);
+}
+
+int32_t OH_ArkUI_DrawableDescriptor_PauseAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
+{
+    CHECK_NULL_RETURN(controller, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return OHOS::Ace::NodeModel::PauseAnimation(controller);
+}
+
+int32_t OH_ArkUI_DrawableDescriptor_GetAnimationStatus(
+    ArkUI_DrawableDescriptor_AnimationController* controller, DrawableDescriptor_AnimationStatus* status)
+{
+    CHECK_NULL_RETURN(controller, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(status, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return OHOS::Ace::NodeModel::GetAnimationStatus(controller, status);
 }
 
 #ifdef __cplusplus

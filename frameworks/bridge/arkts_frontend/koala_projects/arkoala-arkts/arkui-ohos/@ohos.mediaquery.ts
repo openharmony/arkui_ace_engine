@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import { Callback } from 'arkui/component/index';
+import { Callback } from 'arkui/framework'
 
-export declare namespace mediaquery {
+declare namespace mediaquery {
     export interface MediaQueryResult {
         readonly matches: boolean;
         readonly media: string;
@@ -26,3 +26,5 @@ export declare namespace mediaquery {
     }
     export function matchMediaSync(condition: string): MediaQueryListener;
 }
+
+export default mediaquery;

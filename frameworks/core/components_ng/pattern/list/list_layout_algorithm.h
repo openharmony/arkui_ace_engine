@@ -61,6 +61,7 @@ struct PredictLayoutItem {
     int32_t index;
     int32_t forwardCacheCount;
     int32_t backwardCacheCount;
+    bool forceCache = false;
 };
 
 struct ListPredictLayoutParamV2 {
@@ -708,6 +709,7 @@ private:
     bool measureInNextFrame_ = false;
     bool syncLoad_ = false;
     bool prevMeasureBreak_ = false;
+    int32_t prevItemPosCount_ = 0;
 
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 

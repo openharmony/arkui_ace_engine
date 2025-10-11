@@ -21,7 +21,7 @@ group("ace_ani_package") {
     "${ace_root}/interfaces/ets/ani/animator:animator_ani_abc",
     "${ace_root}/interfaces/ets/ani/animator:animator_ani_abc_etc",
 
-    #"${ace_root}/interfaces/ets/ani/componentSnapshot:componentSnapshot_ani",
+    # "${ace_root}/interfaces/ets/ani/componentSnapshot:componentSnapshot_ani",
     "${ace_root}/interfaces/ets/ani/componentSnapshot:componentSnapshot_etc",
     "${ace_root}/interfaces/ets/ani/componentUtils:componentUtils_ani",
     "${ace_root}/interfaces/ets/ani/componentUtils:componentUtils_etc",

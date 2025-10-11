@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_LongPressGestureEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_LongPressGestureEvent CtorImpl()
+Ark_LongPressGestureEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<LongPressGestureEventPeer>();
 }
@@ -53,7 +53,7 @@ const GENERATED_ArkUILongPressGestureEventAccessor* GetLongPressGestureEventAcce
 {
     static const GENERATED_ArkUILongPressGestureEventAccessor LongPressGestureEventAccessorImpl {
         LongPressGestureEventAccessor::DestroyPeerImpl,
-        LongPressGestureEventAccessor::CtorImpl,
+        LongPressGestureEventAccessor::ConstructImpl,
         LongPressGestureEventAccessor::GetFinalizerImpl,
         LongPressGestureEventAccessor::GetRepeatImpl,
         LongPressGestureEventAccessor::SetRepeatImpl,

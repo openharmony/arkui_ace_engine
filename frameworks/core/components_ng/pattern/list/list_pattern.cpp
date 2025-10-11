@@ -71,6 +71,9 @@ void ListPattern::OnModifyDone()
         auto scrollableEvent = GetScrollableEvent();
         CHECK_NULL_VOID(scrollableEvent);
         scrollable_ = scrollableEvent->GetScrollable();
+        if (scrollable_) {
+            scrollable_->SetListSnapSpeed(listSnapSpeed_);
+        }
 #ifdef SUPPORT_DIGITAL_CROWN
         SetDigitalCrownEvent();
 #endif
@@ -2894,6 +2897,12 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     nestedScrollOptions->Put("scrollBackward", nestedScroll.GetNestedScrollModeStr(nestedScroll.backward).c_str());
     json->PutExtAttr("nestedScroll", nestedScrollOptions, filter);
     json->PutExtAttr("focusWrapMode", FocusWrapModeToString(focusWrapMode_).c_str(), filter);
+    auto speed = scrollable_ ? scrollable_->GetListSnapSpeed() : listSnapSpeed_;
+    if (speed == ScrollSnapAnimationSpeed::NORMAL) {
+        json->PutExtAttr("scrollSnapAnimationSpeed", "ScrollSnapAnimationSpeed.NORMAL", filter);
+    } else if (speed == ScrollSnapAnimationSpeed::SLOW) {
+        json->PutExtAttr("scrollSnapAnimationSpeed", "ScrollSnapAnimationSpeed.SLOW", filter);
+    }
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)

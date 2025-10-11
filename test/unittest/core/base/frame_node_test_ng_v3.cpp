@@ -514,4 +514,72 @@ HWTEST_F(FrameNodeTestNg, TriggerVisibleAreaChangeCallback100, TestSize.Level1)
     child->TriggerVisibleAreaChangeCallback(2, false);
     EXPECT_TRUE(visibleAreaUserCallback.isOutOfBoundsAllowed);
 }
+
+/**
+ * @tc.name: ConvertPointTest
+ * @tc.desc: Test ConvertPoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, ConvertPointTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->SetActive(true);
+
+    /**
+     * @tc.steps: step2. test the input null pointer.
+     */
+    OffsetF position = { 10, 10 };
+    auto resultOfNullptr = frameNode->ConvertPoint(position, nullptr);
+    EXPECT_EQ(resultOfNullptr, position);
+
+    /**
+     * @tc.steps: step3. test the input itself.
+     */
+    auto resultOfItself = frameNode->ConvertPoint(position, frameNode);
+    EXPECT_EQ(resultOfItself, position);
+
+    /**
+     * @tc.steps: step4. test the input right parameter.
+     */
+    auto targetNode = FrameNode::CreateFrameNode("page", 2, AceType::MakeRefPtr<Pattern>(), true);
+    targetNode->SetActive(true);
+    auto child = FrameNode::CreateFrameNode("column", 3, AceType::MakeRefPtr<Pattern>(), false);
+    child->SetActive(true);
+    frameNode->AddChild(child);
+    auto result = child->ConvertPoint(position, targetNode);
+    EXPECT_EQ(position, result);
+}
+
+/**
+ * @tc.name: FindSameParentComponentTest
+ * @tc.desc: Test FindSameParentComponent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FindSameParentComponentTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->SetActive(true);
+
+    auto child = FrameNode::CreateFrameNode("column", 3, AceType::MakeRefPtr<Pattern>(), false);
+    child->SetActive(true);
+    frameNode->AddChild(child);
+
+    /**
+     * @tc.steps: step2. test return nullptr.
+     */
+    EXPECT_FALSE(FindSameParentComponent(child, nullptr));
+    EXPECT_FALSE(FindSameParentComponent(nullptr, child));
+
+    /**
+     * @tc.steps: step3. test the input right parameter.
+     */
+    auto result = FindSameParentComponent(frameNode, child);
+    EXPECT_EQ(result, frameNode);
+}
 } // namespace OHOS::Ace::NG

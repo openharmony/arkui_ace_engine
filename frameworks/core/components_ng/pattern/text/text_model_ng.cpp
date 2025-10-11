@@ -29,6 +29,7 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr uint32_t DEFAULT_MIN_LINES = 0;
 constexpr int32_t DEFAULT_ALPHA = 255;
 constexpr float DEFAULT_OPACITY = 0.2;
 
@@ -345,6 +346,16 @@ void TextModelNG::SetMaxLines(uint32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value);
 }
 
+void TextModelNG::SetMinLines(uint32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinLines, value);
+}
+
+void TextModelNG::ResetMinLines()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MinLines, PROPERTY_UPDATE_MEASURE);
+}
+
 void TextModelNG::SetTextIndent(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextIndent, value);
@@ -358,6 +369,67 @@ void TextModelNG::SetLineHeight(const Dimension& value)
 void TextModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value, frameNode);
+}
+
+void TextModelNG::ResetLineHeightMultiply()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, LineHeightMultiply, PROPERTY_UPDATE_MEASURE);
+}
+
+void TextModelNG::SetLineHeightMultiply(double value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeightMultiply, value);
+}
+
+void TextModelNG::ResetLineHeightMultiply(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, LineHeightMultiply, PROPERTY_UPDATE_MEASURE,
+        frameNode);
+}
+
+void TextModelNG::SetLineHeightMultiply(FrameNode* frameNode, double value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeightMultiply, value, frameNode);
+}
+
+void TextModelNG::ResetMinimumLineHeight()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MinimumLineHeight, PROPERTY_UPDATE_MEASURE);
+}
+
+void TextModelNG::SetMinimumLineHeight(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinimumLineHeight, value);
+}
+
+void TextModelNG::ResetMinimumLineHeight(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MinimumLineHeight, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
+void TextModelNG::SetMinimumLineHeight(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinimumLineHeight, value, frameNode);
+}
+
+void TextModelNG::ResetMaximumLineHeight()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MaximumLineHeight, PROPERTY_UPDATE_MEASURE);
+}
+
+void TextModelNG::SetMaximumLineHeight(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaximumLineHeight, value);
+}
+
+void TextModelNG::ResetMaximumLineHeight(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MaximumLineHeight, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
+void TextModelNG::SetMaximumLineHeight(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaximumLineHeight, value, frameNode);
 }
 
 void TextModelNG::SetLineSpacing(const Dimension& value)
@@ -595,6 +667,16 @@ void TextModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value, frameNode);
 }
 
+void TextModelNG::SetMinLines(FrameNode* frameNode, uint32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinLines, value, frameNode);
+}
+
+void TextModelNG::ResetMinLines(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MinLines, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
 void TextModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMinFontSize, value, frameNode);
@@ -731,6 +813,66 @@ void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& re
     if (pattern) {
         pattern->BindSelectionMenu(spanType, responseType, buildFunc, menuParam);
     }
+}
+
+void TextModelNG::SetSelectDetectEnable(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectEnable(value);
+}
+
+void TextModelNG::SetSelectDetectEnable(FrameNode* frameNode, bool value)
+{
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectEnable(value);
+}
+
+bool TextModelNG::GetSelectDetectEnable(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetSelectDetectEnable();
+}
+
+void TextModelNG::ResetSelectDetectEnable(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectEnable();
+}
+
+void TextModelNG::SetSelectDetectConfig(std::vector<TextDataDetectType>& types)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectConfig(types);
+}
+
+void TextModelNG::SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types)
+{
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectDetectConfig(types);
+}
+
+std::vector<TextDataDetectType> TextModelNG::GetSelectDetectConfig(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, std::vector<TextDataDetectType>());
+    return pattern->GetSelectDetectConfig();
+}
+
+void TextModelNG::ResetSelectDetectConfig(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectConfig();
 }
 
 void TextModelNG::SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func)
@@ -884,6 +1026,35 @@ float TextModelNG::GetLineHeight(FrameNode* frameNode)
     return static_cast<float>(value.Value());
 }
 
+double TextModelNG::GetTextLineHeightMultiply(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0);
+    auto value = layoutProperty->GetLineHeightMultiply().value_or(0.0);
+    return value;
+}
+
+float TextModelNG::GetTextMaximumLineHeight(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    Dimension defaultLineHeight(0);
+    auto value = layoutProperty->GetMaximumLineHeight().value_or(defaultLineHeight);
+    return static_cast<float>(value.Value());
+}
+
+float TextModelNG::GetTextMinimumLineHeight(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    Dimension defaultLineHeight(0);
+    auto value = layoutProperty->GetMinimumLineHeight().value_or(defaultLineHeight);
+    return static_cast<float>(value.Value());
+}
+
 float TextModelNG::GetLineSpacing(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
@@ -944,6 +1115,15 @@ uint32_t TextModelNG::GetMaxLines(FrameNode* frameNode)
     auto& textLineStyle = layoutProperty->GetTextLineStyle();
     CHECK_NULL_RETURN(textLineStyle, defaultMaxLines);
     return textLineStyle->GetMaxLines().value_or(defaultMaxLines);
+}
+
+uint32_t TextModelNG::GetMinLines(FrameNode* frameNode)
+{
+    uint32_t defaultMinLines = DEFAULT_MIN_LINES;
+    CHECK_NULL_RETURN(frameNode, defaultMinLines);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultMinLines);
+    return layoutProperty->GetMinLines().value_or(defaultMinLines);
 }
 
 TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)
@@ -1454,8 +1634,24 @@ bool TextModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
 
 void TextModelNG::SetGradientShaderStyle(NG::Gradient& gradient)
 {
-    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, gradient);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto textPattern = frameNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(textPattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [gradient, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Gradient& gradientValue = const_cast<Gradient &>(gradient);
+            gradientValue.ReloadResources();
+            ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle, frameNode);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, gradientValue, frameNode);
+        };
+        textPattern->AddResObj("TextGradient.gradient", resObj, std::move(updateFunc));
+    }
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, gradient, frameNode);
 }
 
 void TextModelNG::SetColorShaderStyle(const Color& value)
@@ -1478,6 +1674,20 @@ void TextModelNG::ResetGradientShaderStyle()
 void TextModelNG::SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient)
 {
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto textPattern = frameNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(textPattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [gradient, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Gradient& gradientValue = const_cast<Gradient &>(gradient);
+            gradientValue.ReloadResources();
+            ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle, frameNode);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, gradientValue, frameNode);
+        };
+        textPattern->AddResObj("TextGradient.gradient", resObj, std::move(updateFunc));
+    }
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, gradient, frameNode);
 }

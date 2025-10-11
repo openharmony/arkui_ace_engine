@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 
+#include "base/utils/multi_thread.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/text_style.h"
@@ -147,9 +148,24 @@ void TextTimerModelNG::SetOnTimer(std::function<void(int64_t, int64_t)> && onCha
 void TextTimerModelNG::SetOnTimer(FrameNode* frameNode, std::function<void(int64_t, int64_t)>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetOnTimer, frameNode,
+        std::move(onChange));  // call SetOnTimerMultiThread() by multi thread
     auto eventHub = frameNode->GetEventHub<TextTimerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnTimer(std::move(onChange));
+}
+
+void TextTimerModelNG::SetOnTimerMultiThread(FrameNode* frameNode, std::function<void(int64_t, int64_t)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weakPtr = AceType::WeakClaim(frameNode),
+        onChange = std::move(onChange)]() mutable {
+        auto frameNode = weakPtr.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto eventHub = frameNode->GetEventHub<TextTimerEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnTimer(std::move(onChange));
+    });
 }
 
 RefPtr<FrameNode> TextTimerModelNG::CreateFrameNode(int32_t nodeId)

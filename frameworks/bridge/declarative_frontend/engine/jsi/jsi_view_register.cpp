@@ -33,10 +33,12 @@
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_image_data.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/card_scope.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.h"
@@ -1251,6 +1253,39 @@ panda::Local<panda::JSValueRef> WrapEventTargetInfoPointer(panda::JsiRuntimeCall
     return eventTargetObj.Get().GetLocalHandle();
 }
 
+panda::Local<panda::JSValueRef> WrapImageAIOptions(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    auto* vm = runtimeCallInfo->GetVM();
+    if (vm == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::JSValueRef> imageValueRef = runtimeCallInfo->GetCallArgRef(0);
+    if (!(imageValueRef->IsNumber())) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto imagePointer = static_cast<int64_t>(imageValueRef->ToNumber(vm)->Value());
+    auto* imageFrameNode = reinterpret_cast<NG::FrameNode*>(imagePointer);
+    auto imagePattern = imageFrameNode->GetPattern<NG::ImagePattern>();
+    if (!imagePattern) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::JSValueRef> imageAIOptionsValueRef = runtimeCallInfo->GetCallArgRef(1);
+    if (imageAIOptionsValueRef.IsNull() || imageAIOptionsValueRef->IsUndefined()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, panda::JSValueRef::Undefined(vm));
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, panda::JSValueRef::Undefined(vm));
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    Framework::ScopeRAII scopeRAII(env);
+    JSValueWrapper optionsWrapper = imageAIOptionsValueRef;
+    napi_value optionsValue = nativeEngine->ValueToNapiValue(optionsWrapper);
+    imagePattern->SetImageAIOptions(optionsValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 panda::Local<panda::JSValueRef> WrapScrollableTargetInfoPointer(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     ContainerScope scope(Container::CurrentIdSafely());
@@ -1866,6 +1901,8 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomE
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapKeyEventPointer));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapEventTargetInfoPointer"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapEventTargetInfoPointer));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapImageAIOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapImageAIOptions));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapScrollableTargetInfoPointer"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapScrollableTargetInfoPointer));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapDragEventPointer"),

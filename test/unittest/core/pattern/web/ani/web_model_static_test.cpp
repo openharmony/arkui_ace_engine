@@ -78,9 +78,11 @@ HWTEST_F(WebModelStaticTest, CreateFrameNode001, TestSize.Level1)
     SetHapPathCallback setHapPathCallback = [](const std::string&) {};
     auto renderExitedId = [](const std::shared_ptr<BaseEventInfo>& info) {};
     std::optional<BlurOnKeyboardHideMode> keyBoardMode;
+    SetWebDetachCallback setWebDetachCallback = [](int32_t) {};
 
     WebModelStatic::SetWebIdCallback(AccessibilityManager::RawPtr(frameNode), std::move(setWebIdCallback));
     WebModelStatic::SetHapPathCallback(AccessibilityManager::RawPtr(frameNode), std::move(setHapPathCallback));
+    WebModelStatic::SetWebDetachCallback(AccessibilityManager::RawPtr(frameNode), std::move(setWebDetachCallback));
     WebModelStatic::SetWebSrc(AccessibilityManager::RawPtr(frameNode), "www.example.com");
     WebModelStatic::SetRenderMode(AccessibilityManager::RawPtr(frameNode), RenderMode::ASYNC_RENDER);
     WebModelStatic::SetIncognitoMode(AccessibilityManager::RawPtr(frameNode), true);
@@ -1676,6 +1678,43 @@ HWTEST_F(WebModelStaticTest, SetWebMediaAVSessionEnabled001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEnableDataDetector001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetEnableDataDetector001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    WebModelStatic::SetEnableDataDetector(AccessibilityManager::RawPtr(frameNode), true);
+#endif
+}
+
+/**
+ * @tc.name: SetDataDetectorConfig001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetDataDetectorConfig001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    TextDetectConfig config;
+    WebModelStatic::SetDataDetectorConfig(AccessibilityManager::RawPtr(frameNode), config);
+#endif
+}
+
+/**
  * @tc.name: SetDefaultTextEncodingFormat001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
@@ -2489,6 +2528,60 @@ HWTEST_F(WebModelStaticTest, SetAdsBlockedEventId001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetActivateContentEventId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetActivateContentEventId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+    };
+
+    WebModelStatic::SetActivateContentEventId(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    ASSERT_NE(frameNode->GetEventHub(), nullptr);
+    webEventHub->propOnActivateContentEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetGestureFocusMode001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetGestureFocusMode001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    WebModelStatic::SetGestureFocusMode(AccessibilityManager::RawPtr(frameNode),
+        GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckGestureFocusMode(
+        GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS), true);
+    WebModelStatic::SetGestureFocusMode(AccessibilityManager::RawPtr(frameNode),
+        GestureFocusMode::DEFAULT);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckGestureFocusMode(GestureFocusMode::DEFAULT), true);
+#endif
+}
+
+/**
  * @tc.name: SetForceEnableZoom001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
@@ -2506,6 +2599,27 @@ HWTEST_F(WebModelStaticTest, SetForceEnableZoom001, TestSize.Level1)
 
     WebModelStatic::SetForceEnableZoom(AccessibilityManager::RawPtr(frameNode), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckForceEnableZoom(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetBackToTop001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetBackToTop001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    WebModelStatic::SetBackToTop(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckBackToTop(true), true);
 #endif
 }
 } // namespace OHOS::Ace::NG

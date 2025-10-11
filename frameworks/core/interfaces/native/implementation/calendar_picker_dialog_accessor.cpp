@@ -57,15 +57,16 @@ DialogProperties BuildDialogProperties(const Ark_CalendarDialogOptions options)
 {
     DialogProperties dialogProps;
     dialogProps.alignment = DialogAlignment::CENTER;
-    dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
-        options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+    auto blurStyle = Converter::OptConvert<BlurStyle>(options.backgroundBlurStyle);
+    if (blurStyle.has_value()) {
+        dialogProps.backgroundBlurStyle = static_cast<int32_t>(blurStyle.value());
+    }
     dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
+    dialogProps.blurStyleOption = Converter::OptConvert<BlurStyleOption>(options.backgroundBlurStyleOptions);
+    dialogProps.effectOption = Converter::OptConvert<EffectOption>(options.backgroundEffect);
     dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
     dialogProps.customStyle = false;
-    auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
-    if (enableHoverMode.has_value()) {
-        dialogProps.enableHoverMode = enableHoverMode.value();
-    }
+    dialogProps.enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
     dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
     BuildDialogPropertiesCallbacks(options, dialogProps);
     return dialogProps;
@@ -77,9 +78,59 @@ CalendarSettingData BuildSettingData(const Ark_CalendarDialogOptions options)
     if (selectedDateOpt) {
         settingData.selectedDate = *selectedDateOpt;
     }
+    auto startDate = Converter::OptConvert<PickerDate>(options.start).value_or(PickerDate());
+    auto endDate = Converter::OptConvert<PickerDate>(options.end).value_or(PickerDate());
+    if (endDate.GetYear() > 0 && startDate.ToDays() > endDate.ToDays()) {
+        startDate = PickerDate();
+        endDate = PickerDate();
+    }
+    settingData.startDate = startDate;
+    settingData.endDate = endDate;
+    settingData.disabledDateRange =
+        Converter::Convert<std::vector<std::pair<PickerDate, PickerDate>>>(options.disabledDateRange.value);
+    PickerDate::SortAndMergeDisabledDateRange(settingData.disabledDateRange);
     settingData.dayRadius = Converter::OptConvert<Dimension>(options.hintRadius);
+    auto markToday = Converter::OptConvert<bool>(options.markToday);
+    if (markToday.has_value()) {
+        settingData.markToday = markToday.value();
+    }
     return settingData;
 }
+
+std::map<std::string, NG::DialogCancelEvent> ParseDialogLifeCycleEvents(const Ark_CalendarDialogOptions& options)
+{
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
+    auto didAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidAppear);
+    if (didAppearCallbackOpt) {
+        auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogLifeCycleEvent.emplace("didAppearId", onDidAppear);
+    }
+    auto didDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidDisappear);
+    if (didDisappearCallbackOpt) {
+        auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogLifeCycleEvent.emplace("didDisappearId", onDidDisappear);
+    }
+    auto willAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillAppear);
+    if (willAppearCallbackOpt) {
+        auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogLifeCycleEvent.emplace("willAppearId", onWillAppear);
+    }
+    auto willDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillDisappear);
+    if (willDisappearCallbackOpt) {
+        auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogLifeCycleEvent.emplace("willDisappearId", onWillDisappear);
+    }
+    return dialogLifeCycleEvent;
+}
+
 std::vector<ButtonInfo> BuildButtonInfos(const Ark_CalendarDialogOptions options)
 {
     std::vector<ButtonInfo> buttonInfos;
@@ -97,10 +148,20 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_CalendarDialogOptions options
     }
     return buttonInfos;
 }
+void DestroyPeerImpl(Ark_CalendarPickerDialog peer)
+{
+}
+Ark_CalendarPickerDialog ConstructImpl()
+{
+    return {};
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
 void ShowImpl(const Opt_CalendarDialogOptions* options)
 {
-    CHECK_NULL_VOID(options);
-    auto arkOptionsOpt = Converter::OptConvert<Ark_CalendarDialogOptions>(*options);
+    auto arkOptionsOpt = Converter::OptConvertPtr<Ark_CalendarDialogOptions>(options);
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_CalendarDialogOptions arkOptions = *arkOptionsOpt;
@@ -135,6 +196,8 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
         dialogCancelEvent["cancelId"] = onCancelFunc;
     }
 
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = ParseDialogLifeCycleEvents(arkOptions);
+
     auto currentId = Container::CurrentIdSafelyWithCheck();
     ContainerScope cope(currentId);
     auto container = Container::CurrentSafely();
@@ -143,12 +206,16 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->ShowCalendarDialog(dialogProps, settingData, dialogEvent, dialogCancelEvent, {}, buttonInfos);
+    overlayManager->ShowCalendarDialog(
+        dialogProps, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
 }
 } // CalendarPickerDialogAccessor
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()
 {
     static const GENERATED_ArkUICalendarPickerDialogAccessor CalendarPickerDialogAccessorImpl {
+        CalendarPickerDialogAccessor::DestroyPeerImpl,
+        CalendarPickerDialogAccessor::ConstructImpl,
+        CalendarPickerDialogAccessor::GetFinalizerImpl,
         CalendarPickerDialogAccessor::ShowImpl,
     };
     return &CalendarPickerDialogAccessorImpl;
