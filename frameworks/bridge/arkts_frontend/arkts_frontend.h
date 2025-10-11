@@ -115,8 +115,12 @@ public:
 
     void* PushExtender(const std::string& url, const std::string& params, bool recoverable,
         std::function<void()>&& finishCallback, void* jsNode) override;
+    void PushNamedRouteExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
     void* ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
         std::function<void()>&& enterFinishCallback, void* jsNode) override;
+    void ReplaceNamedRouteExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
     void* RunPageExtender(const std::string& url, const std::string& params, bool recoverable,
         std::function<void()>&& finishCallback, void* jsNode) override;
     void BackExtender(const std::string& url, const std::string& params) override;

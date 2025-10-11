@@ -89,6 +89,17 @@ enum class FrontendType {
 
 struct PageTarget;
 
+
+// for Arkts1.2
+struct PageRouterOptions {
+    std::string url;
+    std::string params;
+    bool recoverable = true;
+    uint32_t routerMode = 0;
+    std::function<void(const std::string&, int32_t)> errorCallback;
+    bool isNamedRouterMode = false;
+};
+
 class ACE_FORCE_EXPORT Frontend : public AceType {
     DECLARE_ACE_TYPE(Frontend, AceType);
 
@@ -180,11 +191,19 @@ public:
     {
         return nullptr;
     };
+    virtual void PushNamedRouteExtender(const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+    {
+        return;
+    }
     virtual void* ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
         std::function<void()>&& enterFinishCallback, void* jsNode)
     {
         return nullptr;
     };
+    virtual void ReplaceNamedRouteExtender(const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+    {
+        return;
+    }
     virtual void* RunPageExtender(const std::string& url, const std::string& params, bool recoverable,
         std::function<void()>&& finishCallback, void* jsNode)
     {

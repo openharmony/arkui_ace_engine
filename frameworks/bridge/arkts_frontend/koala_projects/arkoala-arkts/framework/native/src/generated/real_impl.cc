@@ -15911,6 +15911,38 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void HideAlertBeforeBackPageImpl()
     {
     }
+    void PushNamedRoute0Impl(Ark_VMContext vmContext,
+                             Ark_AsyncWorkerPtr asyncWorker,
+                             Ark_NativePointer jsView,
+                             const Ark_PageRouterOptions* options,
+                             const Opt_RouterFinishCallback* finishCallback,
+                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+    }
+    void PushNamedRoute1Impl(Ark_NativePointer jsView,
+                             const Ark_PageRouterOptions* options,
+                             const Opt_RouterFinishCallback* finishCallback,
+                             const Opt_AsyncCallback_Void* callback_)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ReplaceNamedRoute0Impl(Ark_VMContext vmContext,
+                                Ark_AsyncWorkerPtr asyncWorker,
+                                Ark_NativePointer jsView,
+                                const Ark_PageRouterOptions* options,
+                                const Opt_RouterFinishCallback* finishCallback,
+                                const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+    }
+    void ReplaceNamedRoute1Impl(Ark_NativePointer jsView,
+                                const Ark_PageRouterOptions* options,
+                                const Opt_RouterFinishCallback* finishCallback,
+                                const Opt_AsyncCallback_Void* callback_)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
     } // RouterExtenderAccessor
     namespace ScaleSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_ScaleSymbolEffect peer)
@@ -20337,6 +20369,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RouterExtenderAccessor::ClearImpl,
             RouterExtenderAccessor::ShowAlertBeforeBackPageImpl,
             RouterExtenderAccessor::HideAlertBeforeBackPageImpl,
+            RouterExtenderAccessor::PushNamedRoute0Impl,
+            RouterExtenderAccessor::PushNamedRoute1Impl,
+            RouterExtenderAccessor::ReplaceNamedRoute0Impl,
+            RouterExtenderAccessor::ReplaceNamedRoute1Impl,
         };
         return &RouterExtenderAccessorImpl;
     }
