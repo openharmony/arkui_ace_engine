@@ -2322,13 +2322,14 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
-    int32_t index = 0;
-    for (const auto& columnNode : tabBarNode->GetChildren()) {
+    auto childCount = tabBarNode->TotalChildCount() - IMAGE_INDICATOR_COUNT;
+    CHECK_NULL_VOID(childCount >= 0);
+    for (int32_t index = 0; index < childCount; index++) {
+        auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
         CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
         auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
         CHECK_NULL_VOID(imageNode);
         if (imageNode->GetTag() != V2::IMAGE_ETS_TAG) {
-            index++;
             continue;
         }
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -2349,7 +2350,6 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
         imageNode->MarkModifyDone();
         imageNode->MarkDirtyNode();
-        index++;
     }
     SetImageColorOnIndex(indicator);
 }
