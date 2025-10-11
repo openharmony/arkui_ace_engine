@@ -1491,6 +1491,7 @@ public:
     bool IsPcMode();
     void OnSwitchFreeMultiWindow(bool enable);
     void OnStatusBarClick();
+    bool IsQuickMenuShow();
     void WebScrollStopFling();
 private:
     void InitWebEvent();

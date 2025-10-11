@@ -9065,6 +9065,13 @@ void WebDelegate::OnStatusBarClick()
     nweb_->ScrollToWithAnime(DEFAULT_BACK_TO_TOP_OFFSET, DEFAULT_BACK_TO_TOP_OFFSET, DEFAULT_BACK_TO_TOP_TIME);
 }
 
+bool WebDelegate::IsQuickMenuShow()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->IsQuickMenuShow();
+}
+
 void WebDelegate::WebScrollStopFling()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::WebScrollStopFling");
