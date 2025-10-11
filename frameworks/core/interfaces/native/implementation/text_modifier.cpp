@@ -443,7 +443,17 @@ void SetDraggableImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    ViewAbstract::SetDraggable(frameNode, convValue.value_or(false));
+    if (!convValue) {
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto draggable = pipeline->GetDraggable<TextTheme>();
+        frameNode->SetDraggable(draggable);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetTextDraggable(true);
+        return;
+    }
+    ViewAbstract::SetDraggable(frameNode, *convValue);
 }
 void SetTextShadowImpl(Ark_NativePointer node,
                        const Opt_Union_ShadowOptions_Array_ShadowOptions* value)

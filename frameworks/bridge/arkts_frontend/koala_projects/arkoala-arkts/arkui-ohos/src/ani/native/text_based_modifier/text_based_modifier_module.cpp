@@ -26,13 +26,13 @@ class TextBasedComponentCallbackAni {
 public:
     TextBasedComponentCallbackAni(ani_env* env, ani_ref func)
     {
-        CHECK_NULL_VOID(env || func);
+        CHECK_NULL_VOID(env && func);
         env_ = env;
         env->GlobalReference_Create(func, &func_);
     }
     ~TextBasedComponentCallbackAni()
     {
-        CHECK_NULL_VOID(func_ || env_);
+        CHECK_NULL_VOID(func_ && env_);
         env_->GlobalReference_Delete(func_);
     }
     void Call(ani_env* env, ani_size argc, ani_ref* argv, ani_ref* result)
