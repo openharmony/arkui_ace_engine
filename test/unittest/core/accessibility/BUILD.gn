@@ -56,6 +56,7 @@ ace_unittest("accessibility_adapter_test_ng") {
   module_output = "basic"
   sources = [
     "$ace_root/adapter/ohos/osal/accessibility/accessibility_hidumper_osal.cpp",
+    "$ace_root/adapter/ohos/osal/accessibility/element_info/accessibility_element_info_osal.cpp",
     "$ace_root/adapter/ohos/osal/accessibility/element_info/accessibility_node_osal.cpp",
     "$ace_root/adapter/ohos/osal/accessibility/focus_move/accessibility_focus_frame_node_utils.cpp",
     "$ace_root/adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.cpp",

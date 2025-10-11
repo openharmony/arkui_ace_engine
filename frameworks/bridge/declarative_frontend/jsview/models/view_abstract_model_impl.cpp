@@ -1709,6 +1709,9 @@ void ViewAbstractModelImpl::SetAccessibilityChecked(bool checked, bool resetValu
 void ViewAbstractModelImpl::SetAccessibilityTextPreferred(bool accessibilityTextPreferred)
 {}
 
+void ViewAbstractModelImpl::SetAccessibilityGroupOptions(NG::AccessibilityGroupOptions groupOptions)
+{}
+
 void ViewAbstractModelImpl::SetAccessibilityNextFocusId(const std::string& nextFocusId)
 {}
 

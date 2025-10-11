@@ -141,6 +141,22 @@ void GetFrameNodeChildren(
         GetFrameNodeChildren(frameChild, children, handleParam, accessibilityManager);
     }
 }
+
+bool FindFrameNodeByCondition(const std::list<RefPtr<NG::UINode>>& children,
+    std::queue<RefPtr<NG::UINode>>& nodes, RefPtr<NG::FrameNode>&result, FindCondition condition)
+{
+    for (const auto& child : children) {
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(child);
+        if (frameNode != nullptr && !frameNode->CheckAccessibilityLevelNo()) {
+            if (condition(frameNode)) {
+                result = frameNode;
+                return true;
+            }
+        }
+        nodes.push(child);
+    }
+    return false;
+}
 } // namespace
 
 void AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(const RefPtr<NG::UINode>& uiNode)
@@ -292,5 +308,45 @@ void AccessibilityFrameNodeUtils::GetLastestPageNodes(
     auto page = stageManager->GetLastPageWithTransition();
     CHECK_NULL_VOID(page);
     pageNodes.push_back(page);
+}
+
+RefPtr<NG::FrameNode> AccessibilityFrameNodeUtils::GetFramenodeByCondition(
+    const RefPtr<NG::FrameNode>& root, FindCondition condition)
+{
+    CHECK_NULL_RETURN(root, nullptr);
+
+    std::queue<RefPtr<NG::UINode>> nodes;
+    nodes.push(root);
+    RefPtr<NG::FrameNode> frameNodeResult = nullptr;
+
+    while (!nodes.empty()) {
+        auto current = nodes.front();
+        nodes.pop();
+        if (current->HasVirtualNodeAccessibilityProperty()) {
+            auto fnode = AceType::DynamicCast<NG::FrameNode>(current);
+            auto property = fnode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            const auto& children = std::list<RefPtr<NG::UINode>> { property->GetAccessibilityVirtualNode() };
+            if (FindFrameNodeByCondition(children, nodes, frameNodeResult, condition)) {
+                return frameNodeResult;
+            }
+        } else {
+            const auto& children = current->GetChildren(true);
+            if (FindFrameNodeByCondition(children, nodes, frameNodeResult, condition)) {
+                return frameNodeResult;
+            }
+        }
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(current);
+        if (!frameNode) {
+            continue;
+        }
+        auto overlayNode = frameNode->GetOverlayNode();
+        if (overlayNode) {
+            const auto& children = std::list<RefPtr<NG::UINode>> { overlayNode };
+            if (FindFrameNodeByCondition(children, nodes, frameNodeResult, condition)) {
+                return frameNodeResult;
+            }
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

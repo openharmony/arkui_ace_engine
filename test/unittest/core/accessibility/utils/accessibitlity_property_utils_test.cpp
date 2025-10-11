@@ -260,4 +260,158 @@ HWTEST_F(AccessibilityPropertyUtilsTest, GetComponentType001, TestSize.Level1)
     result = AccessibilityPropertyUtils::GetComponentType(frameNode, accessibilityProperty);
     EXPECT_EQ(result, testTag2);
 }
+
+/**
+ * @tc.name: CheckAndGetStateController001
+ * @tc.desc: test CheckAndGetStateController when node is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetStateController001, TestSize.Level1)
+{
+    RefPtr<NG::FrameNode> node = nullptr;
+    RefPtr<NG::FrameNode> controllerNode = nullptr;
+    auto result = AccessibilityPropertyUtils::CheckAndGetStateController(node, controllerNode);
+    EXPECT_EQ(controllerNode, nullptr);
+    EXPECT_EQ(result, StateControllerType::CONTROLLER_NONE);
+}
+
+/**
+ * @tc.name: CheckAndGetStateController002
+ * @tc.desc: test CheckAndGetStateController when accessibilityGroup is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetStateController002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct frameNode
+     */
+    std::string testTag = "frameNode";
+    auto frameNode = FrameNode::CreateFrameNode(testTag,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->IsAccessibilityGroup());
+
+    /**
+     * @tc.steps: step2. test CheckAndGetStateController
+     */
+    RefPtr<NG::FrameNode> controllerNode = nullptr;
+    auto result = AccessibilityPropertyUtils::CheckAndGetStateController(frameNode, controllerNode);
+    EXPECT_EQ(controllerNode, nullptr);
+    EXPECT_EQ(result, StateControllerType::CONTROLLER_NONE);
+}
+
+/**
+ * @tc.name: CheckAndGetStateController003
+ * @tc.desc: test CheckAndGetStateController when controllerByInspector is empty and not SupportControllerType
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetStateController003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct frameNode
+     */
+    std::string testTag = "frameNode";
+    auto frameNode = FrameNode::CreateFrameNode(testTag,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityGroup(true);
+    EXPECT_TRUE(accessibilityProperty->IsAccessibilityGroup());
+
+    /**
+     * @tc.steps: step2. construct AccessibilityGroupOptions
+     */
+    AccessibilityGroupOptions accessibilityGroupOptions;
+    EXPECT_TRUE(accessibilityGroupOptions.stateControllerByInspector.empty());
+    accessibilityGroupOptions.stateControllerByType = AccessibilityRoleType::ALERT_DIALOG;
+    accessibilityProperty->SetAccessibilityGroupOptions(accessibilityGroupOptions);
+
+    /**
+     * @tc.steps: step3. test CheckAndGetStateController
+     */
+    RefPtr<NG::FrameNode> controllerNode = nullptr;
+    auto result = AccessibilityPropertyUtils::CheckAndGetStateController(frameNode, controllerNode);
+    EXPECT_EQ(controllerNode, nullptr);
+    EXPECT_EQ(result, StateControllerType::CONTROLLER_NONE);
+}
+
+/**
+ * @tc.name: CheckAndGetActionController001
+ * @tc.desc: test CheckAndGetActionController when node is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetActionController001, TestSize.Level1)
+{
+    RefPtr<NG::FrameNode> node = nullptr;
+    RefPtr<NG::FrameNode> controllerNode = nullptr;
+    auto result = AccessibilityPropertyUtils::CheckAndGetActionController(node, controllerNode);
+    EXPECT_EQ(controllerNode, nullptr);
+    EXPECT_EQ(result, ActionControllerType::CONTROLLER_NONE);
+}
+
+/**
+ * @tc.name: CheckAndGetActionController002
+ * @tc.desc: test CheckAndGetActionController when accessibilityGroup is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetActionController002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct frameNode
+     */
+    std::string testTag = "frameNode";
+    auto frameNode = FrameNode::CreateFrameNode(testTag,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->IsAccessibilityGroup());
+
+    /**
+     * @tc.steps: step2. test CheckAndGetActionController
+     */
+    RefPtr<NG::FrameNode> controllerNode = nullptr;
+    auto result = AccessibilityPropertyUtils::CheckAndGetActionController(frameNode, controllerNode);
+    EXPECT_EQ(controllerNode, nullptr);
+    EXPECT_EQ(result, ActionControllerType::CONTROLLER_NONE);
+}
+
+/**
+ * @tc.name: CheckAndGetActionController003
+ * @tc.desc: test CheckAndGetActionController when controllerByInspector is empty and not SupportControllerType
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetActionController003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct frameNode
+     */
+    std::string testTag = "frameNode";
+    auto frameNode = FrameNode::CreateFrameNode(testTag,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityGroup(true);
+    EXPECT_TRUE(accessibilityProperty->IsAccessibilityGroup());
+
+    /**
+     * @tc.steps: step2. construct AccessibilityGroupOptions
+     */
+    AccessibilityGroupOptions accessibilityGroupOptions;
+    EXPECT_TRUE(accessibilityGroupOptions.actionControllerByInspector.empty());
+    accessibilityGroupOptions.actionControllerByType = AccessibilityRoleType::ALERT_DIALOG;
+    accessibilityProperty->SetAccessibilityGroupOptions(accessibilityGroupOptions);
+
+    /**
+     * @tc.steps: step3. test CheckAndGetActionController
+     */
+    RefPtr<NG::FrameNode> controllerNode = nullptr;
+    auto result = AccessibilityPropertyUtils::CheckAndGetActionController(frameNode, controllerNode);
+    EXPECT_EQ(controllerNode, nullptr);
+    EXPECT_EQ(result, ActionControllerType::CONTROLLER_NONE);
+}
 } // namespace OHOS::Ace::NG
