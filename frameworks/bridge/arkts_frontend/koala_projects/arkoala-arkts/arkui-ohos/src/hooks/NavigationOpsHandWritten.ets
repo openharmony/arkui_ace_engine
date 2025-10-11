@@ -13,20 +13,45 @@
  * limitations under the License.
  */
 
-import { SerializerBase, runtimeType, RuntimeType, InteropNativeModule } from "@koalaui/interop"
+import { SerializerBase, runtimeType, RuntimeType, InteropNativeModule, KPointer } from "@koalaui/interop"
 import { ArkUIGeneratedNativeModule } from "#components"
-import { NavPathStack, ArkNavigationComponent, NavPathStack_serializer } from "../component/navigation"
+import { NavPathStack, NavigationModuleInfo, ArkNavigationComponent, NavPathStack_serializer, NavigationModuleInfo_serializer } from "../component/navigation"
 import { NavExtender } from "../component/idlize"
 import { int32 } from "@koalaui/common"
 import { addPartialUpdate, createUiDetachedRoot } from "../ArkUIEntry"
 import { PeerNode } from "../PeerNode"
 import { ArkStackComponent, ArkStackPeer } from "../component/stack"
 import { __context } from "@koalaui/runtime"
-import { PageMapBuilder } from "../component/builder"
+import { PageMapBuilder, WrappedBuilder } from "../component/builder"
 import { setNeedCreate } from "../ArkComponentRoot"
 
+export type NavDestinationBuilder =
+/** @memo */
+() => void
+
+export class NavigationRouterMap {
+    private static routerMap: Map<string, WrappedBuilder<NavDestinationBuilder>> = new Map<string, WrappedBuilder<NavDestinationBuilder>>()
+    static RegisterNavDestinationBuilder(name: string, builder: WrappedBuilder<NavDestinationBuilder>): void {
+        InteropNativeModule._NativeLog(`AceNavigation: RegisterNavDestinationBuilder for name: ${name}`)
+        NavigationRouterMap.routerMap.set(name, builder);
+    }
+
+    static CreateNavDestinationFromRouterMap(name: string, param: object|null|undefined): PeerNode | undefined {
+        if (!NavigationRouterMap.routerMap.has(name)) {
+            InteropNativeModule._NativeLog(`AceNavigation: NavDestination builder for ${name} does't exist`)
+            return undefined;
+        }
+        let builder = NavigationRouterMap.routerMap.get(name)!;
+        return createUiDetachedRoot((): PeerNode => ArkStackPeer.create(new ArkStackComponent()), () => {
+            setNeedCreate(true)
+            builder.builder();
+            setNeedCreate(false)
+        })
+    }
+}
+
 export class NavigationOpsHandWritten {
-    static hookSetNavigationOptionsImpl(component: ArkNavigationComponent, pathInfos?: NavPathStack) {
+    static hookSetNavigationOptionsImpl(component: ArkNavigationComponent, pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo) {
         let info: NavPathStack = new NavPathStack();
         const pathInfos_type = runtimeType(pathInfos)
         if (pathInfos_type != RuntimeType.UNDEFINED) {
@@ -38,6 +63,13 @@ export class NavigationOpsHandWritten {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const pathInfosTmpValue  = pathInfos!
             NavPathStack_serializer.write(thisSerializer, pathInfosTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (moduleInfo !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const moduleInfoTmpValue  = moduleInfo!
+            NavigationModuleInfo_serializer.write(thisSerializer, moduleInfoTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -54,6 +86,22 @@ export class NavigationOpsHandWritten {
                     setNeedCreate(false)
                 })
             }
+            NavExtender.setCreateNavDestinationCallback(pathInfos!, (index: int32): KPointer => {
+                let names: Array<string> = pathInfos!.getAllPathName()
+                if (index < 0 || index >= names.length) {
+                    InteropNativeModule._NativeLog(`AceNavigation: Invalid index:${index} names.length:${names.length}`);
+                    return 0;
+                }
+                let param = pathInfos!.getParamByIndex(index)
+                let name = names[index];
+                InteropNativeModule._NativeLog(`AceNavigation: create new node: name: ${name}, index: ${index} from router map`);
+                let node = NavigationRouterMap.CreateNavDestinationFromRouterMap(name, param);
+                if (!node) {
+                    InteropNativeModule._NativeLog(`AceNavigation: failed to create NavDestination from router map`);
+                    return 0;
+                }
+                return node.peer.ptr;
+            })
             const value_casted = updater as ((name: string, param: object|null|undefined) => PeerNode)
             NavExtender.setUpdateStackCallback(pathInfos!, () => {
                 addPartialUpdate(() => {

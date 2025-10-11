@@ -8979,13 +8979,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // NavDestinationModifier
     namespace NavDestinationInterfaceModifier {
-    void SetNavDestinationOptionsImpl(Ark_NativePointer node)
+    void SetNavDestinationOptionsImpl(Ark_NativePointer node,
+                                      const Opt_NavDestinationModuleInfo* moduleInfo)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
         string out("setNavDestinationOptions(");
+        WriteToString(&out, moduleInfo);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -9432,7 +9434,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // NavigationModifier
     namespace NavigationInterfaceModifier {
     void SetNavigationOptionsImpl(Ark_NativePointer node,
-                                  const Opt_NavPathStack* pathInfos)
+                                  const Opt_NavPathStack* pathInfos,
+                                  const Opt_NavigationModuleInfo* moduleInfo)
     {
         if (!needGroupedLog(1))
         {
@@ -9440,6 +9443,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         string out("setNavigationOptions(");
         WriteToString(&out, pathInfos);
+        out.append(", ");
+        WriteToString(&out, moduleInfo);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -34107,6 +34112,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {42};
     }
+    void SetCreateNavDestinationCallbackImpl(Ark_NavPathStack peer,
+                                             const NavExtender_CreateNavDestination* callback)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setCreateNavDestinationCallback(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // NavExtenderAccessor
     namespace NavigationTransitionProxyAccessor {
     void DestroyPeerImpl(Ark_NavigationTransitionProxy peer)
@@ -45203,6 +45222,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavExtenderAccessor::GetIdByNameImpl,
             NavExtenderAccessor::PopToIndexImpl,
             NavExtenderAccessor::PopToNameImpl,
+            NavExtenderAccessor::SetCreateNavDestinationCallbackImpl,
         };
         return &NavExtenderAccessorImpl;
     }

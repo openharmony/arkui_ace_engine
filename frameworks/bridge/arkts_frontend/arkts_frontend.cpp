@@ -233,6 +233,145 @@ ani_object LegacyLoadPage(ani_env* env)
     return nullptr;
 }
 
+bool ArktsFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
+{
+    taskExecutor_ = taskExecutor;
+
+    auto mediaQueryCallback = [weakEngine = AceType::WeakClaim(this)](
+                                        const std::string& callbackId, const std::string& args) {
+        auto arktsFrontend = weakEngine.Upgrade();
+        if (!arktsFrontend) {
+            return;
+        }
+        arktsFrontend->CallbackMediaQuery(callbackId, args);
+    };
+    SetMediaQueryCallback(std::move(mediaQueryCallback));
+
+    auto navigationLoadCallback = [weakFront = WeakClaim(this)](
+        const std::string bundleName, const std::string& moduleName, const std::string& pageSourceFile,
+        bool isSingleton) -> int32_t {
+        auto frontend = weakFront.Upgrade();
+        CHECK_NULL_RETURN(frontend, -1);
+        return frontend->LoadNavDestinationPage(bundleName, moduleName, pageSourceFile, isSingleton) ? 0 : -1;
+    };
+    auto container = Container::Current();
+    if (container) {
+        auto navigationRoute = container->GetNavigationRoute();
+        if (navigationRoute) {
+            navigationRoute->SetLoadPageCallback(std::move(navigationLoadCallback));
+        }
+    }
+
+    return true;
+}
+
+bool ArktsFrontend::GetNavigationRegisterClassName(const std::string& pageSourceFile, std::string& className)
+{
+    /**
+     * Example:
+     * from pageSourceFile: @normalized:N&&&entry/src/main/ets/pages/MyPage&
+     * to className: entry.src.main.ets.pages.MyPage.__NavigationBuilderRegisterClass
+     */
+    LOGI("AceNavigation get registerClassName with source: %{public}s", pageSourceFile.c_str());
+    auto it = pageSourceFile.rfind('&');
+    if (it == std::string::npos) {
+        return false;
+    }
+    std::string tempClassName = pageSourceFile.substr(0, it);
+    it = tempClassName.rfind('&');
+    if (it == std::string::npos) {
+        return false;
+    }
+    tempClassName = tempClassName.substr(it + 1);
+    if (tempClassName.empty()) {
+        return false;
+    }
+    tempClassName += "/__NavigationBuilderRegisterClass";
+    std::replace(tempClassName.begin(), tempClassName.end(), '/', '.');
+    className = tempClassName;
+    return true;
+}
+
+bool ArktsFrontend::LoadNavDestinationPage(const std::string bundleName, const std::string& moduleName,
+    const std::string& pageSourceFile, bool isSingleton)
+{
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, false);
+    std::string className;
+    if (!GetNavigationRegisterClassName(pageSourceFile, className)) {
+        return false;
+    }
+    LOGI("AceNavigation registerClassName: %{public}s", className.c_str());
+    if (!linkerRef_) {
+        LOGW("AceNavigation no RuntimeLinker found.");
+        return false;
+    }
+    ani_status status;
+    ani_string classNameStr;
+    if ((status = env->String_NewUTF8(className.c_str(), className.length(), &classNameStr)) != ANI_OK) {
+        LOGW("AceNavigation create className failed, %{public}d", status);
+        return false;
+    }
+    ani_class linkerCls = nullptr;
+    if ((status = env->FindClass("Lstd/core/RuntimeLinker;", &linkerCls)) != ANI_OK) {
+        LOGW("AceNavigation find RuntimeLinker failed, %{public}d", status);
+        return false;
+    }
+    ani_method loadClassMethod;
+    if ((status = env->Class_FindMethod(linkerCls, "loadClass",
+        "Lstd/core/String;Lstd/core/Boolean;:Lstd/core/Class;", &loadClassMethod)) != ANI_OK) {
+        LOGW("AceNavigation find loadClass failed, %{public}d", status);
+        return false;
+    }
+    ani_object isInit;
+    if ((status = static_cast<ani_status>(Ani::AniUtils::CreateAniBoolean(env, true, isInit))) != ANI_OK) {
+        LOGW("AceNavigation create Boolean object failed, %{public}d", status);
+        return false;
+    }
+    ani_ref registerClassRef = nullptr;
+    if ((status = env->Object_CallMethod_Ref(
+        (ani_object)linkerRef_, loadClassMethod, &registerClassRef, classNameStr, isInit)) != ANI_OK) {
+        LOGW("AceNavigation loadClassMethod failed, %{public}d", status);
+        ani_error errorInfo;
+        env->GetUnhandledError(&errorInfo);
+        env->ResetError();
+        return false;
+    }
+    ani_class registerClass = static_cast<ani_class>(registerClassRef);
+    ani_static_field staticField;
+    if ((status = env->Class_FindStaticField(registerClass, "staticBlockTriggerField", &staticField)) != ANI_OK) {
+        LOGW("AceNavigation find static Field failed, %{public}d", status);
+        return false;
+    }
+    ani_boolean staticFieldValue;
+    if ((status = env->Class_GetStaticField_Boolean(registerClass, staticField, &staticFieldValue)) != ANI_OK) {
+        LOGW("AceNavigation get static Field value failed, %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool ArktsFrontend::GetNearestNonBootRuntimeLinker()
+{
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, false);
+    ani_status status;
+    ani_ref linkerRef;
+    if ((status = static_cast<ani_status>(Ani::AniUtils::GetNearestNonBootRuntimeLinker(env, linkerRef))) != ANI_OK) {
+        LOGW("getNearestNonBootRuntimeLinker failed, %{public}d", status);
+        return false;
+    }
+    if ((status = env->GlobalReference_Create((ani_object)linkerRef, &linkerRef_)) != ANI_OK) {
+        LOGW("create RuntimeLinker global Reference failed, %{public}d", status);
+        return false;
+    }
+    if (!linkerRef_) {
+        LOGW("get invalid RuntimeLinker!");
+        return false;
+    }
+    return true;
+}
+
 UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::string& params)
 {
     auto* env = Ani::AniUtils::GetAniEnv(vm_);
@@ -240,6 +379,7 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
 
     ani_class appClass;
     EntryLoader entryLoader(url, env);
+    GetNearestNonBootRuntimeLinker();
 
     pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
 

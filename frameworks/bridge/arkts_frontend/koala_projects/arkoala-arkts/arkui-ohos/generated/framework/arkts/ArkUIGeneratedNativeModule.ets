@@ -1249,7 +1249,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NavDestination_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
-    native static _NavDestinationInterface_setNavDestinationOptions(ptr: KPointer): void
+    native static _NavDestinationInterface_setNavDestinationOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavDestinationAttribute_setHideTitleBar0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4627,6 +4627,8 @@ export class ArkUIGeneratedNativeModule {
     native static _NavExtender_popToIndex(pathStack: KPointer, index: KInt, animated: KInt): void
     @ani.unsafe.Quick
     native static _NavExtender_popToName(pathStack: KPointer, name: KStringPtr, animated: KInt): number
+    @ani.unsafe.Direct
+    native static _NavExtender_setCreateNavDestinationCallback(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavigationTransitionProxy_construct(): KPointer
     @ani.unsafe.Direct

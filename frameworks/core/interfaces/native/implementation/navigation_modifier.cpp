@@ -62,7 +62,8 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 
 namespace NavigationInterfaceModifier {
 void SetNavigationOptionsImpl(Ark_NativePointer node,
-                              const Opt_NavPathStack* pathInfos)
+                              const Opt_NavPathStack* pathInfos,
+                              const Opt_NavigationModuleInfo* moduleInfo)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

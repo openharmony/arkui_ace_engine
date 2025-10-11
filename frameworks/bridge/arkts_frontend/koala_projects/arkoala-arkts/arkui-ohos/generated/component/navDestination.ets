@@ -185,8 +185,17 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setNavDestinationOptionsAttribute(): void {
-        ArkUIGeneratedNativeModule._NavDestinationInterface_setNavDestinationOptions(this.peer.ptr)
+    setNavDestinationOptionsAttribute(moduleInfo?: NavDestinationModuleInfo): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (moduleInfo !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const moduleInfoTmpValue  = moduleInfo!
+            NavDestinationModuleInfo_serializer.write(thisSerializer, moduleInfoTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._NavDestinationInterface_setNavDestinationOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     setHideTitleBar0Attribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -753,7 +762,7 @@ export interface NavDestinationTransition {
     event: (() => void);
 }
 export interface NavDestinationAttribute extends CommonMethod {
-    setNavDestinationOptions(): this {
+    setNavDestinationOptions(moduleInfo?: NavDestinationModuleInfo): this {
         throw new Error("Unimplemented method setNavDestinationOptions")
     }
     hideTitleBar(value: boolean | undefined): this {
@@ -877,7 +886,7 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     onNewParam_value?: ((value0: Object | null | undefined) => void) | undefined
     preferredOrientation_value?: window.Orientation | undefined
     enableNavigationIndicator_value?: boolean | undefined
-    setNavDestinationOptions(): this {
+    setNavDestinationOptions(moduleInfo?: NavDestinationModuleInfo): this {
         return this
     }
     hideTitleBar(value: boolean | undefined): this {
@@ -978,6 +987,10 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     }
 }
 export type NavDestinationTransitionDelegate = (operation: NavigationOperation, isEnter: boolean) => Array<NavDestinationTransition> | undefined;
+export interface NavDestinationModuleInfo {
+    moduleName: string;
+    pagePath: string;
+}
 
 export class ArkNavDestinationComponent extends ArkCommonMethodComponent implements NavDestinationAttribute {
     getPeer(): ArkNavDestinationPeer {
@@ -986,9 +999,10 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return (this.peer as ArkNavDestinationPeer)
     }
-    public setNavDestinationOptions(): this {
+    public setNavDestinationOptions(moduleInfo?: NavDestinationModuleInfo): this {
         if (this.checkPriority("setNavDestinationOptions")) {
-            this.getPeer()?.setNavDestinationOptionsAttribute()
+            const moduleInfo_casted = moduleInfo as (NavDestinationModuleInfo | undefined)
+            this.getPeer()?.setNavDestinationOptionsAttribute(moduleInfo_casted)
             return this
         }
         return this
@@ -1277,6 +1291,22 @@ export function NavDestinationImpl(
     })
 }
 
+export class NavDestinationModuleInfo_serializer {
+    public static write(buffer: SerializerBase, value: NavDestinationModuleInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForModuleName  = value.moduleName
+        valueSerializer.writeString(valueHolderForModuleName)
+        const valueHolderForPagePath  = value.pagePath
+        valueSerializer.writeString(valueHolderForPagePath)
+    }
+    public static read(buffer: DeserializerBase): NavDestinationModuleInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const moduleNameTmpResult : string = (valueDeserializer.readString() as string)
+        const pagePathTmpResult : string = (valueDeserializer.readString() as string)
+        let value : NavDestinationModuleInfo = ({moduleName: moduleNameTmpResult, pagePath: pagePathTmpResult} as NavDestinationModuleInfo)
+        return value
+    }
+}
 export class NavDestinationTransition_serializer {
     public static write(buffer: SerializerBase, value: NavDestinationTransition): void {
         let valueSerializer : SerializerBase = buffer

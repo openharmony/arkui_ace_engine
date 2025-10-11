@@ -1461,6 +1461,8 @@ typedef struct ModifierKeyStateGetter ModifierKeyStateGetter;
 typedef struct Opt_ModifierKeyStateGetter Opt_ModifierKeyStateGetter;
 typedef struct NavDestinationTransitionDelegate NavDestinationTransitionDelegate;
 typedef struct Opt_NavDestinationTransitionDelegate Opt_NavDestinationTransitionDelegate;
+typedef struct NavExtender_CreateNavDestination NavExtender_CreateNavDestination;
+typedef struct Opt_NavExtender_CreateNavDestination Opt_NavExtender_CreateNavDestination;
 typedef struct NavExtender_OnUpdateStack NavExtender_OnUpdateStack;
 typedef struct Opt_NavExtender_OnUpdateStack Opt_NavExtender_OnUpdateStack;
 typedef struct OnAdsBlockedCallback OnAdsBlockedCallback;
@@ -1989,12 +1991,16 @@ typedef struct Ark_NativeEmbedVisibilityInfo Ark_NativeEmbedVisibilityInfo;
 typedef struct Opt_NativeEmbedVisibilityInfo Opt_NativeEmbedVisibilityInfo;
 typedef struct Ark_NavContentInfo Ark_NavContentInfo;
 typedef struct Opt_NavContentInfo Opt_NavContentInfo;
+typedef struct Ark_NavDestinationModuleInfo Ark_NavDestinationModuleInfo;
+typedef struct Opt_NavDestinationModuleInfo Opt_NavDestinationModuleInfo;
 typedef struct Ark_NavDestinationTransition Ark_NavDestinationTransition;
 typedef struct Opt_NavDestinationTransition Opt_NavDestinationTransition;
 typedef struct Ark_NavigationAnimatedTransition Ark_NavigationAnimatedTransition;
 typedef struct Opt_NavigationAnimatedTransition Opt_NavigationAnimatedTransition;
 typedef struct Ark_NavigationInterception Ark_NavigationInterception;
 typedef struct Opt_NavigationInterception Opt_NavigationInterception;
+typedef struct Ark_NavigationModuleInfo Ark_NavigationModuleInfo;
+typedef struct Opt_NavigationModuleInfo Opt_NavigationModuleInfo;
 typedef struct Ark_NavigationOptions Ark_NavigationOptions;
 typedef struct Opt_NavigationOptions Opt_NavigationOptions;
 typedef struct NavPathInfoPeer NavPathInfoPeer;
@@ -11250,6 +11256,16 @@ typedef struct Opt_NavDestinationTransitionDelegate {
     Ark_Tag tag;
     NavDestinationTransitionDelegate value;
 } Opt_NavDestinationTransitionDelegate;
+typedef struct NavExtender_CreateNavDestination {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation);
+} NavExtender_CreateNavDestination;
+typedef struct Opt_NavExtender_CreateNavDestination {
+    Ark_Tag tag;
+    NavExtender_CreateNavDestination value;
+} Opt_NavExtender_CreateNavDestination;
 typedef struct NavExtender_OnUpdateStack {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13565,6 +13581,15 @@ typedef struct Opt_NavContentInfo {
     Ark_Tag tag;
     Ark_NavContentInfo value;
 } Opt_NavContentInfo;
+typedef struct Ark_NavDestinationModuleInfo {
+    /* kind: Interface */
+    Ark_String moduleName;
+    Ark_String pagePath;
+} Ark_NavDestinationModuleInfo;
+typedef struct Opt_NavDestinationModuleInfo {
+    Ark_Tag tag;
+    Ark_NavDestinationModuleInfo value;
+} Opt_NavDestinationModuleInfo;
 typedef struct Ark_NavDestinationTransition {
     /* kind: Interface */
     Opt_Callback_Void onTransitionEnd;
@@ -13598,6 +13623,16 @@ typedef struct Opt_NavigationInterception {
     Ark_Tag tag;
     Ark_NavigationInterception value;
 } Opt_NavigationInterception;
+typedef struct Ark_NavigationModuleInfo {
+    /* kind: Interface */
+    Ark_String moduleName;
+    Ark_String pagePath;
+    Opt_Boolean isUserCreateStack;
+} Ark_NavigationModuleInfo;
+typedef struct Opt_NavigationModuleInfo {
+    Ark_Tag tag;
+    Ark_NavigationModuleInfo value;
+} Opt_NavigationModuleInfo;
 typedef struct Ark_NavigationOptions {
     /* kind: Interface */
     Opt_LaunchMode launchMode;
@@ -21441,7 +21476,8 @@ typedef struct GENERATED_ArkUIMenuItemGroupModifier {
 typedef struct GENERATED_ArkUINavDestinationModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
-    void (*setNavDestinationOptions)(Ark_NativePointer node);
+    void (*setNavDestinationOptions)(Ark_NativePointer node,
+                                     const Opt_NavDestinationModuleInfo* moduleInfo);
     void (*setHideTitleBar0)(Ark_NativePointer node,
                              const Opt_Boolean* value);
     void (*setHideBackButton)(Ark_NativePointer node,
@@ -21518,7 +21554,8 @@ typedef struct GENERATED_ArkUINavigationModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setNavigationOptions)(Ark_NativePointer node,
-                                 const Opt_NavPathStack* pathInfos);
+                                 const Opt_NavPathStack* pathInfos,
+                                 const Opt_NavigationModuleInfo* moduleInfo);
     void (*setNavBarWidth)(Ark_NativePointer node,
                            const Opt_Union_Length_Bindable* value);
     void (*setNavBarPosition)(Ark_NativePointer node,
@@ -25127,6 +25164,8 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
     Ark_Number (*popToName)(Ark_NavPathStack pathStack,
                             const Ark_String* name,
                             Ark_Boolean animated);
+    void (*setCreateNavDestinationCallback)(Ark_NavPathStack peer,
+                                            const NavExtender_CreateNavDestination* callback);
 } GENERATED_ArkUINavExtenderAccessor;
 
 typedef struct GENERATED_ArkUINavigationTransitionProxyAccessor {

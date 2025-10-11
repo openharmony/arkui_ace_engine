@@ -76,21 +76,7 @@ public:
     {
         mediaQueryCallbacks_ = mediaQueryCallback;
     }
-    bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override
-    {
-        taskExecutor_ = taskExecutor;
-
-        auto mediaQueryCallback = [weakEngine = AceType::WeakClaim(this)](
-                                         const std::string& callbackId, const std::string& args) {
-            auto arktsFrontend = weakEngine.Upgrade();
-            if (!arktsFrontend) {
-                return;
-            }
-            arktsFrontend->CallbackMediaQuery(callbackId, args);
-        };
-        SetMediaQueryCallback(std::move(mediaQueryCallback));
-        return true;
-    }
+    bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
 
     void Destroy() override;
 
@@ -401,6 +387,12 @@ public:
     void OpenStateMgmtInterop() override;
     void NotifyArkoalaConfigurationChange(bool isNeedUpdate) override;
 protected:
+    bool LoadNavDestinationPage(const std::string bundleName, const std::string& moduleName,
+        const std::string& pageSourceFile, bool isSingleton);
+    bool GetNavigationRegisterClassName(const std::string& pageSourceFile, std::string& className);
+    bool GetNearestNonBootRuntimeLinker();
+
+    ani_ref linkerRef_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;
     ani_vm* vm_ = nullptr;

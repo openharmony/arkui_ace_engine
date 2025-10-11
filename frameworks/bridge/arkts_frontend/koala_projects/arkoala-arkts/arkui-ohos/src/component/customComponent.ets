@@ -15,6 +15,9 @@
 
 import { __context, StateManager } from '@koalaui/runtime';
 import { int32 } from '@koalaui/common';
+import { WrappedBuilder } from "./builder"
+import { NavigationRouterMap, NavDestinationBuilder } from "#handwritten"
+import { InteropNativeModule } from '@koalaui/interop'
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { ArkStructBase } from '../ArkStructBase';
 import { ArkUIAniModule } from 'arkui.ani';
@@ -443,6 +446,11 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
 }
 
 export class EntryPoint {
+    public static NavigationBuilderRegister(name: string, builder: WrappedBuilder<NavDestinationBuilder>) {
+        InteropNativeModule._NativeLog(`AceNavigation: NavigationBuilderRegister for name: ${name}`)
+        NavigationRouterMap.RegisterNavDestinationBuilder(name, builder)
+    }
+
     constructor() {}
     /** @memo */
     entry(): void {
