@@ -96,6 +96,8 @@ public:
 
     void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override;
 
+    void BuildAllChildren();
+
     // used for drag move operation.
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void SetOnMoveFromTo(std::function<void(int32_t, int32_t)>&& onMoveFromTo);
