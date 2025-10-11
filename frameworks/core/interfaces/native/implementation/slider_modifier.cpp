@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_static.h"
+#include "core/components/slider/slider_theme.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -143,6 +144,7 @@ void SetBlockColorImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<Color>(value);
     SliderModelStatic::SetBlockColor(frameNode, convValue);
 }
+
 void SetTrackColorImpl(Ark_NativePointer node,
                        const Opt_Union_ResourceColor_LinearGradient* value)
 {
@@ -159,7 +161,9 @@ void SetTrackColorImpl(Ark_NativePointer node,
             auto gradientOpt = Converter::OptConvert<Gradient>(value);
             SliderModelStatic::SetTrackBackgroundColor(frameNode, gradientOpt);
         },
-        []() {}
+        [frameNode]() {
+            SliderModelStatic::ResetTrackBackgroundColor(frameNode);
+        }
     );
 }
 void SetSelectedColorImpl(Ark_NativePointer node,
@@ -178,8 +182,9 @@ void SetSelectedColorImpl(Ark_NativePointer node,
             auto gradientOpt = Converter::OptConvert<Gradient>(value);
             SliderModelStatic::SetSelectColor(frameNode, gradientOpt);
         },
-        []() {}
-    );
+        [frameNode]() {
+            SliderModelStatic::SetSelectColor(frameNode, std::nullopt, false);
+        });
 }
 void SetShowStepsImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
@@ -188,7 +193,7 @@ void SetShowStepsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        SliderModelStatic::ResetShowSteps(frameNode);
         return;
     }
     SliderModelNG::SetShowSteps(frameNode, *convValue);
@@ -209,7 +214,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SliderModelNG::SetOnChange(frameNode, nullptr);
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](float newValue, int32_t mode) {
@@ -289,6 +294,9 @@ void SetBlockStyleImpl(Ark_NativePointer node,
             SliderModelNG::ResetBlockImage(frameNode);
         }
         LOGE("SliderModifier::BlockStyleImpl is not implemented, raw pointer is not supported!");
+    } else {
+        SliderModelStatic::SetBlockType(frameNode, std::nullopt);
+        SliderModelNG::ResetBlockImage(frameNode);
     }
 }
 void SetStepSizeImpl(Ark_NativePointer node,
@@ -342,7 +350,7 @@ void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue.has_value()) {
-        // Implement Reset value
+        SliderModelNG::SetEnableHapticFeedback(frameNode, true);
         return;
     }
     SliderModelNG::SetEnableHapticFeedback(frameNode, *convValue);
@@ -355,7 +363,7 @@ void SetShowTipsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        SliderModelStatic::ResetShowTips(frameNode);
         return;
     }
     auto convContent = Converter::OptConvertPtr<std::string>(content);

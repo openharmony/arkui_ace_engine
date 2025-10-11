@@ -116,7 +116,11 @@ void SetShapeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxModelStatic::SetCheckboxStyle(frameNode, Converter::OptConvertPtr<CheckBoxStyle>(value));
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        CheckBoxModelStatic::SetCheckboxStyle(frameNode, CheckBoxStyle::CIRCULAR_STYLE);
+        return;
+    }
 }
 void SetUnselectedColorImpl(Ark_NativePointer node,
                             const Opt_ResourceColor* value)

@@ -387,4 +387,27 @@ void SliderModelStatic::SetOnChangeEvent(FrameNode* frameNode, SliderOnValueChan
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
+
+void SliderModelStatic::ResetShowTips(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, CustomContent, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelStatic::ResetShowSteps(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, ShowSteps, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelStatic::ResetTrackBackgroundColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+    Gradient defaultGradientOpt = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor());
+    SetTrackBackgroundColor(frameNode, defaultGradientOpt, true);
+}
 } // namespace OHOS::Ace::NG

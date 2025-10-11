@@ -44,7 +44,9 @@ std::optional<bool> ProcessBindableSelectAll(FrameNode* frameNode, const Opt_Uni
             };
             CheckBoxGroupModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
         },
-        [] {});
+        [&result] {
+            result = false;
+        });
     return result;
 }
 } // namespace
@@ -131,7 +133,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        CheckBoxGroupModelStatic::SetOnChange(frameNode, nullptr);
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* info) {
