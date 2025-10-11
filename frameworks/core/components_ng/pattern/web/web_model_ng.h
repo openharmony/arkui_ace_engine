@@ -365,10 +365,6 @@ public:
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType);
     static void SetOnShowFileSelector(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
-    static void SetOnDetectedBlankScreen(
-        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
-    static void SetBlankScreenDetectionConfig(
-        FrameNode* frameNode, const BlankScreenDetectionConfig& detectConfig);
     static void SetOnContextMenuShow(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnSafeBrowsingCheckResult(FrameNode* frameNode,
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResult);

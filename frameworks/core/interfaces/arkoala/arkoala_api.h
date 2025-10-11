@@ -2316,19 +2316,6 @@ struct ArkUIMaskFill {
     ArkUI_Float32 strokeWidth;
 };
 
-enum ArkUIBlankScreenDetectionMethod {
-    ARKUI_DETECTION_CONTENTFUL_NODES_SEVENTEEN = 0,
-};
-
-struct ArkUIBlankScreenDetectionConfigStruct {
-    ArkUI_Bool enable = false;
-    ArkUI_Float64* detectionTiming = nullptr;
-    ArkUI_Int32 detectionTimingLength = 0;
-    ArkUIBlankScreenDetectionMethod* detectionMethods = nullptr;
-    ArkUI_Int32 detectionMethodsLength = 0;
-    ArkUI_Int32 contentfulNodesCountThreshold = 0;
-};
-
 struct ArkUICommonModifier {
     ArkUI_Int32 (*setOnTouchTestDoneCallback)(ArkUINodeHandle node, void* userData,
         void (*touchTestDone)(
@@ -5287,11 +5274,6 @@ struct ArkUIWebModifier {
     void (*resetOnPromptCallBack)(ArkUINodeHandle node);
     void (*setOnShowFileSelector)(ArkUINodeHandle node, void* callback);
     void (*resetOnShowFileSelector)(ArkUINodeHandle node);
-    void (*setOnDetectedBlankScreen)(ArkUINodeHandle node, void* callback);
-    void (*resetOnDetectedBlankScreen)(ArkUINodeHandle node);
-    void (*setBlankScreenDetectionConfig)(
-        ArkUINodeHandle node, const struct ArkUIBlankScreenDetectionConfigStruct* arkUITextDetectConfig);
-    void (*resetBlankScreenDetectionConfig)(ArkUINodeHandle node);
     void (*setOnContextMenuShow)(ArkUINodeHandle node, void* callback);
     void (*resetOnContextMenuShow)(ArkUINodeHandle node);
     void (*setOnSafeBrowsingCheckResultCallBack)(ArkUINodeHandle node, void* callback);
