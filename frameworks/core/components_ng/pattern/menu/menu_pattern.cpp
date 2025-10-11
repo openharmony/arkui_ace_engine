@@ -1711,11 +1711,10 @@ void MenuPattern::ShowStackSubMenuAnimation(const RefPtr<FrameNode>& mainMenu, c
     AnimationOption translateOption = AnimationOption();
     translateOption.SetCurve(STACK_SUB_MENU_ANIMATION_CURVE);
     translateOption.SetDuration(STACK_MENU_APPEAR_DURATION);
-    AnimationUtils::Animate(translateOption, [weak = WeakClaim(RawPtr(subMenuContext)), menuPosition = endOffset]() {
+    AnimationUtils::Animate(translateOption, [weak = WeakClaim(RawPtr(subMenuContext)), pos = endOffset]() {
         auto subMenuContextUpgrade = weak.Upgrade();
         CHECK_NULL_VOID(subMenuContextUpgrade);
-        subMenuContextUpgrade->UpdatePosition(
-            OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+        subMenuContextUpgrade->UpdatePosition(OffsetT<Dimension>(Dimension(pos.GetX()), Dimension(pos.GetY())));
     }, nullptr, nullptr, subMenuNode->GetContextRefPtr());
     AnimationOption opacityOption = AnimationOption();
     opacityOption.SetCurve(Curves::FRICTION);
