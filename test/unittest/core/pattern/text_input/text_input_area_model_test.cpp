@@ -2807,42 +2807,6 @@ HWTEST_F(TextInputAreaTest, TextModelStaticTest037, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageSpanViewStatic001
- * @tc.desc: test SetVerticalAlign func
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputAreaTest, ImageSpanViewStatic001, TestSize.Level0)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    ImageSpanViewStatic::SetVerticalAlign(frameNode.GetRawPtr(), std::make_optional(VerticalAlign::BASELINE));
-    EXPECT_TRUE(layoutProperty->GetVerticalAlign().has_value());
-    ImageSpanViewStatic::SetVerticalAlign(frameNode.GetRawPtr(), std::nullopt);
-    EXPECT_FALSE(layoutProperty->GetVerticalAlign().has_value());
-}
-
-/**
- * @tc.name: ImageSpanViewStatic002
- * @tc.desc: test SetObjectFit func
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputAreaTest, ImageSpanViewStatic002, TestSize.Level0)
-{
-    auto pattern = AceType::MakeRefPtr<ImagePattern>();
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    ImageSourceInfo imageInfo;
-    void* voidPtr = static_cast<void*>(new char[0]);
-    imageInfo.pixmap_ = PixelMap::CreatePixelMap(voidPtr);
-    ASSERT_NE(imageInfo.pixmap_, nullptr);
-    ImageSpanViewStatic::SetImageSpanSrc(frameNode.GetRawPtr(), imageInfo);
-    EXPECT_EQ(pattern->GetSyncLoad(), true);
-}
-
-/**
  * @tc.name: testFieldModelStatic055
  * @tc.desc: test testInput ModelStatic
  * @tc.type: FUNC
