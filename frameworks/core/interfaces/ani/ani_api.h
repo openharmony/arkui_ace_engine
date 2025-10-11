@@ -440,10 +440,12 @@ struct ArkUIAniDragModifier {
     void (*setDragDropInfoCustomNode)(ani_ref event, ArkUINodeHandle node);
     void (*setDragDropInfoExtraInfo)(ani_ref event, const char* ptr);
     void (*setDragAllowDropNull)(ArkUINodeHandle node);
-    void (*setDragAllowDrop)(ArkUINodeHandle node, const char** allowDrops, ArkUI_Int32 length);
+    void (*setDragAllowDrop)(ArkUINodeHandle node, char** allowDrops, ArkUI_Int32 length);
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragInfo dragInfo);
     void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUIDragPreviewOption options);
     const char* (*getUdKey)(ani_ref event);
+    ani_long (*createUnifiedDataPeer)(void* data);
+    ani_long (*getUnifiedData)(ani_long peer);
 };
 struct ArkUIAniXBarModifier {
     void (*setComponentCreateFunc)(std::function<int64_t(const int32_t&, const int32_t&)>&& fn);
