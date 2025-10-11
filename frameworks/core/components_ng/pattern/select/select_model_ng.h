@@ -170,6 +170,8 @@ public:
     static void SetOptionBgColorByUser(FrameNode* frameNode, bool isValidValue = true);
     void SetSelectedOptionBgColorByUser(bool isValidValue = true) override;
     static void SetSelectedOptionBgColorByUser(FrameNode* frameNode, bool isValidValue = true);
+    static void BackgroundColor(FrameNode* frameNode, const Color& color);
+    static void ResetBackgroundColor(FrameNode* frameNode);
 
 private:
     void AddResObjWithCallBack(
