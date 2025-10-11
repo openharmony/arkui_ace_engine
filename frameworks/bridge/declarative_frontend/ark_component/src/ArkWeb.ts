@@ -599,6 +599,21 @@ class WebOnNativeEmbedGestureEventModifier extends ModifierWithKey<(event: Nativ
     }
   }
 }
+
+class WebOnNativeEmbedMouseEventModifier extends ModifierWithKey<(event: NativeEmbedMouseInfo) => void> {
+  constructor(value: (event: NativeEmbedMouseInfo) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnNativeEmbedMouseEventModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnNativeEmbedMouseEvent(node);
+    } else {
+      getUINativeModule().web.setOnNativeEmbedMouseEvent(node, this.value);
+    }
+  }
+}
+
 class WebRegisterNativeEmbedRuleModifier extends ModifierWithKey<ArkRegisterNativeEmbedRule> {
   constructor(value: ArkRegisterNativeEmbedRule) {
     super(value);
@@ -1962,6 +1977,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   onNativeEmbedGestureEvent(callback: (event: NativeEmbedTouchInfo) => void): this {
     modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedGestureEventModifier.identity, WebOnNativeEmbedGestureEventModifier, callback);
+    return this;
+  }
+  onNativeEmbedMouseEvent(callback: (event: NativeEmbedMouseInfo) => void): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedMouseEventModifier.identity, WebOnNativeEmbedMouseEventModifier, callback);
     return this;
   }
   onNativeEmbedObjectParamChange(callback: (event: NativeEmbedParamDataInfo) => void): this {

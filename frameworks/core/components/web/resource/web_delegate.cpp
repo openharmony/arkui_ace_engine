@@ -7679,7 +7679,8 @@ bool WebDelegate::SetTouchEventInfoFromMouse(const MouseInfo &mouseInfo, TouchEv
     touchLocationInfo.SetScreenLocation(Offset(mouseInfo.GetScreenLocation()));
     touchLocationInfo.SetGlobalLocation(Offset(mouseInfo.GetScreenLocation()));
     touchLocationInfo.SetTimeStamp(mouseInfo.GetTimeStamp());
-    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
+    TouchLocationInfo changedTouchLocationInfo = touchLocationInfo;
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(changedTouchLocationInfo));
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
     touchEventInfo.SetSourceDevice(SourceType::TOUCH);
 
