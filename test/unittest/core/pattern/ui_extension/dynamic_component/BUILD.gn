@@ -76,6 +76,7 @@ ace_unittest("dynamic_pattern_test") {
     external_deps = [
       "ability_base:want",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:napi_common",
       "accessibility:accessibility_common",
       "c_utils:utils",
       "ffrt:libffrt",
@@ -154,6 +155,7 @@ ace_unittest("dynamic_pattern_test_two") {
     external_deps = [
       "ability_base:want",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:napi_common",
       "accessibility:accessibility_common",
       "c_utils:utils",
       "ffrt:libffrt",
@@ -205,6 +207,7 @@ ace_unittest("dynamic_pattern_manager_test_ng") {
     external_deps = [
       "ability_base:want",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:napi_common",
       "accessibility:accessibility_common",
       "c_utils:utils",
       "ffrt:libffrt",
