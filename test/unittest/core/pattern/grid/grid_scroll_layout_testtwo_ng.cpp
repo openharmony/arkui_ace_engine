@@ -450,5 +450,33 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollWithOptions006, TestSize.Level1)
     layoutAlgorithm->crossCount_ = 4;
     EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(4, option, 1), std::make_pair(2, 2));
 }
+
+/**
+ * @tc.name: ChangeItemNumber002
+ * @tc.desc: Test GridScrollLayoutAlgorithm::FillCurrentLine
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, ChangeItemNumber002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFixedItems(5);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Add item
+     * @tc.expected: The line height of added item is correct
+     */
+    GridItemModelNG itemModel;
+    itemModel.Create(GridItemStyle::NONE);
+    ViewAbstract::SetHeight(CalcLength(Dimension(0.0)));
+    RefPtr<UINode> currentNode = ViewStackProcessor::GetInstance()->Finish();
+    auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    currentFrameNode->MountToParent(frameNode_);
+
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.lineHeightMap_[1], ITEM_MAIN_SIZE);
+}
 } // namespace OHOS::Ace::NG
  
