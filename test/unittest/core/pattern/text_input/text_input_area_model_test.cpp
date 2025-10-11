@@ -1664,7 +1664,7 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic020, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetShowPasswordText().value(), false);
 
     TextFieldModelStatic::SetShowPassword(frameNode, std::nullopt);
-    EXPECT_FALSE(layoutProperty->GetShowPasswordText().has_value());
+    EXPECT_EQ(layoutProperty->GetShowPasswordText().value(), false);
 }
 
 /**

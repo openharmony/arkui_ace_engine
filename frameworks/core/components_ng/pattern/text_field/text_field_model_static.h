@@ -56,6 +56,7 @@ public:
     static void SetCaretPosition(FrameNode* frameNode, const std::optional<int32_t>& optValue);
     static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& valueOpt);
     static void SetCaretStyle(FrameNode* frameNode, const std::optional<CaretStyle>& value);
+    static void SetCaretWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetPlaceholderColor(FrameNode* frameNode, const std::optional<Color>& colorOpt);
     static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value);
     static void SetEnterKeyType(FrameNode* frameNode, const std::optional<TextInputAction>& valueOpt);
