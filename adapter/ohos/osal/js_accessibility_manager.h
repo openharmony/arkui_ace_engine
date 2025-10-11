@@ -483,6 +483,10 @@ private:
             Accessibility::AccessibilityElementOperatorCallback &callback) override;
         void SetChildTreeIdAndWinId(const int64_t nodeId, const int32_t treeId, const int32_t childWindowId) override;
         void SetBelongTreeId(const int32_t treeId) override;
+        void FocusMoveSearchWithCondition(const int64_t elementId, const AccessibilityFocusMoveParam param,
+            const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
+        void DetectElementInfoFocusableThroughAncestor(const AccessibilityElementInfo &info,
+            const int64_t parentId, const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
 
         void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
         {
@@ -526,6 +530,10 @@ private:
             Accessibility::AccessibilityElementOperatorCallback &callback) override;
         void SetChildTreeIdAndWinId(const int64_t nodeId, const int32_t treeId, const int32_t childWindowId) override;
         void SetBelongTreeId(const int32_t treeId) override;
+        void FocusMoveSearchWithCondition(const int64_t elementId, const AccessibilityFocusMoveParam param,
+            const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
+        void DetectElementInfoFocusableThroughAncestor(const AccessibilityElementInfo &info,
+            const int64_t parentId, const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
 
         void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
         {
