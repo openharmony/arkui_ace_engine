@@ -329,16 +329,6 @@ void SetOnRouterImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     LOGE("ARKOALA FormComponentInterfaceModifier::OnRouterImpl - Callback_Any_Void  is not supported "
         "the type Callback_Any_Void should be replaced by Callback_String_Void.");
-    auto optValue = Converter::GetOptPtr(value);
-    auto arkCallback = optValue ? CallbackHelper(*optValue) : CallbackHelper<Callback_Object_Void>();
-    auto onRouter = [arkCallback](const std::string& param) {
-        LOGE("lxg onrouter callback.");
-        //Ark_Callback_Object parameter = {};
-        auto sourceJson = JsonUtil::ParseJsonString(param);
-        Ark_Object obj ={};
-        arkCallback.InvokeSync(obj);
-    };
-    FormModelStatic::SetOnRouter(frameNode, onRouter);
 #endif // FORM_SUPPORTED
 }
 void SetOnUninstallImpl(Ark_NativePointer node,
