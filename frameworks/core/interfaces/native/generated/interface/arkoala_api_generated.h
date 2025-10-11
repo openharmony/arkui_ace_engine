@@ -2312,6 +2312,8 @@ typedef struct Ark_Union_Color_String_Resource Ark_Union_Color_String_Resource;
 typedef struct Opt_Union_Color_String_Resource Opt_Union_Color_String_Resource;
 typedef struct Ark_Union_Color_String_Resource_ColoringStrategy Ark_Union_Color_String_Resource_ColoringStrategy;
 typedef struct Opt_Union_Color_String_Resource_ColoringStrategy Opt_Union_Color_String_Resource_ColoringStrategy;
+typedef struct Ark_Union_ResourceColor_ColorMetrics Ark_Union_ResourceColor_ColorMetrics;
+typedef struct Opt_Union_ResourceColor_ColorMetrics Opt_Union_ResourceColor_ColorMetrics;
 typedef struct Ark_Union_Color_String_Resource_I64 Ark_Union_Color_String_Resource_I64;
 typedef struct Opt_Union_Color_String_Resource_I64 Opt_Union_Color_String_Resource_I64;
 typedef struct Ark_Union_ColumnOptions_ColumnOptionsV2 Ark_Union_ColumnOptions_ColumnOptionsV2;
@@ -15697,6 +15699,18 @@ typedef struct Opt_Union_ResourceColor_ColoringStrategy {
     Ark_Tag tag;
     Ark_Union_ResourceColor_ColoringStrategy value;
 } Opt_Union_ResourceColor_ColoringStrategy;
+typedef struct Ark_Union_ResourceColor_ColorMetrics {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_ResourceColor value0;
+        Ark_ColorMetrics value1;
+    };
+} Ark_Union_ResourceColor_ColorMetrics;
+typedef struct Opt_Union_ResourceColor_ColorMetrics {
+    Ark_Tag tag;
+    Ark_Union_ResourceColor_ColorMetrics value;
+} Opt_Union_ResourceColor_ColorMetrics;
 typedef struct Ark_Union_ResourceColor_LinearGradient {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -20683,7 +20697,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setMargin)(Ark_NativePointer node,
                       const Opt_Union_Margin_Length_LocalizedMargin* value);
     void (*setBackgroundColor)(Ark_NativePointer node,
-                               const Opt_ResourceColor* value);
+                               const Opt_Union_ResourceColor_ColorMetrics* value);
     void (*setPixelRound)(Ark_NativePointer node,
                           const Opt_PixelRoundPolicy* value);
     void (*setBackgroundImageSize)(Ark_NativePointer node,
@@ -20975,11 +20989,13 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                           const Opt_CustomNodeBuilder* builder,
                           const Opt_BackgroundOptions* options);
     void (*setBackgroundImage0)(Ark_NativePointer node,
-                                const Opt_Union_ResourceStr_PixelMap* src,
-                                const Opt_ImageRepeat* repeat);
+                                const Opt_Union_ResourceStr_PixelMap* value);
     void (*setBackgroundImage1)(Ark_NativePointer node,
                                 const Opt_Union_ResourceStr_PixelMap* src,
                                 const Opt_BackgroundImageOptions* options);
+    void (*setBackgroundImage2)(Ark_NativePointer node,
+                                const Opt_Union_ResourceStr_PixelMap* src,
+                                const Opt_ImageRepeat* repeat);
     void (*setBackgroundBlurStyle)(Ark_NativePointer node,
                                    const Opt_BlurStyle* style,
                                    const Opt_BackgroundBlurStyleOptions* options,

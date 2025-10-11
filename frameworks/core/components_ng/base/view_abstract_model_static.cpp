@@ -1661,6 +1661,11 @@ void ViewAbstractModelStatic::SetBackgroundImageRepeat(FrameNode* frameNode,
     }
 }
 
+void ViewAbstractModelStatic::SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSyncMode, syncMode, frameNode);
+}
+
 void ViewAbstractModelStatic::SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(SystemBarEffect, systemBarEffect, frameNode);

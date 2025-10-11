@@ -2081,7 +2081,7 @@ void SetMarginImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
 }
 void SetBackgroundColorImpl(Ark_NativePointer node,
-                            const Opt_ResourceColor* value)
+                            const Opt_Union_ResourceColor_ColorMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4592,6 +4592,34 @@ void SetBackgroundImpl(Ark_NativePointer node,
         }, node);
 }
 void SetBackgroundImage0Impl(Ark_NativePointer node,
+                             const Opt_Union_ResourceStr_PixelMap* src)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvertPtr<ImageSourceInfo>(src);
+    ViewAbstractModelStatic::SetBackgroundImage(frameNode, sourceInfo);
+}
+void SetBackgroundImage1Impl(Ark_NativePointer node,
+                             const Opt_Union_ResourceStr_PixelMap* src,
+                             const Opt_BackgroundImageOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvertPtr<ImageSourceInfo>(src);
+    ViewAbstractModelStatic::SetBackgroundImage(frameNode, sourceInfo);
+    CHECK_NULL_VOID(options);
+
+    auto syncLoad = static_cast<bool>(options->value.syncLoad.value);
+    ViewAbstractModelStatic::SetBackgroundImageSyncMode(frameNode, syncLoad);
+
+    auto imageRepeat = Converter::OptConvertPtr<ImageRepeat>(&options->value.repeat);
+    if (imageRepeat.has_value()) {
+        ViewAbstractModelStatic::SetBackgroundImageRepeat(frameNode, imageRepeat.value());
+    }
+}
+void SetBackgroundImage2Impl(Ark_NativePointer node,
                              const Opt_Union_ResourceStr_PixelMap* src,
                              const Opt_ImageRepeat* repeat)
 {
@@ -4603,13 +4631,6 @@ void SetBackgroundImage0Impl(Ark_NativePointer node,
 
     auto imageRepeat = Converter::OptConvertPtr<ImageRepeat>(repeat);
     ViewAbstractModelStatic::SetBackgroundImageRepeat(frameNode, imageRepeat);
-}
-void SetBackgroundImage1Impl(Ark_NativePointer node,
-                             const Opt_Union_ResourceStr_PixelMap* src,
-                             const Opt_BackgroundImageOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
 }
 void SetBackgroundBlurStyleImpl(Ark_NativePointer node,
                                 const Opt_BlurStyle* style,
@@ -5713,6 +5734,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetBackgroundImpl,
         CommonMethodModifier::SetBackgroundImage0Impl,
         CommonMethodModifier::SetBackgroundImage1Impl,
+        CommonMethodModifier::SetBackgroundImage2Impl,
         CommonMethodModifier::SetBackgroundBlurStyleImpl,
         CommonMethodModifier::SetBackgroundEffect1Impl,
         CommonMethodModifier::SetForegroundBlurStyleImpl,
