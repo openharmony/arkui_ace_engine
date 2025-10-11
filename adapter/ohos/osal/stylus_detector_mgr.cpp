@@ -61,6 +61,7 @@ RefPtr<NG::FrameNode> StylusDetectorMgr::FindHitFrameNode(
     const TouchEvent& touchEvent, const TouchTestResult& touchTestResult)
 {
     RefPtr<NG::FrameNode> frameNode;
+    bool isFoundTarget = false;
     // TextField, textInput, search and richEditor has default touchEventTarget.
     for (const auto& entry : touchTestResult) {
         auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
@@ -71,23 +72,28 @@ RefPtr<NG::FrameNode> StylusDetectorMgr::FindHitFrameNode(
         auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
         frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
         if (frameNode) {
+            auto pipeline = frameNode->GetContextRefPtr();
+            if (!pipeline) {
+                TAG_LOGW(AceLogTag::ACE_STYLUS, "Can't find pipeline for finding hit node.");
+                continue;
+            }
+            auto textBasePattern = frameNode->GetPattern<NG::TextBase>();
+            if (textBasePattern == nullptr) {
+                continue;
+            }
+            auto nanoTimestamp = pipeline->GetVsyncTime();
+            if (!textBasePattern->IsTextEditableForStylus() ||
+                IsHitCleanNodeResponseArea({ touchEvent.x, touchEvent.y }, frameNode, nanoTimestamp)) {
+                continue;
+            }
+            isFoundTarget = true;
             break;
         }
     }
+    if (!isFoundTarget) {
+        return nullptr;
+    }
     CHECK_NULL_RETURN(frameNode, nullptr);
-
-    auto pipeline = frameNode->GetContextRefPtr();
-    if (!pipeline) {
-        TAG_LOGI(AceLogTag::ACE_STYLUS, "Can't find pipeline for find hit node.");
-        return nullptr;
-    }
-    auto nanoTimestamp = pipeline->GetVsyncTime();
-    auto textBasePattern = frameNode->GetPattern<NG::TextBase>();
-    CHECK_NULL_RETURN(textBasePattern, nullptr);
-    if (!textBasePattern->IsTextEditableForStylus() ||
-        IsHitCleanNodeResponseArea({ touchEvent.x, touchEvent.y }, frameNode, nanoTimestamp)) {
-        return nullptr;
-    }
     return frameNode;
 }
 
