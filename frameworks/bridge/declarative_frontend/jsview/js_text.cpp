@@ -1070,6 +1070,10 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
 
 void JSText::SetSelectDetectEnable(const JSCallbackInfo& info)
 {
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        TextModel::GetInstance()->ResetSelectDetectEnable();
+        return;
+    }
     if (info[0]->IsBoolean()) {
         auto enabled = info[0]->ToBoolean();
         TextModel::GetInstance()->SetSelectDetectEnable(enabled);
@@ -1078,6 +1082,10 @@ void JSText::SetSelectDetectEnable(const JSCallbackInfo& info)
 
 void JSText::SetSelectDetectConfig(const JSCallbackInfo& info)
 {
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        TextModel::GetInstance()->ResetSelectDetectConfig();
+        return;
+    }
     std::vector<TextDataDetectType> typesList;
     if (!info[0]->IsObject()) {
         return;

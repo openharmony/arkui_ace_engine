@@ -3139,6 +3139,72 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+bool TextFieldPattern::MaybeNeedShowSelectAIDetect()
+{
+    CHECK_NULL_RETURN(GetSelectDetectorAdapter(), false);
+    return selectDetectEnabled_ && !GetSelectDetectorAdapter()->aiSpanMap_.empty();
+}
+
+bool TextFieldPattern::PrepareAIMenuOptions(
+    std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions)
+{
+    if (!selectDetectEnabled_) {
+        return false;
+    }
+    CHECK_NULL_RETURN(GetSelectDetectorAdapter(), false);
+    CHECK_NULL_RETURN(IsSelected(), false);
+    auto detectorAdapter = GetSelectDetectorAdapter();
+    int selectedAiEntityNum = 0;
+    auto spanIter = detectorAdapter->aiSpanMap_.begin();
+    std::unordered_map<TextDataDetectType, bool> typeMap;
+    // Default. All Detect Types
+    for (auto& mapItr : TEXT_DETECT_MAP) {
+        typeMap[mapItr.first] = true;
+    }
+    // First. Use DataDetectorConfig
+    if (selectDetectEnabled_) {
+        if (selectDetectEnabledIsUserSet_) {
+            for (auto& mapItr : TEXT_DETECT_MAP) {
+                typeMap[mapItr.first] = true;
+            }
+        }
+        if (selectDetectConfigIsUserSet_ && !selectDataDetectorTypes_.empty()) {
+            typeMap.clear();
+            for (auto typeItr : selectDataDetectorTypes_) {
+                typeMap[typeItr] = true;
+            }
+        }
+    } else {
+        typeMap.clear();
+    }
+    aiMenuOptions.clear();
+    for (; spanIter != detectorAdapter->aiSpanMap_.end(); spanIter++) {
+        if (typeMap.find(spanIter->second.type) == typeMap.end()) {
+            continue;
+        }
+        selectedAiEntityNum++;
+        if (selectedAiEntityNum > MAX_SELECTED_AI_ENTITY) {
+            break;
+        } else {
+            aiMenuOptions[spanIter->second.type] = spanIter->second;
+        }
+    }
+    return selectedAiEntityNum == MAX_SELECTED_AI_ENTITY;
+}
+
+void TextFieldPattern::UpdateAIMenuOptions()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if ((layoutProperty->GetCopyOptionsValue(CopyOptions::Local) == CopyOptions::Local ||
+            layoutProperty->GetCopyOptionsValue(CopyOptions::Local) == CopyOptions::Distributed) &&
+        MaybeNeedShowSelectAIDetect()) {
+        isShowAIMenuOption_ = PrepareAIMenuOptions(aiMenuOptions_);
+    } else {
+        isShowAIMenuOption_ = false;
+    }
+}
+
 void TextFieldPattern::HandleAIMenuOption(const std::string& labelInfo)
 {
     CHECK_NE_VOID(isShowAIMenuOption_, true);
@@ -3163,65 +3229,19 @@ void TextFieldPattern::SelectAIDetect()
     selectDetectorAdapter_->SetTextDetectTypes("");
     auto resultTask = [weak = WeakClaim(this)]() -> void {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern->GetSelectDetectorAdapter());
-        CHECK_NULL_VOID(pattern->IsSelected());
-        auto detectorAdapter = pattern->GetSelectDetectorAdapter();
-        int selectedAiEntityNum = 0;
-        auto spanIter = detectorAdapter->aiSpanMap_.begin();
-        std::unordered_map<TextDataDetectType, bool> typeMap;
-        // Default. All Detect Types
-        for (auto& mapItr : TEXT_DETECT_MAP) {
-            typeMap[mapItr.first] = true;
-        }
-        // First. Use DataDetectorConfig
-        if (pattern->selectDetectEnabled_) {
-            if (pattern->selectDetectEnabledIsUserSet_) {
-                for (auto& mapItr : TEXT_DETECT_MAP) {
-                    typeMap[mapItr.first] = true;
-                }
-            }
-            if (pattern->selectDetectTypesIsUserSet_ && !pattern->selectDataDetectorTypes_.empty()) {
-                typeMap.clear();
-                for (auto typeItr : pattern->selectDataDetectorTypes_) {
-                    typeMap[typeItr] = true;
-                }
-            }
-        } else {
-            typeMap.clear();
-        }
-        pattern->aiMenuOptions_.clear();
-        for (; spanIter != detectorAdapter->aiSpanMap_.end(); spanIter++) {
-            if (typeMap.find(spanIter->second.type) == typeMap.end()) {
-                continue;
-            }
-            selectedAiEntityNum++;
-            if (selectedAiEntityNum > MAX_SELECTED_AI_ENTITY) {
-                break;
-            } else {
-                pattern->aiMenuOptions_[spanIter->second.type] = spanIter->second;
-            }
-        }
-        pattern->isShowAIMenuOption_ = selectedAiEntityNum == MAX_SELECTED_AI_ENTITY;
+        pattern->isShowAIMenuOption_ = pattern->PrepareAIMenuOptions(pattern->aiMenuOptions_);
     };
     selectDetectorAdapter_->SetParseSelectAIResCallBack(std::move(resultTask));
     auto updateTask = [isShowAIMenuOptionOld = isShowAIMenuOption_, weak = WeakClaim(this)]() -> void {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        if (!(layoutProperty->GetCopyOptionsValue(CopyOptions::Local) == CopyOptions::Local ||
-                layoutProperty->GetCopyOptionsValue(CopyOptions::Local) == CopyOptions::Distributed)) {
-            pattern->isShowAIMenuOption_ = false;
-        }
-        if (isShowAIMenuOptionOld == false && isShowAIMenuOptionOld == pattern->isShowAIMenuOption_) {
-            return;
-        }
+        pattern->UpdateAIMenuOptions();
         auto selectOverlay = pattern->selectOverlay_;
         CHECK_NULL_VOID(selectOverlay);
         selectOverlay->UpdateAISelectMenu();
     };
     selectDetectorAdapter_->SetUpdateAISelectMenuCallBack(std::move(updateTask));
-    selectDetectorAdapter_->StartAITask(true);
+    selectDetectorAdapter_->StartAITask(true /* default value */, true);
 }
 
 void TextFieldPattern::HandleTripleClickEvent(GestureEvent& info)
@@ -4179,6 +4199,7 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 void TextFieldPattern::ProcessOverlay(const OverlayRequest& request)
 {
     SelectAIDetect();
+    UpdateAIMenuOptions();
     selectOverlay_->ProcessOverlay(request);
 }
 
@@ -4212,7 +4233,7 @@ void TextFieldPattern::SetSelectDetectConfig(std::vector<TextDataDetectType>& ty
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(GetSelectDetectorAdapter());
     selectDetectorAdapter_->frameNode_ = host;
-    selectDetectTypesIsUserSet_ = true;
+    selectDetectConfigIsUserSet_ = true;
     if (types == selectDataDetectorTypes_) {
         return;
     }
@@ -4226,7 +4247,7 @@ std::vector<TextDataDetectType> TextFieldPattern::GetSelectDetectConfig()
 
 void TextFieldPattern::ResetSelectDetectConfig()
 {
-    selectDetectTypesIsUserSet_ = false;
+    selectDetectConfigIsUserSet_ = false;
     selectDataDetectorTypes_.clear();
 }
 

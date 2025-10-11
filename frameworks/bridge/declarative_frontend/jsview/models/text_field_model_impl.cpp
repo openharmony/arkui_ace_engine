@@ -255,6 +255,10 @@ void TextFieldModelImpl::SetSelectDetectEnable(bool value) {}
 
 void TextFieldModelImpl::SetSelectDetectConfig(std::vector<TextDataDetectType>& types) {}
 
+void TextFieldModelImpl::ResetSelectDetectEnable() {}
+
+void TextFieldModelImpl::ResetSelectDetectConfig() {}
+
 void TextFieldModelImpl::SetEnterKeyType(TextInputAction value)
 {
     auto* stack = ViewStackProcessor::GetInstance();

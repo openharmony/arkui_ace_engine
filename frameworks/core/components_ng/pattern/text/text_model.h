@@ -189,6 +189,8 @@ public:
     virtual void SetAdaptMaxFontSize(const Dimension& value) = 0;
     virtual void SetSelectDetectEnable(bool value) = 0;
     virtual void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) = 0;
+    virtual void ResetSelectDetectEnable() = 0;
+    virtual void ResetSelectDetectConfig() = 0;
     virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) = 0;
     virtual void SetContentTransition(TextEffectStrategy value, TextFlipDirection direction, bool enableBlur) {};
     virtual void ResetContentTransition() {};

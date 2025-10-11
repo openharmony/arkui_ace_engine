@@ -1779,6 +1779,9 @@ public:
     void ResetSelectDetectConfig();
     void SelectAIDetect();
     void HandleAIMenuOption(const std::string& labelInfo = "");
+    void UpdateAIMenuOptions();
+    bool MaybeNeedShowSelectAIDetect();
+    bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1831,7 +1834,7 @@ protected:
     std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
     bool selectDetectEnabledIsUserSet_ = false;
     bool selectDetectEnabled_ = true;
-    bool selectDetectTypesIsUserSet_ = false;
+    bool selectDetectConfigIsUserSet_ = false;
     std::vector<TextDataDetectType> selectDataDetectorTypes_;
 
 private:

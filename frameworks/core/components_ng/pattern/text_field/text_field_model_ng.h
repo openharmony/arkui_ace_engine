@@ -48,6 +48,8 @@ public:
     void ResetCaretColor() override;
     void SetSelectDetectEnable(bool value) override;
     void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
+    void ResetSelectDetectEnable() override;
+    void ResetSelectDetectConfig() override;
     void SetCaretStyle(const CaretStyle& value) override;
     void SetCaretPosition(const int32_t& value) override;
     void SetSelectedBackgroundColor(const Color& value) override;

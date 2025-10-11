@@ -254,6 +254,10 @@ void TextModelImpl::SetSelectDetectEnable(bool value) {};
 
 void TextModelImpl::SetSelectDetectConfig(std::vector<TextDataDetectType>& types) {};
 
+void TextModelImpl::ResetSelectDetectEnable() {}
+
+void TextModelImpl::ResetSelectDetectConfig() {}
+
 void TextModelImpl::OnSetWidth()
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
