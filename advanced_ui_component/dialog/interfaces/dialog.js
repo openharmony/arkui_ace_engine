@@ -621,7 +621,7 @@ export class TipsDialog extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.accessibilityGroup(true);
-            Row.accessibilityText(getCheckTipsAccessibilityText(this.checkTips, this.isChecked));
+            Row.accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.isChecked));
             Row.accessibilityDescription(this.isChecked ? {
                 'id': -1,
                 'type': 10003,
@@ -1301,7 +1301,7 @@ export class SelectDialog extends ViewPU {
                             Column.focusBox({
                                 margin: { value: -2, unit: LengthUnit.VP }
                             });
-                            Column.accessibilityText(getAccessibilityText(item.title, this.selectedIndex === index));
+                            Column.accessibilityText(getAccessibilityText(this.getUIContext(), item.title, this.selectedIndex === index));
                             Column.onClick(() => {
                                 this.selectedIndex = index;
                                 item.action && item.action();
@@ -1890,7 +1890,7 @@ export class ConfirmDialog extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.accessibilityGroup(true);
-            Row.accessibilityText(getCheckTipsAccessibilityText(this.checkTips, this.isChecked));
+            Row.accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.isChecked));
             Row.accessibilityDescription(this.isChecked ? {
                 'id': -1,
                 'type': 10003,
@@ -4203,14 +4203,14 @@ function getString(resourceId) {
  * @param selected select state
  * @returns string
  */
-function getAccessibilityText(resource, selected) {
+function getAccessibilityText(context, resource, selected) {
     try {
-        let selectText = getContext().resourceManager.getStringSync(125833934);
+        let selectText = context?.getHostContext()?.resourceManager.getStringSync(125833934) ?? '';
         let resourceString = '';
         if (typeof resource === 'string') {
             resourceString = resource;
         } else {
-            resourceString = getContext().resourceManager.getStringSync(resource);
+            resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource.id) ?? '' : '';
         }
         return selected ? `${selectText},${resourceString}` : resourceString;
     } catch (error) {
@@ -4289,19 +4289,19 @@ function resolveKeyEvent(event, controller) {
  * @param selected select state
  * @returns string
  */
-function getCheckTipsAccessibilityText(resource, selected) {
+function getCheckTipsAccessibilityText(context, resource, selected) {
     try {
         // 'sys.string.slider_accessibility_selected'
-        let selectText = getContext().resourceManager.getStringSync(125833934);
+        let selectText = context?.getHostContext()?.resourceManager.getStringSync(125833934) ?? '';
         // 'sys.string.slider_accessibility_unselected'
-        let unselectText = getContext().resourceManager.getStringSync(125833935);
+        let unselectText = context?.getHostContext()?.resourceManager.getStringSync(125833935) ?? '';
         // 'sys.string.advanced_dialog_accessibility_checkbox'
-        let checkBoxText = getContext().resourceManager.getStringSync(125834354);
+        let checkBoxText = context?.getHostContext()?.resourceManager.getStringSync(125834354) ?? '';
         let resourceString = '';
         if (typeof resource === 'string') {
             resourceString = resource;
         } else {
-            resourceString = getContext().resourceManager.getStringSync(resource);
+            resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource.id) ?? '' : '';
         }
         return selected ? `${selectText},${resourceString},${checkBoxText}` :
             `${unselectText},${resourceString},${checkBoxText}`;
