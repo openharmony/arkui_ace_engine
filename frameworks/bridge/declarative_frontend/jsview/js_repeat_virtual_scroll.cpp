@@ -206,6 +206,7 @@ void JSRepeatVirtualScroll::OnMove(const JSCallbackInfo& info)
     }
     auto onMove = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])](
                       int32_t from, int32_t to) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto params = ConvertToJSValues(from, to);
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
