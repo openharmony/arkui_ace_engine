@@ -1357,7 +1357,7 @@ void AccessibilityProperty::SetAccessibilityGroupOptions(const AccessibilityGrou
 
 bool AccessibilityProperty::HasAccessibilityGroupOptions()
 {
-    return false;
+    return accessibilityGroupOptions_.has_value();
 }
 
 AccessibilityGroupOptions AccessibilityProperty::GetAccessibilityGroupOptions()
