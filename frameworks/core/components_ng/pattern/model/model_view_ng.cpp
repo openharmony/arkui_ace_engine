@@ -131,11 +131,6 @@ void ModelViewNG::AddShaderInputBuffer(const std::shared_ptr<Render3D::ShaderInp
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelShaderInputBuffer, buffer);
 }
 
-void ModelViewNG::AddShaderInputBuffer(FrameNode* frameNode, const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ModelShaderInputBuffer, buffer, frameNode);
-}
-
 std::optional<std::shared_ptr<Render3D::ShaderInputBuffer>> ModelViewNG::GetShaderInputBuffer()
 {
     auto frameNode = frameNode_.Upgrade();

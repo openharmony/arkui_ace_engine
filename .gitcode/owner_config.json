@@ -201,6 +201,12 @@
             "youzhi92",
             "VictorS67",
             "Cuecuexiaoyu"
+        ],
+        "arkui_component3d": [
+            "zzhao0",
+            "huxiaoming",
+            "doggy-Zhang",
+            "zdustc"
         ]
     },
     "userInfos": {
@@ -566,6 +572,18 @@
         },
         "allenlee6": {
             "info": "[卡片框架 lishengyang]"
+        },
+        "zzhao0": {
+            "info": "[Component3D zhangzhenhao]"
+        },
+        "doggy-Zhang": {
+            "info": "[Component3D zhangwenqi]"
+        },
+        "huxiaoming": {
+            "info": "[Component3D huxiaoming]"
+        },
+        "zdustc": {
+            "info": "[Component3D zhaoduo]"
         }
     }
 }
