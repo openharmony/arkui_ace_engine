@@ -41,11 +41,11 @@
   */
 function makeBuilderParameterProxy(builderName: string, source: Object): Object {
     // for interop
-    let staticHook: StaticInteropHook | undefined = InteropConfigureStateMgmt.instance.needsInterop() ? new StaticInteropHook() : undefined;
+    let staticHook: StaticInteropHook | undefined = InteropConfigureStateMgmt.needsInterop() ? new StaticInteropHook() : undefined;
     return new Proxy(source, {
         set(target, prop, val) {
             //for interop
-            if (InteropConfigureStateMgmt.instance.needsInterop() && prop === '__static_interop_hook') {
+            if (InteropConfigureStateMgmt.needsInterop() && prop === '__static_interop_hook') {
                 staticHook!.addRef = val;
                 return true;
             }
@@ -65,7 +65,7 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
                 return value;
             }
             //for interop
-            if (InteropConfigureStateMgmt.instance.needsInterop() && staticHook.addRef) {
+            if (InteropConfigureStateMgmt.needsInterop() && staticHook.addRef) {
                 staticHook!.addRef();
             }
             const funcRet = value();
@@ -83,8 +83,8 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
             stateMgmtConsole.debug(`      - func - no ObservedPropertybstract - ret value ${funcRet}`);
             return funcRet;
         }, // get
-        has(target, prop) :boolean {
-            if (InteropConfigureStateMgmt.instance.needsInterop() && prop === '__static_interop_hook') {
+        has(target, prop) {
+            if (InteropConfigureStateMgmt.needsInterop() && prop === '__static_interop_hook') {
                 return true;
             }
             return prop in target;

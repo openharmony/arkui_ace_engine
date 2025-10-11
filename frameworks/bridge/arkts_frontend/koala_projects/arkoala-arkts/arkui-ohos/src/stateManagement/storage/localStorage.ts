@@ -40,7 +40,7 @@ export class LocalStorage {
         return this.store_.getProxy();
     }
 
-    public setProxy(proxy: ESValue): void {
+    public setProxy(proxy?: ESValue): void {
         this.store_.setProxy(proxy);
     }
 

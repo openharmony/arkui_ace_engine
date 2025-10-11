@@ -251,6 +251,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/component/indicatorcomponent.ets",
   "arkui-preprocessed/arkui/component/inspector.ets",
   "arkui-preprocessed/arkui/component/interop.ets",
+  "arkui-preprocessed/arkui/component/interopExtendableComponent.ets",
   "arkui-preprocessed/arkui/component/lazyForEach.ets",
   "arkui-preprocessed/arkui/component/lazyGridLayout.ets",
   "arkui-preprocessed/arkui/component/line.ets",

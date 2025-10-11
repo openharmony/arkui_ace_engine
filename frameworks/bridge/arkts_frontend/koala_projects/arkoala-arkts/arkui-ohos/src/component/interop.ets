@@ -29,8 +29,7 @@ import {
     uiUtils,
     IObservedObject,
     OBSERVE,
-    ObserveSingleton,
-    IProvideDecoratedVariable
+    ObserveSingleton
 } from '../stateManagement';
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
@@ -40,6 +39,11 @@ import { setNeedCreate } from '../ArkComponentRoot';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { ArkContentSlotPeer } from './contentSlot';
 import { ArkCustomComponentRootPeer } from "#generated";
+import {
+    registerUpdateInteropExtendableComponent,
+    registerResetInteropExtendableComponent,
+    createInteropView
+} from './interopExtendableComponent';
 
 export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
@@ -62,7 +66,7 @@ export interface CompatibleComponentInfo {
 
 /** @memo */
 export function compatibleComponent(
-    init: () => CompatibleComponentInfo,
+    init: (parent: ESValue) => CompatibleComponentInfo,
     update: (instance: ESValue) => void,
     component?: ExtendableComponent
 ): void {
@@ -73,22 +77,12 @@ export function compatibleComponent(
         if (staticComponent === undefined) {
             staticComponent = (ExtendableComponent.current) as (ExtendableComponent | undefined);
         }
-        if (staticComponent !== undefined) {
-            bindCompatibleProvideCallback(staticComponent!);
-            bindCompatibleLocalStorageCallback(staticComponent!);
+        if (staticComponent === undefined) {
+            throw new Error('compatibleComponent error: non current ExtendableComponent');
         }
-        const result = init();
+        const viewInterop = createInteropView(staticComponent);
+        const result = init(viewInterop);
         const dynamicComponent = result.component;
-        if (staticComponent !== undefined) {
-            if (dynamicComponent !== undefined) {
-                bindCompatibleProvideCallback(staticComponent!, dynamicComponent!);
-                bindCompatibleLocalStorageCallback(staticComponent!, dynamicComponent!);
-            }
-            let resetViewPUFindProvideInterop = global.getProperty('resetViewPUFindProvideInterop');
-            resetViewPUFindProvideInterop.invoke();
-            let resetViewPUInterop = global.getProperty('resetViewPUFindLocalStorageInterop');
-            resetViewPUInterop.invoke();
-        }
         const nodePtr = ArkUIAniModule._PopViewStackProcessor();
         ArkUIAniModule._DeleteViewStackProcessor(ptr);
         return CompatiblePeerNode.create(nodePtr, dynamicComponent);
@@ -165,57 +159,6 @@ export type CompatibleStateChangeCallback<T> = (value: T) => void;
 
 type StateUnion<T> = StateDecoratedVariable<T> | ProvideDecoratedVariable<T> | PropDecoratedVariable<T>
 
-export function bindCompatibleProvideCallback(staticComponent: ExtendableComponent, component?: ESValue): void {
-    const global = ESValue.getGlobal();
-    const createState = global.getProperty('createStateVariable');
-    const setFindProvideInterop = global.getProperty('setFindProvideInterop');
-    const callback = (providedPropName: string): Object | null => {
-        let provide = staticComponent.findProvide<Object>(providedPropName);
-        if ((provide === null)) {
-            return provide;
-        }
-        let state = provide as ProvideDecoratedVariable<Object>;
-        if (state.getProxy() === undefined) {
-            const setSource = ((value: Object): void => {
-                state.set(value);
-            });
-            const fireChange = (): void => {
-                state.fireChange();
-            }
-            const proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
-            state.setProxy(proxy);
-            const setProxyValue = ((value: Object): void => {
-                proxy.invokeMethod('set', ESValue.wrap(value));
-            });
-            state.setProxyValue = setProxyValue;
-            const notifyProxy = (): void => {
-                proxy.invokeMethod('syncPeerHasChanged');
-            };
-            state.addWatch(notifyProxy);
-        }
-        return state.getProxy()!.unwrap()! as Object;
-    }
-    setFindProvideInterop.invoke(callback, component);
-    return;
-}
-
-
-export function bindCompatibleLocalStorageCallback(staticComponent: ExtendableComponent,
-    component?: ESValue): void {
-    const callback = (): Object | null => {
-        let storage = staticComponent.localStorage_;
-        if ((storage === null)) {
-            return storage;
-        }
-        return storage.getProxy()!.unwrap()! as Object;
-    }
-    const global = ESValue.getGlobal();
-    const setFindLocalStorageInterop = global.getProperty('setFindLocalStorageInterop');
-    setFindLocalStorageInterop.invoke(callback, component);
-    return;
-}
-
-
 export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESValue {
     const global = ESValue.getGlobal();
     const createState = global.getProperty('createStateVariable');
@@ -243,7 +186,7 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESV
             const fireChange = (): void => {
                 state.fireChange();
             }
-            const proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
+            const proxy = createState.invoke(ESValue.wrap(state), ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
             state.setProxy(proxy);
             const setProxyValue = ((value: T): void => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
@@ -264,7 +207,7 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESV
             const fireChange = (): void => {
                 state.fireChange();
             }
-            const proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
+            const proxy = createState.invoke(ESValue.wrap(state), ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
             state.setProxy(proxy);
             const setProxyValue = ((value: T): void => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
@@ -285,7 +228,7 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESV
             const fireChange = (): void => {
                 state.fireChange();
             }
-            const proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
+            const proxy = createState.invoke(ESValue.wrap(state), ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
             state.setProxy(proxy);
             const setProxyValue = ((value: T): void => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
@@ -583,77 +526,6 @@ class InteropBuilderLiteralProxyHandler<T extends Object> extends proxy.DefaultP
         this.state.value;
         return propertyGetter.invoke().unwrap();
     }
-}
-
-export class InteropExtendableComponent extends ExtendableComponent {
-    dynamicComponent: ESValue;
-    originComponent?: WeakRef<ExtendableComponent>;
-    constructor(dynamicComponent: ESValue) {
-        super();
-        this.dynamicComponent = dynamicComponent;
-        const prev = ExtendableComponent.current;
-        if (prev) {
-            this.originComponent = new WeakRef<ExtendableComponent>(prev! as ExtendableComponent);
-        }
-    }
-
-    /** @memo */ build(): void {}
-
-    override findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | null {
-        const value = this.dynamicComponent.invokeMethod('findProvidePU', ESValue.wrap(providedPropName));
-        if (value.unwrap() == undefined) {
-            return null;
-        }
-        const getProxy = value.invokeMethod('getProxy').unwrap();
-        if (getProxy === undefined && ExtendableComponent.current) {
-            const provideVar = new ProvideDecoratedVariable<T>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, uiUtils.makeObserved(value.invokeMethod('get').unwrap()) as T, false);
-            value.invokeMethod('setProxy', ESValue.wrap(provideVar));
-            const setProxyValue = ((newVal: T): void => {
-                value.invokeMethod('set', ESValue.wrap(newVal));
-            });
-            provideVar.setProxyValue = setProxyValue;
-            const global = ESValue.getGlobal();
-            const setSource = ((newVal: T): void => {
-                provideVar.set(newVal);
-            });
-            const fireChange = (): void => {
-                provideVar.fireChange();
-            }
-            global.getProperty('updateNotifyCallback').invoke(value, ESValue.wrap(fireChange));
-            const notifyProxy = (): void => {
-                value.invokeMethod('syncPeerHasChanged');
-            };
-            provideVar.addWatch(notifyProxy);
-            global.getProperty('updateSetValueCallback').invoke(value, ESValue.wrap(setSource));
-            return provideVar;
-        }
-        else {
-            return getProxy as IProvideDecoratedVariable<T>;
-        }
-    }
-
-    override addProvidedVar<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean | undefined): void {}
-}
-
-export function updateInteropExtendableComponent(dynamicComponent: Object): void {
-    ExtendableComponent.current = new InteropExtendableComponent(ESValue.wrap(dynamicComponent));
-}
-
-export function resetInteropExtendableComponent(): void {
-    const dynamicComponent = ExtendableComponent.current;
-    ExtendableComponent.current = (dynamicComponent as InteropExtendableComponent).originComponent?.deref();
-}
-
-export function registerUpdateInteropExtendableComponent(): void {
-    const global = ESValue.getGlobal();
-    const registerCallback = global.getProperty('registerUpdateInteropExtendableComponent');
-    registerCallback.invoke(updateInteropExtendableComponent);
-}
-
-export function registerResetInteropExtendableComponent(): void {
-    const global = ESValue.getGlobal();
-    const registerCallback = global.getProperty('registerResetInteropExtendableComponent');
-    registerCallback.invoke(resetInteropExtendableComponent);
 }
 
 function registertransferCompatibleDynamicBuilderCallback(): void {

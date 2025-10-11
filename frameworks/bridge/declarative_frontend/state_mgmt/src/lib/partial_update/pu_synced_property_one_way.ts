@@ -398,7 +398,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     }
 
     // for interop
-    if (InteropConfigureStateMgmt.instance.needsInterop() && isStaticProxy(obj)) {
+    if (InteropConfigureStateMgmt.needsInterop() && isStaticProxy(obj)) {
       throw new Error(`deepCopyObjectInternal: Static variable assignment to @Prop${variable} is not allowed.`);
     }
 
