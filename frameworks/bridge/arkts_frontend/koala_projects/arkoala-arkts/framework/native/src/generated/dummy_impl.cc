@@ -37788,6 +37788,90 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void PushNamedRoute0Impl(Ark_VMContext vmContext,
+                             Ark_AsyncWorkerPtr asyncWorker,
+                             Ark_NativePointer jsView,
+                             const Ark_PageRouterOptions* options,
+                             const Opt_RouterFinishCallback* finishCallback,
+                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("pushNamedRoute0(");
+        WriteToString(&out, jsView);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(", ");
+        WriteToString(&out, finishCallback);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void PushNamedRoute1Impl(Ark_NativePointer jsView,
+                             const Ark_PageRouterOptions* options,
+                             const Opt_RouterFinishCallback* finishCallback,
+                             const Opt_AsyncCallback_Void* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("pushNamedRoute1(");
+        WriteToString(&out, jsView);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(", ");
+        WriteToString(&out, finishCallback);
+        out.append(", ");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ReplaceNamedRoute0Impl(Ark_VMContext vmContext,
+                                Ark_AsyncWorkerPtr asyncWorker,
+                                Ark_NativePointer jsView,
+                                const Ark_PageRouterOptions* options,
+                                const Opt_RouterFinishCallback* finishCallback,
+                                const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("replaceNamedRoute0(");
+        WriteToString(&out, jsView);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(", ");
+        WriteToString(&out, finishCallback);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ReplaceNamedRoute1Impl(Ark_NativePointer jsView,
+                                const Ark_PageRouterOptions* options,
+                                const Opt_RouterFinishCallback* finishCallback,
+                                const Opt_AsyncCallback_Void* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("replaceNamedRoute1(");
+        WriteToString(&out, jsView);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(", ");
+        WriteToString(&out, finishCallback);
+        out.append(", ");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // RouterExtenderAccessor
     namespace ScaleSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_ScaleSymbolEffect peer)
@@ -45691,6 +45775,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RouterExtenderAccessor::ClearImpl,
             RouterExtenderAccessor::ShowAlertBeforeBackPageImpl,
             RouterExtenderAccessor::HideAlertBeforeBackPageImpl,
+            RouterExtenderAccessor::PushNamedRoute0Impl,
+            RouterExtenderAccessor::PushNamedRoute1Impl,
+            RouterExtenderAccessor::ReplaceNamedRoute0Impl,
+            RouterExtenderAccessor::ReplaceNamedRoute1Impl,
         };
         return &RouterExtenderAccessorImpl;
     }

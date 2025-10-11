@@ -5746,7 +5746,10 @@ int32_t SetTextAreaBarState(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
 {
     auto* fullImpl = GetFullImpl();
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0) {
+    if (actualSize < 0 || item->value[0].i32 < static_cast<int32_t>(ArkUI_BarState::ARKUI_BAR_STATE_OFF) ||
+        item->value[0].i32 > static_cast<int32_t>(ArkUI_BarState::ARKUI_BAR_STATE_ON)) {
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaBarState(
+            node->uiNodeHandle, static_cast<ArkUI_Uint32>(ArkUI_BarState::ARKUI_BAR_STATE_AUTO));
         return ERROR_CODE_PARAM_INVALID;
     }
     fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaBarState(

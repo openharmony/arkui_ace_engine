@@ -4751,6 +4751,15 @@ HWTEST_F(NativeNodeTest, NativeNodeTest039, TestSize.Level1)
     scrollBarItem = {scrollBar, 0, nullptr, nullptr};
     EXPECT_EQ(nodeAPI->setAttribute(
         textarea, NODE_TEXT_AREA_BAR_STATE, &scrollBarItem), ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_NumberValue textAreaBar[] = { { .i32 = 3 } };
+    ArkUI_AttributeItem textAreaBarItem = { textAreaBar, sizeof(textAreaBar) / sizeof(ArkUI_NumberValue), nullptr,
+        nullptr };
+    EXPECT_EQ(nodeAPI->setAttribute(
+        textarea, NODE_TEXT_AREA_BAR_STATE, &textAreaBarItem), ARKUI_ERROR_CODE_PARAM_INVALID);
+    textAreaBar[0].i32 = negativeInt;
+    textAreaBarItem = { textAreaBar, sizeof(textAreaBar) / sizeof(ArkUI_NumberValue), nullptr, nullptr };
+    EXPECT_EQ(nodeAPI->setAttribute(
+        textarea, NODE_TEXT_AREA_BAR_STATE, &textAreaBarItem), ARKUI_ERROR_CODE_PARAM_INVALID);
     nodeAPI->disposeNode(textinput);
     nodeAPI->disposeNode(textarea);
 }

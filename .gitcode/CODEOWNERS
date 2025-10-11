@@ -3384,6 +3384,13 @@ frameworks/core/interfaces/native/implementation/water_flow_scroller_peer_impl.h
 frameworks/core/interfaces/native/implementation/paste_button_modifier.cpp @harylee
 frameworks/core/interfaces/native/implementation/save_button_modifier.cpp @harylee
 frameworks/core/interfaces/native/implementation/security_component_method_modifier.cpp @harylee
+frameworks/core/interfaces/native/implementation/indicator_component_modifier.cpp @arkui_navigation
+frameworks/core/interfaces/native/implementation/nav_destination_modifier.cpp @arkui_navigation
+frameworks/core/interfaces/native/implementation/navigation_modifier.cpp @arkui_navigation
+frameworks/core/interfaces/native/implementation/side_bar_container_modifier.cpp @arkui_navigation
+frameworks/core/interfaces/native/implementation/swiper_modifier.cpp @arkui_navigation
+frameworks/core/interfaces/native/implementation/select_modifier.cpp @arkuipopupwindow_all
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.inspector.ts @arkui-idlize
 
 [Test source]
 test/mock/base @arkui_framework_xnode
