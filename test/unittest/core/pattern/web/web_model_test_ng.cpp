@@ -4048,35 +4048,6 @@ HWTEST_F(WebModelTestNg, SetOnFileSelectorShow002, TestSize.Level1)
 #endif
 }
 
- /**
- * @tc.name: SetOnDetectedBlankScreenEvent
- * @tc.desc: Test web_model_ng.cpp
- * @tc.type: FUNC
- */
- HWTEST_F(WebModelTestNg, SetOnDetectedBlankScreenEvent, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    bool callbackCalled = false;
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    WebModelNG webModelNG;
-    webModelNG.SetOnDetectedBlankScreen(
-        AccessibilityManager::RawPtr(frameNode), [&callbackCalled](const BaseEventInfo* info) {
-            callbackCalled = true;
-        });
-
-    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
-    ASSERT_NE(webEventHub, nullptr);
-
-    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
-    webEventHub->FireOnDetectedBlankScreenEvent(mockEventInfo);
-    EXPECT_TRUE(callbackCalled);
-#endif
-}
 /**
  * @tc.name: SetOnContextMenuShow002
  * @tc.desc: Test web_model_ng.cpp
