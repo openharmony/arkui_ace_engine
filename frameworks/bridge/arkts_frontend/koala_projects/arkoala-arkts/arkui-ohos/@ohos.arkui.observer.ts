@@ -1,5 +1,5 @@
 import { ResourceStr } from '/arkui/component/units';
-import { NavPathStack } from 'arkui/framework'
+import { NavPathStack, NavigationOperation, NavBar } from 'arkui/framework'
 import { UIContext } from '@ohos/arkui/UIContext';
 import UIAbilityContext from 'application.UIAbilityContext';
 import { NavDestinationMode } from 'arkui/framework'
@@ -22,6 +22,31 @@ declare namespace uiObserver {
         offScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
         onScrollEvent(callback: Callback<ScrollEventInfo>): void;
         offScrollEvent(callback: Callback<ScrollEventInfo>): void;
+
+        onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
+        offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
+        onNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationInfo>
+        ): void;
+        offNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationInfo>
+        ): void;
+
+        onRouterPageUpdate(callback: Callback<RouterPageInfo>): void;
+        offRouterPageUpdate(callback?: Callback<RouterPageInfo>): void;
+
+        onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
+        offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
+        onNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationSwitchInfo>
+          ): void;
+        offNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationSwitchInfo>
+          ): void;
     }
     export function createUIObserver(id: number): UIObserver;
 
@@ -60,6 +85,13 @@ declare namespace uiObserver {
         navDestinationId: string;
         uniqueId?: int32;
         mode?: NavDestinationMode;
+    }
+
+    export interface NavDestinationSwitchInfo {
+        context: UIAbilityContext | UIContext;
+        from: NavDestinationInfo | NavBar;
+        to: NavDestinationInfo | NavBar;
+        operation: NavigationOperation;
     }
 
     export enum RouterPageState {

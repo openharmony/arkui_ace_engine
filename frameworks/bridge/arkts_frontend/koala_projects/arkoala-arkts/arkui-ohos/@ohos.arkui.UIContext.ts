@@ -48,6 +48,7 @@ import { ComputableState, IncrementalNode } from '@koalaui/runtime';
 import { PeerNode } from 'arkui/PeerNode';
 import { ArkUIAniModule } from 'arkui.ani';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
+import { int32 } from '@koalaui/compat';
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
@@ -702,6 +703,78 @@ export class UIObserver {
     public offScrollEvent(callback: Callback<uiObserver.ScrollEventInfo>): void {
         if (this.observerImpl) {
             this.observerImpl!.offScrollEvent(callback);
+        }
+    }
+
+    public onNavDestinationUpdate(
+        options: uiObserver.NavDestinationSwitchObserverOptions,
+        callback: Callback<uiObserver.NavDestinationInfo>
+    ): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationUpdate(options, callback);
+        }
+    }
+
+    public offNavDestinationUpdate(
+        options: uiObserver.NavDestinationSwitchObserverOptions,
+        callback?: Callback<uiObserver.NavDestinationInfo>
+    ): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationUpdate(options, callback);
+        }
+    }
+
+    public onNavDestinationUpdate(callback: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationUpdate(callback);
+        }
+    }
+
+    public offNavDestinationUpdate(callback?: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationUpdate(callback);
+        }
+    }
+
+    public onRouterPageUpdate(callback: Callback<uiObserver.RouterPageInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onRouterPageUpdate(callback);
+        }
+    }
+
+    public offRouterPageUpdate(callback?: Callback<uiObserver.RouterPageInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offRouterPageUpdate(callback);
+        }
+    }
+
+    public onNavDestinationSwitch(callback: Callback<uiObserver.NavDestinationSwitchInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationSwitch(callback);
+        }
+    }
+
+    public offNavDestinationSwitch(callback?: Callback<uiObserver.NavDestinationSwitchInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationSwitch(callback);
+        }
+    }
+
+    public onNavDestinationSwitch(
+        observerOptions: uiObserver.NavDestinationSwitchObserverOptions,
+        callback: Callback<uiObserver.NavDestinationSwitchInfo>
+    ): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationSwitch(observerOptions, callback);
+        }
+    }
+
+    public offNavDestinationSwitch(
+        observerOptions: uiObserver.NavDestinationSwitchObserverOptions,
+        callback?: Callback<uiObserver.NavDestinationSwitchInfo>
+    ): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationSwitch(observerOptions, callback);
         }
     }
 }
