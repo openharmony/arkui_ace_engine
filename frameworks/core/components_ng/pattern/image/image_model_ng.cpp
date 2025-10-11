@@ -1133,6 +1133,15 @@ void HandleSrcResource(const RefPtr<ResourceObject>& resObj, const RefPtr<ImageP
                     params[0].value.value());
             }
         }
+        if (resObj->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
+            if (resObj->GetId() == -1 && params.size() && params[0].value.has_value()) {
+                src = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetStringByName(
+                    params[0].value.value());
+            } else if (resObj->GetId() != -1) {
+                src = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetString(
+                    resObj->GetId());
+            }
+        }
         RefPtr<PixelMap> pixmap = nullptr;
         auto srcInfo = CreateSourceInfo(src, pixmap, resObj->GetBundleName(), resObj->GetModuleName());
         srcInfo.SetIsUriPureNumber(resObj->GetId() == -1);
@@ -1160,6 +1169,15 @@ void HandleAltResource(const RefPtr<ResourceObject>& resObj, const RefPtr<ImageP
             } else {
                 src = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetMediaPathByName(
                     params[0].value.value());
+            }
+        }
+        if (resObj->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
+            if (resObj->GetId() == -1 && params.size() && params[0].value.has_value()) {
+                src = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetStringByName(
+                    params[0].value.value());
+            } else if (resObj->GetId() != -1) {
+                src = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetString(
+                    resObj->GetId());
             }
         }
         RefPtr<PixelMap> pixmap = nullptr;
