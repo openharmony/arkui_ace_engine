@@ -53,6 +53,8 @@ RequestFormInfo formInfo;
 const std::string INIT_VALUE_1 = "hello1";
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double TRANSPARENT_VAL = 0;
+constexpr float DEFAULT_VIEW_SCALE = 1.0f;
+constexpr float MAX_FORM_VIEW_SCALE = 1.0f / 0.85f;
 } // namespace
 class FormPatternTest : public testing::Test {
 public:
@@ -2082,4 +2084,57 @@ HWTEST_F(FormPatternTest, FormPatternTest_058, TestSize.Level1)
     EXPECT_TRUE(pattern->updateFormComponentTimestamp_ >= nowTime);
 }
 
+/**
+ * @tc.name: FormPatternTest_059
+ * @tc.desc: CalculateViewScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_059, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+    float width = 0;
+    float height = 0;
+    float layoutWidth = 0;
+    float layoutHeight = 0;
+    float viewScale = pattern->CalculateViewScale(width, height, layoutWidth, layoutHeight);
+    EXPECT_EQ(viewScale, DEFAULT_VIEW_SCALE);
+    width = 100;
+    height = 100;
+    layoutWidth = 130;
+    layoutHeight = 130;
+    viewScale = pattern->CalculateViewScale(width, height, layoutWidth, layoutHeight);
+    EXPECT_EQ(viewScale, MAX_FORM_VIEW_SCALE);
+}
+
+/**
+ * @tc.name: FormPatternTest_060
+ * @tc.desc: GetNumberFromParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_060, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+    
+    AAFwk::Want want;
+    int layoutWidthInt = 100;
+    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY, layoutWidthInt);
+    float result = DEFAULT_VIEW_SCALE;
+    result = pattern->GetNumberFromParams(want, OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY,
+        DEFAULT_VIEW_SCALE);
+    EXPECT_TRUE(NearEqual(result, 100));
+    float layoutWidthFloat = MAX_FORM_VIEW_SCALE;
+    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY, static_cast<double>(layoutWidthFloat));
+    result = pattern->GetNumberFromParams(want, OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY,
+        DEFAULT_VIEW_SCALE);
+    EXPECT_TRUE(NearEqual(result, layoutWidthFloat));
+    std::string layoutWidthString = "1.0f";
+    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY, layoutWidthString);
+    result = pattern->GetNumberFromParams(want, OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY,
+        DEFAULT_VIEW_SCALE);
+    EXPECT_TRUE(NearEqual(result, DEFAULT_VIEW_SCALE));
+}
 } // namespace OHOS::Ace::NG

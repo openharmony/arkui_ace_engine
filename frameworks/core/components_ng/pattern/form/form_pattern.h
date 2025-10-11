@@ -176,6 +176,11 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
+    float GetFormViewScale()
+    {
+        return formViewScale_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -286,6 +291,8 @@ private:
     void GetWantParam(RequestFormInfo& info);
     void UpdateFormSurface(const RequestFormInfo& info);
     void RemoveFormStyleChildNode();
+    float CalculateViewScale(float width, float height, float layoutWidth, float layoutHeight);
+    float GetNumberFromParams(const AAFwk::Want& want, const std::string& key, float defaultValue);
 
     RefPtr<RenderContext> externalRenderContext_;
 
@@ -325,6 +332,11 @@ private:
     bool isStaticFormSnaping_ = false;
     int64_t updateFormComponentTimestamp_ = 0;
     std::shared_ptr<Rosen::RSUIContext> rsUIContext_ = nullptr;
+    float formViewScale_ = 1.0f;
+    enum {
+        VALUE_TYPE_INT = 5,
+        VALUE_TYPE_DOUBLE = 8,
+    };
 };
 } // namespace NG
 } // namespace Ace
