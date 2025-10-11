@@ -48,6 +48,8 @@ export class ObserveSingleton implements IObserve {
     public renderingComponentRef?: ITrackedDecoratorRef;
     private monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
     private computedPropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+    private monitorPathRefsDelayed_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+    private computedPropRefsDelayed_ = new Set<WeakRef<ITrackedDecoratorRef>>();
     private queuedMutableStateChanges_ = new Set<WeakRef<IBindingSource>>();
     private persistencePropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
     private finalizationRegistry = new FinalizationRegistry<WeakRef<ITrackedDecoratorRef>>(
@@ -177,9 +179,15 @@ export class ObserveSingleton implements IObserve {
     private updateDirtyComputedProps(computedProps: Set<WeakRef<ITrackedDecoratorRef>>): void {
         computedProps.forEach((computedPropWeak: WeakRef<ITrackedDecoratorRef>) => {
             let computedPropRef = computedPropWeak.deref();
-            computedPropRef?.clearReverseBindings();
-            if (computedPropRef) {
-                (computedPropRef as IComputedDecoratorRef).fireChange();
+            if (!computedPropRef) {
+                return;
+            }
+            const computed = computedPropRef as IComputedDecoratorRef;
+            if (computed.isFreeze()) {
+                this.computedPropRefsDelayed_.add(computedPropWeak);
+            } else {
+                computedPropRef!.clearReverseBindings();
+                computed.fireChange();
             }
         });
     }
@@ -190,7 +198,9 @@ export class ObserveSingleton implements IObserve {
             let monitorPath = monitorPathRef.deref();
             if (monitorPath) {
                 let monitor: MonitorFunctionDecorator = (monitorPath as MonitorValueInternal).monitor;
-                if (monitor.notifyChangesForPath(monitorPath)) {
+                if (monitor.isFreeze()) {
+                    this.monitorPathRefsDelayed_.add(monitorPathRef);
+                } else if (monitor.notifyChangesForPath(monitorPath)) {
                     monitors.add(monitor);
                 }
             }
@@ -198,6 +208,19 @@ export class ObserveSingleton implements IObserve {
         return monitors;
     }
 
+    public unFreezeDelayedComputedProps(): void {
+        this.computedPropRefsDelayed_.forEach((weak) => {
+            this.computedPropRefsChanged_.add(weak);
+        });
+        this.computedPropRefsDelayed_.clear();
+    }
+
+    public unFreezeDelayedMonitorPaths(): void {
+        this.monitorPathRefsDelayed_.forEach((weak) => {
+            this.monitorPathRefsChanged_.add(weak);
+        });
+        this.monitorPathRefsDelayed_.clear();
+    }
     /* Execute given task
      * apply state changes to incremental engine immediately that occur while executing the task
      * this is the regular operation mode, therefore the function is rather redundant and given

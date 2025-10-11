@@ -21,6 +21,7 @@ import { ExtendableComponent } from '../../component/extendableComponent';
 
 export interface IComputedDecoratorRef extends ITrackedDecoratorRef {
     fireChange(): void;
+    isFreeze(): boolean;
 }
 
 export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<T> {
@@ -44,6 +45,11 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
         this.decorator = '@Computed';
         ObserveSingleton.instance.addToTrackedRegistry(this, this.reverseBindings);
     }
+
+    isFreeze(): boolean {
+        return !!(this.owningComponent_ && !this.owningComponent_!.isViewActive());
+    }
+
     fireChange(): void {
         const newValue: T = this.runFunctionAndObserve();
         if (this.cachedValue_ !== newValue) {
