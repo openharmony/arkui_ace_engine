@@ -386,6 +386,7 @@ public:
     static void* preloadArkTSRuntime;
     void OpenStateMgmtInterop() override;
     void NotifyArkoalaConfigurationChange(bool isNeedUpdate) override;
+    void InitXBarProxy() override;
 protected:
     bool LoadNavDestinationPage(const std::string bundleName, const std::string& moduleName,
         const std::string& pageSourceFile, bool isSingleton);

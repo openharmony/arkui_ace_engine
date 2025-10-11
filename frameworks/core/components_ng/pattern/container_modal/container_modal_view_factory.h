@@ -17,20 +17,38 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_VIEW_FACTORY_H
 
 #include "base/utils/macros.h"
+#include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
+#include "core/components_ng/pattern/container_modal/static/container_modal_static_view.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ContainerModalViewFactory {
 public:
-    static RefPtr<FrameNode> GetView(RefPtr<FrameNode>& content, MaximizeMode mode) {
-        if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
-            mode == MaximizeMode::MODE_FULL_FILL) {
-            return ContainerModalViewEnhance::Create(content);
+    static RefPtr<FrameNode> GetView(RefPtr<FrameNode>& content, MaximizeMode mode)
+    {
+        FrontendType type = GetFrontendType(content);
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "FrontendType == %{public}d", static_cast<int32_t>(type));
+        if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || mode == MaximizeMode::MODE_FULL_FILL) {
+            if (type == FrontendType::ARK_TS) {
+                return ContainerModalStaticView::Create(content);
+            } else {
+                return ContainerModalViewEnhance::Create(content);
+            }
         } else {
             return ContainerModalView::Create(content);
         }
+    }
+
+    static FrontendType GetFrontendType(RefPtr<FrameNode>& content)
+    {
+        auto pipeline = content->GetContextRefPtr();
+        CHECK_NULL_RETURN(pipeline, FrontendType::DECLARATIVE_JS);
+        auto frontend = pipeline->GetFrontend();
+        CHECK_NULL_RETURN(frontend, FrontendType::DECLARATIVE_JS);
+        frontend->InitXBarProxy();
+        return frontend->GetType();
     }
 };
 } // namespace OHOS::Ace::NG

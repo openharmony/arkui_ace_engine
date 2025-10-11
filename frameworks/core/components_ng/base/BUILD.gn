@@ -24,6 +24,7 @@ build_component_ng("base_ng") {
     "inspector.cpp",
     "inspector_filter.cpp",
     "interop/view_stack_processor_interop.cpp",
+    "xbar_proxy_wrapper.cpp",
     "modifier.cpp",
     "node_render_status_monitor.cpp",
     "observer_handler.cpp",

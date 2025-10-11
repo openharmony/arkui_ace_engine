@@ -14,37 +14,37 @@
  */
 #include "xbar_ani_modifier.h"
 
-// #include "core/components_ng/base/xbar_proxy_wrapper.h"
-// #include "core/components_ng/pattern/container_modal/static/container_modal_static_bridge.h"
+#include "core/components_ng/base/xbar_proxy_wrapper.h"
+#include "core/components_ng/pattern/container_modal/static/container_modal_static_bridge.h"
 namespace OHOS::Ace::NG {
 static void setXBarComponentCreateFunc(std::function<int64_t(const int32_t&, const int32_t&)>&& fn)
 {
-    // NG::XbarProxyWrapper::GetInstance()->InitXBarCreator(std::move(fn));
+    NG::XbarProxyWrapper::GetInstance()->InitXBarCreator(std::move(fn));
 }
 static void setOnWindowFocusedFunc(int64_t ptr, std::function<void()>&& fn)
 {
-    // NG::XbarProxyWrapper::GetInstance()->SetOnWindowFocusedFunc(ptr, std::move(fn));
+    NG::XbarProxyWrapper::GetInstance()->SetOnWindowFocusedFunc(ptr, std::move(fn));
 }
 static void setOnWindowUnFocusedFunc(int64_t ptr, std::function<void()>&& fn)
 {
-    // NG::XbarProxyWrapper::GetInstance()->SetOnWindowUnFocusedFunc(ptr, std::move(fn));
+    NG::XbarProxyWrapper::GetInstance()->SetOnWindowUnFocusedFunc(ptr, std::move(fn));
 }
 static void setSetAppTitleFunc(int64_t ptr, std::function<void(const std::string&)>&& fn)
 {
-    // NG::XbarProxyWrapper::GetInstance()->SetSetAppTitleFunc(ptr, std::move(fn));
+    NG::XbarProxyWrapper::GetInstance()->SetSetAppTitleFunc(ptr, std::move(fn));
 }
 static void setSetAppIconFunc(int64_t ptr, std::function<void(void*)>&& fn)
 {
-    // NG::XbarProxyWrapper::GetInstance()->SetSetAppIconFunc(ptr, std::move(fn));
+    NG::XbarProxyWrapper::GetInstance()->SetSetAppIconFunc(ptr, std::move(fn));
 }
 static void SetSetCustomCallbackFunc(int64_t ptr, std::function<void(const std::string&, const std::string&)>&& fn)
 {
-    // NG::XbarProxyWrapper::GetInstance()->SetSetCustomCallbackFunc(ptr, std::move(fn));
+    NG::XbarProxyWrapper::GetInstance()->SetSetCustomCallbackFunc(ptr, std::move(fn));
 }
 
 static void callNative(const int32_t& xBarType, const std::string callType, const std::string message)
 {
-    // NG::ContainerModalStaticBridge::CallNative(callType, message);
+    NG::ContainerModalStaticBridge::CallNative(callType, message);
 }
 const ArkUIAniXBarModifier* GetXBarAniModifier()
 {
