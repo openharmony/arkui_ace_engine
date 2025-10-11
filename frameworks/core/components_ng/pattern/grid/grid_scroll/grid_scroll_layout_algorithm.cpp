@@ -791,7 +791,8 @@ void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize,
     if (mainIter != info_.gridMatrix_.end() && mainIter->second.size() < crossCount_) {
         bool doneFillCurrentLine = false;
         auto currentIndex = info_.endIndex_ + 1;
-        cellAveLength_ = -1.0f;
+        auto lineHeight = info_.lineHeightMap_.find(currentMainLineIndex_);
+        cellAveLength_ = lineHeight == info_.lineHeightMap_.end() ? -1.0f : lineHeight->second;
         lastCross_ = 0;
         auto childrenCount = info_.GetChildrenCount();
         for (uint32_t i = mainIter->second.size(); i < crossCount_; i++) {
