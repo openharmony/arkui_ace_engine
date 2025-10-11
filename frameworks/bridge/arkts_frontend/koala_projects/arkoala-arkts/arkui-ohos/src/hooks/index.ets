@@ -50,7 +50,7 @@ import { GestureModifier } from "#generated";
 import { pointer } from "@koalaui/interop";
 import { ArkUIAniModule } from "arkui.ani"
 import { InteropNativeModule } from "@koalaui/interop"
-import { NavPathStack, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent } from "../component/navigation"
+import { NavPathStack, NavigationModuleInfo, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent } from "../component/navigation"
 import { PathStackUtils } from "../base/ArkNavPathStack"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
@@ -102,6 +102,7 @@ export function hookCustomPropertyImpl(component: ArkCommonMethodComponent, name
 export * from "./modifiers";
 export * from "./content_modifiers/ContentModifierHooks";
 export * from "./theme";
+export { NavDestinationBuilder, NavigationRouterMap } from "./NavigationOpsHandWritten";
 
 export function hookImageSetImageOptions(component: ArkImageComponent, src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
     ImageOpsHandWritten.hookImageSetImageOptionsImpl(component, src, imageAIOptions);
@@ -135,8 +136,8 @@ export function hookGetParamByIndexMethod(pathStack: NavPathStack, index: number
 export function hookGetParamByNameMethod(pathStack: NavPathStack, name: string): Array<Object | null | undefined> {
   return PathStackUtils.getParamByName(pathStack, name);
 }
-export function hookSetNavigationOptions(component: ArkNavigationComponent, pathInfos?: NavPathStack): void {
-  NavigationOpsHandWritten.hookSetNavigationOptionsImpl(component, pathInfos);
+export function hookSetNavigationOptions(component: ArkNavigationComponent, pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): void {
+  NavigationOpsHandWritten.hookSetNavigationOptionsImpl(component, pathInfos, moduleInfo);
 }
 
 export function hookSetNavDestination(component: ArkNavigationComponent, value: PageMapBuilder | undefined): void {

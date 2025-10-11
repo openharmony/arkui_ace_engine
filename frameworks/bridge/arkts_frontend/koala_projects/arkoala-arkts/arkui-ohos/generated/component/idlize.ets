@@ -1591,6 +1591,12 @@ export class NavExtender {
         const retval  = ArkUIGeneratedNativeModule._NavExtender_popToName(toPeerPtr(pathStack), name, animated ? 1 : 0)
         return retval
     }
+    static setCreateNavDestinationCallback_serialize(peer: NavPathStack, callback: NavExtender_CreateNavDestination): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        ArkUIGeneratedNativeModule._NavExtender_setCreateNavDestinationCallback(toPeerPtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     public static setNavigationOptions(ptr: KPointer, pathStack: NavPathStack): void {
         const ptr_casted = ptr as (KPointer)
         const pathStack_casted = pathStack as (NavPathStack)
@@ -1667,6 +1673,12 @@ export class NavExtender {
         const name_casted = name as (string)
         const animated_casted = animated as (boolean)
         return NavExtender.popToName_serialize(pathStack_casted, name_casted, animated_casted)
+    }
+    public static setCreateNavDestinationCallback(peer: NavPathStack, callback: NavExtender_CreateNavDestination): void {
+        const peer_casted = peer as (NavPathStack)
+        const callback_casted = callback as (NavExtender_CreateNavDestination)
+        NavExtender.setCreateNavDestinationCallback_serialize(peer_casted, callback_casted)
+        return
     }
 }
 export class NodeContainerOps {
@@ -3125,6 +3137,7 @@ export interface IndicatorStyle {
 }
 export type CustomNodeBuilder = (parentNode: KPointer) => KPointer;
 export type NavExtender_OnUpdateStack = () => void;
+export type NavExtender_CreateNavDestination = (index: int32) => KPointer;
 export interface Root {
     attributeModifier(value: AttributeModifier<Root> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")

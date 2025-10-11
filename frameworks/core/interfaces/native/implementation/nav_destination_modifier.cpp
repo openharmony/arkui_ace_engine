@@ -46,7 +46,8 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // namespace NavDestinationModifier
 namespace NavDestinationInterfaceModifier {
-void SetNavDestinationOptionsImpl(Ark_NativePointer node)
+void SetNavDestinationOptionsImpl(Ark_NativePointer node,
+                                  const Opt_NavDestinationModuleInfo* moduleInfo)
 {
     // "No need to implement this method"
 }

@@ -3861,7 +3861,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // NavDestinationModifier
     namespace NavDestinationInterfaceModifier {
-    void SetNavDestinationOptionsImpl(Ark_NativePointer node)
+    void SetNavDestinationOptionsImpl(Ark_NativePointer node,
+                                      const Opt_NavDestinationModuleInfo* moduleInfo)
     {
     }
     } // NavDestinationInterfaceModifier
@@ -4016,7 +4017,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // NavigationModifier
     namespace NavigationInterfaceModifier {
     void SetNavigationOptionsImpl(Ark_NativePointer node,
-                                  const Opt_NavPathStack* pathInfos)
+                                  const Opt_NavPathStack* pathInfos,
+                                  const Opt_NavigationModuleInfo* moduleInfo)
     {
     }
     } // NavigationInterfaceModifier
@@ -14512,6 +14514,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    void SetCreateNavDestinationCallbackImpl(Ark_NavPathStack peer,
+                                             const NavExtender_CreateNavDestination* callback)
+    {
+    }
     } // NavExtenderAccessor
     namespace NavigationTransitionProxyAccessor {
     void DestroyPeerImpl(Ark_NavigationTransitionProxy peer)
@@ -19797,6 +19803,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavExtenderAccessor::GetIdByNameImpl,
             NavExtenderAccessor::PopToIndexImpl,
             NavExtenderAccessor::PopToNameImpl,
+            NavExtenderAccessor::SetCreateNavDestinationCallbackImpl,
         };
         return &NavExtenderAccessorImpl;
     }

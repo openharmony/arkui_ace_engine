@@ -585,6 +585,29 @@ void NavigationStack::SetDestinationIdToJsStack(int32_t index, const std::string
     }
 }
 
+bool NavigationStack::CreateNavDestinationByRouterMap(
+    const std::string& name, int32_t index, RefPtr<NG::UINode>& node)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "create NavDestination by router map, name:%{public}s, index:%{public}d", name.c_str(), index);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto navigationRoute = container->GetNavigationRoute();
+    if (!navigationRoute) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation route is invalid");
+        return false;
+    }
+    if (!navigationRoute->HasLoaded(name) && navigationRoute->LoadPage(name) != 0) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load page failed: %{public}s", name.c_str());
+        return false;
+    }
+    CHECK_NULL_RETURN(createNavDestinationCallback_, false);
+    auto tempNode = createNavDestinationCallback_(index);
+    CHECK_NULL_RETURN(tempNode, false);
+    node = tempNode;
+    return true;
+}
+
 bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode,
     RefPtr<NG::UINode>& node)
 {
@@ -603,6 +626,14 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
     }
     if (GetNavDestinationNodeInUINode(targetNode, desNode)) {
         errorCode = ERROR_CODE_NO_ERROR;
+    }
+    if (errorCode != ERROR_CODE_NO_ERROR) {
+        RefPtr<UINode> tempNode = nullptr;
+        if (CreateNavDestinationByRouterMap(name, index, tempNode) &&
+            GetNavDestinationNodeInUINode(tempNode, desNode)) {
+            errorCode = ERROR_CODE_NO_ERROR;
+            targetNode = tempNode;
+        }
     }
     if (errorCode != ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");

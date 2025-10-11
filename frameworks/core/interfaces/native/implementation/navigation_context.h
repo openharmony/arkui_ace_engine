@@ -182,6 +182,10 @@ public:
     {
         PathStack::SetOnStateChangedCallback(callback);
     }
+    void SetCreateNavDestinationCallback(std::function<RefPtr<NG::UINode>(int32_t)>&& callback)
+    {
+        createNavDestinationCallback_ = std::move(callback);
+    }
 
     void UpdateStackInfo(const RefPtr<::OHOS::Ace::NG::NavigationStack>& newStack) override
     {
@@ -246,6 +250,7 @@ protected:
     std::map<int32_t, RefPtr<NG::UINode>> nodes_;
     RefPtr<PathStack> dataSourceObj_;
     std::function<void()> onStateChangedCallback_;
+    std::function<RefPtr<NG::UINode>(int32_t)> createNavDestinationCallback_;
 
 private:
     void SetIsReplace(int32_t value)
@@ -261,6 +266,8 @@ private:
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool GetNeedUpdatePathInfo(int32_t index);
     void SetNeedUpdatePathInfo(int32_t index, bool need);
+    bool CreateNavDestinationByRouterMap(
+        const std::string& name, int32_t index, RefPtr<NG::UINode>& node);
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext
 

@@ -886,12 +886,19 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setNavigationOptionsAttribute(pathInfos?: NavPathStack): void {
+    setNavigationOptionsAttribute(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (pathInfos !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const pathInfosTmpValue  = pathInfos!
             NavPathStack_serializer.write(thisSerializer, pathInfosTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (moduleInfo !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const moduleInfoTmpValue  = moduleInfo!
+            NavigationModuleInfo_serializer.write(thisSerializer, moduleInfoTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1513,7 +1520,7 @@ export interface MoreButtonOptions {
     backgroundEffect?: BackgroundEffectOptions;
 }
 export interface NavigationAttribute extends CommonMethod {
-    setNavigationOptions(pathInfos?: NavPathStack): this {
+    setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this {
         throw new Error("Unimplemented method setNavigationOptions")
     }
     navBarWidth(value: Length | Bindable<Length> | undefined): this {
@@ -1622,7 +1629,7 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     recoverable_value?: boolean | undefined
     enableDragBar_value?: boolean | undefined
     enableModeChangeAnimation_value?: boolean | undefined
-    setNavigationOptions(pathInfos?: NavPathStack): this {
+    setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this {
         return this
     }
     navBarWidth(value: Length | Bindable<Length> | undefined): this {
@@ -1724,6 +1731,11 @@ export interface NavContentInfo {
     param?: Object;
     navDestinationId?: string;
 }
+export interface NavigationModuleInfo {
+    moduleName: string;
+    pagePath: string;
+    isUserCreateStack?: boolean;
+}
 
 export class ArkNavigationComponent extends ArkCommonMethodComponent implements NavigationAttribute {
     // instructive change begin
@@ -1741,9 +1753,9 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         }
         return (this.peer as ArkNavigationPeer)
     }
-    public setNavigationOptions(pathInfos?: NavPathStack): this {
+    public setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this {
         if (this.checkPriority("setNavigationOptions")) {
-            hookSetNavigationOptions(this, pathInfos)
+            hookSetNavigationOptions(this, pathInfos, moduleInfo)
         }
         return this
     }
@@ -2292,6 +2304,36 @@ export class NavigationInterception_serializer {
         }
         const modeChangeTmpResult : InterceptionModeCallback | undefined = modeChangeTmpBuf
         let value : NavigationInterception = ({willShow: willShowTmpResult, didShow: didShowTmpResult, modeChange: modeChangeTmpResult} as NavigationInterception)
+        return value
+    }
+}
+export class NavigationModuleInfo_serializer {
+    public static write(buffer: SerializerBase, value: NavigationModuleInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForModuleName  = value.moduleName
+        valueSerializer.writeString(valueHolderForModuleName)
+        const valueHolderForPagePath  = value.pagePath
+        valueSerializer.writeString(valueHolderForPagePath)
+        const valueHolderForIsUserCreateStack  = value.isUserCreateStack
+        if (valueHolderForIsUserCreateStack !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsUserCreateStackTmpValue  = valueHolderForIsUserCreateStack!
+            valueSerializer.writeBoolean(valueHolderForIsUserCreateStackTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): NavigationModuleInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const moduleNameTmpResult : string = (valueDeserializer.readString() as string)
+        const pagePathTmpResult : string = (valueDeserializer.readString() as string)
+        const isUserCreateStackTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isUserCreateStackTmpBuf : boolean | undefined = undefined
+        if ((isUserCreateStackTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isUserCreateStackTmpBuf = valueDeserializer.readBoolean()
+        }
+        const isUserCreateStackTmpResult : boolean | undefined = isUserCreateStackTmpBuf
+        let value : NavigationModuleInfo = ({moduleName: moduleNameTmpResult, pagePath: pagePathTmpResult, isUserCreateStack: isUserCreateStackTmpResult} as NavigationModuleInfo)
         return value
     }
 }

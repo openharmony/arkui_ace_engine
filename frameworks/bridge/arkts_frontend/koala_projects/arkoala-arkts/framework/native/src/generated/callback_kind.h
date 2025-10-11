@@ -229,6 +229,7 @@ typedef enum CallbackKind {
     Kind_MenuOnAppearCallback = -614475458,
     Kind_ModifierKeyStateGetter = -1026503952,
     Kind_NavDestinationTransitionDelegate = -1066063065,
+    Kind_NavExtender_CreateNavDestination = -1478233532,
     Kind_NavExtender_OnUpdateStack = -588228933,
     Kind_OnAdsBlockedCallback = 1572284740,
     Kind_OnAlphabetIndexerPopupSelectCallback = 726938390,

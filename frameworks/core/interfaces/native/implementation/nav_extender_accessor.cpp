@@ -46,6 +46,22 @@ void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
     };
     navigationStack->SetOnStateChangedCallback(std::move(updater));
 }
+
+void SetCreateNavDestinationCallbackImpl(Ark_NavPathStack peer,
+                                         const NavExtender_CreateNavDestination* callback)
+{
+    CHECK_NULL_VOID(peer);
+    auto navigationStack = peer->GetNavPathStack();
+    CHECK_NULL_VOID(navigationStack);
+    auto stack = AceType::DynamicCast<Nav::NavigationStack>(navigationStack);
+    CHECK_NULL_VOID(stack);
+    auto creater = [callback = CallbackHelper(*callback)](int32_t index) -> RefPtr<NG::UINode> {
+        auto node = callback.InvokeWithObtainResult<Ark_NativePointer, Callback_Pointer_Void>(index);
+        return Referenced::Claim(reinterpret_cast<UINode*>(node));
+    };
+    stack->SetCreateNavDestinationCallback(std::move(creater));
+}
+
 void SyncStackImpl(Ark_NavPathStack peer)
 {
     CHECK_NULL_VOID(peer);
@@ -204,6 +220,7 @@ const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
         NavExtenderAccessor::GetIdByNameImpl,
         NavExtenderAccessor::PopToIndexImpl,
         NavExtenderAccessor::PopToNameImpl,
+        NavExtenderAccessor::SetCreateNavDestinationCallbackImpl,
     };
     return &NavExtenderAccessorImpl;
 }
