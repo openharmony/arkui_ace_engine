@@ -21,11 +21,6 @@
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_static.h"
 #include "core/components/theme/shadow_theme.h"
 
-namespace {
-constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
-constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
-}
-
 namespace OHOS::Ace::NG::Converter {
 template<>
 inline void AssignCast(std::optional<KeyboardAvoidMode>& dst, const Ark_KeyboardAvoidMode& src)
@@ -39,6 +34,156 @@ inline void AssignCast(std::optional<KeyboardAvoidMode>& dst, const Ark_Keyboard
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
+constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
+constexpr double NUM_DOUBLE_100 = 100.;
+
+std::optional<Dimension> OptConvertFromOptNumStrRes(const Opt_Dimension value)
+{
+    std::optional<Dimension> convValue = std::nullopt;
+    if (value.tag != INTEROP_TAG_UNDEFINED) {
+        convValue = Converter::OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(value.value);
+    }
+    return convValue;
+}
+
+std::optional<Dimension> OptConvertFromOptLength(const Opt_Length value, DimensionUnit defaultUnit)
+{
+    std::optional<Dimension> convValue = std::nullopt;
+    if (value.tag != INTEROP_TAG_UNDEFINED) {
+        convValue = Converter::OptConvertFromArkLength(value.value, defaultUnit);
+    }
+    return convValue;
+}
+
+std::optional<DimensionOffset> ConvertDimensionOffsetFromOptOffset(Opt_Offset offset)
+{
+    if (offset.tag == INTEROP_TAG_UNDEFINED) {
+        return std::nullopt;
+    }
+    auto optDx = Converter::OptConvertFromArkLength(offset.value.dx, DimensionUnit::VP);
+    auto optDy = Converter::OptConvertFromArkLength(offset.value.dy, DimensionUnit::VP);
+    return DimensionOffset(
+        optDx.has_value() ? optDx.value() : Dimension(), optDy.has_value() ? optDy.value() : Dimension());
+}
+
+std::optional<BorderRadiusProperty> ConvertBorderRadiusPropertyFromOptBorderRadius(
+    Opt_Union_Dimension_BorderRadiuses cornerRadius)
+{
+    std::optional<BorderRadiusProperty> optValue = std::nullopt;
+    Converter::VisitUnion(
+        cornerRadius,
+        [&optValue](const Ark_Dimension& src) {
+            BorderRadiusProperty borderRadius;
+            auto radius = Converter::OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(src);
+            borderRadius.radiusTopLeft = radius;
+            Validator::ValidateNonNegative(borderRadius.radiusTopLeft);
+            borderRadius.radiusTopRight = radius;
+            Validator::ValidateNonNegative(borderRadius.radiusTopRight);
+            borderRadius.radiusBottomLeft = radius;
+            Validator::ValidateNonNegative(borderRadius.radiusBottomLeft);
+            borderRadius.radiusBottomRight = radius;
+            Validator::ValidateNonNegative(borderRadius.radiusBottomRight);
+            optValue = borderRadius;
+        },
+        [&optValue](const Ark_BorderRadiuses& src) {
+            BorderRadiusProperty borderRadius;
+            borderRadius.radiusTopLeft = OptConvertFromOptLength(src.topLeft, DimensionUnit::VP);
+            Validator::ValidateNonNegative(borderRadius.radiusTopLeft);
+            borderRadius.radiusTopRight = OptConvertFromOptLength(src.topRight, DimensionUnit::VP);
+            Validator::ValidateNonNegative(borderRadius.radiusTopRight);
+            borderRadius.radiusBottomLeft = OptConvertFromOptLength(src.bottomLeft, DimensionUnit::VP);
+            Validator::ValidateNonNegative(borderRadius.radiusBottomLeft);
+            borderRadius.radiusBottomRight = OptConvertFromOptLength(src.bottomRight, DimensionUnit::VP);
+            Validator::ValidateNonNegative(borderRadius.radiusBottomRight);
+            borderRadius.multiValued = true;
+            optValue = borderRadius;
+        },
+        [] {});
+    return optValue;
+}
+
+std::optional<DimensionRect> ConvertDimensionRectFromOptRectangle(const Opt_Rectangle& rect)
+{
+    if (rect.tag == INTEROP_TAG_UNDEFINED) {
+        return std::nullopt;
+    }
+    std::optional<DimensionRect> optValue = std::nullopt;
+
+    DimensionRect dst;
+    dst.SetOffset(DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
+    dst.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
+
+    auto src = rect.value;
+    if (auto dim = OptConvertFromOptLength(src.width, DimensionUnit::VP); dim) {
+        if (dim.has_value()) {
+            if (dim.value().IsNegative()) {
+                dst.SetWidth(Dimension(NUM_DOUBLE_100, DimensionUnit::PERCENT));
+            } else {
+                dst.SetWidth(*dim);
+            }
+        }
+    }
+    if (auto dim = OptConvertFromOptLength(src.height, DimensionUnit::VP); dim) {
+        if (dim.has_value()) {
+            if (dim.value().IsNegative()) {
+                dst.SetHeight(Dimension(NUM_DOUBLE_100, DimensionUnit::PERCENT));
+            } else {
+                dst.SetHeight(*dim);
+            }
+        }
+    }
+    auto offset = dst.GetOffset();
+    if (auto dim = OptConvertFromOptLength(src.x, DimensionUnit::VP); dim) {
+        offset.SetX(*dim);
+    }
+    if (auto dim = OptConvertFromOptLength(src.y, DimensionUnit::VP); dim) {
+        offset.SetY(*dim);
+    }
+    dst.SetOffset(offset);
+
+    optValue = dst;
+    return optValue;
+}
+
+std::optional<BorderWidthProperty> ConvertBorderWidthPropertyFromOptEdgeWidths(
+    Opt_Union_Dimension_EdgeWidths borderWidth)
+{
+    std::optional<BorderWidthProperty> optValue = std::nullopt;
+    Converter::VisitUnion(
+        borderWidth,
+        [&optValue](const Ark_Dimension& src) {
+            BorderWidthProperty widthProperty;
+            auto width = Converter::OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(src);
+            widthProperty.topDimen = width;
+            Validator::ValidateNonNegative(widthProperty.topDimen);
+            widthProperty.leftDimen = width;
+            Validator::ValidateNonNegative(widthProperty.leftDimen);
+            widthProperty.bottomDimen = width;
+            Validator::ValidateNonNegative(widthProperty.bottomDimen);
+            widthProperty.rightDimen = width;
+            Validator::ValidateNonNegative(widthProperty.rightDimen);
+            optValue = widthProperty;
+        },
+        [&optValue](const Ark_EdgeWidths& src) {
+            BorderWidthProperty widthProperty;
+            widthProperty.topDimen = OptConvertFromOptLength(src.top, DimensionUnit::VP);
+            Validator::ValidateNonNegative(widthProperty.topDimen);
+            widthProperty.leftDimen = OptConvertFromOptLength(src.left, DimensionUnit::VP);
+            Validator::ValidateNonNegative(widthProperty.leftDimen);
+            widthProperty.bottomDimen = OptConvertFromOptLength(src.bottom, DimensionUnit::VP);
+            Validator::ValidateNonNegative(widthProperty.bottomDimen);
+            widthProperty.rightDimen = OptConvertFromOptLength(src.right, DimensionUnit::VP);
+            Validator::ValidateNonNegative(widthProperty.rightDimen);
+            widthProperty.multiValued = true;
+            optValue = widthProperty;
+        },
+        [] {});
+    return optValue;
+}
+} // namespace
+
 void CustomDialogControllerPeerImpl::SetOwnerView(Ark_NativePointer node)
 {
     CHECK_NULL_VOID(node);
@@ -137,7 +282,7 @@ void CustomDialogControllerPeerImpl::SetDialogAlignment(Opt_DialogAlignment alig
 
 void CustomDialogControllerPeerImpl::SetOffset(Opt_Offset offset)
 {
-    auto result = Converter::OptConvert<DimensionOffset>(offset);
+    auto result = ConvertDimensionOffsetFromOptOffset(offset);
     if (result) {
         dialogProperties_.offset = result.value();
     }
@@ -171,7 +316,7 @@ void CustomDialogControllerPeerImpl::SetMaskColor(Opt_ResourceColor maskColor)
 
 void CustomDialogControllerPeerImpl::SetMaskRect(Opt_Rectangle maskRect)
 {
-    dialogProperties_.maskRect = Converter::OptConvert<DimensionRect>(maskRect);
+    dialogProperties_.maskRect = ConvertDimensionRectFromOptRectangle(maskRect);
 }
 
 void CustomDialogControllerPeerImpl::SetOpenAnimation(Opt_AnimateParam openAnimation)
@@ -233,7 +378,7 @@ void CustomDialogControllerPeerImpl::SetBackgroundColor(Opt_ResourceColor backgr
 
 void CustomDialogControllerPeerImpl::SetCornerRadius(Opt_Union_Dimension_BorderRadiuses cornerRadius)
 {
-    dialogProperties_.borderRadius = Converter::OptConvert<BorderRadiusProperty>(cornerRadius);
+    dialogProperties_.borderRadius = ConvertBorderRadiusPropertyFromOptBorderRadius(cornerRadius);
 }
 
 void CustomDialogControllerPeerImpl::SetIsModal(Opt_Boolean isModal)
@@ -249,25 +394,27 @@ void CustomDialogControllerPeerImpl::SetDismiss(Opt_Callback_DismissDialogAction
     AddOnWillDismiss(dialogProperties_, onWillDismiss);
 }
 
-void CustomDialogControllerPeerImpl::SetWidth(std::optional<Dimension> width)
+void CustomDialogControllerPeerImpl::SetWidth(Opt_Dimension width)
 {
-    Validator::ValidateNonNegative(width);
-    if (width) {
-        dialogProperties_.width = *width;
+    auto optWidth = OptConvertFromOptNumStrRes(width);
+    Validator::ValidateNonNegative(optWidth);
+    if (optWidth) {
+        dialogProperties_.width = *optWidth;
     }
 }
 
-void CustomDialogControllerPeerImpl::SetHeight(std::optional<Dimension> height)
+void CustomDialogControllerPeerImpl::SetHeight(Opt_Dimension height)
 {
-    Validator::ValidateNonNegative(height);
-    if (height) {
-        dialogProperties_.height = *height;
+    auto optHeight = OptConvertFromOptNumStrRes(height);
+    Validator::ValidateNonNegative(optHeight);
+    if (optHeight) {
+        dialogProperties_.height = *optHeight;
     }
 }
 
 void CustomDialogControllerPeerImpl::SetBorderWidth(Opt_Union_Dimension_EdgeWidths borderWidth)
 {
-    dialogProperties_.borderWidth = Converter::OptConvert<BorderWidthProperty>(borderWidth);
+    dialogProperties_.borderWidth = ConvertBorderWidthPropertyFromOptEdgeWidths(borderWidth);
 }
 
 void CustomDialogControllerPeerImpl::SetBorderColor(Opt_Union_ResourceColor_EdgeColors borderColor)

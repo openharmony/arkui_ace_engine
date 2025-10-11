@@ -48,8 +48,8 @@ public:
     void SetCornerRadius(Opt_Union_Dimension_BorderRadiuses cornerRadius);
     void SetIsModal(Opt_Boolean isModal);
     void SetDismiss(Opt_Callback_DismissDialogAction_Void onWillDismiss);
-    void SetWidth(std::optional<Dimension> width);
-    void SetHeight(std::optional<Dimension> height);
+    void SetWidth(Opt_Dimension width);
+    void SetHeight(Opt_Dimension height);
     void SetBorderWidth(Opt_Union_Dimension_EdgeWidths borderWidth);
     void SetBorderColor(Opt_Union_ResourceColor_EdgeColors borderColor);
     void SetBorderStyle(Opt_Union_BorderStyle_EdgeStyles borderStyle);
