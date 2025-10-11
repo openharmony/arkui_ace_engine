@@ -96,6 +96,8 @@ public:
 
     void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override;
 
+    void BuildAllChildren();
+
     // used for drag move operation.
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void SetOnMoveFromTo(std::function<void(int32_t, int32_t)>&& onMoveFromTo);
@@ -154,7 +156,7 @@ private:
     std::unordered_set<int32_t> recycleNodeIds_;
 
     // true in the time from requesting idle / predict task until exec predict task.
-    bool postUpdateTaskHasBeenScheduled_;
+    bool postUpdateTaskHasBeenScheduled_ = false;
 
     std::function<void(int32_t, int32_t)> onMoveFromTo_;
     // record (from, to), only valid during dragging item.

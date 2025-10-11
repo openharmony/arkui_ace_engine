@@ -419,6 +419,15 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest015)
     EXPECT_TRUE(lazyNode->postUpdateTaskHasBeenScheduled_);
 }
 
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest016)
+{
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    int32_t totalCount = 50;
+    CreateChildren(lazyNode, totalCount);
+    lazyNode->BuildAllChildren();
+    EXPECT_EQ(lazyNode->children_.size(), totalCount);
+}
+
 /**
  * @tc.name: ArkoalaLazyNodeTest016
  * @tc.desc: Test ArkoalaLazyNode BuildAllChildren.

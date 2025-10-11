@@ -58,9 +58,7 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
     node4Index_.RemoveIf([cacheRange, weak = WeakClaim(this)](const uint32_t& k, const auto& _) {
         const auto idx = static_cast<int32_t>(k);
         auto arkoalaLazyNode = weak.Upgrade();
-        if (!arkoalaLazyNode) {
-            return true;
-        }
+        CHECK_NULL_RETURN(arkoalaLazyNode, true);
         const auto indexMapped = arkoalaLazyNode->ConvertFromToIndexRevert(idx);
         return !arkoalaLazyNode->IsNodeInRange(indexMapped, cacheRange);
     });
@@ -209,6 +207,13 @@ void ArkoalaLazyNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool 
         node->SetJSViewActive(active);
     }
     isActive_ = active;
+}
+
+void ArkoalaLazyNode::BuildAllChildren()
+{
+    for (int32_t i = 0; i < FrameCount(); i++) {
+        GetFrameChildByIndex(i, true, false, false);
+    }
 }
 
 void ArkoalaLazyNode::PostIdleTask()
