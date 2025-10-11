@@ -23,6 +23,11 @@ constexpr float DEFAULT_CENTER_VALUE = 0.5f;
 constexpr float DEFAULT_START_ANGLE_VALUE = 0.0f;
 constexpr float DEFAULT_END_ANGLE_VALUE = 360.0f;
 
+bool InRange(const float& value, const float& low, const float& high)
+{
+    return value >= low && value <= high;
+}
+
 void SetDisturbanceField(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -51,6 +56,39 @@ void ResetDisturbanceField(ArkUINodeHandle node)
     ParticleModelNG::DisturbanceField(dataArray, frameNode);
 }
 
+void ParseFieldRegion(const ArkFieldRegion& region, ParticleFieldRegion& particleFieldRegion)
+{
+    // parse shape: [RECT, MAX]
+    if (region.isSetShape) {
+        auto shapeValue = region.shape;
+        particleFieldRegion.shape =
+            ((shapeValue >= static_cast<int>(ParticleDisturbanceShapeType::RECT)
+            && shapeValue < static_cast<int>(ParticleDisturbanceShapeType::MAX))
+            ? static_cast<ParticleDisturbanceShapeType>(shapeValue)
+            : ParticleDisturbanceShapeType::RECT);
+    }
+
+    // parse position
+    if (region.isSetPosition) {
+        particleFieldRegion.position.first =
+            Dimension(region.positionX, DimensionUnit::VP);
+        particleFieldRegion.position.second =
+            Dimension(region.positionY, DimensionUnit::VP);
+    }
+
+    // parse size: [sizeWidth >= 0.0f, sizeHeight >= 0.0f]
+    if (region.isSetSize) {
+        auto sizeWidth = region.sizeWidth;
+        particleFieldRegion.size.first = GreatOrEqual(sizeWidth, 0.0f)
+            ? Dimension(sizeWidth, DimensionUnit::VP)
+            : Dimension(0.0f, DimensionUnit::VP);
+        auto sizeHeight = region.sizeHeight;
+        particleFieldRegion.size.second = GreatOrEqual(sizeHeight, 0.0f)
+            ? Dimension(sizeHeight, DimensionUnit::VP)
+            : Dimension(0.0f, DimensionUnit::VP);
+    }
+}
+
 void SetRippleField(ArkUINodeHandle node, const ArkRippleFieldOptions* values, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -58,41 +96,45 @@ void SetRippleField(ArkUINodeHandle node, const ArkRippleFieldOptions* values, A
     std::vector<ParticleRippleField> dataArray;
     for (ArkUI_Int32 i = 0; i < length; i++) {
         ParticleRippleField rippleField;
-        if (values[i].isSetAmplitude == 1) {
-            rippleField.amplitude = values[i].amplitude;
+        // parse amplitude: amplitude >= 0.0f
+        if (values[i].isSetAmplitude) {
+            auto amplitude = values[i].amplitude;
+            rippleField.amplitude =
+                GreatOrEqual(amplitude, 0.0f) ? amplitude : 0.0f;
         }
-        if (values[i].isSetWaveLength == 1) {
-            rippleField.wavelength = values[i].wavelength;
+
+        // parse wavelength: wavelength >= 0.0f
+        if (values[i].isSetWaveLength) {
+            auto wavelength = values[i].wavelength;
+            rippleField.wavelength =
+                GreatOrEqual(wavelength, 0.0f) ? wavelength : 0.0f;
         }
-        if (values[i].isSetWaveSpeed == 1) {
-            rippleField.waveSpeed = values[i].waveSpeed;
+
+        // parse waveSpeed: waveSpeed >= 0.0f
+        if (values[i].isSetWaveSpeed) {
+            auto waveSpeed = values[i].waveSpeed;
+            rippleField.waveSpeed =
+                GreatOrEqual(waveSpeed, 0.0f) ? waveSpeed : 0.0f;
         }
-        if (values[i].isSetAttenuation == 1) {
-            rippleField.attenuation = values[i].attenuation;
+
+        // parse attenuation:[0.0f, 1.0f]
+        if (values[i].isSetAttenuation) {
+            auto attenuation = values[i].attenuation;
+            rippleField.attenuation =
+                InRange(attenuation, 0.0f, 1.0f) ? attenuation : 0.0f;
         }
-        if (values[i].isSetCenter == 1) {
-            rippleField.center.first = static_cast<CalcDimension>(values[i].centerX);
-            rippleField.center.second = static_cast<CalcDimension>(values[i].centerY);
+
+        // parse center(x ,y)
+        if (values[i].isSetCenter) {
+            rippleField.center.first =
+                Dimension(values[i].centerX, DimensionUnit::VP);
+            rippleField.center.second =
+                Dimension(values[i].centerY, DimensionUnit::VP);
         }
-        if (values[i].isSetRegion == 1) {
-            if (values[i].region.isSetShape == 1) {
-                auto shapeValue = values[i].region.shape;
-                rippleField.region.shape = shapeValue >= 0 && shapeValue < static_cast<int>(ParticleDisturbanceShapeType::MAX)
-                    ? static_cast<ParticleDisturbanceShapeType>(shapeValue)
-                    : ParticleDisturbanceShapeType::RECT;
-            }
-            if (values[i].region.isSetPosition == 1) {
-                rippleField.region.position.first =
-                    static_cast<CalcDimension>(values[i].region.positionX);
-                rippleField.region.position.second =
-                    static_cast<CalcDimension>(values[i].region.positionY);
-            }
-            if (values[i].region.isSetSize == 1) {
-                rippleField.region.size.first =
-                    static_cast<CalcDimension>(values[i].region.sizeWidth);
-                rippleField.region.size.second =
-                    static_cast<CalcDimension>(values[i].region.sizeHeight);
-            }
+
+        // parse region
+        if (values[i].isSetRegion) {
+            ParseFieldRegion(values[i].region, rippleField.region);
         }
         dataArray.push_back(rippleField);
     }
@@ -114,28 +156,15 @@ void SetVelocityField(ArkUINodeHandle node, const ArkVelocityFieldOptions* value
     std::vector<ParticleVelocityField> dataArray;
     for (ArkUI_Int32 i = 0; i < length; i++) {
         ParticleVelocityField velocityField;
-        if (values[i].isSetVelocity == 1) {
+        // parse velocity(x ,y)
+        if (values[i].isSetVelocity) {
             velocityField.velocity.first = values[i].velocityX;
             velocityField.velocity.second = values[i].velocityY;
         }
-        if (values[i].isSetRegion == 1) {
-            velocityField.velocity.first = values[i].velocityX;
-            velocityField.velocity.second = values[i].velocityY;
-            if (values[i].region.isSetShape == 1) {
-                velocityField.region.shape = static_cast<ParticleDisturbanceShapeType>(values[i].region.shape);
-            }
-            if (values[i].region.isSetPosition == 1) {
-                velocityField.region.position.first =
-                    Dimension(values[i].region.positionX, DimensionUnit::VP);
-                velocityField.region.position.second =
-                    Dimension(values[i].region.positionY, DimensionUnit::VP);
-            }
-            if (values[i].region.isSetSize == 1) {
-                velocityField.region.size.first =
-                    Dimension(values[i].region.sizeWidth, DimensionUnit::VP);
-                velocityField.region.size.second =
-                    Dimension(values[i].region.sizeHeight, DimensionUnit::VP);
-            }
+
+        // parse region
+        if (values[i].isSetRegion) {
+            ParseFieldRegion(values[i].region, velocityField.region);
         }
         dataArray.push_back(velocityField);
     }

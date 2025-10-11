@@ -30,6 +30,8 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
     void OnAttachToMainTree() override;
+    void ParseVelocityFields(std::unique_ptr<JsonValue>& json) const;
+    void ParseRippleFields(std::unique_ptr<JsonValue>& json) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     std::unique_ptr<JsonValue> ToEmitterPropertyJsonValue(const EmitterProperty& emitterProperty) const;
     void UpdateDisturbance(const std::vector<ParticleDisturbance>& disturbance);
@@ -62,7 +64,7 @@ public:
         return rippleField_;
     }
 
-    void SetRippleField(std::vector<ParticleRippleField> rippleField)
+    void SetRippleField(const std::vector<ParticleRippleField>& rippleField)
     {
         rippleField_ = rippleField;
     }
@@ -72,7 +74,7 @@ public:
         return velocityFields_;
     }
 
-    void SetVelocityField(std::vector<ParticleVelocityField> velocityFields)
+    void SetVelocityField(const std::vector<ParticleVelocityField>& velocityFields)
     {
         velocityFields_ = velocityFields;
     }

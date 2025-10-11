@@ -51,11 +51,13 @@ void RosenRenderParticle::UpdateRippleFields(
         auto rsRipple = std::make_shared<Rosen::ParticleRippleField>(center, ripple.amplitude, ripple.wavelength,
             ripple.waveSpeed, ripple.attenuation);
         rsRipple->regionShape_  = static_cast<Rosen::ShapeType>(ripple.region.shape);
-        Rosen::Vector2f size =
-            {ripple.region.size.first.ConvertToPx(), ripple.region.size.second.ConvertToPx()};
+        Rosen::Vector2f size = {
+            ripple.region.size.first.ConvertToPx(), ripple.region.size.second.ConvertToPx()
+        };
         rsRipple->regionSize_ = size;
-        Rosen::Vector2f position =
-            {ripple.region.position.first.ConvertToPx(), ripple.region.position.second.ConvertToPx()};
+        Rosen::Vector2f position = {
+            ripple.region.position.first.ConvertToPx(), ripple.region.position.second.ConvertToPx()
+        };
         rsRipple->regionPosition_ = position;
         rippleFields->AddRippleField(rsRipple);
     }
@@ -72,11 +74,13 @@ void RosenRenderParticle::UpdateVelocityFields(
         Rosen::Vector2f velocity = {velocityField.velocity.first, velocityField.velocity.second};
         auto rsVelocity = std::make_shared<Rosen::ParticleVelocityField>(velocity);
         rsVelocity->regionShape_ = static_cast<Rosen::ShapeType>(velocityField.region.shape);
-        Rosen::Vector2f size =
-            {velocityField.region.size.first.ConvertToPx(), velocityField.region.size.second.ConvertToPx()};
+        Rosen::Vector2f size = {
+            velocityField.region.size.first.ConvertToPx(), velocityField.region.size.second.ConvertToPx()
+        };
         rsVelocity->regionSize_ = size;
-        Rosen::Vector2f position =
-            {velocityField.region.position.first.ConvertToPx(), velocityField.region.position.second.ConvertToPx()};
+        Rosen::Vector2f position = {
+            velocityField.region.position.first.ConvertToPx(), velocityField.region.position.second.ConvertToPx()
+        };
         rsVelocity->regionPosition_ = position;
         velocityFields->AddVelocityField(rsVelocity);
     }

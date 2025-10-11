@@ -238,6 +238,9 @@ class ParticleRippleModifier extends ModifierWithKey<Array<RippleFieldOptions>> 
       for (let i = 0; i < this.value.length; i++) {
         let arkRippleFieldOptions = new ArkRippleFieldOptions();
         let data = this.value[i];
+        if (!data) {
+          continue;
+        }
         if (isNumber(data.amplitude)) {
           arkRippleFieldOptions.isSetAmplitude = 1;
           arkRippleFieldOptions.amplitude = data.amplitude;
@@ -255,33 +258,27 @@ class ParticleRippleModifier extends ModifierWithKey<Array<RippleFieldOptions>> 
           arkRippleFieldOptions.attenuation = data.attenuation;
         }
         if (isObject(data.center)) {
-          if (isNumber(data.center.x) && isNumber(data.center.y)) {
-            arkRippleFieldOptions.isSetCenter = 1;
-            arkRippleFieldOptions.centerX = data.center.x;
-            arkRippleFieldOptions.centerY = data.center.y;
-          }
+          arkRippleFieldOptions.isSetCenter = 1;
+          arkRippleFieldOptions.centerX = data.center.x;
+          arkRippleFieldOptions.centerY = data.center.y;
         }
         if (isObject(data.region)) {
           arkRippleFieldOptions.isSetRegion = 1;
-          if (isNumber(data.shape)) {
+          if (isNumber(data.region.shape)) {
             arkRippleFieldOptions.isSetShape = 1;
             arkRippleFieldOptions.shape = data.region.shape;
           }
 
           if (isObject(data.region.position)) {
-            if (isNumber(data.region.position.x) && isNumber(data.region.position.y)) {
-              arkRippleFieldOptions.isSetPosition = 1;
-              arkRippleFieldOptions.positionX = data.region.position.x;
-              arkRippleFieldOptions.positionY = data.region.position.y;
-            }
+            arkRippleFieldOptions.isSetPosition = 1;
+            arkRippleFieldOptions.positionX = data.region.position.x;
+            arkRippleFieldOptions.positionY = data.region.position.y;
           }
 
           if (isObject(data.region.size)) {
-            if (data.region.size.width > 0 && data.region.size.height > 0) {
-              arkRippleFieldOptions.isSetSize = 1;
-              arkRippleFieldOptions.sizeWidth = data.region.size.width;
-              arkRippleFieldOptions.sizeHeight = data.region.size.height;
-            }
+            arkRippleFieldOptions.isSetSize = 1;
+            arkRippleFieldOptions.sizeWidth = data.region.size.width;
+            arkRippleFieldOptions.sizeHeight = data.region.size.height;
           }
         }
         dataArray.push(arkRippleFieldOptions);
@@ -291,11 +288,7 @@ class ParticleRippleModifier extends ModifierWithKey<Array<RippleFieldOptions>> 
   }
 
   checkObjectDiff(): boolean {
-    if (isString(this.stageValue) && isString(this.value)) {
-      return this.stageValue !== this.value;
-    } else {
-      return true;
-    }
+    return this.stageValue !== this.value;
   }
 }
 
@@ -345,12 +338,13 @@ class ParticleVelocityModifier extends ModifierWithKey<Array<VelocityFieldOption
       for (let i = 0; i < this.value.length; i++) {
         let arkVelocityFieldOptions = new ArkVelocityFieldOptions();
         let data = this.value[i];
+        if (!data) {
+          continue;
+        }
         if (isObject(data.velocity)) {
-          if (isNumber(data.velocity.x) && isNumber(data.velocity.y)) {
-            arkVelocityFieldOptions.isSetVelocity = 1;
-            arkVelocityFieldOptions.velocityX = data.velocity.x;
-            arkVelocityFieldOptions.velocityY = data.velocity.y;
-          }
+          arkVelocityFieldOptions.isSetVelocity = 1;
+          arkVelocityFieldOptions.velocityX = data.velocity.x;
+          arkVelocityFieldOptions.velocityY = data.velocity.y;
         }
         if (isObject(data.region)) {
           arkVelocityFieldOptions.isSetRegion = 1;
@@ -360,19 +354,15 @@ class ParticleVelocityModifier extends ModifierWithKey<Array<VelocityFieldOption
           }
 
           if (isObject(data.region.position)) {
-            if (isNumber(data.region.position.x) && isNumber(data.region.position.y)) {
-              arkVelocityFieldOptions.arkVelocityFieldOptions = 1;
-              arkVelocityFieldOptions.positionX = data.region.position.x;
-              arkVelocityFieldOptions.positionY = data.region.position.y;
-            }
+            arkVelocityFieldOptions.arkVelocityFieldOptions = 1;
+            arkVelocityFieldOptions.positionX = data.region.position.x;
+            arkVelocityFieldOptions.positionY = data.region.position.y;
           }
 
           if (isObject(data.region.size)) {
-            if (data.region.size.width > 0 && data.region.size.height > 0) {
-              arkVelocityFieldOptions.isSetSize = 1;
-              arkVelocityFieldOptions.sizeWidth = data.region.size.width;
-              arkVelocityFieldOptions.sizeHeight = data.region.size.height;
-            }
+            arkVelocityFieldOptions.isSetSize = 1;
+            arkVelocityFieldOptions.sizeWidth = data.region.size.width;
+            arkVelocityFieldOptions.sizeHeight = data.region.size.height;
           }
         }
         dataArray.push(arkVelocityFieldOptions);
@@ -382,11 +372,7 @@ class ParticleVelocityModifier extends ModifierWithKey<Array<VelocityFieldOption
   }
 
   checkObjectDiff(): boolean {
-    if (isString(this.stageValue) && isString(this.value)) {
-      return this.stageValue !== this.value;
-    } else {
-      return true;
-    }
+    return this.stageValue !== this.value;
   }
 }
 

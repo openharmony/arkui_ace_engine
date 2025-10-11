@@ -44,10 +44,8 @@ struct ParticleFieldRegion {
 
     bool operator==(const ParticleFieldRegion& data) const
     {
-        return shape == data.shape && position.first == data.position.first &&
-               position.second == data.position.second &&
-               size.first == data.size.first &&
-               size.second == data.size.second;
+        return shape == data.shape && position == data.position &&
+               size == data.size;
     }
 };
 
@@ -57,7 +55,7 @@ struct ParticleVelocityField {
 
     bool operator==(const ParticleVelocityField& data) const
     {
-        return NearEqual(velocity.first, data.velocity.first) && 
+        return NearEqual(velocity.first, data.velocity.first) &&
                NearEqual(velocity.second, data.velocity.second) && region == data.region;
     }
 };
@@ -74,8 +72,7 @@ struct ParticleRippleField {
     {
         return NearEqual(amplitude, data.amplitude) && NearEqual(wavelength, data.wavelength) &&
                NearEqual(waveSpeed, data.waveSpeed) && NearEqual(attenuation, data.attenuation) &&
-               center.first == data.center.first && center.second == data.center.second &&
-               region == data.region;
+               center == data.center && region == data.region;
     }
 };
 

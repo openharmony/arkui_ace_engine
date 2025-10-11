@@ -133,6 +133,7 @@ void ParticleModelNG::DisturbanceField(const std::vector<ParticleDisturbance>& d
 
 void ParticleModelNG::RippleFields(const std::vector<ParticleRippleField>& rippleFields, NG::FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
     pattern->UpdateRippleFields(rippleFields);
@@ -150,6 +151,7 @@ void ParticleModelNG::RippleFields(const std::vector<ParticleRippleField>& rippl
 void ParticleModelNG::VelocityFields(const std::vector<ParticleVelocityField>& velocityFields,
     NG::FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
     pattern->UpdateVelocityFields(velocityFields);

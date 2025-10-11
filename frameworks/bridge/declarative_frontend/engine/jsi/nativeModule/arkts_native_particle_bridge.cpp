@@ -163,7 +163,7 @@ void ParseEmitterPositionAndSize(EcmaVM* vm, panda::Local<panda::FunctionRef> em
     }
 }
 
-bool ParseFieldRegion(EcmaVM* vm, panda::Local<panda::FunctionRef> rippleFieldObj, ArkFieldRegion& region)
+void ParseFieldRegion(EcmaVM* vm, panda::Local<panda::FunctionRef> rippleFieldObj, ArkFieldRegion& region)
 {
     //parse shape
     auto isSetShape = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetShape"));
@@ -210,7 +210,81 @@ bool ParseFieldRegion(EcmaVM* vm, panda::Local<panda::FunctionRef> rippleFieldOb
         ArkTSUtils::ParseJsDouble(vm, sizeHeightJs, sizeHeight);
         region.sizeHeight = sizeHeight;
     }
-    return true;
+}
+
+void ParseRippleCenter(EcmaVM* vm, panda::Local<panda::FunctionRef> rippleFieldObj,
+    ArkRippleFieldOptions& rippleField)
+{
+    //parse center
+    auto isSetCenter = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetCenter"));
+    int32_t hasCenterValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetCenter, hasCenterValue);
+    rippleField.isSetCenter = hasCenterValue;
+    if (hasCenterValue == 1) {
+        auto centerXJs = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerX"));
+        double centerX = 0;
+        ArkTSUtils::ParseJsDouble(vm, centerXJs, centerX);
+        rippleField.centerX = centerX;
+        auto centerYJs = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerY"));
+        double centerY = 0;
+        ArkTSUtils::ParseJsDouble(vm, centerYJs, centerY);
+        rippleField.centerY = centerY;
+    }
+}
+
+void ParseRipplePara(EcmaVM* vm, panda::Local<panda::FunctionRef> rippleFieldObj,
+    ArkRippleFieldOptions& rippleField)
+{
+    //parse amplitude
+    auto isSetAmplitude = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetAmplitude"));
+    int32_t hasAmplitudeValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetAmplitude, hasAmplitudeValue);
+    rippleField.isSetAmplitude = hasAmplitudeValue;
+    if (hasAmplitudeValue == 1) {
+        auto amplitude = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "amplitude"));
+        double amplitudeValue = 0;
+        ArkTSUtils::ParseJsDouble(vm, amplitude, amplitudeValue);
+        rippleField.amplitude = amplitudeValue;
+    }
+
+    //parse wavelength
+    auto isSetWaveLength = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetWaveLength"));
+    int32_t hasWaveLengthValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetWaveLength, hasWaveLengthValue);
+    rippleField.isSetWaveLength = hasWaveLengthValue;
+    if (hasWaveLengthValue == 1) {
+        auto wavelength = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "wavelength"));
+        double waveLengthValue = 0;
+        ArkTSUtils::ParseJsDouble(vm, wavelength, waveLengthValue);
+        rippleField.wavelength = waveLengthValue;
+    }
+
+    //parse waveSpeed
+    auto isSetWaveSpeed = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetWaveSpeed"));
+    int32_t hasWaveSpeedValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetWaveSpeed, hasWaveSpeedValue);
+    rippleField.isSetWaveSpeed = hasWaveSpeedValue;
+    if (hasWaveSpeedValue == 1) {
+        auto waveSpeed = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "waveSpeed"));
+        double waveSpeedValue = 0;
+        ArkTSUtils::ParseJsDouble(vm, waveSpeed, waveSpeedValue);
+        rippleField.waveSpeed = waveSpeedValue;
+    }
+
+    //parse attenuation
+    auto isSetAttenuation = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetAttenuation"));
+    int32_t hasAttenuationValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetAttenuation, hasAttenuationValue);
+    rippleField.isSetAttenuation = hasAttenuationValue;
+    if (hasAttenuationValue == 1) {
+        auto attenuation = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "attenuation"));
+        double attenuationValue = 0;
+        ArkTSUtils::ParseJsDouble(vm, attenuation, attenuationValue);
+        rippleField.attenuation = attenuationValue;
+    }
+
+    //parse center
+    ParseRippleCenter(vm, rippleFieldObj, rippleField);
 }
 }
 
@@ -301,78 +375,13 @@ ArkUINativeModuleValue ParticleBridge::SetRippleField(ArkUIRuntimeCallInfo* runt
     auto array = panda::Local<panda::ArrayRef>(jsValueRef);
     auto length = array->Length(vm);
     std::vector<ArkRippleFieldOptions> dataVector;
-    dataVector.resize(length);
 
     for (uint32_t i = 0; i < length; i++) {
-        ArkRippleFieldOptions rippleField;
         Local<JSValueRef> rippleFieldValue = panda::ArrayRef::GetValueAt(vm, array, i);
         if (rippleFieldValue->IsObject(vm)) {
+            ArkRippleFieldOptions rippleField;
             auto rippleFieldObj = rippleFieldValue->ToObject(vm);
-            //parse amplitude
-            auto isSetAmplitude = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetAmplitude"));
-            int32_t hasAmplitudeValue = 0;
-            ArkTSUtils::ParseJsInteger(vm, isSetAmplitude, hasAmplitudeValue);
-            rippleField.isSetAmplitude = hasAmplitudeValue;
-            if (hasAmplitudeValue == 1) {
-                auto amplitude = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "amplitude"));
-                double amplitudeValue = 0;
-                ArkTSUtils::ParseJsDouble(vm, amplitude, amplitudeValue);
-                rippleField.amplitude = amplitudeValue;
-            }
-
-            //parse wavelength
-            auto isSetWaveLength = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetWaveLength"));
-            int32_t hasWaveLengthValue = 0;
-            ArkTSUtils::ParseJsInteger(vm, isSetWaveLength, hasWaveLengthValue);
-            rippleField.isSetWaveLength = hasWaveLengthValue;
-            if (hasWaveLengthValue == 1) {
-                auto wavelength = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "wavelength"));
-                double waveLengthValue = 0;
-                ArkTSUtils::ParseJsDouble(vm, wavelength, waveLengthValue);
-                rippleField.wavelength = waveLengthValue;
-            }
-
-            //parse waveSpeed
-            auto isSetWaveSpeed = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetWaveSpeed"));
-            int32_t hasWaveSpeedValue = 0;
-            ArkTSUtils::ParseJsInteger(vm, isSetWaveSpeed, hasWaveSpeedValue);
-            rippleField.isSetWaveSpeed = hasWaveSpeedValue;
-            if (hasWaveSpeedValue == 1) {
-                auto waveSpeed = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "waveSpeed"));
-                double waveSpeedValue = 0;
-                ArkTSUtils::ParseJsDouble(vm, waveSpeed, waveSpeedValue);
-                rippleField.waveSpeed = waveSpeedValue;
-            }
-
-            //parse attenuation
-            auto isSetAttenuation = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetAttenuation"));
-            int32_t hasAttenuationValue = 0;
-            ArkTSUtils::ParseJsInteger(vm, isSetAttenuation, hasAttenuationValue);
-            rippleField.isSetAttenuation = hasAttenuationValue;
-            if (hasAttenuationValue == 1) {
-                auto attenuation = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "attenuation"));
-                double attenuationValue = 0;
-                ArkTSUtils::ParseJsDouble(vm, attenuation, attenuationValue);
-                rippleField.attenuation = attenuationValue;
-            }
-
-            //parse center
-            auto isSetCenter = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetCenter"));
-            int32_t hasCenterValue = 0;
-            ArkTSUtils::ParseJsInteger(vm, isSetCenter, hasCenterValue);
-            rippleField.isSetCenter = hasCenterValue;
-            if (hasCenterValue == 1) {
-                auto centerXJs = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerX"));
-                double centerX = 0;
-                ArkTSUtils::ParseJsDouble(vm, centerXJs, centerX);
-                rippleField.centerX = centerX;
-
-                auto centerYJs = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerY"));
-                double centerY = 0;
-                ArkTSUtils::ParseJsDouble(vm, centerYJs, centerY);
-                rippleField.centerY = centerY;
-            }
-
+            ParseRipplePara(vm, rippleFieldObj, rippleField);
             auto isSetRegion = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetRegion"));
             int32_t hasRegionValue = 0;
             ArkTSUtils::ParseJsInteger(vm, isSetRegion, hasRegionValue);
@@ -380,8 +389,8 @@ ArkUINativeModuleValue ParticleBridge::SetRippleField(ArkUIRuntimeCallInfo* runt
             if (hasRegionValue == 1) {
                 ParseFieldRegion(vm, rippleFieldObj, rippleField.region);
             }
+            dataVector.emplace_back(rippleField);
         }
-        dataVector.emplace_back(rippleField);
     }
     GetArkUINodeModifiers()->getParticleModifier()->SetRippleField(
         nativeNode, dataVector.data(), static_cast<ArkUI_Int32>(dataVector.size()));
@@ -411,10 +420,8 @@ ArkUINativeModuleValue ParticleBridge::SetVelocityField(ArkUIRuntimeCallInfo* ru
     auto array = panda::Local<panda::ArrayRef>(jsValueRef);
     auto length = array->Length(vm);
     std::vector<ArkVelocityFieldOptions> dataVector;
-    dataVector.resize(length);
 
     for (uint32_t i = 0; i < length; i++) {
-        ArkVelocityFieldOptions velocityField;
         Local<JSValueRef> velocityFieldValue = panda::ArrayRef::GetValueAt(vm, array, i);
         if (velocityFieldValue->IsObject(vm)) {
             auto velocityFieldObj = velocityFieldValue->ToObject(vm);
@@ -422,6 +429,7 @@ ArkUINativeModuleValue ParticleBridge::SetVelocityField(ArkUIRuntimeCallInfo* ru
             auto isSetVelocity = velocityFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetVelocity"));
             int32_t hasVelocityValue = 0;
             ArkTSUtils::ParseJsInteger(vm, isSetVelocity, hasVelocityValue);
+            ArkVelocityFieldOptions velocityField;
             velocityField.isSetVelocity = hasVelocityValue;
             if (hasVelocityValue == 1) {
                 auto velocityXJs = velocityFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "velocityX"));
@@ -442,8 +450,8 @@ ArkUINativeModuleValue ParticleBridge::SetVelocityField(ArkUIRuntimeCallInfo* ru
             if (hasRegionValue == 1) {
                 ParseFieldRegion(vm, velocityFieldObj, velocityField.region);
             }
+            dataVector.emplace_back(velocityField);
         }
-        dataVector.emplace_back(velocityField);
     }
     GetArkUINodeModifiers()->getParticleModifier()->SetVelocityField(
         nativeNode, dataVector.data(), static_cast<ArkUI_Int32>(dataVector.size()));

@@ -1189,6 +1189,11 @@ void GetSizeAndPositionValues(
     }
 }
 
+bool InRange(const float& value, const float& low, const float& high)
+{
+    return value >= low && value <= high;
+}
+
 template<typename T>
 void ParseFieldRegion(const JSRef<JSObject>& paramObj, T& field)
 {
@@ -1199,32 +1204,32 @@ void ParseFieldRegion(const JSRef<JSObject>& paramObj, T& field)
     }
     auto fieldRegionObj = Framework::JSRef<Framework::JSObject>::Cast(fieldRegion);
 
-    // Parse shape
+    // parse shape: [RECT, MAX]
     auto shapeValue = fieldRegionObj->GetProperty("shape");
     if (shapeValue->IsNumber()) {
         int shape = shapeValue->ToNumber<int>();
-        region.shape = shape >= 0 && shape < static_cast<int>(ParticleDisturbanceShapeType::MAX)
+        region.shape =
+            ((shape >= static_cast<int>(ParticleDisturbanceShapeType::RECT)
+            && shape < static_cast<int>(ParticleDisturbanceShapeType::MAX))
             ? static_cast<ParticleDisturbanceShapeType>(shape)
-            : ParticleDisturbanceShapeType::RECT;
+            : ParticleDisturbanceShapeType::RECT);
     }
 
-    // Parse position
+    // parse position and size
+    // size: [sizeWidth >= 0.0f, sizeHeight >= 0.0f]
     float sizeXValue = 0;
     float sizeYValue = 0;
     float positionXValue = 0;
     float positionYValue = 0;
     GetSizeAndPositionValues(fieldRegionObj,
         sizeXValue, sizeYValue, positionXValue, positionYValue);
+    sizeXValue = GreatOrEqual(sizeXValue, 0.0f) ? sizeXValue : 0.0f;
+    sizeYValue = GreatOrEqual(sizeYValue, 0.0f) ? sizeYValue : 0.0f;
     region.size.first = Dimension(sizeXValue, DimensionUnit::VP);
     region.size.second = Dimension(sizeYValue, DimensionUnit::VP);
     region.position.first = Dimension(positionXValue, DimensionUnit::VP);
     region.position.second = Dimension(positionYValue, DimensionUnit::VP);
     field.region = region;
-}
-
-template<typename T>
-bool inRange(const T& value, const T& low, const T& high) {
-    return value >= low && value <= high;
 }
 } // namespace
 void JSParticle::Create(const JSCallbackInfo& args)
@@ -1326,8 +1331,9 @@ void JSParticle::JsVelocityFields(const JSCallbackInfo& args)
     std::vector<ParticleVelocityField> dataArray;
     JSRef<JSArray> dataJsArray = JSRef<JSArray>::Cast(args[0]);
     for (size_t i = 0; i < dataJsArray->Length(); i++) {
-        if (dataJsArray->GetValueAt(i)->IsObject()) {
-            auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
+        auto item = dataJsArray->GetValueAt(i);
+        if (item->IsObject()) {
+            auto jsObject = JSRef<JSObject>::Cast(item);
             AddVelocity(dataArray, jsObject);
         }
     }
@@ -1367,8 +1373,9 @@ void JSParticle::JsRippleFields(const JSCallbackInfo& args)
     std::vector<ParticleRippleField> dataArray;
     JSRef<JSArray> dataJsArray = JSRef<JSArray>::Cast(args[0]);
     for (size_t i = 0; i < dataJsArray->Length(); i++) {
-        if (dataJsArray->GetValueAt(i)->IsObject()) {
-            auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
+        auto item = dataJsArray->GetValueAt(i);
+        if (item->IsObject()) {
+            auto jsObject = JSRef<JSObject>::Cast(item);
             AddRipple(dataArray, jsObject);
         }
     }
@@ -1380,31 +1387,39 @@ void JSParticle::AddRipple(std::vector<OHOS::Ace::ParticleRippleField>& dataArra
 {
     ParticleRippleField rippleField;
 
-    // Parse amplitude
+    // parse amplitude: amplitude >= 0.0f
     auto amplitudeValue = paramObj->GetProperty("amplitude");
     if (amplitudeValue->IsNumber()) {
-        rippleField.amplitude = amplitudeValue->ToNumber<float>();
+        auto amplitude = amplitudeValue->ToNumber<float>();
+        rippleField.amplitude =
+            GreatOrEqual(amplitude, 0.0f) ? amplitude : 0.0f;
     }
 
-    // Parse wavelength
+    // parse wavelength: wavelength >= 0.0f
     auto waveLengthValue = paramObj->GetProperty("wavelength");
     if (waveLengthValue->IsNumber()) {
-        rippleField.wavelength = waveLengthValue->ToNumber<float>();
+        auto wavelength = waveLengthValue->ToNumber<float>();
+        rippleField.wavelength =
+            GreatOrEqual(wavelength, 0.0f) ? wavelength : 0.0f;
     }
 
-    // Parse waveSpeed
+    // parse waveSpeed: waveSpeed >= 0.0f
     auto waveSpeedValue = paramObj->GetProperty("waveSpeed");
     if (waveSpeedValue->IsNumber()) {
-        rippleField.waveSpeed = waveSpeedValue->ToNumber<float>();
+        auto waveSpeed = waveSpeedValue->ToNumber<float>();
+        rippleField.waveSpeed =
+            GreatOrEqual(waveSpeed, 0.0f) ? waveSpeed : 0.0f;
     }
 
-    // Parse attenuation
+    // parse attenuation:[0.0f, 1.0f]
     auto attenuationValue = paramObj->GetProperty("attenuation");
     if (attenuationValue->IsNumber()) {
-        rippleField.attenuation = attenuationValue->ToNumber<float>();
+        auto attenuation = attenuationValue->ToNumber<float>();
+        rippleField.attenuation =
+            InRange(attenuation, 0.0f, 1.0f) ? attenuation : 0.0f;
     }
     
-    // Parse center
+    // parse center(x ,y)
     JSRef<JSVal> centerJsValue = paramObj->GetProperty("center");
     if (centerJsValue->IsObject()) {
         auto centerJsObject = JSRef<JSObject>::Cast(centerJsValue);
@@ -1419,6 +1434,7 @@ void JSParticle::AddRipple(std::vector<OHOS::Ace::ParticleRippleField>& dataArra
                 Dimension(centerYJsObject->ToNumber<float>(), DimensionUnit::VP);
         }
     }
+
     // Parse region
     ParseFieldRegion(paramObj, rippleField);
     dataArray.push_back(rippleField);
