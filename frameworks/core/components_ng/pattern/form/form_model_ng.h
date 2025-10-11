@@ -45,11 +45,7 @@ public:
     void SetVisibility(VisibleType visible) override;
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override;
 
-    static void SetVisibility(FrameNode* frameNode, VisibleType visible);
-    static void AllowUpdate(FrameNode* frameNode, bool value);
-    static void SetDimension(FrameNode* frameNode, int32_t value);
-    static void SetModuleName(FrameNode* frameNode, const std::string& value);
-    static void SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     int32_t RequestPublishFormWithSnapshot(const AAFwk::Want& want,
         const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg) override;
 };
