@@ -608,6 +608,37 @@ int32_t OH_ArkUI_GetGestureParam_distanceThreshold(ArkUI_GestureRecognizer* reco
     return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
 }
 
+ArkUI_ErrorCode OH_ArkUI_LongPressGesture_SetAllowableMovement(
+    ArkUI_GestureRecognizer* recognizer, int32_t allowableMovement)
+{
+    if (!recognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gesture = reinterpret_cast<ArkUIGesture*>(recognizer->gesture);
+    if (!gesture) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()
+            ->getNodeModifiers()
+            ->getGestureModifier()
+            ->setLongPressGestureAllowableMovement(gesture, allowableMovement));
+}
+
+int32_t OH_ArkUI_LongPressGesture_GetAllowableMovement(ArkUI_GestureRecognizer* recognizer, int32_t* allowableMovement)
+{
+    if (!recognizer || !allowableMovement) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gesture = reinterpret_cast<ArkUIGesture*>(recognizer->gesture);
+    if (!gesture) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return OHOS::Ace::NodeModel::GetFullImpl()
+        ->getNodeModifiers()
+        ->getGestureModifier()
+        ->getLongPressGestureAllowableMovement(gesture, allowableMovement);
+}
+
 ArkUI_ErrorCode OH_ArkUI_PanGesture_SetDistanceMap(
     ArkUI_GestureRecognizer* recognizer, int size, int* toolTypeArray, double* distanceArray)
 {

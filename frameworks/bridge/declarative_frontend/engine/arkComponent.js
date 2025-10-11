@@ -5423,6 +5423,7 @@ class LongPressGestureHandler extends GestureHandler {
       this.fingers = options.fingers;
       this.repeat = options.repeat;
       this.duration = options.duration;
+      this.allowableMovement = options.allowableMovement;
       this.limitFingerCount = options.isFingerCountLimited;
     }
   }
@@ -5866,7 +5867,7 @@ class UIGestureEvent {
         let longPressGesture = gesture;
         getUINativeModule().common.addLongPressGesture(this._nodePtr, priority, mask, longPressGesture.gestureTag,
           longPressGesture.allowedTypes, longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
-          longPressGesture.limitFingerCount, longPressGesture.onActionCallback,
+          longPressGesture.limitFingerCount, longPressGesture.allowableMovement, longPressGesture.onActionCallback,
           longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback);
         break;
       }
@@ -5971,7 +5972,8 @@ function addGestureToGroup(nodePtr, gesture, gestureGroupPtr) {
       let longPressGesture = gesture;
       getUINativeModule().common.addLongPressGestureToGroup(nodePtr, longPressGesture.gestureTag, longPressGesture.allowedTypes,
         longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration, longPressGesture.limitFingerCount,
-        longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback, gestureGroupPtr);
+        longPressGesture.allowableMovement, longPressGesture.onActionCallback, longPressGesture.onActionEndCallback,
+        longPressGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PAN_GESTURE: {

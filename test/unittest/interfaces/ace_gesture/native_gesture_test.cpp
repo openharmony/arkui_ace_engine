@@ -1483,3 +1483,41 @@ HWTEST_F(NativeGestureTest, GestureImplTest0044, TestSize.Level1)
     auto ret = OHOS::Ace::GestureModel::SetInnerGestureParallelTo(gestureNode, userData, nullptr);
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: GestureImplTest0045
+ * @tc.desc: Test the OH_ArkUI_LongPressGesture_SetAllowableMovement function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer recognizerNew = { 0, nullptr, nullptr, nullptr };
+    ArkUI_GestureRecognizer* recognizer = &recognizerNew;
+    auto ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(nullptr, 0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(recognizer, 0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_1"));
+    ASSERT_NE(gestureAPI, nullptr);
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(gestureNode, nullptr);
+    auto longPressGesture = gestureAPI->createLongPressGesture(1, true, 500);
+    ASSERT_NE(longPressGesture, nullptr);
+    ASSERT_NE(longPressGesture->gesture, nullptr);
+    ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(longPressGesture, 0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    int32_t ret2 = OH_ArkUI_LongPressGesture_GetAllowableMovement(nullptr, nullptr);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret2 = OH_ArkUI_LongPressGesture_GetAllowableMovement(recognizer, nullptr);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    int32_t res = 0;
+    ret2 = OH_ArkUI_LongPressGesture_GetAllowableMovement(recognizer, &res);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_LongPressGesture_GetAllowableMovement(longPressGesture, &res);
+    EXPECT_EQ(res, 15);
+}

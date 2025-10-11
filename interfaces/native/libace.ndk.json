@@ -2864,6 +2864,14 @@
         "name": "OH_ArkUI_GetGestureParam_repeat"
     },
     {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_LongPressGesture_SetAllowableMovement"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_LongPressGesture_GetAllowableMovement"
+    },
+    {
         "first_introduced": "18",
         "name": "OH_ArkUI_GetGestureParam_distance"
     },

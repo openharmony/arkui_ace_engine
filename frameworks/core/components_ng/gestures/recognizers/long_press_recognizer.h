@@ -47,8 +47,8 @@ class ACE_FORCE_EXPORT LongPressRecognizer : public MultiFingersRecognizer {
 
 public:
     explicit LongPressRecognizer() = default;
-    LongPressRecognizer(int32_t duration, int32_t fingers, bool repeat,
-        bool isForDrag = false, bool isDisableMouseLeft = false, bool isLimitFingerCount = false);
+    LongPressRecognizer(int32_t duration, int32_t fingers, bool repeat, bool isForDrag = false,
+        bool isDisableMouseLeft = false, bool isLimitFingerCount = false, int32_t allowableMovement = 15);
 
     LongPressRecognizer(bool isForDrag = false, bool isDisableMouseLeft = false)
         : isForDrag_(isForDrag), isDisableMouseLeft_(isDisableMouseLeft)
@@ -74,6 +74,16 @@ public:
     void SetUseCatchMode(bool useCatchMode)
     {
         useCatchMode_ = useCatchMode;
+    }
+
+    void SetAllowableMovement(int32_t allowableMovement)
+    {
+        allowableMovement_ = allowableMovement;
+    }
+
+    int32_t GetAllowableMovement() const
+    {
+        return allowableMovement_;
     }
 
     void SetDuration(int32_t duration)
@@ -156,6 +166,7 @@ private:
     bool repeat_ = false;
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;
+    int32_t allowableMovement_ = 15;
 
     TouchEvent lastTouchEvent_;
     WeakPtr<GestureEventHub> gestureHub_;
