@@ -2166,7 +2166,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("nativeEmbedOptions", &JSWeb::NativeEmbedOptions);
     JSClass<JSWeb>::StaticMethod("registerNativeEmbedRule", &JSWeb::RegisterNativeEmbedRule);
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
-    JSClass<JSWeb>::StaticMethod("zoomControlAccess", &JSWeb::ZoomControlAccess);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
     JSClass<JSWeb>::StaticMethod("javaScriptProxy", &JSWeb::JavaScriptProxy);
     JSClass<JSWeb>::StaticMethod("userAgent", &JSWeb::UserAgent);
@@ -4303,12 +4302,6 @@ void JSWeb::MixedMode(int32_t mixedMode)
 void JSWeb::ZoomAccessEnabled(bool isZoomAccessEnabled)
 {
     WebModel::GetInstance()->SetZoomAccessEnabled(isZoomAccessEnabled);
-}
-
-void JSWeb::ZoomControlAccess(bool zoomControlAccess)
-{
-    RETURN_IF_CALLING_FROM_M114();
-    WebModel::GetInstance()->SetZoomControlAccess(zoomControlAccess);
 }
 
 void JSWeb::EnableNativeEmbedMode(bool isEmbedModeEnabled)
