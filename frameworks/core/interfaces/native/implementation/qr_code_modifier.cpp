@@ -51,9 +51,6 @@ void SetColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Color>(value);
-    if (!convValue) {
-        return;
-    }
     QRCodeModelStatic::SetQRCodeColor(frameNode, convValue);
 }
 void SetBackgroundColorImpl(Ark_NativePointer node,
@@ -62,9 +59,6 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Color>(value);
-    if (!convValue) {
-        return;
-    }
     QRCodeModelStatic::SetQRBackgroundColor(frameNode, convValue);
 }
 void SetContentOpacityImpl(Ark_NativePointer node,
@@ -73,10 +67,6 @@ void SetContentOpacityImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
-    Validator::ValidateOpacity(convValue);
-    if (!convValue) {
-        return;
-    }
     QRCodeModelStatic::SetContentOpacity(frameNode, convValue);
 }
 } // QRCodeAttributeModifier

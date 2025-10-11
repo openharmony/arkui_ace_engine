@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkRadioPeer, OnRadioChangeCallback, RadioStyle, RadioConfiguration, RadioAttribute } from "./component/radio"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
@@ -39,8 +40,9 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
     _onChange_0_0value?: OnRadioChangeCallback | undefined
     _radioStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radioStyle_0_0value?: RadioStyle | undefined
-    applyModifierPatch(peer: ArkRadioPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkRadioPeer;
         if (this._checked_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._checked_0_flag) {

@@ -16,20 +16,31 @@
 import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 import { PeerNode } from './PeerNode'
 import { ArkUINativeModule } from "#components"
-import { AnimateParam } from './framework'
+import { AnimateParam, UIGestureEvent } from './framework'
 import { UICommonBase } from './base'
 import { unsafeCast } from "@koalaui/common"
 
 export class ComponentBase implements UICommonBase {
     protected peer?: PeerNode
     protected isFirstBuild: boolean = true
+    protected gestureEvent: UIGestureEvent | undefined = undefined
     setPeer(peer: PeerNode | undefined) {
         this.peer = peer
+    }
+    getPeer(): PeerNode | undefined {
+        return this.peer;
+    }
+    setGestureEvent(gestureEvent: UIGestureEvent) {
+        this.gestureEvent = gestureEvent
+    }
+    getGestureEvent(): UIGestureEvent | undefined {
+        return this.gestureEvent
     }
     protected checkPriority(name: string): boolean {
         return true
     }
     public applyAttributesFinish(): void {
+        this.isFirstBuild = false;
         ArkUINativeModule._ApplyModifierFinish(this.peer!.peer.ptr)
     }
     public applyAttributes(attrs: Object): void {

@@ -1172,7 +1172,7 @@ void NavigationPattern::UpdateNavPathList()
                 DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(uiNode));
             if (navDestination) {
                 navDestination->SetInCurrentStack(true);
-                auto eventHub = navDestination->GetOrCreateEventHub<EventHub>();
+                auto eventHub = navDestination->GetEventHub<EventHub>();
                 CHECK_NULL_VOID(eventHub);
                 eventHub->SetEnabledInternal(true);
                 navigationStack_->ResetIsForceSetFlag(arrayIndex);
@@ -1433,7 +1433,7 @@ void NavigationPattern::CheckTopNavPathChange(
             navBarOrHomeDestNode->SetJSViewActive(true);
         }
         ProcessPageShowEvent();
-        navBarOrHomeDestNode->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(true);
+        navBarOrHomeDestNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         if (GetIsFocusable(navBarOrHomeDestNode)) {
             auto navBarOrHomeDestFocusView = navBarOrHomeDestNode->GetPattern<FocusView>();
             CHECK_NULL_VOID(navBarOrHomeDestFocusView);
@@ -1597,7 +1597,7 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
                 !curDestination->IsActive() || navDestinationPattern->GetIsOnShow() == isOnShow) {
                 continue;
             }
-            auto eventHub = curDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+            auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
             CHECK_NULL_VOID(eventHub);
             auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ?
                 navigationPattern->navigationStack_->GetRouteParam() : "";
@@ -1622,7 +1622,7 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
             !curDestination->IsActive() || navDestinationPattern->GetIsOnShow() == isOnShow) {
             continue;
         }
-        auto eventHub = curDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+        auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
         navDestinationPattern->SetIsOnShow(false);
@@ -1950,7 +1950,7 @@ void NavigationPattern::OnVisibleChange(bool isVisible)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto eventHub = hostNode->GetOrCreateEventHub<NavigationEventHub>();
+    auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireNavBarStateChangeEvent(isVisible);
 }
@@ -1966,7 +1966,7 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
 
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto eventHub = hostNode->GetOrCreateEventHub<NavigationEventHub>();
+    auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto currentNavigationMode = GetNavigationMode();
 
@@ -2002,7 +2002,7 @@ void NavigationPattern::OnNavigationModeChange(bool modeChange)
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto eventHub = hostNode->GetOrCreateEventHub<NavigationEventHub>();
+    auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireNavigationModeChangeEvent(navigationMode_);
     // fire navigation stack navigation mode change event
@@ -2154,7 +2154,7 @@ void NavigationPattern::UpdateContextRect(
     if (!curDestination->IsOnAnimation()) {
         curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
         curDestination->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
-        navBarOrHomeDestNode->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(true);
+        navBarOrHomeDestNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         auto titleBarNode = DynamicCast<TitleBarNode>(navBarOrHomeDestNode->GetTitleBarNode());
         CHECK_NULL_VOID(titleBarNode);
         auto titleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
@@ -2172,7 +2172,7 @@ bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGro
     CHECK_NULL_RETURN(titleBarNode, false);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_RETURN(titleBarLayoutProperty, false);
-    auto eventHub = hostNode->GetOrCreateEventHub<NavigationEventHub>();
+    auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
         auto titleBarPattern = AceType::DynamicCast<TitleBarPattern>(titleBarNode->GetPattern());
@@ -2298,7 +2298,7 @@ bool NavigationPattern::GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& nod
         navDestinationPattern->SetNavigationNode(navigationNode);
         navDestinationPattern->SetNavigationId(navigationNode->GetInspectorId().value_or(""));
     }
-    auto eventHub = navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = navDestinationNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(eventHub, isCreate);
     eventHub->FireOnWillAppear();
     return isCreate;
@@ -2761,10 +2761,10 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
         CHECK_NULL_RETURN(hostNode, true);
         auto navBarOrHomeDestNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarOrHomeDestinationNode());
         CHECK_NULL_RETURN(navBarOrHomeDestNode, true);
-        eventHub = navBarOrHomeDestNode->GetOrCreateEventHub<EventHub>();
+        eventHub = navBarOrHomeDestNode->GetEventHub<EventHub>();
     }
     if (preTopNavDestination) {
-        eventHub = preTopNavDestination->GetOrCreateEventHub<EventHub>();
+        eventHub = preTopNavDestination->GetEventHub<EventHub>();
     }
     CHECK_NULL_RETURN(eventHub, true);
     eventHub->SetEnabledInternal(false);
@@ -2855,7 +2855,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
                 preTopNavDestination->SetIsOnAnimation(false);
             }
             // recover event hub
-            auto eventHub = node->GetOrCreateEventHub<EventHub>();
+            auto eventHub = node->GetEventHub<EventHub>();
             if (eventHub) {
                 eventHub->SetEnabledInternal(true);
             }
@@ -3605,7 +3605,7 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
     auto curDestination =
         AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(uiNode));
     CHECK_NULL_VOID(curDestination);
-    auto eventHub = curDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (lifecycle == NavDestinationLifecycle::ON_WILL_DISAPPEAR) {
         NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
@@ -3659,7 +3659,7 @@ void NavigationPattern::FireOnShowLifecycle(const RefPtr<NavDestinationGroupNode
         return;
     }
     auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? navigationStack_->GetRouteParam() : "";
-    auto eventHub = curDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto navDestinationPattern = curDestination->GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(navDestinationPattern);
@@ -3677,7 +3677,7 @@ void NavigationPattern::FireOnActiveLifecycle(const RefPtr<NavDestinationGroupNo
     if (navDestinationPattern->IsActive() || CheckParentDestinationInactive()) {
         return;
     }
-    auto eventHub = curDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     navDestinationPattern->SetIsActive(true);
     eventHub->FireOnActive(static_cast<int32_t>(reason));
@@ -3692,7 +3692,7 @@ void NavigationPattern::FireOnInactiveLifecycle(const RefPtr<NavDestinationGroup
     if (!navDestinationPattern->IsActive()) {
         return;
     }
-    auto eventHub = curDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     navDestinationPattern->SetIsActive(false);
     NavigationPattern::FireNavigationLifecycle(curDestination, NavDestinationLifecycle::ON_INACTIVE, reason);
@@ -4534,7 +4534,7 @@ void NavigationPattern::FireOnNewParam(const RefPtr<UINode>& uiNode)
     CHECK_NULL_VOID(navDestinationPattern);
     auto navPathInfo = navDestinationPattern->GetNavPathInfo();
     CHECK_NULL_VOID(navPathInfo);
-    auto eventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnNewParam(navPathInfo->GetParamObj());
 }

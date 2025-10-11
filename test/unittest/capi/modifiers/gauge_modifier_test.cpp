@@ -110,13 +110,14 @@ HWTEST_F(GaugeModifierTest, setGaugeOptionsTestDefaultValues, TestSize.Level1)
 
 // Valid values for attribute 'value' of method 'setGaugeOptions'
 static std::vector<std::tuple<std::string, Ark_Number, std::string>> setGaugeOptionsValueValidValues = {
-    {"20.15f", Converter::ArkValue<Ark_Number>(20.15f), "20.15"},
-    {"499.0f", Converter::ArkValue<Ark_Number>(499.0f), "499.00"},
-    {"-99.0f", Converter::ArkValue<Ark_Number>(-99.0f), "-99.00"},
-    {"-100.0f", Converter::ArkValue<Ark_Number>(-100.0f), "-100.00"},
-    {"500.0f", Converter::ArkValue<Ark_Number>(500.0f), "500.00"},
-    {"-999.0f", Converter::ArkValue<Ark_Number>(-999.0f), "-100.00"},
-    {"1000.0f", Converter::ArkValue<Ark_Number>(1000.0f), "-100.00"},
+    {"20.15f", Converter::ArkValue<Opt_Number>(20.15f), "20.15"},
+    {"499.0f", Converter::ArkValue<Opt_Number>(499.0f), "499.00"},
+    {"-99.0f", Converter::ArkValue<Opt_Number>(-99.0f), "-99.00"},
+    {"-100.0f", Converter::ArkValue<Opt_Number>(-100.0f), "-100.00"},
+    {"500.0f", Converter::ArkValue<Opt_Number>(500.0f), "500.00"},
+    {"-999.0f", Converter::ArkValue<Opt_Number>(-999.0f), "-100.00"},
+    {"1000.0f", Converter::ArkValue<Opt_Number>(1000.0f), "-100.00"},
+    {"undefined", Converter::ArkValue<Opt_Number>(), "0.00"},
 };
 
 // Valid values for attribute 'min' of method 'setGaugeOptions'
@@ -1095,7 +1096,7 @@ privacySensitivePrivacySensitiveIsPrivacySensitiveModeValidValues = {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, DISABLED_setPrivacySensitiveTestValidValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, setPrivacySensitiveTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

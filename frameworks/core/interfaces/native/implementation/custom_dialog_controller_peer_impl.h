@@ -31,6 +31,8 @@ public:
     void SetOwnerView(Ark_NativePointer node);
     void SetBuilder(CustomNodeBuilder builder, const RefPtr<CustomDialogControllerPeer>& peer);
     void SetOnCancel(Opt_Callback_Void cancel, const RefPtr<CustomDialogControllerPeer>& peer);
+    void SetBuilderExtender(CustomNodeBuilder builder, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
+    void SetOnCancelExtender(Opt_Callback_Void cancel, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
     void SetAutoCancel(Opt_Boolean autoCancel);
     void SetDialogAlignment(Opt_DialogAlignment alignment);
     void SetOffset(Opt_Offset offset);
@@ -62,6 +64,13 @@ public:
     void SetOnDidDisappear(Opt_Callback_Void onDidDisappear, const RefPtr<CustomDialogControllerPeer>& peer);
     void SetOnWillAppear(Opt_Callback_Void onWillAppear, const RefPtr<CustomDialogControllerPeer>& peer);
     void SetOnWillDisappear(Opt_Callback_Void onWillDisappear, const RefPtr<CustomDialogControllerPeer>& peer);
+    void SetOnDidAppearExtender(Opt_Callback_Void onDidAppear, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
+    void SetOnDidDisappearExtender(Opt_Callback_Void onDidDisappear,
+        const RefPtr<CustomDialogControllerExtenderPeer>& peer);
+    void SetOnWillAppearExtender(Opt_Callback_Void onWillAppear,
+        const RefPtr<CustomDialogControllerExtenderPeer>& peer);
+    void SetOnWillDisappearExtender(Opt_Callback_Void onWillDisappear,
+        const RefPtr<CustomDialogControllerExtenderPeer>& peer);
     void SetKeyboardAvoidDistance(Opt_LengthMetrics keyboardAvoidDistance);
     void SetLevelMode(Opt_Boolean showInSubWindow, Opt_LevelMode levelMode);
     void SetLevelUniqueId(Opt_Number levelUniqueId);
@@ -87,6 +96,8 @@ private:
     RefPtr<UINode> GetWindowScene() const;
     std::function<void()> TransformCallbackToFunctionVoid(
         Opt_Callback_Void callback, const RefPtr<CustomDialogControllerPeer>& peer);
+    std::function<void()> TransformCallbackToFunctionVoidExtender(
+        Opt_Callback_Void callback, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
 
     WeakPtr<FrameNode> ownerView_;
     DialogProperties dialogProperties_;
@@ -98,6 +109,10 @@ private:
 
 struct CustomDialogControllerPeer : public OHOS::Ace::NG::GeneratedModifier::CustomDialogControllerPeerImpl {
     ~CustomDialogControllerPeer() override = default;
+};
+
+struct CustomDialogControllerExtenderPeer : public OHOS::Ace::NG::GeneratedModifier::CustomDialogControllerPeerImpl {
+    ~CustomDialogControllerExtenderPeer() override = default;
 };
 
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CUSTOM_DIALOG_CONTROLLER_PEER_IMPL_H

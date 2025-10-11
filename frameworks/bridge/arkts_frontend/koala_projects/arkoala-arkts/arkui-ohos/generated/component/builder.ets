@@ -20,6 +20,6 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr } from "@koalaui/interop"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-export type CustomBuilder = @memo () => void;
-export type CustomBuilderT<T = void> = @memo (t: T) => void;
+export type CustomBuilder = @Builder () => void;
+export type CustomBuilderT<T = void> = @Builder (t: T) => void;
 export type PageMapBuilder = @Builder (name: string, param: Object | null | undefined) => void;

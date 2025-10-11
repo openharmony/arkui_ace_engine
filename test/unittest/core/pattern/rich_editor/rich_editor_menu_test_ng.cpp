@@ -720,7 +720,7 @@ HWTEST_F(RichEditorMenuTestNg, CloseSystemMenu002, TestSize.Level1)
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
 
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     bool enabledCache = eventHub->IsEnabled();
@@ -849,7 +849,7 @@ HWTEST_F(RichEditorMenuTestNg, HandleMenuCallbackOnSelectAll002, TestSize.Level1
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
 
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     bool enabledCache = eventHub->IsEnabled();

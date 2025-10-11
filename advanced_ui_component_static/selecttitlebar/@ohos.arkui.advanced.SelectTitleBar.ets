@@ -112,7 +112,7 @@ export struct SelectTitleBar {
         uiContext = hostContext?.resourceManager?.getStringByNameSync(contextName);
       }
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'Ace', `Faild to getStringByNameSync,cause, code: ${code}, message: ${message}`);
     }
@@ -254,7 +254,7 @@ export struct SelectTitleBar {
         resourceManager?.getIntPluralStringByNameSync('selecttitlebar_accessibility_message_desc_new',
           this.badgeValue as Int) as string;
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'Ace', `Faild to getIntPluralStringByNameSync,cause, code: ${code}, message: ${message}`);
     }
@@ -322,7 +322,7 @@ struct CollapsibleMenuSection {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
@@ -354,12 +354,12 @@ struct CollapsibleMenuSection {
     Column() {
       Row() {
         if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-          ForEach(this.menuItems, (item: SelectTitleBarMenuItem, index: number) => {
+          ForEach(this.menuItems, (item: SelectTitleBarMenuItem, index: int) => {
             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
         } else {
-          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
-            (item: SelectTitleBarMenuItem, index: number) => {
+          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems.toInt() - 1),
+            (item: SelectTitleBarMenuItem, index: int) => {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
             })
 
@@ -403,7 +403,7 @@ struct CollapsibleMenuSection {
           })
           .onKeyEvent((event: KeyEvent) => {
             if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-              return
+              return false
             }
             if (event.type === KeyType.Down) {
               this.isMoreIconOnClick = true
@@ -457,8 +457,8 @@ struct CollapsibleMenuSection {
   @Builder
   popupBuilder() {
     Column() {
-      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length),
-        (item: SelectTitleBarMenuItem, index: number) => {
+      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems.toInt() - 1, this.menuItems.length),
+        (item: SelectTitleBarMenuItem, index: int) => {
           ImageMenuItem({
             item: item, index: this.index * 1000 +
             CollapsibleMenuSection.maxCountOfVisibleItems + index, isPopup: false
@@ -541,7 +541,7 @@ struct ImageMenuItem {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
@@ -568,7 +568,7 @@ struct ImageMenuItem {
         resourceString = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
         getStringSync((resource as Resource).id) as string;
       } catch (err) {
-        let code: undefined | number = (err as ClassCastError)?.code;
+        let code: undefined | int = (err as ClassCastError)?.code;
         let message: undefined | string = (err as ClassCastError)?.message;
         hilog.error(ERROR_CODE, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -582,7 +582,7 @@ struct ImageMenuItem {
       try {
         return context?.resourceManager?.getStringByNameSync('icon_back');
       } catch (err) {
-        let code: undefined | number = (err as ClassCastError)?.code;
+        let code: undefined | int = (err as ClassCastError)?.code;
         let message: undefined | string = (err as ClassCastError)?.message;
         hilog.error(ERROR_CODE, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -590,7 +590,7 @@ struct ImageMenuItem {
       try {
         return context?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
       } catch (err) {
-        let code: undefined | number = (err as ClassCastError)?.code;
+        let code: undefined | int = (err as ClassCastError)?.code;
         let message: undefined | string = (err as ClassCastError)?.message;
         hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -686,10 +686,10 @@ struct ImageMenuItem {
       })
       .onKeyEvent((event: KeyEvent) => {
         if (!this.item.isEnabled) {
-          return
+          return false
         }
         if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-          return
+          return false
         }
         if (event.type === KeyType.Down) {
           this.isOnClick = true
@@ -788,10 +788,10 @@ struct ImageMenuItem {
       })
       .onKeyEvent((event: KeyEvent) => {
         if (!this.item.isEnabled) {
-          return
+          return false
         }
         if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-          return
+          return false
         }
         if (event.type === KeyType.Down) {
           this.isOnClick = true
@@ -831,11 +831,11 @@ export struct SelectTitleBarDialog {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
   screenWidth: number = 640;
-  verticalScreenLines: number = 6;
-  horizontalsScreenLines: number = 1;
+  verticalScreenLines: int = 6;
+  horizontalsScreenLines: int = 1;
   @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
   @State fontSize: number = 1;
-  @State maxLines: number = 1;
+  @State maxLines: int = 1;
   @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
   cancel: () => void = () => {
   }
@@ -946,7 +946,7 @@ export struct SelectTitleBarDialog {
         this.maxLines = this.horizontalsScreenLines;
       }
     } catch (err) {
-      let code: undefined | number = (err as ClassCastError)?.code;
+      let code: undefined | int = (err as ClassCastError)?.code;
       let message: undefined | string = (err as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar getMainWindowSync,code: ${code},message:${message}`);
     }

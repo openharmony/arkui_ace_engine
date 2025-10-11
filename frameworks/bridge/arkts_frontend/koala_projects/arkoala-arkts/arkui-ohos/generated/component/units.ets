@@ -29,7 +29,6 @@ import { Color, BorderStyle, FontWeight, FontStyle, DividerMode } from "./enums"
 import { OutlineStyle } from "./common"
 import { LengthMetrics_serializer } from "./../Graphics"
 import { Resource_serializer } from "./../framework/resource"
-import { ArkUIAniModule } from "arkui.ani"
 export class ColorFilterInternal {
     public static fromPtr(ptr: KPointer): ColorFilter {
         return new ColorFilter(false, ptr)
@@ -43,15 +42,15 @@ export class ColorFilter implements MaterializedBase {
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ColorFilter.getFinalizer())
     }
-    constructor(value: Array<number>) {
+    constructor(value: Array<double>) {
         this(false, ColorFilter.construct(value))
     }
-    static construct(value: Array<number>): KPointer {
+    static construct(value: Array<double>): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((value.length).toInt())
         for (let valueCounterI = 0; valueCounterI < value.length; valueCounterI++) {
-            const valueTmpElement : number = value[valueCounterI]
-            thisSerializer.writeNumber(valueTmpElement)
+            const valueTmpElement : double = value[valueCounterI]
+            thisSerializer.writeFloat64(valueTmpElement)
         }
         const retval  = ArkUIGeneratedNativeModule._ColorFilter_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -60,58 +59,11 @@ export class ColorFilter implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ColorFilter_getFinalizer()
     }
-    static transferStatic(input: Any): Any {
-        if (typeof (input) !== 'object' || input === null) {
-            return undefined;
-        }
-        let esValue: ESValue = input as ESValue;
-        const global = ESValue.getGlobal();
-        const getColorFilterPointerFunc = global.getProperty('GetColorFilterPointer');
-        if (getColorFilterPointerFunc.isNull() || getColorFilterPointerFunc.isUndefined()) {
-            return undefined;
-        }
-        const pointer = getColorFilterPointerFunc.invoke(esValue);
-        if (!pointer.isNumber()) {
-            return undefined;
-        }
-        let pointerVal = pointer.toNumber() as long;
-        let ctorPtr = ArkUIAniModule._Image_ColorFilter_TransferStatic(pointerVal);
-        if (ctorPtr === 0) {
-            return undefined;
-        }
-        let colorFilter = new ColorFilter(false, ctorPtr);
-        return colorFilter;
-    }
-    static transferDynamic(input: Object): Any {
-        if (input === null) {
-            return undefined;
-        }
-        if (!(input instanceof ColorFilter)) {
-            return undefined;
-        }
-        let colorFilter = input as ColorFilter;
-        let colorFilterObj = ESValue.instantiateEmptyObject();
-        const global = ESValue.getGlobal();
-        const wrapFunc = global.getProperty('WrapColorFilterPointer');
-        if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
-            return undefined;
-        }
-        let peerPtr = colorFilter?.peer?.ptr;
-        if (peerPtr === undefined) {
-            return undefined;
-        }
-        let pointer = ArkUIAniModule._Image_ColorFilter_TransferDynamic(peerPtr);
-        if (pointer === 0) {
-            return undefined;
-        }
-        wrapFunc.invoke(colorFilterObj, ESObject.wrap(pointer));
-        return colorFilterObj;
-    }
 }
 export { Resource } from "global.resource"
-export type Length = string | number | Resource;
+export type Length = string | double | Resource;
 export type PX = string;
-export type VP = string | number;
+export type VP = string | double;
 export type FP = string;
 export type LPX = string;
 export type Percentage = string;
@@ -197,7 +149,7 @@ export interface Offset {
     dx: Length;
     dy: Length;
 }
-export type ResourceColor = Color | number | string | Resource;
+export type ResourceColor = Color | int32 | string | Resource;
 export interface LengthConstrain {
     minLength: Length;
     maxLength: Length;
@@ -208,7 +160,7 @@ export { LengthMetrics } from "arkui.Graphics"
 export { ColorMetrics } from "arkui.Graphics"
 export interface Font {
     size?: Length;
-    weight?: FontWeight | number | string;
+    weight?: FontWeight | int32 | string;
     family?: string | Resource;
     style?: FontStyle;
 }
@@ -239,8 +191,8 @@ export interface LocalizedEdges {
     end?: LengthMetrics;
 }
 export interface Bias {
-    horizontal?: number;
-    vertical?: number;
+    horizontal?: double;
+    vertical?: double;
 }
 export interface ConstraintSizeOptions {
     minWidth?: Length;
@@ -294,8 +246,8 @@ export interface ScrollBarMargin {
     end?: LengthMetrics;
 }
 export interface ChainWeightOptions {
-    horizontal?: number;
-    vertical?: number;
+    horizontal?: double;
+    vertical?: double;
 }
 export interface AccessibilityOptions {
     accessibilityPreferred?: boolean;
@@ -380,7 +332,7 @@ export class ChainWeightOptions_serializer {
         if (valueHolderForHorizontal !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHorizontalTmpValue  = valueHolderForHorizontal!
-            valueSerializer.writeNumber(valueHolderForHorizontalTmpValue)
+            valueSerializer.writeFloat64(valueHolderForHorizontalTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -388,7 +340,7 @@ export class ChainWeightOptions_serializer {
         if (valueHolderForVertical !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForVerticalTmpValue  = valueHolderForVertical!
-            valueSerializer.writeNumber(valueHolderForVerticalTmpValue)
+            valueSerializer.writeFloat64(valueHolderForVerticalTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -396,17 +348,17 @@ export class ChainWeightOptions_serializer {
     public static read(buffer: DeserializerBase): ChainWeightOptions {
         let valueDeserializer : DeserializerBase = buffer
         const horizontalTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let horizontalTmpBuf : number | undefined = undefined
+        let horizontalTmpBuf : double | undefined = undefined
         if ((horizontalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            horizontalTmpBuf = (valueDeserializer.readNumber() as number)
+            horizontalTmpBuf = valueDeserializer.readFloat64()
         }
-        const horizontalTmpResult : number | undefined = horizontalTmpBuf
+        const horizontalTmpResult : double | undefined = horizontalTmpBuf
         const verticalTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let verticalTmpBuf : number | undefined = undefined
+        let verticalTmpBuf : double | undefined = undefined
         if ((verticalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            verticalTmpBuf = (valueDeserializer.readNumber() as number)
+            verticalTmpBuf = valueDeserializer.readFloat64()
         }
-        const verticalTmpResult : number | undefined = verticalTmpBuf
+        const verticalTmpResult : double | undefined = verticalTmpBuf
         let value : ChainWeightOptions = ({horizontal: horizontalTmpResult, vertical: verticalTmpResult} as ChainWeightOptions)
         return value
     }
@@ -583,7 +535,7 @@ export class DividerStyleOptions_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -637,11 +589,11 @@ export class DividerStyleOptions_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -649,7 +601,7 @@ export class DividerStyleOptions_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const startMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -684,7 +636,7 @@ export class EdgeColors_serializer {
             if (valueHolderForTopTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForTopTmpValueForIdx0  = valueHolderForTopTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForTopTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForTopTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForTopTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForTopTmpValueForIdx1  = valueHolderForTopTmpValue as number
@@ -708,7 +660,7 @@ export class EdgeColors_serializer {
             if (valueHolderForRightTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForRightTmpValueForIdx0  = valueHolderForRightTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForRightTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForRightTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForRightTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForRightTmpValueForIdx1  = valueHolderForRightTmpValue as number
@@ -732,7 +684,7 @@ export class EdgeColors_serializer {
             if (valueHolderForBottomTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBottomTmpValueForIdx0  = valueHolderForBottomTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBottomTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBottomTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBottomTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBottomTmpValueForIdx1  = valueHolderForBottomTmpValue as number
@@ -756,7 +708,7 @@ export class EdgeColors_serializer {
             if (valueHolderForLeftTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForLeftTmpValueForIdx0  = valueHolderForLeftTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForLeftTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForLeftTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForLeftTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForLeftTmpValueForIdx1  = valueHolderForLeftTmpValue as number
@@ -780,11 +732,11 @@ export class EdgeColors_serializer {
         let topTmpBuf : ResourceColor | undefined = undefined
         if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const topTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let topTmpBuf_ : Color | number | string | Resource | undefined
+            let topTmpBuf_ : Color | int32 | string | Resource | undefined
             if (topTmpBuf_UnionSelector == (0).toChar()) {
-                topTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                topTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (topTmpBuf_UnionSelector == (1).toChar()) {
-                topTmpBuf_ = (valueDeserializer.readNumber() as number)
+                topTmpBuf_ = (valueDeserializer.readInt32())
             } else if (topTmpBuf_UnionSelector == (2).toChar()) {
                 topTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (topTmpBuf_UnionSelector == (3).toChar()) {
@@ -792,18 +744,18 @@ export class EdgeColors_serializer {
             } else {
                 throw new Error("One of the branches for topTmpBuf_ has to be chosen through deserialisation.")
             }
-            topTmpBuf = (topTmpBuf_ as Color | number | string | Resource)
+            topTmpBuf = (topTmpBuf_ as Color | int32 | string | Resource)
         }
         const topTmpResult : ResourceColor | undefined = topTmpBuf
         const rightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let rightTmpBuf : ResourceColor | undefined = undefined
         if ((rightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const rightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let rightTmpBuf_ : Color | number | string | Resource | undefined
+            let rightTmpBuf_ : Color | int32 | string | Resource | undefined
             if (rightTmpBuf_UnionSelector == (0).toChar()) {
-                rightTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                rightTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (rightTmpBuf_UnionSelector == (1).toChar()) {
-                rightTmpBuf_ = (valueDeserializer.readNumber() as number)
+                rightTmpBuf_ = (valueDeserializer.readInt32())
             } else if (rightTmpBuf_UnionSelector == (2).toChar()) {
                 rightTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (rightTmpBuf_UnionSelector == (3).toChar()) {
@@ -811,18 +763,18 @@ export class EdgeColors_serializer {
             } else {
                 throw new Error("One of the branches for rightTmpBuf_ has to be chosen through deserialisation.")
             }
-            rightTmpBuf = (rightTmpBuf_ as Color | number | string | Resource)
+            rightTmpBuf = (rightTmpBuf_ as Color | int32 | string | Resource)
         }
         const rightTmpResult : ResourceColor | undefined = rightTmpBuf
         const bottomTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottomTmpBuf : ResourceColor | undefined = undefined
         if ((bottomTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const bottomTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let bottomTmpBuf_ : Color | number | string | Resource | undefined
+            let bottomTmpBuf_ : Color | int32 | string | Resource | undefined
             if (bottomTmpBuf_UnionSelector == (0).toChar()) {
-                bottomTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                bottomTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (bottomTmpBuf_UnionSelector == (1).toChar()) {
-                bottomTmpBuf_ = (valueDeserializer.readNumber() as number)
+                bottomTmpBuf_ = (valueDeserializer.readInt32())
             } else if (bottomTmpBuf_UnionSelector == (2).toChar()) {
                 bottomTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (bottomTmpBuf_UnionSelector == (3).toChar()) {
@@ -830,18 +782,18 @@ export class EdgeColors_serializer {
             } else {
                 throw new Error("One of the branches for bottomTmpBuf_ has to be chosen through deserialisation.")
             }
-            bottomTmpBuf = (bottomTmpBuf_ as Color | number | string | Resource)
+            bottomTmpBuf = (bottomTmpBuf_ as Color | int32 | string | Resource)
         }
         const bottomTmpResult : ResourceColor | undefined = bottomTmpBuf
         const leftTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let leftTmpBuf : ResourceColor | undefined = undefined
         if ((leftTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const leftTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let leftTmpBuf_ : Color | number | string | Resource | undefined
+            let leftTmpBuf_ : Color | int32 | string | Resource | undefined
             if (leftTmpBuf_UnionSelector == (0).toChar()) {
-                leftTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                leftTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (leftTmpBuf_UnionSelector == (1).toChar()) {
-                leftTmpBuf_ = (valueDeserializer.readNumber() as number)
+                leftTmpBuf_ = (valueDeserializer.readInt32())
             } else if (leftTmpBuf_UnionSelector == (2).toChar()) {
                 leftTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (leftTmpBuf_UnionSelector == (3).toChar()) {
@@ -849,7 +801,7 @@ export class EdgeColors_serializer {
             } else {
                 throw new Error("One of the branches for leftTmpBuf_ has to be chosen through deserialisation.")
             }
-            leftTmpBuf = (leftTmpBuf_ as Color | number | string | Resource)
+            leftTmpBuf = (leftTmpBuf_ as Color | int32 | string | Resource)
         }
         const leftTmpResult : ResourceColor | undefined = leftTmpBuf
         let value : EdgeColors = ({top: topTmpResult, right: rightTmpResult, bottom: bottomTmpResult, left: leftTmpResult} as EdgeColors)
@@ -994,7 +946,7 @@ export class LocalizedEdgeColors_serializer {
             if (valueHolderForTopTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForTopTmpValueForIdx0  = valueHolderForTopTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForTopTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForTopTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForTopTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForTopTmpValueForIdx1  = valueHolderForTopTmpValue as number
@@ -1018,7 +970,7 @@ export class LocalizedEdgeColors_serializer {
             if (valueHolderForEndTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForEndTmpValueForIdx0  = valueHolderForEndTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForEndTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForEndTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForEndTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForEndTmpValueForIdx1  = valueHolderForEndTmpValue as number
@@ -1042,7 +994,7 @@ export class LocalizedEdgeColors_serializer {
             if (valueHolderForBottomTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBottomTmpValueForIdx0  = valueHolderForBottomTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBottomTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBottomTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBottomTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBottomTmpValueForIdx1  = valueHolderForBottomTmpValue as number
@@ -1066,7 +1018,7 @@ export class LocalizedEdgeColors_serializer {
             if (valueHolderForStartTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForStartTmpValueForIdx0  = valueHolderForStartTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForStartTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForStartTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForStartTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForStartTmpValueForIdx1  = valueHolderForStartTmpValue as number
@@ -1090,11 +1042,11 @@ export class LocalizedEdgeColors_serializer {
         let topTmpBuf : ResourceColor | undefined = undefined
         if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const topTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let topTmpBuf_ : Color | number | string | Resource | undefined
+            let topTmpBuf_ : Color | int32 | string | Resource | undefined
             if (topTmpBuf_UnionSelector == (0).toChar()) {
-                topTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                topTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (topTmpBuf_UnionSelector == (1).toChar()) {
-                topTmpBuf_ = (valueDeserializer.readNumber() as number)
+                topTmpBuf_ = (valueDeserializer.readInt32())
             } else if (topTmpBuf_UnionSelector == (2).toChar()) {
                 topTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (topTmpBuf_UnionSelector == (3).toChar()) {
@@ -1102,18 +1054,18 @@ export class LocalizedEdgeColors_serializer {
             } else {
                 throw new Error("One of the branches for topTmpBuf_ has to be chosen through deserialisation.")
             }
-            topTmpBuf = (topTmpBuf_ as Color | number | string | Resource)
+            topTmpBuf = (topTmpBuf_ as Color | int32 | string | Resource)
         }
         const topTmpResult : ResourceColor | undefined = topTmpBuf
         const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let endTmpBuf : ResourceColor | undefined = undefined
         if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const endTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let endTmpBuf_ : Color | number | string | Resource | undefined
+            let endTmpBuf_ : Color | int32 | string | Resource | undefined
             if (endTmpBuf_UnionSelector == (0).toChar()) {
-                endTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                endTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (endTmpBuf_UnionSelector == (1).toChar()) {
-                endTmpBuf_ = (valueDeserializer.readNumber() as number)
+                endTmpBuf_ = (valueDeserializer.readInt32())
             } else if (endTmpBuf_UnionSelector == (2).toChar()) {
                 endTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (endTmpBuf_UnionSelector == (3).toChar()) {
@@ -1121,18 +1073,18 @@ export class LocalizedEdgeColors_serializer {
             } else {
                 throw new Error("One of the branches for endTmpBuf_ has to be chosen through deserialisation.")
             }
-            endTmpBuf = (endTmpBuf_ as Color | number | string | Resource)
+            endTmpBuf = (endTmpBuf_ as Color | int32 | string | Resource)
         }
         const endTmpResult : ResourceColor | undefined = endTmpBuf
         const bottomTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottomTmpBuf : ResourceColor | undefined = undefined
         if ((bottomTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const bottomTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let bottomTmpBuf_ : Color | number | string | Resource | undefined
+            let bottomTmpBuf_ : Color | int32 | string | Resource | undefined
             if (bottomTmpBuf_UnionSelector == (0).toChar()) {
-                bottomTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                bottomTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (bottomTmpBuf_UnionSelector == (1).toChar()) {
-                bottomTmpBuf_ = (valueDeserializer.readNumber() as number)
+                bottomTmpBuf_ = (valueDeserializer.readInt32())
             } else if (bottomTmpBuf_UnionSelector == (2).toChar()) {
                 bottomTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (bottomTmpBuf_UnionSelector == (3).toChar()) {
@@ -1140,18 +1092,18 @@ export class LocalizedEdgeColors_serializer {
             } else {
                 throw new Error("One of the branches for bottomTmpBuf_ has to be chosen through deserialisation.")
             }
-            bottomTmpBuf = (bottomTmpBuf_ as Color | number | string | Resource)
+            bottomTmpBuf = (bottomTmpBuf_ as Color | int32 | string | Resource)
         }
         const bottomTmpResult : ResourceColor | undefined = bottomTmpBuf
         const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let startTmpBuf : ResourceColor | undefined = undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const startTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let startTmpBuf_ : Color | number | string | Resource | undefined
+            let startTmpBuf_ : Color | int32 | string | Resource | undefined
             if (startTmpBuf_UnionSelector == (0).toChar()) {
-                startTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                startTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (startTmpBuf_UnionSelector == (1).toChar()) {
-                startTmpBuf_ = (valueDeserializer.readNumber() as number)
+                startTmpBuf_ = (valueDeserializer.readInt32())
             } else if (startTmpBuf_UnionSelector == (2).toChar()) {
                 startTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (startTmpBuf_UnionSelector == (3).toChar()) {
@@ -1159,7 +1111,7 @@ export class LocalizedEdgeColors_serializer {
             } else {
                 throw new Error("One of the branches for startTmpBuf_ has to be chosen through deserialisation.")
             }
-            startTmpBuf = (startTmpBuf_ as Color | number | string | Resource)
+            startTmpBuf = (startTmpBuf_ as Color | int32 | string | Resource)
         }
         const startTmpResult : ResourceColor | undefined = startTmpBuf
         let value : LocalizedEdgeColors = ({top: topTmpResult, end: endTmpResult, bottom: bottomTmpResult, start: startTmpResult} as LocalizedEdgeColors)
@@ -2285,10 +2237,10 @@ export class Font_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForWeightTmpValueForIdx0  = valueHolderForWeightTmpValue as FontWeight
                 valueSerializer.writeInt32(valueHolderForWeightTmpValueForIdx0.valueOf())
-            } else if (valueHolderForWeightTmpValue instanceof number) {
+            } else if (valueHolderForWeightTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForWeightTmpValueForIdx1  = valueHolderForWeightTmpValue as number
-                valueSerializer.writeNumber(valueHolderForWeightTmpValueForIdx1)
+                const valueHolderForWeightTmpValueForIdx1  = valueHolderForWeightTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForWeightTmpValueForIdx1)
             } else if (valueHolderForWeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForWeightTmpValueForIdx2  = valueHolderForWeightTmpValue as string
@@ -2342,22 +2294,22 @@ export class Font_serializer {
         }
         const sizeTmpResult : Length | undefined = sizeTmpBuf
         const weightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let weightTmpBuf : FontWeight | number | string | undefined = undefined
+        let weightTmpBuf : FontWeight | int32 | string | undefined = undefined
         if ((weightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const weightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let weightTmpBuf_ : FontWeight | number | string | undefined
+            let weightTmpBuf_ : FontWeight | int32 | string | undefined
             if (weightTmpBuf_UnionSelector == (0).toChar()) {
                 weightTmpBuf_ = FontWeight.fromValue(valueDeserializer.readInt32())
             } else if (weightTmpBuf_UnionSelector == (1).toChar()) {
-                weightTmpBuf_ = (valueDeserializer.readNumber() as number)
+                weightTmpBuf_ = valueDeserializer.readInt32()
             } else if (weightTmpBuf_UnionSelector == (2).toChar()) {
                 weightTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for weightTmpBuf_ has to be chosen through deserialisation.")
             }
-            weightTmpBuf = (weightTmpBuf_ as FontWeight | number | string)
+            weightTmpBuf = (weightTmpBuf_ as FontWeight | int32 | string)
         }
-        const weightTmpResult : FontWeight | number | string | undefined = weightTmpBuf
+        const weightTmpResult : FontWeight | int32 | string | undefined = weightTmpBuf
         const familyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let familyTmpBuf : string | Resource | undefined = undefined
         if ((familyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -2393,7 +2345,7 @@ export class MarkStyle_serializer {
             if (valueHolderForStrokeColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForStrokeColorTmpValueForIdx0  = valueHolderForStrokeColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForStrokeColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForStrokeColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForStrokeColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForStrokeColorTmpValueForIdx1  = valueHolderForStrokeColorTmpValue as number
@@ -2457,11 +2409,11 @@ export class MarkStyle_serializer {
         let strokeColorTmpBuf : ResourceColor | undefined = undefined
         if ((strokeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const strokeColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let strokeColorTmpBuf_ : Color | number | string | Resource | undefined
+            let strokeColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (strokeColorTmpBuf_UnionSelector == (0).toChar()) {
-                strokeColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                strokeColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (strokeColorTmpBuf_UnionSelector == (1).toChar()) {
-                strokeColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                strokeColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (strokeColorTmpBuf_UnionSelector == (2).toChar()) {
                 strokeColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (strokeColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -2469,7 +2421,7 @@ export class MarkStyle_serializer {
             } else {
                 throw new Error("One of the branches for strokeColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            strokeColorTmpBuf = (strokeColorTmpBuf_ as Color | number | string | Resource)
+            strokeColorTmpBuf = (strokeColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const strokeColorTmpResult : ResourceColor | undefined = strokeColorTmpBuf
         const sizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -3111,7 +3063,7 @@ export class BorderOptions_serializer {
                 if (valueHolderForColorTmpValueForIdx1 instanceof Color) {
                     valueSerializer.writeInt8((0).toChar())
                     const valueHolderForColorTmpValueForIdx1ForIdx0  = valueHolderForColorTmpValueForIdx1 as Color
-                    valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1ForIdx0.valueOf())
+                    valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1ForIdx0.getOrdinal())
                 } else if (valueHolderForColorTmpValueForIdx1 instanceof number) {
                     valueSerializer.writeInt8((1).toChar())
                     const valueHolderForColorTmpValueForIdx1ForIdx1  = valueHolderForColorTmpValueForIdx1 as number
@@ -3269,11 +3221,11 @@ export class BorderOptions_serializer {
                 colorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 const colorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let colorTmpBuf_BufU : Color | number | string | Resource | undefined
+                let colorTmpBuf_BufU : Color | int32 | string | Resource | undefined
                 if (colorTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    colorTmpBuf_BufU = Color.fromValue(valueDeserializer.readInt32())
+                    colorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (colorTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    colorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    colorTmpBuf_BufU = (valueDeserializer.readInt32())
                 } else if (colorTmpBuf_BufUUnionSelector == (2).toChar()) {
                     colorTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (colorTmpBuf_BufUUnionSelector == (3).toChar()) {
@@ -3281,7 +3233,7 @@ export class BorderOptions_serializer {
                 } else {
                     throw new Error("One of the branches for colorTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                colorTmpBuf_ = (colorTmpBuf_BufU as Color | number | string | Resource)
+                colorTmpBuf_ = (colorTmpBuf_BufU as Color | int32 | string | Resource)
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = LocalizedEdgeColors_serializer.read(valueDeserializer)
             } else {
@@ -3422,7 +3374,7 @@ export class OutlineOptions_serializer {
                 if (valueHolderForColorTmpValueForIdx1 instanceof Color) {
                     valueSerializer.writeInt8((0).toChar())
                     const valueHolderForColorTmpValueForIdx1ForIdx0  = valueHolderForColorTmpValueForIdx1 as Color
-                    valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1ForIdx0.valueOf())
+                    valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1ForIdx0.getOrdinal())
                 } else if (valueHolderForColorTmpValueForIdx1 instanceof number) {
                     valueSerializer.writeInt8((1).toChar())
                     const valueHolderForColorTmpValueForIdx1ForIdx1  = valueHolderForColorTmpValueForIdx1 as number
@@ -3526,11 +3478,11 @@ export class OutlineOptions_serializer {
                 colorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 const colorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let colorTmpBuf_BufU : Color | number | string | Resource | undefined
+                let colorTmpBuf_BufU : Color | int32 | string | Resource | undefined
                 if (colorTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    colorTmpBuf_BufU = Color.fromValue(valueDeserializer.readInt32())
+                    colorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (colorTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    colorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    colorTmpBuf_BufU = (valueDeserializer.readInt32())
                 } else if (colorTmpBuf_BufUUnionSelector == (2).toChar()) {
                     colorTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (colorTmpBuf_BufUUnionSelector == (3).toChar()) {
@@ -3538,7 +3490,7 @@ export class OutlineOptions_serializer {
                 } else {
                     throw new Error("One of the branches for colorTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                colorTmpBuf_ = (colorTmpBuf_BufU as Color | number | string | Resource)
+                colorTmpBuf_ = (colorTmpBuf_BufU as Color | int32 | string | Resource)
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = LocalizedEdgeColors_serializer.read(valueDeserializer)
             } else {

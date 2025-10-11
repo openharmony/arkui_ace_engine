@@ -61,9 +61,9 @@ void AssignCast(std::optional<TextFontWeight>& dst, const Ark_FontWeight& src)
 }
 
 template<>
-void AssignCast(std::optional<TextFontWeight>& dst, const Ark_Number& src)
+void AssignCast(std::optional<TextFontWeight>& dst, const Ark_Int32& src)
 {
-    auto intVal = src.i32;
+    auto intVal = static_cast<int32_t>(src);
     if (intVal >= 0) {
         auto strVal = std::to_string(intVal);
         std::optional<Ace::FontWeight> fontWeight;
@@ -140,7 +140,7 @@ void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
 } // SymbolGlyphInterfaceModifier
 namespace SymbolGlyphAttributeModifier {
 void SetFontSizeImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_String_Resource* value)
+                     const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -168,7 +168,7 @@ void SetFontColorImpl(Ark_NativePointer node,
     SymbolModelNG::SetFontColor(frameNode, fontColors);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -195,26 +195,6 @@ void SetRenderingStrategyImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<Converter::RenderingStrategy>(value);
     SymbolModelStatic::SetRenderingStrategy(frameNode, EnumToInt(convValue));
 }
-void SetMinFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<float>(value);
-    Validator::ValidatePositive(convValue);
-    Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
-    SymbolModelStatic::SetMinFontScale(frameNode, convValue);
-}
-void SetMaxFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<float>(value);
-    Validator::ValidatePositive(convValue);
-    Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
-    SymbolModelStatic::SetMaxFontScale(frameNode, convValue);
-}
 bool ParseSymbolEffectOptions(NG::SymbolEffectOptions& options, Ark_SymbolEffect symbolEffect)
 {
     options.SetEffectType(symbolEffect->type);
@@ -229,9 +209,37 @@ bool ParseSymbolEffectOptions(NG::SymbolEffectOptions& options, Ark_SymbolEffect
     }
     return true;
 }
-void SetSymbolEffectImpl(Ark_NativePointer node,
-                         const Opt_SymbolEffect* symbolEffect,
-                         const Opt_Union_Boolean_Number* triggerValue)
+void SetSymbolEffect0Impl(Ark_NativePointer node,
+                          const Opt_SymbolEffect* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optSymbolEffect = Converter::GetOptPtr(value);
+    NG::SymbolEffectOptions symbolEffectOptions;
+    if (optSymbolEffect.has_value()) {
+        ParseSymbolEffectOptions(symbolEffectOptions, optSymbolEffect.value());
+    }
+    SymbolModelNG::SetSymbolEffectOptions(frameNode, symbolEffectOptions);
+}
+void SetMinFontScaleImpl(Ark_NativePointer node,
+                         const Opt_Union_F64_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<float>(value);
+    SymbolModelStatic::SetMinFontScale(frameNode, convValue);
+}
+void SetMaxFontScaleImpl(Ark_NativePointer node,
+                         const Opt_Union_F64_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<float>(value);
+    SymbolModelStatic::SetMaxFontScale(frameNode, convValue);
+}
+void SetSymbolEffect1Impl(Ark_NativePointer node,
+                          const Opt_SymbolEffect* symbolEffect,
+                          const Opt_Boolean* isActive)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -240,16 +248,27 @@ void SetSymbolEffectImpl(Ark_NativePointer node,
     if (optSymbolEffect.has_value()) {
         ParseSymbolEffectOptions(symbolEffectOptions, optSymbolEffect.value());
     }
-    Converter::VisitUnionPtr(triggerValue,
-        [&symbolEffectOptions](const Ark_Boolean& src) {
-            symbolEffectOptions.SetIsActive(Converter::Convert<bool>(src));
-        },
-        [&symbolEffectOptions](const Ark_Number& src) {
-            symbolEffectOptions.SetTriggerNum(Converter::Convert<int32_t>(src));
-        },
-        [&symbolEffectOptions]() {
-            symbolEffectOptions.SetIsActive(false);
-        });
+    auto optBool = Converter::OptConvertPtr<bool>(isActive);
+    if (optBool.has_value()) {
+        symbolEffectOptions.SetIsActive(optBool.value());
+    }
+    SymbolModelNG::SetSymbolEffectOptions(frameNode, symbolEffectOptions);
+}
+void SetSymbolEffect2Impl(Ark_NativePointer node,
+                          const Opt_SymbolEffect* symbolEffect,
+                          const Opt_Int32* triggerValue)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optSymbolEffect = Converter::GetOptPtr(symbolEffect);
+    NG::SymbolEffectOptions symbolEffectOptions;
+    if (optSymbolEffect.has_value()) {
+        ParseSymbolEffectOptions(symbolEffectOptions, optSymbolEffect.value());
+    }
+    auto optTriggerNumb = Converter::OptConvertPtr<int32_t>(triggerValue);
+    if (optTriggerNumb.has_value()) {
+        symbolEffectOptions.SetTriggerNum(optTriggerNumb.value());
+    }
     SymbolModelNG::SetSymbolEffectOptions(frameNode, symbolEffectOptions);
 }
 } // SymbolGlyphAttributeModifier
@@ -263,9 +282,11 @@ const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
         SymbolGlyphAttributeModifier::SetFontWeightImpl,
         SymbolGlyphAttributeModifier::SetEffectStrategyImpl,
         SymbolGlyphAttributeModifier::SetRenderingStrategyImpl,
+        SymbolGlyphAttributeModifier::SetSymbolEffect0Impl,
         SymbolGlyphAttributeModifier::SetMinFontScaleImpl,
         SymbolGlyphAttributeModifier::SetMaxFontScaleImpl,
-        SymbolGlyphAttributeModifier::SetSymbolEffectImpl,
+        SymbolGlyphAttributeModifier::SetSymbolEffect1Impl,
+        SymbolGlyphAttributeModifier::SetSymbolEffect2Impl,
     };
     return &ArkUISymbolGlyphModifierImpl;
 }

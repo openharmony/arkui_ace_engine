@@ -146,31 +146,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setSideBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinSideBarWidth0Attribute(value: number | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMinSideBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setMaxSideBarWidth0Attribute(value: number | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMaxSideBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setMinSideBarWidth1Attribute(value: Length | undefined): void {
+    setMinSideBarWidthAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -191,10 +167,10 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMinSideBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMinSideBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxSideBarWidth1Attribute(value: Length | undefined): void {
+    setMaxSideBarWidthAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -215,7 +191,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMaxSideBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMaxSideBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAutoHideAttribute(value: boolean | undefined): void {
@@ -298,10 +274,10 @@ export interface ButtonIconOptions {
     switching?: string | image.PixelMap | Resource;
 }
 export interface ButtonStyle {
-    left?: number;
-    top?: number;
-    width?: number;
-    height?: number;
+    left?: double;
+    top?: double;
+    width?: double;
+    height?: double;
     icons?: ButtonIconOptions;
 }
 export interface SideBarContainerAttribute extends CommonMethod {
@@ -322,12 +298,6 @@ export interface SideBarContainerAttribute extends CommonMethod {
     }
     sideBarWidth(value: Length | Bindable<Length> | undefined): this {
         throw new Error("Unimplemented method sideBarWidth")
-    }
-    minSideBarWidth(value: number | undefined): this {
-        throw new Error("Unimplemented method minSideBarWidth")
-    }
-    maxSideBarWidth(value: number | undefined): this {
-        throw new Error("Unimplemented method maxSideBarWidth")
     }
     minSideBarWidth(value: Length | undefined): this {
         throw new Error("Unimplemented method minSideBarWidth")
@@ -357,8 +327,8 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     showControlButton_value?: boolean | undefined
     onChange_value?: ((value: boolean) => void) | undefined
     sideBarWidth_value?: Length | Bindable<Length> | undefined
-    minSideBarWidth_value?: number | undefined
-    maxSideBarWidth_value?: number | undefined
+    minSideBarWidth_value?: Length | undefined
+    maxSideBarWidth_value?: Length | undefined
     autoHide_value?: boolean | undefined
     sideBarPosition_value?: SideBarPosition | undefined
     divider_value?: DividerStyle | null | undefined
@@ -379,12 +349,6 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
         return this
     }
     sideBarWidth(value: Length | Bindable<Length> | undefined): this {
-        return this
-    }
-    minSideBarWidth(value: number | undefined): this {
-        return this
-    }
-    maxSideBarWidth(value: number | undefined): this {
         return this
     }
     minSideBarWidth(value: Length | undefined): this {
@@ -465,26 +429,10 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    public minSideBarWidth(value: number | undefined): this {
-        if (this.checkPriority("minSideBarWidth")) {
-            const value_casted = value as (number | undefined)
-            this.getPeer()?.setMinSideBarWidth0Attribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public maxSideBarWidth(value: number | undefined): this {
-        if (this.checkPriority("maxSideBarWidth")) {
-            const value_casted = value as (number | undefined)
-            this.getPeer()?.setMaxSideBarWidth0Attribute(value_casted)
-            return this
-        }
-        return this
-    }
     public minSideBarWidth(value: Length | undefined): this {
         if (this.checkPriority("minSideBarWidth")) {
             const value_casted = value as (Length | undefined)
-            this.getPeer()?.setMinSideBarWidth1Attribute(value_casted)
+            this.getPeer()?.setMinSideBarWidthAttribute(value_casted)
             return this
         }
         return this
@@ -492,7 +440,7 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
     public maxSideBarWidth(value: Length | undefined): this {
         if (this.checkPriority("maxSideBarWidth")) {
             const value_casted = value as (Length | undefined)
-            this.getPeer()?.setMaxSideBarWidth1Attribute(value_casted)
+            this.getPeer()?.setMaxSideBarWidthAttribute(value_casted)
             return this
         }
         return this
@@ -663,7 +611,7 @@ export class ButtonStyle_serializer {
         if (valueHolderForLeft !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLeftTmpValue  = valueHolderForLeft!
-            valueSerializer.writeNumber(valueHolderForLeftTmpValue)
+            valueSerializer.writeFloat64(valueHolderForLeftTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -671,7 +619,7 @@ export class ButtonStyle_serializer {
         if (valueHolderForTop !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTopTmpValue  = valueHolderForTop!
-            valueSerializer.writeNumber(valueHolderForTopTmpValue)
+            valueSerializer.writeFloat64(valueHolderForTopTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -679,7 +627,7 @@ export class ButtonStyle_serializer {
         if (valueHolderForWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
-            valueSerializer.writeNumber(valueHolderForWidthTmpValue)
+            valueSerializer.writeFloat64(valueHolderForWidthTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -687,7 +635,7 @@ export class ButtonStyle_serializer {
         if (valueHolderForHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
-            valueSerializer.writeNumber(valueHolderForHeightTmpValue)
+            valueSerializer.writeFloat64(valueHolderForHeightTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -703,29 +651,29 @@ export class ButtonStyle_serializer {
     public static read(buffer: DeserializerBase): ButtonStyle {
         let valueDeserializer : DeserializerBase = buffer
         const leftTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let leftTmpBuf : number | undefined = undefined
+        let leftTmpBuf : double | undefined = undefined
         if ((leftTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            leftTmpBuf = (valueDeserializer.readNumber() as number)
+            leftTmpBuf = valueDeserializer.readFloat64()
         }
-        const leftTmpResult : number | undefined = leftTmpBuf
+        const leftTmpResult : double | undefined = leftTmpBuf
         const topTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let topTmpBuf : number | undefined = undefined
+        let topTmpBuf : double | undefined = undefined
         if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            topTmpBuf = (valueDeserializer.readNumber() as number)
+            topTmpBuf = valueDeserializer.readFloat64()
         }
-        const topTmpResult : number | undefined = topTmpBuf
+        const topTmpResult : double | undefined = topTmpBuf
         const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let widthTmpBuf : number | undefined = undefined
+        let widthTmpBuf : double | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            widthTmpBuf = (valueDeserializer.readNumber() as number)
+            widthTmpBuf = valueDeserializer.readFloat64()
         }
-        const widthTmpResult : number | undefined = widthTmpBuf
+        const widthTmpResult : double | undefined = widthTmpBuf
         const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightTmpBuf : number | undefined = undefined
+        let heightTmpBuf : double | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            heightTmpBuf = (valueDeserializer.readNumber() as number)
+            heightTmpBuf = valueDeserializer.readFloat64()
         }
-        const heightTmpResult : number | undefined = heightTmpBuf
+        const heightTmpResult : double | undefined = heightTmpBuf
         const iconsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let iconsTmpBuf : ButtonIconOptions | undefined = undefined
         if ((iconsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

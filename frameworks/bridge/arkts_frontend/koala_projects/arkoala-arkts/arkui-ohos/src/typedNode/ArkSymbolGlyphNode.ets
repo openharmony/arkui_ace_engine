@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { int32 } from "@koalaui/common"
 import { InteropNativeModule, runtimeType, RuntimeType } from "@koalaui/interop";
 
 import { ArkBaseNode } from "./ArkBaseNode";
@@ -43,8 +44,8 @@ export class ArkSymbolGlyphNode extends ArkBaseNode implements SymbolGlyphAttrib
         this.markDirty();
         return this;
     }
-    fontSize(value: number | string | Resource | undefined): this {
-        const value_casted = value as (number | string | Resource | undefined)
+    fontSize(value: double | string | Resource | undefined): this {
+        const value_casted = value as (double | string | Resource | undefined)
         this.getPeer()?.setFontSizeAttribute(value_casted)
         this.markDirty();
         return this;
@@ -55,8 +56,8 @@ export class ArkSymbolGlyphNode extends ArkBaseNode implements SymbolGlyphAttrib
         this.markDirty();
         return this;
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
-        const value_casted = value as (number | FontWeight | string | undefined)
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
+        const value_casted = value as (int32 | FontWeight | string | undefined)
         this.getPeer()?.setFontWeightAttribute(value_casted)
         this.markDirty();
         return this;
@@ -73,35 +74,36 @@ export class ArkSymbolGlyphNode extends ArkBaseNode implements SymbolGlyphAttrib
         this.markDirty();
         return this;
     }
-    minFontScale(value: number | Resource | undefined): this {
-        const value_casted = value as (number | Resource | undefined)
+    minFontScale(value: double | Resource | undefined): this {
+        const value_casted = value as (double | Resource | undefined)
         this.getPeer()?.setMinFontScaleAttribute(value_casted)
         this.markDirty();
         return this;
     }
-    maxFontScale(value: number | Resource | undefined): this {
-        const value_casted = value as (number | Resource | undefined)
+    maxFontScale(value: double | Resource | undefined): this {
+        const value_casted = value as (double | Resource | undefined)
         this.getPeer()?.setMaxFontScaleAttribute(value_casted)
         this.markDirty();
         return this;
     }
-    symbolEffect(symbolEffect: SymbolEffect | undefined, isActive?: number | boolean | undefined): this {
-        const symbolEffect_type = runtimeType(symbolEffect)
-        const isActive_type = runtimeType(isActive)
-        if (((RuntimeType.OBJECT == symbolEffect_type) || (RuntimeType.UNDEFINED == symbolEffect_type)) && ((RuntimeType.BOOLEAN == isActive_type) || (RuntimeType.UNDEFINED == isActive_type))) {
-            const symbolEffect_casted = symbolEffect as (SymbolEffect | undefined)
-            const isActive_casted = isActive as (boolean | undefined)
-            this.getPeer()?.setSymbolEffectAttribute(symbolEffect_casted, isActive_casted)
-            this.markDirty();
-            return this
-        }
-        if (((RuntimeType.OBJECT == symbolEffect_type) || (RuntimeType.UNDEFINED == symbolEffect_type)) && ((RuntimeType.NUMBER == isActive_type) || (RuntimeType.UNDEFINED == isActive_type))) {
-            const symbolEffect_casted = symbolEffect as (SymbolEffect | undefined)
-            const triggerValue_casted = isActive as (number | undefined)
-            this.getPeer()?.setSymbolEffectAttribute(symbolEffect_casted, triggerValue_casted)
-            this.markDirty();
-            return this
-        }
-        return this;
+    symbolEffect(value: SymbolEffect | undefined): this {
+        const value_casted = value as (SymbolEffect | undefined)
+        this.getPeer()?.setSymbolEffect0Attribute(value_casted)
+        this.markDirty();
+        return this
+    }
+    symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
+        const symbolEffect_casted = symbolEffect as (SymbolEffect | undefined)
+        const isActive_casted = isActive as (boolean | undefined)
+        this.getPeer()?.setSymbolEffect1Attribute(symbolEffect_casted, isActive_casted)
+        this.markDirty();
+        return this
+    }
+    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue: int32 | undefined): this {
+        const symbolEffect_casted = symbolEffect as (SymbolEffect | undefined)
+        const triggerValue_casted = triggerValue as (int32 | undefined)
+        this.getPeer()?.setSymbolEffect2Attribute(symbolEffect_casted, triggerValue_casted)
+        this.markDirty();
+        return this
     }
 }

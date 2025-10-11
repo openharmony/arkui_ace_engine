@@ -20,6 +20,12 @@ export class StateMgmtConsole {
     static log(str: string): void {
         console.log('StateManagement: [' + str + ']');
     }
+    static warn(str: string): void {
+        console.warn('StateManagement: [' + str + ']');
+    }
+    static error(str: string): void {
+        console.error('StateManagement: [' + str + ']');
+    }
     static traceBegin(str: string): void {}
     static traceEnd(): void {}
     static scopedTrace(str: string, cb: () => void): void {

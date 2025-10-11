@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSearchPeer, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchSubmitCallback, SearchType, SearchAttribute, SearchButtonOptions } from "./component/search"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, TextDecorationOptions } from "./component/common"
@@ -64,7 +65,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _enterKeyType_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enterKeyType_0_0value?: EnterKeyType | undefined
     _onSubmit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSubmit_0_0value?: ((value0: string) => void) | SearchSubmitCallback | undefined
+    _onSubmit_0_0value?: SearchSubmitCallback | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: EditableTextOnChangeCallback | undefined
     _onTextSelectionChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -80,7 +81,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _copyOption_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _copyOption_0_0value?: CopyOptions | undefined
     _maxLength_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxLength_0_0value?: number | undefined
+    _maxLength_0_0value?: int32 | undefined
     _textAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textAlign_0_0value?: TextAlign | undefined
     _enableKeyboardOnFocus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -88,19 +89,19 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _selectionMenuHidden_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selectionMenuHidden_0_0value?: boolean | undefined
     _minFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minFontSize_0_0value?: number | string | Resource | undefined
+    _minFontSize_0_0value?: double | string | Resource | undefined
     _maxFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxFontSize_0_0value?: number | string | Resource | undefined
+    _maxFontSize_0_0value?: double | string | Resource | undefined
     _minFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minFontScale_0_0value?: number | Resource | undefined
+    _minFontScale_0_0value?: double | Resource | undefined
     _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxFontScale_0_0value?: number | Resource | undefined
+    _maxFontScale_0_0value?: double | Resource | undefined
     _decoration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _decoration_0_0value?: TextDecorationOptions | undefined
     _letterSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _letterSpacing_0_0value?: number | string | Resource | undefined
+    _letterSpacing_0_0value?: double | string | Resource | undefined
     _lineHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _lineHeight_0_0value?: number | string | Resource | undefined
+    _lineHeight_0_0value?: double | string | Resource | undefined
     _type_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _type_0_0value?: SearchType | undefined
     _fontFeature_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -138,8 +139,9 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _customKeyboard_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _customKeyboard_0_0value?: CustomBuilder | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
-    applyModifierPatch(peer: ArkSearchPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkSearchPeer;
         if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._fontColor_0_flag) {
@@ -342,7 +344,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._onSubmit_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnSubmitAttribute((this._onSubmit_0_0value as ((value0: string) => void) | SearchSubmitCallback | undefined));
+                    peer.setOnSubmitAttribute((this._onSubmit_0_0value as SearchSubmitCallback | undefined));
                     this._onSubmit_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -352,7 +354,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     this._onSubmit_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnSubmitAttribute((undefined as ((value0: string) => void) | SearchSubmitCallback | undefined));
+                    peer.setOnSubmitAttribute((undefined as SearchSubmitCallback | undefined));
                 }
             }
         }
@@ -486,7 +488,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._maxLength_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxLengthAttribute((this._maxLength_0_0value as number | undefined));
+                    peer.setMaxLengthAttribute((this._maxLength_0_0value as int32 | undefined));
                     this._maxLength_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -496,7 +498,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     this._maxLength_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxLengthAttribute((undefined as number | undefined));
+                    peer.setMaxLengthAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -558,7 +560,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._minFontSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinFontSizeAttribute((this._minFontSize_0_0value as number | string | Resource | undefined));
+                    peer.setMinFontSizeAttribute((this._minFontSize_0_0value as double | string | Resource | undefined));
                     this._minFontSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -568,7 +570,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     this._minFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinFontSizeAttribute((undefined as number | string | Resource | undefined));
+                    peer.setMinFontSizeAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -576,7 +578,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._maxFontSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxFontSizeAttribute((this._maxFontSize_0_0value as number | string | Resource | undefined));
+                    peer.setMaxFontSizeAttribute((this._maxFontSize_0_0value as double | string | Resource | undefined));
                     this._maxFontSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -586,7 +588,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     this._maxFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxFontSizeAttribute((undefined as number | string | Resource | undefined));
+                    peer.setMaxFontSizeAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -594,7 +596,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._minFontScale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as number | Resource | undefined));
+                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as double | Resource | undefined));
                     this._minFontScale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -604,7 +606,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     this._minFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinFontScaleAttribute((undefined as number | Resource | undefined));
+                    peer.setMinFontScaleAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -612,7 +614,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._maxFontScale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as number | Resource | undefined));
+                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as double | Resource | undefined));
                     this._maxFontScale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -622,7 +624,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     this._maxFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxFontScaleAttribute((undefined as number | Resource | undefined));
+                    peer.setMaxFontScaleAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -648,7 +650,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._letterSpacing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as number | string | Resource | undefined));
+                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as double | string | Resource | undefined));
                     this._letterSpacing_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -658,7 +660,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     this._letterSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLetterSpacingAttribute((undefined as number | string | Resource | undefined));
+                    peer.setLetterSpacingAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -666,7 +668,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._lineHeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLineHeightAttribute((this._lineHeight_0_0value as number | string | Resource | undefined));
+                    peer.setLineHeightAttribute((this._lineHeight_0_0value as double | string | Resource | undefined));
                     this._lineHeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -676,7 +678,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     this._lineHeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLineHeightAttribute((undefined as number | string | Resource | undefined));
+                    peer.setLineHeightAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -936,7 +938,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._searchButton_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSearchButtonAttribute((this._searchButton_0_0value as string | undefined), (this._searchButton_0_1value as SearchButtonOptions | undefined));
+                    peer.setSearchButtonAttribute((this._searchButton_0_0value as string | undefined), (this._searchButton_0_1value as SearchButtonOptions | undefined | undefined));
                     this._searchButton_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -954,7 +956,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._inputFilter_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setInputFilterAttribute((this._inputFilter_0_0value as ResourceStr | undefined), (this._inputFilter_0_1value as ((value0: string) => void) | undefined));
+                    peer.setInputFilterAttribute((this._inputFilter_0_0value as ResourceStr | undefined), (this._inputFilter_0_1value as ((value0: string) => void) | undefined | undefined));
                     this._inputFilter_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -972,7 +974,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._customKeyboard_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined));
+                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1141,7 +1143,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                     break;
                 }
                 default: {
-                    this.onSubmit((undefined as ((value0: string) => void) | SearchSubmitCallback | undefined));
+                    this.onSubmit((undefined as SearchSubmitCallback | undefined));
                 }
             }
         }
@@ -1245,7 +1247,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                     break;
                 }
                 default: {
-                    this.maxLength((undefined as number | undefined));
+                    this.maxLength((undefined as int32 | undefined));
                 }
             }
         }
@@ -1297,7 +1299,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                     break;
                 }
                 default: {
-                    this.minFontSize((undefined as number | string | Resource | undefined));
+                    this.minFontSize((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -1310,7 +1312,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                     break;
                 }
                 default: {
-                    this.maxFontSize((undefined as number | string | Resource | undefined));
+                    this.maxFontSize((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -1323,7 +1325,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                     break;
                 }
                 default: {
-                    this.minFontScale((undefined as number | Resource | undefined));
+                    this.minFontScale((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -1336,7 +1338,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                     break;
                 }
                 default: {
-                    this.maxFontScale((undefined as number | Resource | undefined));
+                    this.maxFontScale((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -1362,7 +1364,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                     break;
                 }
                 default: {
-                    this.letterSpacing((undefined as number | string | Resource | undefined));
+                    this.letterSpacing((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -1375,7 +1377,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                     break;
                 }
                 default: {
-                    this.lineHeight((undefined as number | string | Resource | undefined));
+                    this.lineHeight((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -1722,7 +1724,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
         return this
     }
-    onSubmit(value: ((value0: string) => void) | SearchSubmitCallback | undefined): this {
+    onSubmit(value: SearchSubmitCallback | undefined): this {
         if (((this._onSubmit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onSubmit_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1810,7 +1812,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
         return this
     }
-    maxLength(value: number | undefined): this {
+    maxLength(value: int32 | undefined): this {
         if (((this._maxLength_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLength_0_0value) !== (value)))
         {
             this._maxLength_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1854,7 +1856,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
         return this
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         if (((this._minFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1865,7 +1867,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
         return this
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         if (((this._maxFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1876,7 +1878,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
         return this
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         if (((this._minFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1887,7 +1889,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
         return this
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         if (((this._maxFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1909,7 +1911,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
         return this
     }
-    letterSpacing(value: number | string | Resource | undefined): this {
+    letterSpacing(value: double | string | Resource | undefined): this {
         if (((this._letterSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1920,7 +1922,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
         return this
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         if (((this._lineHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.UPDATE

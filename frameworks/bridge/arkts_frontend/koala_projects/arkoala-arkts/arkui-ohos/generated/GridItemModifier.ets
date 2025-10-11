@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkGridItemPeer, GridItemAttribute } from "./component/gridItem"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
@@ -47,8 +48,9 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
     _selected_0_0value?: boolean | Bindable<boolean> | undefined
     _onSelect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onSelect_0_0value?: ((isSelected: boolean) => void) | undefined
-    applyModifierPatch(peer: ArkGridItemPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkGridItemPeer;
         if (this._rowStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._rowStart_0_flag) {

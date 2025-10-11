@@ -93,6 +93,7 @@ export struct TabTitleBar {
   };
   @State tabWidth: number = 0;
   @State currentIndex: number = 0;
+  @State swiperCurrentIndex: int = 0;
   @State fontSize: number = 1;
 
   static readonly totalHeight: number = 56;
@@ -181,7 +182,7 @@ export struct TabTitleBar {
           Stack({ alignContent: Alignment.Start }) {
             Column() {
               List({ initialIndex: 0, scroller: this.scroller, space: 0 }) {
-                ForEach(this.tabItems, (tabItem: TabTitleBarTabItem, index: number) => {
+                ForEach(this.tabItems, (tabItem: TabTitleBarTabItem, index: int) => {
                   ListItem() {
                     TabContentItem({
                       item: tabItem,
@@ -232,16 +233,16 @@ export struct TabTitleBar {
         Swiper(this.swiperController as SwiperController) {
           this.swiperContent();
         }
-        .index(this.currentIndex)
+        .index(this.swiperCurrentIndex)
         .itemSpace(0)
         .indicator(false)
         .width('100%')
         .height('100%')
         .curve(Curve.Friction)
-        .onChange((index: number) => {
+        .onChange((index: int) => {
           if(index < this.tabOffsets.length) {
-            const offset = this.tabOffsets[Double.toInt(index)] + TabTitleBar.correctionOffset;
-            this.currentIndex = index;
+            const offset = this.tabOffsets[index] + TabTitleBar.correctionOffset;
+            this.swiperCurrentIndex = index;
             this.scroller.scrollTo({
               xOffset: offset > 0 ? offset : 0,
               yOffset: 0,
@@ -251,7 +252,7 @@ export struct TabTitleBar {
               } as ScrollAnimationOptions
             } as ScrollOptions)
           }
-        } as Callback<number>)
+        } as Callback<int>)
         .onAppear(() => {
           this.scroller.scrollToIndex(this.currentIndex);
           this.scroller.scrollBy(TabTitleBar.correctionOffset, 0);
@@ -329,7 +330,7 @@ export struct CollapsibleMenuSection {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
-        let code: number | undefined = (exception as ClassCastError)?.code;
+        let code: int | undefined = (exception as ClassCastError)?.code;
         let message: string | undefined = (exception as ClassCastError)?.message;
         hilog.error(0x3900, 'tabTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
 
@@ -362,12 +363,12 @@ export struct CollapsibleMenuSection {
     Column() {
       Row() {
         if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-          ForEach(this.menuItems, (item: TabTitleBarMenuItem, index: number) => {
+          ForEach(this.menuItems, (item: TabTitleBarMenuItem, index: int) => {
             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 });
           })
         } else {
-          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
-            (item: TabTitleBarMenuItem, index: number) => {
+          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems.toInt() - 1),
+            (item: TabTitleBarMenuItem, index: int) => {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 });
             })
           Button({ type: ButtonType.Normal, stateEffect: true } as ButtonOptions) {
@@ -464,8 +465,8 @@ export struct CollapsibleMenuSection {
   @Builder
   popupBuilder() {
     Column() {
-      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length),
-        (item: TabTitleBarMenuItem, index: number) => {
+      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems.toInt() - 1, this.menuItems.length),
+        (item: TabTitleBarMenuItem, index: int) => {
           ImageMenuItem({
             item: item as TabTitleBarMenuItem, index: this.index * 1000 +
             CollapsibleMenuSection.maxCountOfVisibleItems + index
@@ -562,7 +563,7 @@ struct TabContentItem {
       try {
         resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id as Long);
       } catch (exception) {
-        let code: number | undefined = (exception as ClassCastError)?.code;
+        let code: int | undefined = (exception as ClassCastError)?.code;
         let message: string | undefined = (exception as ClassCastError)?.message;
         hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -805,7 +806,7 @@ struct ImageMenuItem {
       try {
         resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id as Long);
       } catch (exception) {
-        let code: number | undefined = (exception as ClassCastError)?.code;
+        let code: int | undefined = (exception as ClassCastError)?.code;
         let message: string | undefined = (exception as ClassCastError)?.message;
         hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -818,7 +819,7 @@ struct ImageMenuItem {
       try {
       	return resourceManager.getSysResourceManager().getStringByNameSync('ohos_toolbar_more');
 	    } catch (exception) {
-        let code: number | undefined = (exception as ClassCastError)?.code;
+        let code: int | undefined = (exception as ClassCastError)?.code;
         let message: string | undefined = (exception as ClassCastError)?.message;
         hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -945,10 +946,10 @@ struct TabTitleBarDialog {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
   screenWidth: number = 640;
-  verticalScreenLines: number = 6;
-  horizontalsScreenLines: number = 1;
+  verticalScreenLines: int = 6;
+  horizontalsScreenLines: int = 1;
   @State fontSize: number = 1;
-  @State maxLines: number = 1;
+  @State maxLines: int = 1;
   @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
   cancel: () => void = () => {
   };
@@ -1063,7 +1064,7 @@ struct TabTitleBarDialog {
         this.maxLines = this.horizontalsScreenLines;
       }
     } catch (exception) {
-      let code: number | undefined = (exception as ClassCastError)?.code;
+      let code: int | undefined = (exception as ClassCastError)?.code;
       let message: string | undefined = (exception as ClassCastError)?.message;
       hilog.error(0x3900, 'tabTitleBar', `Faild to getMainWindowSync,cause, code: ${code}, message: ${message}`);
     }

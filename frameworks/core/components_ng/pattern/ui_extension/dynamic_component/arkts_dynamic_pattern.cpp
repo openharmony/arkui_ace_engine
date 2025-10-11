@@ -157,5 +157,6 @@ void ArktsDynamicPattern::SetDynamicParam(const DynamicParam& param)
 {
     param_ = param;
     PLATFORM_LOGI("ArktsDynamicPattern DynamicParam: %{public}s", param_.ToString().c_str());
+    SetBackgroundTransparent(param_.backgroundTransparent);
 }
 } // namespace OHOS::Ace::NG

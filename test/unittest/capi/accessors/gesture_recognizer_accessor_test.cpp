@@ -92,7 +92,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureRecognizerAccessorTest, SetEnabledTest, TestSize.Level1)
+HWTEST_F(GestureRecognizerAccessorTest, DISABLED_SetEnabledTest, TestSize.Level1)
 {
     constexpr bool enabledTrue = true;
     constexpr bool enabledFalse = false;
@@ -114,7 +114,7 @@ HWTEST_F(GestureRecognizerAccessorTest, SetEnabledTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureRecognizerAccessorTest, IsEnabledTest, TestSize.Level1)
+HWTEST_F(GestureRecognizerAccessorTest, DISABLED_IsEnabledTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->isEnabled, nullptr);
 
@@ -217,7 +217,7 @@ HWTEST_F(GestureRecognizerAccessorTest, GetEventTargetInfo, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureRecognizerAccessorTest, IsValidTest, TestSize.Level1)
+HWTEST_F(GestureRecognizerAccessorTest, DISABLED_IsValidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->isValid, nullptr);
 

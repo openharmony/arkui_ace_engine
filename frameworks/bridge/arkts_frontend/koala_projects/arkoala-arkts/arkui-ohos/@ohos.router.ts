@@ -16,7 +16,7 @@
 import { Router } from "arkui/base"
 import { PeerNode } from "arkui/PeerNode"
 import { UserViewBuilder } from "arkui/UserView"
-import { ComputableState, State, IncrementalNode } from "@koalaui/runtime"
+import { ComputableState, IncrementalNode } from "@koalaui/runtime"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 
@@ -33,7 +33,7 @@ namespace router {
     }
 
     export interface RouterState {
-        index: number;
+        index: int;
         name: string;
         path: string;
         params: Object;

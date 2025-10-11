@@ -125,7 +125,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy002, TestSize.Level1)
     auto pipeline = MockPipelineContext::GetCurrent();
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     richEditorPattern->clipboard_ = clipboard;
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isEventCalled = false;
     auto onCopyWithEvent = [&isEventCalled](NG::TextCommonEvent& event) { isEventCalled = true; };
@@ -164,7 +164,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy003, TestSize.Level1)
     auto pipeline = MockPipelineContext::GetCurrent();
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     richEditorPattern->clipboard_ = clipboard;
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isEventCalled = false;
     auto onCopyWithEvent = [&isEventCalled](NG::TextCommonEvent& event) {
@@ -244,6 +244,8 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopyStyledString001, TestSize.Lev
 
     richEditorPattern->OnModifyDone();
     richEditorPattern->SetSpanStringMode(true);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->OnCopyOperation();
     ASSERT_NE(richEditorPattern->GetClipboard(), nullptr);
 }
@@ -384,7 +386,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, ResetAfterPaste001, TestSize.Level1)
 HWTEST_F(RichEditorCopyCutPasteTestNg, PasteStr001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto changeReason = TextChangeReason::UNKNOWN;
     auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
@@ -454,7 +456,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut004, TestSize.Level1)
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isEventCalled = false;
     auto onCutWithEvent = [&isEventCalled](NG::TextCommonEvent& event) {
@@ -503,7 +505,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut002, TestSize.Level1)
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isEventCalled = false;
     auto onCutWithEvent = [&isEventCalled](NG::TextCommonEvent& event) { isEventCalled = true; };
@@ -542,7 +544,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut003, TestSize.Level1)
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isEventCalled = false;
     auto onCutWithEvent = [&isEventCalled](NG::TextCommonEvent& event) {

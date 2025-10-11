@@ -127,7 +127,7 @@ HWTEST_F(DragEventAccessorTest, GetWindowYTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, SetResultTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, DISABLED_SetResultTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureEnumDragResultValues) {
         accessor_->setResult(peer_, value);

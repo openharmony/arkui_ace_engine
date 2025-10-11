@@ -1,6 +1,11 @@
 // this file will be merged with component/xxx.ets by compiler pre-process script
 
+import { PeerNode } from "../PeerNode.ets"
 import { WrappedBuilder, CustomBuilderT } from "./builder"
+import { GestureGroupHandler, GestureHandler, GesturePriority } from "./gesture"
+import { GestureOps } from "./idlize"
+import { ArkUIAniModule } from "arkui.ani"
+import { DrawContext } from "arkui.Graphics"
 
 export interface AttributeModifier<T> {
     applyNormalAttribute(instance: T): void {}
@@ -21,11 +26,71 @@ export interface ContentModifier<T = void> {
   applyContent(): WrappedBuilder<CustomBuilderT<T>>
 }
 
+export class DrawModifier {
+    weakRefOfPeerNode?: WeakRef<PeerNode>;
+    public drawBehind(drawContext: DrawContext): void { }
+
+    public drawContent(drawContext: DrawContext): void { }
+
+    public drawFront(drawContext: DrawContext): void { }
+
+    public drawForeground(drawContext: DrawContext): void { }
+
+    public invalidate(): void {
+        let peerNode: PeerNode | undefined = this.weakRefOfPeerNode?.deref();
+        if (peerNode && peerNode.peer.ptr) {
+            ArkUIAniModule._Invalidate(peerNode.peer.ptr)
+        }
+    }
+}
+
 export class UIGestureEvent {
+    private peer?: PeerNode
+    setPeer(peer?: PeerNode) {
+        this.peer = peer
+    }
+    addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
+        if (gesture instanceof GestureGroupHandler) {
+            let gestureGroup = gesture as GestureGroupHandler;
+            gestureGroup.addGestureGroupToNode(priority ?? GesturePriority.NORMAL, this.peer, mask)
+        } else if (gesture instanceof GestureHandler) {
+            gesture.setGesture(priority ?? GesturePriority.NORMAL, this.peer, mask);
+        }
+    }
+    addParallelGesture(gesture: GestureHandler, mask?: GestureMask): void {
+        if (gesture instanceof GestureGroupHandler) {
+            let gestureGroup = gesture as GestureGroupHandler;
+            gestureGroup.addGestureGroupToNode(2, this.peer, mask)
+        } else if (gesture instanceof GestureHandler) {
+            gesture.setGesture(2, this.peer, mask);
+        }
+    }
+    removeGestureByTag(tag: string): void {
+        if (this.peer) {
+            let peerNode = this.peer as PeerNode;
+            GestureOps.removeGestureByTag(peerNode.peer.ptr, tag);
+        }
+    }
+    clearGestures(): void {
+        if (this.peer) {
+            let peerNode = this.peer as PeerNode;
+            GestureOps.clearGestures(peerNode.peer.ptr);
+        }
+    }
 }
 
 export type CustomStyles =  (instance: CommonMethod) => void;
 
 export interface GestureModifier {
     applyGesture(event: UIGestureEvent): void
+}
+
+export interface DynamicNode {
+    onMove(handler?: OnMoveHandler): this;
+    onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this;
+}
+
+export function applyStyles<T extends CommonMethod>(this: T, customStyles: CustomStyles): T {
+    customStyles(this);
+    return this;
 }

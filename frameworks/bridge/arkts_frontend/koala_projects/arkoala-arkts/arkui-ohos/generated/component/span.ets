@@ -120,7 +120,7 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -140,15 +140,15 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         ArkUIGeneratedNativeModule._SpanAttribute_setFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontSizeAttribute(value: number | string | Resource | undefined): void {
+    setFontSizeAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -176,15 +176,15 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         ArkUIGeneratedNativeModule._SpanAttribute_setFontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: number | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
@@ -232,15 +232,15 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         ArkUIGeneratedNativeModule._SpanAttribute_setDecoration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLetterSpacingAttribute(value: number | string | undefined): void {
+    setLetterSpacingAttribute(value: double | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -351,13 +351,13 @@ export interface SpanAttribute extends BaseSpan {
     fontColor(value: ResourceColor | undefined): this {
         throw new Error("Unimplemented method fontColor")
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method fontSize")
     }
     fontStyle(value: FontStyle | undefined): this {
         throw new Error("Unimplemented method fontStyle")
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontFamily(value: string | Resource | undefined): this {
@@ -366,7 +366,7 @@ export interface SpanAttribute extends BaseSpan {
     decoration(value: DecorationStyleInterface | undefined): this {
         throw new Error("Unimplemented method decoration")
     }
-    letterSpacing(value: number | string | undefined): this {
+    letterSpacing(value: double | string | undefined): this {
         throw new Error("Unimplemented method letterSpacing")
     }
     textCase(value: TextCase | undefined): this {
@@ -385,12 +385,12 @@ export interface SpanAttribute extends BaseSpan {
 export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     font_value?: Font | undefined
     fontColor_value?: ResourceColor | undefined
-    fontSize_value?: number | string | Resource | undefined
+    fontSize_value?: double | string | Resource | undefined
     fontStyle_value?: FontStyle | undefined
-    fontWeight_value?: number | FontWeight | string | undefined
+    fontWeight_value?: int32 | FontWeight | string | undefined
     fontFamily_value?: string | Resource | undefined
     decoration_value?: DecorationStyleInterface | undefined
-    letterSpacing_value?: number | string | undefined
+    letterSpacing_value?: double | string | undefined
     textCase_value?: TextCase | undefined
     lineHeight_value?: Length | undefined
     textShadow_value?: ShadowOptions | Array<ShadowOptions> | undefined
@@ -404,13 +404,13 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     fontColor(value: ResourceColor | undefined): this {
         return this
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         return this
     }
     fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         return this
     }
     fontFamily(value: string | Resource | undefined): this {
@@ -419,7 +419,7 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     decoration(value: DecorationStyleInterface | undefined): this {
         return this
     }
-    letterSpacing(value: number | string | undefined): this {
+    letterSpacing(value: double | string | undefined): this {
         return this
     }
     textCase(value: TextCase | undefined): this {
@@ -499,9 +499,9 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttrib
         }
         return this
     }
-    public fontSize(value: number | string | Resource | undefined): this {
+    public fontSize(value: double | string | Resource | undefined): this {
         if (this.checkPriority("fontSize")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setFontSizeAttribute(value_casted)
             return this
         }
@@ -515,9 +515,9 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttrib
         }
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | string | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }
@@ -539,9 +539,9 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttrib
         }
         return this
     }
-    public letterSpacing(value: number | string | undefined): this {
+    public letterSpacing(value: double | string | undefined): this {
         if (this.checkPriority("letterSpacing")) {
-            const value_casted = value as (number | string | undefined)
+            const value_casted = value as (double | string | undefined)
             this.getPeer()?.setLetterSpacingAttribute(value_casted)
             return this
         }
@@ -609,7 +609,7 @@ export class TextBackgroundStyle_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -661,11 +661,11 @@ export class TextBackgroundStyle_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -673,7 +673,7 @@ export class TextBackgroundStyle_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

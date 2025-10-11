@@ -67,7 +67,7 @@ void SetIndicatorComponentOptionsImpl(Ark_NativePointer node,
 } // IndicatorComponentInterfaceModifier
 namespace IndicatorComponentAttributeModifier {
 void SetInitialIndexImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -76,7 +76,7 @@ void SetInitialIndexImpl(Ark_NativePointer node,
     IndicatorModelStatic::SetInitialIndex(frameNode, aceVal);
 }
 void SetCountImpl(Ark_NativePointer node,
-                  const Opt_Number* value)
+                  const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -108,6 +108,11 @@ void SetStyleImpl(Ark_NativePointer node,
             IndicatorModelStatic::SetShowIndicator(frameNode, true);
         },
         [frameNode]() {
+            SwiperParameters dotParam;
+            auto isCustomSize = SwiperAttributeModifierInternal::CheckSwiperParameters(dotParam);
+            IndicatorModelStatic::SetDotIndicatorStyle(frameNode, dotParam);
+            IndicatorModelStatic::SetIsIndicatorCustomSize(frameNode, isCustomSize);
+            IndicatorModelStatic::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
             IndicatorModelStatic::SetShowIndicator(frameNode, false);
         });
 }
@@ -128,19 +133,19 @@ void SetVerticalImpl(Ark_NativePointer node,
     IndicatorModelStatic::SetDirection(frameNode, convValue ? Axis::VERTICAL : Axis::HORIZONTAL);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_Callback_Number_Void* value)
+                     const Opt_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(frameNode);
-    if (auto optCallback = Converter::OptConvertPtr<Callback_Number_Void>(value); optCallback) {
+    if (auto optCallback = Converter::OptConvertPtr<Callback_I32_Void>(value); optCallback) {
         auto onChange = [arkCallback = CallbackHelper(*optCallback), node = targetNode](const BaseEventInfo* info) {
             const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
             if (!swiperInfo) {
                 return;
             }
             PipelineContext::SetCallBackNode(node);
-            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(swiperInfo->GetIndex()));
+            arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(swiperInfo->GetIndex()));
         };
         IndicatorModelStatic::SetOnChange(frameNode, std::move(onChange));
     } else {

@@ -159,7 +159,7 @@ export class BadgeStyle_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -231,7 +231,7 @@ export class BadgeStyle_serializer {
             if (valueHolderForBadgeColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBadgeColorTmpValueForIdx0  = valueHolderForBadgeColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBadgeColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBadgeColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBadgeColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBadgeColorTmpValueForIdx1  = valueHolderForBadgeColorTmpValue as number
@@ -255,7 +255,7 @@ export class BadgeStyle_serializer {
             if (valueHolderForBorderColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBorderColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as number
@@ -327,11 +327,11 @@ export class BadgeStyle_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -339,7 +339,7 @@ export class BadgeStyle_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -394,11 +394,11 @@ export class BadgeStyle_serializer {
         let badgeColorTmpBuf : ResourceColor | undefined = undefined
         if ((badgeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const badgeColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let badgeColorTmpBuf_ : Color | number | string | Resource | undefined
+            let badgeColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (badgeColorTmpBuf_UnionSelector == (0).toChar()) {
-                badgeColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                badgeColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (badgeColorTmpBuf_UnionSelector == (1).toChar()) {
-                badgeColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                badgeColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (badgeColorTmpBuf_UnionSelector == (2).toChar()) {
                 badgeColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (badgeColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -406,18 +406,18 @@ export class BadgeStyle_serializer {
             } else {
                 throw new Error("One of the branches for badgeColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            badgeColorTmpBuf = (badgeColorTmpBuf_ as Color | number | string | Resource)
+            badgeColorTmpBuf = (badgeColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const badgeColorTmpResult : ResourceColor | undefined = badgeColorTmpBuf
         const borderColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderColorTmpBuf : ResourceColor | undefined = undefined
         if ((borderColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const borderColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let borderColorTmpBuf_ : Color | number | string | Resource | undefined
+            let borderColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (borderColorTmpBuf_UnionSelector == (0).toChar()) {
-                borderColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                borderColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (borderColorTmpBuf_UnionSelector == (1).toChar()) {
-                borderColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                borderColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (borderColorTmpBuf_UnionSelector == (2).toChar()) {
                 borderColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (borderColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -425,7 +425,7 @@ export class BadgeStyle_serializer {
             } else {
                 throw new Error("One of the branches for borderColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            borderColorTmpBuf = (borderColorTmpBuf_ as Color | number | string | Resource)
+            borderColorTmpBuf = (borderColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const borderColorTmpResult : ResourceColor | undefined = borderColorTmpBuf
         const borderWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

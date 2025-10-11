@@ -25,13 +25,13 @@ void DestroyPeerImpl(Ark_LetterSpacingStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_LetterSpacingStyle ConstructImpl(Ark_LengthMetrics value)
+Ark_LetterSpacingStyle ConstructImpl(const Ark_LengthMetrics* value)
 {
     auto peer = PeerUtils::CreatePeer<LetterSpacingStylePeer>();
     std::optional<Dimension> spacing;
     Dimension defaultSpacing = Dimension(0, DimensionUnit::VP);
     if (value) {
-        spacing = Converter::OptConvert<Dimension>(value);
+        spacing = Converter::OptConvert<Dimension>(*value);
         Validator::ValidateNonPercent(spacing);
     }
     peer->span = AceType::MakeRefPtr<LetterSpacingSpan>(spacing.value_or(defaultSpacing));
@@ -41,11 +41,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetLetterSpacingImpl(Ark_LetterSpacingStyle peer)
+Ark_Float64 GetLetterSpacingImpl(Ark_LetterSpacingStyle peer)
 {
     CHECK_NULL_RETURN(peer, {});
     CHECK_NULL_RETURN(peer->span, {});
-    auto value = Converter::ArkValue<Ark_Number>(peer->span->GetLetterSpacing().ConvertToVp());
+    auto value = Converter::ArkValue<Ark_Float64>(peer->span->GetLetterSpacing().ConvertToVp());
     return value;
 }
 } // LetterSpacingStyleAccessor

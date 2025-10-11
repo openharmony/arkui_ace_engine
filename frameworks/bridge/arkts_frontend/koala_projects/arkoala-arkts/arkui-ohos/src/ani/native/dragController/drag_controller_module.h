@@ -28,9 +28,9 @@ ani_object ANICreateDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     [[maybe_unused]] ani_object dragInfoObj);
 ani_object ANIDragActionStartDrag(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragActionPtr);
-void ANIDragActionOn([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string type,
+void ANIDragActionOn([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
     ani_object callback, ani_long dragActionPtr);
-void ANIDragActionOff([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string type,
+void ANIDragActionOff([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
     [[maybe_unused]] ani_object callback, ani_long dragActionPtr);
 ani_object ANIGetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass);
 void ANIDragPreviewSetForegroundColor([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,

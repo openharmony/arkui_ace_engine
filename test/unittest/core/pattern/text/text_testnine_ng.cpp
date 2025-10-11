@@ -213,6 +213,7 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction001, TestSize.Level1)
      * @tc.step: step4. test OnMenuItemAction
      */
     pattern->isMousePressed_ = true;
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
     pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::COPY, OptionMenuType::MOUSE_MENU);
     EXPECT_FALSE(pattern->SelectOverlayIsOn());
     pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::MOUSE_MENU);

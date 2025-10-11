@@ -18,6 +18,7 @@
 
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkCustomLayoutRootPeer, Callback_onMeasureSize_SizeResult, Callback_onPlaceChildren_Void, CustomLayoutRoot } from "./component/idlize"
 import { int32 } from "@koalaui/common"
 import { GeometryInfo, Measurable, Layoutable } from "./component/common"
@@ -37,7 +38,8 @@ export class CustomLayoutRootModifier implements CustomLayoutRoot,AttributeModif
     _subscribeOnMeasureSize_0_0value?: Callback_onMeasureSize_SizeResult
     _subscribeOnPlaceChildren_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _subscribeOnPlaceChildren_0_0value?: Callback_onPlaceChildren_Void
-    applyModifierPatch(peer: ArkCustomLayoutRootPeer): void {
+    applyModifierPatch(node: PeerNode): void {
+        const peer = node as ArkCustomLayoutRootPeer;
     }
     mergeModifier(modifier: CustomLayoutRootModifier): void {
     }

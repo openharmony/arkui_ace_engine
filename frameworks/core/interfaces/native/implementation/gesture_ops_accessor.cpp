@@ -61,6 +61,7 @@ namespace GestureOpsAccessor {
 Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers, const Ark_Number* count,
     const Ark_Number* distanceThreshold, Ark_Boolean isFingerCountLimited)
 {
+    LOGE("zcb CreateTapGestureImpl");
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
         fingerValue = DEFAULT_TAP_FINGER;
@@ -253,6 +254,7 @@ void SetAllowedTypesImpl(Ark_NativePointer gesture, const Array_SourceTool* type
 void AddGestureToNodeImpl(Ark_NativePointer node, const Ark_Number* priority, Ark_GestureMask mask,
     Ark_NativePointer gesture, Ark_Boolean isModifier)
 {
+    LOGE("zcb AddGestureToNodeImpl");
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();

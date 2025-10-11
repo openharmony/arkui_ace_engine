@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTabContentPeer, SubTabBarStyle, BottomTabBarStyle, TabBarOptions, TabContentAttribute } from "./component/tabContent"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -43,8 +44,9 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
     _onWillShow_0_0value?: VoidCallback | undefined
     _onWillHide_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onWillHide_0_0value?: VoidCallback | undefined
-    applyModifierPatch(peer: ArkTabContentPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTabContentPeer;
         if (this._tabBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._tabBar_0_flag) {

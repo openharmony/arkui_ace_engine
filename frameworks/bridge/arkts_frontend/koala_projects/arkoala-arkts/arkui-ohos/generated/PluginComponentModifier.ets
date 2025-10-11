@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkPluginComponentPeer, PluginErrorCallback, PluginErrorData, PluginComponentAttribute } from "./component/pluginComponent"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -38,8 +39,9 @@ export class PluginComponentModifier extends CommonMethodModifier implements Plu
     _onComplete_0_0value?: VoidCallback | undefined
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onError_0_0value?: PluginErrorCallback | undefined
-    applyModifierPatch(peer: ArkPluginComponentPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkPluginComponentPeer;
         if (this._onComplete_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onComplete_0_flag) {

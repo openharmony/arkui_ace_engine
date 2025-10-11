@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
+#include "core/components_ng/pattern/video/video_model_static.h"
 #include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/video/video_styles.h"
@@ -101,6 +102,8 @@ const std::string VIDEO_MESSAGE = "message";
 const std::string VIDEO_CALLBACK_RESULT = "result_ok";
 const std::string VIDEO_STOP_EVENT = "stop";
 const std::string JSON_VALUE_FALSE = "false";
+const std::string JSON_VALUE_TRUE = "true";
+const std::string JSON_VALUE_COVER = "ImageFit.Cover";
 constexpr float MAX_WIDTH = 400.0f;
 constexpr float MAX_HEIGHT = 400.0f;
 constexpr float VIDEO_WIDTH = 300.0f;
@@ -499,7 +502,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -584,7 +587,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     ASSERT_TRUE(pattern);
 
     // set videoEvent
-    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string preparedCheck;
     VideoEventCallback onPrepared = [&preparedCheck](
@@ -647,7 +650,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     auto rawChildNum = static_cast<int32_t>(frameNode->GetChildren().size());
 
     // set video event
-    auto videoEventHub = pattern->GetOrCreateEventHub<VideoEventHub>();
+    auto videoEventHub = pattern->GetEventHub<VideoEventHub>();
     std::string pauseCheck;
     VideoEventCallback onPause = [&pauseCheck](const std::string& /* param */) { pauseCheck = VIDEO_PAUSE_EVENT; };
     videoEventHub->SetOnPause(std::move(onPause));
@@ -754,7 +757,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
     frameNode->AddChild(tempFrameNode, 0);
 
     // set video event
-    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string seekingCheck;
     VideoEventCallback onSeeking = [&seekingCheck](
@@ -993,7 +996,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest016, TestSize.Level1)
     frameNode->AddChild(tempFrameNode, 0);
 
     // set video event
-    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
 
     std::string fullScreenCheck;
@@ -1161,7 +1164,7 @@ HWTEST_F(VideoTestNg, VideoPatternEventTest001, TestSize.Level1)
      */
     std::string result;
     auto errorCallback = [&result](const std::string& error) { result = VIDEO_CALLBACK_RESULT; };
-    auto eventHub = pattern->GetOrCreateEventHub<VideoEventHub>();
+    auto eventHub = pattern->GetEventHub<VideoEventHub>();
     eventHub->SetOnError(std::move(errorCallback));
     pattern->OnError(VIDEO_ERROR_ID);
     EXPECT_EQ(result, VIDEO_CALLBACK_RESULT);
@@ -1430,5 +1433,39 @@ HWTEST_F(VideoTestNg, CallVideoPatternSetVideoControllerFunc, TestSize.Level1)
     auto videoControllerUpdate = AceType::MakeRefPtr<VideoControllerV2>();
     pattern->SetVideoController(videoControllerUpdate);
     EXPECT_NE(pattern->GetVideoController(), videoControllerUpdate);
+}
+
+/**
+ * @tc.name: CallVideoStaticPatternToJsonValue
+ * @tc.desc: Test VideoStaticPattern ToJsonValue() func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, CallVideoStaticPatternToJsonValue, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_TRUE(stack);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = VideoModelStatic::CreateFrameNode(nodeId);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue
+     * @tc.expected: step2. filter.IsFastFilter() is false.
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json, filter);
+    EXPECT_FALSE(filter.IsFastFilter());
+    EXPECT_EQ(json->GetValue("autoPlay")->GetString().c_str(), JSON_VALUE_FALSE);
+    EXPECT_EQ(json->GetValue("muted")->GetString().c_str(), JSON_VALUE_FALSE);
+    EXPECT_EQ(json->GetValue("loop")->GetString().c_str(), JSON_VALUE_FALSE);
+    EXPECT_EQ(json->GetValue("controls")->GetString().c_str(), JSON_VALUE_TRUE);
+    EXPECT_EQ(json->GetValue("objectFit")->GetString().c_str(), JSON_VALUE_COVER);
 }
 } // namespace OHOS::Ace::NG

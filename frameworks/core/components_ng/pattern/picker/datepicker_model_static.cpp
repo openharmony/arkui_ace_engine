@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG {
 void DatePickerModelStatic::SetOnChange(FrameNode* frameNode, DateChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -29,7 +29,7 @@ void DatePickerModelStatic::SetOnChange(FrameNode* frameNode, DateChangeEvent&& 
 void DatePickerModelStatic::SetChangeEvent(FrameNode* frameNode, DateChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
 }

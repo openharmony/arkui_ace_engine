@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkVideoPeer, FullscreenInfo, PreparedInfo, PlaybackInfo, VideoAttribute } from "./component/video"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -72,8 +73,9 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
     _analyzerConfig_0_0value?: ImageAnalyzerConfig | undefined
     _enableShortcutKey_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableShortcutKey_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkVideoPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkVideoPeer;
         if (this._muted_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._muted_0_flag) {

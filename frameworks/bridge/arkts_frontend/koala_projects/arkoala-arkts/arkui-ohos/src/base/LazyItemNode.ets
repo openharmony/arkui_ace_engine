@@ -31,7 +31,11 @@ export class LazyItemNode extends IncrementalNode {
                 return
             }
             const peer = node as PeerNode
-            peer.reusable ? peer.onReuse() : peer.reusable = true
+            if (peer.reusable) {
+                peer.onReuse(false)
+            } else {
+                peer.reusable = true
+            } 
         }
         this.onChildRemoved = (node: IncrementalNode) => {
             if (!node.isKind(PeerNodeType)) {

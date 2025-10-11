@@ -19,12 +19,15 @@
 #include "load.h"
 #include "utils/ani_utils.h"
 
+#if defined(MODEL_COMPONENT_SUPPORTED)
 #include "scene_adapter/scene_bridge_ani.h"
+#endif
 
 namespace OHOS::Ace::Ani {
 void Component3DSetScene(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node, ani_object sceneObj, ani_int modelType)
 {
+#if defined(MODEL_COMPONENT_SUPPORTED)
     CHECK_NULL_VOID(env);
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
     CHECK_NULL_VOID(arkNode);
@@ -35,11 +38,13 @@ void Component3DSetScene(
 
     auto scene = Render3D::SceneBridgeAni::UnwrapSceneFromAni(env, sceneObj);
     modifier3D->setScene(arkNode, scene, static_cast<int32_t>(modelType));
+#endif
 }
 
 void Component3DSetWidget(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node, ani_string scenePath, ani_int modelType)
 {
+#if defined(MODEL_COMPONENT_SUPPORTED)
     CHECK_NULL_VOID(env);
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
     CHECK_NULL_VOID(arkNode);
@@ -50,5 +55,17 @@ void Component3DSetWidget(
 
     std::string str = AniUtils::ANIStringToStdString(env, scenePath);
     modifier3D->setWidget(arkNode, str, static_cast<int32_t>(modelType));
+#endif
+}
+
+ani_long ExtractorsToScenePtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object sceneObj)
+{
+#if defined(MODEL_COMPONENT_SUPPORTED)
+    CHECK_NULL_RETURN(env, 0);
+    auto sceneAdapterPtr = Render3D::SceneBridgeAni::UnwrapSceneFromAni(env, sceneObj);
+    return reinterpret_cast<ani_long>(sceneAdapterPtr);
+#else
+    return 0;
+#endif // MODEL_COMPONENT_SUPPORTED
 }
 } // namespace OHOS::Ace::Ani

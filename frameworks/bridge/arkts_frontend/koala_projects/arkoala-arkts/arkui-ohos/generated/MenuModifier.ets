@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkMenuPeer, SubMenuExpandingMode, MenuAttribute } from "./component/menu"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -48,8 +49,9 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
     _menuItemGroupDivider_0_0value?: DividerStyleOptions | undefined
     _subMenuExpandingMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _subMenuExpandingMode_0_0value?: SubMenuExpandingMode | undefined
-    applyModifierPatch(peer: ArkMenuPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkMenuPeer;
         if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._font_0_flag) {

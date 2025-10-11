@@ -43,25 +43,6 @@ void CanvasModule::SetPixelMap(
     canvasModifier->setPixelMap(peer, reinterpret_cast<void*>(&mediaPixelMap));
 }
 
-ani_object CanvasModule::GetPixelMap(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr,
-    ani_double sx, ani_double sy, ani_double sw, ani_double sh)
-{
-    // auto* peer = reinterpret_cast<ArkUICanvasRenderer>(peerPtr);
-    // CHECK_NULL_RETURN(peer, nullptr);
-    // const auto* modifier = GetNodeAniModifier();
-    // CHECK_NULL_RETURN(modifier, nullptr);
-    // auto* canvasModifier = modifier->getCanvasAniModifier();
-    // CHECK_NULL_RETURN(canvasModifier, nullptr);
-    // auto* pixelMapPeer = reinterpret_cast<PixelMapPeer*>(canvasModifier->getPixelMap(peer, sx, sy, sw, sh));
-    // CHECK_NULL_RETURN(pixelMapPeer, nullptr);
-    // auto pixelMap = pixelMapPeer->pixelMap;
-    // CHECK_NULL_RETURN(pixelMap, nullptr);
-    // auto mediaPixelMap = pixelMap->GetPixelMapSharedPtr();
-    // CHECK_NULL_RETURN(mediaPixelMap, nullptr);
-    // return Media::PixelMapTaiheAni::CreateEtsPixelMap(env, mediaPixelMap);
-    return nullptr;
-}
-
 void CanvasModule::DrawPixelMap0(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr,
     ani_object pixelMapObj, ani_double dx, ani_double dy)
 {
@@ -173,13 +154,13 @@ ani_object CanvasModule::GetImageData(ani_env* env, [[maybe_unused]] ani_object 
         return nullptr;
     }
     canvasModifier->getImageData(peer, imageData, sx * density, sy * density, sw * density, sh * density);
-    static const char* className = "Lescompat/Uint8ClampedArray;";
+    static const char* className = "escompat.Uint8ClampedArray";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/Object;:V", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "C{std.core.Object}:", &ctor)) {
         return nullptr;
     }
     ani_object aniValue;

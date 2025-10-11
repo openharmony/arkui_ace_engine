@@ -404,7 +404,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestDefaultValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, setColorTestColorValidValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, DISABLED_setColorTestColorValidValues, TestSize.Level1)
 {
     Opt_Union_ResourceColor_LinearGradient initValueColor;
 

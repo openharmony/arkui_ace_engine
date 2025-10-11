@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkEffectComponentPeer, EffectComponentAttribute } from "./component/effectComponent"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -33,8 +34,9 @@ export class EffectComponentModifier extends CommonMethodModifier implements Eff
     applyFocusedAttribute(instance: EffectComponentAttribute): void { }
     applyDisabledAttribute(instance: EffectComponentAttribute): void { }
     applySelectedAttribute(instance: EffectComponentAttribute): void { }
-    applyModifierPatch(peer: ArkEffectComponentPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkEffectComponentPeer;
     }
     mergeModifier(modifier: EffectComponentModifier): void {
         super.mergeModifier(modifier)

@@ -18,6 +18,7 @@
 
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkToolBarItemPeer, ToolBarItemAttribute } from "./component/toolbar"
 import { int32 } from "@koalaui/common"
 export class ToolBarItemModifier implements ToolBarItemAttribute,AttributeModifier<ToolBarItemAttribute> {
@@ -31,7 +32,8 @@ export class ToolBarItemModifier implements ToolBarItemAttribute,AttributeModifi
     applyFocusedAttribute(instance: ToolBarItemAttribute): void { }
     applyDisabledAttribute(instance: ToolBarItemAttribute): void { }
     applySelectedAttribute(instance: ToolBarItemAttribute): void { }
-    applyModifierPatch(peer: ArkToolBarItemPeer): void {
+    applyModifierPatch(node: PeerNode): void {
+        const peer = node as ArkToolBarItemPeer;
     }
     mergeModifier(modifier: ToolBarItemModifier): void {
     }

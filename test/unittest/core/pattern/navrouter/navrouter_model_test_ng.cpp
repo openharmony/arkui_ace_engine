@@ -102,8 +102,8 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0017, TestSize.Level1)
     navDestinationNode->titleBarNode_ = titleBarNode;
     auto buttonNode = FrameNode::CreateFrameNode("buttonNode", 44, AceType::MakeRefPtr<ButtonPattern>());
     titleBarNode->backButton_ = buttonNode;
-    ASSERT_NE(buttonNode->GetOrCreateEventHub<EventHub>(), nullptr);
-    auto eventHub = navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    ASSERT_NE(buttonNode->GetEventHub<EventHub>(), nullptr);
+    auto eventHub = navDestinationNode->GetEventHub<NavDestinationEventHub>();
     auto onBack = []() { return true; };
     eventHub->onBackPressedEvent_ = onBack;
     auto layoutProperty = AceType::MakeRefPtr<NavigationLayoutProperty>();
@@ -358,7 +358,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0025, TestSize.Level1)
     auto destinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto backButton = FrameNode::CreateFrameNode("BackButton", 77, AceType::MakeRefPtr<ButtonPattern>());
-    auto eventHub = backButton->GetOrCreateEventHub<EventHub>();
+    auto eventHub = backButton->GetEventHub<EventHub>();
     auto pattern = navigation->GetPattern<NavigationPattern>();
     /**
      * @tc.steps: step2. call navigation->SetBackButtonEvent.
@@ -367,7 +367,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0025, TestSize.Level1)
     navDestination->titleBarNode_ = destinationTitleBarNode;
     destinationTitleBarNode->backButton_ = backButton;
     backButton->eventHub_ = eventHub;
-    navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+    navDestination->GetEventHub<NavDestinationEventHub>();
     navDestination->contentNode_ = nullptr;
     navigation->SetBackButtonEvent(navDestination);
     pattern->navigationMode_ = NavigationMode::STACK;
@@ -384,7 +384,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0025, TestSize.Level1)
     GestureEvent event;
     navDestination->backButtonEvent_(event);
     auto onBack = []() { return true; };
-    navDestination->GetOrCreateEventHub<NavDestinationEventHub>()->onBackPressedEvent_ = onBack;
+    navDestination->GetEventHub<NavDestinationEventHub>()->onBackPressedEvent_ = onBack;
     navDestination->contentNode_ = contentNode;
     eventHub->gestureEventHub_ = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     navDestination->GetPattern<NavDestinationPattern>()->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
@@ -392,7 +392,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0025, TestSize.Level1)
     navDestination->GetPattern<NavDestinationPattern>()->customNode_ = preNavDestination;
     navigation->SetBackButtonEvent(navDestination);
     navDestination->backButtonEvent_(event);
-    EXPECT_TRUE(navDestination->GetOrCreateEventHub<NavDestinationEventHub>()->onBackPressedEvent_());
+    EXPECT_TRUE(navDestination->GetEventHub<NavDestinationEventHub>()->onBackPressedEvent_());
 }
 
 /**

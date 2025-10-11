@@ -32,7 +32,7 @@ import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLig
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Resource } from "global.resource"
-import { extractors, AttributeModifier, hookImageAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookImageSetImageOptions, hookImageAttributeModifier, AttributeUpdater } from "#handwritten"
 import { default as image } from "@ohos.multimedia.image"
 import { Color, ImageFit, ImageRepeat, CopyOptions } from "./enums"
 import { ColorMetrics } from "arkui.Graphics"
@@ -187,7 +187,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 if (valueTmpValueForIdx0 instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
-                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.valueOf())
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
@@ -781,9 +781,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     }
     public setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
-            const src_casted = src as (image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent)
-            const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
-            this.getPeer()?.setImageOptionsAttribute(src_casted, imageAIOptions_casted)
+            hookImageSetImageOptions(this, src, imageAIOptions)
             return this
         }
         return this

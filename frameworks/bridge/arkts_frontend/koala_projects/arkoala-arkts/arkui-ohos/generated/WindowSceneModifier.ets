@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkWindowScenePeer, WindowSceneAttribute } from "./component/windowScene"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -37,8 +38,9 @@ export class WindowSceneModifier extends CommonMethodModifier implements WindowS
     _attractionEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _attractionEffect_0_0value?: Position | undefined
     _attractionEffect_0_1value?: number | undefined
-    applyModifierPatch(peer: ArkWindowScenePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkWindowScenePeer;
         if (this._attractionEffect_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._attractionEffect_0_flag) {

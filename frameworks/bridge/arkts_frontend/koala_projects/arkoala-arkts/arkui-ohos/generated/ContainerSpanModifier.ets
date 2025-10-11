@@ -18,6 +18,7 @@
 
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkContainerSpanPeer, ContainerSpanAttribute } from "./component/containerSpan"
 import { int32 } from "@koalaui/common"
 import { TextBackgroundStyle } from "./component/span"
@@ -34,7 +35,8 @@ export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeMo
     applySelectedAttribute(instance: ContainerSpanAttribute): void { }
     _textBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
-    applyModifierPatch(peer: ArkContainerSpanPeer): void {
+    applyModifierPatch(node: PeerNode): void {
+        const peer = node as ArkContainerSpanPeer;
         if (this._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._textBackgroundStyle_0_flag) {

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSliderPeer, SliderChangeMode, SliderBlockStyle, SliderInteraction, SliderConfiguration, SlideRange, SliderAttribute } from "./component/slider"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -78,8 +79,9 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
     _showTips_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _showTips_0_0value?: boolean | undefined
     _showTips_0_1value?: ResourceStr | undefined
-    applyModifierPatch(peer: ArkSliderPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkSliderPeer;
         if (this._blockColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._blockColor_0_flag) {
@@ -426,7 +428,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             switch (this._showTips_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setShowTipsAttribute((this._showTips_0_0value as boolean | undefined), (this._showTips_0_1value as ResourceStr | undefined));
+                    peer.setShowTipsAttribute((this._showTips_0_0value as boolean | undefined), (this._showTips_0_1value as ResourceStr | undefined | undefined));
                     this._showTips_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

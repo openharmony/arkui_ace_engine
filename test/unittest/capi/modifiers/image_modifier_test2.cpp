@@ -18,7 +18,6 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
-#include "core/interfaces/native/implementation/matrix4_transit_peer.h"
 #include "generated/test_fixtures.h"
 #include "point_light_test.h"
 #include "generated/type_helpers.h"
@@ -152,9 +151,9 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest2, setImageMatrixTest, TestSize.Level1)
 {
-    matrix4_Matrix4TransitPeer* matrix4transit = PeerUtils::CreatePeer<matrix4_Matrix4TransitPeer>();
-    matrix4transit->matrix = Matrix4::CreateScale(11.0, 7.0, 1.0);
-    auto optValue = Converter::ArkValue<Opt_matrix4_Matrix4Transit>(matrix4transit);
+    Matrix4 matrix4transit = Matrix4::CreateScale(11.0, 7.0, 1.0);
+    auto matrix4transitPeer = reinterpret_cast<Ark_matrix4_Matrix4Transit>(&matrix4transit);
+    auto optValue = Converter::ArkValue<Opt_matrix4_Matrix4Transit>(matrix4transitPeer);
 
     modifier_->setImageMatrix(node_, &optValue);
 

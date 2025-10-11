@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkFormComponentPeer, FormSize, FormDimension, FormCallbackInfo, ErrorInformation, FormComponentAttribute } from "./component/formComponent"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -57,8 +58,9 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
     _onLoad_0_0value?: VoidCallback | undefined
     _onUpdate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onUpdate_0_0value?: ((value0: FormCallbackInfo) => void) | undefined
-    applyModifierPatch(peer: ArkFormComponentPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkFormComponentPeer;
         if (this._size_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._size_0_flag) {

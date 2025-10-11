@@ -77,7 +77,7 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
                 if (valueTmpValueForIdx0 instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
-                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.valueOf())
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
@@ -731,7 +731,7 @@ export class CapsuleStyleOptions_serializer {
             if (valueHolderForBorderColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBorderColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as number
@@ -783,7 +783,7 @@ export class CapsuleStyleOptions_serializer {
             if (valueHolderForFontColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
@@ -829,11 +829,11 @@ export class CapsuleStyleOptions_serializer {
         let borderColorTmpBuf : ResourceColor | undefined = undefined
         if ((borderColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const borderColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let borderColorTmpBuf_ : Color | number | string | Resource | undefined
+            let borderColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (borderColorTmpBuf_UnionSelector == (0).toChar()) {
-                borderColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                borderColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (borderColorTmpBuf_UnionSelector == (1).toChar()) {
-                borderColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                borderColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (borderColorTmpBuf_UnionSelector == (2).toChar()) {
                 borderColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (borderColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -841,7 +841,7 @@ export class CapsuleStyleOptions_serializer {
             } else {
                 throw new Error("One of the branches for borderColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            borderColorTmpBuf = (borderColorTmpBuf_ as Color | number | string | Resource)
+            borderColorTmpBuf = (borderColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const borderColorTmpResult : ResourceColor | undefined = borderColorTmpBuf
         const borderWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -871,11 +871,11 @@ export class CapsuleStyleOptions_serializer {
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
-                fontColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -883,7 +883,7 @@ export class CapsuleStyleOptions_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         const showDefaultPercentageTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

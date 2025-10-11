@@ -15,69 +15,21 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DRAW_CANVAS_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DRAW_CANVAS_PEER_IMPL_H
 
-#include "base/image/pixel_map.h"
-#include "core/components_ng/image_provider/image_data.h"
-#include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
-#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 
-#include "arkoala_api_generated.h"
-
-class DrawingCanvasPeerImpl {
+struct drawing_CanvasPeer {
 public:
-    explicit DrawingCanvasPeerImpl(const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& pixelmap)
-        : pixelmap_(pixelmap)
-    {
-        pattern_ = OHOS::Ace::AceType::Claim(new OHOS::Ace::NG::OffscreenCanvasPattern(defaultSize, defaultSize));
-        CHECK_NULL_VOID(pixelmap);
-        // Setting Offscreen buffer size
-        pattern_->UpdateSize(pixelmap->GetWidth(), pixelmap->GetHeight());
-        // Setting image data to back buffer canvas
-        OHOS::Ace::ImageData image;
-        image.pixelMap = pixelmap;
-        image.x = 0;
-        image.y = 0;
-        image.dirtyX = 0;
-        image.dirtyY = 0;
-        image.dirtyWidth = pixelmap->GetWidth();
-        image.dirtyHeight = pixelmap->GetHeight();
-        pattern_->PutImageData(image);
-    }
-    virtual ~DrawingCanvasPeerImpl() = default;
-
-    void FillRect(const OHOS::Ace::Rect& rect)
-    {
-        CHECK_NULL_VOID(pattern_);
-        pattern_->FillRect(rect);
-    }
-
-    void SetPattern(const OHOS::Ace::RefPtr<OHOS::Ace::NG::OffscreenCanvasPattern>& pattern)
-    {
-        pattern_ = pattern;
-    }
-
-    void SetCanvas(const std::shared_ptr<OHOS::Ace::RSCanvas>& rsCanvas)
+    explicit drawing_CanvasPeer(OHOS::Rosen::Drawing::Canvas* rsCanvas)
     {
         rsCanvas_ = rsCanvas;
     }
-
-    std::shared_ptr<OHOS::Ace::RSCanvas> GetCanvas()
+    ~drawing_CanvasPeer() = default;
+    OHOS::Rosen::Drawing::Canvas* GetCanvas() const
     {
         return rsCanvas_;
     }
-
-private:
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::OffscreenCanvasPattern> pattern_;
-    std::shared_ptr<OHOS::Ace::RSCanvas> rsCanvas_;
-    const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> pixelmap_;
-    static constexpr int defaultSize = 1; // The canvas size should be at least 1x1
-};
-
-struct drawing_CanvasPeer : public DrawingCanvasPeerImpl {
-protected:
-    explicit drawing_CanvasPeer(const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& pixelmap)
-        : DrawingCanvasPeerImpl(pixelmap) {}
-    ~drawing_CanvasPeer() override = default;
     friend OHOS::Ace::NG::PeerUtils;
+private:
+    OHOS::Rosen::Drawing::Canvas* rsCanvas_;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DRAW_CANVAS_PEER_IMPL_H

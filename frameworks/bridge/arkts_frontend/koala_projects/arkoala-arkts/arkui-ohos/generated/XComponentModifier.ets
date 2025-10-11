@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkXComponentPeer, XComponentAttribute } from "./component/xcomponent"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -44,8 +45,9 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
     _enableSecure_0_0value?: boolean | undefined
     _hdrBrightness_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hdrBrightness_0_0value?: double | undefined
-    applyModifierPatch(peer: ArkXComponentPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkXComponentPeer;
         if (this._onLoad_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onLoad_0_flag) {

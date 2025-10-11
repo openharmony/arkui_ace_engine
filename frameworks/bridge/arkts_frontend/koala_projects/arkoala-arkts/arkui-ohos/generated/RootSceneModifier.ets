@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkRootScenePeer, RootSceneAttribute } from "./component/rootScene"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -33,8 +34,9 @@ export class RootSceneModifier extends CommonMethodModifier implements RootScene
     applyFocusedAttribute(instance: RootSceneAttribute): void { }
     applyDisabledAttribute(instance: RootSceneAttribute): void { }
     applySelectedAttribute(instance: RootSceneAttribute): void { }
-    applyModifierPatch(peer: ArkRootScenePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkRootScenePeer;
     }
     mergeModifier(modifier: RootSceneModifier): void {
         super.mergeModifier(modifier)

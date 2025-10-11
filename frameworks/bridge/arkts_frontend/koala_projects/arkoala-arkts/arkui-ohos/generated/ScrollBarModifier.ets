@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkScrollBarPeer, ScrollBarAttribute } from "./component/scrollBar"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -35,8 +36,9 @@ export class ScrollBarModifier extends CommonMethodModifier implements ScrollBar
     applySelectedAttribute(instance: ScrollBarAttribute): void { }
     _enableNestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableNestedScroll_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkScrollBarPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkScrollBarPeer;
         if (this._enableNestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._enableNestedScroll_0_flag) {

@@ -34,6 +34,10 @@ type FixedStringArrayType = FixedArray<StringOrUndefinedType>;
 export type ToJSONType<T> = (value: T) => jsonx.JsonElement;
 export type FromJSONType<T> = (element: jsonx.JsonElement) => T;
 
+export function transferTypeName(typename: string): string {
+    return typename.substring(typename.lastIndexOf('.') + 1);
+}
+
 export interface ConnectOptions<T extends object> {
     type: Type;
     key?: string;
@@ -41,13 +45,11 @@ export interface ConnectOptions<T extends object> {
     areaMode?: contextConstant.AreaMode;
 }
 
-const enum PersistError {
-    Quota = 'quota',
-    Serialization = 'serialization',
-    Unknown = 'unknown'
-};
+const Quota: string = 'quota';
+const Serialization: string = 'serialization';
+const Unknown: string = 'unknown';
 
-type PersistenceErrorCallback = ((key: string, reason: PersistError, message: string) => void) | undefined;
+type PersistenceErrorCallback = ((key: string, reason: string, message: string) => void) | undefined;
 
 const enum MapType {
     NOT_IN_MAP = -1,
@@ -70,7 +72,7 @@ export class PersistenceV2 {
         fromJson: FromJSONType<T>,
         defaultCreator?: StorageDefaultCreator<T>
     ): T | undefined {
-        return PersistenceV2Impl.instance().connect(ttype, ttype.getName(), toJson, fromJson, defaultCreator);
+        return PersistenceV2Impl.instance().connect(ttype, transferTypeName(ttype.getName()), toJson, fromJson, defaultCreator);
     }
 
     public static connect<T extends object>(
@@ -217,7 +219,7 @@ export class StorageHelper {
             const key = keyOrType as string;
             return StorageHelper.isKeyValid(key) ? key : undefined;
         }
-        return (keyOrType as Type).getName();
+        return transferTypeName((keyOrType as Type).getName());
     }
 
     public static checkTypeByType<T>(key: string, newType: Type, oldType: Type): void {
@@ -227,8 +229,8 @@ export class StorageHelper {
     }
 
     public static checkTypeByName(key: string, ttype: Type, typeName: string): void {
-        if (ttype.getName() !== typeName) {
-            throw new Error(`The type mismatches when use the key '${key}' in storage, '${ttype.getName()}' vs. '${typeName}'`);
+        if (transferTypeName(ttype.getName()) !== typeName) {
+            throw new Error(`The type mismatches when use the key '${key}' in storage, '${transferTypeName(ttype.getName())}' vs. '${typeName}'`);
         }
     }
 
@@ -346,7 +348,7 @@ export class PersistenceV2Impl {
         fromJson: FromJSONType<T>,
         defaultCreator?: StorageDefaultCreator<T>
     ): T | undefined {
-        return this.connect(ttype, ttype.getName(), toJson, fromJson, defaultCreator);
+        return this.connect(ttype, transferTypeName(ttype.getName()), toJson, fromJson, defaultCreator);
     }
 
     public connect<T extends object>(
@@ -357,7 +359,7 @@ export class PersistenceV2Impl {
         defaultCreator?: StorageDefaultCreator<T>,
     ): T | undefined {
         if (this.storageBackend_ === undefined) {
-            this.errorHelper(key, PersistError.Unknown, `The storage is null`);
+            this.errorHelper(key, Unknown, `The storage is null`);
             return undefined;
         }
 
@@ -417,7 +419,7 @@ export class PersistenceV2Impl {
         }
 
         if (this.storageBackend_ === undefined) {
-            this.errorHelper(key, PersistError.Unknown, `The storage is null`);
+            this.errorHelper(key, Unknown, `The storage is null`);
             return undefined;
         }
 
@@ -476,7 +478,7 @@ export class PersistenceV2Impl {
             }
         } catch (err) {
             if (this.errorCB_) {
-                this.errorCB_!('', PersistError.Unknown, `fail to get all persisted keys`);
+                this.errorCB_!('', Unknown, `fail to get all persisted keys`);
                 return [];
             }
             throw err;
@@ -514,7 +516,7 @@ export class PersistenceV2Impl {
                 writer();
             }
         } catch (err) {
-            this.errorHelper(key, PersistError.Serialization, JSON.stringify(err));
+            this.errorHelper(key, Serialization, JSON.stringify(err));
             status = false;
         }
         return status;
@@ -570,7 +572,6 @@ export class PersistenceV2Impl {
         }
         const areaMode = (keyType === MapType.GLOBAL_MAP) ? this.globalMapAreaMode_.get(key!) : undefined;
         // Write to backend
-        StateMgmtConsole.log("### propertyWriter  set to backend " + jsonString);
         this.storageBackend_!.set(key!, jsonString, areaMode);
         PersistenceV2Impl.backendUpdateCountForTesting++;
     }
@@ -658,7 +659,7 @@ export class PersistenceV2Impl {
     private createDefaultValue<T extends object>(key: string, ttype: Type,
         defaultCreator?: StorageDefaultCreator<T>): StoragePropertyV2<T> | undefined {
         if (!defaultCreator) {
-            this.errorHelper(key, PersistError.Unknown, `Can not create default value for '${key}'`);
+            this.errorHelper(key, Unknown, `Can not create default value for '${key}'`);
             return undefined;
         }
         const value: T = defaultCreator!();
@@ -674,11 +675,11 @@ export class PersistenceV2Impl {
         try {
             let maybeTarget = StateMgmtTool.tryGetTarget(value);
             let target = maybeTarget ? maybeTarget as T : value;
-            return Type.of(target).getName();
+            return transferTypeName(Type.of(target).getName());
         } catch (err) {
             // not proxied
         }
-        return Type.of(value).getName();
+        return transferTypeName(Type.of(value).getName());
     }
 
     private static fromJsonWithType<T extends object>(fromJson: FromJSONType<T>, record: jsonx.JsonElement)
@@ -708,7 +709,7 @@ export class PersistenceV2Impl {
         try {
             const jsonString: string = this.storageBackend_!.get(key, areaMode)!;
             if (!jsonString) {
-                this.errorHelper(key, PersistError.Serialization, StorageHelper.ERROR_NOT_IN_THE_STORE);
+                this.errorHelper(key, Serialization, StorageHelper.ERROR_NOT_IN_THE_STORE);
                 return undefined;
             }
             let property = new StoragePropertyV2<T>(key);
@@ -735,7 +736,7 @@ export class PersistenceV2Impl {
             return newObservedValue;
         } catch (err) {
             this.stopObservation();
-            this.errorHelper(key, PersistError.Serialization, JSON.stringify(err));
+            this.errorHelper(key, Serialization, JSON.stringify(err));
         }
         return undefined;
     }
@@ -752,7 +753,7 @@ export class PersistenceV2Impl {
                     }
                 } catch (err) {
                     if (this.errorCB_) {
-                        this.errorCB_!(key!, PersistError.Serialization, JSON.stringify(err));
+                        this.errorCB_!(key!, Serialization, JSON.stringify(err));
                     }
                     StateMgmtConsole.log(`Exception writing for '${key}' key: ` + err);
                 }
@@ -812,7 +813,7 @@ export class PersistenceV2Impl {
                 this.storeKeysToStorage(this.keysSet_);
             }
         } catch (err) {
-            this.errorHelper(key, PersistError.Unknown, `fail to store the key '${key}'`);
+            this.errorHelper(key, Unknown, `fail to store the key '${key}'`);
         }
     }
 
@@ -842,7 +843,6 @@ export class PersistenceV2Impl {
     }
 
     private removeFromPersistenceV2(key: string, areaMode?: AreaMode): void {
-        StateMgmtConsole.log("### removeFromPersistenceV2 start");
         try {
             // check for global path
             if (areaMode !== undefined) {
@@ -859,12 +859,12 @@ export class PersistenceV2Impl {
                     removeFlag = this.removeFlagForGlobalPath(key);
                 }
                 if (!removeFlag) {
-                    StateMgmtConsole.log(StorageHelper.DELETE_NOT_EXIST_KEY + `keys:${key}`);
+                    StateMgmtConsole.warn(StorageHelper.DELETE_NOT_EXIST_KEY + `keys:${key}`);
                 }
             }
         } catch (err) {
-            StateMgmtConsole.log("### removeFromPersistenceV2 fails to remove " + err);
-            this.errorHelper(key, PersistError.Unknown, `fail to remove the key '${key}'`);
+            StateMgmtConsole.log("removeFromPersistenceV2 fails to remove " + err);
+            this.errorHelper(key, Unknown, `fail to remove the key '${key}'`);
         }
     }
 
@@ -903,7 +903,7 @@ export class PersistenceV2Impl {
 
     private isPersistentKeyValid(key: string): string | undefined {
         if (key === PersistenceV2Impl.KEYS_ARR_) {
-            this.errorHelper(key, PersistError.Quota, `The key '${key}' cannot be used`);
+            this.errorHelper(key, Quota, `The key '${key}' cannot be used`);
             return undefined;
         }
         return StorageHelper.isKeyValid(key!) ? key : undefined;
@@ -913,7 +913,7 @@ export class PersistenceV2Impl {
         let key = options.key;
         if (!options.key) {
             StateMgmtConsole.log(StorageHelper.NULL_OR_UNDEFINED_KEY + ', try to use the type name as key');
-            key = options.type.getName();
+            key = transferTypeName(options.type.getName());
         }
 
         if (key === undefined) {
@@ -922,7 +922,7 @@ export class PersistenceV2Impl {
         return this.isPersistentKeyValid(key);
     }
 
-    private errorHelper(key: string, reason: PersistError, message: string) {
+    private errorHelper(key: string, reason: string, message: string) {
         if (this.errorCB_ !== undefined) {
             this.errorCB_!(key, reason, message);
             return;

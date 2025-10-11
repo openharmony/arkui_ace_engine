@@ -18,12 +18,12 @@ import { PeerNode } from "./PeerNode";
 import { ArkCustomComponentRootPeer } from "#generated";
 import { ArkCustomComponent } from "./ArkCustomComponent"
 import { InteropNativeModule } from "@koalaui/interop"
-let _isNeedCreate: boolean = false
+import { __context, GlobalStateManager, StateManager } from "@koalaui/runtime"
 
 export function setNeedCreate(isNeedCreate: boolean): boolean
 {
-    const temp = _isNeedCreate
-    _isNeedCreate = isNeedCreate
+    const temp = GlobalStateManager.instance._isNeedCreate
+    GlobalStateManager.instance._isNeedCreate = isNeedCreate
     return temp
 }
 
@@ -31,16 +31,16 @@ export function setNeedCreate(isNeedCreate: boolean): boolean
 export function ArkComponentRoot(
     component: ArkCustomComponent,
     @memo
-    content: () => void
+    content: (node: PeerNode) => void
 ) {
     InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot enter`)
     NodeAttach<PeerNode>(
         () => ArkCustomComponentRootPeer.create(component),
         (node: PeerNode) => {
-            if (_isNeedCreate) {
+            if ((__context() as StateManager)._isNeedCreate) {
                 rememberDisposable(() => {
                     let state = mutableState(false)
-                    scheduleCallback(() => {})
+                    scheduleCallback(() => { })
                     return state;
                 }, (_: MutableState<boolean> | undefined) => {
                     scheduleCallback(() => {
@@ -49,7 +49,7 @@ export function ArkComponentRoot(
                 })
                 component.aboutToAppear()
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach before content`)
-                content()
+                content(node)
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach after content`)
                 return
             }
@@ -69,7 +69,7 @@ export function ArkComponentRoot(
             if (shown.value) {
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach before WithRouterTransitionState`)
                 InteropNativeModule._NativeLog("AceRouter:ArkComponentRoot NodeAttach, UpdateRouter page visibility state")
-                content();
+                content(node);
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach after WithRouterTransitionState`)
             }
         }

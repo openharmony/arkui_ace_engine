@@ -81,8 +81,8 @@ const PUBLIC_IMAGE_BACK = $r('sys.media.ohos_ic_compnent_titlebar_back');
 
 const DEFAULT_TITLE_BAR_HEIGHT: number = 56;
 const DEFAULT_TITLE_PADDING: number = 2;
-const MAX_LINE_ONE: number = 1;
-const MAX_LINES_TWO: number = 2;
+const MAX_LINE_ONE: int = 1;
+const MAX_LINES_TWO: int = 2;
 const MAX_MAIN_TITLE_PERCENT: number = 0.65;
 const MAX_SUB_TITLE_PERCENT: number = 0.35;
 const MIN_SUBTITLE_SIZE = '10.0vp';
@@ -234,7 +234,7 @@ export struct EditableTitleBar {
         this.maxFontScale = uiContent.getMaxFontScale();
       }
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | String = (exception as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
     }
@@ -438,10 +438,10 @@ struct EditableTitleBarMenuSection {
     Column() {
       Row() {
         if (this.menuItems) {
-          ForEach((this.menuItems as EditableTitleBarMenuItem[]).slice(EditableTitleBar.commonZero,
+          ForEach((this.menuItems as EditableTitleBarMenuItem[]).slice(EditableTitleBar.commonZero.toInt(),
               this.isSaveEnabled ?
-              EditableTitleBar.maxOtherCountOfExtraItems : EditableTitleBar.maxCountOfExtraItems),
-            (item: EditableTitleBarMenuItem, index: number) => {
+              EditableTitleBar.maxOtherCountOfExtraItems.toInt() : EditableTitleBar.maxCountOfExtraItems.toInt()),
+            (item: EditableTitleBarMenuItem, index: int) => {
               ImageMenuItem({
                 item: item,
                 attribute: ItemType.Icon,
@@ -536,7 +536,7 @@ struct ImageMenuItem {
         let hostContext: common.UIAbilityContext = context.getHostContext() as common.UIAbilityContext
         this.applicationContext = hostContext.getApplicationContext();
         try {
-          this.callbackId = this.applicationContext.on('environment', this.envCallback);
+          this.callbackId = this.applicationContext.onEnvironment(this.envCallback);
         } catch (paramError) {
           hilog.error(0x3900, 'Ace',
             `EditableTitleBar Faild to get environment param error `);
@@ -563,7 +563,7 @@ struct ImageMenuItem {
       }
       return Math.min(this.systemFontScale as number, this.maxFontScale as number);
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | String = (exception as ClassCastError)?.message;
       hilog.error(0x3900, 'EditableTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
@@ -615,7 +615,7 @@ struct ImageMenuItem {
         uiContext = hostContext?.resourceManager?.getStringByNameSync(contextName);
       }
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | String = (exception as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace', `Faild to getStringByNameSync,cause, code: ${code}, message: ${message}`);
     }
@@ -641,7 +641,7 @@ struct ImageMenuItem {
           resourceString = context?.resourceManager?.getStringSync(resource as Long);
         }
       } catch (err) {
-        let code: undefined | number = (err as ClassCastError)?.code;
+        let code: undefined | int = (err as ClassCastError)?.code;
         let message: undefined | String = (err as ClassCastError)?.message;
         hilog.error(0x3900, 'Ace', `Faild to EditableTitleBar toStringFormat, code: ${code}, message: ${message}`)
       }
@@ -902,14 +902,14 @@ struct EditableTitleBarDialog {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
   screenWidth: number = 640;
-  verticalScreenLines: number = 6;
-  horizontalsScreenLines: number = 1;
+  verticalScreenLines: int = 6;
+  horizontalsScreenLines: int = 1;
   cancel: () => void = () => {
   }
   confirm: () => void = () => {
   }
   @Prop fontSize: number = 1;
-  @State maxLines: number = 1;
+  @State maxLines: int = 1;
   @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
 
   build() {
@@ -1010,7 +1010,7 @@ struct EditableTitleBarDialog {
         this.mainWindowStage = hostContext?.windowStage.getMainWindowSync();
       }
     } catch (error) {
-      let code: undefined | number = (error as ClassCastError)?.code;
+      let code: undefined | int = (error as ClassCastError)?.code;
       let message: undefined | String = (error as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace', `EditableTitleBar getMainWindowStage error, code: ${code},message:${message}`);
     }
@@ -1051,7 +1051,7 @@ function getNumberByResource(resourceId: number, defaultNumber: number): number 
       return resourceNumber / densityPixels;
     }
   } catch (error) {
-    let code: number = (error as ClassCastError).code;
+    let code: int = (error as ClassCastError).code;
     let message: string = (error as ClassCastError).message;
     hilog.error(0x3900, 'Ace', `EditableTitleBar getNumberByResource error, code: ${code},message:${message}`);
     return 0;

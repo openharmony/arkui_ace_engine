@@ -71,7 +71,7 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -99,7 +99,7 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -352,7 +352,7 @@ export class SwitchStyle_serializer {
             if (valueHolderForUnselectedColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
@@ -376,7 +376,7 @@ export class SwitchStyle_serializer {
             if (valueHolderForPointColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForPointColorTmpValueForIdx0  = valueHolderForPointColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForPointColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForPointColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForPointColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForPointColorTmpValueForIdx1  = valueHolderForPointColorTmpValue as number
@@ -431,11 +431,11 @@ export class SwitchStyle_serializer {
         let unselectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((unselectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const unselectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let unselectedColorTmpBuf_ : Color | number | string | Resource | undefined
+            let unselectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (unselectedColorTmpBuf_UnionSelector == (0).toChar()) {
-                unselectedColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                unselectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (unselectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                unselectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                unselectedColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (unselectedColorTmpBuf_UnionSelector == (2).toChar()) {
                 unselectedColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (unselectedColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -443,18 +443,18 @@ export class SwitchStyle_serializer {
             } else {
                 throw new Error("One of the branches for unselectedColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | number | string | Resource)
+            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const unselectedColorTmpResult : ResourceColor | undefined = unselectedColorTmpBuf
         const pointColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let pointColorTmpBuf : ResourceColor | undefined = undefined
         if ((pointColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const pointColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let pointColorTmpBuf_ : Color | number | string | Resource | undefined
+            let pointColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (pointColorTmpBuf_UnionSelector == (0).toChar()) {
-                pointColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                pointColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (pointColorTmpBuf_UnionSelector == (1).toChar()) {
-                pointColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                pointColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (pointColorTmpBuf_UnionSelector == (2).toChar()) {
                 pointColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (pointColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -462,7 +462,7 @@ export class SwitchStyle_serializer {
             } else {
                 throw new Error("One of the branches for pointColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            pointColorTmpBuf = (pointColorTmpBuf_ as Color | number | string | Resource)
+            pointColorTmpBuf = (pointColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const pointColorTmpResult : ResourceColor | undefined = pointColorTmpBuf
         const trackBorderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

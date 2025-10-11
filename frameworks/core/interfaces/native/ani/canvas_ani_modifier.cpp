@@ -48,22 +48,6 @@ void SetPixelMap(ArkUICanvasRenderer peer, void* pixelMapPtr)
 #endif
 }
 
-void* GetPixelMap(ArkUICanvasRenderer peer, ani_double sx, ani_double sy, ani_double sw, ani_double sh)
-{
-#if defined(PIXEL_MAP_SUPPORTED)
-    CHECK_NULL_RETURN(peer, nullptr);
-    auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    auto pixelMap = peerImpl->GetPixelMap(sx, sy, sw, sh);
-    CHECK_NULL_RETURN(pixelMap, nullptr);
-    image_PixelMapPeer* pixelMapPeer = new image_PixelMapPeer();
-    pixelMapPeer->pixelMap = pixelMap;
-    return reinterpret_cast<void*>(pixelMapPeer);
-#else
-    return nullptr;
-#endif
-}
-
 void DrawPixelMap0(ArkUICanvasRenderer peer, void* pixelMapPtr, ani_double dx, ani_double dy)
 {
     CHECK_NULL_VOID(peer);
@@ -241,9 +225,9 @@ void* GetDrawingCanvas(ArkUIDrawingRenderingContext peer)
 {
     auto peerImpl = reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);
-    auto canvas = peerImpl->GetCanvas();
-    CHECK_NULL_RETURN(canvas, nullptr);
-    return reinterpret_cast<void*>(canvas.get());
+    auto drawingCanvasPeer = peerImpl->GetCanvas();
+    CHECK_NULL_RETURN(drawingCanvasPeer, nullptr);
+    return reinterpret_cast<void*>(drawingCanvasPeer->GetCanvas());
 }
 
 ani_int GetCanvasId(ArkUICanvasRenderingContext peer)
@@ -257,7 +241,6 @@ ani_int GetCanvasId(ArkUICanvasRenderingContext peer)
 const ArkUIAniCanvasModifier* GetCanvasAniModifier()
 {
     static const ArkUIAniCanvasModifier impl = { .setPixelMap = CanvasAniModifier::SetPixelMap,
-        .getPixelMap = CanvasAniModifier::GetPixelMap,
         .drawPixelMap0 = CanvasAniModifier::DrawPixelMap0,
         .drawPixelMap1 = CanvasAniModifier::DrawPixelMap1,
         .drawPixelMap2 = CanvasAniModifier::DrawPixelMap2,

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkBaseSpanPeer, TextBackgroundStyle, BaseSpan } from "./component/span"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -38,8 +39,9 @@ export class BaseSpanModifier extends CommonMethodModifier implements BaseSpan,A
     _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
     _baselineOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _baselineOffset_0_0value?: LengthMetrics | undefined
-    applyModifierPatch(peer: ArkBaseSpanPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkBaseSpanPeer;
         if (this._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._textBackgroundStyle_0_flag) {

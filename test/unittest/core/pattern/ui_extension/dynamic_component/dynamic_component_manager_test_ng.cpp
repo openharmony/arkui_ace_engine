@@ -88,7 +88,7 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg001, TestSize.L
     EXPECT_TRUE(geometryNode->GetMarginFrameSize().IsPositive());
     DynamicComponentManager::TriggerOnAreaChangeCallback(frameNode, 1);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_FALSE(eventHub->HasOnAreaChanged());
     DynamicComponentManager::TriggerOnAreaChangeCallback(frameNode, 1);
@@ -117,7 +117,7 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg002, TestSize.L
     /**
      * @tc.steps: step2. test method HandleDynamicRenderOnAreaChange
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_FALSE(eventHub->HasInnerOnAreaChanged());
     RectF rectF(5, 5, 1, 1);
@@ -158,15 +158,17 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg003, TestSize.L
     auto geometryNode = stageNode->GetGeometryNode();
     EXPECT_NE(geometryNode, nullptr);
     EXPECT_TRUE(geometryNode->GetMarginFrameSize().IsPositive());
-    auto frameNodeRef = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNodeRef =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(frameNodeRef, nullptr);
     FrameNode* frameNode = &(*frameNodeRef);
     geometryNode->frame_.rect_.SetWidth(NEGATIVE_SIZE);
     geometryNode->frame_.rect_.SetHeight(NEGATIVE_SIZE);
     EXPECT_FALSE(geometryNode->GetMarginFrameSize().IsPositive());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
-    auto func = [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {};
+    auto func =
+        [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {};
     eventHub->SetOnAreaChanged(std::move(func));
     ASSERT_TRUE(eventHub->HasOnAreaChanged());
     frameNode->lastHostParentOffsetToWindow_ = std::make_shared<OffsetF>();

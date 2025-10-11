@@ -71,7 +71,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -175,7 +175,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -215,7 +215,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -271,20 +271,12 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setEnterKeyType(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnSubmitAttribute(value: ((value0: string) => void) | SearchSubmitCallback | undefined): void {
+    setOnSubmitAttribute(value: SearchSubmitCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof ((value0: string) => void)) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as ((value0: string) => void)
-                thisSerializer.holdAndWriteCallback(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof SearchSubmitCallback) {
-                thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as SearchSubmitCallback
-                thisSerializer.holdAndWriteCallback(valueTmpValueForIdx1)
-            }
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -375,12 +367,12 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setCopyOption(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxLengthAttribute(value: number | undefined): void {
+    setMaxLengthAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -423,15 +415,15 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setSelectionMenuHidden(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontSizeAttribute(value: number | string | Resource | undefined): void {
+    setMinFontSizeAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -447,15 +439,15 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setMinFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxFontSizeAttribute(value: number | string | Resource | undefined): void {
+    setMaxFontSizeAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -471,15 +463,15 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setMaxFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontScaleAttribute(value: number | Resource | undefined): void {
+    setMinFontScaleAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -491,15 +483,15 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setMinFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxFontScaleAttribute(value: number | Resource | undefined): void {
+    setMaxFontScaleAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -523,15 +515,15 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setDecoration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLetterSpacingAttribute(value: number | string | Resource | undefined): void {
+    setLetterSpacingAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -547,15 +539,15 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setLetterSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLineHeightAttribute(value: number | string | Resource | undefined): void {
+    setLineHeightAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -880,7 +872,7 @@ export interface SearchAttribute extends CommonMethod {
     enterKeyType(value: EnterKeyType | undefined): this {
         throw new Error("Unimplemented method enterKeyType")
     }
-    onSubmit(value: ((value0: string) => void) | SearchSubmitCallback | undefined): this {
+    onSubmit(value: SearchSubmitCallback | undefined): this {
         throw new Error("Unimplemented method onSubmit")
     }
     onChange(value: EditableTextOnChangeCallback | undefined): this {
@@ -904,7 +896,7 @@ export interface SearchAttribute extends CommonMethod {
     copyOption(value: CopyOptions | undefined): this {
         throw new Error("Unimplemented method copyOption")
     }
-    maxLength(value: number | undefined): this {
+    maxLength(value: int32 | undefined): this {
         throw new Error("Unimplemented method maxLength")
     }
     textAlign(value: TextAlign | undefined): this {
@@ -916,25 +908,25 @@ export interface SearchAttribute extends CommonMethod {
     selectionMenuHidden(value: boolean | undefined): this {
         throw new Error("Unimplemented method selectionMenuHidden")
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method minFontSize")
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method maxFontSize")
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method minFontScale")
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method maxFontScale")
     }
     decoration(value: TextDecorationOptions | undefined): this {
         throw new Error("Unimplemented method decoration")
     }
-    letterSpacing(value: number | string | Resource | undefined): this {
+    letterSpacing(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method letterSpacing")
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method lineHeight")
     }
     type(value: SearchType | undefined): this {
@@ -1004,7 +996,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     placeholderFont_value?: Font | undefined
     textFont_value?: Font | undefined
     enterKeyType_value?: EnterKeyType | undefined
-    onSubmit_value?: ((value0: string) => void) | SearchSubmitCallback | undefined
+    onSubmit_value?: SearchSubmitCallback | undefined
     onChange_value?: EditableTextOnChangeCallback | undefined
     onTextSelectionChange_value?: OnTextSelectionChangeCallback | undefined
     onContentScroll_value?: OnContentScrollCallback | undefined
@@ -1012,17 +1004,17 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     onCut_value?: ((value0: string) => void) | undefined
     onPaste_value?: OnPasteCallback | undefined
     copyOption_value?: CopyOptions | undefined
-    maxLength_value?: number | undefined
+    maxLength_value?: int32 | undefined
     textAlign_value?: TextAlign | undefined
     enableKeyboardOnFocus_value?: boolean | undefined
     selectionMenuHidden_value?: boolean | undefined
-    minFontSize_value?: number | string | Resource | undefined
-    maxFontSize_value?: number | string | Resource | undefined
-    minFontScale_value?: number | Resource | undefined
-    maxFontScale_value?: number | Resource | undefined
+    minFontSize_value?: double | string | Resource | undefined
+    maxFontSize_value?: double | string | Resource | undefined
+    minFontScale_value?: double | Resource | undefined
+    maxFontScale_value?: double | Resource | undefined
     decoration_value?: TextDecorationOptions | undefined
-    letterSpacing_value?: number | string | Resource | undefined
-    lineHeight_value?: number | string | Resource | undefined
+    letterSpacing_value?: double | string | Resource | undefined
+    lineHeight_value?: double | string | Resource | undefined
     type_value?: SearchType | undefined
     fontFeature_value?: string | undefined
     onWillInsert_value?: ((value0: InsertValue) => boolean) | undefined
@@ -1074,7 +1066,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     enterKeyType(value: EnterKeyType | undefined): this {
         return this
     }
-    onSubmit(value: ((value0: string) => void) | SearchSubmitCallback | undefined): this {
+    onSubmit(value: SearchSubmitCallback | undefined): this {
         return this
     }
     onChange(value: EditableTextOnChangeCallback | undefined): this {
@@ -1098,7 +1090,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     copyOption(value: CopyOptions | undefined): this {
         return this
     }
-    maxLength(value: number | undefined): this {
+    maxLength(value: int32 | undefined): this {
         return this
     }
     textAlign(value: TextAlign | undefined): this {
@@ -1110,25 +1102,25 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     selectionMenuHidden(value: boolean | undefined): this {
         return this
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         return this
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         return this
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         return this
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         return this
     }
     decoration(value: TextDecorationOptions | undefined): this {
         return this
     }
-    letterSpacing(value: number | string | Resource | undefined): this {
+    letterSpacing(value: double | string | Resource | undefined): this {
         return this
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         return this
     }
     type(value: SearchType | undefined): this {
@@ -1290,9 +1282,9 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         }
         return this
     }
-    public onSubmit(value: ((value0: string) => void) | SearchSubmitCallback | undefined): this {
+    public onSubmit(value: SearchSubmitCallback | undefined): this {
         if (this.checkPriority("onSubmit")) {
-            const value_casted = value as (((value0: string) => void) | SearchSubmitCallback | undefined)
+            const value_casted = value as (SearchSubmitCallback | undefined)
             this.getPeer()?.setOnSubmitAttribute(value_casted)
             return this
         }
@@ -1354,9 +1346,9 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         }
         return this
     }
-    public maxLength(value: number | undefined): this {
+    public maxLength(value: int32 | undefined): this {
         if (this.checkPriority("maxLength")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setMaxLengthAttribute(value_casted)
             return this
         }
@@ -1386,33 +1378,33 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         }
         return this
     }
-    public minFontSize(value: number | string | Resource | undefined): this {
+    public minFontSize(value: double | string | Resource | undefined): this {
         if (this.checkPriority("minFontSize")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setMinFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public maxFontSize(value: number | string | Resource | undefined): this {
+    public maxFontSize(value: double | string | Resource | undefined): this {
         if (this.checkPriority("maxFontSize")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setMaxFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public minFontScale(value: number | Resource | undefined): this {
+    public minFontScale(value: double | Resource | undefined): this {
         if (this.checkPriority("minFontScale")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setMinFontScaleAttribute(value_casted)
             return this
         }
         return this
     }
-    public maxFontScale(value: number | Resource | undefined): this {
+    public maxFontScale(value: double | Resource | undefined): this {
         if (this.checkPriority("maxFontScale")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setMaxFontScaleAttribute(value_casted)
             return this
         }
@@ -1426,17 +1418,17 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         }
         return this
     }
-    public letterSpacing(value: number | string | Resource | undefined): this {
+    public letterSpacing(value: double | string | Resource | undefined): this {
         if (this.checkPriority("letterSpacing")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setLetterSpacingAttribute(value_casted)
             return this
         }
         return this
     }
-    public lineHeight(value: number | string | Resource | undefined): this {
+    public lineHeight(value: double | string | Resource | undefined): this {
         if (this.checkPriority("lineHeight")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setLineHeightAttribute(value_casted)
             return this
         }
@@ -1788,7 +1780,7 @@ export class IconOptions_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -1845,11 +1837,11 @@ export class IconOptions_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1857,7 +1849,7 @@ export class IconOptions_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const srcTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1909,7 +1901,7 @@ export class SearchButtonOptions_serializer {
             if (valueHolderForFontColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
@@ -1958,11 +1950,11 @@ export class SearchButtonOptions_serializer {
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
-                fontColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1970,7 +1962,7 @@ export class SearchButtonOptions_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         const autoDisableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2040,8 +2032,8 @@ export class SearchController extends TextContentControllerBase implements Mater
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._SearchController_getFinalizer()
     }
-    public caretPosition(value: number): void {
-        const value_casted = value as (number)
+    public caretPosition(value: int32): void {
+        const value_casted = value as (int32)
         this.caretPosition_serialize(value_casted)
         return
     }
@@ -2049,20 +2041,20 @@ export class SearchController extends TextContentControllerBase implements Mater
         this.stopEditing_serialize()
         return
     }
-    public setTextSelection(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void {
-        const selectionStart_casted = selectionStart as (number)
-        const selectionEnd_casted = selectionEnd as (number)
+    public setTextSelection(selectionStart: int32, selectionEnd: int32, options?: SelectionOptions): void {
+        const selectionStart_casted = selectionStart as (int32)
+        const selectionEnd_casted = selectionEnd as (int32)
         const options_casted = options as (SelectionOptions | undefined)
         this.setTextSelection_serialize(selectionStart_casted, selectionEnd_casted, options_casted)
         return
     }
-    caretPosition_serialize(value: number): void {
+    caretPosition_serialize(value: int32): void {
         ArkUIGeneratedNativeModule._SearchController_caretPosition(this.peer!.ptr, value)
     }
     stopEditing_serialize(): void {
         ArkUIGeneratedNativeModule._SearchController_stopEditing(this.peer!.ptr)
     }
-    setTextSelection_serialize(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void {
+    setTextSelection_serialize(selectionStart: int32, selectionEnd: int32, options?: SelectionOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

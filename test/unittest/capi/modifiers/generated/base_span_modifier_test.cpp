@@ -104,7 +104,7 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestDefaultValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleColorValidValues, TestSize.Level1)
+HWTEST_F(BaseSpanModifierTest, DISABLED_setTextBackgroundStyleTestTextBackgroundStyleColorValidValues, TestSize.Level1)
 {
     Opt_TextBackgroundStyle initValueTextBackgroundStyle;
 

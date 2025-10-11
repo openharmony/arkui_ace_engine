@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkRichTextPeer, RichTextAttribute } from "./component/richText"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -37,8 +38,9 @@ export class RichTextModifier extends CommonMethodModifier implements RichTextAt
     _onStart_0_0value?: (() => void) | undefined
     _onComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onComplete_0_0value?: (() => void) | undefined
-    applyModifierPatch(peer: ArkRichTextPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkRichTextPeer;
         if (this._onStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onStart_0_flag) {

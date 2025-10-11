@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkCanvasPeer, CanvasAttribute } from "./component/canvas"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -38,8 +39,9 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
     _onReady_0_0value?: VoidCallback | undefined
     _enableAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableAnalyzer_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkCanvasPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkCanvasPeer;
         if (this._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onReady_0_flag) {

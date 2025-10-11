@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkColumnSplitPeer, ColumnSplitDividerStyle, ColumnSplitAttribute } from "./component/columnSplit"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -37,8 +38,9 @@ export class ColumnSplitModifier extends CommonMethodModifier implements ColumnS
     _resizeable_0_0value?: boolean | undefined
     _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _divider_0_0value?: ColumnSplitDividerStyle | null | undefined
-    applyModifierPatch(peer: ArkColumnSplitPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkColumnSplitPeer;
         if (this._resizeable_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._resizeable_0_flag) {

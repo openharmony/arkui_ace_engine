@@ -268,7 +268,7 @@ void SheetPresentationPattern::CheckBuilderChange()
     CHECK_NULL_VOID(host);
     auto builderNode = GetFirstFrameNodeOfBuilder();
     CHECK_NULL_VOID(builderNode);
-    auto eventHub = builderNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = builderNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onBuilderAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                                      const OffsetF& /* oldOrigin */, const RectF& /* rect */,
@@ -360,7 +360,7 @@ void SheetPresentationPattern::OnAttachToFrameNode()
             sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
@@ -389,7 +389,7 @@ void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* sheetNode)
 
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(sheetNode->GetId());
 }
@@ -472,7 +472,7 @@ void SheetPresentationPattern::InitPanEvent()
         return;
     }
 
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkListItemGroupPeer, ListItemGroupAttribute } from "./component/listItemGroup"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, ChildrenMainSize } from "./component/common"
@@ -38,8 +39,9 @@ export class ListItemGroupModifier extends CommonMethodModifier implements ListI
     _divider_0_0value?: ListDividerOptions | null | undefined
     _childrenMainSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _childrenMainSize_0_0value?: ChildrenMainSize | undefined
-    applyModifierPatch(peer: ArkListItemGroupPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkListItemGroupPeer;
         if (this._divider_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._divider_0_flag) {

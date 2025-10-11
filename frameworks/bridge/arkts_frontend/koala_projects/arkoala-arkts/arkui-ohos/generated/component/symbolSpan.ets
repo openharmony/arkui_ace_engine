@@ -52,15 +52,15 @@ export class ArkSymbolSpanPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolSpanInterface_setSymbolSpanOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontSizeAttribute(value: number | string | Resource | undefined): void {
+    setFontSizeAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -87,7 +87,7 @@ export class ArkSymbolSpanPeer extends ArkCommonMethodPeer {
                 if (valueTmpValueTmpElement instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as Color
-                    thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0.valueOf())
+                    thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0.getOrdinal())
                 } else if (valueTmpValueTmpElement instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
                     const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as number
@@ -108,15 +108,15 @@ export class ArkSymbolSpanPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolSpanAttribute_setFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: number | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
@@ -161,13 +161,13 @@ export interface SymbolSpanAttribute extends CommonMethod {
     setSymbolSpanOptions(value: Resource): this {
         throw new Error("Unimplemented method setSymbolSpanOptions")
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method fontSize")
     }
     fontColor(value: Array<ResourceColor> | undefined): this {
         throw new Error("Unimplemented method fontColor")
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     effectStrategy(value: SymbolEffectStrategy | undefined): this {
@@ -181,22 +181,22 @@ export interface SymbolSpanAttribute extends CommonMethod {
     }
 }
 export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSpanAttribute {
-    fontSize_value?: number | string | Resource | undefined
+    fontSize_value?: double | string | Resource | undefined
     fontColor_value?: Array<ResourceColor> | undefined
-    fontWeight_value?: number | FontWeight | string | undefined
+    fontWeight_value?: int32 | FontWeight | string | undefined
     effectStrategy_value?: SymbolEffectStrategy | undefined
     renderingStrategy_value?: SymbolRenderingStrategy | undefined
     attributeModifier_value?: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined
     setSymbolSpanOptions(value: Resource): this {
         return this
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         return this
     }
     fontColor(value: Array<ResourceColor> | undefined): this {
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         return this
     }
     effectStrategy(value: SymbolEffectStrategy | undefined): this {
@@ -225,9 +225,9 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public fontSize(value: number | string | Resource | undefined): this {
+    public fontSize(value: double | string | Resource | undefined): this {
         if (this.checkPriority("fontSize")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setFontSizeAttribute(value_casted)
             return this
         }
@@ -241,9 +241,9 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | string | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }

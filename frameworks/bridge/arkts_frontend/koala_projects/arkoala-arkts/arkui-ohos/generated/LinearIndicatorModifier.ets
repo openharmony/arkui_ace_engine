@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkLinearIndicatorPeer, LinearIndicatorStyle, OnLinearIndicatorChangeCallback, LinearIndicatorAttribute } from "./component/linearindicator"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -39,8 +40,9 @@ export class LinearIndicatorModifier extends CommonMethodModifier implements Lin
     _indicatorLoop_0_0value?: boolean | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: OnLinearIndicatorChangeCallback | undefined
-    applyModifierPatch(peer: ArkLinearIndicatorPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkLinearIndicatorPeer;
         if (this._indicatorStyle_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._indicatorStyle_0_flag) {

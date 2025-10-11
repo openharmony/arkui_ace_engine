@@ -41,14 +41,17 @@ class InteropExtractorModule {
     static makeObserved?: (value: Object) => Object;
     static compatibleStaticComponent?: (
         factory: () => Object,
-        options?: Object,
+        options?: () => Object,
         content?: () => void
-    ) => number;
+    ) => [() => void, number];
     static makeBuilderParameterStaticProxy?: (name: string, value: Object, sourceGetter: Object) => Object;
+    static updateInteropExtendableComponent?: (dynamicComponent: any) => void;
+    static resetInteropExtendableComponent?: ()=> void;
+    static transferCompatibleBuilder?: (builder: (...args: any[]) => void) => (...args: any[]) => void;
+    static transferCompatibleDynamicBuilder?: (builder: (...args: any[]) => void) => (...args: any[]) => void;
 }
 
 class StaticInteropHook {
-    state?: Object;
     addRef?: () => void;
 }
 
@@ -63,13 +66,29 @@ function registerCallbackForMakeObserved(callback: (value: Object) => Object): v
 function registerCompatibleStaticComponentCallback(
     callback: (
         factory: () => Object,
-        options?: Object,
+        options?: () => Object,
         content?: () => void
-    ) => number
+    ) => [() => void, number]
 ): void {
     InteropExtractorModule.compatibleStaticComponent = callback;
 }
 
-function registerMakeBuilderParameterStaticProxy(callback: (name: string, value: Object, sourceGetter: Object) => Object) {
+function registerMakeBuilderParameterStaticProxy(callback: (name: string, value: Object, sourceGetter: Object) => Object): void {
     InteropExtractorModule.makeBuilderParameterStaticProxy = callback;
+}
+
+function registerUpdateInteropExtendableComponent(callback: (dynamicComponent: Object) => void): void {
+    InteropExtractorModule.updateInteropExtendableComponent = callback;
+}
+
+function registerResetInteropExtendableComponent(callback: () => void): void {
+    InteropExtractorModule.resetInteropExtendableComponent = callback;
+}
+
+function registerTransferCompatibleBuilderCallback(callback: (builder: (...args: any[]) => void) => (...args: any[]) => void) {
+    InteropExtractorModule.transferCompatibleBuilder = callback;
+}
+
+function registerTransferCompatibleDynamicBuilderCallback(callback: (builder: (...args: any[]) => void) => (...args: any[]) => void) {
+    InteropExtractorModule.transferCompatibleDynamicBuilder = callback;
 }

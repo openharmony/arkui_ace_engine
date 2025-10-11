@@ -117,7 +117,7 @@ void ArcListItemPattern::InitDisableEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

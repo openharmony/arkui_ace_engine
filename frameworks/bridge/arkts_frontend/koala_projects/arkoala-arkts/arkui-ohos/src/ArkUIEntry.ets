@@ -14,13 +14,15 @@
  */
 
 import { memo } from "@koalaui/runtime/annotations"
-import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks } from "@koalaui/runtime"
+import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, RuntimeProfiler } from "@koalaui/runtime"
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { int32, int64 } from "@koalaui/common"
-import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback } from "@koalaui/interop"
+import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback, loadNativeModuleLibrary } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
 import { ArkUINativeModule } from "#components"
 import { EventEmulator } from "#generated"
-import { UserView, UserViewBuilder, EntryPoint } from "./UserView"
+import { UserView, UserViewBuilder } from "./UserView"
+import { EntryPoint } from './component/customComponent';
 import { ClickEvent, ClickEventInternal } from "#generated"
 import { setCustomEventsChecker } from "./Events"
 import { checkArkoalaCallbacks } from "./CallbacksChecker"
@@ -32,6 +34,9 @@ import router from "@ohos/router"
 import { UIContextImpl, ContextRecord, DetachedRootEntryManager, DetachedRootEntry } from "arkui/base/UIContextImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { registerArkuiApiHandler } from "./framework/peers/CallbackDeserializeCall"
+import { ObserveSingleton } from './stateManagement/base/observeSingleton'
+import { StateUpdateLoop } from './stateManagement'
+import { AceTrace } from 'arkui/base/AceTrace'
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -129,6 +134,17 @@ export function createUiDetachedBuilderRoot(
     detachedRoots.set(node.value.peer.ptr, node)
     detachedStatMgt.set(new WeakRef<StateManager>(manager), new WeakRef<ComputableState<PeerNode>>(node))
     return node
+}
+
+export function createUiDetachedRootT<T>(
+    peerFactory: () => PeerNode,
+    /** @memo */
+    builder: (arg: T) => void,
+    arg: T,
+    instanceId: int32 = _undefinedInstanceId
+): PeerNode {
+    let uicontext = getUicontextByInstanceId(instanceId);
+    return uicontext.getDetachedRootEntryManager().createUiDetachedRootT(peerFactory, builder, arg);
 }
 
 export function destroyUiDetachedRoot(ptr: KPointer, instanceId: int32): boolean {
@@ -229,6 +245,8 @@ export class Application {
     }
 
     start(): pointer {
+        RuntimeProfiler.initTrace(AceTrace.begin, AceTrace.end)
+        RuntimeProfiler.initNativeLog(InteropNativeModule._NativeLog)
         if (this.withLog) UserView.startNativeLog(1)
         let root: PeerNode | undefined = undefined
         try {
@@ -243,6 +261,9 @@ export class Application {
             this.manager!.isDebugMode = uiContext.isDebugMode_;
             let instanceId = uiContext.getInstanceId();
             this.manager!.setThreadChecker(() => uiContext.checkThread(instanceId));
+            if (this.startUrl == "__INTEROP__") {
+                return nullptr
+            }
             @memo
             let builder: () => void
             if (this.entryPoint) {
@@ -304,7 +325,15 @@ export class Application {
         let uiContextRouter = this.uiContext!.getRouter();
         let rootState = uiContextRouter.getStateRoot();
         let preState = uiContextRouter.getPreState();
+        ObserveSingleton.instance.updateDirty();
         this.updateStates(this.manager!, rootState, preState);
+        ObserveSingleton.instance.makeDelayedMutableStateChanges();
+        while (StateUpdateLoop.len) {
+            StateUpdateLoop.consume();
+            ObserveSingleton.instance.updateDirty();
+            this.updateStates(this.manager!, rootState, preState);
+            ObserveSingleton.instance.makeDelayedMutableStateChanges();
+        }
         // Here we request to draw a frame and call custom components callbacks.
         // ArkUINativeModule._MeasureLayoutAndDraw(this.rootPointer)
 
@@ -317,7 +346,7 @@ export class Application {
         callScheduledCallbacks()
     }
 
-    updateStates(manager: StateManager, root: ComputableState<IncrementalNode>, pre: ComputableState<IncrementalNode> | undefined) {
+    updateStates(manager: StateManager, root: ComputableState<IncrementalNode> | undefined, pre: ComputableState<IncrementalNode> | undefined) {
         if (this.instanceId < 0) {
             InteropNativeModule._NativeLog(
                 `ArkTS updateStates failed due to instanceId: ${this.instanceId} is illegal`)
@@ -346,7 +375,9 @@ export class Application {
                 update.callback(true)
                 // Compute new tree state
                 try {
-                    root.value
+                    if (root) {
+                        root.value
+                    }
                     if (pre) {
                         pre!.value;
                     }
@@ -371,6 +402,7 @@ export class Application {
     }
 
     enter(arg0: int32, arg1: int32, foreignContext: pointer): boolean {
+        StateUpdateLoop.canRequestFrame = true;
         enterForeignContext(foreignContext)
         if (this.withLog) UserView.startNativeLog(1)
 
@@ -457,7 +489,7 @@ export class Application {
     }
 
     static createApplication(startUrl: string, startParams: string, useNativeLog: boolean, moduleName: string, userView: UserView | undefined, entryPoint: EntryPoint | undefined): Application {
-        if (!userView && !entryPoint) {
+        if (!userView && !entryPoint && startUrl != "__INTEROP__") {
             throw new Error(`Invalid EntryPoint`)
         }
         registerNativeModuleLibraryName("InteropNativeModule", "ArkoalaNative_ark.z")
@@ -470,6 +502,16 @@ export class Application {
             Application.firstRegisterArkuiApiHandler = false
         }
         return new Application(useNativeLog, moduleName, startUrl, startParams, userView, entryPoint)
+    }
+    static registerNativeModulePreloader(): void {
+        registerNativeModuleLibraryName('InteropNativeModule', 'ArkoalaNative_ark.z');
+        registerNativeModuleLibraryName('ArkUINativeModule', 'ArkoalaNative_ark.z');
+        registerNativeModuleLibraryName('ArkUIGeneratedNativeModule', 'ArkoalaNative_ark.z');
+        registerNativeModuleLibraryName('TestNativeModule', 'ArkoalaNative_ark.z');
+        registerNativeModuleLibraryName('ArkNativeAni', 'arkoala_native_ani');
+        wrapSystemApiHandlerCallback();
+        loadNativeModuleLibrary('InteropNativeModule');
+        loadNativeModuleLibrary('ArkNativeAni');
     }
 }
 

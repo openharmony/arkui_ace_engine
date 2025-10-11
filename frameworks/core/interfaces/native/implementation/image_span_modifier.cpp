@@ -24,6 +24,19 @@
 #include "pixel_map_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+ImageSourceInfo CreateSourceInfo(
+    const std::string& src, RefPtr<PixelMap>& pixmap, const std::string& bundleName, const std::string& moduleName)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (pixmap) {
+        return ImageSourceInfo(pixmap);
+    }
+#endif
+    return { src, bundleName, moduleName };
+}
+}
+
 namespace ImageSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -31,8 +44,20 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     if (MultiThreadBuildManager::IsParallelScope()) {
         LOGF_ABORT("Unsupported UI components ImageSpan used in ParallelizeUI");
     }
-    auto imageSpanNode = ImageSpanView::CreateFrameNode(id);
+
+    auto imageSpanNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, id, AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(imageSpanNode, nullptr);
+    imageSpanNode->SetDraggable(false);
+
+    RefPtr<PixelMap> pixmap = nullptr;
+    auto srcInfo = CreateSourceInfo("", pixmap, "", "");
+    srcInfo.SetIsUriPureNumber(false);
+
+    auto layoutProperty = imageSpanNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateImageSourceInfo(srcInfo);
+    layoutProperty->UpdateHasPlaceHolderStyle(false);
+
     imageSpanNode->IncRefCount();
     return AceType::RawPtr(imageSpanNode);
 }
@@ -57,6 +82,10 @@ void SetVerticalAlignImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<VerticalAlign>(value);
+    if (!convValue) {
+        ImageSpanViewStatic::SetVerticalAlign(frameNode, VerticalAlign::BOTTOM);
+        return;
+    }
     ImageSpanViewStatic::SetVerticalAlign(frameNode, convValue);
 }
 void SetColorFilterImpl(Ark_NativePointer node,
@@ -70,6 +99,10 @@ void SetObjectFitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<ImageFit>(value);
+    if (!convValue) {
+        ImageSpanViewStatic::SetObjectFit(frameNode, ImageFit::COVER);
+        return;
+    }
     ImageSpanViewStatic::SetObjectFit(frameNode, convValue);
 }
 void SetOnCompleteImpl(Ark_NativePointer node,

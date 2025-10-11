@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkButtonPeer, ButtonType, ButtonStyleMode, ControlSize, ButtonRole, ButtonConfiguration, ButtonLabelStyle, ButtonAttribute } from "./component/button"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -62,8 +63,9 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
     _minFontScale_0_0value?: number | Resource | undefined
     _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _maxFontScale_0_0value?: number | Resource | undefined
-    applyModifierPatch(peer: ArkButtonPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkButtonPeer;
         if (this._type_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._type_0_flag) {

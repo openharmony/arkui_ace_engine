@@ -108,7 +108,7 @@ export class OperateCheck {
   public accessibilityLevel?: string;
 }
 
-const TEXT_MAX_LINE: number = 1;
+const TEXT_MAX_LINE: int = 1;
 const ITEM_BORDER_SHOWN: number = 2;
 const TEXT_COLUMN_SPACE: number = 4;
 const TEXT_SAFE_MARGIN: number = 8;
@@ -729,7 +729,7 @@ export struct OperateItemStruct {
         fadeout: true,
         marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
       })
-      .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
+      .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value as int)
       .draggable(false)
       .flexShrink(1)
   }
@@ -986,7 +986,7 @@ export struct OperateItemStruct {
               fadeout: true,
               marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
             })
-            .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
+            .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value as int)
             .focusable(true)
             .draggable(false)
             .constraintSize({
@@ -1288,7 +1288,7 @@ export struct ComposeListItem {
         let hostContext: common.UIAbilityContext = context.getHostContext() as common.UIAbilityContext
         this.applicationContext = hostContext.getApplicationContext();
         try {
-          this.callbackId = this.applicationContext.on('environment', this.envCallback);
+          this.callbackId = this.applicationContext.onEnvironment(this.envCallback);
         } catch (paramError) {
           hilog.error(0x3900, 'Ace',
             `ComposeListItem Faild to get environment param error `);
@@ -1309,7 +1309,7 @@ export struct ComposeListItem {
     if (this.callbackId) {
       let context: UIContext = this.getUIContext();
       if (context.getHostContext() !== undefined) {
-        this.applicationContext.off('environment', this.callbackId as Int,
+        this.applicationContext.offEnvironment(this.callbackId as Int,
           (err: BusinessError<void> | null): void => {
             hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
           })

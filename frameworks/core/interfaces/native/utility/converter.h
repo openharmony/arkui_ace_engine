@@ -63,6 +63,7 @@
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/drawable/drawable_descriptor.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/native/implementation/circle_shape_peer.h"
@@ -217,8 +218,8 @@ namespace Converter {
             std::vector<ParamType> params_;
     };
     Dimension ConvertFromString(const std::string& str, DimensionUnit unit = DimensionUnit::FP);
-    template<typename T> std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src,
-        DimensionUnit defaultUnit = DimensionUnit::FP);
+    template<typename T, typename NumberType = Ark_Int32> std::optional<Dimension> OptConvertFromArkNumStrRes(
+        const T& src, DimensionUnit defaultUnit = DimensionUnit::FP);
     std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src,
         DimensionUnit defaultUnit = DimensionUnit::VP);
     std::optional<Dimension> OptConvertFromArkResource(const Ark_Resource& src,
@@ -315,6 +316,18 @@ namespace Converter {
     }
 
     template<>
+    inline unsigned int Convert(const Ark_Int32& src)
+    {
+        return static_cast<unsigned int>(src);
+    }
+
+    template<>
+    inline float Convert(const Ark_Int32& src)
+    {
+        return static_cast<float>(src);
+    }
+
+    template<>
     inline long long Convert(const Ark_Number& src)
     {
         LOGE("Ark_Number doesn`t support int64_t type");
@@ -383,10 +396,9 @@ namespace Converter {
     }
 
     template<>
-    inline ImageSourceInfo Convert(const Ark_DrawableDescriptor& value)
+    inline DrawableDescriptor* Convert(const Ark_DrawableDescriptor& value)
     {
-        LOGW("Convert [Ark_DrawableDescriptor] to [ImageSourceInfo] is not supported");
-        return ImageSourceInfo();
+        return reinterpret_cast<DrawableDescriptor*>(value);
     }
 
     template<>
@@ -499,6 +511,7 @@ namespace Converter {
     template<> BorderRadiusProperty Convert(const Ark_BorderRadiuses& src);
     template<> BorderRadiusProperty Convert(const Ark_LengthMetrics& src);
     template<> BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src);
+    template<> BorderStyleProperty Convert(const Ark_NodeEdgeStyles& src);
     template<> BorderRadiusProperty Convert(const Ark_Number& src);
     template<> BorderRadiusProperty Convert(const Ark_Resource& src);
     template<> BorderRadiusProperty Convert(const Ark_String& src);
@@ -522,10 +535,12 @@ namespace Converter {
     template<> CalcLength Convert(const Ark_String& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> Color Convert(const Ark_Number& src);
+    template<> Color Convert(const Ark_Int32& src);
     template<> Color Convert(const Ark_String& src);
     template<> Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_LengthMetrics& src);
     template<> Dimension Convert(const Ark_Number& src);
+    template<> Dimension Convert(const Ark_Int32& src);
     template<> Dimension Convert(const Ark_String& src);
     template<> DimensionOffset Convert(const Ark_Offset& src);
     template<> DimensionOffset Convert(const Ark_Position& src);
@@ -538,9 +553,10 @@ namespace Converter {
     template<> FingerInfo Convert(const Ark_FingerInfo& src);
     template<> Font Convert(const Ark_Font& src);
     template<> FontFamilies Convert(const Ark_String& src);
+    template<> FontInfo Convert(const Ark_font_FontInfo& src);
     template<> FontMetaData Convert(const Ark_Font& src);
     template<> FontWeightInt Convert(const Ark_FontWeight& src);
-    template<> FontWeightInt Convert(const Ark_Number& src);
+    template<> FontWeightInt Convert(const Ark_Int32& src);
     template<> FontWeightInt Convert(const Ark_String& src);
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradientOptions& value);
@@ -597,8 +613,6 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_String& src);
     template<> RefPtr<Curve> Convert(const Ark_curves_ICurve& src);
     template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
-    template<> RefPtr<Gesture> Convert(const Ark_RotationGesture& src);
-    template<> RefPtr<Gesture> Convert(const Ark_SwipeGesture& src);
     template<> RefPtr<PixelMap> Convert(const Ark_image_PixelMap& src);
     template<> RotateOptions Convert(const Ark_RotateOptions& src);
     template<> ScaleOpt Convert(const Ark_ScaleOptions& src);
@@ -629,6 +643,7 @@ namespace Converter {
     template<> double Convert(const Ark_Float64& src);
     template<> float Convert(const Ark_Float32& src);
     template<> float Convert(const Ark_Float64& src);
+    template<> int Convert(const Ark_Float64& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
@@ -637,6 +652,7 @@ namespace Converter {
     template<> std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src);
     template<> std::set<SourceTool> Convert(const Array_SourceTool& src);
     template<> std::set<std::string> Convert(const Array_uniformTypeDescriptor_UniformDataType& src);
+    template<> std::string Convert(const Ark_CommandPath& src);
     template<> std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src);
     template<> std::u16string Convert(const Ark_String& src);
     template<> std::vector<Dimension> Convert(const Array_Length& src);
@@ -653,6 +669,8 @@ namespace Converter {
 
     // SORTED_SECTION: No multiline declarations, please!
     template<> void AssignCast(std::optional<AIImageQuality>& dst, const Ark_image_ResolutionQuality& src);
+    template<> void AssignCast(std::optional<AccessibilityInterfaceAction>& dst, const Ark_AccessibilityAction& src);
+    template<> void AssignCast(std::optional<AccessibilityActionInterceptResult>& dst, const Ark_AccessibilityActionInterceptResult& src);
     template<> void AssignCast(std::optional<AccessibilityHoverAction>& dst, const Ark_AccessibilityHoverType& src);
     template<> void AssignCast(std::optional<Ace::CanvasUnit>& dst, const Ark_LengthMetricsUnit& src);
     template<> void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src);
@@ -854,6 +872,10 @@ namespace Converter {
     template<> void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<uint32_t>& dst, const Ark_Number& src);
     template<> void AssignCast(std::optional<int32_t>& dst, const Ark_UIContext& src);
+    template<> void AssignCast(std::optional<Matrix4>& dst, const Ark_matrix4_Matrix4Transit& src);
+    template<> void AssignCast(std::optional<OHOS::Rosen::VisualEffect*>& dst, const Ark_uiEffect_VisualEffect& src);
+    template<> void AssignCast(std::optional<OHOS::Rosen::Filter*>& dst, const Ark_uiEffect_Filter& src);
+    template<> void AssignCast(std::optional<Orientation>& dst, const Ark_window_Orientation& src);
 
     // Long declarations goes below. DO NOT ADD SHORT DECLARATIONS HERE!
     template<>
@@ -876,6 +898,27 @@ namespace Converter {
         }
         return std::nullopt;
     }
+    
+    class ConverterStatus {
+    public:
+        inline static DimensionUnit DEFAULT_UNIT = DimensionUnit::VP;
+    };
+
+    class DefaultDimensionUnit {
+    public:
+        explicit DefaultDimensionUnit(DimensionUnit unit)
+        {
+            save_ = ConverterStatus::DEFAULT_UNIT;
+            ConverterStatus::DEFAULT_UNIT = unit;
+        }
+        ~DefaultDimensionUnit()
+        {
+            ConverterStatus::DEFAULT_UNIT = save_;
+        }
+
+    private:
+        DimensionUnit save_;
+    };
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

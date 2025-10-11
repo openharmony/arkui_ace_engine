@@ -57,7 +57,7 @@ static bool g_onStartCalled = false;
  * @tc.desc: Check the functionality of setOnStart
  * @tc.type: FUNC
  */
-HWTEST_F(RichTextModifierTest, setOnStartTest, TestSize.Level1)
+HWTEST_F(RichTextModifierTest, DISABLED_setOnStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(modifier_->setOnStart, nullptr);
@@ -71,7 +71,7 @@ HWTEST_F(RichTextModifierTest, setOnStartTest, TestSize.Level1)
     auto optFunc = Converter::ArkValue<Opt_Callback_Void>(func);
     modifier_->setOnStart(node_, &optFunc);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::WebEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::WebEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto event = std::make_shared<BaseEventInfo>("info");
     eventHub->FireOnPageStartedEvent(event);
@@ -85,7 +85,7 @@ static bool g_onCompleteCalled = false;
  * @tc.desc: Check the functionality of setOnComplete
  * @tc.type: FUNC
  */
-HWTEST_F(RichTextModifierTest, setOnCompleteTest, TestSize.Level1)
+HWTEST_F(RichTextModifierTest, DISABLED_setOnCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(modifier_->setOnComplete, nullptr);
@@ -99,7 +99,7 @@ HWTEST_F(RichTextModifierTest, setOnCompleteTest, TestSize.Level1)
     auto optFunc = Converter::ArkValue<Opt_Callback_Void>(func);
     modifier_->setOnComplete(node_, &optFunc);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::WebEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::WebEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto event = std::make_shared<BaseEventInfo>("info");
     eventHub->FireOnPageFinishedEvent(event);

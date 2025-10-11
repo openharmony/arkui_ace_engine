@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkGridColPeer, GridColColumnOption, GridColAttribute } from "./component/gridCol"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -39,8 +40,9 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
     _gridColOffset_0_0value?: number | GridColColumnOption | undefined
     _order_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _order_0_0value?: number | GridColColumnOption | undefined
-    applyModifierPatch(peer: ArkGridColPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkGridColPeer;
         if (this._span_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._span_0_flag) {

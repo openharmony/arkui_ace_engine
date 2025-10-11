@@ -63,6 +63,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -81,6 +82,7 @@ constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 const int32_t FLAG_DRAW_FRONT = 1;
 const int32_t FLAG_DRAW_CONTENT = 1 << 1;
 const int32_t FLAG_DRAW_BEHIND = 1 << 2;
+const int32_t FLAG_DRAW_FOREGROUND = 1 << 3;
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -194,11 +196,8 @@ ArkUI_Int32 GetCurrentInstanceId()
 
 ArkUI_Int32 GetFocusedInstanceId()
 {
-    auto container = Container::GetFocused();
-    auto currentInstance = -1;
-    if (container) {
-        currentInstance = container->GetInstanceId();
-    } else if (ContainerScope::RecentActiveId() == -1) {
+    auto currentInstance = ContainerScope::RecentActiveId();
+    if (currentInstance == -1) {
         currentInstance = ContainerScope::SingletonId();
     }
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
@@ -603,6 +602,17 @@ ani_double Px2lpx(ani_double value, ani_int instanceId)
     return value / windowConfig.designWidthScale;
 }
 
+std::optional<std::string> GetWindowName(ani_int instanceId)
+{
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto window = context->GetWindow();
+    CHECK_NULL_RETURN(window, std::nullopt);
+    ContainerScope cope(instanceId);
+    std::string windowName = window->GetWindowName();
+    return windowName;
+}
+
 void* TransferKeyEventPointer(ani_long nativePtr)
 {
     CHECK_NULL_RETURN(nativePtr, nullptr);
@@ -877,6 +887,34 @@ float GetPx2VpWithCurrentDensity(float px)
     return PipelineBase::Px2VpWithCurrentDensity(px);
 }
 
+void SetImageCacheCount(ani_int value, ani_int instanceId)
+{
+    int32_t count = static_cast<int32_t>(value);
+    if (count < 0) {
+        return;
+    }
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto imageCache = pipelineContext->GetImageCache();
+    imageCache->SetCapacity(count);
+}
+
+void SetImageRawDataCacheSize(ani_int value, ani_int instanceId)
+{
+    int32_t cacheSize = static_cast<int32_t>(value);
+    if (cacheSize < 0) {
+        return;
+    }
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto imageCache = pipelineContext->GetImageCache();
+    imageCache->SetDataCacheLimit(cacheSize);
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -913,6 +951,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .px2fp = OHOS::Ace::NG::Px2fp,
         .lpx2px = OHOS::Ace::NG::Lpx2px,
         .px2lpx = OHOS::Ace::NG::Px2lpx,
+        .getWindowName = OHOS::Ace::NG::GetWindowName,
         .transferKeyEventPointer = OHOS::Ace::NG::TransferKeyEventPointer,
         .createKeyEventAccessorWithPointer = OHOS::Ace::NG::CreateKeyEventAccessorWithPointer,
         .createEventTargetInfoAccessor = OHOS::Ace::NG::CreateEventTargetInfoAccessor,
@@ -943,13 +982,15 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .setThemeScopeId = OHOS::Ace::NG::SetThemeScopeId,
         .createAndBindTheme = OHOS::Ace::NG::CreateAndBindTheme,
         .applyParentThemeScopeId = OHOS::Ace::NG::ApplyParentThemeScopeId,
-        .getPx2VpWithCurrentDensity = OHOS::Ace::NG::GetPx2VpWithCurrentDensity
+        .getPx2VpWithCurrentDensity = OHOS::Ace::NG::GetPx2VpWithCurrentDensity,
+        .setImageCacheCount = OHOS::Ace::NG::SetImageCacheCount,
+        .setImageRawDataCacheSize = OHOS::Ace::NG::SetImageRawDataCacheSize
     };
     return &impl;
 }
 
-void SetDrawModifier(ani_long ptr, uint32_t flag,
-    void* fnDrawBehindFun, void* fnDrawContentFun, void* fnDrawFrontFun)
+void SetDrawModifier(ani_long ptr, uint32_t flag, void* fnDrawBehindFun, void* fnDrawContentFun, void* fnDrawFrontFun,
+    void* fnDrawForegroundFun)
 {
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
     CHECK_NULL_VOID(frameNode && frameNode->IsSupportDrawModifier());
@@ -968,6 +1009,11 @@ void SetDrawModifier(ani_long ptr, uint32_t flag,
         auto* fnDrawFrontFunPtr =
             static_cast<std::function<void(NG::DrawingContext & drawingContext)>*>(fnDrawFrontFun);
         drawModifier->drawFrontFunc = *fnDrawFrontFunPtr;
+    }
+    if (flag & FLAG_DRAW_FOREGROUND) {
+        auto* fnDrawForegroundFunPtr =
+            static_cast<std::function<void(NG::DrawingContext & drawingContext)>*>(fnDrawForegroundFun);
+        drawModifier->drawForegroundFunc = *fnDrawForegroundFunPtr;
     }
     frameNode->SetDrawModifier(drawModifier);
     if (frameNode) {

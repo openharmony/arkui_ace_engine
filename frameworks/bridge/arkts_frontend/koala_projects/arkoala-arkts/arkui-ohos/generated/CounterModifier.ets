@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkCounterPeer, CounterAttribute } from "./component/counter"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -42,8 +43,9 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
     _enableDec_0_0value?: boolean | undefined
     _enableInc_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableInc_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkCounterPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkCounterPeer;
         if (this._onInc_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onInc_0_flag) {

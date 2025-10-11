@@ -43,6 +43,21 @@ export class RuntimeProfiler {
         if (!set.delete(node)) console.log("node is already disposed")
     }
 
+    static startTrace = (s: string) => {}
+
+    static endTrace = () => {}
+
+    static initTrace(start: (s: string) => void, end: () => void) {
+        RuntimeProfiler.startTrace = start
+        RuntimeProfiler.endTrace = end
+    }
+
+    static nativeLog = (s: string) => {}
+
+    static initNativeLog(cb: (s: string) => void) {
+        RuntimeProfiler.nativeLog = cb
+    }
+
     public static instance: RuntimeProfiler | undefined = undefined
 
     private invalidations = 0

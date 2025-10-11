@@ -41,13 +41,13 @@ import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import { i18n } from '@kit.LocalizationKit';
 
 export class ButtonOptions {
-  value: ResourceStr = '';
-  action?: () => void;
-  background?: ResourceColor;
-  fontColor?: ResourceColor;
-  buttonStyle?: ButtonStyleMode;
-  role?: ButtonRole;
-  defaultFocus?: boolean;
+  public value: ResourceStr = '';
+  public action?: () => void;
+  public background?: ResourceColor;
+  public fontColor?: ResourceColor;
+  public buttonStyle?: ButtonStyleMode;
+  public role?: ButtonRole;
+  public defaultFocus?: boolean;
 }
 
 class CustomThemeImpl implements CustomTheme {
@@ -58,15 +58,15 @@ class CustomThemeImpl implements CustomTheme {
   }
 }
 
-const TITLE_MAX_LINES: number = 2;
+const TITLE_MAX_LINES: int = 2;
 const HORIZON_BUTTON_MAX_COUNT: number = 2;
 const VERTICAL_BUTTON_MAX_COUNT: number = 4;
 const BUTTON_LAYOUT_WEIGHT: number = 1;
-const CONTENT_MAX_LINES: number = 2;
+const CONTENT_MAX_LINES: int = 2;
 const LOADING_PROGRESS_WIDTH: number = 40;
 const LOADING_PROGRESS_HEIGHT: number = 40;
-const LOADING_MAX_LINES: number = 10;
-const LOADING_MAX_LINES_BIG_FONT: number = 4;
+const LOADING_MAX_LINES: int = 10;
+const LOADING_MAX_LINES_BIG_FONT: int = 4;
 const LOADING_TEXT_LAYOUT_WEIGHT: number = 1;
 const LOADING_TEXT_MARGIN_LEFT: number = 12;
 const LOADING_MIN_HEIGHT: number = 48;
@@ -360,6 +360,7 @@ export struct TipsDialog {
                 if (event) {
                   resolveKeyEvent(event, this.contentScroller);
                 }
+                return false
               })
           }
         }
@@ -536,7 +537,7 @@ export struct SelectDialog {
           }.applyStyles(this.paddingContentStyle).width('100%')
         }
         List() {
-          ForEach(this.radioContent, (item: SheetInfo, index: number) => {
+          ForEach(this.radioContent, (item: SheetInfo, index: int) => {
             ListItem() {
               Column() {
                 Button({ type: ButtonType.Normal } as ButtonParam) {
@@ -790,6 +791,7 @@ export struct ConfirmDialog {
               if (event) {
                 resolveKeyEvent(event, this.contentScroller);
               }
+              return false
             })
             .width('100%')
         }
@@ -957,7 +959,7 @@ export struct AlertDialog {
             strokeWidth: LengthMetrics.px(0)
           })
           .fontSize(`${BODY_L}fp`)
-          .fontWeight(this.getFontWeight())
+          .fontWeight(this.getFontWeight() as int)
           .fontColor(this.fontColorWithTheme)
           .width('100%')
           .textAlign(this.textAlign)
@@ -965,6 +967,7 @@ export struct AlertDialog {
             if (event) {
               resolveKeyEvent(event, this.contentScroller);
             }
+            return false
           })
       }
       .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
@@ -1608,8 +1611,8 @@ struct CustomDialogContentComponent {
   buildVerticalAlignButtons(): void {
     if (this.buttons) {
       Column() {
-        ForEach((this.buttons as Array<ButtonOptions>).slice(0, VERTICAL_BUTTON_MAX_COUNT),
-          (item: ButtonOptions, index: number) => {
+        ForEach((this.buttons as Array<ButtonOptions>).slice(0, VERTICAL_BUTTON_MAX_COUNT.toInt()),
+          (item: ButtonOptions, index: int) => {
             this.buildButtonWithDivider((this.buttons as Array<ButtonOptions>)?.length === HORIZON_BUTTON_MAX_COUNT ?
               HORIZON_BUTTON_MAX_COUNT - index - 1 : index);
           }, (item: ButtonOptions) => item.value.toString());
@@ -1714,7 +1717,7 @@ function setButtonProperties(this: ButtonAttribute, buttonOptions: ButtonOptions
   isAllFocusFalse: boolean, controller?: CustomDialogController): this {
   this.onKeyEvent((event: KeyEvent) => {
     if (!event) {
-      return;
+      return false;
     }
     if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
       event.type === KeyType.Down) {

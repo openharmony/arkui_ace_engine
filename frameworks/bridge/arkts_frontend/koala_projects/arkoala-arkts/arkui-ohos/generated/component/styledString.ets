@@ -85,7 +85,7 @@ export class BaselineOffsetStyle implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly baselineOffset: number
+    readonly baselineOffset: double
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, BaselineOffsetStyle.getFinalizer())
         this.baselineOffset = this.getBaselineOffset()
@@ -94,16 +94,19 @@ export class BaselineOffsetStyle implements MaterializedBase {
         this(false, BaselineOffsetStyle.construct(value))
     }
     static construct(value: LengthMetrics): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._BaselineOffsetStyle_construct(extractors.toLengthMetricsPtr(value))
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        LengthMetrics_serializer.write(thisSerializer, value)
+        const retval  = ArkUIGeneratedNativeModule._BaselineOffsetStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._BaselineOffsetStyle_getFinalizer()
     }
-    private getBaselineOffset(): number {
+    private getBaselineOffset(): double {
         return this.getBaselineOffset_serialize()
     }
-    private getBaselineOffset_serialize(): number {
+    private getBaselineOffset_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._BaselineOffsetStyle_getBaselineOffset(this.peer!.ptr)
         return retval
     }
@@ -118,23 +121,31 @@ export class CustomSpan implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get onMeasure(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
-        return this.getOnMeasure()
+    onMeasure(measureInfo: CustomSpanMeasureInfo): CustomSpanMetrics {
+        throw new Error("Not implemented!")
     }
-    set onMeasure(onMeasure: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)) {
-        this.setOnMeasure(onMeasure)
+    get onMeasure_callback(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
+        return this.getOnMeasure_callback()
     }
-    get onDraw(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
-        return this.getOnDraw()
+    set onMeasure_callback(onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)) {
+        this.setOnMeasure_callback(onMeasure_callback)
     }
-    set onDraw(onDraw: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)) {
-        this.setOnDraw(onDraw)
+    onDraw(context: DrawContext, drawInfo: CustomSpanDrawInfo): void {
+        throw new Error("Not implemented!")
+    }
+    get onDraw_callback(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
+        return this.getOnDraw_callback()
+    }
+    set onDraw_callback(onDraw_callback: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)) {
+        this.setOnDraw_callback(onDraw_callback)
     }
     constructor(peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, CustomSpan.getFinalizer())
     }
     constructor() {
         this(CustomSpan.construct())
+        this.onMeasure_callback = this.onMeasure
+        this.onDraw_callback = this.onDraw
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._CustomSpan_construct()
@@ -147,43 +158,43 @@ export class CustomSpan implements MaterializedBase {
         this.invalidate_serialize()
         return
     }
-    private getOnMeasure(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
-        return this.getOnMeasure_serialize()
+    private getOnMeasure_callback(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
+        return this.getOnMeasure_callback_serialize()
     }
-    private setOnMeasure(onMeasure: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)): void {
-        const onMeasure_casted = onMeasure as (((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics))
-        this.setOnMeasure_serialize(onMeasure_casted)
+    private setOnMeasure_callback(onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)): void {
+        const onMeasure_callback_casted = onMeasure_callback as (((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics))
+        this.setOnMeasure_callback_serialize(onMeasure_callback_casted)
         return
     }
-    private getOnDraw(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
-        return this.getOnDraw_serialize()
+    private getOnDraw_callback(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
+        return this.getOnDraw_callback_serialize()
     }
-    private setOnDraw(onDraw: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
-        const onDraw_casted = onDraw as (((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void))
-        this.setOnDraw_serialize(onDraw_casted)
+    private setOnDraw_callback(onDraw_callback: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
+        const onDraw_callback_casted = onDraw_callback as (((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void))
+        this.setOnDraw_callback_serialize(onDraw_callback_casted)
         return
     }
     invalidate_serialize(): void {
         ArkUIGeneratedNativeModule._CustomSpan_invalidate(this.peer!.ptr)
     }
-    private getOnMeasure_serialize(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
-        const retval  = ArkUIGeneratedNativeModule._CustomSpan_getOnMeasure(this.peer!.ptr)
+    private getOnMeasure_callback_serialize(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
+        const retval  = ArkUIGeneratedNativeModule._CustomSpan_getOnMeasure_callback(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
-    private setOnMeasure_serialize(onMeasure: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)): void {
+    private setOnMeasure_callback_serialize(onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(onMeasure)
-        ArkUIGeneratedNativeModule._CustomSpan_setOnMeasure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.holdAndWriteCallback(onMeasure_callback)
+        ArkUIGeneratedNativeModule._CustomSpan_setOnMeasure_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getOnDraw_serialize(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
-        const retval  = ArkUIGeneratedNativeModule._CustomSpan_getOnDraw(this.peer!.ptr)
+    private getOnDraw_callback_serialize(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
+        const retval  = ArkUIGeneratedNativeModule._CustomSpan_getOnDraw_callback(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
-    private setOnDraw_serialize(onDraw: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
+    private setOnDraw_callback_serialize(onDraw_callback: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(onDraw)
-        ArkUIGeneratedNativeModule._CustomSpan_setOnDraw(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.holdAndWriteCallback(onDraw_callback)
+        ArkUIGeneratedNativeModule._CustomSpan_setOnDraw_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -239,11 +250,11 @@ export class DecorationStyle implements MaterializedBase {
         let buffer : ResourceColor | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : Color | number | string | Resource | undefined
+            let buffer_ : Color | int32 | string | Resource | undefined
             if (buffer_UnionSelector == (0).toChar()) {
-                buffer_ = Color.fromValue(retvalDeserializer.readInt32())
+                buffer_ = Color.values()[retvalDeserializer.readInt32()]
             } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = (retvalDeserializer.readNumber() as number)
+                buffer_ = (retvalDeserializer.readInt32())
             } else if (buffer_UnionSelector == (2).toChar()) {
                 buffer_ = (retvalDeserializer.readString() as string)
             } else if (buffer_UnionSelector == (3).toChar()) {
@@ -251,7 +262,7 @@ export class DecorationStyle implements MaterializedBase {
             } else {
                 throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
             }
-            buffer = (buffer_ as Color | number | string | Resource)
+            buffer = (buffer_ as Color | int32 | string | Resource)
         }
         const returnResult : ResourceColor | undefined = buffer
         return returnResult
@@ -326,33 +337,25 @@ export class ImageAttachment implements MaterializedBase {
         this.layoutStyle = this.getLayoutStyle()
         this.colorFilter = this.getColorFilter()
     }
-    constructor(value: ImageAttachmentInterface | AttachmentType | undefined) {
+    constructor(value: AttachmentType | undefined) {
         this(false, ImageAttachment.construct(value))
     }
-    static construct(value: ImageAttachmentInterface | AttachmentType | undefined): KPointer {
+    static construct(value: AttachmentType | undefined): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value instanceof ImageAttachmentInterface) {
-            thisSerializer.writeInt8((0).toChar())
-            const valueForIdx0  = value as ImageAttachmentInterface
-            ImageAttachmentInterface_serializer.write(thisSerializer, valueForIdx0)
-        } else if (value instanceof AttachmentType | undefined) {
-            thisSerializer.writeInt8((1).toChar())
-            const valueForIdx1  = value as AttachmentType | undefined
-            if (valueForIdx1 !== undefined) {
-                thisSerializer.writeInt8(RuntimeType.OBJECT)
-                const valueForIdx1TmpValue  = valueForIdx1!
-                if (valueForIdx1TmpValue instanceof ImageAttachmentInterface) {
-                    thisSerializer.writeInt8((0).toChar())
-                    const valueForIdx1TmpValueForIdx0  = valueForIdx1TmpValue as ImageAttachmentInterface
-                    ImageAttachmentInterface_serializer.write(thisSerializer, valueForIdx1TmpValueForIdx0)
-                } else if (valueForIdx1TmpValue instanceof ResourceImageAttachmentOptions) {
-                    thisSerializer.writeInt8((1).toChar())
-                    const valueForIdx1TmpValueForIdx1  = valueForIdx1TmpValue as ResourceImageAttachmentOptions
-                    ResourceImageAttachmentOptions_serializer.write(thisSerializer, valueForIdx1TmpValueForIdx1)
-                }
-            } else {
-                thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof ImageAttachmentInterface) {
+                thisSerializer.writeInt8((0).toChar())
+                const valueTmpValueForIdx0  = valueTmpValue as ImageAttachmentInterface
+                ImageAttachmentInterface_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof ResourceImageAttachmentOptions) {
+                thisSerializer.writeInt8((1).toChar())
+                const valueTmpValueForIdx1  = valueTmpValue as ResourceImageAttachmentOptions
+                ResourceImageAttachmentOptions_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -459,7 +462,7 @@ export class LetterSpacingStyle implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly letterSpacing: number
+    readonly letterSpacing: double
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, LetterSpacingStyle.getFinalizer())
         this.letterSpacing = this.getLetterSpacing()
@@ -468,16 +471,19 @@ export class LetterSpacingStyle implements MaterializedBase {
         this(false, LetterSpacingStyle.construct(value))
     }
     static construct(value: LengthMetrics): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._LetterSpacingStyle_construct(extractors.toLengthMetricsPtr(value))
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        LengthMetrics_serializer.write(thisSerializer, value)
+        const retval  = ArkUIGeneratedNativeModule._LetterSpacingStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._LetterSpacingStyle_getFinalizer()
     }
-    private getLetterSpacing(): number {
+    private getLetterSpacing(): double {
         return this.getLetterSpacing_serialize()
     }
-    private getLetterSpacing_serialize(): number {
+    private getLetterSpacing_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._LetterSpacingStyle_getLetterSpacing(this.peer!.ptr)
         return retval
     }
@@ -492,7 +498,7 @@ export class LineHeightStyle implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly lineHeight: number
+    readonly lineHeight: double
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, LineHeightStyle.getFinalizer())
         this.lineHeight = this.getLineHeight()
@@ -501,16 +507,19 @@ export class LineHeightStyle implements MaterializedBase {
         this(false, LineHeightStyle.construct(lineHeight))
     }
     static construct(lineHeight: LengthMetrics): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._LineHeightStyle_construct(extractors.toLengthMetricsPtr(lineHeight))
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        LengthMetrics_serializer.write(thisSerializer, lineHeight)
+        const retval  = ArkUIGeneratedNativeModule._LineHeightStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._LineHeightStyle_getFinalizer()
     }
-    private getLineHeight(): number {
+    private getLineHeight(): double {
         return this.getLineHeight_serialize()
     }
-    private getLineHeight_serialize(): number {
+    private getLineHeight_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._LineHeightStyle_getLineHeight(this.peer!.ptr)
         return retval
     }
@@ -526,12 +535,12 @@ export class ParagraphStyle implements MaterializedBase {
         return this.peer
     }
     readonly textAlign?: TextAlign | undefined
-    readonly textIndent?: number | undefined
-    readonly maxLines?: number | undefined
+    readonly textIndent?: double | undefined
+    readonly maxLines?: int32 | undefined
     readonly overflow?: TextOverflow | undefined
     readonly wordBreak?: WordBreak | undefined
-    readonly leadingMargin?: number | LeadingMarginPlaceholder | undefined
-    readonly paragraphSpacing?: number | undefined
+    readonly leadingMargin?: double | LeadingMarginPlaceholder | undefined
+    readonly paragraphSpacing?: double | undefined
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ParagraphStyle.getFinalizer())
         this.textAlign = this.getTextAlign()
@@ -564,10 +573,10 @@ export class ParagraphStyle implements MaterializedBase {
     private getTextAlign(): TextAlign | undefined {
         return this.getTextAlign_serialize()
     }
-    private getTextIndent(): number | undefined {
+    private getTextIndent(): double | undefined {
         return this.getTextIndent_serialize()
     }
-    private getMaxLines(): number | undefined {
+    private getMaxLines(): int32 | undefined {
         return this.getMaxLines_serialize()
     }
     private getOverflow(): TextOverflow | undefined {
@@ -576,10 +585,10 @@ export class ParagraphStyle implements MaterializedBase {
     private getWordBreak(): WordBreak | undefined {
         return this.getWordBreak_serialize()
     }
-    private getLeadingMargin(): number | LeadingMarginPlaceholder | undefined {
+    private getLeadingMargin(): double | LeadingMarginPlaceholder | undefined {
         return this.getLeadingMargin_serialize()
     }
-    private getParagraphSpacing(): number | undefined {
+    private getParagraphSpacing(): double | undefined {
         return this.getParagraphSpacing_serialize()
     }
     private getTextAlign_serialize(): TextAlign | undefined {
@@ -593,26 +602,26 @@ export class ParagraphStyle implements MaterializedBase {
         const returnResult : TextAlign | undefined = buffer
         return returnResult
     }
-    private getTextIndent_serialize(): number | undefined {
+    private getTextIndent_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getTextIndent(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private getMaxLines_serialize(): number | undefined {
+    private getMaxLines_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getMaxLines(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readInt32()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
     private getOverflow_serialize(): TextOverflow | undefined {
@@ -637,35 +646,35 @@ export class ParagraphStyle implements MaterializedBase {
         const returnResult : WordBreak | undefined = buffer
         return returnResult
     }
-    private getLeadingMargin_serialize(): number | LeadingMarginPlaceholder | undefined {
+    private getLeadingMargin_serialize(): double | LeadingMarginPlaceholder | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getLeadingMargin(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | LeadingMarginPlaceholder | undefined = undefined
+        let buffer : double | LeadingMarginPlaceholder | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : number | LeadingMarginPlaceholder | undefined
+            let buffer_ : double | LeadingMarginPlaceholder | undefined
             if (buffer_UnionSelector == (0).toChar()) {
-                buffer_ = (retvalDeserializer.readNumber() as number)
+                buffer_ = retvalDeserializer.readFloat64()
             } else if (buffer_UnionSelector == (1).toChar()) {
                 buffer_ = LeadingMarginPlaceholder_serializer.read(retvalDeserializer)
             } else {
                 throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
             }
-            buffer = (buffer_ as number | LeadingMarginPlaceholder)
+            buffer = (buffer_ as double | LeadingMarginPlaceholder)
         }
-        const returnResult : number | LeadingMarginPlaceholder | undefined = buffer
+        const returnResult : double | LeadingMarginPlaceholder | undefined = buffer
         return returnResult
     }
-    private getParagraphSpacing_serialize(): number | undefined {
+    private getParagraphSpacing_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getParagraphSpacing(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
 }
@@ -679,7 +688,7 @@ export class StyledString implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly length: number
+    readonly length: int32
     constructor(_0: boolean, _1: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, StyledString.getFinalizer())
         this.length = this.getLength()
@@ -762,9 +771,9 @@ export class StyledString implements MaterializedBase {
     public getString(): string {
         return this.getString_serialize()
     }
-    public getStyles(start: number, length: number, styledKey?: StyledStringKey): Array<SpanStyle> {
-        const start_casted = start as (number)
-        const length_casted = length as (number)
+    public getStyles(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> {
+        const start_casted = start as (int32)
+        const length_casted = length as (int32)
         const styledKey_casted = styledKey as (StyledStringKey | undefined)
         return this.getStyles_serialize(start_casted, length_casted, styledKey_casted)
     }
@@ -772,9 +781,9 @@ export class StyledString implements MaterializedBase {
         const other_casted = other as (StyledString)
         return this.equals_serialize(other_casted)
     }
-    public subStyledString(start: number, length?: number): StyledString {
-        const start_casted = start as (number)
-        const length_casted = length as (number | undefined)
+    public subStyledString(start: int32, length?: int32): StyledString {
+        const start_casted = start as (int32)
+        const length_casted = length as (int32 | undefined)
         return this.subStyledString_serialize(start_casted, length_casted)
     }
     public static fromHtml(html: string): Promise<StyledString> {
@@ -803,14 +812,14 @@ export class StyledString implements MaterializedBase {
         const buffer_casted = buffer as (ArrayBuffer)
         return StyledString.unmarshalling1_serialize(buffer_casted)
     }
-    private getLength(): number {
+    private getLength(): int32 {
         return this.getLength_serialize()
     }
     getString_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._StyledString_getString(this.peer!.ptr)
         return retval
     }
-    getStyles_serialize(start: number, length: number, styledKey?: StyledStringKey): Array<SpanStyle> {
+    getStyles_serialize(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (styledKey !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -834,12 +843,12 @@ export class StyledString implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._StyledString_equals(this.peer!.ptr, toPeerPtr(other))
         return retval
     }
-    subStyledString_serialize(start: number, length?: number): StyledString {
+    subStyledString_serialize(start: int32, length?: int32): StyledString {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (length !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const lengthTmpValue  = length!
-            thisSerializer.writeNumber(lengthTmpValue)
+            thisSerializer.writeInt32(lengthTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -848,7 +857,7 @@ export class StyledString implements MaterializedBase {
         const obj : StyledString = StyledStringInternal.fromPtr(retval)
         return obj
     }
-    private getLength_serialize(): number {
+    private getLength_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._StyledString_getLength(this.peer!.ptr)
         return retval
     }
@@ -920,8 +929,8 @@ export class TextStyle implements MaterializedBase {
     }
     readonly fontColor?: ResourceColor | undefined
     readonly fontFamily?: string | undefined
-    readonly fontSize?: number | undefined
-    readonly fontWeight?: number | undefined
+    readonly fontSize?: double | undefined
+    readonly fontWeight?: int32 | undefined
     readonly fontStyle?: FontStyle | undefined
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TextStyle.getFinalizer())
@@ -956,10 +965,10 @@ export class TextStyle implements MaterializedBase {
     private getFontFamily(): string | undefined {
         return this.getFontFamily_serialize()
     }
-    private getFontSize(): number | undefined {
+    private getFontSize(): double | undefined {
         return this.getFontSize_serialize()
     }
-    private getFontWeight(): number | undefined {
+    private getFontWeight(): int32 | undefined {
         return this.getFontWeight_serialize()
     }
     private getFontStyle(): FontStyle | undefined {
@@ -972,11 +981,11 @@ export class TextStyle implements MaterializedBase {
         let buffer : ResourceColor | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : Color | number | string | Resource | undefined
+            let buffer_ : Color | int32 | string | Resource | undefined
             if (buffer_UnionSelector == (0).toChar()) {
-                buffer_ = Color.fromValue(retvalDeserializer.readInt32())
+                buffer_ = Color.values()[retvalDeserializer.readInt32()]
             } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = (retvalDeserializer.readNumber() as number)
+                buffer_ = (retvalDeserializer.readInt32())
             } else if (buffer_UnionSelector == (2).toChar()) {
                 buffer_ = (retvalDeserializer.readString() as string)
             } else if (buffer_UnionSelector == (3).toChar()) {
@@ -984,7 +993,7 @@ export class TextStyle implements MaterializedBase {
             } else {
                 throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
             }
-            buffer = (buffer_ as Color | number | string | Resource)
+            buffer = (buffer_ as Color | int32 | string | Resource)
         }
         const returnResult : ResourceColor | undefined = buffer
         return returnResult
@@ -1000,26 +1009,26 @@ export class TextStyle implements MaterializedBase {
         const returnResult : string | undefined = buffer
         return returnResult
     }
-    private getFontSize_serialize(): number | undefined {
+    private getFontSize_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_getFontSize(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private getFontWeight_serialize(): number | undefined {
+    private getFontWeight_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_getFontWeight(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readInt32()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
     private getFontStyle_serialize(): FontStyle | undefined {
@@ -1101,8 +1110,8 @@ export interface StyleOptions {
     styledValue: StyledStringValue;
 }
 export interface SpanStyle {
-    start: number;
-    length: number;
+    start: int32;
+    length: int32;
     styledKey: StyledStringKey;
     styledValue: StyledStringValue;
 }
@@ -1110,7 +1119,7 @@ export interface TextStyleInterface {
     fontColor?: ResourceColor;
     fontFamily?: ResourceStr;
     fontSize?: LengthMetrics;
-    fontWeight?: number | FontWeight | string;
+    fontWeight?: int32 | FontWeight | string;
     fontStyle?: FontStyle;
 }
 export interface DecorationStyleInterface {
@@ -1125,7 +1134,7 @@ export interface GestureStyleInterface {
 export interface ParagraphStyleInterface {
     textAlign?: TextAlign;
     textIndent?: LengthMetrics;
-    maxLines?: number;
+    maxLines?: int32;
     overflow?: TextOverflow;
     wordBreak?: WordBreak;
     leadingMargin?: LengthMetrics | LeadingMarginPlaceholder;
@@ -1172,17 +1181,17 @@ export interface ImageAttachmentLayoutStyle {
     borderRadius?: LengthMetrics | BorderRadiuses;
 }
 export interface CustomSpanMetrics {
-    width: number;
-    height?: number;
+    width: double;
+    height?: double;
 }
 export interface CustomSpanDrawInfo {
-    x: number;
-    lineTop: number;
-    lineBottom: number;
-    baseline: number;
+    x: double;
+    lineTop: double;
+    lineBottom: double;
+    baseline: double;
 }
 export interface CustomSpanMeasureInfo {
-    fontSize: number;
+    fontSize: double;
 }
 export class GestureStyle_serializer {
     public static write(buffer: SerializerBase, value: GestureStyle): void {
@@ -1193,6 +1202,39 @@ export class GestureStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return GestureStyleInternal.fromPtr(ptr)
+    }
+}
+export class LetterSpacingStyle_serializer {
+    public static write(buffer: SerializerBase, value: LetterSpacingStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): LetterSpacingStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return LetterSpacingStyleInternal.fromPtr(ptr)
+    }
+}
+export class LineHeightStyle_serializer {
+    public static write(buffer: SerializerBase, value: LineHeightStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): LineHeightStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return LineHeightStyleInternal.fromPtr(ptr)
+    }
+}
+export class MutableStyledString_serializer {
+    public static write(buffer: SerializerBase, value: MutableStyledString): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): MutableStyledString {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return MutableStyledStringInternal.fromPtr(ptr)
     }
 }
 export class StyledString_serializer {
@@ -1254,20 +1296,20 @@ export class CustomSpanDrawInfo_serializer {
     public static write(buffer: SerializerBase, value: CustomSpanDrawInfo): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
+        valueSerializer.writeFloat64(valueHolderForX)
         const valueHolderForLineTop  = value.lineTop
-        valueSerializer.writeNumber(valueHolderForLineTop)
+        valueSerializer.writeFloat64(valueHolderForLineTop)
         const valueHolderForLineBottom  = value.lineBottom
-        valueSerializer.writeNumber(valueHolderForLineBottom)
+        valueSerializer.writeFloat64(valueHolderForLineBottom)
         const valueHolderForBaseline  = value.baseline
-        valueSerializer.writeNumber(valueHolderForBaseline)
+        valueSerializer.writeFloat64(valueHolderForBaseline)
     }
     public static read(buffer: DeserializerBase): CustomSpanDrawInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const lineTopTmpResult : number = (valueDeserializer.readNumber() as number)
-        const lineBottomTmpResult : number = (valueDeserializer.readNumber() as number)
-        const baselineTmpResult : number = (valueDeserializer.readNumber() as number)
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const lineTopTmpResult : double = valueDeserializer.readFloat64()
+        const lineBottomTmpResult : double = valueDeserializer.readFloat64()
+        const baselineTmpResult : double = valueDeserializer.readFloat64()
         let value : CustomSpanDrawInfo = ({x: xTmpResult, lineTop: lineTopTmpResult, lineBottom: lineBottomTmpResult, baseline: baselineTmpResult} as CustomSpanDrawInfo)
         return value
     }
@@ -1276,11 +1318,11 @@ export class CustomSpanMeasureInfo_serializer {
     public static write(buffer: SerializerBase, value: CustomSpanMeasureInfo): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForFontSize  = value.fontSize
-        valueSerializer.writeNumber(valueHolderForFontSize)
+        valueSerializer.writeFloat64(valueHolderForFontSize)
     }
     public static read(buffer: DeserializerBase): CustomSpanMeasureInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const fontSizeTmpResult : number = (valueDeserializer.readNumber() as number)
+        const fontSizeTmpResult : double = valueDeserializer.readFloat64()
         let value : CustomSpanMeasureInfo = ({fontSize: fontSizeTmpResult} as CustomSpanMeasureInfo)
         return value
     }
@@ -1289,25 +1331,25 @@ export class CustomSpanMetrics_serializer {
     public static write(buffer: SerializerBase, value: CustomSpanMetrics): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForWidth  = value.width
-        valueSerializer.writeNumber(valueHolderForWidth)
+        valueSerializer.writeFloat64(valueHolderForWidth)
         const valueHolderForHeight  = value.height
         if (valueHolderForHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
-            valueSerializer.writeNumber(valueHolderForHeightTmpValue)
+            valueSerializer.writeFloat64(valueHolderForHeightTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): CustomSpanMetrics {
         let valueDeserializer : DeserializerBase = buffer
-        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : double = valueDeserializer.readFloat64()
         const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightTmpBuf : number | undefined = undefined
+        let heightTmpBuf : double | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            heightTmpBuf = (valueDeserializer.readNumber() as number)
+            heightTmpBuf = valueDeserializer.readFloat64()
         }
-        const heightTmpResult : number | undefined = heightTmpBuf
+        const heightTmpResult : double | undefined = heightTmpBuf
         let value : CustomSpanMetrics = ({width: widthTmpResult, height: heightTmpResult} as CustomSpanMetrics)
         return value
     }
@@ -1374,39 +1416,6 @@ export class GestureStyleInterface_serializer {
         return value
     }
 }
-export class LetterSpacingStyle_serializer {
-    public static write(buffer: SerializerBase, value: LetterSpacingStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): LetterSpacingStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return LetterSpacingStyleInternal.fromPtr(ptr)
-    }
-}
-export class LineHeightStyle_serializer {
-    public static write(buffer: SerializerBase, value: LineHeightStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): LineHeightStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return LineHeightStyleInternal.fromPtr(ptr)
-    }
-}
-export class MutableStyledString_serializer {
-    public static write(buffer: SerializerBase, value: MutableStyledString): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): MutableStyledString {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return MutableStyledStringInternal.fromPtr(ptr)
-    }
-}
 export class TextShadowStyle_serializer {
     public static write(buffer: SerializerBase, value: TextShadowStyle): void {
         let valueSerializer : SerializerBase = buffer
@@ -1441,7 +1450,7 @@ export class DecorationStyleInterface_serializer {
             if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
@@ -1474,11 +1483,11 @@ export class DecorationStyleInterface_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1486,7 +1495,7 @@ export class DecorationStyleInterface_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1520,7 +1529,7 @@ export class TextStyleInterface_serializer {
             if (valueHolderForFontColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
@@ -1565,10 +1574,10 @@ export class TextStyleInterface_serializer {
         if (valueHolderForFontWeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontWeightTmpValue  = valueHolderForFontWeight!
-            if (valueHolderForFontWeightTmpValue instanceof number) {
+            if (valueHolderForFontWeightTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontWeightTmpValueForIdx0)
+                const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx0)
             } else if (valueHolderForFontWeightTmpValue instanceof FontWeight) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as FontWeight
@@ -1596,11 +1605,11 @@ export class TextStyleInterface_serializer {
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
-                fontColorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1608,7 +1617,7 @@ export class TextStyleInterface_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         const fontFamilyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1633,12 +1642,12 @@ export class TextStyleInterface_serializer {
         }
         const fontSizeTmpResult : LengthMetrics | undefined = fontSizeTmpBuf
         const fontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontWeightTmpBuf : number | FontWeight | string | undefined = undefined
+        let fontWeightTmpBuf : int32 | FontWeight | string | undefined = undefined
         if ((fontWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontWeightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontWeightTmpBuf_ : number | FontWeight | string | undefined
+            let fontWeightTmpBuf_ : int32 | FontWeight | string | undefined
             if (fontWeightTmpBuf_UnionSelector == (0).toChar()) {
-                fontWeightTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontWeightTmpBuf_ = valueDeserializer.readInt32()
             } else if (fontWeightTmpBuf_UnionSelector == (1).toChar()) {
                 fontWeightTmpBuf_ = FontWeight.fromValue(valueDeserializer.readInt32())
             } else if (fontWeightTmpBuf_UnionSelector == (2).toChar()) {
@@ -1646,9 +1655,9 @@ export class TextStyleInterface_serializer {
             } else {
                 throw new Error("One of the branches for fontWeightTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontWeightTmpBuf = (fontWeightTmpBuf_ as number | FontWeight | string)
+            fontWeightTmpBuf = (fontWeightTmpBuf_ as int32 | FontWeight | string)
         }
-        const fontWeightTmpResult : number | FontWeight | string | undefined = fontWeightTmpBuf
+        const fontWeightTmpResult : int32 | FontWeight | string | undefined = fontWeightTmpBuf
         const fontStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontStyleTmpBuf : FontStyle | undefined = undefined
         if ((fontStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1796,7 +1805,7 @@ export class ParagraphStyleInterface_serializer {
         if (valueHolderForMaxLines !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxLinesTmpValue  = valueHolderForMaxLines!
-            valueSerializer.writeNumber(valueHolderForMaxLinesTmpValue)
+            valueSerializer.writeInt32(valueHolderForMaxLinesTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1856,11 +1865,11 @@ export class ParagraphStyleInterface_serializer {
         }
         const textIndentTmpResult : LengthMetrics | undefined = textIndentTmpBuf
         const maxLinesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxLinesTmpBuf : number | undefined = undefined
+        let maxLinesTmpBuf : int32 | undefined = undefined
         if ((maxLinesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            maxLinesTmpBuf = (valueDeserializer.readNumber() as number)
+            maxLinesTmpBuf = valueDeserializer.readInt32()
         }
-        const maxLinesTmpResult : number | undefined = maxLinesTmpBuf
+        const maxLinesTmpResult : int32 | undefined = maxLinesTmpBuf
         const overflowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let overflowTmpBuf : TextOverflow | undefined = undefined
         if ((overflowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -2293,9 +2302,9 @@ export class SpanStyle_serializer {
     public static write(buffer: SerializerBase, value: SpanStyle): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForStart  = value.start
-        valueSerializer.writeNumber(valueHolderForStart)
+        valueSerializer.writeInt32(valueHolderForStart)
         const valueHolderForLength  = value.length
-        valueSerializer.writeNumber(valueHolderForLength)
+        valueSerializer.writeInt32(valueHolderForLength)
         const valueHolderForStyledKey  = value.styledKey
         valueSerializer.writeInt32(valueHolderForStyledKey.valueOf())
         const valueHolderForStyledValue  = value.styledValue
@@ -2355,8 +2364,8 @@ export class SpanStyle_serializer {
     }
     public static read(buffer: DeserializerBase): SpanStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const startTmpResult : number = (valueDeserializer.readNumber() as number)
-        const lengthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const startTmpResult : int32 = valueDeserializer.readInt32()
+        const lengthTmpResult : int32 = valueDeserializer.readInt32()
         const styledKeyTmpResult : StyledStringKey = StyledStringKey.fromValue(valueDeserializer.readInt32())
         const styledValueTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
         let styledValueTmpBuf : TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
@@ -2439,22 +2448,22 @@ export class MutableStyledString extends StyledString implements MaterializedBas
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._MutableStyledString_getFinalizer()
     }
-    public replaceString(start: number, length: number, other: string): void {
-        const start_casted = start as (number)
-        const length_casted = length as (number)
+    public replaceString(start: int32, length: int32, other: string): void {
+        const start_casted = start as (int32)
+        const length_casted = length as (int32)
         const other_casted = other as (string)
         this.replaceString_serialize(start_casted, length_casted, other_casted)
         return
     }
-    public insertString(start: number, other: string): void {
-        const start_casted = start as (number)
+    public insertString(start: int32, other: string): void {
+        const start_casted = start as (int32)
         const other_casted = other as (string)
         this.insertString_serialize(start_casted, other_casted)
         return
     }
-    public removeString(start: number, length: number): void {
-        const start_casted = start as (number)
-        const length_casted = length as (number)
+    public removeString(start: int32, length: int32): void {
+        const start_casted = start as (int32)
+        const length_casted = length as (int32)
         this.removeString_serialize(start_casted, length_casted)
         return
     }
@@ -2468,16 +2477,16 @@ export class MutableStyledString extends StyledString implements MaterializedBas
         this.setStyle_serialize(spanStyle_casted)
         return
     }
-    public removeStyle(start: number, length: number, styledKey: StyledStringKey): void {
-        const start_casted = start as (number)
-        const length_casted = length as (number)
+    public removeStyle(start: int32, length: int32, styledKey: StyledStringKey): void {
+        const start_casted = start as (int32)
+        const length_casted = length as (int32)
         const styledKey_casted = styledKey as (StyledStringKey)
         this.removeStyle_serialize(start_casted, length_casted, styledKey_casted)
         return
     }
-    public removeStyles(start: number, length: number): void {
-        const start_casted = start as (number)
-        const length_casted = length as (number)
+    public removeStyles(start: int32, length: int32): void {
+        const start_casted = start as (int32)
+        const length_casted = length as (int32)
         this.removeStyles_serialize(start_casted, length_casted)
         return
     }
@@ -2485,15 +2494,15 @@ export class MutableStyledString extends StyledString implements MaterializedBas
         this.clearStyles_serialize()
         return
     }
-    public replaceStyledString(start: number, length: number, other: StyledString): void {
-        const start_casted = start as (number)
-        const length_casted = length as (number)
+    public replaceStyledString(start: int32, length: int32, other: StyledString): void {
+        const start_casted = start as (int32)
+        const length_casted = length as (int32)
         const other_casted = other as (StyledString)
         this.replaceStyledString_serialize(start_casted, length_casted, other_casted)
         return
     }
-    public insertStyledString(start: number, other: StyledString): void {
-        const start_casted = start as (number)
+    public insertStyledString(start: int32, other: StyledString): void {
+        const start_casted = start as (int32)
         const other_casted = other as (StyledString)
         this.insertStyledString_serialize(start_casted, other_casted)
         return
@@ -2503,13 +2512,13 @@ export class MutableStyledString extends StyledString implements MaterializedBas
         this.appendStyledString_serialize(other_casted)
         return
     }
-    replaceString_serialize(start: number, length: number, other: string): void {
+    replaceString_serialize(start: int32, length: int32, other: string): void {
         ArkUIGeneratedNativeModule._MutableStyledString_replaceString(this.peer!.ptr, start, length, other)
     }
-    insertString_serialize(start: number, other: string): void {
+    insertString_serialize(start: int32, other: string): void {
         ArkUIGeneratedNativeModule._MutableStyledString_insertString(this.peer!.ptr, start, other)
     }
-    removeString_serialize(start: number, length: number): void {
+    removeString_serialize(start: int32, length: int32): void {
         ArkUIGeneratedNativeModule._MutableStyledString_removeString(this.peer!.ptr, start, length)
     }
     replaceStyle_serialize(spanStyle: SpanStyle): void {
@@ -2524,19 +2533,19 @@ export class MutableStyledString extends StyledString implements MaterializedBas
         ArkUIGeneratedNativeModule._MutableStyledString_setStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    removeStyle_serialize(start: number, length: number, styledKey: StyledStringKey): void {
+    removeStyle_serialize(start: int32, length: int32, styledKey: StyledStringKey): void {
         ArkUIGeneratedNativeModule._MutableStyledString_removeStyle(this.peer!.ptr, start, length, styledKey.valueOf())
     }
-    removeStyles_serialize(start: number, length: number): void {
+    removeStyles_serialize(start: int32, length: int32): void {
         ArkUIGeneratedNativeModule._MutableStyledString_removeStyles(this.peer!.ptr, start, length)
     }
     clearStyles_serialize(): void {
         ArkUIGeneratedNativeModule._MutableStyledString_clearStyles(this.peer!.ptr)
     }
-    replaceStyledString_serialize(start: number, length: number, other: StyledString): void {
+    replaceStyledString_serialize(start: int32, length: int32, other: StyledString): void {
         ArkUIGeneratedNativeModule._MutableStyledString_replaceStyledString(this.peer!.ptr, start, length, toPeerPtr(other))
     }
-    insertStyledString_serialize(start: number, other: StyledString): void {
+    insertStyledString_serialize(start: int32, other: StyledString): void {
         ArkUIGeneratedNativeModule._MutableStyledString_insertStyledString(this.peer!.ptr, start, toPeerPtr(other))
     }
     appendStyledString_serialize(other: StyledString): void {

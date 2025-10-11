@@ -139,7 +139,7 @@ HWTEST_F(TextFieldPatternTestTwo, InitDragDropCallBack001, TestSize.Level0)
     auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     std::string extraParams = "Test";
 
-    auto eventHub = textFieldNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = textFieldNode->GetEventHub<EventHub>();
     pattern->dragStatus_ = DragStatus::ON_DROP;
     pattern->isDetachFromMainTree_ = false;
     eventHub->onDragEnd_.operator()(event);
@@ -564,7 +564,7 @@ HWTEST_F(TextFieldPatternTestTwo, OnModifyDone001, TestSize.Level0)
     pattern->deleteForwardOperations_.emplace(10);
     pattern->OnModifyDone();
 
-    auto eventHub = textFieldNode->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(false);
     pattern->OnModifyDone();

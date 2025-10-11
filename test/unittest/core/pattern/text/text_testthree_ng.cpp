@@ -126,7 +126,7 @@ HWTEST_F(TextTestThreeNg, BetweenSelectedPosition001, TestSize.Level1)
     auto [host, pattern] = Init();
     pattern->copyOption_ = CopyOptions::Distributed;
     host->draggable_ = true;
-    host->GetOrCreateEventHub<EventHub>()->SetOnDragStart(
+    host->GetEventHub<EventHub>()->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
 
     /**
@@ -800,7 +800,7 @@ HWTEST_F(TextTestThreeNg, SetTextSelection001, TestSize.Level1)
      * @tc.steps: step4. enabled is false or obscured is true
      * @tc.expected: not selected
      */
-    auto eventHub = pattern->GetOrCreateEventHub<EventHub>();
+    auto eventHub = pattern->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->enabled_ = false;
     pattern->SetTextSelection(0, 4);
@@ -1078,7 +1078,7 @@ HWTEST_F(TextTestThreeNg, OnTextSelectionChange002, TestSize.Level1)
     auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
     EXPECT_NE(gestureEventHub->longPressEventActuator_->longPressEvent_, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     EXPECT_TRUE(!inputHub->mouseEventActuator_->inputEvents_.empty());
@@ -1530,7 +1530,7 @@ HWTEST_F(TextTestThreeNg, HandleDragEvent001, TestSize.Level1)
     auto gesture = frameNode->GetOrCreateGestureEventHub();
     EXPECT_TRUE(gesture->GetTextDraggable());
     gesture->SetIsTextDraggable(true);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(event, "");
     EXPECT_EQ(dragDropInfo.extraInfo, "3456");
@@ -1607,7 +1607,7 @@ HWTEST_F(TextTestThreeNg, HandleDragEvent002, TestSize.Level1)
      * @tc.expect: expect childSpanNode selected add into dragResultObjects.
      */
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(dragDropInfo.extraInfo, "");
@@ -1664,7 +1664,7 @@ HWTEST_F(TextTestThreeNg, GetTextResultObject001, TestSize.Level1)
      */
     pattern->textSelector_.Update(0, 15);
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dragResultObjects_.back().valueString), SPAN_PHONE);
@@ -1733,7 +1733,7 @@ HWTEST_F(TextTestThreeNg, GetSymbolSpanResultObject001, TestSize.Level1)
      * @tc.expect: symbol spanNode len is 2, thus last dragResultObject is partial selected, range [0, 1]
      */
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto onDragStart = eventHub->GetDefaultOnDragStart();
     pattern->dragResultObjects_.clear();
     pattern->textSelector_.Update(0, 5);
@@ -1808,7 +1808,7 @@ HWTEST_F(TextTestThreeNg, GetImageResultObject001, TestSize.Level1)
      */
     pattern->textSelector_.Update(0, 20);
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(pattern->dragResultObjects_.size(), 2); // 2 means result list size.
@@ -2223,7 +2223,7 @@ HWTEST_F(TextTestThreeNg, CreateParagphDragTest001, TestSize.Level1)
     auto gesture = frameNode->GetOrCreateGestureEventHub();
     EXPECT_TRUE(gesture->GetTextDraggable());
     gesture->SetIsTextDraggable(true);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(event, "");
     EXPECT_EQ(pattern->status_, Status::DRAGGING);

@@ -118,7 +118,7 @@ public:
         auto addNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId_.value())));
         if (addNode) {
-            auto eventHub = addNode->GetOrCreateEventHub<ButtonEventHub>();
+            auto eventHub = addNode->GetEventHub<ButtonEventHub>();
             if (eventHub) {
                 enableInc = eventHub->IsEnabled();
             }
@@ -129,7 +129,7 @@ public:
         auto subNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId_.value())));
         if (subNode) {
-            auto eventHub = subNode->GetOrCreateEventHub<ButtonEventHub>();
+            auto eventHub = subNode->GetEventHub<ButtonEventHub>();
             if (eventHub) {
                 enableDec = eventHub->IsEnabled();
             }
@@ -145,7 +145,7 @@ private:
         auto addNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId_.value())));
         if (addNode) {
-            auto eventHub = addNode->GetOrCreateEventHub<ButtonEventHub>();
+            auto eventHub = addNode->GetEventHub<ButtonEventHub>();
             if (eventHub) {
                 auto enableInc = eventHub->GetStateEffect();
                 DumpLog::GetInstance().AddDesc(std::string("enableInc: ").append(enableInc ? "true" : "false"));
@@ -155,7 +155,7 @@ private:
         auto subNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId_.value())));
         if (subNode) {
-            auto eventHub = subNode->GetOrCreateEventHub<ButtonEventHub>();
+            auto eventHub = subNode->GetEventHub<ButtonEventHub>();
             if (eventHub) {
                 auto enableDec = eventHub->GetStateEffect();
                 DumpLog::GetInstance().AddDesc(std::string("enableDec: ").append(enableDec ? "true" : "false"));

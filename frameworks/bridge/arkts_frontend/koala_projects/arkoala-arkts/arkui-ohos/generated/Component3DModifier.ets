@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkComponent3DPeer, Component3DAttribute } from "./component/component3d"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -50,8 +51,9 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
     _customRender_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _customRender_0_0value?: ResourceStr | undefined
     _customRender_0_1value?: boolean | undefined
-    applyModifierPatch(peer: ArkComponent3DPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkComponent3DPeer;
         if (this._environment_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._environment_0_flag) {

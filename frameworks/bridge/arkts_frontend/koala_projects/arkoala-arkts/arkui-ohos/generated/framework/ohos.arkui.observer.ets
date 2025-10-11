@@ -69,7 +69,7 @@ export class uiObserver_NavDestinationInfo_serializer {
         const valueHolderForState  = value.state
         valueSerializer.writeInt32(valueHolderForState.valueOf())
         const valueHolderForIndex  = value.index
-        valueSerializer.writeNumber(valueHolderForIndex)
+        valueSerializer.writeInt32(valueHolderForIndex)
         const valueHolderForParam  = value.param
         if (valueHolderForParam !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -84,7 +84,7 @@ export class uiObserver_NavDestinationInfo_serializer {
         if (valueHolderForUniqueId !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForUniqueIdTmpValue  = valueHolderForUniqueId!
-            valueSerializer.writeNumber(valueHolderForUniqueIdTmpValue)
+            valueSerializer.writeInt32(valueHolderForUniqueIdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -120,7 +120,7 @@ export class uiObserver_NavDestinationInfo_serializer {
         }
         const nameTmpResult : ResourceStr = (nameTmpBuf as string | Resource)
         const stateTmpResult : uiObserver.NavDestinationState = uiObserver.NavDestinationState.fromValue(valueDeserializer.readInt32())
-        const indexTmpResult : number = (valueDeserializer.readNumber() as number)
+        const indexTmpResult : int32 = valueDeserializer.readInt32()
         const paramTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let paramTmpBuf : Object | undefined = undefined
         if ((paramTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -129,20 +129,18 @@ export class uiObserver_NavDestinationInfo_serializer {
         const paramTmpResult : Object | undefined = paramTmpBuf
         const navDestinationIdTmpResult : string = (valueDeserializer.readString() as string)
         const uniqueIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let uniqueIdTmpBuf : number | undefined = undefined
+        let uniqueIdTmpBuf : int32 | undefined = undefined
         if ((uniqueIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            uniqueIdTmpBuf = (valueDeserializer.readNumber() as number)
+            uniqueIdTmpBuf = valueDeserializer.readInt32()
         }
-        const uniqueIdTmpResult : number | undefined = uniqueIdTmpBuf
+        const uniqueIdTmpResult : int32 | undefined = uniqueIdTmpBuf
         const modeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let modeTmpBuf : NavDestinationMode | undefined = undefined
         if ((modeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             modeTmpBuf = NavDestinationMode.fromValue(valueDeserializer.readInt32())
         }
         const modeTmpResult : NavDestinationMode | undefined = modeTmpBuf
-        // instructive changes, need to be removed
-        let value : uiObserver.NavDestinationInfo = ({navigationId: navigationIdTmpResult, name: nameTmpResult, state: stateTmpResult, index: indexTmpResult, param: paramTmpResult, navDestinationId: navDestinationIdTmpResult, uniqueId: uniqueIdTmpResult!, mode: modeTmpResult} as uiObserver.NavDestinationInfo)
-        // instructive changes, need to be removed
+        let value : uiObserver.NavDestinationInfo = ({navigationId: navigationIdTmpResult, name: nameTmpResult, state: stateTmpResult, index: indexTmpResult, param: paramTmpResult, navDestinationId: navDestinationIdTmpResult, uniqueId: uniqueIdTmpResult, mode: modeTmpResult} as uiObserver.NavDestinationInfo)
         return value
     }
 }

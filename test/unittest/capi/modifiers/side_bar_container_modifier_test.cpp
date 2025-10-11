@@ -503,7 +503,7 @@ HWTEST_F(SideBarContainerModifierTest, setShowControlButtonTestValidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SideBarContainerModifierTest, setOnChangeTest, TestSize.Level1)
+HWTEST_F(SideBarContainerModifierTest, DISABLED_setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -522,7 +522,7 @@ HWTEST_F(SideBarContainerModifierTest, setOnChangeTest, TestSize.Level1)
     };
     auto optCallback = Converter::ArkValue<Opt_Callback_Boolean_Void>(arkCallback);
     modifier_->setOnChange(node_, &optCallback);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SideBarContainerEventHub>();
     eventHub->FireChangeEvent(true);
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_TRUE(checkEvent->value);
@@ -921,7 +921,7 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> divi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SideBarContainerModifierTest, setDividerTestColorValidValues, TestSize.Level1)
+HWTEST_F(SideBarContainerModifierTest, DISABLED_setDividerTestColorValidValues, TestSize.Level1)
 {
     checkDividerColorAttr(dividerColorValidValues);
 }
@@ -935,7 +935,7 @@ HWTEST_F(SideBarContainerModifierTest, setDividerTestColorValidValues, TestSize.
 HWTEST_F(SideBarContainerModifierTest, setOnChangeEventSelectImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

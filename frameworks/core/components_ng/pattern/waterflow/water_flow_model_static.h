@@ -26,8 +26,8 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static RefPtr<ScrollProxy> GetOrCreateScrollBarProxy(FrameNode* frameNode);
-    static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
-    static void SetRowsTemplate(FrameNode* frameNode, const std::string& value);
+    static void SetColumnsTemplate(FrameNode* frameNode, const std::optional<std::string>& value);
+    static void SetRowsTemplate(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static void SetColumnsGap(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetRowsGap(FrameNode* frameNode, const std::optional<Dimension>& value);

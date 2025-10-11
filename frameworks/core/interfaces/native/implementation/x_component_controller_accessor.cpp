@@ -156,65 +156,74 @@ void StopImageAnalyzerImpl(Ark_XComponentController peer)
     peerImpl->controller->StopImageAnalyzer();
 #endif //XCOMPONENT_SUPPORTED
 }
-void SetOnSurfaceCreatedCallbackImpl(Ark_XComponentController peer,
-    const Callback_String_Void* onSurfaceCreatedCallback)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(peerImpl->controller);
-    CHECK_NULL_VOID(onSurfaceCreatedCallback);
-    peerImpl->SetOnSurfaceCreatedEvent(*onSurfaceCreatedCallback);
-#endif //XCOMPONENT_SUPPORTED
-}
-void SetOnSurfaceChangedCallbackImpl(Ark_XComponentController peer,
-    const Callback_String_SurfaceRect_Void* onSurfaceChangedCallback)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(peerImpl->controller);
-    CHECK_NULL_VOID(onSurfaceChangedCallback);
-    peerImpl->SetOnSurfaceChangedEvent(*onSurfaceChangedCallback);
-#endif //XCOMPONENT_SUPPORTED
-}
-void SetOnSurfaceDestroyedCallbackImpl(Ark_XComponentController peer,
-    const Callback_String_Void* onSurfaceDestroyedCallback)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(peerImpl->controller);
-    CHECK_NULL_VOID(onSurfaceDestroyedCallback);
-    peerImpl->SetOnSurfaceDestroyedEvent(*onSurfaceDestroyedCallback);
-#endif //XCOMPONENT_SUPPORTED
-}
 Callback_String_Void GetOnSurfaceCreatedImpl(Ark_XComponentController peer)
 {
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_RETURN(peer, {});
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, {});
+    return peerImpl->arkOnSurfaceCreated;
+#else
     return {};
+#endif //XCOMPONENT_SUPPORTED
 }
 void SetOnSurfaceCreatedImpl(Ark_XComponentController peer,
                              const Callback_String_Void* onSurfaceCreated)
 {
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(peerImpl->controller);
+    CHECK_NULL_VOID(onSurfaceCreated);
+    peerImpl->SetOnSurfaceCreatedEvent(*onSurfaceCreated);
+#endif //XCOMPONENT_SUPPORTED
 }
 Callback_String_SurfaceRect_Void GetOnSurfaceChangedImpl(Ark_XComponentController peer)
 {
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_RETURN(peer, {});
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, {});
+    return peerImpl->arkOnSurfaceChanged;
+#else
     return {};
+#endif //XCOMPONENT_SUPPORTED
 }
 void SetOnSurfaceChangedImpl(Ark_XComponentController peer,
                              const Callback_String_SurfaceRect_Void* onSurfaceChanged)
 {
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(peerImpl->controller);
+    CHECK_NULL_VOID(onSurfaceChanged);
+    peerImpl->SetOnSurfaceChangedEvent(*onSurfaceChanged);
+#endif //XCOMPONENT_SUPPORTED
 }
 Callback_String_Void GetOnSurfaceDestroyedImpl(Ark_XComponentController peer)
 {
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_RETURN(peer, {});
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, {});
+    return peerImpl->arkOnSurfaceDestroyed;
+#else
     return {};
+#endif //XCOMPONENT_SUPPORTED
 }
 void SetOnSurfaceDestroyedImpl(Ark_XComponentController peer,
                                const Callback_String_Void* onSurfaceDestroyed)
 {
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(peerImpl->controller);
+    CHECK_NULL_VOID(onSurfaceDestroyed);
+    peerImpl->SetOnSurfaceDestroyedEvent(*onSurfaceDestroyed);
+#endif //XCOMPONENT_SUPPORTED
 }
 } // XComponentControllerAccessor
 const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccessor()

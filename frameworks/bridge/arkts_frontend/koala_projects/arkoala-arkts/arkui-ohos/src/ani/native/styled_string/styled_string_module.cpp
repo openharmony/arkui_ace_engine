@@ -41,19 +41,6 @@ void StyledStringModule::SetPixelMap([[maybe_unused]] ani_env* env, ani_object a
 
 ani_object StyledStringModule::GetPixelMap(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr)
 {
-    // auto* peer = reinterpret_cast<ArkUIStyledString>(peerPtr);
-    // CHECK_NULL_RETURN(peer, nullptr);
-    // const auto* modifier = GetNodeAniModifier();
-    // CHECK_NULL_RETURN(modifier, nullptr);
-    // auto* styledStringModifier = modifier->getStyledStringAniModifier();
-    // CHECK_NULL_RETURN(styledStringModifier, nullptr);
-    // auto* pixelMapPeer = reinterpret_cast<PixelMapPeer*>(styledStringModifier->getPixelMap(peer));
-    // CHECK_NULL_RETURN(pixelMapPeer, nullptr);
-    // auto pixelMap = pixelMapPeer->pixelMap;
-    // CHECK_NULL_RETURN(pixelMap, nullptr);
-    // auto mediaPixelMap = pixelMap->GetPixelMapSharedPtr();
-    // CHECK_NULL_RETURN(mediaPixelMap, nullptr);
-    // return Media::PixelMapTaiheAni::CreateEtsPixelMap(env, mediaPixelMap);
     return nullptr;
 }
 

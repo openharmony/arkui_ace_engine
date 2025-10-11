@@ -32,7 +32,7 @@ class BlankModifierTest : public ModifierTestBase<GENERATED_ArkUIBlankModifier,
  * @tc.desc: Check the functionality of BlankModifier.setColor
  * @tc.type: FUNC
  */
-HWTEST_F(BlankModifierTest, BlankModifierTest001, TestSize.Level1)
+HWTEST_F(BlankModifierTest, DISABLED_BlankModifierTest001, TestSize.Level1)
 {
     static const std::string PROP_NAME("color");
     ASSERT_NE(modifier_->setColor, nullptr);

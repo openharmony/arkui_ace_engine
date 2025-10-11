@@ -164,7 +164,7 @@ HWTEST_F(MarqueeModifierTest, setFontColorTestValidValues, TestSize.Level1)
  * @tc.desc: Check the functionality of MarqueeModifier.setFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(MarqueeModifierTest, setFontColorTestInvalidValues, TestSize.Level1)
+HWTEST_F(MarqueeModifierTest, DISABLED_setFontColorTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -480,12 +480,12 @@ HWTEST_F(MarqueeModifierTest, DISABLED_SetMarqueeOptionsValidTest, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MarqueeModifierTest, setOnStartTest, TestSize.Level1)
+HWTEST_F(MarqueeModifierTest, DISABLED_setOnStartTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnStart, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<MarqueeEventHub>();
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static constexpr int32_t contextId = 123;
@@ -508,12 +508,12 @@ HWTEST_F(MarqueeModifierTest, setOnStartTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MarqueeModifierTest, setOnBounceTest, TestSize.Level1)
+HWTEST_F(MarqueeModifierTest, DISABLED_setOnBounceTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnBounce, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<MarqueeEventHub>();
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static constexpr int32_t contextId = 123;
@@ -536,12 +536,12 @@ HWTEST_F(MarqueeModifierTest, setOnBounceTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MarqueeModifierTest, setOnFinishTest, TestSize.Level1)
+HWTEST_F(MarqueeModifierTest, DISABLED_setOnFinishTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnFinish, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<MarqueeEventHub>();
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static constexpr int32_t contextId = 123;

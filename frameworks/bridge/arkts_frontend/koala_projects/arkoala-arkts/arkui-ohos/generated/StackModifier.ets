@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkStackPeer, StackAttribute } from "./component/stack"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -36,8 +37,9 @@ export class StackModifier extends CommonMethodModifier implements StackAttribut
     applySelectedAttribute(instance: StackAttribute): void { }
     _alignContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignContent_0_0value?: Alignment | undefined
-    applyModifierPatch(peer: ArkStackPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkStackPeer;
         if (this._alignContent_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._alignContent_0_flag) {

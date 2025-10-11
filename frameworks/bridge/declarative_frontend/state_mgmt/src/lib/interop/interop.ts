@@ -66,6 +66,14 @@ function createStateVariable<T>(value: T, setValueCallback: setValue<T>, notifyC
     return proxy;
 }
 
+function updateSetValueCallback(observedProperty, setValueCallback): void {
+    observedProperty._setInteropValueForStaticState = setValueCallback;
+}
+
+function updateNotifyCallback(observedProperty, notifyCallback): void {
+    observedProperty._notifyInteropFireChange = notifyCallback;
+}
+
 function resetViewPUFindProvideInterop(): void {
     ViewPU._resetFindProvide_ViewPU_Interop();
 }
@@ -94,6 +102,10 @@ function viewPUCreate(component: ViewPU): void {
     ViewPU.create(component);
 }
 
+function viewV2Create(component: ViewV2): void {
+    ViewV2.create(component);
+}
+
 function getRawObjectForInterop(value: Object): Object {
     if ((Array.isArray(value) || value instanceof Set || value instanceof Date || value instanceof Map) &&
         ObservedObject.IsObservedObject(value)) {
@@ -111,13 +123,41 @@ function staticStateBindObservedObject(value: Object, staticCallback: () => void
     return value;
 }
 
-function compatibleStaticComponent(
+function __Interop_CreateStaticComponent_Internal(
     factory: () => Object,
-    options?: Object,
+    options?: () => Object,
     content?: () => void
-): number {
+): [() => void, number] {
     if (InteropExtractorModule.compatibleStaticComponent === undefined) {
         throw new Error('Non Method For Create StaticComponent');
     }
     return InteropExtractorModule.compatibleStaticComponent(factory, options, content);
+}
+
+function __Interop_UpdateInteropExtendableComponent_Internal(dynamicComponent: Object): void {
+    if (InteropExtractorModule.updateInteropExtendableComponent === undefined) {
+        throw new Error('Non Method For update InteropExtendableComponent');
+    }
+    return InteropExtractorModule.updateInteropExtendableComponent(dynamicComponent);
+}
+
+function __Interop_ResetInteropExtendableComponent_Internal(): void {
+    if (InteropExtractorModule.resetInteropExtendableComponent === undefined) {
+        throw new Error('Non Method For reset InteropExtendableComponent');
+    }
+    return InteropExtractorModule.resetInteropExtendableComponent();
+}
+
+function __Interop_TransferCompatibleBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleBuilder === undefined) {
+        throw new Error("Non Method For Transfer CompatibleBuilder");
+    }
+    return InteropExtractorModule.transferCompatibleBuilder(builder);
+}
+
+function __Interop_transferCompatibleDynamicBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder === undefined) {
+        throw new Error("Non Method For Transfer Compatible Dynamic Builder");
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder(builder);
 }

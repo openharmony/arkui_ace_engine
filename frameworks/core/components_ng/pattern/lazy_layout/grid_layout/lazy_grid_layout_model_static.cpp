@@ -35,7 +35,7 @@ void LazyGridLayoutModelStatic::SetRowGap(FrameNode* frameNode, const std::optio
     if (rowGap && GreatOrEqual(rowGap.value().Value(), 0.0f)) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, RowGap, rowGap.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, RowGap, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(LazyGridLayoutProperty, RowGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
@@ -44,7 +44,7 @@ void LazyGridLayoutModelStatic::SetColumnGap(FrameNode* frameNode, const std::op
     if (columnGap && GreatOrEqual(columnGap.value().Value(), 0.0f)) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnGap, columnGap.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnGap, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(LazyGridLayoutProperty, ColumnGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 

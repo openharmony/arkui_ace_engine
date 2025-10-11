@@ -18,6 +18,7 @@
 
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkCustomBuilderRootPeer, CustomBuilderRoot } from "./component/idlize"
 import { int32 } from "@koalaui/common"
 export class CustomBuilderRootModifier implements CustomBuilderRoot,AttributeModifier<CustomBuilderRoot> {
@@ -31,7 +32,8 @@ export class CustomBuilderRootModifier implements CustomBuilderRoot,AttributeMod
     applyFocusedAttribute(instance: CustomBuilderRoot): void { }
     applyDisabledAttribute(instance: CustomBuilderRoot): void { }
     applySelectedAttribute(instance: CustomBuilderRoot): void { }
-    applyModifierPatch(peer: ArkCustomBuilderRootPeer): void {
+    applyModifierPatch(node: PeerNode): void {
+        const peer = node as ArkCustomBuilderRootPeer;
     }
     mergeModifier(modifier: CustomBuilderRootModifier): void {
     }

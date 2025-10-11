@@ -126,7 +126,7 @@ bool GetBoolParam(ani_env* env, ani_object object, bool& result)
     }
 
     ani_boolean resultValue;
-    ani_status status = env->Object_CallMethodByName_Boolean(object, "unboxed", nullptr, &resultValue);
+    ani_status status = env->Object_CallMethodByName_Boolean(object, "toBoolean", nullptr, &resultValue);
     if (status != ANI_OK) {
         return false;
     }
@@ -156,7 +156,7 @@ bool GetInt32Param(ani_env* env, ani_object object, int32_t& result)
     }
 
     ani_int resultValue;
-    ani_status status = env->Object_CallMethodByName_Int(object, "unboxed", nullptr, &resultValue);
+    ani_status status = env->Object_CallMethodByName_Int(object, "toInt", nullptr, &resultValue);
     if (status != ANI_OK) {
         return false;
     }
@@ -186,7 +186,7 @@ bool GetInt64Param(ani_env* env, ani_object object, int64_t& result)
     }
 
     ani_long resultValue;
-    ani_status status = env->Object_CallMethodByName_Long(object, "unboxed", nullptr, &resultValue);
+    ani_status status = env->Object_CallMethodByName_Long(object, "toLong", nullptr, &resultValue);
     if (status != ANI_OK) {
         return false;
     }
@@ -216,7 +216,7 @@ bool GetDoubleParam(ani_env* env, ani_object object, double& result)
     }
 
     ani_double resultValue;
-    ani_status status = env->Object_CallMethodByName_Double(object, "unboxed", nullptr, &resultValue);
+    ani_status status = env->Object_CallMethodByName_Double(object, "toDouble", nullptr, &resultValue);
     if (status != ANI_OK) {
         return false;
     }
@@ -421,15 +421,27 @@ bool GetFunctionParam(ani_env *env, ani_ref ref, std::function<void()>& result)
         return false;
     }
 
-    result = [env, globalRef]() {
+    ani_vm *vm = nullptr;
+    status = env->GetVM(&vm);
+    if (status != ANI_OK || vm == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        return false;
+    }
+    result = [vm, globalRef]() {
         if (!globalRef) {
             return;
         }
-
+        ani_env* env = nullptr;
+        ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+        if (status != ANI_OK || env == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
+                "[ANI] GetEnv fail. status: %{public}d", status);
+            return;
+        }
         ani_fn_object func = static_cast<ani_fn_object>(globalRef);
         std::vector<ani_ref> args;
         ani_ref fnReturnVal {};
-        ani_status status = env->FunctionalObject_Call(func, args.size(), args.data(), &fnReturnVal);
+        status = env->FunctionalObject_Call(func, args.size(), args.data(), &fnReturnVal);
         env->GlobalReference_Delete(globalRef);
         if (status != ANI_OK) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTabsPeer, BarPosition, AnimationMode, OnTabsAnimationStartCallback, TabsAnimationEvent, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabsAttribute, BarMode, ScrollableBarModeOptions, TabsCacheMode } from "./component/tabs"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions } from "./component/common"
@@ -95,8 +96,9 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     _cachedMaxCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _cachedMaxCount_0_0value?: number | undefined
     _cachedMaxCount_0_1value?: TabsCacheMode | undefined
-    applyModifierPatch(peer: ArkTabsPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTabsPeer;
         if (this._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._vertical_0_flag) {
@@ -551,7 +553,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             switch (this._barMode_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBarModeAttribute((this._barMode_0_0value as BarMode | undefined), (this._barMode_0_1value as ScrollableBarModeOptions | undefined));
+                    peer.setBarModeAttribute((this._barMode_0_0value as BarMode | undefined), (this._barMode_0_1value as ScrollableBarModeOptions | undefined | undefined));
                     this._barMode_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

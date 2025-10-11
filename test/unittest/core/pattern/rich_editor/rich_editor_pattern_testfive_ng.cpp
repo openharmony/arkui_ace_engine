@@ -257,7 +257,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction001, TestSize.Level1)
     richEditorPattern->HandleExtendAction(ACTION_COPY);
     EXPECT_EQ(richEditorPattern->copyOption_, CopyOptions::None);
 
-    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(richEditorPattern, nullptr);
     TextCommonEvent event;
     eventHub->FireOnPaste(event);

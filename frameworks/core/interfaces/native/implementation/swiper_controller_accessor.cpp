@@ -69,15 +69,15 @@ void ShowPreviousImpl(Ark_SwiperController peer)
     peerImpl->TriggerShowPrevious();
 }
 void ChangeIndexImpl(Ark_SwiperController peer,
-                     const Ark_Number* index,
+                     const Opt_Int32* index,
                      const Opt_Union_SwiperAnimationMode_Boolean* animationMode)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(index);
-    auto aceIdx = Converter::Convert<int32_t>(*index);
+    auto aceIdx = Converter::OptConvertPtr<int32_t>(index);
     auto aceUseAnim = Converter::OptConvertPtr<SwiperAnimationMode>(animationMode);
-    peerImpl->TriggerChangeIndex(aceIdx, aceUseAnim.value_or(SwiperAnimationMode::NO_ANIMATION));
+    peerImpl->TriggerChangeIndex(aceIdx.value_or(0), aceUseAnim.value_or(SwiperAnimationMode::NO_ANIMATION));
 }
 void FinishAnimationImpl(Ark_SwiperController peer,
                          const Opt_VoidCallback* callback_)
@@ -96,7 +96,7 @@ void FinishAnimationImpl(Ark_SwiperController peer,
 void PreloadItemsImpl(Ark_VMContext vmContext,
                       Ark_AsyncWorkerPtr asyncWorker,
                       Ark_SwiperController peer,
-                      const Opt_Array_Number* indices,
+                      const Opt_Array_Int32* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
     CHECK_NULL_VOID(asyncWorker);

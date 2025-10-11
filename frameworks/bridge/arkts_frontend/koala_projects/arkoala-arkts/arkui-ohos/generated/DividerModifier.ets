@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkDividerPeer, DividerAttribute } from "./component/divider"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -44,8 +45,9 @@ export class DividerModifier extends CommonMethodModifier implements DividerAttr
     _strokeWidth_0_0value?: number | string | undefined
     _lineCap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _lineCap_0_0value?: LineCapStyle | undefined
-    applyModifierPatch(peer: ArkDividerPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkDividerPeer;
         if (this._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._vertical_0_flag) {

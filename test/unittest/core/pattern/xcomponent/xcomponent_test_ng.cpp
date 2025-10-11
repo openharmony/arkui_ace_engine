@@ -85,14 +85,14 @@ const float CHILD_OFFSET_WIDTH = 50.0f;
 const float CHILD_OFFSET_HEIGHT = 0.0f;
 const float FORCE = 3.0f;
 TestProperty testProperty;
-bool isFocus = false;
+bool g_isFocus = false;
 int g_surfaceShowNum = 1;
 const float SURFACE_WIDTH = 250.0f;
 const float SURFACE_HEIGHT = 150.0f;
 const float SURFACE_OFFSETX = 10.0f;
 const float SURFACE_OFFSETY = 20.0f;
-bool isAxis = false;
-bool isLock = true;
+bool g_isAxis = false;
+bool g_isLock = true;
 const RenderFit g_renderFitCases[] = {
     RenderFit::CENTER,
     RenderFit::TOP,
@@ -285,7 +285,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
      * @tc.steps: step2. call FireLoadEvent, FireDestroyEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
     xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
@@ -306,7 +306,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
 
     auto frameNode2 = CreateXComponentNode(testProperty);
     EXPECT_TRUE(frameNode2);
-    xComponentEventHub = frameNode2->GetOrCreateEventHub<XComponentEventHub>();
+    xComponentEventHub = frameNode2->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
     xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
@@ -592,18 +592,18 @@ HWTEST_F(XComponentTestNg, XComponentKeyEventTest010, TestSize.Level1)
      * @tc.steps: step3. register focus & blur event for nativeXComponent instance
      */
     nativeXComponent->RegisterFocusEventCallback(
-        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isFocus = true; });
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { g_isFocus = true; });
     nativeXComponent->RegisterBlurEventCallback(
-        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isFocus = false; });
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { g_isFocus = false; });
 
     /**
      * @tc.steps: step4. call focusHub's focus & blur event
      * @tc.expected: the callbacks registered in step3 are called
      */
     focusHub->onFocusInternal_(focusHub->focusReason_);
-    EXPECT_TRUE(isFocus);
+    EXPECT_TRUE(g_isFocus);
     focusHub->onBlurInternal_();
-    EXPECT_FALSE(isFocus);
+    EXPECT_FALSE(g_isFocus);
 
     /**
      * @tc.steps: step5. call HandleKeyEvent
@@ -787,7 +787,7 @@ HWTEST_F(XComponentTestNg, XComponentSetDetachEventTest021, TestSize.Level1)
      * @tc.steps: step2. call FireDetachEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
 
     bool detachFlage = false;
@@ -879,7 +879,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest023, TestSize.Level1)
      * @tc.steps: step3. call FireLoadEvent, FireDestroyEvent
      * @tc.expected: three checkKeys not changed
      */
-    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
     xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
@@ -934,7 +934,7 @@ HWTEST_F(XComponentTestNg, XComponentDetachCallbackTest024, TestSize.Level1)
      * @tc.steps: step2. call FireDetachEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireDetachEvent(XCOMPONENT_ID);
     EXPECT_FALSE(onDetachKey == CHECK_KEY);
@@ -1043,7 +1043,7 @@ HWTEST_F(XComponentTestNg, XComponentExtSurfaceCallbackClient026, TestSize.Level
      * @tc.steps: step2. call FireDetachEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
 
     std::string surfaceInitFlage;
@@ -1234,19 +1234,19 @@ HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
 
     /**
      * @tc.steps: step5. call XcomponentController's interface relative to SetSurfaceRotation
-     * @tc.expected: handlingSurfaceRenderContext_->SetSurfaceRotation(isLock) is called
+     * @tc.expected: handlingSurfaceRenderContext_->SetSurfaceRotation(g_isLock) is called
      */
     EXPECT_CALL(
-        *AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_), SetSurfaceRotation(isLock))
+        *AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_), SetSurfaceRotation(g_isLock))
         .WillOnce(Return());
-    xcomponentController->SetSurfaceRotation(isLock);
+    xcomponentController->SetSurfaceRotation(g_isLock);
 
     /**
      * @tc.steps: step6. call XcomponentController's interface relative to GetSurfaceRotation
      * @tc.expected: the lock status get from GetSurfaceRotation equals the lock status set by SetSurfaceRotation
      */
     auto lock = xcomponentController->GetSurfaceRotation();
-    EXPECT_EQ(lock, isLock);
+    EXPECT_EQ(lock, g_isLock);
 }
 
 /**
@@ -1281,7 +1281,7 @@ HWTEST_F(XComponentTestNg, XComponentAxisEventTest012, TestSize.Level1)
      * @tc.steps: step3. register axis event for nativeXComponent instance
      */
     auto callback = [](OH_NativeXComponent* /* nativeXComponent */, ArkUI_UIInputEvent* event,
-                        ArkUI_UIInputEvent_Type type) { isAxis = true; };
+                        ArkUI_UIInputEvent_Type type) { g_isAxis = true; };
     nativeXComponent->RegisterUIAxisEventCallback(callback);
 
     /**
@@ -1289,7 +1289,7 @@ HWTEST_F(XComponentTestNg, XComponentAxisEventTest012, TestSize.Level1)
      */
     AxisInfo event;
     pattern->HandleAxisEvent(event);
-    EXPECT_TRUE(isAxis);
+    EXPECT_TRUE(g_isAxis);
 }
 
 /**
@@ -1394,7 +1394,7 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
     testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
     auto frameNode = CreateXComponentNode(testProperty);
     ASSERT_TRUE(frameNode);
-    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     EXPECT_FALSE(xComponentEventHub->surfaceInitEvent_);
     auto pattern = frameNode->GetPattern<XComponentPattern>();

@@ -29,6 +29,7 @@ class ACE_FORCE_EXPORT DynamicModelStatic : public AceType {
     DECLARE_ACE_TYPE(DynamicModelStatic, AceType);
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void* CreateFrameNodeByIncRefCount(int32_t nodeId);
     static void SetDynamicParam(FrameNode* frameNode, const DynamicParam& param);
     static void SetOnError(FrameNode* frameNode,
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError);

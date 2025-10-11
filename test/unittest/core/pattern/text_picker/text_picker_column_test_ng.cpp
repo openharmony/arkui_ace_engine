@@ -1589,7 +1589,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest003, TestSize.Level1
     ASSERT_NE(pickerNodeLayout, nullptr);
     pickerNodeLayout->UpdateCanLoop(true);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     columnPattern->InitPanEvent(gestureHub);
     auto panEvent = columnPattern->panEvent_;
@@ -1658,7 +1658,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest005, TestSize.Level1
     ASSERT_NE(pickerNodeLayout, nullptr);
     pickerNodeLayout->UpdateCanLoop(true);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     columnPattern->InitPanEvent(gestureHub);
     auto panEvent = columnPattern->panEvent_;

@@ -39,7 +39,7 @@ bool ParseAniDimension(ani_env* env, ani_object obj, CalcDimension& result, Dime
     }
     if (AniUtils::IsNumber(env, obj)) {
         ani_double param_value;
-        env->Object_CallMethodByName_Double(obj, "unboxed", ":D", &param_value);
+        env->Object_CallMethodByName_Double(obj, "toDouble", ":d", &param_value);
 
         result = CalcDimension(param_value, defaultUnit);
         return true;
@@ -164,7 +164,7 @@ ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, Ref
 ani_object GenPadding(ani_env* env,  const std::unique_ptr<NG::PaddingProperty>& paddingNative)
 {
     ani_object padding_obj;
-    static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/PaddingInner;";
+    static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.PaddingInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -193,7 +193,7 @@ ani_object GenMargin(ani_env* env,  const std::unique_ptr<NG::MarginProperty>& m
 {
     ani_object margin_obj;
     ani_class cls;
-    static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/MarginInner;";
+    static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.MarginInner";
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
@@ -222,7 +222,7 @@ ani_object GenEdgeWidths(ani_env* env,  const std::unique_ptr<NG::BorderWidthPro
 {
     ani_object edgeWidths_obj;
     ani_class cls;
-    static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/EdgeWidthsInner;";
+    static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.EdgeWidthsInner";
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
@@ -251,7 +251,7 @@ ani_object GenEdgesGlobalized(ani_env* env, const NG::PaddingPropertyT<float>& e
 {
     ani_object edges_obj;
     ani_class cls;
-    static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/DirectionalEdgesTInner;";
+    static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.DirectionalEdgesTInner";
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
@@ -291,7 +291,7 @@ ani_object GenBorderWidthGlobalized(ani_env* env, const NG::BorderWidthPropertyT
 {
     ani_object edges_obj;
     ani_class cls;
-    static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/DirectionalEdgesTInner;";
+    static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.DirectionalEdgesTInner";
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
@@ -330,7 +330,7 @@ ani_object GenSelfLayoutInfo(ani_env* env, RefPtr<NG::LayoutProperty> layoutProp
 {
     ani_object selfLayoutInfo_obj;
     ani_class cls;
-    static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/GeometryInfoInner;";
+    static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.GeometryInfoInner";
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
@@ -401,7 +401,7 @@ void FillPlaceSizeProperty(ani_env* env, ani_object info, const NG::SizeF& size)
 {
     ani_object measureResult_obj;
     ani_class cls;
-    static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/MeasureResultInner;";
+    static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.MeasureResultInner";
     if (ANI_OK != env->FindClass(className, &cls)) {
         return;
     }
@@ -427,7 +427,7 @@ ani_object GenMeasureResult(ani_env* env, const NG::SizeF& size)
 {
     ani_object measureResult_obj;
     ani_class cls;
-    static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/MeasureResultInner;";
+    static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.MeasureResultInner";
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
@@ -492,7 +492,7 @@ ani_object GenMeasurable(ani_env* env,  NG::MeasureLayoutChild* child)
 {
         ani_class cls ;
         static const char *className =
-            "Larkui/ani/arkts/ArkUIAniCustomNodeModule/MeasurableLayoutableInner;";
+            "arkui.ani.arkts.ArkUIAniCustomNodeModule/MeasurableLayoutableInner";
         if (ANI_OK != env->FindClass(className, &cls)) {
             return nullptr;
         }
@@ -573,7 +573,7 @@ void JSMeasureLayoutParamNG::Update(ani_env* env,  NG::LayoutWrapper* layoutWrap
     }
     if (count < newCount) {
         ani_class childCls = nullptr;
-        static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/MeasurableLayoutableInner;";
+        static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.MeasurableLayoutableInner";
         if (ANI_OK != env->FindClass(className, &childCls)) {
             return;
         }
@@ -786,7 +786,7 @@ ani_object ANIPlaceChildren(ani_env* env, ani_object aniClass, ani_object positi
 
 ani_status BindMeasurable(ani_env* env)
 {
-    static const char* className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/MeasurableLayoutableInner;";
+    static const char* className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.MeasurableLayoutableInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return ANI_ERROR;

@@ -20,6 +20,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -75,7 +76,7 @@ void SetCheckboxOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     Converter::WithOptional(*options, [frameNode, node](const Ark_CheckboxOptions& options) {
-        auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+        auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
 
         auto name = Converter::OptConvert<std::string>(options.name);
@@ -115,7 +116,11 @@ void SetShapeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxModelStatic::SetCheckboxStyle(frameNode, Converter::OptConvertPtr<CheckBoxStyle>(value));
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        CheckBoxModelStatic::SetCheckboxStyle(frameNode, CheckBoxStyle::CIRCULAR_STYLE);
+        return;
+    }
 }
 void SetUnselectedColorImpl(Ark_NativePointer node,
                             const Opt_ResourceColor* value)
@@ -140,11 +145,13 @@ void SetMarkImpl(Ark_NativePointer node,
     }
 
     auto size = Converter::OptConvert<Dimension>(optValue->size);
+    Validator::ValidateNonNegative(size);
     if (size) {
         CheckBoxModelStatic::SetCheckMarkSize(frameNode, size.value());
     }
 
     auto width = Converter::OptConvert<Dimension>(optValue->strokeWidth);
+    Validator::ValidateNonNegative(width);
     if (width) {
         CheckBoxModelStatic::SetCheckMarkWidth(frameNode, width.value());
     }

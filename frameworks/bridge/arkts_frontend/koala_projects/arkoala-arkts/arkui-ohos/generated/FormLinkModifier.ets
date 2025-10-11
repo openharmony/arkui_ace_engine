@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkFormLinkPeer, FormLinkAttribute } from "./component/formLink"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -33,8 +34,9 @@ export class FormLinkModifier extends CommonMethodModifier implements FormLinkAt
     applyFocusedAttribute(instance: FormLinkAttribute): void { }
     applyDisabledAttribute(instance: FormLinkAttribute): void { }
     applySelectedAttribute(instance: FormLinkAttribute): void { }
-    applyModifierPatch(peer: ArkFormLinkPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkFormLinkPeer;
     }
     mergeModifier(modifier: FormLinkModifier): void {
         super.mergeModifier(modifier)

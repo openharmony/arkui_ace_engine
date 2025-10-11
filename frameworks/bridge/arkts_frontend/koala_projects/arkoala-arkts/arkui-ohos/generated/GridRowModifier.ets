@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkGridRowPeer, GridRowAttribute } from "./component/gridRow"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -38,8 +39,9 @@ export class GridRowModifier extends CommonMethodModifier implements GridRowAttr
     _onBreakpointChange_0_0value?: ((breakpoints: string) => void) | undefined
     _alignItems_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignItems_0_0value?: ItemAlign | undefined
-    applyModifierPatch(peer: ArkGridRowPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkGridRowPeer;
         if (this._onBreakpointChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onBreakpointChange_0_flag) {

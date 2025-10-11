@@ -24,6 +24,31 @@
 #include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_AccessibilityAction& dst, const AccessibilityInterfaceAction& src)
+{
+    switch (src) {
+        case AccessibilityInterfaceAction::UNDEFINED_ACTION: dst = ARK_ACCESSIBILITY_ACTION_UNDEFINED_ACTION; break;
+        case AccessibilityInterfaceAction::ACCESSIBILITY_CLICK: dst = ARK_ACCESSIBILITY_ACTION_ACCESSIBILITY_CLICK; break;
+        default:
+            dst = static_cast<Ark_AccessibilityAction>(-1);
+            LOGE("Unexpected enum value in Ark_AccessibilityAction: %{public}d", src);
+            break;
+    }
+}
+
+void AssignArkValue(Ark_AccessibilityActionInterceptResult& dst, const AccessibilityActionInterceptResult& src)
+{
+    switch (src) {
+        case AccessibilityActionInterceptResult::ACTION_INTERCEPT: dst =  ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_INTERCEPT; break;
+        case AccessibilityActionInterceptResult::ACTION_CONTINUE: dst = ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_CONTINUE; break;
+        case AccessibilityActionInterceptResult::ACTION_RISE: dst = ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_RISE; break;
+        default:
+            dst = static_cast<Ark_AccessibilityActionInterceptResult>(-1);
+            LOGE("Unexpected enum value in Ark_AccessibilityActionInterceptResult: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAction& src)
 {
     switch (src) {
@@ -490,34 +515,12 @@ void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src
 }
 void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src)
 {
-    switch (src.type) {
-        case PanDirection::NONE:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_NONE;
-            break;
-        case PanDirection::LEFT:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_LEFT;
-            break;
-        case PanDirection::RIGHT:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_RIGHT;
-            break;
-        case PanDirection::HORIZONTAL:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_HORIZONTAL;
-            break;
-        case PanDirection::UP:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_UP;
-            break;
-        case PanDirection::DOWN:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_DOWN;
-            break;
-        case PanDirection::VERTICAL:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_VERTICAL;
-            break;
-        case PanDirection::ALL:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_ALL;
-            break;
-        default:
-            dst = static_cast<Ark_PanDirection>(-1);
-            LOGE("Unexpected enum value in PanDirection: %{public}d", src.type);
+    if (src.type >= static_cast<uint32_t>(Ark_PanDirection::ARK_PAN_DIRECTION_NONE) &&
+        src.type <= static_cast<uint32_t>(Ark_PanDirection::ARK_PAN_DIRECTION_ALL)) {
+        dst = static_cast<Ark_PanDirection>(src.type);
+    } else {
+        dst = static_cast<Ark_PanDirection>(-1);
+        LOGE("Unexpected enum value in PanDirection: %{public}d", src.type);
     }
 }
 void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
@@ -632,6 +635,7 @@ void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src)
         case V2::StickyStyle::NONE: dst = ARK_STICKY_STYLE_NONE; break;
         case V2::StickyStyle::HEADER: dst = ARK_STICKY_STYLE_HEADER; break;
         case V2::StickyStyle::FOOTER: dst = ARK_STICKY_STYLE_FOOTER; break;
+        case V2::StickyStyle::BOTH: dst = ARK_STICKY_STYLE_BOTH; break;
         default: dst = static_cast<Ark_StickyStyle>(-1);
             LOGE("Unexpected enum value in V2::StickyStyle: %{public}d", src);
     }
@@ -981,6 +985,7 @@ void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src)
         case WordBreak::NORMAL: dst = ARK_WORD_BREAK_NORMAL; break;
         case WordBreak::BREAK_ALL: dst = ARK_WORD_BREAK_BREAK_ALL; break;
         case WordBreak::BREAK_WORD: dst = ARK_WORD_BREAK_BREAK_WORD; break;
+        case WordBreak::HYPHENATION: dst = ARK_WORD_BREAK_HYPHENATION; break;
         default:
             dst = static_cast<Ark_WordBreak>(-1);
             LOGE("Unexpected enum value in WordBreak: %{public}d", src);

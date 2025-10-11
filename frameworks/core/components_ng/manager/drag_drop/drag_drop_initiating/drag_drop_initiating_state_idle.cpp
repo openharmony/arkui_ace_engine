@@ -232,7 +232,7 @@ void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
         CHECK_NULL_VOID(dragDropManager);
         auto gestureHub = frameNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
-        auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+        auto eventHub = frameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         dragDropManager->SetIsAnyDraggableHit(gestureHub->IsAllowedDrag(eventHub));
     }

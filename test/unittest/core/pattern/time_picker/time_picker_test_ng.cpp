@@ -1330,7 +1330,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_TRUE(minuteColumnPattern);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     minuteColumnPattern->InitPanEvent(gestureHub);
     auto panEvent = minuteColumnPattern->panEvent_;
@@ -1545,7 +1545,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern015, TestSize.Level1)
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_TRUE(minuteColumnPattern);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     minuteColumnPattern->InitOnKeyEvent(focusHub);
 
@@ -1882,7 +1882,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     timePickerRowPattern->InitOnKeyEvent(focusHub);
     auto getInnerFocusRectFunc = focusHub->getInnerFocusRectFunc_;
@@ -2231,7 +2231,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern018, TestSize.Level1)
      * @tc.steps: step2. call InitDisabled.
      * @tc.expected: set eventHub is disenabled.
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->enabled_ = false;
     timePickerRowPattern->InitDisabled();
     bool res = eventHub->IsEnabled();
@@ -5981,7 +5981,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerPaintTest004, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
 
     CrownEvent crownEvent;

@@ -257,7 +257,7 @@ struct ListFilterRow {
     Stack({ alignContent: Alignment.End }) {
       Stack({ alignContent: Alignment.Start }) {
         List() {
-          ForEach(this.filterRow.options as Array<ResourceStr>, (option: ResourceStr, colIndex: number) => {
+          ForEach(this.filterRow.options as Array<ResourceStr>, (option: ResourceStr, colIndex: int) => {
             if (colIndex === 0) {
               ListItem()
                 .width($r('sys.float.ohos_id_max_padding_start'))
@@ -279,7 +279,7 @@ struct ListFilterRow {
             .id(`filterListFilterRow_${this.filterId}_${this.rowIndex}`)
             .height(PERCENT_100)
             .onClick((event?: ClickEvent) => {
-              this.onItemClick(colIndex)
+              this.onItemClick(colIndex as number)
               this.sendAccessibility(option, true);
             })
             .focusable(true)
@@ -387,7 +387,7 @@ struct MultiFilterRow {
   @State arrowBgColorRow: Resource = $r('sys.color.ohos_id_color_hover');
   @State isArrowBgHoverRow: boolean = false;
   @PropRef fontSizeScale: number | undefined;
-  @State replaceEffect: number = 0;
+  @State replaceEffect: int = 0;
   @State isSendArrowAccessibility: boolean = false;
   private filterColumnWidth: number = 0;
   private lastFilterColumnWidth: number = 0;
@@ -732,8 +732,8 @@ struct MultiFilterRow {
       Row() {
         Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap }) {
           ForEach((this.filterRow?.options as Array<ResourceStr>)
-            .slice(0, this.twoLineModeItemNumRow.value + 1),
-            (option: ResourceStr, colIndex: number) => {
+            .slice(0, this.twoLineModeItemNumRow.value.toInt() + 1),
+            (option: ResourceStr, colIndex: int) => {
               if (colIndex > 0) {
                 Text(option)
                   .transition(TransitionEffect.OPACITY,(transitionIn: boolean) => { } )
@@ -752,7 +752,7 @@ struct MultiFilterRow {
                   .backgroundColor(this.isBackgroundHoverRow[colIndex.toInt()] ?
                   this.backgroundColorRow[colIndex.toInt()] : TRANS_COLOR)
                   .onClick((event?: ClickEvent) => {
-                    this.onItemClick(colIndex)
+                    this.onItemClick(colIndex as number)
                     this.sendAccessibility(option, true);
                   })
                   .onHover((isHover: boolean, event: HoverEvent) => {
@@ -951,7 +951,7 @@ export struct Filter {
       if(uiContent.getHostContext() !== undefined) {
         let hostContext : common.UIAbilityContext = uiContent.getHostContext() as common.UIAbilityContext
          this.applicationContext = hostContext.getApplicationContext();
-         this.callbackId = this.applicationContext.on('environment', this.callbacks);
+         this.callbackId = this.applicationContext.onEnvironment(this.callbacks);
       }
 
     } catch (err) {
@@ -966,7 +966,7 @@ export struct Filter {
     if (this.callbackId) {
       let context: UIContext = this.getUIContext();
       if(context.getHostContext() !== undefined) {
-        this.applicationContext.off('environment', this.callbackId!.toInt(),
+        this.applicationContext.offEnvironment(this.callbackId!.toInt(),
           (err: BusinessError<void> | null): void => {
           hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
         })
@@ -1269,7 +1269,7 @@ export struct Filter {
   @Builder
   ListFilter() {
     Column() {
-      ForEach((this.multiFilters as Array<FilterParams>), (filter: FilterParams, rowIndex: number) => {
+      ForEach((this.multiFilters as Array<FilterParams>), (filter: FilterParams, rowIndex: int) => {
         ListFilterRow({
           colorRow: this.colorArr ? (this.colorArr as Array<ResourceArray>)[rowIndex.toInt()] : this.colorArrNew,
           fontWeightRow: this.fontWeightArr ?
@@ -1282,9 +1282,9 @@ export struct Filter {
           (this.isSelectedArr as Array<BooleanArray>)[rowIndex.toInt()] : this.isSelectedArrNew,
           filterRow: filter,
           onItemClick: (colIndex: number) => {
-            this.filterItemClick(rowIndex, colIndex);
+            this.filterItemClick(rowIndex as number, colIndex);
           },
-          rowIndex: rowIndex,
+          rowIndex: rowIndex as number,
           filterAccessibilityText: this.filterAccessibilityText
         })
       })
@@ -1306,7 +1306,7 @@ export struct Filter {
   @Builder
   MultiLineFilter() {
     Column() {
-      ForEach((this.multiFilters as Array<FilterParams>), (filterItem: FilterParams, rowIndex: number) => {
+      ForEach((this.multiFilters as Array<FilterParams>), (filterItem: FilterParams, rowIndex: int) => {
         MultiFilterRow({
           colorRow: this.colorArr ?
           (this.colorArr as Array<ResourceArray>)[rowIndex.toInt()] : this.colorArrNew,
@@ -1328,9 +1328,9 @@ export struct Filter {
           (this.isArrowIconDownArr as Array<ObservedBoolean>)[rowIndex.toInt()] : this.isArrowIconDownArrNew,
           filterRow: filterItem,
           onItemClick: (colIndex: number) => {
-            this.filterItemClick(rowIndex, colIndex);
+            this.filterItemClick(rowIndex as number, colIndex);
           },
-          rowIndex: rowIndex,
+          rowIndex: rowIndex as number,
           fontSizeScale: this.fontSizeScale,
           filterId: this.filterId,
           filterAccessibilityText: this.filterAccessibilityText
@@ -1435,7 +1435,7 @@ export struct Filter {
             }.height(PERCENT_100)
             .margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) } as LocalizedMargin)
 
-            ForEach(this.additionFilters?.options as Array<ResourceStr>, (option: ResourceStr, index: number) => {
+            ForEach(this.additionFilters?.options as Array<ResourceStr>, (option: ResourceStr, index: int) => {
               ListItem() {
                 Text(option)
                   .fontSize($r('sys.float.ohos_id_text_size_body3'))
@@ -1523,8 +1523,8 @@ export struct Filter {
                 }
               })
               .onClick((event?: ClickEvent) => {
-                this.additionItemClick(index)
-                this.sendAccessibility(option, this.getSelected(index));
+                this.additionItemClick(index as number)
+                this.sendAccessibility(option, this.getSelected(index as number));
               })
               .tabIndex(index === 0 ? 1 : -1)
             })
@@ -1649,7 +1649,7 @@ export struct Filter {
         FilterAccessibilityType.ACCESSIBILITY_TEXT))
       .accessibilityDescription(this.getFloatAccessibilityText(this.floatFilterBarAccessibilityText,
         FilterAccessibilityType.ACCESSIBILITY_DESC))
-      .backgroundColor(this.isFloatArrowBgHover ? this.floatArrowBgColor as undefined | Color | number | ResourceStr :
+      .backgroundColor(this.isFloatArrowBgHover ? this.floatArrowBgColor as undefined | Color | int | ResourceStr :
         TRANS_COLOR)
       .stateStyles({
         focused: (instance: CommonMethod) => {

@@ -49,7 +49,7 @@ void SetSymbolSpanOptionsImpl(Ark_NativePointer node,
 } // SymbolSpanInterfaceModifier
 namespace SymbolSpanAttributeModifier {
 void SetFontSizeImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_String_Resource* value)
+                     const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -64,11 +64,12 @@ void SetFontColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optColorVec = Converter::OptConvert<std::vector<std::optional<Color>>>(*value);
+    std::vector<Color> colorVec;
     if (!optColorVec) {
         // Implement Reset value
+        SymbolSpanModelNG::SetFontColor(frameNode, colorVec);
         return;
     }
-    std::vector<Color> colorVec;
     for (std::optional<Color> color: *optColorVec) {
         if (color.has_value()) {
             colorVec.emplace_back(color.value());
@@ -77,7 +78,7 @@ void SetFontColorImpl(Ark_NativePointer node,
     SymbolSpanModelNG::SetFontColor(frameNode, colorVec);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

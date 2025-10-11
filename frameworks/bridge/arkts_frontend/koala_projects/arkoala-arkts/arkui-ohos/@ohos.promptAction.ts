@@ -116,10 +116,10 @@ declare namespace promptAction {
         shadow?: ShadowOptions | ShadowStyle;
         enableHoverMode?: boolean;
         hoverModeArea?: HoverModeAreaType;
-        onDidAppear?: ((data: undefined) => void);
-        onDidDisappear?: ((data: undefined) => void);
-        onWillAppear?: ((data: undefined) => void);
-        onWillDisappear?: ((data: undefined) => void);
+        onDidAppear?: (() => void);
+        onDidDisappear?: (() => void);
+        onWillAppear?: (() => void);
+        onWillDisappear?: (() => void);
         levelMode?: LevelMode;
         levelUniqueId?: number;
         immersiveMode?: ImmersiveMode;
@@ -207,6 +207,12 @@ declare namespace promptAction {
         shadow?: ShadowOptions | ShadowStyle;
     }
 
+    export interface DialogBuilderOptions {
+        builder?: KPointer;
+        destroyFunc?: ((ptr: KPointer) => void);
+        builderWithId?: ((dialogId: number) => KPointer);
+    }
+
     export class DialogController extends CommonController {}
 
     export type DialogOptionsCornerRadius = Dimension | BorderRadiuses;
@@ -247,7 +253,7 @@ declare namespace promptAction {
     export function openCustomDialog1(content: KPointer, options?: BaseDialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<void>;
 
-    export function openCustomDialog(builder: KPointer, options: CustomDialogOptions,
+    export function openCustomDialog(builderOptions: DialogBuilderOptions, options: CustomDialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<number>;
 
     export function updateCustomDialog(content: KPointer, options: BaseDialogOptions): Promise<void>;
@@ -259,11 +265,13 @@ declare namespace promptAction {
     export function openCustomDialogWithController(content: KPointer, controller: DialogController,
         options?: BaseDialogOptions, optionsInternal?: DialogOptionsInternal): Promise<void>;
 
-    export function presentCustomDialog(builder: KPointer, controller?: DialogController,
+    export function presentCustomDialog(builderOptions: DialogBuilderOptions, controller?: DialogController,
         options?: DialogOptions, optionsInternal?: DialogOptionsInternal): Promise<number>;
 
     export function getTopOrder(): number | undefined;
     export function getBottomOrder(): number | undefined;
+
+    export function getDialogController(content: KPointer): DialogController | undefined;
 }
 
 export default promptAction

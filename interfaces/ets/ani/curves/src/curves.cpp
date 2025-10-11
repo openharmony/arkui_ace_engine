@@ -52,6 +52,7 @@ typedef enum Curve {
     Friction = 12,
 } Curve;
 
+const char* ICURVE_CLASS_NAME = "@ohos.curves.curves.ICurveImpl";
 }
 
 std::string GetCubicBezierCurveString(ani_double x1, ani_double y1, ani_double x2, ani_double y2)
@@ -90,7 +91,7 @@ std::string GetSpringMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(response, &isUndefinedResponse);
     if (!isUndefinedResponse) {
         ani_double resultResponse;
-        if (ANI_OK == env->Object_CallMethodByName_Double(response, "unboxed", nullptr, &resultResponse)) {
+        if (ANI_OK == env->Object_CallMethodByName_Double(response, "toDouble", nullptr, &resultResponse)) {
             double value = static_cast<double>(resultResponse);
             responseValue = static_cast<float>(value);
         }
@@ -99,7 +100,7 @@ std::string GetSpringMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(dampingFraction, &isUndefinedDampingFraction);
     if (!isUndefinedDampingFraction) {
         ani_double resultDampingFraction;
-        if (ANI_OK == env->Object_CallMethodByName_Double(dampingFraction, "unboxed",
+        if (ANI_OK == env->Object_CallMethodByName_Double(dampingFraction, "toDouble",
             nullptr, &resultDampingFraction)) {
             double value = static_cast<double>(resultDampingFraction);
             dampingFractionValue = static_cast<float>(value);
@@ -109,7 +110,7 @@ std::string GetSpringMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(overlapDuration, &isUndefinedOverlapDuration);
     if (!isUndefinedOverlapDuration) {
         ani_double resultOverlapDuration;
-        if (ANI_OK == env->Object_CallMethodByName_Double(overlapDuration, "unboxed",
+        if (ANI_OK == env->Object_CallMethodByName_Double(overlapDuration, "toDouble",
             nullptr, &resultOverlapDuration)) {
             double value = static_cast<double>(resultOverlapDuration);
             overlapDurationValue = static_cast<float>(value);
@@ -160,7 +161,7 @@ static CurvesObj* unwrapp(ani_env *env, ani_object object)
     return reinterpret_cast<CurvesObj*>(curvesObj);
 }
 
-static ani_double Interpolate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_double fraction)
+static ani_double Interpolate(ani_env* env, ani_object object, ani_double fraction)
 {
     auto curveObject = unwrapp(env, object);
     auto curveInterpolate = curveObject->curve;
@@ -169,21 +170,11 @@ static ani_double Interpolate([[maybe_unused]] ani_env* env, [[maybe_unused]] an
     return curveValue;
 }
 
-static ani_string CubicBezier([[maybe_unused]] ani_env *env,
+static ani_object CubicBezierCurve(ani_env *env,
     ani_double x1, ani_double y1, ani_double x2, ani_double y2)
 {
-    auto curvesStr = GetCubicBezierCurveString(x1, y1, x2, y2);
-    ani_string ret;
-    env->String_NewUTF8(curvesStr.c_str(), curvesStr.size(), &ret);
-    return ret;
-}
-
-static ani_object CubicBezierCurve([[maybe_unused]] ani_env *env,
-    ani_double x1, ani_double y1, ani_double x2, ani_double y2)
-{
-    static const char *className = "@ohos.curves.curves.Curves";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ICURVE_CLASS_NAME, &cls)) {
         return nullptr;
     }
 
@@ -203,12 +194,11 @@ static ani_object CubicBezierCurve([[maybe_unused]] ani_env *env,
     return curve_object;
 }
 
-static ani_object SpringCurve([[maybe_unused]] ani_env* env,
+static ani_object SpringCurve(ani_env* env,
     ani_double velocity, ani_double mass, ani_double stiffness, ani_double damping)
 {
-    static const char* className = "@ohos.curves.curves.Curves";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ICURVE_CLASS_NAME, &cls)) {
         return nullptr;
     }
 
@@ -250,7 +240,7 @@ std::string GetSpringResponsiveMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(response, &isUndefinedResponse);
     if (!isUndefinedResponse) {
         ani_double resultResponse;
-        if (ANI_OK == env->Object_CallMethodByName_Double(response, "unboxed", nullptr, &resultResponse)) {
+        if (ANI_OK == env->Object_CallMethodByName_Double(response, "toDouble", nullptr, &resultResponse)) {
             double value = static_cast<double>(resultResponse);
             responseValue = static_cast<float>(value);
         }
@@ -259,7 +249,7 @@ std::string GetSpringResponsiveMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(dampingFraction, &isUndefinedDampingFraction);
     if (!isUndefinedDampingFraction) {
         ani_double resultDampingFraction;
-        if (ANI_OK == env->Object_CallMethodByName_Double(dampingFraction, "unboxed",
+        if (ANI_OK == env->Object_CallMethodByName_Double(dampingFraction, "toDouble",
             nullptr, &resultDampingFraction)) {
             double value = static_cast<double>(resultDampingFraction);
             dampingFractionValue = static_cast<float>(value);
@@ -269,7 +259,7 @@ std::string GetSpringResponsiveMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(overlapDuration, &isUndefinedOverlapDuration);
     if (!isUndefinedOverlapDuration) {
         ani_double resultOverlapDuration;
-        if (ANI_OK == env->Object_CallMethodByName_Double(overlapDuration, "unboxed",
+        if (ANI_OK == env->Object_CallMethodByName_Double(overlapDuration, "toDouble",
             nullptr, &resultOverlapDuration)) {
             double value = static_cast<double>(resultOverlapDuration);
             overlapDurationValue = static_cast<float>(value);
@@ -289,19 +279,18 @@ std::string GetSpringResponsiveMotionCurveString(ani_env *env,
     return curve->ToString();
 }
 
-static ani_object SpringResponsiveMotion([[maybe_unused]] ani_env *env,
+static ani_object SpringResponsiveMotion(ani_env *env,
     ani_object response, ani_object dampingFraction, ani_object overlapDuration)
 {
-    CurvesObj* springResponsiveMotion = new CurvesObj();
-    static const char *className = "@ohos.curves.curves.Curves";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ICURVE_CLASS_NAME, &cls)) {
         return nullptr;
     }
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         return nullptr;
     }
+    CurvesObj* springResponsiveMotion = new CurvesObj();
     std::string curveString = GetSpringResponsiveMotionCurveString(env, response, dampingFraction, overlapDuration);
     springResponsiveMotion->curve = OHOS::Ace::Framework::CreateCurve(curveString);
     ani_object curve_object;
@@ -312,12 +301,11 @@ static ani_object SpringResponsiveMotion([[maybe_unused]] ani_env *env,
     return curve_object;
 }
 
-static ani_object SpringMotion([[maybe_unused]] ani_env *env,
+static ani_object SpringMotion(ani_env *env,
     ani_object response, ani_object dampingFraction, ani_object overlapDuration)
 {
-    static const char *className = "@ohos.curves.curves.Curves";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ICURVE_CLASS_NAME, &cls)) {
         return nullptr;
     }
 
@@ -336,28 +324,29 @@ static ani_object SpringMotion([[maybe_unused]] ani_env *env,
     return curve_object;
 }
 
-static ani_object InitCurve([[maybe_unused]] ani_env* env, ani_enum_item enumItem)
+static ani_object InitCurve(ani_env* env, ani_enum_item enumItem)
 {
     ani_boolean isUndefined;
     env->Reference_IsUndefined(enumItem, &isUndefined);
-    ani_int curveType;
+    ani_int curveType = Curve::Linear;
     if (isUndefined) {
         curveType = Curve::Linear;
     } else {
         if (ANI_OK != env->EnumItem_GetValue_Int(enumItem, &curveType)) {
+            LOGW("InitCurve input enum is invalid");
+            curveType = Curve::Linear;
         }
     }
     std::string curveString = GetCurvesInitInternalMap(curveType);
 
-    static const char* className = "@ohos.curves.curve.Curves";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        std::cerr << "Not found '" << className << "'" << std::endl;
+    if (ANI_OK != env->FindClass(ICURVE_CLASS_NAME, &cls)) {
+        LOGW("InitCurve not found class");
         return nullptr;
     }
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-        std::cerr << "get ctor Failed'" << className << "'" << std::endl;
+        LOGW("InitCurve get ctor failed");
         return nullptr;
     }
     CurvesObj* curvesInitInternal = new CurvesObj();
@@ -370,19 +359,18 @@ static ani_object InitCurve([[maybe_unused]] ani_env* env, ani_enum_item enumIte
     return curve_object;
 }
 
-static ani_object InterpolatingSpring([[maybe_unused]] ani_env* env,
+static ani_object InterpolatingSpring(ani_env* env,
     ani_double velocity, ani_double mass, ani_double stiffness, ani_double damping)
 {
-    static const char* className = "@ohos.curves.curves.Curves";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        std::cerr << "Not found '" << className << "'" << std::endl;
+    if (ANI_OK != env->FindClass(ICURVE_CLASS_NAME, &cls)) {
+        LOGW("InterpolatingSpring not found class");
         return nullptr;
     }
 
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-        std::cerr << "get ctor Failed'" << className << "'" << std::endl;
+        LOGW("InterpolatingSpring get ctor failed");
         return nullptr;
     }
 
@@ -409,18 +397,17 @@ static ani_object InterpolatingSpring([[maybe_unused]] ani_env* env,
     return curve_object;
 }
 
-static ani_object StepsCurve([[maybe_unused]] ani_env* env, ani_double count, ani_boolean end)
+static ani_object StepsCurve(ani_env* env, ani_double count, ani_boolean end)
 {
-    static const char* className = "@ohos.curves.curves.Curves";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        std::cerr << "Not found '" << className << "'" << std::endl;
+    if (ANI_OK != env->FindClass(ICURVE_CLASS_NAME, &cls)) {
+        LOGW("StepsCurve not found class");
         return nullptr;
     }
 
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-        std::cerr << "get ctor Failed'" << className << "'" << std::endl;
+        LOGW("StepsCurve get ctor failed");
         return nullptr;
     }
 
@@ -461,18 +448,17 @@ static ani_object createDouble(ani_env *env, double value)
     return personInfoObj;
 }
 
-static ani_object CustomCurve([[maybe_unused]] ani_env* env, ani_object callbackObj)
+static ani_object CustomCurve(ani_env* env, ani_object callbackObj)
 {
-    static const char* className = "@ohos.curves.curves.Curves";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        std::cerr << "Not found '" << className << "'" << std::endl;
+    if (ANI_OK != env->FindClass(ICURVE_CLASS_NAME, &cls)) {
+        LOGW("CustomCurve not found class");
         return nullptr;
     }
 
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-        std::cerr << "get ctor Failed'" << className << "'" << std::endl;
+        LOGW("CustomCurve get ctor failed");
         return nullptr;
     }
 
@@ -493,7 +479,7 @@ static ani_object CustomCurve([[maybe_unused]] ani_env* env, ani_object callback
         env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
         auto aniObj = reinterpret_cast<ani_object>(result);
         ani_double valueAniDouble = 0.0;
-        env->Object_CallMethodByName_Double(aniObj, "unboxed", ":d", &valueAniDouble);
+        env->Object_CallMethodByName_Double(aniObj, "toDouble", ":d", &valueAniDouble);
         return static_cast<float>(valueAniDouble);
     };
 
@@ -519,7 +505,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
     std::array methods = {
-        ani_native_function {"cubicBezier", nullptr, reinterpret_cast<void *>(CubicBezier)},
         ani_native_function {"cubicBezierCurve", nullptr, reinterpret_cast<void *>(CubicBezierCurve)},
         ani_native_function {"springMotion", nullptr, reinterpret_cast<void *>(SpringMotion)},
         ani_native_function {"initCurve", nullptr, reinterpret_cast<void*>(InitCurve)},
@@ -533,9 +518,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *classNameCurves = "@ohos.curves.curves.Curves";
     ani_class clsCurves;
-    if (ANI_OK != env->FindClass(classNameCurves, &clsCurves)) {
+    if (ANI_OK != env->FindClass(ICURVE_CLASS_NAME, &clsCurves)) {
         return ANI_ERROR;
     }
     std::array methodsCurves = {

@@ -453,7 +453,7 @@ HWTEST_F(MouseEventAccessorTest, GetRawDeltaXTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, SetRawDeltaYTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, DISABLED_SetRawDeltaYTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);

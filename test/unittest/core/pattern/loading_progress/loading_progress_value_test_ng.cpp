@@ -92,7 +92,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest001, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**
@@ -137,7 +137,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest002, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**
@@ -182,7 +182,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest003, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**
@@ -230,7 +230,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest004, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**
@@ -278,7 +278,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest005, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**
@@ -339,7 +339,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest006, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**
@@ -392,7 +392,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest007, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**
@@ -445,7 +445,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest008, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**
@@ -506,7 +506,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest009, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**
@@ -567,7 +567,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest010, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**
@@ -620,7 +620,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest011, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**
@@ -673,7 +673,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest012, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**
@@ -726,7 +726,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest013, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**
@@ -779,7 +779,7 @@ HWTEST_F(LoadingProgressValueTestNg, LoadingProgressValueTest014, TestSize.Level
      * @tc.steps: step2. Set loadingProgressConfiguration
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(CHECKED);
     /**

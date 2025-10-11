@@ -68,7 +68,7 @@ ani_status NativeUiExtension::BindNativeUiExtensionComponent(ani_env *env)
 {
     ani_class cls;
     static const char *className =
-        "Larkui/ani/arkts/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUiextensionModal;";
+        "arkui.ani.arkts.ui_extension.ArkUIAniUiextensionModal.ArkUIAniUiextensionModal";
     auto ani_status = env->FindClass(className, &cls);
     if (ani_status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
@@ -115,7 +115,7 @@ ani_status NativeUiExtension::BindNativeUiExtensionComponent(ani_env *env)
 ani_status NativeUiExtension::BindNativeUiExtensionProxy(ani_env *env)
 {
     static const char *className =
-        "Larkui/ani/arkts/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUiextensionProxyModal;";
+        "arkui.ani.arkts.ui_extension.ArkUIAniUiextensionModal.ArkUIAniUiextensionProxyModal";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
@@ -150,7 +150,7 @@ ani_status NativeUiExtension::SetUiextensionOption(
     }
 
     std::string optionClassName =
-        "Larkui/ani/arkts/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUIExtensionOptions;";
+        "arkui.ani.arkts.ui_extension.ArkUIAniUiextensionModal.ArkUIAniUIExtensionOptions";
     if (!AniUtils::CheckType(env, obj, optionClassName)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "CheckType %{public}s failed when SetUiextensionOption",
@@ -216,7 +216,7 @@ ani_status NativeUiExtension::SetUiextensionWant(
     }
 
     std::string wantClassName =
-        "L@ohos/app/ability/Want/Want;";
+        "@ohos.app.ability.Want.Want";
     if (!AniUtils::CheckType(env, obj, wantClassName)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "CheckType failed when SetUiextensionWant");
@@ -661,34 +661,3 @@ ani_object NativeUiExtension::SendDataSync(
     return static_cast<ani_object>(wantParamsObj);
 }
 } // namespace OHOS::Ace::Ani
-
-ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
-{
-    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "arkuiuiextension_ani ANI_Constructor start");
-    ani_env* env;
-    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "GetEnv failed when ANI_Constructor");
-        return ANI_ERROR;
-    }
-
-    auto ani_status = OHOS::Ace::Ani::NativeUiExtension::BindNativeUiExtension(env);
-    if (ani_status != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "BindNativeUiExtension failed when ANI_Constructor");
-        return ani_status;
-    }
-
-    ani_status = OHOS::Ace::Ani::NativeDynamicModule::BindNativeDynamicModule(env);
-    if (ani_status != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DYNAMIC_COMPONENT,
-            "BindNativeDynamicModule failed when ANI_Constructor");
-        return ani_status;
-    }
-
-    *result = ANI_VERSION_1;
-    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "arkuiuiextension_ani ANI_Constructor end");
-    return ANI_OK;
-}

@@ -20,12 +20,17 @@ import { nullptr, pointer } from "@koalaui/interop"
 import { ArkRootPeer, StateStylesOps } from "#generated"
 import { ReusablePool } from "./ReusablePool"
 import { StateUpdateLoop } from "./stateManagement"  
+import { RecordData } from "@ohos.base"
+import { ArkUIAniModule } from 'arkui.ani';
 
 export const PeerNodeType = 11
 export const RootPeerType = 33
+export const LazyForEachType = 13
 export const LazyItemNodeType = 17 // LazyItems are detached node trees that are stored privately in LazyForEach
 export const BuilderRootNodeType = 19 // BuilderRootNode are detached node trees that are stored privately in BuilderNode
-const INITIAL_ID = 1000
+const INITIAL_ID = 0
+const ID_CAPACITY = 10000
+const UNINITIALIZE_CURSOR = -1
 
 export class PeerNode extends IncrementalNode {
     static generateRootPeer() {
@@ -33,13 +38,20 @@ export class PeerNode extends IncrementalNode {
     }
     peer: NativePeerNode
     protected static currentId: int32 = INITIAL_ID
-    static nextId(): int32 { return PeerNode.currentId++ }
+    protected static cursor: int32 = UNINITIALIZE_CURSOR
+    static nextId(): int32 {
+        if (PeerNode.cursor === UNINITIALIZE_CURSOR || PeerNode.currentId >= PeerNode.cursor + ID_CAPACITY) {
+            PeerNode.cursor = ArkUIAniModule._RequireArkoalaNodeId(ID_CAPACITY)
+            PeerNode.currentId = PeerNode.cursor
+        }
+        return PeerNode.currentId++;
+    }
     private id: int32
-    private _onReuse?: () => void
+    private _onReuse?: (param?: RecordData) => void
     private _onRecycle?: () => void
     // Pool to store recycled child scopes, grouped by type
     private _reusePool?: Map<string, ReusablePool>
-    private _reusable: boolean = false
+    public reusable: boolean = false
     private _uiStateStyle?: MutableState<int32>;
 
     getPeerPtr(): pointer {
@@ -59,17 +71,31 @@ export class PeerNode extends IncrementalNode {
         return this.id
     }
 
-    onReuse(): void {
-        if (!this._reusable) {
+    onReuse(needRecurs: boolean, param?: RecordData): void {
+        if (!this.reusable && !needRecurs) {
             return
         }
-        if (this._onReuse) {
-            scheduleCallback(() => { this._onReuse?.() }) // could change states
+        if (this._onReuse && !needRecurs) {
+            scheduleCallback(() => { this._onReuse?.(param) }) // could change states
+        } else if (needRecurs) {
+            this._onReuse?.(param);
+            for (let child = this.firstChild; child; child = child!.nextSibling) {
+                if (child?.isKind(PeerNodeType)) {
+                    (child as PeerNode)!.onReuse(needRecurs, param);
+                }
+            }
         }
     }
 
-    onRecycle(): void {
+    onRecycle(needRecurs?: boolean): void {
         this._onRecycle?.()
+        if (needRecurs) {
+            for (let child = this.firstChild; child; child = child!.nextSibling) {
+                if (child?.isKind(PeerNodeType)) {
+                    (child as PeerNode)!.onRecycle(needRecurs);
+                }
+            }
+        }
     }
 
     private isRootNode() {
@@ -111,7 +137,12 @@ export class PeerNode extends IncrementalNode {
         return true
     }
 
-    setReusePoolSize(size: number, reuseKey: string): void {
+    override incrementalUpdateDone(parent?: IncrementalNode) {
+        super.incrementalUpdateDone(parent)
+        ArkUIAniModule._UINode_OnUpdateDone(this.peer.ptr)
+    }
+
+    setReusePoolSize(size: int32, reuseKey: string): void {
         if (size < 0) {
             return
         }
@@ -133,7 +164,7 @@ export class PeerNode extends IncrementalNode {
     setOnRecycle(cb: () => void): void {
         this._onRecycle = cb
     }
-    setOnReuse(cb: () => void): void {
+    setOnReuse(cb: (param?: RecordData) => void): void {
         this._onReuse = cb
     }
 
@@ -175,7 +206,11 @@ export class PeerNode extends IncrementalNode {
             // Improve: rework to avoid search
             let peer = findPeerNode(child)
             if (peer) {
-                peer._reusable ? peer!.onReuse() : peer._reusable = true // becomes reusable after initial mount
+                if (peer.reusable) {
+                    peer!.onReuse(false)
+                } else {
+                    peer.reusable = true // becomes reusable after initial mount
+                }
                 let peerPtr = peer.peer.ptr
                 if (this.insertMark != nullptr) {
                     if (this.insertDirection == 0) {

@@ -569,7 +569,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarMonthNode(int32_t calendarNo
     }
 
     monthPattern->SetCalendarDialogFlag(true);
-    auto calendarEventHub = monthPattern->GetOrCreateEventHub<CalendarEventHub>();
+    auto calendarEventHub = monthPattern->GetEventHub<CalendarEventHub>();
     CHECK_NULL_RETURN(calendarEventHub, nullptr);
     auto selectedChangeEvent = [calendarNodeId, changeEvent, settingData](const std::string& callbackInfo) {
         OnSelectedChangeEvent(calendarNodeId, callbackInfo, std::move(changeEvent), settingData);
@@ -612,7 +612,7 @@ void CalendarDialogView::UpdateCalendarMonthData(const RefPtr<FrameNode>& calend
 void CalendarDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<CalendarEventHub>();
+    auto eventHub = frameNode->GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogChange(std::move(onChange));
 }
@@ -620,7 +620,7 @@ void CalendarDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, Dia
 void CalendarDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onAccept)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<CalendarEventHub>();
+    auto eventHub = frameNode->GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogAcceptEvent(std::move(onAccept));
 }
@@ -659,7 +659,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     textNode->MountToParent(buttonNode);
 
     UpdateButtonLayoutProperty(buttonNode, isConfirm, buttonInfos, pipeline);
-    auto buttonEventHub = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
     buttonEventHub->SetStateEffect(true);
 
@@ -805,7 +805,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateConfirmNode(
         auto calendarPattern = calendarNode->GetPattern<CalendarPattern>();
         CHECK_NULL_VOID(calendarPattern);
         auto str = calendarPattern->GetSelectDate();
-        auto calendarEventHub = calendarNode->GetOrCreateEventHub<CalendarEventHub>();
+        auto calendarEventHub = calendarNode->GetEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
         calendarEventHub->FireDialogAcceptEvent(str);
     };
@@ -993,7 +993,7 @@ void CalendarDialogView::InitOnRequestDataEvent(
         calendarNode->MarkModifyDone();
         calendarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     };
-    auto eventHub = calendarNode->GetOrCreateEventHub<CalendarEventHub>();
+    auto eventHub = calendarNode->GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRequestDataEvent(std::move(callback));
 }
@@ -1022,7 +1022,7 @@ void CalendarDialogView::OnSelectedChangeEvent(int32_t calendarNodeId, const std
 
     auto entryNode = settingData.entryNode.Upgrade();
     CHECK_NULL_VOID(entryNode);
-    auto eventHub = entryNode->GetOrCreateEventHub<CalendarPickerEventHub>();
+    auto eventHub = entryNode->GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateOnChangeEvent(callbackInfo);
 }

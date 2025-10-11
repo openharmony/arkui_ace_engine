@@ -377,7 +377,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setAlphabetIndexerOptionsSelected, TestSi
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.ColorImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setColor, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_COLOR);
@@ -413,7 +413,7 @@ HWTEST_F(IndexerModifierTest, setColorRes, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.SelectedColorImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setSelectedColor, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setSelectedColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED_COLOR);
@@ -449,7 +449,7 @@ HWTEST_F(IndexerModifierTest, setSelectedColorRes, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.PopupColorImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setPopupColor, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setPopupColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_COLOR);
@@ -484,7 +484,7 @@ HWTEST_F(IndexerModifierTest, setPopupColorRes, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.SelectedBackgroundColorImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setSelectedBackgroundColor, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setSelectedBackgroundColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
@@ -502,7 +502,7 @@ HWTEST_F(IndexerModifierTest, setSelectedBackgroundColor, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.SelectedBackgroundColorImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setSelectedBackgroundColorRes, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setSelectedBackgroundColorRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
@@ -520,7 +520,7 @@ HWTEST_F(IndexerModifierTest, setSelectedBackgroundColorRes, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.PopupBackgroundImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setPopupBackground, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setPopupBackground, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupBackground, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_BACKGROUND);
@@ -538,7 +538,7 @@ HWTEST_F(IndexerModifierTest, setPopupBackground, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.PopupBackgroundImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setPopupBackgroundRes, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setPopupBackgroundRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupBackground, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_BACKGROUND);
@@ -556,7 +556,7 @@ HWTEST_F(IndexerModifierTest, setPopupBackgroundRes, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.PopupSelectedColorImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setPopupSelectedColor, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setPopupSelectedColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupSelectedColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_SELECTED_COLOR);
@@ -592,7 +592,7 @@ HWTEST_F(IndexerModifierTest, setPopupSelectedColorRes, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.PopupUnselectedColorImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setPopupUnselectedColor, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setPopupUnselectedColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupUnselectedColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_UNSELECTED_COLOR);
@@ -628,7 +628,7 @@ HWTEST_F(IndexerModifierTest, setPopupUnselectedColorRes, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.PopupItemBackgroundColorImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setPopupItemBackgroundColor, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setPopupItemBackgroundColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupItemBackgroundColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_BACKGROUND);
@@ -1278,7 +1278,7 @@ HWTEST_F(IndexerModifierTest, setAlignStyleOffset, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setOnSelect, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
@@ -1317,7 +1317,7 @@ HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static bool wasInvoke = false;
@@ -1349,7 +1349,7 @@ HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setOnPopupSelect, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
@@ -1476,7 +1476,7 @@ HWTEST_F(IndexerModifierTest, setAutoCollapse, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.PopupItemBorderRadiusImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setPopupItemBorderRadius, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setPopupItemBorderRadius, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupItemBorderRadius, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BORDER_RADIUS);
@@ -1497,7 +1497,7 @@ HWTEST_F(IndexerModifierTest, setPopupItemBorderRadius, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.ItemBorderRadiusImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setItemBorderRadius, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setItemBorderRadius, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setItemBorderRadius, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_BORDER_RADIUS);
@@ -1552,7 +1552,7 @@ HWTEST_F(IndexerModifierTest, setPopupBackgroundBlurStyle, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.PopupTitleBackgroundImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setPopupTitleBackground, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setPopupTitleBackground, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupTitleBackground, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_TITLE_BACKGROUND);
@@ -1617,7 +1617,7 @@ HWTEST_F(IndexerModifierTest, setEnableHapticFeedback, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

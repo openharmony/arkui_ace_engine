@@ -1095,7 +1095,7 @@ void SelectModelNG::SetChangeValue(FrameNode* frameNode, int index, const std::s
 void SelectModelNG::SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect)
 {
     CHECK_NULL_VOID(frameNode);
-    auto hub = frameNode->GetOrCreateEventHub<SelectEventHub>();
+    auto hub = frameNode->GetEventHub<SelectEventHub>();
     CHECK_NULL_VOID(hub);
     hub->SetSelectEvent(std::move(onSelect));
 }

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkRelativeContainerPeer, GuideLineStyle, BarrierStyle, RelativeContainerAttribute } from "./component/relativeContainer"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -37,8 +38,9 @@ export class RelativeContainerModifier extends CommonMethodModifier implements R
     _guideLine_0_0value?: Array<GuideLineStyle> | undefined
     _barrier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barrier_0_0value?: Array<BarrierStyle> | undefined
-    applyModifierPatch(peer: ArkRelativeContainerPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkRelativeContainerPeer;
         if (this._guideLine_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._guideLine_0_flag) {

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkScrollableCommonMethodPeer, CommonMethod, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod } from "./component/common"
 import { int32 } from "@koalaui/common"
 import { BarState, Color, CrownSensitivity, EdgeEffect } from "./component/enums"
@@ -69,8 +70,9 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
     _fadingEdge_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fadingEdge_0_0value?: boolean | undefined
     _fadingEdge_0_1value?: FadingEdgeOptions | undefined
-    applyModifierPatch(peer: ArkScrollableCommonMethodPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkScrollableCommonMethodPeer;
         if (this._scrollBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._scrollBar_0_flag) {
@@ -327,7 +329,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             switch (this._edgeEffect_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined), (this._edgeEffect_0_1value as EdgeEffectOptions | undefined));
+                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined), (this._edgeEffect_0_1value as EdgeEffectOptions | undefined | undefined));
                     this._edgeEffect_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -345,7 +347,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             switch (this._fadingEdge_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined), (this._fadingEdge_0_1value as FadingEdgeOptions | undefined));
+                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined), (this._fadingEdge_0_1value as FadingEdgeOptions | undefined | undefined));
                     this._fadingEdge_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

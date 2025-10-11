@@ -21,9 +21,9 @@
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_Number& src)
+void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_Int32& src)
 {
-    auto fontStyleValue = Converter::Convert<int32_t>(src);
+    auto fontStyleValue = static_cast<int32_t>(src);
     if (fontStyleValue > static_cast<int32_t>(ARK_FONT_STYLE_ITALIC) ||
         fontStyleValue < static_cast<int32_t>(ARK_FONT_STYLE_NORMAL)) {
         return;
@@ -33,9 +33,21 @@ void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_Number& src)
 }
 
 template<>
-void AssignCast(std::optional<TextOverflow>& dst, const Ark_Number& src)
+void AssignCast(std::optional<TextAlign>& dst, const Ark_Int32& src)
 {
-    auto overflowValue = Converter::Convert<int32_t>(src);
+    auto alignValue = static_cast<int32_t>(src);
+    if (alignValue > static_cast<int32_t>(ARK_TEXT_ALIGN_JUSTIFY) ||
+        alignValue < static_cast<int32_t>(ARK_TEXT_ALIGN_CENTER)) {
+        return;
+    }
+    auto arkTextAlign = static_cast<Ark_TextAlign>(alignValue);
+    dst = Converter::OptConvert<TextAlign>(arkTextAlign);
+}
+
+template<>
+void AssignCast(std::optional<TextOverflow>& dst, const Ark_Int32& src)
+{
+    auto overflowValue = static_cast<int32_t>(src);
     if (overflowValue > static_cast<int32_t>(ARK_TEXT_OVERFLOW_MARQUEE) ||
         overflowValue < static_cast<int32_t>(ARK_TEXT_OVERFLOW_NONE)) {
         return;
@@ -45,9 +57,9 @@ void AssignCast(std::optional<TextOverflow>& dst, const Ark_Number& src)
 }
 
 template<>
-void AssignCast(std::optional<TextCase>& dst, const Ark_Number& src)
+void AssignCast(std::optional<TextCase>& dst, const Ark_Int32& src)
 {
-    auto textCaseValue = Converter::Convert<int32_t>(src);
+    auto textCaseValue = static_cast<int32_t>(src);
     if (textCaseValue > static_cast<int32_t>(ARK_TEXT_CASE_UPPER_CASE) ||
         textCaseValue < static_cast<int32_t>(ARK_TEXT_CASE_NORMAL)) {
         return;
@@ -100,7 +112,7 @@ std::optional<Dimension> ConvertToDimension(const T& src, DimensionUnit defaultU
     std::optional<Dimension> dimension;
     Converter::VisitUnion(
         src,
-        [&dimension, defaultUnit](const Ark_Number& number) {
+        [&dimension, defaultUnit](const Ark_Int32& number) {
             std::optional<float> optValue = Converter::OptConvert<float>(number);
             if (optValue.has_value()) {
                 dimension = Dimension(optValue.value(), defaultUnit);
@@ -132,13 +144,13 @@ std::optional<Dimension> ConvertToDimension(const T& src, DimensionUnit defaultU
     return dimension;
 }
 
-std::string ConvertToFontWeight(const Opt_Union_Number_String_FontWeight& src)
+std::string ConvertToFontWeight(const Opt_Union_I32_String_FontWeight& src)
 {
     std::string fontWeight = "normal";
     Converter::VisitUnion(
         src,
-        [&fontWeight](const Ark_Number& number) {
-            auto weightValue = Converter::Convert<float>(number);
+        [&fontWeight](const Ark_Int32& number) {
+            auto weightValue = Converter::Convert<int32_t>(number);
             fontWeight = std::to_string(weightValue);
         },
         [&fontWeight](const Ark_String& str) { fontWeight = Converter::Convert<std::string>(str); },
@@ -159,9 +171,8 @@ std::string ConvertToFontWeight(const Opt_Union_Number_String_FontWeight& src)
         []() {});
     return fontWeight;
 }
-Ark_Number MeasureTextImpl(const Ark_MeasureOptions* options)
+Ark_Float64 MeasureTextImpl(const Ark_MeasureOptions* options)
 {
-#ifdef WRONG_GEN1
     MeasureContext context;
     auto fontSizeUnit = AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)
                             ? DimensionUnit::FP
@@ -183,13 +194,10 @@ Ark_Number MeasureTextImpl(const Ark_MeasureOptions* options)
     context.textIndent = ConvertToDimension(options->textIndent);
     context.wordBreak = Converter::OptConvert<WordBreak>(options->wordBreak).value_or(WordBreak::BREAK_WORD);
     auto textWidth = MeasureUtil::MeasureText(context);
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(textWidth));
-#endif
-    return {};
+    return Converter::ArkValue<Ark_Float64>(textWidth);
 }
 Ark_SizeOptions MeasureTextSizeImpl(const Ark_MeasureOptions* options)
 {
-#ifdef WRONG_GEN1
     MeasureContext context;
     auto fontSizeUnit = AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)
                             ? DimensionUnit::FP
@@ -215,8 +223,6 @@ Ark_SizeOptions MeasureTextSizeImpl(const Ark_MeasureOptions* options)
         .width = Converter::ArkValue<Opt_Length>(textSize.Width()),
         .height = Converter::ArkValue<Opt_Length>(textSize.Height())
     };
-#endif
-    return {};
 }
 } // GlobalScope_ohos_measure_utilsAccessor
 const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor* GetGlobalScope_ohos_measure_utilsAccessor()

@@ -27,6 +27,14 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+#ifdef XCOMPONENT_SUPPORTED
+XComponentType ConvertXComponentType(Ark_XComponentType type)
+{
+    return type == Ark_XComponentType::ARK_XCOMPONENT_TYPE_TEXTURE ? XComponentType::TEXTURE : XComponentType::SURFACE;
+}
+#endif // XCOMPONENT_SUPPORTED
+}
 namespace XComponentModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -41,61 +49,51 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // XComponentModifier
 namespace XComponentInterfaceModifier {
-void SetXComponentOptions0Impl(Ark_NativePointer node,
-                               const Ark_XComponentParameters* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-#ifdef XCOMPONENT_SUPPORTED
-#ifdef WRONG_GEN
-    auto id = Converter::Convert<std::string>(value->id);
-    XComponentModelNG::SetXComponentId(frameNode, id);
-#endif
-
-    LOGE("XComponentInterfaceModifier::SetXComponentOptions0Impl - wrong input type");
-    auto type = Converter::OptConvert<XComponentType>(value->type).value_or(XComponentType::SURFACE);
-    XComponentModelNG::SetXComponentType(frameNode, type);
-
-#ifdef WRONG_GEN
-    auto libraryName = Converter::OptConvert<std::string>(value->libraryname);
-    XComponentModelNG::SetXComponentLibraryname(frameNode, libraryName.value_or(""));
-#endif
-#endif // XCOMPONENT_SUPPORTED
-}
-void SetXComponentOptions1Impl(Ark_NativePointer node,
-                               const Ark_XComponentOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-#ifdef XCOMPONENT_SUPPORTED
-
-    auto type = Converter::OptConvert<XComponentType>(options->type);
-    XComponentModelNG::SetXComponentType(frameNode, type.value_or(XComponentType::UNKNOWN));
-
-    auto peerPtr = options->controller;
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peerPtr);
-    XComponentModelStatic::SetXComponentController(frameNode, peerImpl->controller);
-    XComponentModelNG::SetControllerOnCreated(frameNode, peerImpl->GetOnSurfaceCreatedEvent());
-    XComponentModelNG::SetControllerOnChanged(frameNode, peerImpl->GetOnSurfaceChangedEvent());
-    XComponentModelNG::SetControllerOnDestroyed(frameNode, peerImpl->GetOnSurfaceDestroyedEvent());
-#endif // XCOMPONENT_SUPPORTED
-}
-void SetXComponentOptions2Impl(Ark_NativePointer node,
-                               const Ark_NativeXComponentParameters* params)
+void SetXComponentOptionsImpl(Ark_NativePointer node,
+                              const Ark_Union_XComponentParameters_XComponentOptions_NativeXComponentParameters* params)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(params);
-    auto type = Converter::OptConvert<XComponentType>(params->type);
 #ifdef XCOMPONENT_SUPPORTED
-    XComponentModelNG::SetXComponentType(frameNode, type.value_or(XComponentType::UNKNOWN));
-#endif // XCOMPONENT_SUPPORTED
-}
-void SetXComponentOptionsImpl(Ark_NativePointer node,
-                              const Ark_Union_XComponentParameters_XComponentOptions_NativeXComponentParameters* params)
-{
+    Converter::VisitUnion(*params,
+        [frameNode](const Ark_XComponentParameters& src) {
+            std::string xComponentId = Converter::Convert<std::string>(src.id);
+            XComponentModelStatic::SetXComponentId(frameNode, xComponentId);
+            XComponentType type = ConvertXComponentType(src.type);
+            XComponentModelStatic::SetXComponentType(frameNode, type);
+            auto handler = [arkCallback = CallbackHelper(src.nativeXComponentHandler)](void* ptr) {
+                arkCallback.InvokeSync(reinterpret_cast<Ark_Int64>(ptr));
+            };
+            XComponentModelStatic::SetNativeXComponentHandler(frameNode, handler);
+            if (src.controller.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+                auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(src.controller.value);
+                CHECK_NULL_VOID(peerImpl);
+                XComponentModelStatic::SetXComponentController(frameNode, peerImpl->controller);
+            }
+        },
+        [frameNode](const Ark_XComponentOptions& src) {
+            XComponentType type = ConvertXComponentType(src.type);
+            XComponentModelStatic::SetXComponentType(frameNode, type);
+            if (src.screenId.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+                XComponentModelStatic::SetScreenId(frameNode, static_cast<uint64_t>(src.screenId.value));
+            }
+            auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(src.controller);
+            CHECK_NULL_VOID(peerImpl);
+            bool isUpdated = XComponentModelStatic::SetXComponentController(frameNode, peerImpl->controller);
+            CHECK_EQUAL_VOID(isUpdated, false);
+            XComponentModelNG::SetControllerOnCreated(frameNode, std::move(peerImpl->onSurfaceCreatedEvent));
+            XComponentModelNG::SetControllerOnChanged(frameNode, std::move(peerImpl->onSurfaceChangedEvent));
+            XComponentModelNG::SetControllerOnDestroyed(frameNode, std::move(peerImpl->onSurfaceDestroyedEvent));
+        },
+        [frameNode](const Ark_NativeXComponentParameters& src) {
+            XComponentType type = ConvertXComponentType(src.type);
+            XComponentModelStatic::SetXComponentType(frameNode, type);
+            XComponentModelStatic::MarkBindNative(frameNode);
+        },
+        []() {});
+    XComponentModelStatic::InitParams(frameNode);
+#endif
 }
 } // XComponentInterfaceModifier
 namespace XComponentAttributeModifier {

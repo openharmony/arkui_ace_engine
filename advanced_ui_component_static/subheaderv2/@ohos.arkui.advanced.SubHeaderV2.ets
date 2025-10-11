@@ -38,7 +38,7 @@ const INDEX_ONE: int = 1;
 const INDEX_TWO: int = 2;
 // 行数及整体高度
 const SINGLE_LINE_NUM: number = 1;
-const DOUBLE_LINE_NUM: number = 2;
+const DOUBLE_LINE_NUM: int = 2;
 // 资源数值
 const RESOURCE_TYPE_SYMBOL: int = 40000;
 // 左边尺寸常量
@@ -193,9 +193,9 @@ class ContentIconOption {
 @ObservedV2
 class FontStyle {
   @Trace
-  public maxLines: number = 0;
+  public maxLines: int = 0;
   @Trace
-  public fontWeight: number = 0;
+  public fontWeight: int = 0;
   @Trace
   public fontColor?: ResourceColor;
   @Trace
@@ -455,7 +455,7 @@ export struct SubHeaderV2 {
     Column() {
       Text($$.content)
         .primaryTitleStyles({
-          fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
+          fontWeight: getResourceValue('sys.float.subheader_title_font_weight') as int,
           maxLines: DOUBLE_LINE_NUM,
           alignment: Alignment.Start,
           fontColor: this.subHeaderV2Theme.fontPrimaryColor,
@@ -495,7 +495,7 @@ export struct SubHeaderV2 {
   PrimaryTitleStyle($$: ContentIconOption): void {
     Text($$.content)
       .primaryTitleStyles({
-        fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
+        fontWeight: getResourceValue('sys.float.subheader_title_font_weight') as int,
         maxLines: DOUBLE_LINE_NUM,
         alignment: Alignment.Start,
         fontColor: this.subHeaderV2Theme.fontPrimaryColor,
@@ -540,7 +540,7 @@ export struct SubHeaderV2 {
   rightAreaClickEvent(instance: CommonMethod) {
     instance.onKeyEvent((event: KeyEvent) => {
       if (!event) {
-        return;
+        return false;
       }
       if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
         event.type === KeyType.Down) {
@@ -787,7 +787,7 @@ export struct SubHeaderV2 {
       Stack() {
         Button({ type: ButtonType.Normal, stateEffect: false } as ButtonOptions) {
           TextArrowLayout() {
-            ForEach([INDEX_ZERO, INDEX_ONE], (item: Int, index: number) => {
+            ForEach([INDEX_ZERO, INDEX_ONE], (item: Int, index: int) => {
               if (index === INDEX_ZERO) {
                 this.TextStyle();
               } else {
@@ -873,7 +873,7 @@ export struct SubHeaderV2 {
   @Builder
   IconGroupStyle(): void {
     Row() {
-      ForEach(this.operationItems as SubHeaderV2OperationItem[], (item: SubHeaderV2OperationItem, index: number) => {
+      ForEach(this.operationItems as SubHeaderV2OperationItem[], (item: SubHeaderV2OperationItem, index: int) => {
         if (index <= INDEX_TWO) {
           SingleIconStyle({
             iconOptions: this.operationItems?.[index.toInt()].content,
@@ -887,7 +887,7 @@ export struct SubHeaderV2 {
         } else {
           // 最大支持3个ICON,此场景不支持
         }
-      }, (item: SubHeaderV2OperationItem, index: number) => {
+      }, (item: SubHeaderV2OperationItem, index: int) => {
         return `${index}`;
       })
     }

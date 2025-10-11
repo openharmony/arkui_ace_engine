@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkCommonShapeMethodPeer, CommonMethod, CommonShapeMethod } from "./component/common"
 import { int32 } from "@koalaui/common"
 import { ResourceColor, Length } from "./component/units"
@@ -57,8 +58,9 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
     _antiAlias_0_0value?: boolean | undefined
     _strokeDashArray_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeDashArray_0_0value?: Array<Length> | undefined
-    applyModifierPatch(peer: ArkCommonShapeMethodPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkCommonShapeMethodPeer;
         if (this._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._stroke_0_flag) {

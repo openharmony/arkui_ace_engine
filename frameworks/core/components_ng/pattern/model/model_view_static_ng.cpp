@@ -112,7 +112,7 @@ void ModelViewNG::AddCustomRender(FrameNode* frameNode,
 
     const auto curCustomRender = paintProperty->GetModelCustomRenderValue({ });
     if (!curCustomRender || (curCustomRender->GetUri() != customRender->GetUri())) {
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCustomRender, customRender);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ModelCustomRender, customRender, frameNode);
     }
 }
 void ModelViewNG::AddShaderInputBuffer(FrameNode* frameNode, const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer)

@@ -14,14 +14,15 @@
  */
 
 import { __id, NodeAttach, ComputableState, GlobalStateManager, Disposable, memoEntry2, remember,
-    rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from '@koalaui/runtime'
+    rememberDisposable, rememberMutableState, scheduleCallback } from '@koalaui/runtime'
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { InteropNativeModule, nullptr, pointer } from '@koalaui/interop'
 import { int32 } from '@koalaui/common'
 import { PeerNode } from '../PeerNode'
 import { InternalListener } from './DataChangeListener'
 import { setNeedCreate } from '../ArkComponentRoot'
 import { IDataSource } from '../component/lazyForEach'
-import { OnMoveHandler, ItemDragEventHandler } from '#generated'
+import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from '#generated'
 import { LazyItemNode } from './LazyItemNode'
 import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
 import { CustomComponent } from '../component/customComponent'
@@ -46,8 +47,8 @@ export function updateLazyItems() {
 /** @memo:intrinsic */
 export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     /** @memo */
-    itemGenerator: (item: T, index: number) => void,
-    keyGenerator?: (item: T, index: number) => string,
+    itemGenerator: (item: T, index: int32) => void,
+    keyGenerator?: (item: T, index: int32) => string,
     isRepeat: boolean = false,
     onMove?: OnMoveHandler,
     itemDragEvent?: ItemDragEventHandler,
@@ -82,6 +83,12 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
             return nullptr
         }
     }
+    LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
+
+    /**
+     * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
+     */
+    LazyForEachOps.SyncOnMoveOps(node.getPeerPtr(), pool.onMoveFromTo, onMove, itemDragEvent)
 }
 
 export class NodeHolder {
@@ -168,7 +175,7 @@ class LazyItemPool implements Disposable {
         index: int32,
         data: T,
         /** @memo */
-        itemGenerator: (item: T, index: number) => void,
+        itemGenerator: (item: T, index: int32) => void,
     ): pointer {
         if (this._activeItems.has(index)) {
             const node = this._activeItems.get(index)!
@@ -179,7 +186,7 @@ class LazyItemPool implements Disposable {
         const node = manager.updatableNode<LazyItemNode>(new LazyItemNode(this._parent),
             (context: StateContext) => {
                 let scope = new LazyItemCompositionContext(this._componentRoot)
-                memoEntry2<T, number, void>(
+                memoEntry2<T, int32, void>(
                     context,
                     0,
                     itemGenerator,

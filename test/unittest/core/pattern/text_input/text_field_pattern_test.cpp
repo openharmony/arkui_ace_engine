@@ -36,7 +36,7 @@ public:
 HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     * @tc.steps: step1. create frameNode and test pattern UpdateCaretRect
      */
     CreateTextField();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
@@ -125,7 +125,6 @@ HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isCustomKeyboardAttached_ = true;
     auto func1 = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ;
     auto func2 = [] {};
     pattern->customKeyboard_ = AceType::Claim<UINode>(func1);
     pattern->customKeyboardBuilder_ = func2;
@@ -2737,7 +2736,7 @@ HWTEST_F(TextFieldPatternTest, HandleOnCopy001, TestSize.Level0)
     ASSERT_NE(pattern->selectController_, nullptr);
     pattern->selectController_->UpdateHandleIndex(0, 4);
 
-    auto eventHub = textFieldNode->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     bool calledOnCopy = false;

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkRemoteWindowPeer, RemoteWindowAttribute } from "./component/remoteWindow"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -33,8 +34,9 @@ export class RemoteWindowModifier extends CommonMethodModifier implements Remote
     applyFocusedAttribute(instance: RemoteWindowAttribute): void { }
     applyDisabledAttribute(instance: RemoteWindowAttribute): void { }
     applySelectedAttribute(instance: RemoteWindowAttribute): void { }
-    applyModifierPatch(peer: ArkRemoteWindowPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkRemoteWindowPeer;
     }
     mergeModifier(modifier: RemoteWindowModifier): void {
         super.mergeModifier(modifier)

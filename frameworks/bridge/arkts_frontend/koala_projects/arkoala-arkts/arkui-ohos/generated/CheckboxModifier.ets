@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkCheckboxPeer, OnCheckboxChangeCallback, CheckBoxConfiguration, CheckboxAttribute } from "./component/checkbox"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
@@ -48,8 +49,9 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
     _mark_0_0value?: MarkStyle | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: OnCheckboxChangeCallback | undefined
-    applyModifierPatch(peer: ArkCheckboxPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkCheckboxPeer;
         if (this._select_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._select_0_flag) {

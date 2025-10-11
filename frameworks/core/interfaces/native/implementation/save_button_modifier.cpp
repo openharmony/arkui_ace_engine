@@ -55,6 +55,15 @@ void AssignCast(std::optional<SaveButtonSaveDescription>& dst, const Ark_SaveDes
         default: LOGE("Unexpected enum value in Ark_SaveDescription: %{public}d", src);
     }
 }
+template<>
+SaveButtonStyle Convert(const Opt_SaveButtonOptions& src)
+{
+    SaveButtonStyle style;
+    style.text = OptConvert<SaveButtonSaveDescription>(src.value.text);
+    style.icon = OptConvert<SaveButtonIconStyle>(src.value.icon);
+    style.backgroundType = OptConvert<ButtonType>(src.value.buttonType);
+    return style;
+}
 } // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SaveButtonModifier {
@@ -71,11 +80,14 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // SaveButtonModifier
 namespace SaveButtonInterfaceModifier {
-void SetSaveButtonOptionsImpl(Ark_NativePointer node)
+void SetSaveButtonOptionsImpl(Ark_NativePointer node,
+                              const Opt_SaveButtonOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SaveButtonModelNG::InitSaveButton(frameNode, SaveButtonStyle(), false);
+    CHECK_NULL_VOID(options);
+    auto style = Converter::Convert<SaveButtonStyle>(*options);
+    SaveButtonModelNG::InitSaveButton(frameNode, style, false);
 }
 } // SaveButtonInterfaceModifier
 namespace SaveButtonAttributeModifier {

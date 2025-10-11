@@ -40,6 +40,7 @@ ani_long ConstructCustomNode(ani_int id, ArkUICustomNodeInfo&& customNodeInfo)
     customNode->SetPageTransitionFunc(std::move(customNodeInfo.pageTransitionFunc));
     customNode->SetOnCleanupFunc(std::move(customNodeInfo.onCleanupFunc));
     customNode->SetOnDumpInspectorFunc(std::move(customNodeInfo.onDumpInspectorFunc));
+    customNode->SetSetActiveFunc(std::move(customNodeInfo.setActiveFunc));
 
     if (customNode) {
         return reinterpret_cast<ani_long>(AceType::RawPtr(customNode));

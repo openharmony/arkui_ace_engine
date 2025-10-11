@@ -24,9 +24,10 @@ import { Color, BorderStyle } from '#generated';
 import { default as common2D } from "@ohos.graphics.common2D"
 import { default as drawing } from "@ohos.graphics.drawing"
 import { BusinessError } from '@ohos.base';
+import { SystemOps } from './framework';
 export interface Size {
-    width: number;
-    height: number;
+    width: double;
+    height: double;
 }
 export interface SizeT<T> {
     width: T,
@@ -41,15 +42,15 @@ export class SizeInternal implements Size {
     }
 }
 export interface Frame {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+    x: double;
+    y: double;
+    width: double;
+    height: double;
 }
-export type Position = Vector2;
+export type NodePosition = Vector2;
 export interface Vector2 {
-    x: number;
-    y: number;
+    x: double;
+    y: double;
 }
 export enum LengthMetricsUnit {
     DEFAULT = 0,
@@ -62,32 +63,15 @@ export enum LengthUnit {
     PERCENT = 3,
     LPX = 4
 }
-export class LengthMetricsInternal {
-    public static fromPtr(ptr: KPointer): LengthMetrics {
-        const obj: LengthMetrics = new LengthMetrics(0)
-        obj.peer = new Finalizable(ptr, LengthMetrics.getFinalizer())
-        return obj
-    }
-}
-export class LengthMetrics implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+
+export class LengthMetrics {
     public unit: LengthUnit;
-    public value: number;
-    public getPeer(): Finalizable | undefined {
-        return this.peer
+    public value: double;
+    constructor(){
+        this.value = 0;
+        this.unit = LengthUnit.VP;
     }
-    static ctor_lengthmetrics(): KPointer {
-        throw new Error('Not implemented');
-        // const retval = ArkUIGeneratedNativeModule._LengthMetrics_ctor()
-        // return retval
-    }
-    static getFinalizer(): KPointer {
-        throw new Error('Not implemented');
-        // return ArkUIGeneratedNativeModule._LengthMetrics_getFinalizer()
-    }
-    constructor(value: number, unit?: LengthUnit) {
-        const ctorPtr: KPointer = LengthMetrics.ctor_lengthmetrics()
-        this.peer = new Finalizable(ctorPtr, LengthMetrics.getFinalizer())
+    constructor(value: double, unit?: LengthUnit) {
         this.value = value;
         if (unit === undefined || unit === null || unit < LengthUnit.PX || unit > LengthUnit.LPX) {
             this.unit = LengthUnit.VP;
@@ -96,61 +80,30 @@ export class LengthMetrics implements MaterializedBase {
             this.unit = unit!;
             this.value = value;
         }
-        this.setValue(this.value);
-        this.setUnit(this.unit);
     }
-    static px(value: number) {
+    static px(value: double) {
         return new LengthMetrics(value, LengthUnit.PX);
     }
-    static vp(value: number) {
+    static vp(value: double) {
         return new LengthMetrics(value, LengthUnit.VP);
     }
-    static fp(value: number) {
+    static fp(value: double) {
         return new LengthMetrics(value, LengthUnit.FP);
     }
-    static percent(value: number) {
+    static percent(value: double) {
         return new LengthMetrics(value, LengthUnit.PERCENT);
     }
-    static lpx(value: number) {
+    static lpx(value: double) {
         return new LengthMetrics(value, LengthUnit.LPX);
     }
     static resource(res: Resource) {
-        throw new Error('Not implemented');
-        // const thisSerializer : Serializer = Serializer.hold();
-        // thisSerializer.writeResource(res);
-        // // @ts-ignore
-        // const retval  = ArkUIGeneratedNativeModule._SystemOps_resourceToLengthMetrics(thisSerializer.asBuffer(), thisSerializer.length()) as FixedArray<byte>;
-        // thisSerializer.release();
-        // // @ts-ignore
-        // let exactRetValue: byte[] = new Array<byte>;
-        // for (let i = 0; i < retval.length; i++) {
-        //     // @ts-ignore
-        //     exactRetValue.push(new Byte(retval[i]));
-        // }
-        // let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        // const returnResult : LengthMetricsCustom = retvalDeserializer.readLengthMetricsCustom();
-        // let unit = returnResult.unit as int32;
-        // let lengthUnit: LengthUnit = LengthUnit.PX;
-        // if (unit >= LengthUnit.PX || unit <= LengthUnit.LPX) {
-        //     lengthUnit = unit as LengthUnit;
-        // }
-        // return new LengthMetrics((returnResult.value as number), lengthUnit);
-    }
-    private setUnit(unit: LengthUnit): void {
-        const unit_casted = unit as (LengthUnit)
-        this.setUnit_serialize(unit_casted)
-        return
-    }
-    private setValue(value: number): void {
-        const value_casted = value as (number)
-        this.setValue_serialize(value_casted)
-        return
-    }
-    private setUnit_serialize(unit: LengthUnit): void {
-        // ArkUIGeneratedNativeModule._LengthMetrics_setUnit(this.peer!.ptr, unit.valueOf())
-    }
-    private setValue_serialize(value: number): void {
-        // ArkUIGeneratedNativeModule._LengthMetrics_setValue(this.peer!.ptr, value)
+        let returnResult = SystemOps.resourceToLengthMetrics(res);
+        let unit = returnResult.unit as int32;
+        let lengthUnit: LengthUnit = LengthUnit.PX;
+        if (unit >= LengthUnit.PX || unit <= LengthUnit.LPX) {
+            lengthUnit = unit as LengthUnit;
+        }
+        return new LengthMetrics((returnResult.value as number), lengthUnit);
     }
   }
 
@@ -158,18 +111,11 @@ const MAX_CHANNEL_VALUE = 0xFF;
 const MAX_ALPHA_VALUE = 1;
 const ERROR_CODE_RESOURCE_GET_FAILED = 180003;
 const ERROR_CODE_COLOR_PARAMETER_INCORRECT = 401;
-export class ColorMetricsInternal {
-    public static fromPtr(ptr: KPointer): ColorMetrics {
-        const obj: ColorMetrics = new ColorMetrics()
-        obj.peer = new Finalizable(ptr, ColorMetrics.getFinalizer())
-        return obj
-    }
-}
-export class ColorMetrics implements MaterializedBase {
-    private red_: number | undefined = undefined;
-    private green_: number | undefined = undefined;
-    private blue_: number | undefined = undefined;
-    private alpha_: number | undefined = undefined;
+export class ColorMetrics {
+    private red_: int32 | undefined = undefined;
+    private green_: int32 | undefined = undefined;
+    private blue_: int32 | undefined = undefined;
+    private alpha_: int32 | undefined = undefined;
     private resourceId_: number = -1;
     static readonly WHITE: int32 = 0xffffffff;
     static readonly BLACK: int32 = 0xff000000;
@@ -183,61 +129,41 @@ export class ColorMetrics implements MaterializedBase {
     static readonly RED: int32 = 0xffff0000;
     static readonly YELLOW: int32 = 0xffffff00;
     static readonly TRANSPARENT: string = '#00000000';
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     get color(): string {
         return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha / MAX_CHANNEL_VALUE})`;
     }
-    get red(): number {
-        if (!this.red_) {
-            this.red_ = this.getRed();
-        }
+    get red(): int32 {
         return this.red_!;
     }
-    get green(): number {
-        if (!this.green_) {
-            this.green_ = this.getGreen();
-        }
+    get green(): int32 {
         return this.green_!;
     }
-    get blue(): number {
-        if (!this.blue_) {
-            this.blue_ = this.getBlue();
-        }
+    get blue(): int32 {
         return this.blue_!;
     }
-    get alpha(): number {
-        if (!this.alpha_) {
-            this.alpha_ = this.getAlpha();
-        }
+    get alpha(): int32 {
         return this.alpha_!;
     }
     private static clamp(value: number): number {
         return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
     }
-    static ctor_colormetrics(): KPointer {
-        return 0;
-        // const retval = ArkUIGeneratedNativeModule._ColorMetrics_ctor()
-        // return retval
+    constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE) {
+        this.red_ = ColorMetrics.clamp(red) as int32;
+        this.green_ = ColorMetrics.clamp(green) as int32;
+        this.blue_ = ColorMetrics.clamp(blue) as int32;
+        this.alpha_ = ColorMetrics.clamp(alpha) as int32;
     }
-    constructor() {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr: KPointer = ColorMetrics.ctor_colormetrics()
-        this.peer = new Finalizable(ctorPtr, ColorMetrics.getFinalizer())
+    public static numeric(value: int32): ColorMetrics {
+        const red = (value >> 16) & 0x000000FF;
+        const green = (value >> 8) & 0x000000FF;
+        const blue = value & 0x000000FF;
+        const alpha = (value >> 24) & 0x000000FF;
+        if (alpha === 0) {
+            return new ColorMetrics(red, green, blue);
+        }
+        return new ColorMetrics(red, green, blue, alpha);
     }
-    static getFinalizer(): KPointer {
-        return 0;
-        // return ArkUIGeneratedNativeModule._ColorMetrics_getFinalizer()
-    }
-    public static numeric(value: number): ColorMetrics {
-        const value_casted = value as (number)
-        return ColorMetrics.numeric_serialize(value_casted)
-    }
-    public static rgba(red: number, green: number, blue: number, alpha?: number): ColorMetrics {
+    public static rgba(red: double, green: double, blue: double, alpha?: double): ColorMetrics {
         const red_casted = red as (number)
         const green_casted = green as (number)
         const blue_casted = blue as (number)
@@ -247,11 +173,7 @@ export class ColorMetrics implements MaterializedBase {
         } else {
             alpha_casted = MAX_CHANNEL_VALUE;
         }
-        let result = ColorMetrics.rgba_serialize(red_casted, green_casted, blue_casted, alpha_casted);
-        if (alpha !== undefined) {
-            result.alpha_ = ColorMetrics.clamp(alpha_casted);
-        }
-        return result;
+        return new ColorMetrics(red, green, blue, alpha_casted);
     }
     private static rgbOrRGBA(format: string): ColorMetrics {
         const rgbPattern = new RegExp('^rgb\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)$', 'i');
@@ -285,7 +207,7 @@ export class ColorMetrics implements MaterializedBase {
         let chanels: Array<number> = [];
         if (typeof color === 'object') {
             const color_casted = (color as Object) as (Resource);
-            chanels = ColorMetrics.colorMetricsResourceColor_serialize(color_casted);
+            chanels = SystemOps.colorMetricsResourceColor(color_casted);
             if (chanels[0] === 0) {
                 const error = new Error('Failed to obtain the color resource.');
                 throw new BusinessError(ERROR_CODE_RESOURCE_GET_FAILED, error);
@@ -294,15 +216,15 @@ export class ColorMetrics implements MaterializedBase {
             const green = chanels[2];
             const blue = chanels[3];
             const alpha = chanels[4];
-            let colorMetrics = ColorMetrics.rgba_serialize(red, green, blue, alpha);
-            colorMetrics.alpha_ = ColorMetrics.clamp(alpha);
+            let colorMetrics = new ColorMetrics(red, green, blue, alpha);
+            colorMetrics.alpha_ = ColorMetrics.clamp(alpha) as int32;
             if (chanels.length > 5) {
                 const resourceId = chanels[5];
                 colorMetrics.setResourceId(resourceId);
             }
             return colorMetrics;
         } else if (typeof color === 'number') {
-            return ColorMetrics.numeric(color as number);
+            return ColorMetrics.numeric(color as int32);
         } else if (typeof color === 'string') {
             let colorValue = color as string;
             if (ColorMetrics.isHexFormat(colorValue)) {
@@ -346,134 +268,28 @@ export class ColorMetrics implements MaterializedBase {
 
         return ColorMetrics.rgba(r, g, b, a);
     }
+    private toNumeric(): number {
+        return (this.alpha_! << 24) + (this.red_! << 16) + (this.green_! << 8) + this.blue_!;
+    }
     public blendColor(overlayColor: ColorMetrics): ColorMetrics {
-        const overlayColor_casted = overlayColor as (ColorMetrics)
-        return this.blendColor_serialize(overlayColor_casted)
-    }
-    private getColor(): string {
-        return this.getColor_serialize()
-    }
-    private getRed(): number {
-        return this.getRed_serialize()
-    }
-    private getGreen(): number {
-        return this.getGreen_serialize()
-    }
-    private getBlue(): number {
-        return this.getBlue_serialize()
-    }
-    private getAlpha(): number {
-        return this.getAlpha_serialize()
-    }
-    private static numeric_serialize(value: number): ColorMetrics {
-        throw new Error('Not implemented');
-        // const retval = ArkUIGeneratedNativeModule._ColorMetrics_numeric(value)
-        // const obj: ColorMetrics = ColorMetricsInternal.fromPtr(retval)
-        // return obj
-    }
-    private static rgba_serialize(red: number, green: number, blue: number, alpha?: number): ColorMetrics {
-        throw new Error('Not implemented');
-        // const thisSerializer: Serializer = Serializer.hold()
-        // let alpha_type: int32 = RuntimeType.UNDEFINED
-        // alpha_type = runtimeType(alpha)
-        // thisSerializer.writeInt8(alpha_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (alpha_type)) {
-        //     const alpha_value = alpha!
-        //     thisSerializer.writeNumber(alpha_value)
-        // }
-        // const retval = ArkUIGeneratedNativeModule._ColorMetrics_rgba(red, green, blue, thisSerializer.asBuffer(), thisSerializer.length())
-        // thisSerializer.release()
-        // const obj: ColorMetrics = ColorMetricsInternal.fromPtr(retval)
-        // return obj
-    }
-    private static resourceColor_serialize(color: ResourceColor): ColorMetrics {
-        throw new Error('Not implemented');
-        // const thisSerializer: Serializer = Serializer.hold()
-        // let color_type: int32 = RuntimeType.UNDEFINED
-        // color_type = runtimeType(color)
-        // if (TypeChecker.isColor(color)) {
-        //     thisSerializer.writeInt8(0 as int32)
-        //     const color_0 = color as Color
-        //     thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(color_0))
-        // }
-        // else if (RuntimeType.NUMBER == color_type) {
-        //     thisSerializer.writeInt8(1 as int32)
-        //     const color_1 = color as number
-        //     thisSerializer.writeNumber(color_1)
-        // }
-        // else if (RuntimeType.STRING == color_type) {
-        //     thisSerializer.writeInt8(2 as int32)
-        //     const color_2 = color as string
-        //     thisSerializer.writeString(color_2)
-        // }
-        // else if (RuntimeType.OBJECT == color_type) {
-        //     thisSerializer.writeInt8(3 as int32)
-        //     const color_3 = color as Resource
-        //     thisSerializer.writeResource(color_3)
-        // }
-        // const retval = ArkUIGeneratedNativeModule._ColorMetrics_resourceColor(thisSerializer.asBuffer(), thisSerializer.length())
-        // thisSerializer.release()
-        // const obj: ColorMetrics = ColorMetricsInternal.fromPtr(retval)
-        // return obj
-    }
-    private blendColor_serialize(overlayColor: ColorMetrics): ColorMetrics {
-        throw new Error('Not implemented');
-        // const retval = ArkUIGeneratedNativeModule._ColorMetrics_blendColor(this.peer!.ptr, toPeerPtr(overlayColor))
-        // const obj: ColorMetrics = ColorMetricsInternal.fromPtr(retval)
-        // return obj
-    }
-    private getColor_serialize(): string {
-        throw new Error('Not implemented');
-        // const retval = ArkUIGeneratedNativeModule._ColorMetrics_getColor(this.peer!.ptr)
-        // return retval
-    }
-    private getRed_serialize(): number {
-        throw new Error('Not implemented');
-        // const retval = ArkUIGeneratedNativeModule._ColorMetrics_getRed(this.peer!.ptr)
-        // return retval
-    }
-    private getGreen_serialize(): number {
-        throw new Error('Not implemented');
-        // const retval = ArkUIGeneratedNativeModule._ColorMetrics_getGreen(this.peer!.ptr)
-        // return retval
-    }
-    private getBlue_serialize(): number {
-        throw new Error('Not implemented');
-        // const retval = ArkUIGeneratedNativeModule._ColorMetrics_getBlue(this.peer!.ptr)
-        // return retval
-    }
-    private getAlpha_serialize(): number {
-        throw new Error('Not implemented');
-        // const retval = ArkUIGeneratedNativeModule._ColorMetrics_getAlpha(this.peer!.ptr)
-        // return retval
+        let chanels: Array<number> = [];
+        chanels = SystemOps.blendColorByColorMetrics(this.toNumeric(), overlayColor.toNumeric());
+        if (chanels.length <= 1) {
+            const error = new Error('Parameter error. The type of the input parameter is not ColorMetrics.');
+            throw new BusinessError(ERROR_CODE_COLOR_PARAMETER_INCORRECT, error);
+        }
+        const red = chanels[1];
+        const green = chanels[2];
+        const blue = chanels[3];
+        const alpha = chanels[4];
+
+        return new ColorMetrics(red, green, blue, alpha);
     }
     setResourceId(resourceId: number): void {
         this.resourceId_ = resourceId;
     }
     getResourceId(): number {
         return this.resourceId_;
-    }
-    private static colorMetricsResourceColor_serialize(color: Resource): Array<number> {
-        throw new Error('Not implemented');
-        // const thisSerializer : Serializer = Serializer.hold();
-        // thisSerializer.writeResource(color);
-        // // @ts-ignore
-        // const retval = ArkUIGeneratedNativeModule._SystemOps_colorMetricsResourceColor(thisSerializer.asBuffer(), thisSerializer.length()) as FixedArray<byte>;
-        // thisSerializer.release();
-        // // @ts-ignore
-        // let exactRetValue: byte[] = new Array<byte>;
-        // for (let i = 0; i < retval.length; i++) {
-        //     // @ts-ignore
-        //     exactRetValue.push(new Byte(retval[i]));
-        // }
-        // let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        // const buffer_length : int32 = retvalDeserializer.readInt32();
-        // let buffer : Array<number> = new Array<number>(buffer_length);
-        // for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-        //     buffer[buffer_i] = (retvalDeserializer.readNumber() as number);
-        // }
-        // const returnResult : Array<number> = buffer;
-        // return returnResult;
     }
 }
 export class ShapeMask {
@@ -517,9 +333,9 @@ export class ShapeMask {
         this.circle = null;
         this.roundRect = null;
     }
-    public fillColor: number = 0XFF000000;
-    public strokeColor: number = 0XFF000000;
-    public strokeWidth: number = 0;
+    public fillColor: int32 = 0XFF000000;
+    public strokeColor: int32 = 0XFF000000;
+    public strokeWidth: double = 0;
 }
 export class ShapeClip {
     public rect: Rect | null = null;
@@ -588,29 +404,29 @@ export interface Vector2T<T> {
 }
 export type PositionT<T> = Vector2T<T>;
 export interface Vector3 {
-    x: number;
-    y: number;
-    z: number;
+    x: double;
+    y: double;
+    z: double;
 }
 export type Matrix4 = [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double
 ]
-export interface Edges<T> {
+export interface NodeEdges<T> {
     top?: T;
     left?: T;
     bottom?: T;
@@ -629,9 +445,9 @@ export interface RoundRect {
     corners: CornerRadius;
 }
 export interface Circle {
-    centerX: number;
-    centerY: number;
-    radius: number;
+    centerX: double;
+    centerY: double;
+    radius: double;
 }
 export interface CommandPath {
     commands: string;
@@ -642,21 +458,21 @@ export type Scale = Vector2;
 export type Translation = Vector2;
 export type Rotation = Vector3;
 
-export function edgeColors(all: number): Edges<number> {
+export function edgeColors(all: int32): NodeEdges<int32> {
     return { left: all, top: all, right: all, bottom: all };
 }
 
-export function edgeWidths(all: number): Edges<number> {
+export function edgeWidths(all: double): NodeEdges<double> {
     return { left: all, top: all, right: all, bottom: all };
 }
 
-export function borderStyles(all: BorderStyle): Edges<BorderStyle> {
+export function borderStyles(all: BorderStyle): NodeEdges<BorderStyle> {
     return { left: all, top: all, right: all, bottom: all };
 }
 
-export function borderRadiuses(all: number): Corners<number> {
+export function borderRadiuses(all: double): Corners<double> {
     return { topLeft: all, topRight: all, bottomLeft: all, bottomRight: all };
 }
 
-export type NodeBorderRadiuses = Corners<number>;
-export type Offset = Vector2;
+export type NodeBorderRadiuses = Corners<double>;
+export type NodeOffset = Vector2;

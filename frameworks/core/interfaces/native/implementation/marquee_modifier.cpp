@@ -89,7 +89,13 @@ void SetMarqueeOptionsImpl(Ark_NativePointer node,
         MarqueeModelNG::SetScrollAmount(frameNode, stepOpt);
     }
     if (marqueeOptions.loop) {
-        MarqueeModelNG::SetLoop(frameNode, marqueeOptions.loop);
+        std::optional<int32_t> loopOpt;
+        int32_t loop = marqueeOptions.loop.value();
+        if (loop == std::numeric_limits<int32_t>::max() || loop < 1) {
+            loop = -1;
+        }
+        loopOpt = loop;
+        MarqueeModelNG::SetLoop(frameNode, loopOpt);
     }
     if (marqueeOptions.src) {
         MarqueeModelNG::SetValue(frameNode, marqueeOptions.src);
@@ -118,7 +124,7 @@ void SetFontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     std::optional<Dimension> convValue = std::nullopt;
     if (value->tag != INTEROP_TAG_UNDEFINED) {
-        convValue = Converter::OptConvertFromArkNumStrRes(value->value, DimensionUnit::FP);
+        convValue = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(value->value, DimensionUnit::FP);
     }
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
@@ -132,12 +138,13 @@ void SetAllowScaleImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // Implement Reset value
+        MarqueeModelNG::SetAllowScale(frameNode, false);
         return;
     }
     MarqueeModelNG::SetAllowScale(frameNode, *convValue);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -171,6 +178,7 @@ void SetOnStartImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         // Implement Reset value
+        MarqueeModelNG::SetOnStart(frameNode, nullptr);
         return;
     }
     auto onStart = [arkCallback = CallbackHelper(*optValue)]() -> void {
@@ -186,6 +194,7 @@ void SetOnBounceImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         // Implement Reset value
+        MarqueeModelNG::SetOnBounce(frameNode, nullptr);
         return;
     }
     auto onBounce = [arkCallback = CallbackHelper(*optValue)]() -> void {
@@ -201,6 +210,7 @@ void SetOnFinishImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         // Implement Reset value
+        MarqueeModelNG::SetOnFinish(frameNode, nullptr);
         return;
     }
     auto onFinish = [arkCallback = CallbackHelper(*optValue)]() -> void {

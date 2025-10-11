@@ -17,44 +17,92 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { int32, hashCodeFromString } from '@koalaui/common'
-import { memoEntry2, __context, NodeAttach } from '@koalaui/runtime'
-import { InteropNativeModule } from '@koalaui/interop'
+import { memoEntry2, __context, NodeAttach, remember } from '@koalaui/runtime'
 import { SyntaxItemPeer, ForEachNodePeer } from '../base/RepeatImpl'
+import { DynamicNode, OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from '#generated'
+import { NodeHolder } from '../base/LazyForEachImpl'
+import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
+
+export interface ForEachAttribute<T> extends DynamicNode {
+    arr: () => Array<T>;
+    setForEachOptions(arr: () => Array<T>,
+        /** @memo */
+        itemGenerator: (item: T, index: int32) => void,
+        keyGenerator?: (item: T, index: int32) => string): this {
+        return this;
+    }
+    onMove(handler?: OnMoveHandler): this {
+        return this;
+    }
+    onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this {
+        return this;
+    }
+}
+
+export class ArkForEachComponent<T> implements ForEachAttribute<T> {
+    arr: () => Array<T> = () => new Array<T>();
+    /** @memo */
+    itemGenerator: (item: T, index: int32) => void = (item: T, index: int32) => {};
+    keyGenerator?: (item: T, index: int32) => string = undefined;
+    onMoveEvent?: OnMoveHandler = undefined;
+    itemDragEvent?: ItemDragEventHandler = undefined;
+
+    public onMove(handler?: OnMoveHandler): this {
+        this.onMoveEvent = handler;
+        return this;
+    }
+
+    public onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this {
+        this.onMoveEvent = handler;
+        this.itemDragEvent = eventHandler;
+        return this;
+    }
+
+    public setForEachOptions(arr: () => Array<T>,
+        /** @memo */
+        itemGenerator: (item: T, index: int32) => void,
+        keyGenerator?: (item: T, index: int32) => string): this {
+        this.arr = arr;
+        this.itemGenerator = itemGenerator;
+        this.keyGenerator = keyGenerator;
+        return this;
+    }
+}
+
+function onMoveFromTo(moveFrom: int32, moveTo: int32): void {}
 
 /** @memo */
-export function ForEach<T>(
-    arr: () => Array<T>,
+export function ForEachImpl<T>(
     /** @memo */
-    itemGenerator: (item: T, index: number) => void,
-    keyGenerator?: (item: T, index: number) => string,
+    style: ((attributes: ForEachAttribute<T>) => void) | undefined
 ) {
-    if (arr === null || arr === undefined) {
-        InteropNativeModule._NativeLog('input array function is null or undefined error. Application error!');
-        return;
+    const receiver = remember(() => {
+        return new ArkForEachComponent<T>()
+    })
+    style?.(receiver)
+    if (receiver.arr === null || receiver.arr === undefined) {
+        throw new Error('input array function is null or undefined error. Application error!');
     }
-    if (typeof itemGenerator !== 'function') {
-        InteropNativeModule._NativeLog('item generator function missing. Application error!');
-        return;
+    if (typeof receiver.itemGenerator !== 'function') {
+        throw new Error('item generator function missing. Application error!');
     }
-    if (keyGenerator !== undefined && typeof keyGenerator !== 'function') {
-        InteropNativeModule._NativeLog('key generator is not a function. Application error!');
-        return;
+    if (receiver.keyGenerator !== undefined && typeof receiver.keyGenerator !== 'function') {
+        throw new Error('key generator is not a function. Application error!');
     }
+    let nodeHolder = remember(() => new NodeHolder())
     /** @memo */
     const createAndUpdate = (): void => {
-        const array: Array<T> = arr();
+        const array: Array<T> = receiver.arr();
         if (array === null || array === undefined) {
-            InteropNativeModule._NativeLog('input array is null or undefined error. Application error!');
-            return;
+            throw new Error('input array is null or undefined error. Application error!');
         }
-        const length: number = array.length;
-        const key = (element: T, index: int32): int32 => keyGenerator
-            ? hashCodeFromString(keyGenerator!(element, (index as number)))
-            : index;
+        const length: int32 = array.length;
+        const key = (element: T, index: int32): int32 =>
+            receiver.keyGenerator ? hashCodeFromString(receiver.keyGenerator!(element, index)) : index;
         /** @memo */
         const action = (element: T, index: int32): void => {
             NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
-                itemGenerator(element, (index as number));
+                receiver.itemGenerator(element, index);
             });
         };
         for (let i = 0; i < length; i++) {
@@ -64,5 +112,16 @@ export function ForEach<T>(
     }
     NodeAttach(() => ForEachNodePeer.create(), (node: ForEachNodePeer) => {
         createAndUpdate();
+        nodeHolder.node = node;
     });
+
+    /**
+     * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
+     */
+    LazyForEachOps.SyncOnMoveOps(nodeHolder.node!.getPeerPtr(),
+        onMoveFromTo,
+        receiver.onMoveEvent,
+        receiver.itemDragEvent);
+
+    ArkUIAniModule._ForEach_FinishRender(nodeHolder.node!.getPeerPtr());
 }

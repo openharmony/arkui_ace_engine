@@ -30,6 +30,7 @@ link_abc_files("arkoala_abc") {
     "koala_projects/incremental/common:common_abc",
     "koala_projects/incremental/compat:compat_abc",
     "koala_projects/incremental/runtime:runtime_abc",
+    "koala_projects/incremental/public:public_abc",
     "koala_projects/interop:interop-arkts_abc",
     "koala_projects/arkoala-arkts:components_abc",
   ]

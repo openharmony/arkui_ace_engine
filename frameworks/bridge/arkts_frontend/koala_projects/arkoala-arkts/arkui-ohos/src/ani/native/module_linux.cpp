@@ -40,7 +40,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     ani_class cls;
-    auto ani_status = env->FindClass("Larkui/ani/arkts/ArkUIAniModule/ArkUIAniModule;", &cls);
+    auto ani_status = env->FindClass("arkui.ani.arkts.ArkUIAniModule.ArkUIAniModule", &cls);
     if (ani_status != ANI_OK) {
         return ANI_ERROR;
     }
@@ -73,62 +73,72 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_Common_Sync_InstanceId",
-            "I:V",
+            "i:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SyncInstanceId)
         },
         ani_native_function {
             "_Common_Restore_InstanceId",
-            ":V",
+            ":",
             reinterpret_cast<void*>(OHOS::Ace::Ani::RestoreInstanceId)
         },
         ani_native_function {
             "_Common_Get_Current_InstanceId",
-            ":I",
+            ":i",
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetCurrentInstanceId)
         },
         ani_native_function {
             "_Common_GetFocused_InstanceId",
-            ":I",
+            ":i",
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetFocusedInstanceId)
         },
         ani_native_function {
+            "_Common_SetImageCacheCount",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetImageCacheCount)
+        },
+        ani_native_function {
+            "_Common_SetImageRawDataCacheSize",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetImageRawDataCacheSize)
+        },
+        ani_native_function {
             "_CustomNode_Construct",
-            "ILarkui/ArkCustomComponent/ArkCustomComponent;:J",
+            "iC{arkui.ArkCustomComponent.ArkCustomComponent}:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
         },
         ani_native_function {
             "_LazyForEachNode_Construct",
-            "I:J",
+            "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructLazyForEachNode)
         },
         ani_native_function {
             "_BuilderProxyNode_Construct",
-            "I:J",
+            "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeConstruct)
         },
         ani_native_function {
             "_ContentSlot_construct",
-            "I:J",
+            "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ContentSlotConstruct)
         },
         ani_native_function {
             "_ContentSlotInterface_setContentSlotOptions",
-            "JJ:V",
+            "ll:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetContentSlotOptions)
         },
         ani_native_function {
             "_SetDrawCallback",
-            "JLstd/core/Function1;:V",
+            "lC{std.core.Function1}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetDrawCallback)
         },
         ani_native_function {
             "_SetDrawModifier",
-            "JILarkui/component/common/DrawModifier;:V",
+            "liC{arkui.component.common.DrawModifier}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetDrawModifier)
         },
         ani_native_function {
             "_Invalidate",
-            "J:V",
+            "l:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::Invalidate)
         },
         ani_native_function {
@@ -138,12 +148,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_SetWaterFlowSection",
-            "JLarkui/component/waterFlow/WaterFlowSections;:V",
+            "lC{arkui.component.waterFlow.WaterFlowSections}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowSection)
         },
         ani_native_function {
             "_SetListChildrenMainSize",
-            "JLarkui/component/common/ChildrenMainSize;:V",
+            "lC{arkui.component.common.ChildrenMainSize}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetListChildrenMainSize)
         },
         ani_native_function {
@@ -158,17 +168,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_CreateViewStackProcessor",
-            ":J",
+            ":l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateViewStackProcessor)
         },
         ani_native_function {
             "_PopViewStackProcessor",
-            ":J",
+            ":l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PopViewStackProcessor)
         },
         ani_native_function {
             "_DeleteViewStackProcessor",
-            "J:V",
+            "l:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::DeleteViewStackProcessor)
         },
         ani_native_function {
@@ -183,22 +193,22 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_RequireArkoalaNodeId",
-            "I:I",
+            "i:i",
             reinterpret_cast<void*>(OHOS::Ace::Ani::RequireArkoalaNodeId)
         },
         ani_native_function {
             "_PersistentStorage_Get",
-            "Lstd/core/String;:Lstd/core/String;",
+            "C{std.core.String}:C{std.core.String}",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Get)
         },
         ani_native_function {
             "_PersistentStorage_Set",
-            "Lstd/core/String;Lstd/core/String;:V",
+            "C{std.core.String}C{std.core.String}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Set)
         },
         ani_native_function {
             "_PersistentStorage_Has",
-            "Lstd/core/String;:Z",
+            "C{std.core.String}:z",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Has)
         },
         ani_native_function {
@@ -208,72 +218,62 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_PersistentStorage_Delete",
-            "Lstd/core/String;:V",
+            "C{std.core.String}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Delete)
         },
         ani_native_function {
             "_Env_GetColorMode",
-            ":I",
+            ":i",
             reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetColorMode)
         },
         ani_native_function {
             "_Env_GetFontScale",
-            ":F",
+            ":f",
             reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetFontScale)
         },
         ani_native_function {
             "_Env_GetFontWeightScale",
-            ":F",
+            ":f",
             reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetFontWeightScale)
         },
         ani_native_function {
             "_Env_GetAccessibilityEnabled",
-            ":Z",
+            ":z",
             reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetAccessibilityEnabled)
         },
         ani_native_function {
             "_Env_GetLayoutDirection",
-            ":Lstd/core/String;",
+            ":C{std.core.String}",
             reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetLayoutDirection)
         },
         ani_native_function {
             "_Env_GetLanguageCode",
-            ":Lstd/core/String;",
+            ":C{std.core.String}",
             reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetLanguageCode)
         },
         ani_native_function {
-            "_XComponent_SetXComponentOptions",
-            "JLarkui/component/xcomponent/XComponentOptionsInternal;:V",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetXComponentOptions)
-        },
-        ani_native_function {
-            "_XComponent_SetXComponentParameters",
-            "JLarkui/component/xcomponent/XComponentParametersInternal;:V",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetXComponentParameters)
-        },
-        ani_native_function {
-            "_XComponent_SetNativeXComponentParameters",
-            "JI:V",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetNativeXComponentParameters)
+            "_XComponent_SetXComponentControllerCallback",
+            "lC{arkui.component.xcomponent.XComponentOptionsInternal}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetXComponentControllerCallback)
         },
         ani_native_function {
             "_RemoveComponent_FromFrameNode",
-            "JJ:V",
+            "ll:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveComponentFromFrameNode)
         },
         ani_native_function {
             "_AddComponent_ToFrameNode",
-            "JJ:V",
+            "ll:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::AddComponentToFrameNode)
         },
         ani_native_function {
             "_CheckIsUIThread",
-            "I:I",
+            "i:i",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CheckIsUIThread)
         },
         ani_native_function {
             "_IsDebugMode",
-            "I:I",
+            "i:i",
             reinterpret_cast<void*>(OHOS::Ace::Ani::IsDebugMode)
         },
         ani_native_function {
@@ -288,7 +288,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_SetParallelScoped",
-            "Z:V",
+            "z:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetParallelScoped)
         },
         ani_native_function {
@@ -337,13 +337,18 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::Px2lpx)
         },
         ani_native_function {
+            "_Common_getWindowName",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::getWindowName)
+        },
+        ani_native_function {
             "_SyntaxItem_Construct",
-            "I:J",
+            "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructSyntaxItem)
         },
         ani_native_function {
             "_ForEachNode_Construct",
-            "I:J",
+            "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructForEachNode)
         }
     };

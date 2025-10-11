@@ -16,42 +16,41 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { FrameNode } from "arkui/FrameNode"
-import { default as font } from "@ohos/font"
-import { MeasureOptions } from "@ohos/measure"
-import { SizeOptions } from 'arkui/framework'
-import { AnimateParam } from 'arkui/framework'
-import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from "@ohos/animator"
-import { Context, PointerStyle, PixelMap } from "#external"
-import { componentUtils } from "@ohos/arkui/componentUtils"
-import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
-import { dragController } from "@ohos/arkui/dragController"
-import { focusController } from "@ohos/arkui/focusController"
-import { Frame } from "arkui/Graphics"
-import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions } from 'arkui/framework'
-import { TextMenuOptions } from 'arkui/framework'
-import { Nullable, WidthBreakpoint, HeightBreakpoint } from 'arkui/framework'
-import { KeyProcessingMode } from 'arkui/framework'
-import { default as uiObserver } from "@ohos/arkui/observer"
-import { default as mediaquery } from '@ohos/mediaquery'
-import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
-    AlertDialogParamWithOptions }from 'arkui/framework'
-import { ActionSheetOptions} from 'arkui/framework'
-import inspector from "@ohos/arkui/inspector"
-import router from '@ohos/router'
-import { ComponentContent } from 'arkui/ComponentContent'
-import overlayManager from '@ohos/overlayManager'
-import promptAction, { LevelOrder } from '@ohos/promptAction'
+import { FrameNode } from 'arkui/FrameNode';
+import { default as font } from '@ohos/font';
+import { MeasureOptions } from '@ohos/measure';
+import { SizeOptions } from 'arkui/framework';
+import { AnimateParam } from 'arkui/framework';
+import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from '@ohos/animator';
+import { Context, PointerStyle, PixelMap } from '#external';
+import { componentUtils } from '@ohos/arkui/componentUtils';
+import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
+import { dragController } from '@ohos/arkui/dragController';
+import { focusController } from '@ohos/arkui/focusController';
+import { Frame } from 'arkui/Graphics';
+import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions } from 'arkui/framework';
+import { TextMenuOptions } from 'arkui/framework';
+import { Nullable, WidthBreakpoint, HeightBreakpoint } from 'arkui/framework';
+import { KeyProcessingMode } from 'arkui/framework';
+import { default as uiObserver } from '@ohos/arkui/observer';
+import { default as mediaquery } from '@ohos/mediaquery';
+import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions }from 'arkui/framework';
+import { ActionSheetOptions} from 'arkui/framework';
+import inspector from '@ohos/arkui/inspector';
+import router from '@ohos/router';
+import { ComponentContent } from 'arkui/ComponentContent';
+import overlayManager from '@ohos/overlayManager';
+import promptAction, { LevelOrder } from '@ohos/promptAction';
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
-import { CustomBuilder, DragItemInfo, Callback } from 'arkui/framework'
+import { CustomBuilder, CustomBuilderT, DragItemInfo, Callback } from 'arkui/framework';
 import { Router as RouterExt, AsyncCallback } from 'arkui/base';
-import { ComputableState, IncrementalNode } from '@koalaui/runtime'
-import { PeerNode } from 'arkui/PeerNode'
+import { ComputableState, IncrementalNode } from '@koalaui/runtime';
+import { PeerNode } from 'arkui/PeerNode';
 import { ArkUIAniModule } from 'arkui.ani';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 
 export class UIInspector {
-    public createComponentObserver(id: string): inspector.ComponentObserver {
+    public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
         throw Error("createComponentObserver not implemented in UIInspector!")
     }
 }
@@ -80,7 +79,7 @@ export class MediaQuery {
 }
 
 export class MeasureUtils {
-    public measureText(options: MeasureOptions) : number {
+    public measureText(options: MeasureOptions) : double {
         throw Error("measureText not implemented in MeasureUtils!")
     }
     public measureTextSize(options: MeasureOptions) : SizeOptions {
@@ -137,7 +136,7 @@ export class Router {
         throw Error("getStateByUrl not implemented in Router!");
     }
 
-    public getStateRoot(): ComputableState<IncrementalNode> {
+    public getStateRoot(): ComputableState<IncrementalNode> | undefined {
         throw Error("getStateRoot not implemented in Router!");
     }
 
@@ -372,16 +371,16 @@ export class PromptAction {
         throw Error("openCustomDialogWithController not implemented in PromptAction!")
     }
 
-    presentCustomDialog(builder: CustomBuilder | CustomBuilderWithId, controller?: promptAction.DialogController,
+    presentCustomDialog(builder: CustomBuilder | CustomBuilderT<number>, controller?: promptAction.DialogController,
         options?: promptAction.DialogOptions): Promise<number> {
         throw Error("presentCustomDialog not implemented in PromptAction!")
     }
 
-    getTopOrder(): LevelOrder {
+    getTopOrder(): LevelOrder | undefined {
         throw Error("getTopOrder not implemented in PromptAction!")
     }
 
-    getBottomOrder(): LevelOrder {
+    getBottomOrder(): LevelOrder | undefined {
         throw Error("getBottomOrder not implemented in PromptAction!")
     }
 
@@ -418,6 +417,14 @@ export class CursorController {
     public setCursor(value: PointerStyle): void {
         throw Error("setCursor not implemented in CursorController!")
     }
+}
+
+export const enum KeyboardAvoidMode {
+    OFFSET = 0,
+    RESIZE = 1,
+    OFFSET_WITH_CARET = 2,
+    RESIZE_WITH_CARET = 3,
+    NONE = 4,
 }
 
 export class UIContext {
@@ -467,6 +474,14 @@ export class UIContext {
     }
     getHostContext(): Context | undefined {
         throw Error("getHostContext not implemented in UIContext!")
+    }
+
+    public getKeyboardAvoidMode(): KeyboardAvoidMode {
+        throw Error("getKeyboardAvoidMode not implemented in UIContext!")
+    }
+
+    public setKeyboardAvoidMode(mode: KeyboardAvoidMode) {
+        throw Error("setKeyboardAvoidMode not implemented in UIContext!")
     }
 
     public getAtomicServiceBar(): Nullable<AtomicServiceBar> {
@@ -520,8 +535,8 @@ export class UIContext {
     public createAnimator(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult {
         throw Error("createAnimator not implemented in UIContext!")
     }
-    public setFrameCallback(onFrameCallback: ((index: number) => void), onIdleCallback: ((index: number) => void),
-                                              delayTime: number): void {
+    public setFrameCallback(onFrameCallback: ((index: long) => void), onIdleCallback: ((index: long) => void),
+                                              delayTime: long): void {
         throw Error("setFrameCallback not implemented in UIContext!")
     }
     runScopedTask(callback: () => void): void {
@@ -533,7 +548,7 @@ export class UIContext {
     postFrameCallback(frameCallback: FrameCallback): void {
         throw Error("postFrameCallback not implemented in UIContext!")
     }
-    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: number): void {
+    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: long): void {
         throw Error("postDelayedFrameCallback not implemented in UIContext!")
     }
     public getUIInspector(): UIInspector {
@@ -568,7 +583,7 @@ export class UIContext {
         throw Error("showActionSheet not implemented in UIContext!")
     }
     // @ts-ignore
-    public freezeUINode(id: number, isFrozen: boolean): void {
+    public freezeUINode(id: long, isFrozen: boolean): void {
         throw Error("freezeUINode not implemented in UIContext!")
     }
 
@@ -586,32 +601,46 @@ export class UIContext {
     public getWindowHeightBreakpoint(): HeightBreakpoint {
         throw Error("getWindowHeightBreakpoint not implemented in UIContext!")
     }
-    public vp2px(value: number): number {
+    public vp2px(value: double): double {
         throw Error("vp2px not implemented in UIContext!")
     }
-    public px2vp(value: number): number {
+    public px2vp(value: double): double {
         throw Error("px2vp not implemented in UIContext!")
     }
-    public fp2px(value: number): number {
+    public fp2px(value: double): double {
         throw Error("fp2px not implemented in UIContext!")
     }
-    public px2fp(value: number): number {
+    public px2fp(value: double): double {
         throw Error("px2fp not implemented in UIContext!")
     }
-    public lpx2px(value: number): number {
+    public lpx2px(value: double): double {
         throw Error("lpx2px not implemented in UIContext!")
     }
-    public px2lpx(value: number): number {
+    public px2lpx(value: double): double {
         throw Error("px2lpx not implemented in UIContext!")
     }
 
     public setUIStates(callback: () => void): void {
         throw Error("setUIStates not implemented in UIContext!")
     }
+    public getFilteredInspectorTree(filters?: Array<string>): string {
+        throw Error("getFilteredInspectorTree not implemented in UIContext!")
+    }
+ 
+    public getFilteredInspectorTreeById(id: string, depth: int, filters?: Array<string>): string {
+        throw Error("getFilteredInspectorTreeById not implemented in UIContext!")
+    }
+    public setImageCacheCount(value: int): void {
+        throw Error("setImageCacheCount not implemented in UIContext!")
+    }
+
+    public setImageRawDataCacheSize(value: int): void {
+        throw Error("setImageRawDataCacheSize not implemented in UIContext!")
+    }
 }
 export abstract class FrameCallback {
-    onFrame(frameTimeInNano: number): void {}
-    onIdle(timeLeftInNano: number): void {}
+    onFrame(frameTimeInNano: long): void {}
+    onIdle(timeLeftInNano: long): void {}
 }
 
 export class UIObserver {
@@ -649,6 +678,30 @@ export class UIObserver {
     public off(type: string, options: uiObserver.NavDestinationSwitchObserverOptions, callback?: ((param: object) => void)): void {
         if (this.observerImpl) {
             this.observerImpl!.off(type, options, callback);
+        }
+    }
+
+    public onScrollEvent(options: uiObserver.ObserverOptions, callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onScrollEvent(options, callback);
+        }
+    }
+
+    public offScrollEvent(options: uiObserver.ObserverOptions, callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offScrollEvent(options, callback);
+        }
+    }
+
+    public onScrollEvent(callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onScrollEvent(callback);
+        }
+    }
+
+    public offScrollEvent(callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offScrollEvent(callback);
         }
     }
 }

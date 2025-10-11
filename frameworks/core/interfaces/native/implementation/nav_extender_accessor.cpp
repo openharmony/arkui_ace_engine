@@ -40,6 +40,9 @@ void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
     CHECK_NULL_VOID(navigationStack);
     auto updater = [callback = CallbackHelper(*callback)]() {
         callback.Invoke();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(context);
+        context->RequestFrame();
     };
     navigationStack->SetOnStateChangedCallback(std::move(updater));
 }
@@ -91,48 +94,98 @@ void PushPathImpl(Ark_NavPathStack pathStack,
                   Ark_NavPathInfo info,
                   const Ark_NavigationOptions* options)
 {
+    CHECK_NULL_VOID(pathStack);
+    CHECK_NULL_VOID(info);
+    CHECK_NULL_VOID(options);
+    auto navStack = pathStack->GetNavPathStack();
+    CHECK_NULL_VOID(navStack);
+    auto navInfo = Converter::Convert<NavigationContext::PathInfo>(info);
+    auto navOptions = Converter::Convert<NavigationOptions>(*options);
+    pathStack->SetInstanceId(1);
+    navStack->NavigationContext::PathStack::PushPath(navInfo, navOptions);
 }
 void ReplacePathImpl(Ark_NavPathStack pathStack,
                      Ark_NavPathInfo info,
                      const Ark_NavigationOptions* options)
 {
+    CHECK_NULL_VOID(pathStack);
+    CHECK_NULL_VOID(info);
+    CHECK_NULL_VOID(options);
+    auto navStack = pathStack->GetNavPathStack();
+    CHECK_NULL_VOID(navStack);
+    auto navInfo = Converter::Convert<NavigationContext::PathInfo>(info);
+    auto navOptions = Converter::Convert<NavigationOptions>(*options);
+    navStack->NavigationContext::PathStack::ReplacePath(navInfo, navOptions);
 }
 Ark_String PopImpl(Ark_NavPathStack pathStack,
                    Ark_Boolean animated)
 {
-    return {};
+    auto invalidVal = Converter::ArkValue<Ark_String>("", Converter::FC);
+    CHECK_NULL_RETURN(pathStack, invalidVal);
+    auto navStack = pathStack->GetNavPathStack();
+    CHECK_NULL_RETURN(navStack, invalidVal);
+    auto isAnimated = Converter::Convert<bool>(animated);
+    auto info = navStack->NavigationContext::PathStack::Pop(isAnimated);
+    return Converter::ArkValue<Ark_String>(info.navDestinationId_.value_or(""), Converter::FC);
 }
 void SetOnPopCallbackImpl(Ark_NavPathStack pathStack,
                           const Callback_String_Void* popCallback)
 {
+    auto stack = pathStack;
+    CHECK_NULL_VOID(stack);
+    auto navigationStack = stack->GetNavPathStack();
+    CHECK_NULL_VOID(navigationStack);
+    auto callback = [callback = CallbackHelper(*popCallback)](const std::string& navDestinationId) {
+        auto idVal = Converter::ArkValue<Ark_String>(navDestinationId);
+        callback.Invoke(idVal);
+    };
+    navigationStack->SetOnPopCallback(std::move(callback));
 }
 Ark_String GetIdByIndexImpl(Ark_NavPathStack pathStack,
                             Ark_Int32 index)
 {
-    return {};
+    auto invalidVal = Converter::ArkValue<Ark_String>("", Converter::FC);
+    CHECK_NULL_RETURN(pathStack, invalidVal);
+    auto navStack = pathStack->GetNavPathStack();
+    CHECK_NULL_RETURN(navStack, invalidVal);
+    auto indexVal = Converter::Convert<int32_t>(index);
+    auto pathInfo = navStack->GetPathInfo(indexVal);
+    CHECK_NULL_RETURN(pathInfo, invalidVal);
+    return Converter::ArkValue<Ark_String>(pathInfo->navDestinationId_.value_or(""), Converter::FC);
 }
 Array_String GetIdByNameImpl(Ark_NavPathStack pathStack,
                              const Ark_String* name)
 {
-    return {};
+    CHECK_NULL_RETURN(pathStack, {});
+    auto navStack = pathStack->GetNavPathStack();
+    CHECK_NULL_RETURN(navStack, {});
+    auto nameVal = Converter::Convert<std::string>(*name);
+    auto ids = navStack->GetIdByName(nameVal);
+    return Converter::ArkValue<Array_String>(ids, Converter::FC);
 }
 void PopToIndexImpl(Ark_NavPathStack pathStack,
                     Ark_Int32 index,
                     Ark_Boolean animated)
 {
+    CHECK_NULL_VOID(pathStack);
+    auto navStack = pathStack->GetNavPathStack();
+    CHECK_NULL_VOID(navStack);
+    auto indexVal = Converter::Convert<int32_t>(index);
+    auto animatedVal = Converter::Convert<bool>(animated);
+    navStack->NavigationContext::PathStack::PopToIndex(indexVal, animatedVal);
 }
-Ark_Number PopToNameImpl(Ark_NavPathStack pathStack,
+Ark_Int32 PopToNameImpl(Ark_NavPathStack pathStack,
                          const Ark_String* name,
                          Ark_Boolean animated)
 {
-    static Ark_Number invalidVal = Converter::ArkValue<Ark_Number>(-1);
+    static Ark_Int32 invalidVal = Converter::ArkValue<Ark_Int32>(-1);
     CHECK_NULL_RETURN(pathStack, invalidVal);
     auto navStack = pathStack->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
     auto nameVal = Converter::Convert<std::string>(*name);
     auto animatedVal = Converter::Convert<bool>(animated);
     auto index = navStack->NavigationContext::PathStack::PopToName(nameVal, animatedVal);
-    return Converter::ArkValue<Ark_Number>(index);
+    return Converter::ArkValue<Ark_Int32>(index);
 }
 } // NavExtenderAccessor
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()

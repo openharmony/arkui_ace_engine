@@ -42,6 +42,7 @@ namespace {
 const int32_t FLAG_DRAW_FRONT = 1;
 const int32_t FLAG_DRAW_CONTENT = 1 << 1;
 const int32_t FLAG_DRAW_BEHIND = 1 << 2;
+const int32_t FLAG_DRAW_FOREGROUND = 1 << 3;
 }
 ani_status GetAniEnv(ani_vm* vm, ani_env** env)
 {
@@ -54,34 +55,31 @@ ani_status GetAniEnv(ani_vm* vm, ani_env** env)
     return status;
 }
 
-class CommonModuleCallbackAni {
-public:
-    CommonModuleCallbackAni(ani_env* env, ani_ref func)
-    {
-        CHECK_NULL_VOID(env);
-        env->GetVM(&vm_);
-        env->GlobalReference_Create(func, &func_);
+CommonModuleCallbackAni::CommonModuleCallbackAni(ani_env* env, ani_ref func)
+{
+    CHECK_NULL_VOID(env);
+    env->GetVM(&vm_);
+    env->GlobalReference_Create(func, &func_);
+}
+
+CommonModuleCallbackAni::~CommonModuleCallbackAni()
+{
+    CHECK_NULL_VOID(vm_);
+    CHECK_NULL_VOID(func_);
+    ani_env* env = nullptr;
+    auto attachCurrentThreadStatus = GetAniEnv(vm_, &env);
+    if (attachCurrentThreadStatus == ANI_OK && env != nullptr) {
+        env->GlobalReference_Delete(func_);
+        vm_->DetachCurrentThread();
     }
-    ~CommonModuleCallbackAni()
-    {
-        CHECK_NULL_VOID(vm_);
-        CHECK_NULL_VOID(func_);
-        ani_env* env = nullptr;
-        auto attachCurrentThreadStatus = GetAniEnv(vm_, &env);
-        if (attachCurrentThreadStatus == ANI_OK && env != nullptr) {
-            env->GlobalReference_Delete(func_);
-            vm_->DetachCurrentThread();
-        }
-    }
-    void Call(ani_env* env, ani_size argc, ani_ref* argv, ani_ref* result)
-    {
-        CHECK_NULL_VOID(env);
-        env->FunctionalObject_Call(static_cast<ani_fn_object>(func_), argc, argv, result);
-    }
-private:
-    ani_vm* vm_ = nullptr;
-    ani_ref func_ = nullptr;
-};
+}
+
+void CommonModuleCallbackAni::Call(ani_env* env, ani_size argc, ani_ref* argv, ani_ref* result)
+{
+    CHECK_NULL_VOID(env);
+    env->FunctionalObject_Call(static_cast<ani_fn_object>(func_), argc, argv, result);
+}
+
 ani_object GetHostContext([[maybe_unused]] ani_env* env, ani_object obj, ani_int key)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -145,12 +143,12 @@ ani_object CreateSizeObject(ani_env* env, const NG::DrawingContext& context)
 {
     ani_status status;
     ani_class sizeClass;
-    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.SizeInternal", &sizeClass)) != ANI_OK) {
         HILOGE("FindClass Size failed, %{public}d", status);
         return nullptr;
     }
     ani_method sizeCtor;
-    if ((status = env->Class_FindMethod(sizeClass, "<ctor>", "DD:V", &sizeCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(sizeClass, "<ctor>", "dd:", &sizeCtor)) != ANI_OK) {
         HILOGE("Class_FindMethod sizeClass ctor failed, %{public}d", status);
         return nullptr;
     }
@@ -159,8 +157,8 @@ ani_object CreateSizeObject(ani_env* env, const NG::DrawingContext& context)
         return nullptr;
     }
     ani_object sizeObject;
-    ani_float width = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.height);
-    ani_float height = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.width);
+    ani_float width = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.width);
+    ani_float height = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.height);
     if ((status = env->Object_New(sizeClass, sizeCtor, &sizeObject, width, height)) != ANI_OK) {
         HILOGE("New Size object failed, %{public}d", status);
         return nullptr;
@@ -172,12 +170,12 @@ ani_object CreateSizeInPixelObject(ani_env* env, const NG::DrawingContext& conte
 {
     ani_status status;
     ani_class sizeInPixelClass;
-    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeInPixelClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.SizeInternal", &sizeInPixelClass)) != ANI_OK) {
         HILOGE("FindClass Size failed, %{public}d", status);
         return nullptr;
     }
     ani_method sizeInPixelCtor;
-    if ((status = env->Class_FindMethod(sizeInPixelClass, "<ctor>", "DD:V", &sizeInPixelCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(sizeInPixelClass, "<ctor>", "dd:", &sizeInPixelCtor)) != ANI_OK) {
         HILOGE("Class_FindMethod sizeInPixelClass ctor failed, %{public}d", status);
         return nullptr;
     }
@@ -199,12 +197,12 @@ ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
 
     // DrawContext object
     ani_class drawContextClass;
-    if ((status = env->FindClass("Larkui/Graphics/DrawContext;", &drawContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.DrawContext", &drawContextClass)) != ANI_OK) {
         HILOGE("FindClass DrawContext failed, %{public}d", status);
         return nullptr;
     }
     ani_method drawContextCtor;
-    if ((status = env->Class_FindMethod(drawContextClass, "<ctor>", ":V", &drawContextCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(drawContextClass, "<ctor>", ":", &drawContextCtor)) != ANI_OK) {
         HILOGE("Class_FindMethod drawContextClass ctor failed, %{public}d", status);
         return nullptr;
     }
@@ -294,80 +292,92 @@ void SetFrameNodeDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn
     modifier->getCommonAniModifier()->setFrameNodeDrawCallback(env, ptr, fnDrawCallbackFun);
 }
 
-std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawBehindFun(ani_vm* vm,
-    const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
+std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawBehindFun(
+    ani_vm* vm, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
 {
     return [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
-            CHECK_NULL_VOID(vm);
-            CHECK_NULL_VOID(callbackAni);
-            ani_env* env = nullptr;
-            auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
-            CHECK_NULL_VOID(env);
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(callbackAni);
+        ani_env* env = nullptr;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
 
-            auto drawingContext = CreateDrawingContext(env, context);
-            if (!drawingContext) {
-                return;
-            }
-            env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawBehind",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
-            std::vector<ani_ref> params = {};
-            ani_ref ret = nullptr;
-            callbackAni->Call(env, params.size(), params.data(), &ret);
-            if (attachCurrentThreadStatus == ANI_OK) {
-                vm->DetachCurrentThread();
-            }
-        };
+        auto drawingContext = CreateDrawingContext(env, context);
+        if (!drawingContext) {
+            return;
+        }
+        env->Object_CallMethodByName_Void(
+            reinterpret_cast<ani_fn_object>(object), "drawBehind", "C{arkui.Graphics.DrawContext}:", drawingContext);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
+    };
 }
 
-std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawContentFun(ani_vm* vm,
-    const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
+std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawContentFun(
+    ani_vm* vm, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
 {
     return [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
-            CHECK_NULL_VOID(vm);
-            CHECK_NULL_VOID(callbackAni);
-            ani_env* env = nullptr;
-            auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
-            CHECK_NULL_VOID(env);
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(callbackAni);
+        ani_env* env = nullptr;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
 
-            auto drawingContext = CreateDrawingContext(env, context);
-            if (!drawingContext) {
-                return;
-            }
-            env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawContent",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
-            std::vector<ani_ref> params = {};
-            ani_ref ret = nullptr;
-            callbackAni->Call(env, params.size(), params.data(), &ret);
-            if (attachCurrentThreadStatus == ANI_OK) {
-                vm->DetachCurrentThread();
-            }
-        };
+        auto drawingContext = CreateDrawingContext(env, context);
+        if (!drawingContext) {
+            return;
+        }
+        env->Object_CallMethodByName_Void(
+            reinterpret_cast<ani_fn_object>(object), "drawContent", "C{arkui.Graphics.DrawContext}:", drawingContext);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
+    };
 }
 
-std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawFrontFun(ani_vm* vm,
-    const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
+std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawFrontFun(
+    ani_vm* vm, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
 {
     return [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
-            CHECK_NULL_VOID(vm);
-            CHECK_NULL_VOID(callbackAni);
-            ani_env* env = nullptr;
-            auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
-            CHECK_NULL_VOID(env);
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(callbackAni);
+        ani_env* env = nullptr;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
 
-            auto drawingContext = CreateDrawingContext(env, context);
-            if (!drawingContext) {
-                return;
-            }
-            env->Object_CallMethodByName_Void(
-                reinterpret_cast<ani_fn_object>(object), "drawFront",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
-            std::vector<ani_ref> params = {};
-            ani_ref ret = nullptr;
-            callbackAni->Call(env, params.size(), params.data(), &ret);
-            if (attachCurrentThreadStatus == ANI_OK) {
-                vm->DetachCurrentThread();
-            }
-        };
+        auto drawingContext = CreateDrawingContext(env, context);
+        if (!drawingContext) {
+            return;
+        }
+        env->Object_CallMethodByName_Void(
+            reinterpret_cast<ani_fn_object>(object), "drawFront", "C{arkui.Graphics.DrawContext}:", drawingContext);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
+    };
+}
+
+std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawForeGroundFun(
+    ani_vm* vm, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
+{
+    return [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(callbackAni);
+        ani_env* env = nullptr;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
+
+        auto drawingContext = CreateDrawingContext(env, context);
+        if (!drawingContext) {
+            return;
+        }
+        env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawForeground",
+            "C{arkui.Graphics.DrawContext}:", drawingContext);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
+    };
 }
 
 void SetDrawModifier(
@@ -380,7 +390,7 @@ void SetDrawModifier(
     if (drawModifier == nullptr) {
         // fnObj should not be nullptr;
         HILOGE("DrawModifier is undefined.");
-        abort();
+        return;
     }
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
@@ -389,9 +399,11 @@ void SetDrawModifier(
     void* fnDrawBehindFun = nullptr;
     void* fnDrawContentFun = nullptr;
     void* fnDrawFrontFun = nullptr;
-    std::function<void(NG::DrawingContext& drawingContext)> drawBehindFun = nullptr;
-    std::function<void(NG::DrawingContext& drawingContext)> drawContentFun = nullptr;
-    std::function<void(NG::DrawingContext& drawingContext)> drawFrontFun = nullptr;
+    void* fnDrawForegroundFun = nullptr;
+    std::function<void(NG::DrawingContext & drawingContext)> drawBehindFun = nullptr;
+    std::function<void(NG::DrawingContext & drawingContext)> drawContentFun = nullptr;
+    std::function<void(NG::DrawingContext & drawingContext)> drawFrontFun = nullptr;
+    std::function<void(NG::DrawingContext & drawingContext)> drawForegroundFun = nullptr;
     if (flag & FLAG_DRAW_BEHIND) {
         auto fnDrawBehindAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
         drawBehindFun = ConvertFnObjDrawBehindFun(vm, fnDrawBehindAni, drawModifierRef);
@@ -404,6 +416,10 @@ void SetDrawModifier(
         auto fnDrawFrontAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
         drawFrontFun = ConvertFnObjDrawFrontFun(vm, fnDrawFrontAni, drawModifierRef);
     }
+    if (flag & FLAG_DRAW_FOREGROUND) {
+        auto fnDrawForegroundAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
+        drawForegroundFun = ConvertFnObjDrawForeGroundFun(vm, fnDrawForegroundAni, drawModifierRef);
+    }
     if (drawBehindFun != nullptr) {
         fnDrawBehindFun = &drawBehindFun;
     }
@@ -413,8 +429,11 @@ void SetDrawModifier(
     if (drawFrontFun != nullptr) {
         fnDrawFrontFun = &drawFrontFun;
     }
-    modifier->getArkUIAniDrawModifier()->setDrawModifier(ptr, flag,
-        fnDrawBehindFun, fnDrawContentFun, fnDrawFrontFun);
+    if (drawForegroundFun != nullptr) {
+        fnDrawForegroundFun = &drawForegroundFun;
+    }
+    modifier->getArkUIAniDrawModifier()->setDrawModifier(
+        ptr, flag, fnDrawBehindFun, fnDrawContentFun, fnDrawFrontFun, fnDrawForegroundFun);
 }
 
 void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
@@ -789,7 +808,7 @@ ani_string GetCustomProperty(
 void GetAlignmentEnum(ani_env* env, ani_object align, AniOverlayOptions& opt)
 {
     ani_enum enumType;
-    if (ANI_OK != env->FindEnum("Larkui/component/enums/Alignment;", &enumType)) {
+    if (ANI_OK != env->FindEnum("arkui.component.enums.Alignment", &enumType)) {
         return;
     }
 
@@ -831,13 +850,13 @@ void ParseOverlayOptions(ani_env* env, ani_object options, AniOverlayOptions& op
         ani_ref x;
         if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "x", &x)) {
             ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "unboxed", ":D", &param_value);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "toDouble", ":d", &param_value);
             opt.x = static_cast<float>(param_value);
         }
         ani_ref y;
         if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "y", &y)) {
             ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "unboxed", ":D", &param_value);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "toDouble", ":d", &param_value);
             opt.y = static_cast<float>(param_value);
         }
     }
@@ -906,6 +925,23 @@ ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instan
     }
     return modifier->getCommonAniModifier()->px2lpx(value, instanceId);
 }
+
+ani_string getWindowName(ani_env* env, ani_object obj, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    auto ret = modifier->getCommonAniModifier()->getWindowName(instanceId);
+    if (ret.has_value()) {
+        auto retValue = AniUtils::StdStringToANIString(env, ret.value());
+        if (retValue) {
+            return *retValue;
+        }
+    }
+    return nullptr;
+}
+
 void* TransferKeyEventPointer(ani_env* env, ani_object obj, ani_long pointer)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -1214,5 +1250,36 @@ void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, a
         return;
     }
     modifier->getCommonAniModifier()->applyParentThemeScopeId(env, self, parent);
+}
+
+void SetImageCacheCount(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_int value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setImageCacheCount(value, instanceId);
+}
+
+void SetImageRawDataCacheSize(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_int value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setImageRawDataCacheSize(value, instanceId);
+}
+
+ani_long ExtractorsToDrawContextPtr(ani_env* env, ani_object aniClass, ani_object ptr)
+{
+    return {};
+}
+ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_long ptr)
+{
+    auto contextPtr = reinterpret_cast<NG::DrawingContext *>(ptr);
+    CHECK_NULL_RETURN(contextPtr, {});
+    return CreateDrawingContext(env, *contextPtr);
 }
 } // namespace OHOS::Ace::Ani

@@ -47,9 +47,13 @@ using ReverseResultHandler = std::variant<
     std::function<void(const void *)>,
     std::function<void(Ark_Boolean)>,
     std::function<void(Ark_Number)>,
+    std::function<void(Ark_Float64)>,
+    std::function<void(Ark_DrawContext)>,
     std::function<void(Ark_Number, Ark_Number)>,
     std::function<void(Ark_Number, Ark_SliderChangeMode)>,
     std::function<void(Ark_Number, Callback_Number_Void)>,
+    std::function<void(Ark_DrawContext, Ark_CustomSpanDrawInfo)>,
+    std::function<void(Ark_CustomSpanMeasureInfo, Callback_CustomSpanMetrics_Void)>,
     std::monostate // Keep this last
 >;
 }

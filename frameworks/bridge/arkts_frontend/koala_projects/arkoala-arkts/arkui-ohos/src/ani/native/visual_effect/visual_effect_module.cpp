@@ -28,7 +28,6 @@ ani_long GetPropertyName(ani_env* env, ani_object obj, const char* name)
 
 ani_object CallFromPtrMethod(ani_env* env, const char* methodName, ani_long ptr)
 {
-    ani_status status;
     ani_static_method method;
     ani_class myClass;
     ani_ref resultRef;
@@ -73,5 +72,21 @@ ani_long ExtractorsToPathShapePtr(ani_env* env, ani_object aniClass, ani_object 
 ani_object ExtractorsFromPathShapePtr(ani_env* env, ani_object aniClass, ani_long ptr)
 {
     return CallFromPtrMethod(env, "PathFromPtr", ptr);
+}
+ani_long ExtractorsToICurvePtr(ani_env* env, ani_object aniClass, ani_object obj)
+{
+    return GetPropertyName(env, obj, "nativeContext");
+}
+ani_long ExtractorsToMatrix4TransitPtr(ani_env* env, ani_object aniClass, ani_object obj)
+{
+    return GetPropertyName(env, obj, "matrix4Object");
+}
+ani_long ExtractorsToUiEffectFilterPtr(ani_env* env, ani_object aniClass, ani_object obj)
+{
+    return GetPropertyName(env, obj, "filterNativeObj");
+}
+ani_long ExtractorsToUiEffectVisualEffectPtr(ani_env* env, ani_object aniClass, ani_object obj)
+{
+    return GetPropertyName(env, obj, "visualEffectNativeObj");
 }
 } // namespace OHOS::Ace::Ani

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkImageAnimatorPeer, ImageFrameInfo, ImageAnimatorAttribute } from "./component/imageAnimator"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -60,8 +61,9 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
     _onCancel_0_0value?: (() => void) | undefined
     _onFinish_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onFinish_0_0value?: (() => void) | undefined
-    applyModifierPatch(peer: ArkImageAnimatorPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkImageAnimatorPeer;
         if (this._images_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._images_0_flag) {

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+import { int32 } from "@koalaui/common"
 import { InteropNativeModule } from "@koalaui/interop";
-
 import { ArkBaseNode } from "./ArkBaseNode";
 import { CopyOptions, CustomBuilder, DecorationStyleInterface, EditMenuOptions, EllipsisMode, Font, FontSettingOptions, FontStyle, FontWeight, Length, LineBreakStrategy, MarqueeState, ResourceColor, SelectionMenuOptions, ShadowOptions, TextAlign, TextAttribute, TextCase, TextDataDetectorConfig, TextHeightAdaptivePolicy, TextMarqueeOptions, TextOverflowOptions, TextResponseType, TextSelectableMode, TextSpanType, WordBreak } from "../framework";
 import { ArkCommonMethodPeer } from "../framework";
@@ -77,32 +77,32 @@ export class ArkTextNode extends ArkBaseNode  implements TextAttribute  {
         this.markDirty();
         return this;
     }
-    fontSize(value: number | string | Resource | undefined): this {
-        const value_casted = value as (number | string | Resource | undefined)
+    fontSize(value: double | string | Resource | undefined): this {
+        const value_casted = value as (double | string | Resource | undefined)
         this.getPeer()?.setFontSizeAttribute(value_casted)
         this.markDirty();
         return this;
     }
-    minFontSize(value: number | string | Resource | undefined): this {
-        const value_casted = value as (number | string | Resource | undefined)
+    minFontSize(value: double | string | Resource | undefined): this {
+        const value_casted = value as (double | string | Resource | undefined)
         this.getPeer()?.setMinFontSizeAttribute(value_casted)
         this.markDirty();
         return this;
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
-        const value_casted = value as (number | string | Resource | undefined)
+    maxFontSize(value: double | string | Resource | undefined): this {
+        const value_casted = value as (double | string | Resource | undefined)
         this.getPeer()?.setMaxFontSizeAttribute(value_casted)
         this.markDirty();
         return this;
     }
-    minFontScale(value: number | Resource | undefined): this {
-        const value_casted = value as (number | Resource | undefined)
+    minFontScale(value: double | Resource | undefined): this {
+        const value_casted = value as (double | Resource | undefined)
         this.getPeer()?.setMinFontScaleAttribute(value_casted)
         this.markDirty();
         return this;
     }
-    maxFontScale(value: number | Resource | undefined): this {
-        const value_casted = value as (number | Resource | undefined)
+    maxFontScale(value: double | Resource | undefined): this {
+        const value_casted = value as (double | Resource | undefined)
         this.getPeer()?.setMaxFontScaleAttribute(value_casted)
         this.markDirty();
         return this;
@@ -113,11 +113,11 @@ export class ArkTextNode extends ArkBaseNode  implements TextAttribute  {
         this.markDirty();
         return this;
     }
-    fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this {
+    fontWeight(weight: int32 | FontWeight | string | undefined, options?: FontSettingOptions): this {
         const weight_type = runtimeType(weight)
         const options_type = runtimeType(options)
         if ((RuntimeType.NUMBER == weight_type) || (RuntimeType.NUMBER == weight_type) || (RuntimeType.STRING == weight_type) || (RuntimeType.UNDEFINED == weight_type)) {
-            const weight_casted = weight as (number | FontWeight | string | undefined)
+            const weight_casted = weight as (int32 | FontWeight | string | undefined)
             const options_casted = options as (FontSettingOptions | undefined)
             this.getPeer()?.setFontWeightAttribute(weight_casted, options_casted)
             this.markDirty();
@@ -137,9 +137,9 @@ export class ArkTextNode extends ArkBaseNode  implements TextAttribute  {
         this.markDirty();
         return this;
     }
-    lineHeight(value: number | string | Resource | undefined): this {
-        const value_casted = value as (TextAlign | undefined)
-        this.getPeer()?.setTextAlignAttribute(value_casted)
+    lineHeight(value: double | string | Resource | undefined): this {
+        const value_casted = value as (double | string | Resource | undefined)
+        this.getPeer()?.setLineHeightAttribute(value_casted)
         this.markDirty();
         return this;
     }
@@ -155,8 +155,8 @@ export class ArkTextNode extends ArkBaseNode  implements TextAttribute  {
         this.markDirty();
         return this;
     }
-    maxLines(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    maxLines(value: int32 | undefined): this {
+        const value_casted = value as (int32 | undefined)
         this.getPeer()?.setMaxLinesAttribute(value_casted)
         this.markDirty();
         return this;
@@ -167,8 +167,8 @@ export class ArkTextNode extends ArkBaseNode  implements TextAttribute  {
         this.markDirty();
         return this;
     }
-    letterSpacing(value: number | string | undefined): this {
-        const value_casted = value as (number | string | undefined)
+    letterSpacing(value: double | string | undefined): this {
+        const value_casted = value as (double | string | undefined)
         this.getPeer()?.setLetterSpacingAttribute(value_casted)
         this.markDirty();
         return this;
@@ -179,8 +179,8 @@ export class ArkTextNode extends ArkBaseNode  implements TextAttribute  {
         this.markDirty();
         return this;
     }
-    baselineOffset(value: number | string | undefined): this {
-        const value_casted = value as (number | string | undefined)
+    baselineOffset(value: double | string | undefined): this {
+        const value_casted = value as (double | string | undefined)
         this.getPeer()?.setBaselineOffsetAttribute(value_casted)
         this.markDirty();
         return this;
@@ -263,8 +263,8 @@ export class ArkTextNode extends ArkBaseNode  implements TextAttribute  {
         this.markDirty();
         return this;
     }
-    onTextSelectionChange(value: ((first: number, last: number) => void) | undefined): this {
-        const value_casted = value as (((first: number,last: number) => void) | undefined)
+    onTextSelectionChange(value: ((first: int32, last: int32) => void) | undefined): this {
+        const value_casted = value as (((first: int32,last: int32) => void) | undefined)
         this.getPeer()?.setOnTextSelectionChangeAttribute(value_casted)
         this.markDirty();
         return this;
@@ -317,9 +317,9 @@ export class ArkTextNode extends ArkBaseNode  implements TextAttribute  {
         this.markDirty();
         return this;
     }
-    selection(selectionStart: number | undefined, selectionEnd: number | undefined): this {
-        const selectionStart_casted = selectionStart as (number | undefined)
-        const selectionEnd_casted = selectionEnd as (number | undefined)
+    selection(selectionStart: int32 | undefined, selectionEnd: int32 | undefined): this {
+        const selectionStart_casted = selectionStart as (int32 | undefined)
+        const selectionEnd_casted = selectionEnd as (int32 | undefined)
         this.getPeer()?.setSelectionAttribute(selectionStart_casted, selectionEnd_casted)
         this.markDirty();
         return this;

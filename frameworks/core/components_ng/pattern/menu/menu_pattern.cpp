@@ -189,7 +189,7 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipelineContext);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     halfFoldHoverCallbackId_ = RegisterHalfFoldHover(targetNode);
     OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
@@ -262,7 +262,7 @@ void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
 
@@ -315,7 +315,7 @@ void MenuPattern::OnModifyDone()
         CHECK_NULL_VOID(node);
         auto scroll = AceType::DynamicCast<FrameNode>(node);
         CHECK_NULL_VOID(scroll);
-        auto hub = scroll->GetOrCreateEventHub<EventHub>();
+        auto hub = scroll->GetEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);

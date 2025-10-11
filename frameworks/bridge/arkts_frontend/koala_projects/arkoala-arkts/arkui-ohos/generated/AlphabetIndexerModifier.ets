@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkAlphabetIndexerPeer, OnAlphabetIndexerSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerPopupSelectCallback, AlphabetIndexerAttribute, IndexerAlign } from "./component/alphabetIndexer"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable, BlurStyle } from "./component/common"
@@ -89,8 +90,9 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
     _alignStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignStyle_0_0value?: IndexerAlign | undefined
     _alignStyle_0_1value?: Length | undefined
-    applyModifierPatch(peer: ArkAlphabetIndexerPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkAlphabetIndexerPeer;
         if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._color_0_flag) {
@@ -545,7 +547,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             switch (this._alignStyle_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignStyleAttribute((this._alignStyle_0_0value as IndexerAlign | undefined), (this._alignStyle_0_1value as Length | undefined));
+                    peer.setAlignStyleAttribute((this._alignStyle_0_0value as IndexerAlign | undefined), (this._alignStyle_0_1value as Length | undefined | undefined));
                     this._alignStyle_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

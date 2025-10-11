@@ -45,9 +45,6 @@ void SetNodeContainerOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(controller);
-    //auto convValue = Converter::OptConvert<type>(controller); // for enums
-    //NodeContainerModelNG::SetNodeContainerOptions(frameNode, convValue);
 }
 
 void AddNodeContainerRootNodeImpl(Ark_NativePointer self, Ark_NativePointer childNode)

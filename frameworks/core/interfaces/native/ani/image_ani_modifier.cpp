@@ -20,8 +20,11 @@
 #include "base/image/drawing_color_filter.h"
 #include "base/log/log.h"
 #include "core/components_ng/pattern/image/image_model_static.h"
+#include "core/drawable/drawable_descriptor.h"
 #include "core/interfaces/native/implementation/color_filter_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
+#include "core/interfaces/native/implementation/drawing_lattice_peer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -32,10 +35,10 @@ void SetPixelMap(ArkUINodeHandle node, void* pixelMap)
     ImageModelStatic::SetPixelMap(frameNode, pixelMapRef);
 }
 
-void SetDrawableDescriptor(ArkUINodeHandle node, void* drawableDescriptor, int type)
+void SetDrawableDescriptor(ArkUINodeHandle node, void* drawableDescriptor)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
-    ImageModelStatic::SetDrawableDescriptor(frameNode, drawableDescriptor, type);
+    ImageModelStatic::SetDrawableDescriptor(frameNode, static_cast<DrawableDescriptor*>(drawableDescriptor));
 }
 
 void SetResizableLattice(ArkUINodeHandle node, void* aniLattice)
@@ -87,6 +90,16 @@ ani_long GetColorFilter(ani_long colorFilterPeer)
     return pointer;
 }
 
+void* GetDrawingColorFilterPeer(void* colorFilterMapPtr)
+{
+    return reinterpret_cast<void*>(drawing_ColorFilterPeer::Create(colorFilterMapPtr));
+}
+
+void* GetDrawingLatticePeer(void* drawingLatticePeerPtr)
+{
+    return reinterpret_cast<void*>(drawing_LatticePeer::Create(drawingLatticePeerPtr));
+}
+
 const ArkUIAniImageModifier* GetImageAniModifier()
 {
     static const ArkUIAniImageModifier impl = {
@@ -97,6 +110,8 @@ const ArkUIAniImageModifier* GetImageAniModifier()
         .getPixelMapPeer = OHOS::Ace::NG::GetPixelMapPeer,
         .createColorFilterPeer = OHOS::Ace::NG::CreateColorFilterPeer,
         .getColorFilter = OHOS::Ace::NG::GetColorFilter,
+        .getDrawingColorFilterPeer = OHOS::Ace::NG::GetDrawingColorFilterPeer,
+        .getDrawingLatticePeer = OHOS::Ace::NG::GetDrawingLatticePeer,
     };
     return &impl;
 }

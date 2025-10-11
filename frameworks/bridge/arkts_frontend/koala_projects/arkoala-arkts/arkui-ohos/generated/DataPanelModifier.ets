@@ -17,8 +17,9 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier } from "#handwritten"
+import { AttributeModifier, ContentModifier, hookDataPanelContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkDataPanelPeer, LinearGradient, DataPanelShadowOptions, DataPanelConfiguration, DataPanelAttribute } from "./component/dataPanel"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -46,8 +47,11 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
     _strokeWidth_0_0value?: Length | undefined
     _trackShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _trackShadow_0_0value?: DataPanelShadowOptions | undefined
-    applyModifierPatch(peer: ArkDataPanelPeer): void {
-        super.applyModifierPatch(peer)
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<DataPanelConfiguration> | undefined
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkDataPanelPeer;
         if (this._closeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._closeEffect_0_flag) {
@@ -138,6 +142,24 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookDataPanelContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<DataPanelConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookDataPanelContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<DataPanelConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: DataPanelModifier): void {
         super.mergeModifier(modifier)
@@ -206,6 +228,19 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<DataPanelConfiguration> | undefined));
+                }
+            }
+        }
     }
     closeEffect(value: boolean | undefined): this {
         if (((this._closeEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._closeEffect_0_0value) !== (value)))
@@ -259,6 +294,17 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         } else
         {
             this._trackShadow_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<DataPanelConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

@@ -18,6 +18,7 @@
 
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkRootPeer, Root } from "./component/idlize"
 import { int32 } from "@koalaui/common"
 export class RootModifier implements Root,AttributeModifier<Root> {
@@ -31,7 +32,8 @@ export class RootModifier implements Root,AttributeModifier<Root> {
     applyFocusedAttribute(instance: Root): void { }
     applyDisabledAttribute(instance: Root): void { }
     applySelectedAttribute(instance: Root): void { }
-    applyModifierPatch(peer: ArkRootPeer): void {
+    applyModifierPatch(node: PeerNode): void {
+        const peer = node as ArkRootPeer;
     }
     mergeModifier(modifier: RootModifier): void {
     }

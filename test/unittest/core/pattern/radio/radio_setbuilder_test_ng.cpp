@@ -79,7 +79,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest001, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(CHECKED);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -121,7 +121,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest002, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(CHECKED);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(UNCHECKED);
@@ -163,7 +163,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest003, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(CHECKED);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(0);
@@ -205,7 +205,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest004, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(CHECKED);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(1);
@@ -247,7 +247,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest005, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(CHECKED);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(-1);
@@ -289,7 +289,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest006, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(1);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -331,7 +331,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest007, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(0);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -373,7 +373,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest008, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(-1);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -416,7 +416,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest009, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(CHECKED);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(BIG_INT);
@@ -459,7 +459,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest010, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(CHECKED);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
@@ -501,7 +501,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest011, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -543,7 +543,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest012, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -795,7 +795,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest019, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(CHECKED);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(EMPTY_VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -838,7 +838,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest020, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(NEGATIVE_NNORMAL_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -881,7 +881,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest021, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(CHECKED);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(NEGATIVE_NNORMAL_INT);
@@ -924,7 +924,7 @@ HWTEST_F(RadioSetBuilderTestNg, RadioSetBuilderTest022, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(NEGATIVE_NNORMAL_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(EMPTY_VALUE);
     eventHub->SetEnabled(NEGATIVE_NNORMAL_INT);

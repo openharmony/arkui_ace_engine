@@ -265,7 +265,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest003, TestSize.Level1)
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    RefPtr<MarqueeEventHub> eventHub = frameNode->GetOrCreateEventHub<NG::MarqueeEventHub>();
+    RefPtr<MarqueeEventHub> eventHub = frameNode->GetEventHub<NG::MarqueeEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**
@@ -1902,7 +1902,6 @@ HWTEST_F(MarqueeTestNg, OnFontScaleConfigurationUpdate_001, TestSize.Level1)
     marqueeModel.OnFontScaleConfigurationUpdate();
     EXPECT_FALSE(AnimationUtils::IsImplicitAnimationOpen());
 }
-
 
 /**
  * @tc.name: MarqueeMultiThreadTest01

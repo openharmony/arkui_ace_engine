@@ -239,7 +239,7 @@ struct InteropTypeConverter<KInt*> {
         ani_ref dataElem {};
         CHECK_ANI_FATAL(env->Array_Get(value, i, &dataElem));
         CHECK_ANI_FATAL(env->Object_CallMethodByName_Int(
-          static_cast<ani_object>(dataElem), "unboxed", ":i", (ani_int *)(&data[i])));
+          static_cast<ani_object>(dataElem), "toInt", ":i", (ani_int *)(&data[i])));
       }
       return data;
     }
@@ -275,7 +275,7 @@ struct InteropTypeConverter<KFloat*> {
         ani_ref dataElem {};
         CHECK_ANI_FATAL(env->Array_Get(value, i, &dataElem));
         CHECK_ANI_FATAL(env->Object_CallMethodByName_Float(
-          static_cast<ani_object>(dataElem), "unboxed", ":f", (ani_float*)(&data[i])));
+          static_cast<ani_object>(dataElem), "toFloat", ":f", (ani_float*)(&data[i])));
       }
       return data;
     }
@@ -312,7 +312,7 @@ struct InteropTypeConverter<KByte*> {
           ani_ref dataElem {};
           CHECK_ANI_FATAL(env->Array_Get(value, i, &dataElem));
           CHECK_ANI_FATAL(env->Object_CallMethodByName_Byte(
-              static_cast<ani_object>(dataElem), "unboxed", ":b", (ani_byte *)(&data[i])));
+              static_cast<ani_object>(dataElem), "toByte", ":b", (ani_byte *)(&data[i])));
         }
       }
       return data;
@@ -439,7 +439,7 @@ public:
     }
 #define KOALA_ANI_INTEROP_MODULE_CLASSPATH(module, classpath)                                 \
     static void __init_classpath_##module() {                                                 \
-        AniExports::getInstance()->setClasspath(KOALA_QUOTE(module), "L" classpath ";"); \
+        AniExports::getInstance()->setClasspath(KOALA_QUOTE(module), classpath);              \
     }                                                                                         \
     namespace {                                                                               \
       struct __Init_classpath_##module {                                                      \
@@ -455,7 +455,7 @@ public:
 #define KOALA_ANI_INTEROP_MODULE_CLASSPATH(module, classpath)                                 \
     __attribute__((constructor))                                                              \
     static void __init_ani_classpath_##module() {                                             \
-        AniExports::getInstance()->setClasspath(KOALA_QUOTE(module), "L" classpath ";"); \
+        AniExports::getInstance()->setClasspath(KOALA_QUOTE(module), classpath);              \
     }
 #endif
 

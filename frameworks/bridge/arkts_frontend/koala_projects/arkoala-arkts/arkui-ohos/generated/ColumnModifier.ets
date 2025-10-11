@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkColumnPeer, ColumnAttribute } from "./component/column"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -40,8 +41,9 @@ export class ColumnModifier extends CommonMethodModifier implements ColumnAttrib
     _justifyContent_0_0value?: FlexAlign | undefined
     _reverse_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _reverse_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkColumnPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkColumnPeer;
         if (this._alignItems_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._alignItems_0_flag) {

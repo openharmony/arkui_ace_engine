@@ -17,8 +17,9 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier } from "#handwritten"
+import { AttributeModifier, ContentModifier, hookGaugeContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkGaugePeer, GaugeShadowOptions, GaugeIndicatorOptions, GaugeConfiguration, GaugeAttribute } from "./component/gauge"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -56,8 +57,11 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
     _indicator_0_0value?: GaugeIndicatorOptions | undefined
     _privacySensitive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _privacySensitive_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkGaugePeer): void {
-        super.applyModifierPatch(peer)
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<GaugeConfiguration> | undefined
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkGaugePeer;
         if (this._value_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._value_0_flag) {
@@ -220,6 +224,24 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookGaugeContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<GaugeConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookGaugeContentModifier(peer, (undefined as ContentModifier<GaugeConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: GaugeModifier): void {
         super.mergeModifier(modifier)
@@ -340,6 +362,19 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<GaugeConfiguration> | undefined));
+                }
+            }
+        }
     }
     value(value: number | undefined): this {
         if (((this._value_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._value_0_0value) !== (value)))
@@ -437,6 +472,17 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         } else
         {
             this._privacySensitive_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<GaugeConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

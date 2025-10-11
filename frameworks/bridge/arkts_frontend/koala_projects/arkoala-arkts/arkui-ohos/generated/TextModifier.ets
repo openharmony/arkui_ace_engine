@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTextPeer, TextOverflowOptions, TextMarqueeOptions, MarqueeState, TextAttribute, TextSpanType, TextResponseType } from "./component/text"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { CommonMethod, ShadowOptions } from "./component/common"
@@ -48,15 +49,15 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontColor_0_0value?: ResourceColor | undefined
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontSize_0_0value?: number | string | Resource | undefined
+    _fontSize_0_0value?: double | string | Resource | undefined
     _minFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minFontSize_0_0value?: number | string | Resource | undefined
+    _minFontSize_0_0value?: double | string | Resource | undefined
     _maxFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxFontSize_0_0value?: number | string | Resource | undefined
+    _maxFontSize_0_0value?: double | string | Resource | undefined
     _minFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minFontScale_0_0value?: number | Resource | undefined
+    _minFontScale_0_0value?: double | Resource | undefined
     _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxFontScale_0_0value?: number | Resource | undefined
+    _maxFontScale_0_0value?: double | Resource | undefined
     _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontStyle_0_0value?: FontStyle | undefined
     _lineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -64,21 +65,21 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _textAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textAlign_0_0value?: TextAlign | undefined
     _lineHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _lineHeight_0_0value?: number | string | Resource | undefined
+    _lineHeight_0_0value?: double | string | Resource | undefined
     _textOverflow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textOverflow_0_0value?: TextOverflowOptions | undefined
     _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontFamily_0_0value?: string | Resource | undefined
     _maxLines_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxLines_0_0value?: number | undefined
+    _maxLines_0_0value?: int32 | undefined
     _decoration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _decoration_0_0value?: DecorationStyleInterface | undefined
     _letterSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _letterSpacing_0_0value?: number | string | undefined
+    _letterSpacing_0_0value?: double | string | undefined
     _textCase_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textCase_0_0value?: TextCase | undefined
     _baselineOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _baselineOffset_0_0value?: number | string | undefined
+    _baselineOffset_0_0value?: double | string | undefined
     _copyOption_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _copyOption_0_0value?: CopyOptions | undefined
     _draggable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -106,7 +107,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _dataDetectorConfig_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _dataDetectorConfig_0_0value?: TextDataDetectorConfig | undefined
     _onTextSelectionChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onTextSelectionChange_0_0value?: ((selectionStart: number,selectionEnd: number) => void) | undefined
+    _onTextSelectionChange_0_0value?: ((selectionStart: int32,selectionEnd: int32) => void) | undefined
     _fontFeature_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontFeature_0_0value?: string | undefined
     _marqueeOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -127,18 +128,19 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _font_0_0value?: Font | undefined
     _font_0_1value?: FontSettingOptions | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: number | FontWeight | string | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
     _fontWeight_0_1value?: FontSettingOptions | undefined
     _selection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selection_0_0value?: number | undefined
-    _selection_0_1value?: number | undefined
+    _selection_0_0value?: int32 | undefined
+    _selection_0_1value?: int32 | undefined
     _bindSelectionMenu_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _bindSelectionMenu_0_0value?: TextSpanType | undefined
     _bindSelectionMenu_0_1value?: CustomBuilder | undefined
     _bindSelectionMenu_0_2value?: TextResponseType | undefined
     _bindSelectionMenu_0_3value?: SelectionMenuOptions | undefined
-    applyModifierPatch(peer: ArkTextPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTextPeer;
         if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._fontColor_0_flag) {
@@ -161,7 +163,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._fontSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontSizeAttribute((this._fontSize_0_0value as number | string | Resource | undefined));
+                    peer.setFontSizeAttribute((this._fontSize_0_0value as double | string | Resource | undefined));
                     this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -171,7 +173,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._fontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontSizeAttribute((undefined as number | string | Resource | undefined));
+                    peer.setFontSizeAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -179,7 +181,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._minFontSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinFontSizeAttribute((this._minFontSize_0_0value as number | string | Resource | undefined));
+                    peer.setMinFontSizeAttribute((this._minFontSize_0_0value as double | string | Resource | undefined));
                     this._minFontSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -189,7 +191,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._minFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinFontSizeAttribute((undefined as number | string | Resource | undefined));
+                    peer.setMinFontSizeAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -197,7 +199,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._maxFontSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxFontSizeAttribute((this._maxFontSize_0_0value as number | string | Resource | undefined));
+                    peer.setMaxFontSizeAttribute((this._maxFontSize_0_0value as double | string | Resource | undefined));
                     this._maxFontSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -207,7 +209,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._maxFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxFontSizeAttribute((undefined as number | string | Resource | undefined));
+                    peer.setMaxFontSizeAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -215,7 +217,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._minFontScale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as number | Resource | undefined));
+                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as double | Resource | undefined));
                     this._minFontScale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -225,7 +227,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._minFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinFontScaleAttribute((undefined as number | Resource | undefined));
+                    peer.setMinFontScaleAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -233,7 +235,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._maxFontScale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as number | Resource | undefined));
+                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as double | Resource | undefined));
                     this._maxFontScale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -243,7 +245,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._maxFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxFontScaleAttribute((undefined as number | Resource | undefined));
+                    peer.setMaxFontScaleAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -305,7 +307,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._lineHeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLineHeightAttribute((this._lineHeight_0_0value as number | string | Resource | undefined));
+                    peer.setLineHeightAttribute((this._lineHeight_0_0value as double | string | Resource | undefined));
                     this._lineHeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -315,7 +317,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._lineHeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLineHeightAttribute((undefined as number | string | Resource | undefined));
+                    peer.setLineHeightAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -359,7 +361,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._maxLines_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxLinesAttribute((this._maxLines_0_0value as number | undefined));
+                    peer.setMaxLinesAttribute((this._maxLines_0_0value as int32 | undefined));
                     this._maxLines_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -369,7 +371,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._maxLines_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxLinesAttribute((undefined as number | undefined));
+                    peer.setMaxLinesAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -395,7 +397,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._letterSpacing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as number | string | undefined));
+                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as double | string | undefined));
                     this._letterSpacing_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -405,7 +407,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._letterSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLetterSpacingAttribute((undefined as number | string | undefined));
+                    peer.setLetterSpacingAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -431,7 +433,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._baselineOffset_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBaselineOffsetAttribute((this._baselineOffset_0_0value as number | string | undefined));
+                    peer.setBaselineOffsetAttribute((this._baselineOffset_0_0value as double | string | undefined));
                     this._baselineOffset_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -441,7 +443,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._baselineOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBaselineOffsetAttribute((undefined as number | string | undefined));
+                    peer.setBaselineOffsetAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -683,7 +685,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._onTextSelectionChange_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnTextSelectionChangeAttribute((this._onTextSelectionChange_0_0value as ((selectionStart: number,selectionEnd: number) => void) | undefined));
+                    peer.setOnTextSelectionChangeAttribute((this._onTextSelectionChange_0_0value as ((selectionStart: int32,selectionEnd: int32) => void) | undefined));
                     this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -693,7 +695,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnTextSelectionChangeAttribute((undefined as ((selectionStart: number,selectionEnd: number) => void) | undefined));
+                    peer.setOnTextSelectionChangeAttribute((undefined as ((selectionStart: int32,selectionEnd: int32) => void) | undefined));
                 }
             }
         }
@@ -845,7 +847,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._font_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontAttribute((this._font_0_0value as Font | undefined), (this._font_0_1value as FontSettingOptions | undefined));
+                    peer.setFontAttribute((this._font_0_0value as Font | undefined), (this._font_0_1value as FontSettingOptions | undefined | undefined));
                     this._font_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -863,7 +865,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined), (this._fontWeight_0_1value as FontSettingOptions | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined), (this._fontWeight_0_1value as FontSettingOptions | undefined | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -873,7 +875,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined), (undefined as FontSettingOptions | undefined | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined), (undefined as FontSettingOptions | undefined | undefined));
                 }
             }
         }
@@ -881,7 +883,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._selection_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSelectionAttribute((this._selection_0_0value as number | undefined), (this._selection_0_1value as number | undefined));
+                    peer.setSelectionAttribute((this._selection_0_0value as int32 | undefined), (this._selection_0_1value as int32 | undefined));
                     this._selection_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -891,7 +893,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._selection_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSelectionAttribute((undefined as number | undefined), (undefined as number | undefined));
+                    peer.setSelectionAttribute((undefined as int32 | undefined), (undefined as int32 | undefined));
                 }
             }
         }
@@ -899,7 +901,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._bindSelectionMenu_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as TextSpanType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as TextResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptions | undefined));
+                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as TextSpanType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as TextResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptions | undefined | undefined));
                     this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -938,7 +940,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                     break;
                 }
                 default: {
-                    this.fontSize((undefined as number | string | Resource | undefined));
+                    this.fontSize((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -951,7 +953,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                     break;
                 }
                 default: {
-                    this.minFontSize((undefined as number | string | Resource | undefined));
+                    this.minFontSize((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -964,7 +966,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                     break;
                 }
                 default: {
-                    this.maxFontSize((undefined as number | string | Resource | undefined));
+                    this.maxFontSize((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -977,7 +979,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                     break;
                 }
                 default: {
-                    this.minFontScale((undefined as number | Resource | undefined));
+                    this.minFontScale((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -990,7 +992,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                     break;
                 }
                 default: {
-                    this.maxFontScale((undefined as number | Resource | undefined));
+                    this.maxFontScale((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -1042,7 +1044,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                     break;
                 }
                 default: {
-                    this.lineHeight((undefined as number | string | Resource | undefined));
+                    this.lineHeight((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -1081,7 +1083,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                     break;
                 }
                 default: {
-                    this.maxLines((undefined as number | undefined));
+                    this.maxLines((undefined as int32 | undefined));
                 }
             }
         }
@@ -1107,7 +1109,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                     break;
                 }
                 default: {
-                    this.letterSpacing((undefined as number | string | undefined));
+                    this.letterSpacing((undefined as double | string | undefined));
                 }
             }
         }
@@ -1133,7 +1135,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                     break;
                 }
                 default: {
-                    this.baselineOffset((undefined as number | string | undefined));
+                    this.baselineOffset((undefined as double | string | undefined));
                 }
             }
         }
@@ -1315,7 +1317,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                     break;
                 }
                 default: {
-                    this.onTextSelectionChange((undefined as ((selectionStart: number,selectionEnd: number) => void) | undefined));
+                    this.onTextSelectionChange((undefined as ((selectionStart: int32,selectionEnd: int32) => void) | undefined));
                 }
             }
         }
@@ -1445,7 +1447,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as number | FontWeight | string | undefined), (undefined as FontSettingOptions | undefined | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | string | undefined), (undefined as FontSettingOptions | undefined | undefined));
                 }
             }
         }
@@ -1458,7 +1460,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                     break;
                 }
                 default: {
-                    this.selection((undefined as number | undefined), (undefined as number | undefined));
+                    this.selection((undefined as int32 | undefined), (undefined as int32 | undefined));
                 }
             }
         }
@@ -1487,7 +1489,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         if (((this._fontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1498,7 +1500,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         if (((this._minFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1509,7 +1511,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         if (((this._maxFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1520,7 +1522,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         if (((this._minFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1531,7 +1533,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         if (((this._maxFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1575,7 +1577,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         if (((this._lineHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1608,7 +1610,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    maxLines(value: number | undefined): this {
+    maxLines(value: int32 | undefined): this {
         if (((this._maxLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLines_0_0value) !== (value)))
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1630,7 +1632,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    letterSpacing(value: number | string | undefined): this {
+    letterSpacing(value: double | string | undefined): this {
         if (((this._letterSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._letterSpacing_0_0value) !== (value)))
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1652,7 +1654,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    baselineOffset(value: number | string | undefined): this {
+    baselineOffset(value: double | string | undefined): this {
         if (((this._baselineOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._baselineOffset_0_0value) !== (value)))
         {
             this._baselineOffset_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1806,7 +1808,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+    onTextSelectionChange(value: ((selectionStart: int32,selectionEnd: int32) => void) | undefined): this {
         if (((this._onTextSelectionChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1917,7 +1919,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this {
+    fontWeight(weight: int32 | FontWeight | string | undefined, options?: FontSettingOptions): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1929,7 +1931,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    selection(selectionStart: number | undefined, selectionEnd: number | undefined): this {
+    selection(selectionStart: int32 | undefined, selectionEnd: int32 | undefined): this {
         if (((this._selection_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._selection_0_0value) !== (selectionStart)) || ((this._selection_0_1value) !== (selectionEnd)))
         {
             this._selection_0_flag = AttributeUpdaterFlag.UPDATE

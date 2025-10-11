@@ -313,7 +313,7 @@ class ObservableArray<T> extends Array<T> {
         super.length = length
     }
 
-    override at(index: int): T | undefined {
+    override at(index: int): T {
         this.handler?.onAccess()
         return super.at(index)
     }
@@ -333,13 +333,13 @@ class ObservableArray<T> extends Array<T> {
         super.$_set(index, value)
     }
 
-    override copyWithin(target: int, start: int, end: int): this {
+    override copyWithin(target: int, start: int, end?: int): this {
         this.handler?.onModify()
         super.copyWithin(target, start, end)
         return this
     }
 
-    override fill(value: T, start: int, end: int): this {
+    override fill(value: T, start?: int, end?: int): this {
         const handler = this.handler
         if (handler) {
             handler.onModify()
@@ -357,22 +357,13 @@ class ObservableArray<T> extends Array<T> {
         return result
     }
 
-    override pushArray(...items: T[]): number {
+    override pushArray(...items: T[]): int {
         const handler = this.handler
         if (handler) {
             handler.onModify()
             proxyChildrenOnly(items, handler)
         }
         return super.pushArray(...items)
-    }
-
-    override pushECMA(...items: T[]): number {
-        const handler = this.handler
-        if (handler) {
-            handler.onModify()
-            proxyChildrenOnly(items, handler)
-        }
-        return super.pushECMA(...items)
     }
 
     override reverse(): this {
@@ -395,7 +386,7 @@ class ObservableArray<T> extends Array<T> {
         return this
     }
 
-    override splice(index: int, count: int, ...items: T[]): Array<T> {
+    override splice(index: int, count: int | undefined, ...items: T[]): Array<T> {
         const handler = this.handler
         if (handler) {
             handler.onModify()
@@ -409,7 +400,7 @@ class ObservableArray<T> extends Array<T> {
         return super.splice(index, count, ...items)
     }
 
-    override unshift(...items: T[]): number {
+    override unshift(...items: T[]): int {
         const handler = this.handler
         if (handler) {
             handler.onModify()
@@ -452,7 +443,7 @@ class ObservableArray<T> extends Array<T> {
         return super.find(predicate)
     }
 
-    override findIndex(predicate: (value: T, index: int, array: Array<T>) => boolean): number {
+    override findIndex(predicate: (value: T, index: int, array: Array<T>) => boolean): int {
         this.handler?.onAccess()
         return super.findIndex(predicate)
     }
@@ -472,7 +463,7 @@ class ObservableArray<T> extends Array<T> {
         return super.some(predicate)
     }
 
-    override findLastIndex(predicate: (element: T, index: int, array: Array<T>) => boolean): number {
+    override findLastIndex(predicate: (element: T, index: int, array: Array<T>) => boolean): int {
         this.handler?.onAccess()
         return super.findLastIndex(predicate)
     }
@@ -502,7 +493,7 @@ class ObservableArray<T> extends Array<T> {
         super.forEach(callbackfn)
     }
 
-    override slice(start: int, end: int): Array<T> {
+    override slice(start?: int, end?: int): Array<T> {
         this.handler?.onAccess()
         return super.slice(start, end)
     }
@@ -527,7 +518,7 @@ class ObservableArray<T> extends Array<T> {
         return super.toSpliced(start, delete, ...items)
     }
 
-    override includes(val: T, fromIndex?: Number): boolean {
+    override includes(val: T, fromIndex?: int): boolean {
         this.handler?.onAccess()
         return super.includes(val, fromIndex)
     }

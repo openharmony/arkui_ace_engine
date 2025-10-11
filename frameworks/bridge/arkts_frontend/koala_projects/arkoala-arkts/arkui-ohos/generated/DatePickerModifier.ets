@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkDatePickerPeer, DatePickerAttribute } from "./component/datePicker"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, PickerTextStyle } from "./component/common"
@@ -48,8 +49,9 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
     _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
     _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableHapticFeedback_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkDatePickerPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkDatePickerPeer;
         if (this._lunar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._lunar_0_flag) {

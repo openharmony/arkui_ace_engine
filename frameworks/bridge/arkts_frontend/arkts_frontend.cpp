@@ -55,8 +55,8 @@ struct AppInfo {
 const AppInfo KOALA_APP_INFO = {
     "arkui.ArkUIEntry.Application",
     "createApplication",
-    "C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}C{arkui.UserView.EntryPoint}"
-    ":C{arkui.ArkUIEntry.Application}",
+    "C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}"
+    "C{arkui.component.customComponent.EntryPoint}:C{arkui.ArkUIEntry.Application}",
     "start",
     ":l",
     "enter",
@@ -263,8 +263,8 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     ani_ref appLocal;
     ani_ref optionalEntry;
     env->GetUndefined(&optionalEntry);
-    auto entryPointObj = entryLoader.GetPageEntryObj();
-    auto legacyEntryPointObj = LegacyLoadPage(env);
+    auto entryPointObj = url == "__INTEROP__" ? nullptr : entryLoader.GetPageEntryObj();
+    auto legacyEntryPointObj = url == "__INTEROP__" ? nullptr : LegacyLoadPage(env);
     std::string moduleName = Container::Current()->GetModuleName();
     ani_string module;
     env->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module);
@@ -567,6 +567,27 @@ void ArktsFrontend::NotifyArkoalaConfigurationChange()
     if ((status = env->Object_CallMethodByName_Void((ani_object)app_, "notifyConfigurationChange", ":")) != ANI_OK) {
         LOGE("Call notifyConfigurationChange error");
         return;
+    }
+}
+
+void ArktsFrontend::InitXBarProxy()
+{
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
+    CHECK_NULL_VOID(env);
+    ani_class appClass;
+    if (env->FindClass("C{arkui.XBarProxy.XBarProxy}", &appClass) != ANI_OK) {
+        LOGE("Cannot load main class arkui.XBarProxy.XBarProxy");
+        return;
+    }
+    ani_static_method create;
+    if (env->Class_FindStaticMethod(appClass, "initializeXBarProxy", ":", &create) != ANI_OK) {
+        LOGE("Cannot find create methodinitializeXBarProxy");
+        return;
+    }
+
+    ani_ref result;
+    if (env->Class_CallStaticMethod_Void(appClass, create, &result) != ANI_OK) {
+        LOGE("initializeXBarProxy returned null");
     }
 }
 

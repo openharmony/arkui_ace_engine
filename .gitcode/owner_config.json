@@ -179,6 +179,12 @@
             "https://gitee.com/forantar",
             "https://gitee.com/huaweimaxuchu",
             "https://gitee.com/fironov-igor"
+        ],
+        "https://gitee.com/arkui_component3d": [
+            "https://gitee.com/zzhao0",
+            "https://gitee.com/hu-xiaoming",
+            "https://gitee.com/doggy-Zhang",
+            "https://gitee.com/zhaoduo-ustc"
         ]
     },
     "userInfos": {
@@ -626,6 +632,22 @@
         "https://gitee.com/maoruihao": {
             "info": "[逻辑组件 maoruihao]",
             "group": "https://gitee.com/arkuieco3"
+        },
+        "https://gitee.com/zzhao0": {
+            "info": "[Component3D zhangzhenhao]",
+            "group": "https://gitee.com/arkui_component3d"
+        },
+        "https://gitee.com/hu-xiaoming": {
+            "info": "[Component3D huxiaoming]",
+            "group": "https://gitee.com/arkui_component3d"
+        },
+        "https://gitee.com/doggy-Zhang": {
+            "info": "[Component3D zhangwenqi]",
+            "group": "https://gitee.com/arkui_component3d"
+        },
+        "https://gitee.com/zhaoduo-ustc": {
+            "info": "[Component3D zhaoduo]",
+            "group": "https://gitee.com/arkui_component3d"
         }
     }
 }

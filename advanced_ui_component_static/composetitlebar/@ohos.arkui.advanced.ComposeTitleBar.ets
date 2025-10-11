@@ -32,14 +32,14 @@ import common from '@ohos.app.ability.common';
 import hilog from '@ohos.hilog';
 
 export class ComposeTitleBarMenuItem {
-  value: ResourceStr = '';
-  symbolStyle?: SymbolGlyphModifier;
-  isEnabled?: boolean;
-  action?: () => void;
-  label?: ResourceStr;
-  accessibilityText?: ResourceStr;
-  accessibilityLevel?: string;
-  accessibilityDescription?: ResourceStr;
+  public value: ResourceStr = '';
+  public symbolStyle?: SymbolGlyphModifier;
+  public isEnabled?: boolean;
+  public action?: () => void;
+  public label?: ResourceStr;
+  public accessibilityText?: ResourceStr;
+  public accessibilityLevel?: string;
+  public accessibilityDescription?: ResourceStr;
 }
 
 const TEXT_EDITABLE_DIALOG = '18.3fp';
@@ -114,7 +114,7 @@ export struct ComposeTitleBar {
   menuItems?: Array<ComposeTitleBarMenuItem> = [] as Array<ComposeTitleBarMenuItem>;
   @State titleMaxWidth: number = 0;
   @State fontSize: number = 1;
-  @Provide uniqueId?: number = -1;
+  @Provide uniqueId?: long = -1;
 
   build() {
     Flex({
@@ -189,7 +189,7 @@ export struct ComposeTitleBar {
       try {
         this.uniqueId = this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
       } catch (exception) {
-        let code: undefined| number = (exception as ClassCastError)?.code;
+        let code: undefined| int = (exception as ClassCastError)?.code;
         let message: undefined | string = (exception as ClassCastError)?.message;
         hilog.error(ERROR_CODE, 'ComposeTitleBar',
           `Faild to getFrameNodeByUniqueId,cause, code: ${code}, message: ${message}`);
@@ -283,7 +283,7 @@ struct CollapsibleMenuSection {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (err) {
-      let code: undefined | number = (err as ClassCastError)?.code;
+      let code: undefined | int = (err as ClassCastError)?.code;
       let message: undefined | string = (err as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar',
         `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
@@ -308,7 +308,7 @@ struct CollapsibleMenuSection {
       }
       return Math.min(this.systemFontScale as number, this.maxFontScale as number);
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
@@ -324,12 +324,12 @@ struct CollapsibleMenuSection {
       Row() {
         if (this.menuItems) {
           if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-            ForEach(this.menuItems, (item: ComposeTitleBarMenuItem, index: number) => {
+            ForEach(this.menuItems, (item: ComposeTitleBarMenuItem, index: int) => {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1, itemIndex: index })
             })
           } else {
-            ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
-              (item: ComposeTitleBarMenuItem, index: number) => {
+            ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems.toInt() - 1),
+              (item: ComposeTitleBarMenuItem, index: int) => {
                 ImageMenuItem({ item: item, index: this.index * 1000 + index + 1, itemIndex: index })
               })
 
@@ -374,7 +374,7 @@ struct CollapsibleMenuSection {
             .onKeyEvent((event: KeyEvent) => {
               if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
                 event.keyCode !== KeyCode.KEYCODE_SPACE) {
-                return;
+                return false;
               }
               if (event.type === KeyType.Down) {
                 this.isMoreIconOnClick = true;
@@ -430,9 +430,9 @@ struct CollapsibleMenuSection {
   popupBuilder() {
     Column() {
       if (this.menuItems) {
-        ForEach(this.menuItems!.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
+        ForEach(this.menuItems!.slice(CollapsibleMenuSection.maxCountOfVisibleItems.toInt() - 1,
           this.menuItems!.length),
-          (item: ComposeTitleBarMenuItem, index: number) => {
+          (item: ComposeTitleBarMenuItem, index: int) => {
             ImageMenuItem({
               item: item, index: this.index * 1000 +
               CollapsibleMenuSection.maxCountOfVisibleItems + index, isPopup: false
@@ -510,7 +510,7 @@ struct ImageMenuItem {
         resourceString = (this.getUIContext()
           .getHostContext() as common.UIAbilityContext)?.resourceManager?.getStringSync((resource as Resource).id);
       } catch (err) {
-        let code: number = (err as ClassCastError)?.code ?? 0;
+        let code: int = (err as ClassCastError)?.code ?? 0;
         let message: string = (err as ClassCastError)?.message ?? '';
         hilog.error(ERROR_CODE, 'Ace', `Faild to ComposeTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -524,7 +524,7 @@ struct ImageMenuItem {
         return (this.getUIContext()
           .getHostContext() as common.UIAbilityContext)?.resourceManager!.getStringByNameSync('icon_back');
       } catch (err) {
-        let code: undefined | number = (err as ClassCastError)?.code;
+        let code: undefined | int = (err as ClassCastError)?.code;
         let message: undefined | string = (err as ClassCastError)?.message;
         hilog.error(ERROR_CODE, 'Ace',
           `Faild to ComposeTitleBar getStringByNameSync icon_back,code: ${code},message:${message}`);
@@ -534,7 +534,7 @@ struct ImageMenuItem {
         return (this.getUIContext()
           .getHostContext() as common.UIAbilityContext)?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
       } catch(err) {
-        let code: undefined | number = (err as ClassCastError)?.code;
+        let code: undefined | int = (err as ClassCastError)?.code;
         let message: undefined | string = (err as ClassCastError)?.message;
         hilog.error(ERROR_CODE, 'Ace',
           `Faild to ComposeTitleBar getStringByNameSync ohos_toolbar_more,code: ${code},message:${message}`);
@@ -576,7 +576,7 @@ struct ImageMenuItem {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (err) {
-      let code: undefined | number = (err as ClassCastError)?.code;
+      let code: undefined | int = (err as ClassCastError)?.code;
       let message: undefined | string = (err as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar',
         `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
@@ -599,7 +599,7 @@ struct ImageMenuItem {
       }
       return Math.min(this.systemFontScale as number, this.maxFontScale as number);
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
@@ -681,10 +681,10 @@ struct ImageMenuItem {
       })
       .onKeyEvent((event: KeyEvent) => {
         if (!this.item.isEnabled) {
-          return;
+          return false;
         }
         if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-          return;
+          return false;
         }
         if (event.type === KeyType.Down) {
           this.isOnClick = true;
@@ -785,10 +785,10 @@ struct ImageMenuItem {
       })
       .onKeyEvent((event: KeyEvent) => {
         if (!this.item.isEnabled) {
-          return;
+          return false;
         }
         if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-          return;
+          return false;
         }
         if (event.type === KeyType.Down) {
           this.isOnClick = true;
@@ -831,11 +831,11 @@ struct ComposeTitleBarDialog {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
   screenWidth: number = 640;
-  verticalScreenLines: number = 6;
-  horizontalsScreenLines: number = 1;
+  verticalScreenLines: int = 6;
+  horizontalsScreenLines: int = 1;
   @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
   @State fontSize: number = 1;
-  @State maxLines: number = 1;
+  @State maxLines: int = 1;
   @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
   cancel: () => void = () => {
   }
@@ -940,7 +940,7 @@ struct ComposeTitleBarDialog {
         this.maxLines = this.horizontalsScreenLines;
       }
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar', `Faild to getMainWindowSync,cause, code: ${code}, message: ${message}`);
     }

@@ -250,25 +250,6 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
         super.applyAttributesFinish()
     }
 }
-
-@memo
-export function ListItemImpl(
-    @memo
-    style: ((attributes: ListItemAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
-): void {
-    const receiver = remember<ArkListItemComponent>((): ArkListItemComponent => {
-        return new ArkListItemComponent()
-    })
-    NodeAttach<ArkListItemPeer>((): ArkListItemPeer => ArkListItemPeer.create(receiver), (peer: ArkListItemPeer): void => {
-        receiver.setPeer(peer)
-        style?.(receiver)
-        receiver.setPeer(undefined)
-        content_?.()
-    })
-}
-
 export class ListItemOptions_serializer {
     public static write(buffer: SerializerBase, value: ListItemOptions): void {
         let valueSerializer : SerializerBase = buffer

@@ -471,5 +471,32 @@ HWTEST_F(ModelTestNg, ModelViewNgTest006, TestSize.Level1)
     EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 1, 0), true);
     EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 0, 0), true);
 }
+
+/**
+ * @tc.name: ModelViewNgTest007
+ * @tc.desc: static path, test ModelPattern::SetModelViewContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(ModelTestNg, ModelViewNgTest007, TestSize.Level1)
+{
+    // Create FrameNode in static way
+    auto frameNode = ModelViewNG::CreateFrameNode(testKey++);
+    ASSERT_NE(frameNode, nullptr);
+
+    // Get ModelPattern
+    auto modelPattern = frameNode->GetPattern<ModelPattern>();
+    ASSERT_NE(modelPattern, nullptr);
+    // modelAdapter_ should be null after static create
+    ASSERT_EQ(modelPattern->modelAdapter_, nullptr);
+
+    Render3D::SurfaceType surfaceType = OHOS::Render3D::SurfaceType::SURFACE_TEXTURE;
+    ModelViewNG::SetModelViewContext(frameNode.GetRawPtr(), { "bundleName", "moduleName", surfaceType, nullptr });
+    ASSERT_NE(modelPattern->modelAdapter_, nullptr);
+
+    // call several times SetModelViewContext, modelAdapter_ should create once
+    auto oldAdapter = modelPattern->modelAdapter_;
+    ModelViewNG::SetModelViewContext(frameNode.GetRawPtr(), { "bundleName", "moduleName", surfaceType, nullptr });
+    ASSERT_EQ(modelPattern->modelAdapter_, oldAdapter);
+}
 } // namespace OHOS::Ace::NG
 

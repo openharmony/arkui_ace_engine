@@ -91,9 +91,12 @@ public:
     template <typename... Params>
     void InvokeSync(Params&&... args) const
     {
-        APP_LOGE("InvokeSync %{public}p", callback_.callSync);
         if (callback_.callSync) {
-            (*callback_.callSync)(GetVMContext(), callback_.resource.resourceId, std::forward<Params>(args)...);
+            Ark_VMContext vmContext = GetVMContext();
+            if (vmContext == nullptr) {
+                LOGF_ABORT("InvokeSync %{public}p. VMContext is null.", callback_.callSync);
+            }
+            (*callback_.callSync)(vmContext, callback_.resource.resourceId, std::forward<Params>(args)...);
         }
     }
 
@@ -188,6 +191,9 @@ public:
         CHECK_NULL_RETURN(container, nullptr);
         auto frontEnd = container->GetFrontend();
         CHECK_NULL_RETURN(frontEnd, nullptr);
+        if (!frontEnd->GetEnv() && container->GetSubFrontend()) {
+            frontEnd = container->GetSubFrontend(); // return ArktsFrontend when 1.1 hybrid 1.2
+        }
         return Ark_VMContext(frontEnd->GetEnv());
     }
 

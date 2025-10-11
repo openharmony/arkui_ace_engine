@@ -31,6 +31,11 @@ import hilog from '@ohos.hilog'
         off(type: string, callback?: object) : void;
         on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
+
+        onScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        offScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        onScrollEvent(callback: Callback<ScrollEventInfo>): void;
+        offScrollEvent(callback: Callback<ScrollEventInfo>): void;
     }
     
     class UIObserverImpl implements UIObserver
@@ -48,6 +53,11 @@ import hilog from '@ohos.hilog'
         
         public native on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         public native off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
+
+        public native onScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        public native offScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        public native onScrollEvent(callback: Callback<ScrollEventInfo>): void;
+        public native offScrollEvent(callback: Callback<ScrollEventInfo>): void;
     }
 
     export interface NavigationInfo {
@@ -112,8 +122,8 @@ import hilog from '@ohos.hilog'
         index: number;
         param?: Object;
         navDestinationId: string;
-        uniqueId: number;
-        mode: NavDestinationMode;
+        uniqueId?: number;
+        mode?: NavDestinationMode;
     }
 
     export class NavDestinationInfoImpl implements NavDestinationInfo {
@@ -123,8 +133,8 @@ import hilog from '@ohos.hilog'
         index: number;
         param?: Object;
         navDestinationId: string;
-        uniqueId: number;
-        mode: NavDestinationMode;
+        uniqueId?: number;
+        mode?: NavDestinationMode;
         static castToNavDestinationInfo(value: number): NavDestinationState {
             if (value === 0) {
                 return NavDestinationState.ON_SHOWN;

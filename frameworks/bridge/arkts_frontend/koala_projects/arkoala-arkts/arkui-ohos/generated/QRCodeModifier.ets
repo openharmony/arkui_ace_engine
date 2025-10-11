@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkQRCodePeer, QRCodeAttribute } from "./component/qrcode"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -42,8 +43,9 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
     _backgroundColor_0_0value?: ResourceColor | undefined
     _contentOpacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentOpacity_0_0value?: number | Resource | undefined
-    applyModifierPatch(peer: ArkQRCodePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkQRCodePeer;
         if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._color_0_flag) {

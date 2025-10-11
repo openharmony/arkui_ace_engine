@@ -27,8 +27,14 @@ void QRCodeModelStatic::SetQRCodeColor(FrameNode* frameNode, const std::optional
         ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Color, *color, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *color, frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(QRCodePaintProperty, Color, frameNode);
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto castQRCodePaintProperty = frameNode->GetPaintPropertyPtr<QRCodePaintProperty>();
+        CHECK_NULL_VOID(castQRCodePaintProperty);
+        const auto& castRenderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(castRenderContext);
+        castQRCodePaintProperty->ResetColor();
+        castRenderContext->ResetForegroundColor();
+        castQRCodePaintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
     }
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
@@ -48,9 +54,17 @@ void QRCodeModelStatic::SetQRBackgroundColor(FrameNode* frameNode, const std::op
 void QRCodeModelStatic::SetContentOpacity(FrameNode* frameNode, const std::optional<double>& opacity)
 {
     if (opacity) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, *opacity, frameNode);
+        double opca = *opacity;
+        if (LessNotEqual(opca, 0.0) || GreatNotEqual(opca, 1.0)) {
+            opca = 1.0;
+        }
+        ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, opca, frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto castQRCodePaintProperty = frameNode->GetPaintPropertyPtr<QRCodePaintProperty>();
+        CHECK_NULL_VOID(castQRCodePaintProperty);
+        castQRCodePaintProperty->ResetOpacity();
+        castQRCodePaintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
     }
 }
 } // namespace OHOS::Ace::NG

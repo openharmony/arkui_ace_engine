@@ -444,7 +444,7 @@ void SecurityUIExtensionPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
         const RectF& oldRect,
@@ -498,7 +498,7 @@ void SecurityUIExtensionPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -598,7 +598,7 @@ void SecurityUIExtensionPattern::FireOnRemoteReadyCallback()
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<UIExtensionHub>();
+    auto eventHub = host->GetEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnRemoteReadyCallback(
         MakeRefPtr<NG::SecurityUIExtensionProxy>(sessionWrapper_, Claim(this)));
@@ -623,7 +623,7 @@ void SecurityUIExtensionPattern::FireOnTerminatedCallback(
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<UIExtensionHub>();
+    auto eventHub = host->GetEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnTerminatedCallback(code, wantWrap);
 }
@@ -645,7 +645,7 @@ void SecurityUIExtensionPattern::FireOnReceiveCallback(const AAFwk::WantParams& 
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<UIExtensionHub>();
+    auto eventHub = host->GetEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnReceiveCallback(params);
 }

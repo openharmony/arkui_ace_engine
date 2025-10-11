@@ -133,7 +133,7 @@ private:
             dragPreview->previewAsync_.previewAnimation.duration = DEFAULT_DURATION_VALUE;
         } else {
             if ((status = env->Object_CallMethodByName_Double(
-                static_cast<ani_object>(durationAni), "unboxed", ":D", &duration)) != ANI_OK) {
+                static_cast<ani_object>(durationAni), "toDouble", ":d", &duration)) != ANI_OK) {
                 HILOGE("AceDrag, Object_CallMethodByName_Double failed. status = %{public}d", status);
             } else {
                 if (GreatOrEqual(static_cast<size_t>(duration), INT32_MAX)) {
@@ -141,7 +141,7 @@ private:
                 } else if (LessOrEqual(static_cast<size_t>(duration), 0)) {
                     duration = 0;
                 }
-                dragPreview->previewAsync_.previewAnimation.duration = static_cast<size_t>(duration);
+                dragPreview->previewAsync_.previewAnimation.duration = static_cast<int32_t>(duration);
             }
         }
         HILOGI("AceDrag, animation duration is %{public}d", dragPreview->previewAsync_.previewAnimation.duration);

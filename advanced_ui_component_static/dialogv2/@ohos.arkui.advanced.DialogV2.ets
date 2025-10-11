@@ -39,16 +39,16 @@ import resourceManager from '@ohos.resourceManager';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 
-const TITLE_MAX_LINES: number = 2;
+const TITLE_MAX_LINES: int = 2;
 const HORIZON_BUTTON_MAX_COUNT: int = 2;
 const VERTICAL_BUTTON_MAX_COUNT: number = 4;
 const BUTTON_LAYOUT_WEIGHT: number = 1;
 const CHECKBOX_CONTAINER_HEIGHT: number = 48;
-const CONTENT_MAX_LINES: number = 2;
+const CONTENT_MAX_LINES: int = 2;
 const LOADING_PROGRESS_WIDTH: number = 40;
 const LOADING_PROGRESS_HEIGHT: number = 40;
-const LOADING_MAX_LINES: number = 10;
-const LOADING_MAX_LINES_BIG_FONT: number = 4;
+const LOADING_MAX_LINES: int = 10;
+const LOADING_MAX_LINES_BIG_FONT: int = 4;
 const LOADING_TEXT_LAYOUT_WEIGHT: number = 1;
 const LOADING_TEXT_MARGIN_LEFT: number = 12;
 const LOADING_MIN_HEIGHT: number = 48;
@@ -365,6 +365,7 @@ export struct TipsDialogV2 {
                 if (event) {
                   resolveKeyEvent(event, this.contentScroller);
                 }
+                return false
               })
           }
         }
@@ -585,7 +586,7 @@ export struct SelectDialogV2 {
           }.applyStyles(this.paddingContentStyle).width('100%')
         }
         List() {
-          ForEach(this.radioContent, (item: SheetInfo, index: number) => {
+          ForEach(this.radioContent, (item: SheetInfo, index: int) => {
             ListItem() {
               Column() {
                 Button({ type: ButtonType.Normal } as ButtonOptions) {
@@ -637,7 +638,6 @@ export struct SelectDialogV2 {
               .onClick((event: ClickEvent) => {
                 this.selectedIndexInner = index;
                 item?.action();
-                // this.getDialogController()?.close();
               })
             }
             .applyStyles(this.paddingStyle)
@@ -849,6 +849,7 @@ export struct ConfirmDialogV2 {
               if (event) {
                 resolveKeyEvent(event, this.contentScroller);
               }
+              return false
             })
             .width('100%')
         }
@@ -993,7 +994,7 @@ export struct AlertDialogV2 {
             strokeWidth: LengthMetrics.px(0)
           })
           .fontSize(`${BODY_L}fp`)
-          .fontWeight(this.getFontWeight())
+          .fontWeight(this.getFontWeight() as int)
           .fontColor(this.fontColorWithTheme)
           .width('100%')
           .padding({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedPadding)
@@ -1002,6 +1003,7 @@ export struct AlertDialogV2 {
             if (event) {
               resolveKeyEvent(event, this.contentScroller);
             }
+            return false
           })
       }
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
@@ -1570,8 +1572,8 @@ struct CustomDialogContentComponent {
   buildVerticalAlignButtons(): void {
     if (this.buttons) {
       Column() {
-        ForEach((this.buttons as Array<AdvancedDialogV2Button>).slice(0, VERTICAL_BUTTON_MAX_COUNT),
-          (item: AdvancedDialogV2Button, index: number) => {
+        ForEach((this.buttons as Array<AdvancedDialogV2Button>).slice(0, VERTICAL_BUTTON_MAX_COUNT.toInt()),
+          (item: AdvancedDialogV2Button, index: int) => {
             this.buildButtonWithDivider(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
               HORIZON_BUTTON_MAX_COUNT - index.toInt() - 1 : index.toInt());
           }, (item: AdvancedDialogV2Button) => item.content.toString());
@@ -1670,7 +1672,7 @@ function setButtonProperties(this: ButtonAttribute, buttonOptions?: AdvancedDial
   controller?: PromptActionDialogController): this {
   this.onKeyEvent((event: KeyEvent) => {
     if (!event) {
-      return;
+      return false;
     }
     if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
       event.type === KeyType.Down) {

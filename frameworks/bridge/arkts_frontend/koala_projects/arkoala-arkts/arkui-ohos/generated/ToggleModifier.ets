@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTogglePeer, ToggleConfiguration, SwitchStyle, ToggleAttribute } from "./component/toggle"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -44,8 +45,9 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
     _switchPointColor_0_0value?: ResourceColor | undefined
     _switchStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _switchStyle_0_0value?: SwitchStyle | undefined
-    applyModifierPatch(peer: ArkTogglePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTogglePeer;
         if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onChange_0_flag) {

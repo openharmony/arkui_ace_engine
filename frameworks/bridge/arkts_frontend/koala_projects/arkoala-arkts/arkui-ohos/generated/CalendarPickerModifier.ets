@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkCalendarPickerPeer, CalendarPickerAttribute, CalendarAlign } from "./component/calendarPicker"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, PickerTextStyle } from "./component/common"
@@ -43,8 +44,9 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
     _edgeAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _edgeAlign_0_0value?: CalendarAlign | undefined
     _edgeAlign_0_1value?: Offset | undefined
-    applyModifierPatch(peer: ArkCalendarPickerPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkCalendarPickerPeer;
         if (this._textStyle_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._textStyle_0_flag) {
@@ -103,7 +105,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
         {
             switch (this._edgeAlign_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEdgeAlignAttribute((this._edgeAlign_0_0value as CalendarAlign | undefined), (this._edgeAlign_0_1value as Offset | undefined));
+                    peer.setEdgeAlignAttribute((this._edgeAlign_0_0value as CalendarAlign | undefined), (this._edgeAlign_0_1value as Offset | undefined | undefined));
                     this._edgeAlign_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

@@ -147,7 +147,7 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -235,7 +235,7 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -315,12 +315,12 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setOnContentScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxLengthAttribute(value: number | undefined): void {
+    setMaxLengthAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -335,7 +335,7 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -391,15 +391,15 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setFontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: number | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
@@ -547,7 +547,7 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -567,12 +567,12 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setSelectedBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCaretPositionAttribute(value: number | undefined): void {
+    setCaretPositionAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -658,7 +658,7 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                 if (valueTmpValueForIdx0 instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
-                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.valueOf())
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
@@ -707,12 +707,12 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setBarState(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxLinesAttribute(value: number | undefined): void {
+    setMaxLinesAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -743,24 +743,28 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setLineBreakStrategy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCancelButtonAttribute(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): void {
+    setCancelButton0Attribute(value: CancelButtonOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof CancelButtonOptions) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as CancelButtonOptions
-                CancelButtonOptions_serializer.write(thisSerializer, valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof CancelButtonSymbolOptions) {
-                thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as CancelButtonSymbolOptions
-                CancelButtonSymbolOptions_serializer.write(thisSerializer, valueTmpValueForIdx1)
-            }
+            CancelButtonOptions_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._TextInputAttribute_setCancelButton(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextInputAttribute_setCancelButton0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setCancelButton1Attribute(value: CancelButtonSymbolOptions | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            CancelButtonSymbolOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setCancelButton1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSelectAllAttribute(value: boolean | undefined): void {
@@ -775,15 +779,15 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setSelectAll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontSizeAttribute(value: number | string | Resource | undefined): void {
+    setMinFontSizeAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -799,15 +803,15 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setMinFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxFontSizeAttribute(value: number | string | Resource | undefined): void {
+    setMaxFontSizeAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -823,15 +827,15 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setMaxFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontScaleAttribute(value: number | Resource | undefined): void {
+    setMinFontScaleAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -843,15 +847,15 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setMinFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxFontScaleAttribute(value: number | Resource | undefined): void {
+    setMaxFontScaleAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -899,15 +903,15 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setDecoration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLetterSpacingAttribute(value: number | string | Resource | undefined): void {
+    setLetterSpacingAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -923,15 +927,15 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setLetterSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLineHeightAttribute(value: number | string | Resource | undefined): void {
+    setLineHeightAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -1306,8 +1310,8 @@ export interface PasswordIcon {
     offIconSrc?: string | Resource;
 }
 export type OnSubmitCallback = (enterKey: EnterKeyType, event: SubmitEvent) => void;
-export type OnTextSelectionChangeCallback = (selectionStart: number, selectionEnd: number) => void;
-export type OnContentScrollCallback = (totalOffsetX: number, totalOffsetY: number) => void;
+export type OnTextSelectionChangeCallback = (selectionStart: int32, selectionEnd: int32) => void;
+export type OnContentScrollCallback = (totalOffsetX: double, totalOffsetY: double) => void;
 export type OnPasteCallback = (content: string, event: PasteEvent) => void;
 export interface TextInputAttribute extends CommonMethod {
     setTextInputOptions(value?: TextInputOptions): this {
@@ -1352,7 +1356,7 @@ export interface TextInputAttribute extends CommonMethod {
     onContentScroll(value: OnContentScrollCallback | undefined): this {
         throw new Error("Unimplemented method onContentScroll")
     }
-    maxLength(value: number | undefined): this {
+    maxLength(value: int32 | undefined): this {
         throw new Error("Unimplemented method maxLength")
     }
     fontColor(value: ResourceColor | undefined): this {
@@ -1364,7 +1368,7 @@ export interface TextInputAttribute extends CommonMethod {
     fontStyle(value: FontStyle | undefined): this {
         throw new Error("Unimplemented method fontStyle")
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontFamily(value: ResourceStr | undefined): this {
@@ -1397,7 +1401,7 @@ export interface TextInputAttribute extends CommonMethod {
     selectedBackgroundColor(value: ResourceColor | undefined): this {
         throw new Error("Unimplemented method selectedBackgroundColor")
     }
-    caretPosition(value: number | undefined): this {
+    caretPosition(value: int32 | undefined): this {
         throw new Error("Unimplemented method caretPosition")
     }
     enableKeyboardOnFocus(value: boolean | undefined): this {
@@ -1424,7 +1428,7 @@ export interface TextInputAttribute extends CommonMethod {
     barState(value: BarState | undefined): this {
         throw new Error("Unimplemented method barState")
     }
-    maxLines(value: number | undefined): this {
+    maxLines(value: int32 | undefined): this {
         throw new Error("Unimplemented method maxLines")
     }
     wordBreak(value: WordBreak | undefined): this {
@@ -1433,22 +1437,25 @@ export interface TextInputAttribute extends CommonMethod {
     lineBreakStrategy(value: LineBreakStrategy | undefined): this {
         throw new Error("Unimplemented method lineBreakStrategy")
     }
-    cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
+    cancelButton(value: CancelButtonOptions | undefined): this {
+        throw new Error("Unimplemented method cancelButton")
+    }
+    cancelButton(value: CancelButtonSymbolOptions | undefined): this {
         throw new Error("Unimplemented method cancelButton")
     }
     selectAll(value: boolean | undefined): this {
         throw new Error("Unimplemented method selectAll")
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method minFontSize")
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method maxFontSize")
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method minFontScale")
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method maxFontScale")
     }
     heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
@@ -1460,10 +1467,10 @@ export interface TextInputAttribute extends CommonMethod {
     decoration(value: TextDecorationOptions | undefined): this {
         throw new Error("Unimplemented method decoration")
     }
-    letterSpacing(value: number | string | Resource | undefined): this {
+    letterSpacing(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method letterSpacing")
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method lineHeight")
     }
     passwordRules(value: string | undefined): this {
@@ -1544,11 +1551,11 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     onChange_value?: EditableTextOnChangeCallback | undefined
     onTextSelectionChange_value?: OnTextSelectionChangeCallback | undefined
     onContentScroll_value?: OnContentScrollCallback | undefined
-    maxLength_value?: number | undefined
+    maxLength_value?: int32 | undefined
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: Length | undefined
     fontStyle_value?: FontStyle | undefined
-    fontWeight_value?: number | FontWeight | string | undefined
+    fontWeight_value?: int32 | FontWeight | string | undefined
     fontFamily_value?: ResourceStr | undefined
     onCopy_value?: ((value0: string) => void) | undefined
     onCut_value?: ((value0: string) => void) | undefined
@@ -1559,7 +1566,7 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     style_value?: TextInputStyle | TextContentStyle | undefined
     caretStyle_value?: CaretStyle | undefined
     selectedBackgroundColor_value?: ResourceColor | undefined
-    caretPosition_value?: number | undefined
+    caretPosition_value?: int32 | undefined
     enableKeyboardOnFocus_value?: boolean | undefined
     passwordIcon_value?: PasswordIcon | undefined
     showError_value?: ResourceStr | undefined
@@ -1568,20 +1575,20 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     underlineColor_value?: ResourceColor | UnderlineColor | undefined
     selectionMenuHidden_value?: boolean | undefined
     barState_value?: BarState | undefined
-    maxLines_value?: number | undefined
+    maxLines_value?: int32 | undefined
     wordBreak_value?: WordBreak | undefined
     lineBreakStrategy_value?: LineBreakStrategy | undefined
-    cancelButton_value?: CancelButtonOptions | CancelButtonSymbolOptions | undefined
+    cancelButton_value?: CancelButtonOptions | undefined
     selectAll_value?: boolean | undefined
-    minFontSize_value?: number | string | Resource | undefined
-    maxFontSize_value?: number | string | Resource | undefined
-    minFontScale_value?: number | Resource | undefined
-    maxFontScale_value?: number | Resource | undefined
+    minFontSize_value?: double | string | Resource | undefined
+    maxFontSize_value?: double | string | Resource | undefined
+    minFontScale_value?: double | Resource | undefined
+    maxFontScale_value?: double | Resource | undefined
     heightAdaptivePolicy_value?: TextHeightAdaptivePolicy | undefined
     enableAutoFill_value?: boolean | undefined
     decoration_value?: TextDecorationOptions | undefined
-    letterSpacing_value?: number | string | Resource | undefined
-    lineHeight_value?: number | string | Resource | undefined
+    letterSpacing_value?: double | string | Resource | undefined
+    lineHeight_value?: double | string | Resource | undefined
     passwordRules_value?: string | undefined
     fontFeature_value?: string | undefined
     showPassword_value?: boolean | undefined
@@ -1642,7 +1649,7 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     onContentScroll(value: OnContentScrollCallback | undefined): this {
         return this
     }
-    maxLength(value: number | undefined): this {
+    maxLength(value: int32 | undefined): this {
         return this
     }
     fontColor(value: ResourceColor | undefined): this {
@@ -1654,7 +1661,7 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         return this
     }
     fontFamily(value: ResourceStr | undefined): this {
@@ -1687,7 +1694,7 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     selectedBackgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    caretPosition(value: number | undefined): this {
+    caretPosition(value: int32 | undefined): this {
         return this
     }
     enableKeyboardOnFocus(value: boolean | undefined): this {
@@ -1714,7 +1721,7 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     barState(value: BarState | undefined): this {
         return this
     }
-    maxLines(value: number | undefined): this {
+    maxLines(value: int32 | undefined): this {
         return this
     }
     wordBreak(value: WordBreak | undefined): this {
@@ -1723,22 +1730,25 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     lineBreakStrategy(value: LineBreakStrategy | undefined): this {
         return this
     }
-    cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
+    cancelButton(value: CancelButtonOptions | undefined): this {
+        return this
+    }
+    cancelButton(value: CancelButtonSymbolOptions | undefined): this {
         return this
     }
     selectAll(value: boolean | undefined): this {
         return this
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         return this
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         return this
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         return this
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         return this
     }
     heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
@@ -1750,10 +1760,10 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     decoration(value: TextDecorationOptions | undefined): this {
         return this
     }
-    letterSpacing(value: number | string | Resource | undefined): this {
+    letterSpacing(value: double | string | Resource | undefined): this {
         return this
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         return this
     }
     passwordRules(value: string | undefined): this {
@@ -1940,9 +1950,9 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public maxLength(value: number | undefined): this {
+    public maxLength(value: int32 | undefined): this {
         if (this.checkPriority("maxLength")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setMaxLengthAttribute(value_casted)
             return this
         }
@@ -1972,9 +1982,9 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | string | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }
@@ -2060,9 +2070,9 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public caretPosition(value: number | undefined): this {
+    public caretPosition(value: int32 | undefined): this {
         if (this.checkPriority("caretPosition")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setCaretPositionAttribute(value_casted)
             return this
         }
@@ -2132,9 +2142,9 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public maxLines(value: number | undefined): this {
+    public maxLines(value: int32 | undefined): this {
         if (this.checkPriority("maxLines")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setMaxLinesAttribute(value_casted)
             return this
         }
@@ -2156,10 +2166,18 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
+    public cancelButton(value: CancelButtonOptions | undefined): this {
         if (this.checkPriority("cancelButton")) {
-            const value_casted = value as (CancelButtonOptions | CancelButtonSymbolOptions | undefined)
-            this.getPeer()?.setCancelButtonAttribute(value_casted)
+            const value_casted = value as (CancelButtonOptions | undefined)
+            this.getPeer()?.setCancelButton0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public cancelButton(value: CancelButtonSymbolOptions | undefined): this {
+        if (this.checkPriority("cancelButton")) {
+            const value_casted = value as (CancelButtonSymbolOptions | undefined)
+            this.getPeer()?.setCancelButton1Attribute(value_casted)
             return this
         }
         return this
@@ -2172,33 +2190,33 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public minFontSize(value: number | string | Resource | undefined): this {
+    public minFontSize(value: double | string | Resource | undefined): this {
         if (this.checkPriority("minFontSize")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setMinFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public maxFontSize(value: number | string | Resource | undefined): this {
+    public maxFontSize(value: double | string | Resource | undefined): this {
         if (this.checkPriority("maxFontSize")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setMaxFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public minFontScale(value: number | Resource | undefined): this {
+    public minFontScale(value: double | Resource | undefined): this {
         if (this.checkPriority("minFontScale")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setMinFontScaleAttribute(value_casted)
             return this
         }
         return this
     }
-    public maxFontScale(value: number | Resource | undefined): this {
+    public maxFontScale(value: double | Resource | undefined): this {
         if (this.checkPriority("maxFontScale")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setMaxFontScaleAttribute(value_casted)
             return this
         }
@@ -2228,17 +2246,17 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public letterSpacing(value: number | string | Resource | undefined): this {
+    public letterSpacing(value: double | string | Resource | undefined): this {
         if (this.checkPriority("letterSpacing")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setLetterSpacingAttribute(value_casted)
             return this
         }
         return this
     }
-    public lineHeight(value: number | string | Resource | undefined): this {
+    public lineHeight(value: double | string | Resource | undefined): this {
         if (this.checkPriority("lineHeight")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setLineHeightAttribute(value_casted)
             return this
         }
@@ -2539,7 +2557,7 @@ export class UnderlineColor_serializer {
             if (valueHolderForTypingTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForTypingTmpValueForIdx0  = valueHolderForTypingTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForTypingTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForTypingTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForTypingTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForTypingTmpValueForIdx1  = valueHolderForTypingTmpValue as number
@@ -2563,7 +2581,7 @@ export class UnderlineColor_serializer {
             if (valueHolderForNormalTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForNormalTmpValueForIdx0  = valueHolderForNormalTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForNormalTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForNormalTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForNormalTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForNormalTmpValueForIdx1  = valueHolderForNormalTmpValue as number
@@ -2587,7 +2605,7 @@ export class UnderlineColor_serializer {
             if (valueHolderForErrorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForErrorTmpValueForIdx0  = valueHolderForErrorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForErrorTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForErrorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForErrorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForErrorTmpValueForIdx1  = valueHolderForErrorTmpValue as number
@@ -2611,7 +2629,7 @@ export class UnderlineColor_serializer {
             if (valueHolderForDisableTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForDisableTmpValueForIdx0  = valueHolderForDisableTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForDisableTmpValueForIdx0.valueOf())
+                valueSerializer.writeInt32(valueHolderForDisableTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForDisableTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForDisableTmpValueForIdx1  = valueHolderForDisableTmpValue as number
@@ -2635,11 +2653,11 @@ export class UnderlineColor_serializer {
         let typingTmpBuf : ResourceColor | undefined = undefined
         if ((typingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const typingTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let typingTmpBuf_ : Color | number | string | Resource | undefined
+            let typingTmpBuf_ : Color | int32 | string | Resource | undefined
             if (typingTmpBuf_UnionSelector == (0).toChar()) {
-                typingTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                typingTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (typingTmpBuf_UnionSelector == (1).toChar()) {
-                typingTmpBuf_ = (valueDeserializer.readNumber() as number)
+                typingTmpBuf_ = (valueDeserializer.readInt32())
             } else if (typingTmpBuf_UnionSelector == (2).toChar()) {
                 typingTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (typingTmpBuf_UnionSelector == (3).toChar()) {
@@ -2647,18 +2665,18 @@ export class UnderlineColor_serializer {
             } else {
                 throw new Error("One of the branches for typingTmpBuf_ has to be chosen through deserialisation.")
             }
-            typingTmpBuf = (typingTmpBuf_ as Color | number | string | Resource)
+            typingTmpBuf = (typingTmpBuf_ as Color | int32 | string | Resource)
         }
         const typingTmpResult : ResourceColor | undefined = typingTmpBuf
         const normalTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let normalTmpBuf : ResourceColor | undefined = undefined
         if ((normalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const normalTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let normalTmpBuf_ : Color | number | string | Resource | undefined
+            let normalTmpBuf_ : Color | int32 | string | Resource | undefined
             if (normalTmpBuf_UnionSelector == (0).toChar()) {
-                normalTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                normalTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (normalTmpBuf_UnionSelector == (1).toChar()) {
-                normalTmpBuf_ = (valueDeserializer.readNumber() as number)
+                normalTmpBuf_ = (valueDeserializer.readInt32())
             } else if (normalTmpBuf_UnionSelector == (2).toChar()) {
                 normalTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (normalTmpBuf_UnionSelector == (3).toChar()) {
@@ -2666,18 +2684,18 @@ export class UnderlineColor_serializer {
             } else {
                 throw new Error("One of the branches for normalTmpBuf_ has to be chosen through deserialisation.")
             }
-            normalTmpBuf = (normalTmpBuf_ as Color | number | string | Resource)
+            normalTmpBuf = (normalTmpBuf_ as Color | int32 | string | Resource)
         }
         const normalTmpResult : ResourceColor | undefined = normalTmpBuf
         const errorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let errorTmpBuf : ResourceColor | undefined = undefined
         if ((errorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const errorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let errorTmpBuf_ : Color | number | string | Resource | undefined
+            let errorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (errorTmpBuf_UnionSelector == (0).toChar()) {
-                errorTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                errorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (errorTmpBuf_UnionSelector == (1).toChar()) {
-                errorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                errorTmpBuf_ = (valueDeserializer.readInt32())
             } else if (errorTmpBuf_UnionSelector == (2).toChar()) {
                 errorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (errorTmpBuf_UnionSelector == (3).toChar()) {
@@ -2685,18 +2703,18 @@ export class UnderlineColor_serializer {
             } else {
                 throw new Error("One of the branches for errorTmpBuf_ has to be chosen through deserialisation.")
             }
-            errorTmpBuf = (errorTmpBuf_ as Color | number | string | Resource)
+            errorTmpBuf = (errorTmpBuf_ as Color | int32 | string | Resource)
         }
         const errorTmpResult : ResourceColor | undefined = errorTmpBuf
         const disableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let disableTmpBuf : ResourceColor | undefined = undefined
         if ((disableTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const disableTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let disableTmpBuf_ : Color | number | string | Resource | undefined
+            let disableTmpBuf_ : Color | int32 | string | Resource | undefined
             if (disableTmpBuf_UnionSelector == (0).toChar()) {
-                disableTmpBuf_ = Color.fromValue(valueDeserializer.readInt32())
+                disableTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (disableTmpBuf_UnionSelector == (1).toChar()) {
-                disableTmpBuf_ = (valueDeserializer.readNumber() as number)
+                disableTmpBuf_ = (valueDeserializer.readInt32())
             } else if (disableTmpBuf_UnionSelector == (2).toChar()) {
                 disableTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (disableTmpBuf_UnionSelector == (3).toChar()) {
@@ -2704,7 +2722,7 @@ export class UnderlineColor_serializer {
             } else {
                 throw new Error("One of the branches for disableTmpBuf_ has to be chosen through deserialisation.")
             }
-            disableTmpBuf = (disableTmpBuf_ as Color | number | string | Resource)
+            disableTmpBuf = (disableTmpBuf_ as Color | int32 | string | Resource)
         }
         const disableTmpResult : ResourceColor | undefined = disableTmpBuf
         let value : UnderlineColor = ({typing: typingTmpResult, normal: normalTmpResult, error: errorTmpResult, disable: disableTmpResult} as UnderlineColor)
@@ -2845,14 +2863,14 @@ export class TextInputController extends TextContentControllerBase implements Ma
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TextInputController_getFinalizer()
     }
-    public caretPosition(value: number): void {
-        const value_casted = value as (number)
+    public caretPosition(value: int32): void {
+        const value_casted = value as (int32)
         this.caretPosition_serialize(value_casted)
         return
     }
-    public setTextSelection(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void {
-        const selectionStart_casted = selectionStart as (number)
-        const selectionEnd_casted = selectionEnd as (number)
+    public setTextSelection(selectionStart: int32, selectionEnd: int32, options?: SelectionOptions): void {
+        const selectionStart_casted = selectionStart as (int32)
+        const selectionEnd_casted = selectionEnd as (int32)
         const options_casted = options as (SelectionOptions | undefined)
         this.setTextSelection_serialize(selectionStart_casted, selectionEnd_casted, options_casted)
         return
@@ -2861,10 +2879,10 @@ export class TextInputController extends TextContentControllerBase implements Ma
         this.stopEditing_serialize()
         return
     }
-    caretPosition_serialize(value: number): void {
+    caretPosition_serialize(value: int32): void {
         ArkUIGeneratedNativeModule._TextInputController_caretPosition(this.peer!.ptr, value)
     }
-    setTextSelection_serialize(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void {
+    setTextSelection_serialize(selectionStart: int32, selectionEnd: int32, options?: SelectionOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

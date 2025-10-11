@@ -41,6 +41,15 @@ void AssignCast(std::optional<PasteButtonPasteDescription>& dst, const Ark_Paste
         default: LOGE("Unexpected enum value in Ark_PasteDescription: %{public}d", src);
     }
 }
+template<>
+PasteButtonStyle Convert(const Opt_PasteButtonOptions& src)
+{
+    PasteButtonStyle style;
+    style.text = OptConvert<PasteButtonPasteDescription>(src.value.text);
+    style.icon = OptConvert<PasteButtonIconStyle>(src.value.icon);
+    style.backgroundType = OptConvert<ButtonType>(src.value.buttonType);
+    return style;
+}
 } // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PasteButtonModifier {
@@ -57,11 +66,14 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // PasteButtonModifier
 namespace PasteButtonInterfaceModifier {
-void SetPasteButtonOptionsImpl(Ark_NativePointer node)
+void SetPasteButtonOptionsImpl(Ark_NativePointer node,
+                               const Opt_PasteButtonOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    PasteButtonModelNG::InitPasteButton(frameNode, PasteButtonStyle(), false);
+    CHECK_NULL_VOID(options);
+    auto style = Converter::Convert<PasteButtonStyle>(*options);
+    PasteButtonModelNG::InitPasteButton(frameNode, style, false);
 }
 } // PasteButtonInterfaceModifier
 namespace PasteButtonAttributeModifier {

@@ -33,7 +33,7 @@
 #include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
-#include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
+#include "core/interfaces/native/implementation/text_style_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
 #include "core/text/html_utils.h"
 
@@ -108,9 +108,6 @@ RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
             result = AceType::MakeRefPtr<ExtSpan>(start, end);  // Ark_UserDataSpan is temporarily ignored.
             LOGE("Converter::Convert(Ark_StyleOptions) the Ark_UserDataSpan is not implemented.");
         },
-        [](const Ark_ImageAttachment& style) {
-            LOGE("Converter::Convert(Ark_StyleOptions) the Ark_ImageAttachment is not implemented.");
-        },
         [](const Ark_CustomSpan& style) {
             LOGE("Converter::Convert(Ark_StyleOptions) the Ark_CustomSpan is not implemented.");
         },
@@ -183,7 +180,8 @@ Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan
             [&peer](const Ark_CustomSpan& arkCustomSpan) {
                 CustomSpanPeer* peerCustomSpan = arkCustomSpan;
                 CHECK_NULL_VOID(peerCustomSpan && peerCustomSpan->span);
-                peer->spanString = AceType::MakeRefPtr<SpanString>(peerCustomSpan->span);
+                auto customSpan = AceType::DynamicCast<CustomSpan>(peerCustomSpan->span);
+                peer->spanString = AceType::MakeRefPtr<SpanString>(customSpan);
             },
             []() {}
         );
@@ -206,16 +204,14 @@ Ark_String GetStringImpl(Ark_StyledString peer)
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
-                              const Ark_Number* start,
-                              const Ark_Number* length,
+                              const Ark_Int32 start,
+                              const Ark_Int32 length,
                               const Opt_StyledStringKey* styledKey)
 {
     CHECK_NULL_RETURN(peer, {});
     CHECK_NULL_RETURN(peer->spanString, {});
-    CHECK_NULL_RETURN(start, {});
-    CHECK_NULL_RETURN(length, {});
-    auto spanStart = Converter::Convert<int32_t>(*start);
-    auto spanLength = Converter::Convert<int32_t>(*length);
+    auto spanStart = Converter::Convert<int32_t>(start);
+    auto spanLength = Converter::Convert<int32_t>(length);
     if (!peer->spanString->CheckRange(spanStart, spanLength)) {
         LOGE("CheckBoundary failed: start:%{public}d length:%{public}d", spanStart, spanLength);
         return {};
@@ -239,14 +235,13 @@ Ark_Boolean EqualsImpl(Ark_StyledString peer,
     return peer->spanString->IsEqualToSpanString(other->spanString);
 }
 Ark_StyledString SubStyledStringImpl(Ark_StyledString peer,
-                                     const Ark_Number* start,
-                                     const Opt_Number* length)
+                                     const Ark_Int32 start,
+                                     const Opt_Int32* length)
 {
     Ark_StyledString ret = nullptr;
     CHECK_NULL_RETURN(peer, ret);
     CHECK_NULL_RETURN(peer->spanString, ret);
-    CHECK_NULL_RETURN(start, ret);
-    auto startSpan = Converter::Convert<int32_t>(*start);
+    auto startSpan = Converter::Convert<int32_t>(start);
     auto lengthSpan = peer->spanString->GetLength() - startSpan;
     auto lengthOpt = Converter::OptConvertPtr<int32_t>(length);
     if (lengthOpt) {
@@ -358,12 +353,12 @@ void Unmarshalling1Impl(Ark_VMContext vmContext,
 {
     Unmarshalling0Impl(vmContext, asyncWorker, buffer, nullptr, outputArgumentForReturningPromise);
 }
-Ark_Number GetLengthImpl(Ark_StyledString peer)
+Ark_Int32 GetLengthImpl(Ark_StyledString peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->spanString, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->spanString->GetLength());
+    return Converter::ArkValue<Ark_Int32>(peer->spanString->GetLength());
 }
 } // StyledStringAccessor
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()

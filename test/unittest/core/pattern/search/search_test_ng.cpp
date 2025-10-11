@@ -1129,7 +1129,7 @@ HWTEST_F(SearchTestNg, SetSearchButtonAutodisable002, TestSize.Level1)
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
     textFieldPattern->UpdateEditingValue(textStr, 0);
-    auto buttonEventHub = buttonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
     ASSERT_NE(buttonEventHub, nullptr);
     auto pattern = frameNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -1167,7 +1167,7 @@ HWTEST_F(SearchTestNg, SetSearchButtonAutodisable004, TestSize.Level1)
     ASSERT_NE(textFieldFrameNode, nullptr);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     ASSERT_NE(buttonFrameNode, nullptr);
-    auto buttonEventHub = buttonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
     ASSERT_NE(buttonEventHub, nullptr);
 
     auto textStr = "a";
@@ -1326,7 +1326,7 @@ HWTEST_F(SearchTestNg, Create003, TestSize.Level1)
     searchModelInstance.SetOnChangeEvent(std::move(onChangeEvent));
     searchModelInstance.SetSelectionMenuOptions(std::move(onCreate), std::move(onMenuItemClick), std::move(onPrepare));
     auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
-    auto eventHub = searchTextField->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ChangeValueInfo changeValueInfo;
     changeValueInfo.value = u"123";
@@ -1387,7 +1387,7 @@ HWTEST_F(SearchTestNg, Create004, TestSize.Level1)
     std::function<void(const std::u16string&, NG::TextCommonEvent&)> onPasteEvent;
     searchModelInstance.SetOnPasteWithEvent(std::move(onPasteEvent));
     auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
-    auto eventHub = searchTextField->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     TextCommonEvent event;
     eventHub->FireOnPasteWithEvent(u"", event);
@@ -1473,7 +1473,7 @@ HWTEST_F(SearchTestNg, Create006, TestSize.Level1)
     OHOS::Ace::NG::SearchModelNG::SetOnTextSelectionChange(frameNode, std::move(OnTextSelectionChange));
     OHOS::Ace::NG::SearchModelNG::SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::SENTENCES);
     auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
-    auto eventHub = searchTextField->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     TextCommonEvent event;
     eventHub->FireOnPasteWithEvent(u"", event);
@@ -1614,7 +1614,7 @@ HWTEST_F(SearchTestNg, SetOnSubmit001, TestSize.Level1)
     ASSERT_NE(textFieldChild, nullptr);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(textFieldLayoutProperty, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SearchEventHub>();
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     ASSERT_NE(eventHub, nullptr);
     searchModelInstance.SetOnSubmit([&searchModelInstance, &textFieldLayoutProperty](
         const std::u16string& title, NG::TextFieldCommonEvent& commonEvent) {
@@ -1646,7 +1646,7 @@ HWTEST_F(SearchTestNg, SetOn001, TestSize.Level1)
     ASSERT_NE(textFieldChild, nullptr);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(textFieldLayoutProperty, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SearchEventHub>();
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * SetOnCopy
@@ -1724,7 +1724,7 @@ HWTEST_F(SearchTestNg, SearchChangeEventHub001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     ChangeAndSubmitEvent changeEvent = [](const std::u16string str) {};
     searchModelInstance.SetOnChangeEvent(changeEvent);
-    auto eventHub = frameNode->GetOrCreateEventHub<SearchEventHub>();
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->AttachHost(frameNode);
     eventHub->UpdateChangeEvent(u"");

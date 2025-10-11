@@ -231,7 +231,7 @@ HWTEST_F(DragBarPatternTestNg, DragBarPatternTest003, TestSize.Level1)
     EXPECT_FALSE(paintProperty == nullptr);
     paintProperty->UpdateDragOffset(DRAG_OFFSET);
 
-    auto hub = dragBarNode->GetOrCreateEventHub<EventHub>();
+    auto hub = dragBarNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

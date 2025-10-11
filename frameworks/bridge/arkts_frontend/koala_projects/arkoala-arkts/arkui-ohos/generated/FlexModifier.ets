@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkFlexPeer, FlexAttribute } from "./component/flex"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -33,8 +34,9 @@ export class FlexModifier extends CommonMethodModifier implements FlexAttribute,
     applyFocusedAttribute(instance: FlexAttribute): void { }
     applyDisabledAttribute(instance: FlexAttribute): void { }
     applySelectedAttribute(instance: FlexAttribute): void { }
-    applyModifierPatch(peer: ArkFlexPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkFlexPeer;
     }
     mergeModifier(modifier: FlexModifier): void {
         super.mergeModifier(modifier)

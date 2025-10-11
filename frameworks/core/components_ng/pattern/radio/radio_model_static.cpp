@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 void RadioModelStatic::SetChecked(FrameNode* frameNode, const std::optional<bool> isChecked)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isChecked.value_or(false));
     if (isChecked) {
@@ -72,7 +72,7 @@ void RadioModelStatic::SetBuilder(FrameNode* frameNode, std::function<void()>&& 
 void RadioModelStatic::SetOnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }

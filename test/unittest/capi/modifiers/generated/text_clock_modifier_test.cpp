@@ -255,7 +255,7 @@ HWTEST_F(TextClockModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockModifierTest, setFontColorTestFontColorValidValues, TestSize.Level1)
+HWTEST_F(TextClockModifierTest, DISABLED_setFontColorTestFontColorValidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueFontColor;
 

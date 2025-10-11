@@ -51,6 +51,14 @@
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+// this is for excluding the conflics with macros which defined
+// in ../../prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/include/nb30.h
+#ifdef REGISTERING
+#undef REGISTERING
+#endif
+#ifdef REGISTERED
+#undef REGISTERED
+#endif
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
@@ -181,6 +189,8 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     // SORTED_SECTION
+    void AssignArkValue(Ark_AccessibilityAction& dst, const AccessibilityInterfaceAction& src);
+    void AssignArkValue(Ark_AccessibilityActionInterceptResult& dst, const AccessibilityActionInterceptResult& src);
     void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAction& src);
     void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src);
     void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src);
@@ -196,6 +206,9 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src);
     void AssignArkValue(Ark_CheckboxGroupResult& dst, const CheckboxGroupResult& src);
     void AssignArkValue(Ark_CrownAction& dst, const CrownAction& src);
+    void AssignArkValue(Ark_CustomSpanDrawInfo& dst, const CustomSpanOptions& src);
+    void AssignArkValue(Ark_CustomSpanMetrics& dst, const CustomSpanMetrics& src);
+    void AssignArkValue(Ark_CustomSpanMeasureInfo& dst, const CustomSpanMeasureInfo& src);
     void AssignArkValue(Ark_Date& dst, const DatePickerChangeEvent& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     void AssignArkValue(Ark_Date& dst, const std::string& src);
@@ -221,6 +234,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src);
     void AssignArkValue(Ark_Float64& dst, const double& src);
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
+    void AssignArkValue(Ark_font_FontInfo& dst, const FontInfo& src, ConvContext *ctx);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_FontWeight& dst, OHOS::Ace::FontWeight src);
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
@@ -277,7 +291,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src);
     void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src);
     void AssignArkValue(Ark_Number& dst, const Dimension& src);
-    void AssignArkValue(Ark_Number& dst, const LeadingMargin& src);
+    void AssignArkValue(Ark_Float64& dst, const Dimension& src);
+    void AssignArkValue(Ark_Float64& dst, const LeadingMargin& src);
     void AssignArkValue(Ark_Number& dst, const double& src);
     void AssignArkValue(Ark_Number& dst, const float& src);
     void AssignArkValue(Ark_Number& dst, const int32_t& src);
@@ -357,9 +372,16 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src);
     void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx);
     void AssignArkValue(Ark_TextChangeOptions& dst, const ChangeValueInfo& src, ConvContext *ctx);
+    void AssignArkValue(Ark_LengthMetricsCustom& dst, const CalcDimension& src);
     void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src);
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
+    void AssignArkValue(Ark_font_UIFontFallbackInfo& dst, const FallbackInfo& src, ConvContext* ctx);
+    void AssignArkValue(Ark_font_UIFontFallbackGroupInfo& dst, const FallbackGroup& src, ConvContext* ctx);
+    void AssignArkValue(Ark_font_UIFontAdjustInfo& dst, const AdjustInfo& src);
+    void AssignArkValue(Ark_font_UIFontAliasInfo& dst, const AliasInfo& src, ConvContext* ctx);
+    void AssignArkValue(Ark_font_UIFontGenericInfo& dst, const FontGenericInfo& src, ConvContext* ctx);
+    void AssignArkValue(Ark_font_UIFontConfig& dst, const FontConfigJsonInfo& src, ConvContext* ctx);
     void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx);
     void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src);
     void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src);

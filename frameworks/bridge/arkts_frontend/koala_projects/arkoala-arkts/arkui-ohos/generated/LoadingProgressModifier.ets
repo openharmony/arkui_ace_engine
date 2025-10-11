@@ -17,8 +17,9 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier } from "#handwritten"
+import { AttributeModifier, ContentModifier, hookLoadingProgressContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkLoadingProgressPeer, LoadingProgressConfiguration, LoadingProgressAttribute } from "./component/loadingProgress"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -40,8 +41,11 @@ export class LoadingProgressModifier extends CommonMethodModifier implements Loa
     _color_0_0value?: ResourceColor | undefined
     _enableLoading_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableLoading_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkLoadingProgressPeer): void {
-        super.applyModifierPatch(peer)
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<LoadingProgressConfiguration> | undefined
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkLoadingProgressPeer;
         if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._color_0_flag) {
@@ -78,6 +82,24 @@ export class LoadingProgressModifier extends CommonMethodModifier implements Loa
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookLoadingProgressContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<LoadingProgressConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookLoadingProgressContentModifier(peer, (undefined as ContentModifier<LoadingProgressConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: LoadingProgressModifier): void {
         super.mergeModifier(modifier)
@@ -107,6 +129,19 @@ export class LoadingProgressModifier extends CommonMethodModifier implements Loa
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<LoadingProgressConfiguration> | undefined));
+                }
+            }
+        }
     }
     color(value: ResourceColor | undefined): this {
         if (((this._color_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -127,6 +162,17 @@ export class LoadingProgressModifier extends CommonMethodModifier implements Loa
         } else
         {
             this._enableLoading_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<LoadingProgressConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

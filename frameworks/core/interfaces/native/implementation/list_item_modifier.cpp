@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/lazy_build_accessor.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -134,7 +135,8 @@ namespace ListItemModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ListItemModelStatic::CreateFrameNode(id);
+    auto frameNode = ListItemModelStatic::CreateFrameNode(id, false, LazyBuild::IsLazyBuild());
+    LazyBuild::ResetLazyBuild();
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -160,8 +162,7 @@ void SetSelectableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
-        return;
+        convValue = true;
     }
     ListItemModelStatic::SetSelectable(frameNode, *convValue);
 }
@@ -172,8 +173,7 @@ void SetSelectedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = ProcessBindableSelected(frameNode, value);
     if (!convValue) {
-        // Implement Reset value
-        return;
+        convValue = false;
     }
     ListItemModelStatic::SetSelected(frameNode, *convValue);
 }
@@ -184,7 +184,11 @@ void SetSwipeActionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListItemModelStatic::SetDeleteArea(frameNode, nullptr, nullptr, nullptr, nullptr, nullptr,
+            Dimension(0, DimensionUnit::VP), true);
+        ListItemModelStatic::SetDeleteArea(frameNode, nullptr, nullptr, nullptr, nullptr, nullptr,
+            Dimension(0, DimensionUnit::VP), false);
+        ListItemModelStatic::SetSwiperAction(frameNode, nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::None);
         return;
     }
 
@@ -212,7 +216,7 @@ void SetOnSelectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListItemModelStatic::SetSelectCallback(frameNode, nullptr);
         return;
     }
     auto onSelect = [arkCallback = CallbackHelper(*optValue)](bool param) {

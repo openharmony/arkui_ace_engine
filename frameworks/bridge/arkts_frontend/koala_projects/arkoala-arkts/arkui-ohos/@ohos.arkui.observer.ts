@@ -3,10 +3,11 @@ import { NavPathStack } from 'arkui/framework'
 import { UIContext } from '@ohos/arkui/UIContext';
 import UIAbilityContext from 'application.UIAbilityContext';
 import { NavDestinationMode } from 'arkui/framework'
+import { int32 } from "@koalaui/common"
 
 declare namespace uiObserver {
     export class DensityInfo {
-        density: number;
+        density: double;
     }
     type Callback<T,V = void> = (data: T) => V
       
@@ -16,6 +17,11 @@ declare namespace uiObserver {
         
         on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
+
+        onScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        offScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        onScrollEvent(callback: Callback<ScrollEventInfo>): void;
+        offScrollEvent(callback: Callback<ScrollEventInfo>): void;
     }
     export function createUIObserver(id: number): UIObserver;
 
@@ -38,7 +44,7 @@ declare namespace uiObserver {
 
     export class RouterPageInfo {
         context: UIAbilityContext | UIContext;
-        index: number;
+        index: int32;
         name: string;
         path: string;
         state: RouterPageState;
@@ -49,10 +55,10 @@ declare namespace uiObserver {
         navigationId: ResourceStr;
         name: ResourceStr;
         state: NavDestinationState;
-        index: number;
+        index: int32;
         param?: Object;
         navDestinationId: string;
-        uniqueId: number;
+        uniqueId?: int32;
         mode?: NavDestinationMode;
     }
 
@@ -65,6 +71,19 @@ declare namespace uiObserver {
     }
     export interface NavDestinationSwitchObserverOptions {
         navigationId: ResourceStr;
+    }
+    export interface ObserverOptions {
+      id: string
+    }
+    export interface ScrollEventInfo {
+        id: string;
+        uniqueId: number;
+        scrollEvent: ScrollEventType;
+        offset: number;
+    }
+    export enum ScrollEventType {
+      SCROLL_START = 0,
+      SCROLL_STOP = 1
     }
 }
 

@@ -19,6 +19,7 @@
 import { SecurityComponentMethodModifier } from "./SecurityComponentMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkPasteButtonPeer, PasteButtonCallback, PasteButtonOnClickResult, PasteButtonAttribute } from "./component/pasteButton"
 import { int32 } from "@koalaui/common"
 import { SecurityComponentMethod } from "./component/securityComponent"
@@ -37,8 +38,9 @@ export class PasteButtonModifier extends SecurityComponentMethodModifier impleme
     applySelectedAttribute(instance: PasteButtonAttribute): void { }
     _onClick_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onClick_0_0value?: PasteButtonCallback | undefined
-    applyModifierPatch(peer: ArkPasteButtonPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkPasteButtonPeer;
         if (this._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onClick_0_flag) {

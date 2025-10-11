@@ -15,18 +15,96 @@
 
 #include "arkoala_api_generated.h"
 
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/view_context/view_context_model_static.h"
 #include "core/components_ng/pattern/view_context/view_context_model.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/common/ace_engine.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t MAX_FLUSH_COUNT = 2;
+int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
+{
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    return (GetMicroTickCount() - pipelineContext->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
+}
+void ConvertAnimateParam(std::optional<AnimationOption>& result, const Opt_AnimateParam& optParam, bool isForm)
+{
+    if (optParam.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    const auto& src = optParam.value;
+    // If the attribute does not exist, the default value is used.
+    auto duration = Converter::OptConvert<int32_t>(src.duration).value_or(DEFAULT_DURATION);
+    auto delay = Converter::OptConvert<int32_t>(src.delay).value_or(0);
+    auto iterations = Converter::OptConvert<int32_t>(src.iterations).value_or(1);
+    auto tempo = static_cast<double>(Converter::OptConvert<float>(src.tempo).value_or(1.0f));
+    if (SystemProperties::GetRosenBackendEnabled() && NearZero(tempo)) {
+        // set duration to 0 to disable animation.
+        duration = 0;
+    }
+    auto direction = Converter::OptConvert<AnimationDirection>(src.playMode).value_or(AnimationDirection::NORMAL);
+    auto finishCallbackType = Converter::OptConvert<FinishCallbackType>(src.finishCallbackType)
+        .value_or(FinishCallbackType::REMOVED);
+    auto curve = Converter::OptConvert<RefPtr<Curve>>(src.curve).value_or(Curves::EASE_IN_OUT);
+    auto frameRateRange = Converter::OptConvert<RefPtr<FrameRateRange>>(src.expectedFrameRateRange)
+        .value_or(AceType::MakeRefPtr<FrameRateRange>(0, 0, 0));
+
+    // limit animation for ArkTS Form
+    if (isForm) {
+        if (duration > static_cast<int32_t>(DEFAULT_DURATION)) {
+            duration = static_cast<int32_t>(DEFAULT_DURATION);
+        }
+        if (delay != 0) {
+            delay = 0;
+        }
+        if (SystemProperties::IsFormAnimationLimited() && iterations != 1) {
+            iterations = 1;
+        }
+        if (!NearEqual(tempo, 1.0)) {
+            tempo = 1.0;
+        }
+    }
+    result = AnimationOption();
+
+    result->SetDuration(duration);
+    result->SetDelay(delay);
+    result->SetIteration(iterations);
+    result->SetTempo(tempo);
+    result->SetAnimationDirection(direction);
+    result->SetFinishCallbackType(finishCallbackType);
+    result->SetCurve(curve);
+    result->SetFrameRateRange(frameRateRange);
+}
+void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interface, const std::optional<int32_t>& cnt)
+{
+    auto animationInterfaceName = GetAnimationInterfaceName(interface);
+    CHECK_NULL_VOID(animationInterfaceName);
+    if (option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
+        if (interface == AnimationInterface::KEYFRAME_ANIMATE_TO) {
+            TAG_LOGI(AceLogTag::ACE_ANIMATION,
+                "keyframeAnimateTo iteration is infinite, remember to stop it. total duration:%{public}d",
+                option.GetDuration());
+        } else {
+            TAG_LOGI(AceLogTag::ACE_ANIMATION,
+                "%{public}s iteration is infinite. duration:%{public}d, curve:%{public}s",
+                animationInterfaceName, option.GetDuration(), option.GetCurve()->ToString().c_str());
+        }
+        return;
+    }
+    if (cnt) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "%{public}s starts, [%{public}s], finish cnt:%{public}d",
+            animationInterfaceName, option.ToString().c_str(), cnt.value());
+    }
+}
 } // namespace
 namespace AnimationExtenderAccessor {
 void SetClipRectImpl(Ark_NativePointer node,
@@ -135,13 +213,12 @@ void ExecuteSharedRuntimeAnimation(const RefPtr<Container>& container, const Ref
     }
     StartAnimationForStageMode(pipelineContextBase, option, onEventFinish, count, true);
 }
-#ifdef WRONG_GEN
-void AnimateToImmediatelyImpl(const Ark_AnimateParam* param, const Opt_Callback_Void* event_)
+
+void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param, const Callback_Void* event)
 {
-    auto event = Converter::OptConvert<Callback_Void>(*event_);
     std::function<void()> onEventFinish;
     if (event) {
-        onEventFinish = [arkCallback = CallbackHelper(event.value())]() {
+        onEventFinish = [arkCallback = CallbackHelper(*event)]() {
             arkCallback.InvokeSync();
         };
     }
@@ -164,7 +241,7 @@ void AnimateToImmediatelyImpl(const Ark_AnimateParam* param, const Opt_Callback_
     auto onFinish = Converter::OptConvert<Callback_Void>(param->onFinish);
     std::optional<int32_t> count;
     if (onFinish) {
-        count = GetAnimationFinshCount();
+        count = GetAnimationFinishCount();
         std::function<void()> onFinishEvent = [arkCallback = CallbackHelper(*onFinish), currentId]() mutable {
             ContainerScope scope(currentId);
             arkCallback.InvokeSync();
@@ -174,7 +251,7 @@ void AnimateToImmediatelyImpl(const Ark_AnimateParam* param, const Opt_Callback_
 
     ExecuteSharedRuntimeAnimation(container, pipelineContextBase, option, onEventFinish, count, true);
 }
-#endif
+
 void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
 {
     auto currentId = Container::CurrentIdSafelyWithCheck();
@@ -229,6 +306,63 @@ void CloseImplicitAnimationImpl()
     AnimationOption option;
     ViewContextModel::GetInstance()->closeAnimation(option, true);
 #endif
+}
+void OpenImplicitAnimationForAnimationImpl(Ark_NativePointer node,
+                                           const Opt_AnimateParam* param)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode && param);
+    ACE_SCOPED_TRACE("animationStart node[%d]", frameNode->GetId());
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_VOID(container);
+    auto pipelineContextBase = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContextBase);
+    if (pipelineContextBase->IsFormAnimationFinishCallback() &&
+        pipelineContextBase->IsFormRenderExceptDynamicComponent() &&
+        GetFormAnimationTimeInterval(pipelineContextBase) > DEFAULT_DURATION) {
+        TAG_LOGW(
+            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
+        return;
+    }
+    std::optional<AnimationOption> option;
+    ConvertAnimateParam(option, *param, pipelineContextBase->IsFormRenderExceptDynamicComponent());
+    if (option == std::nullopt) {
+        ViewContextModelStatic::OpenAnimation(frameNode, std::nullopt);
+        return;
+    }
+    if (pipelineContextBase->IsFormAnimationFinishCallback() &&
+        pipelineContextBase->IsFormRenderExceptDynamicComponent() &&
+        option->GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
+        option->SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase));
+        TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation SetDuration: %{public}lld ms",
+            static_cast<long long>(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase)));
+    }
+    auto arkParam = param->value; // previous check has insured param is not undefined.
+    auto onFinish = Converter::OptConvert<Callback_Void>(arkParam.onFinish);
+    if (onFinish) {
+        auto weakNode = AceType::WeakClaim(frameNode);
+        std::function<void()> onFinishEvent = [arkCallback = CallbackHelper(*onFinish),
+                                                  currentId = container->GetInstanceId(), weakNode]() {
+            ContainerScope scope(currentId);
+            auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(weakNode);
+            arkCallback.InvokeSync();
+        };
+        option->SetOnFinishEvent(onFinishEvent);
+    }
+    option->SetAllowRunningAsynchronously(true);
+    PrintAnimationInfo(*option, AnimationInterface::ANIMATION, std::nullopt);
+    option->SetAnimationInterface(AnimationInterface::ANIMATION);
+    AceScopedTrace paramTrace("%s", option->ToString().c_str());
+    ViewContextModelStatic::OpenAnimation(frameNode, option);
+}
+void CloseImplicitAnimationForAnimationImpl(Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ACE_SCOPED_TRACE("animationStop node[%d]", frameNode->GetId());
+    ViewContextModelStatic::CloseAnimation(frameNode);
 }
 void StartDoubleAnimationImpl(Ark_NativePointer node,
                               const Ark_DoubleAnimationParam* param)
@@ -344,8 +478,8 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
     // close KeyframeAnimation.
     AnimationUtils::CloseImplicitAnimation();
 }
-#ifdef WRONG_GEN
-void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ark_KeyframeState* keyframes)
+
+void KeyframeAnimationImplImpl(const Ark_KeyframeAnimateParam* param, const Array_KeyframeState* keyframes)
 {
     auto scopedDelegate = Container::CurrentIdSafelyWithCheck();
     if (!scopedDelegate) {
@@ -367,7 +501,7 @@ void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ar
     option.SetDelay(delay);
     option.SetIteration(iterations);
     if (param && param->onFinish.tag != INTEROP_TAG_UNDEFINED) {
-        count = GetAnimationFinshCount();
+        count = GetAnimationFinishCount();
         auto onFinishEvent = [arkCallback = CallbackHelper(param->onFinish.value),
                                  currentId = Container::CurrentIdSafely()]() mutable {
             ContainerScope scope(currentId);
@@ -380,9 +514,6 @@ void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ar
     if (keyframes && keyframes->array) {
         for (int i = 0; i < keyframes->length; ++i) {
             const auto& arkFrame = keyframes->array[i];
-            if (arkFrame.event.tag == INTEROP_TAG_UNDEFINED) {
-                continue;
-            }
             Keyframe keyframe;
             keyframe.duration = Converter::OptConvert<int32_t>(arkFrame.duration).value_or(DEFAULT_DURATION);
             if (keyframe.duration < 0) {
@@ -390,7 +521,7 @@ void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ar
             }
             totalDuration += keyframe.duration;
             keyframe.curve = Converter::OptConvert<RefPtr<Curve>>(arkFrame.curve).value_or(Curves::EASE_IN_OUT);
-            keyframe.animationClosure = [arkCallback = CallbackHelper(arkFrame.event.value),
+            keyframe.animationClosure = [arkCallback = CallbackHelper(arkFrame.event),
                                             currentId = Container::CurrentIdSafely()]() {
                 ContainerScope scope(currentId);
                 arkCallback.InvokeSync();
@@ -404,7 +535,7 @@ void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ar
     StartKeyframeAnimation(pipelineContext, option, parsedKeyframes, count);
     pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
 }
-#endif
+
 void AnimationTranslateImpl(Ark_NativePointer node,
                             const Ark_TranslateOptions* value)
 {
@@ -433,8 +564,12 @@ const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
         AnimationExtenderAccessor::SetClipRectImpl,
         AnimationExtenderAccessor::OpenImplicitAnimationImpl,
         AnimationExtenderAccessor::CloseImplicitAnimationImpl,
+        AnimationExtenderAccessor::OpenImplicitAnimationForAnimationImpl,
+        AnimationExtenderAccessor::CloseImplicitAnimationForAnimationImpl,
         AnimationExtenderAccessor::StartDoubleAnimationImpl,
         AnimationExtenderAccessor::AnimationTranslateImpl,
+        AnimationExtenderAccessor::AnimateToImmediatelyImplImpl,
+        AnimationExtenderAccessor::KeyframeAnimationImplImpl,
     };
     return &AnimationExtenderAccessorImpl;
 }

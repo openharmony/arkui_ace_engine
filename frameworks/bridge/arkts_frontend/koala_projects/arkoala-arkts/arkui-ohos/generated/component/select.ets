@@ -141,7 +141,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -169,7 +169,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -209,7 +209,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -237,7 +237,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -277,7 +277,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -409,7 +409,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -557,7 +557,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -1322,7 +1322,7 @@ export class MenuOutlineOptions_serializer {
                 if (valueHolderForColorTmpValueForIdx0 instanceof Color) {
                     valueSerializer.writeInt8((0).toChar())
                     const valueHolderForColorTmpValueForIdx0ForIdx0  = valueHolderForColorTmpValueForIdx0 as Color
-                    valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0ForIdx0.valueOf())
+                    valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForColorTmpValueForIdx0 instanceof number) {
                     valueSerializer.writeInt8((1).toChar())
                     const valueHolderForColorTmpValueForIdx0ForIdx1  = valueHolderForColorTmpValueForIdx0 as number
@@ -1380,11 +1380,11 @@ export class MenuOutlineOptions_serializer {
             let colorTmpBuf_ : ResourceColor | EdgeColors | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 const colorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let colorTmpBuf_BufU : Color | number | string | Resource | undefined
+                let colorTmpBuf_BufU : Color | int32 | string | Resource | undefined
                 if (colorTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    colorTmpBuf_BufU = Color.fromValue(valueDeserializer.readInt32())
+                    colorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (colorTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    colorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    colorTmpBuf_BufU = (valueDeserializer.readInt32())
                 } else if (colorTmpBuf_BufUUnionSelector == (2).toChar()) {
                     colorTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (colorTmpBuf_BufUUnionSelector == (3).toChar()) {
@@ -1392,7 +1392,7 @@ export class MenuOutlineOptions_serializer {
                 } else {
                     throw new Error("One of the branches for colorTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                colorTmpBuf_ = (colorTmpBuf_BufU as Color | number | string | Resource)
+                colorTmpBuf_ = (colorTmpBuf_BufU as Color | int32 | string | Resource)
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
             } else {

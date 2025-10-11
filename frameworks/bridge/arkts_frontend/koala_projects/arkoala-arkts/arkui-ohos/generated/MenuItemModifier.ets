@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkMenuItemPeer, MenuItemAttribute } from "./component/menuItem"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
@@ -51,8 +52,9 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
     _labelFont_0_0value?: Font | undefined
     _labelFontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _labelFontColor_0_0value?: ResourceColor | undefined
-    applyModifierPatch(peer: ArkMenuItemPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkMenuItemPeer;
         if (this._selected_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._selected_0_flag) {

@@ -133,7 +133,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -153,15 +153,15 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontSizeAttribute(value: number | string | Resource | undefined): void {
+    setFontSizeAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -177,15 +177,15 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontSizeAttribute(value: number | string | Resource | undefined): void {
+    setMinFontSizeAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -201,15 +201,15 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setMinFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxFontSizeAttribute(value: number | string | Resource | undefined): void {
+    setMaxFontSizeAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -225,15 +225,15 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setMaxFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontScaleAttribute(value: number | Resource | undefined): void {
+    setMinFontScaleAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -245,15 +245,15 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setMinFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxFontScaleAttribute(value: number | Resource | undefined): void {
+    setMaxFontScaleAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -301,15 +301,15 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setTextAlign(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLineHeightAttribute(value: number | string | Resource | undefined): void {
+    setLineHeightAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -357,12 +357,12 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setFontFamily(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxLinesAttribute(value: number | undefined): void {
+    setMaxLinesAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -381,15 +381,15 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setDecoration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLetterSpacingAttribute(value: number | string | undefined): void {
+    setLetterSpacingAttribute(value: double | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -413,15 +413,15 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setTextCase(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBaselineOffsetAttribute(value: number | string | undefined): void {
+    setBaselineOffsetAttribute(value: double | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -561,7 +561,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -589,7 +589,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as number
@@ -645,7 +645,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setDataDetectorConfig(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnTextSelectionChangeAttribute(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): void {
+    setOnTextSelectionChangeAttribute(value: ((selectionStart: int32,selectionEnd: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -772,15 +772,15 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): void {
+    setFontWeightAttribute(weight: int32 | FontWeight | string | undefined, options?: FontSettingOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (weight !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const weightTmpValue  = weight!
-            if (weightTmpValue instanceof number) {
+            if (weightTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toChar())
-                const weightTmpValueForIdx0  = weightTmpValue as number
-                thisSerializer.writeNumber(weightTmpValueForIdx0)
+                const weightTmpValueForIdx0  = weightTmpValue as int32
+                thisSerializer.writeInt32(weightTmpValueForIdx0)
             } else if (weightTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toChar())
                 const weightTmpValueForIdx1  = weightTmpValue as FontWeight
@@ -803,19 +803,19 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setFontWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSelectionAttribute(selectionStart: number | undefined, selectionEnd: number | undefined): void {
+    setSelectionAttribute(selectionStart: int32 | undefined, selectionEnd: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (selectionStart !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const selectionStartTmpValue  = selectionStart!
-            thisSerializer.writeNumber(selectionStartTmpValue)
+            thisSerializer.writeInt32(selectionStartTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         if (selectionEnd !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const selectionEndTmpValue  = selectionEnd!
-            thisSerializer.writeNumber(selectionEndTmpValue)
+            thisSerializer.writeInt32(selectionEndTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -866,19 +866,19 @@ export interface TextAttribute extends CommonMethod {
     fontColor(value: ResourceColor | undefined): this {
         throw new Error("Unimplemented method fontColor")
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method fontSize")
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method minFontSize")
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method maxFontSize")
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method minFontScale")
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method maxFontScale")
     }
     fontStyle(value: FontStyle | undefined): this {
@@ -890,7 +890,7 @@ export interface TextAttribute extends CommonMethod {
     textAlign(value: TextAlign | undefined): this {
         throw new Error("Unimplemented method textAlign")
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method lineHeight")
     }
     textOverflow(value: TextOverflowOptions | undefined): this {
@@ -899,19 +899,19 @@ export interface TextAttribute extends CommonMethod {
     fontFamily(value: string | Resource | undefined): this {
         throw new Error("Unimplemented method fontFamily")
     }
-    maxLines(value: number | undefined): this {
+    maxLines(value: int32 | undefined): this {
         throw new Error("Unimplemented method maxLines")
     }
     decoration(value: DecorationStyleInterface | undefined): this {
         throw new Error("Unimplemented method decoration")
     }
-    letterSpacing(value: number | string | undefined): this {
+    letterSpacing(value: double | string | undefined): this {
         throw new Error("Unimplemented method letterSpacing")
     }
     textCase(value: TextCase | undefined): this {
         throw new Error("Unimplemented method textCase")
     }
-    baselineOffset(value: number | string | undefined): this {
+    baselineOffset(value: double | string | undefined): this {
         throw new Error("Unimplemented method baselineOffset")
     }
     copyOption(value: CopyOptions | undefined): this {
@@ -951,7 +951,7 @@ export interface TextAttribute extends CommonMethod {
     dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
         throw new Error("Unimplemented method dataDetectorConfig")
     }
-    onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+    onTextSelectionChange(value: ((selectionStart: int32,selectionEnd: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onTextSelectionChange")
     }
     fontFeature(value: string | undefined): this {
@@ -981,10 +981,10 @@ export interface TextAttribute extends CommonMethod {
     font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         throw new Error("Unimplemented method font")
     }
-    fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this {
+    fontWeight(weight: int32 | FontWeight | string | undefined, options?: FontSettingOptions): this {
         throw new Error("Unimplemented method fontWeight")
     }
-    selection(selectionStart: number | undefined, selectionEnd: number | undefined): this {
+    selection(selectionStart: int32 | undefined, selectionEnd: int32 | undefined): this {
         throw new Error("Unimplemented method selection")
     }
     bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this {
@@ -996,22 +996,22 @@ export interface TextAttribute extends CommonMethod {
 }
 export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute {
     fontColor_value?: ResourceColor | undefined
-    fontSize_value?: number | string | Resource | undefined
-    minFontSize_value?: number | string | Resource | undefined
-    maxFontSize_value?: number | string | Resource | undefined
-    minFontScale_value?: number | Resource | undefined
-    maxFontScale_value?: number | Resource | undefined
+    fontSize_value?: double | string | Resource | undefined
+    minFontSize_value?: double | string | Resource | undefined
+    maxFontSize_value?: double | string | Resource | undefined
+    minFontScale_value?: double | Resource | undefined
+    maxFontScale_value?: double | Resource | undefined
     fontStyle_value?: FontStyle | undefined
     lineSpacing_value?: LengthMetrics | undefined
     textAlign_value?: TextAlign | undefined
-    lineHeight_value?: number | string | Resource | undefined
+    lineHeight_value?: double | string | Resource | undefined
     textOverflow_value?: TextOverflowOptions | undefined
     fontFamily_value?: string | Resource | undefined
-    maxLines_value?: number | undefined
+    maxLines_value?: int32 | undefined
     decoration_value?: DecorationStyleInterface | undefined
-    letterSpacing_value?: number | string | undefined
+    letterSpacing_value?: double | string | undefined
     textCase_value?: TextCase | undefined
-    baselineOffset_value?: number | string | undefined
+    baselineOffset_value?: double | string | undefined
     copyOption_value?: CopyOptions | undefined
     draggable_value?: boolean | undefined
     textShadow_value?: ShadowOptions | Array<ShadowOptions> | undefined
@@ -1025,7 +1025,7 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     ellipsisMode_value?: EllipsisMode | undefined
     enableDataDetector_value?: boolean | undefined
     dataDetectorConfig_value?: TextDataDetectorConfig | undefined
-    onTextSelectionChange_value?: ((selectionStart: number,selectionEnd: number) => void) | undefined
+    onTextSelectionChange_value?: ((selectionStart: int32,selectionEnd: int32) => void) | undefined
     fontFeature_value?: string | undefined
     marqueeOptions_value?: TextMarqueeOptions | undefined
     onMarqueeStateChange_value?: ((value0: MarqueeState) => void) | undefined
@@ -1041,19 +1041,19 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     fontColor(value: ResourceColor | undefined): this {
         return this
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         return this
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         return this
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         return this
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         return this
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         return this
     }
     fontStyle(value: FontStyle | undefined): this {
@@ -1065,7 +1065,7 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     textAlign(value: TextAlign | undefined): this {
         return this
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         return this
     }
     textOverflow(value: TextOverflowOptions | undefined): this {
@@ -1074,19 +1074,19 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     fontFamily(value: string | Resource | undefined): this {
         return this
     }
-    maxLines(value: number | undefined): this {
+    maxLines(value: int32 | undefined): this {
         return this
     }
     decoration(value: DecorationStyleInterface | undefined): this {
         return this
     }
-    letterSpacing(value: number | string | undefined): this {
+    letterSpacing(value: double | string | undefined): this {
         return this
     }
     textCase(value: TextCase | undefined): this {
         return this
     }
-    baselineOffset(value: number | string | undefined): this {
+    baselineOffset(value: double | string | undefined): this {
         return this
     }
     copyOption(value: CopyOptions | undefined): this {
@@ -1128,7 +1128,7 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
         return this
     }
-    onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+    onTextSelectionChange(value: ((selectionStart: int32,selectionEnd: int32) => void) | undefined): this {
         return this
     }
     fontFeature(value: string | undefined): this {
@@ -1158,10 +1158,10 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         return this
     }
-    fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this {
+    fontWeight(weight: int32 | FontWeight | string | undefined, options?: FontSettingOptions): this {
         return this
     }
-    selection(selectionStart: number | undefined, selectionEnd: number | undefined): this {
+    selection(selectionStart: int32 | undefined, selectionEnd: int32 | undefined): this {
         return this
     }
     bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this {
@@ -1197,10 +1197,10 @@ export interface TextOptions {
 }
 export interface TextMarqueeOptions {
     start: boolean;
-    step?: number;
-    loop?: number;
+    step?: double;
+    loop?: int32;
     fromStart?: boolean;
-    delay?: number;
+    delay?: int32;
     fadeout?: boolean;
     marqueeStartPolicy?: MarqueeStartPolicy;
 }
@@ -1229,41 +1229,41 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         }
         return this
     }
-    public fontSize(value: number | string | Resource | undefined): this {
+    public fontSize(value: double | string | Resource | undefined): this {
         if (this.checkPriority("fontSize")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public minFontSize(value: number | string | Resource | undefined): this {
+    public minFontSize(value: double | string | Resource | undefined): this {
         if (this.checkPriority("minFontSize")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setMinFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public maxFontSize(value: number | string | Resource | undefined): this {
+    public maxFontSize(value: double | string | Resource | undefined): this {
         if (this.checkPriority("maxFontSize")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setMaxFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public minFontScale(value: number | Resource | undefined): this {
+    public minFontScale(value: double | Resource | undefined): this {
         if (this.checkPriority("minFontScale")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setMinFontScaleAttribute(value_casted)
             return this
         }
         return this
     }
-    public maxFontScale(value: number | Resource | undefined): this {
+    public maxFontScale(value: double | Resource | undefined): this {
         if (this.checkPriority("maxFontScale")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setMaxFontScaleAttribute(value_casted)
             return this
         }
@@ -1293,9 +1293,9 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         }
         return this
     }
-    public lineHeight(value: number | string | Resource | undefined): this {
+    public lineHeight(value: double | string | Resource | undefined): this {
         if (this.checkPriority("lineHeight")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setLineHeightAttribute(value_casted)
             return this
         }
@@ -1317,9 +1317,9 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         }
         return this
     }
-    public maxLines(value: number | undefined): this {
+    public maxLines(value: int32 | undefined): this {
         if (this.checkPriority("maxLines")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setMaxLinesAttribute(value_casted)
             return this
         }
@@ -1333,9 +1333,9 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         }
         return this
     }
-    public letterSpacing(value: number | string | undefined): this {
+    public letterSpacing(value: double | string | undefined): this {
         if (this.checkPriority("letterSpacing")) {
-            const value_casted = value as (number | string | undefined)
+            const value_casted = value as (double | string | undefined)
             this.getPeer()?.setLetterSpacingAttribute(value_casted)
             return this
         }
@@ -1349,9 +1349,9 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         }
         return this
     }
-    public baselineOffset(value: number | string | undefined): this {
+    public baselineOffset(value: double | string | undefined): this {
         if (this.checkPriority("baselineOffset")) {
-            const value_casted = value as (number | string | undefined)
+            const value_casted = value as (double | string | undefined)
             this.getPeer()?.setBaselineOffsetAttribute(value_casted)
             return this
         }
@@ -1461,9 +1461,9 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         }
         return this
     }
-    public onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+    public onTextSelectionChange(value: ((selectionStart: int32,selectionEnd: int32) => void) | undefined): this {
         if (this.checkPriority("onTextSelectionChange")) {
-            const value_casted = value as (((selectionStart: number,selectionEnd: number) => void) | undefined)
+            const value_casted = value as (((selectionStart: int32,selectionEnd: int32) => void) | undefined)
             this.getPeer()?.setOnTextSelectionChangeAttribute(value_casted)
             return this
         }
@@ -1542,19 +1542,19 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         }
         return this
     }
-    public fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this {
+    public fontWeight(weight: int32 | FontWeight | string | undefined, options?: FontSettingOptions): this {
         if (this.checkPriority("fontWeight")) {
-            const weight_casted = weight as (number | FontWeight | string | undefined)
+            const weight_casted = weight as (int32 | FontWeight | string | undefined)
             const options_casted = options as (FontSettingOptions | undefined)
             this.getPeer()?.setFontWeightAttribute(weight_casted, options_casted)
             return this
         }
         return this
     }
-    public selection(selectionStart: number | undefined, selectionEnd: number | undefined): this {
+    public selection(selectionStart: int32 | undefined, selectionEnd: int32 | undefined): this {
         if (this.checkPriority("selection")) {
-            const selectionStart_casted = selectionStart as (number | undefined)
-            const selectionEnd_casted = selectionEnd as (number | undefined)
+            const selectionStart_casted = selectionStart as (int32 | undefined)
+            const selectionEnd_casted = selectionEnd as (int32 | undefined)
             this.getPeer()?.setSelectionAttribute(selectionStart_casted, selectionEnd_casted)
             return this
         }
@@ -1645,7 +1645,7 @@ export class TextMarqueeOptions_serializer {
         if (valueHolderForStep !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStepTmpValue  = valueHolderForStep!
-            valueSerializer.writeNumber(valueHolderForStepTmpValue)
+            valueSerializer.writeFloat64(valueHolderForStepTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1653,7 +1653,7 @@ export class TextMarqueeOptions_serializer {
         if (valueHolderForLoop !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLoopTmpValue  = valueHolderForLoop!
-            valueSerializer.writeNumber(valueHolderForLoopTmpValue)
+            valueSerializer.writeInt32(valueHolderForLoopTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1669,7 +1669,7 @@ export class TextMarqueeOptions_serializer {
         if (valueHolderForDelay !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDelayTmpValue  = valueHolderForDelay!
-            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1694,17 +1694,17 @@ export class TextMarqueeOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const startTmpResult : boolean = valueDeserializer.readBoolean()
         const stepTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let stepTmpBuf : number | undefined = undefined
+        let stepTmpBuf : double | undefined = undefined
         if ((stepTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            stepTmpBuf = (valueDeserializer.readNumber() as number)
+            stepTmpBuf = valueDeserializer.readFloat64()
         }
-        const stepTmpResult : number | undefined = stepTmpBuf
+        const stepTmpResult : double | undefined = stepTmpBuf
         const loopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let loopTmpBuf : number | undefined = undefined
+        let loopTmpBuf : int32 | undefined = undefined
         if ((loopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            loopTmpBuf = (valueDeserializer.readNumber() as number)
+            loopTmpBuf = valueDeserializer.readInt32()
         }
-        const loopTmpResult : number | undefined = loopTmpBuf
+        const loopTmpResult : int32 | undefined = loopTmpBuf
         const fromStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fromStartTmpBuf : boolean | undefined = undefined
         if ((fromStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1712,11 +1712,11 @@ export class TextMarqueeOptions_serializer {
         }
         const fromStartTmpResult : boolean | undefined = fromStartTmpBuf
         const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let delayTmpBuf : number | undefined = undefined
+        let delayTmpBuf : int32 | undefined = undefined
         if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            delayTmpBuf = (valueDeserializer.readNumber() as number)
+            delayTmpBuf = valueDeserializer.readInt32()
         }
-        const delayTmpResult : number | undefined = delayTmpBuf
+        const delayTmpResult : int32 | undefined = delayTmpBuf
         const fadeoutTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fadeoutTmpBuf : boolean | undefined = undefined
         if ((fadeoutTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

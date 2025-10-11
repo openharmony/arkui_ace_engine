@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkScreenPeer, ScreenAttribute } from "./component/screen"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -33,8 +34,9 @@ export class ScreenModifier extends CommonMethodModifier implements ScreenAttrib
     applyFocusedAttribute(instance: ScreenAttribute): void { }
     applyDisabledAttribute(instance: ScreenAttribute): void { }
     applySelectedAttribute(instance: ScreenAttribute): void { }
-    applyModifierPatch(peer: ArkScreenPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkScreenPeer;
     }
     mergeModifier(modifier: ScreenModifier): void {
         super.mergeModifier(modifier)

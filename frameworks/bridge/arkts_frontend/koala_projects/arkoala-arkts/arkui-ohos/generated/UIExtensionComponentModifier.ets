@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkUIExtensionComponentPeer, UIExtensionProxy, UIExtensionComponentAttribute } from "./component/uiExtensionComponent"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, TerminationInfo } from "./component/common"
@@ -45,8 +46,9 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
     _onTerminated_0_0value?: ((value0: TerminationInfo) => void) | undefined
     _onDrawReady_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDrawReady_0_0value?: (() => void) | undefined
-    applyModifierPatch(peer: ArkUIExtensionComponentPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkUIExtensionComponentPeer;
         if (this._onRemoteReady_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onRemoteReady_0_flag) {

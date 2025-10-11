@@ -295,9 +295,9 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTest, TestSize.Level1)
     auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEST_VALUE, &ctx);
     auto options = Converter::ArkValue<Opt_RichEditorTextSpanOptions>(textSpanOptions);
 
-    accessor_->addTextSpan(peer_, &value, &options);
+    auto code = accessor_->addTextSpan(peer_, &value, &options);
+    EXPECT_NE(code, 1);
     const TextSpanOptions& result = mockRichEditorController_->textSpanOptions_;
-
     ASSERT_TRUE(result.offset);
     EXPECT_EQ(result.offset.value(), TEST_OFFSET);
 

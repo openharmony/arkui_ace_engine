@@ -380,7 +380,7 @@ KOALA_INTEROP_DIRECT_V4(WriteByte, KNativePointer, KLong, KLong, KInt)
 
 void impl_CopyArray(KNativePointer data, KLong length, KByte* array) {
     if (!array || !data) {
-        INTEROP_FATAL("CopyArray called with incorrect nullptr args (array, data):(%p, %p)", array, data);
+        INTEROP_FATAL("CopyArray called with incorrect nullptr args");
     }
 
     interop_memcpy(data, length, array, length);
@@ -770,7 +770,7 @@ void impl_ReportMemLeaks() {
 #ifndef KOALA_INTEROP_MEM_ANALYZER
     const auto count = mallocCounter.load(std::memory_order_acquire);
     if (count > 0) {
-        fprintf(stderr, "Memory leaks detected: %d blocks\n", count);
+        fprintf(stderr, "Memory leaks detected: %u blocks\n", count);
     } else {
 		fprintf(stderr, "No memory leaks\n");
 	}

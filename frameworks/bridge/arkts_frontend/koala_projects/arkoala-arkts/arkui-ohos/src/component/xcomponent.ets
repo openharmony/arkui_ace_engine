@@ -43,7 +43,9 @@ export class TypedXComponentPeerInternal extends ArkXComponentPeer {
 }
 
 export interface XComponentOptionsInternal {
-
+    onSurfaceCreated: ((surfaceId: string) => void);
+    onSurfaceChanged: ((surfaceId: string, surfaceRect: SurfaceRect) => void);
+    onSurfaceDestroyed: ((surfaceId: string) => void);
 }
 
 export interface XComponentParametersInternal {

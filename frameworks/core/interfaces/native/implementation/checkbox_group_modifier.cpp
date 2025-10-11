@@ -21,6 +21,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -43,7 +44,9 @@ std::optional<bool> ProcessBindableSelectAll(FrameNode* frameNode, const Opt_Uni
             };
             CheckBoxGroupModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
         },
-        [] {});
+        [&result] {
+            result = false;
+        });
     return result;
 }
 } // namespace
@@ -112,10 +115,14 @@ void SetMarkImpl(Ark_NativePointer node,
     if (auto color = Converter::OptConvert<Color>(optValue->strokeColor); color) {
         CheckBoxGroupModelStatic::SetCheckMarkColor(frameNode, color);
     }
-    if (auto size = Converter::OptConvert<Dimension>(optValue->size); size) {
+    auto size = Converter::OptConvert<Dimension>(optValue->size);
+    Validator::ValidateNonNegative(size);
+    if (size) {
         CheckBoxGroupModelStatic::SetCheckMarkSize(frameNode, size);
     }
-    if (auto strokeWidth = Converter::OptConvert<Dimension>(optValue->strokeWidth); strokeWidth) {
+    auto strokeWidth = Converter::OptConvert<Dimension>(optValue->strokeWidth);
+    Validator::ValidateNonNegative(strokeWidth);
+    if (strokeWidth) {
         CheckBoxGroupModelStatic::SetCheckMarkWidth(frameNode, strokeWidth);
     }
 }
@@ -126,7 +133,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        CheckBoxGroupModelStatic::SetOnChange(frameNode, nullptr);
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* info) {

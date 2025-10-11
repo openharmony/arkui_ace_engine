@@ -21,8 +21,8 @@
 #include "base/error/error_code.h"
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/syntax/node_content_peer.h"
 #include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
-#include "frameworks/core/interfaces/native/ani/node_content_peer.h"
 
 namespace {
 constexpr char NAV_PATH_STACK_CLASS[] = "arkui.component.navigation.NavPathStack";
@@ -40,7 +40,7 @@ int32_t GetFrameNodeFromAniObject(ani_env* env, ani_object frameNodePeerObj, OHO
     }
 
     ani_long frameNodePeerPtr;
-    status = env->Object_CallMethodByName_Long(frameNodePeerObj, "unboxed", ":l", &frameNodePeerPtr);
+    status = env->Object_CallMethodByName_Long(frameNodePeerObj, "toLong", ":l", &frameNodePeerPtr);
     if (status != ANI_OK) {
         LOGE("fail to unbox frameNodePeerObj");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
@@ -196,7 +196,7 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
     }
 
     ani_long nodeContentPeerPtr;
-    status = env->Object_CallMethodByName_Long(nodeContentPeerObj, "unboxed", ":l", &nodeContentPeerPtr);
+    status = env->Object_CallMethodByName_Long(nodeContentPeerObj, "toLong", ":l", &nodeContentPeerPtr);
     if (status != ANI_OK) {
         LOGE("unbox nodeContentPeerObj fail");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
@@ -268,14 +268,9 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromAniValue(
     if (object == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    auto increaseRefApi = reinterpret_cast<void (*)(void*)>(OHOS::Ace::NodeModel::IncreaseRefDrawable());
-    if (!increaseRefApi) {
-        LOGE("find increase drawable ref count api failed in libace module");
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
     ArkUI_DrawableDescriptor* drawable =
         new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, object, nullptr, nullptr, nullptr, nullptr };
-    increaseRefApi(object);
+    OHOS::Ace::NodeModel::IncreaseRefDrawable(object);
     *drawableDescriptor = drawable;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }

@@ -288,7 +288,7 @@ static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array filters)
     return result;
 }
  
-static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_double depth, ani_array filters)
+static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_int depth, ani_array filters)
 {
     if (depth < 0) {
         AniThrow(env, "The parameter depth must be greater than 0.",

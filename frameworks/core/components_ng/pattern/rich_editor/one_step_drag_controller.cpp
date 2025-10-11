@@ -186,7 +186,7 @@ MenuParam PlaceholderOneStepDragParam::GetMenuParam(const RefPtr<FrameNode>& fra
 void PlaceholderOneStepDragParam::EnableDrag(const RefPtr<FrameNode>& frameNode) const
 {
     OneStepDragParam::EnableDrag(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto dragStart = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) -> DragDropInfo {
         return DragDropInfo();
@@ -260,8 +260,8 @@ void OneStepDragController::CopyDragCallback(TextSpanType spanType, const RefPtr
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
 
-    auto hostEventHub = host->GetOrCreateEventHub<EventHub>();
-    auto frameNodeEventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto hostEventHub = host->GetEventHub<EventHub>();
+    auto frameNodeEventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hostEventHub && frameNodeEventHub);
 
     // start

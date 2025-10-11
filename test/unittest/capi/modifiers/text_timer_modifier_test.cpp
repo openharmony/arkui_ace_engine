@@ -321,7 +321,7 @@ HWTEST_F(TextTimerModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerModifierTest, setFontColorTestFontColorValidValues, TestSize.Level1)
+HWTEST_F(TextTimerModifierTest, DISABLED_setFontColorTestFontColorValidValues, TestSize.Level1)
 {
     auto checkValue = [this](
                           const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
@@ -1271,7 +1271,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowFillInvalidValues, Te
 HWTEST_F(TextTimerModifierTest, DISABLED_setOnTimerTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<TextTimerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TextTimerEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;

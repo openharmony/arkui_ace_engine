@@ -17,7 +17,8 @@ import { ArkUIAniModule } from 'arkui.ani'
 import { KPointer } from '@koalaui/interop';
 import { PeerNode, findPeerNode } from '../PeerNode';
 import { int32 } from '@koalaui/common';
-import { __context, __id, GlobalStateManager, IncrementalNode, memoEntry, memoEntry1, mutableState, MutableState, NodeAttach, StateContext } from '@koalaui/runtime';
+import { __context, __id, GlobalStateManager, IncrementalNode, memoEntry, memoEntry1, mutableState, MutableState, NodeAttach } from '@koalaui/runtime';
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { ExtendableComponent } from './extendableComponent';
 import { 
     StateDecoratedVariable, 
@@ -29,15 +30,17 @@ import {
     uiUtils,
     IObservedObject,
     OBSERVE,
-    ObserveSingleton
+    ObserveSingleton,
+    IProvideDecoratedVariable
 } from '../stateManagement';
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { DetachedRootEntryImpl, UIContextImpl } from 'arkui/base/UIContextImpl';
-import { CustomComponent } from './customComponent';
+import { CustomComponent, CustomDelegate } from './customComponent';
 import { setNeedCreate } from '../ArkComponentRoot';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { ArkContentSlotPeer } from './contentSlot';
+import { ArkCustomComponentRootPeer } from "#generated";
 
 export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
@@ -97,11 +100,11 @@ export function compatibleComponent(
 
 export function compatibleStaticComponent<T extends CustomComponent<T, T_Options>, T_Options>(
     factory: () => T,
-    options?: T_Options,
+    options?: () => T_Options,
     content?: () => void
-): number {
+): [() => void, number] {
     const instantiateImpl = /** @memo */ (): void => {
-        T._instantiateImpl(undefined, factory, options, undefined, content);
+        T._instantiateImpl(undefined, factory, options ? options() : undefined, undefined, content);
     };
 
     const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
@@ -128,10 +131,11 @@ export function compatibleStaticComponent<T extends CustomComponent<T, T_Options
     const peerNode = findPeerNode(inc);
     if (peerNode === undefined) {
         node.dispose();
-        return 0;
+        return [() => {}, 0];
     }
+    const staticComponent = (peerNode as ArkCustomComponentRootPeer).getComponent();
     uiContext.getDetachedRootEntryManager().detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node));
-    return peerNode.getPeerPtr() as number;
+    return [() => {(staticComponent as CustomDelegate<T, T_Options>).__updateStruct(options ? options() : undefined);}, peerNode.getPeerPtr() as number];
 }
 
 function openInterop(): void {
@@ -145,6 +149,10 @@ function openInterop(): void {
     registerCreateStaticObservedCallback();
     registerCompatibleStaticComponentCallback();
     registerMakeBuilderParameterStaticProxy();
+    registerUpdateInteropExtendableComponent();
+    registerResetInteropExtendableComponent();
+    registerTransferCompatibleBuilderCallback();
+    registertransferCompatibleDynamicBuilderCallback();
 }
 
 function closeInterop(): void {
@@ -349,8 +357,22 @@ export function registerMakeBuilderParameterStaticProxy(): void {
     registerCallback.invoke(makeBuilderParameterStaticProxy);
 }
 
+export function registerTransferCompatibleBuilderCallback(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerTransferCompatibleBuilderCallback');
+    const callback = (builder: Any) => { return transferCompatibleBuilder(builder).unwrap()!};
+    registerCallback.invoke(callback);
+}
+
+type ESValueOrUndefined  = ESValue | undefined;
+
 /** @memo */
 export function compatibleWrappedBuilder(builder: Any, ...args: FixedArray<ESValue>): void {
+    compatibleWrappedBuilderInternal(builder, ...args);
+}
+
+/** @memo */
+export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArray<ESValueOrUndefined>): void {
     compatibleComponent((() => {
         const global = ESValue.getGlobal();
         const viewStackProcessor = global.getProperty('ViewStackProcessor');
@@ -425,7 +447,7 @@ export function compatibleWrappedBuilder(builder: Any, ...args: FixedArray<ESVal
         if (args.length !== 1) {
             return;
         }
-        const param = args[0]
+        const param = args[0] as ESValue;
         if (param.typeOf() !== 'object') {
             return;
         }
@@ -562,4 +584,99 @@ class InteropBuilderLiteralProxyHandler<T extends Object> extends proxy.DefaultP
         this.state.value;
         return propertyGetter.invoke().unwrap();
     }
+}
+
+export class InteropExtendableComponent extends ExtendableComponent {
+    dynamicComponent: ESValue;
+    originComponent?: WeakRef<ExtendableComponent>;
+    constructor(dynamicComponent: ESValue) {
+        super();
+        this.dynamicComponent = dynamicComponent;
+        const prev = ExtendableComponent.current;
+        if (prev) {
+            this.originComponent = new WeakRef<ExtendableComponent>(prev! as ExtendableComponent);
+        }
+    }
+
+    /** @memo */ build(): void {}
+
+    override findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | null {
+        const value = this.dynamicComponent.invokeMethod('findProvidePU', ESValue.wrap(providedPropName));
+        if (value.unwrap() == undefined) {
+            return null;
+        }
+        const getProxy = value.invokeMethod('getProxy').unwrap();
+        if (getProxy === undefined && ExtendableComponent.current) {
+            const provideVar = new ProvideDecoratedVariable<T>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, uiUtils.makeObserved(value.invokeMethod('get').unwrap()) as T, false);
+            value.invokeMethod('setProxy', ESValue.wrap(provideVar));
+            const setProxyValue = ((newVal: T): void => {
+                value.invokeMethod('set', ESValue.wrap(newVal));
+            });
+            provideVar.setProxyValue = setProxyValue;
+            const global = ESValue.getGlobal();
+            const setSource = ((newVal: T): void => {
+                provideVar.set(newVal);
+            });
+            const fireChange = (): void => {
+                provideVar.fireChange();
+            }
+            global.getProperty('updateNotifyCallback').invoke(value, ESValue.wrap(fireChange));
+            const notifyProxy = (): void => {
+                value.invokeMethod('syncPeerHasChanged');
+            };
+            provideVar.addWatch(notifyProxy);
+            global.getProperty('updateSetValueCallback').invoke(value, ESValue.wrap(setSource));
+            return provideVar;
+        }
+        else {
+            return getProxy as IProvideDecoratedVariable<T>;
+        }
+    }
+
+    override addProvidedVar<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean | undefined): void {}
+}
+
+export function updateInteropExtendableComponent(dynamicComponent: Object): void {
+    ExtendableComponent.current = new InteropExtendableComponent(ESValue.wrap(dynamicComponent));
+}
+
+export function resetInteropExtendableComponent(): void {
+    const dynamicComponent = ExtendableComponent.current;
+    ExtendableComponent.current = (dynamicComponent as InteropExtendableComponent).originComponent?.deref();
+}
+
+export function registerUpdateInteropExtendableComponent(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerUpdateInteropExtendableComponent');
+    registerCallback.invoke(updateInteropExtendableComponent);
+}
+
+export function registerResetInteropExtendableComponent(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerResetInteropExtendableComponent');
+    registerCallback.invoke(resetInteropExtendableComponent);
+}
+
+function registertransferCompatibleDynamicBuilderCallback(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerTransferCompatibleDynamicBuilderCallback');
+    registerCallback.invoke(transferCompatibleDynamicBuilder);
+}
+
+function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) => void):
+/** @memo */
+(...args: FixedArray<Any>) => void {
+    return (
+        /** @memo */
+        (...args: FixedArray<Any>) => {
+            let argsESValue: FixedArray<ESValueOrUndefined> = new ESValueOrUndefined[args.length]; 
+            for (let i = 0; i < args.length; i++) {
+                if (args[i] instanceof ESValue) {
+                    argsESValue[i] = args[i] as ESValue;
+                }
+                argsESValue[i] = ESValue.wrap(args[i]);
+            }
+            compatibleWrappedBuilderInternal(builder, ...argsESValue);
+        }
+    )
 }

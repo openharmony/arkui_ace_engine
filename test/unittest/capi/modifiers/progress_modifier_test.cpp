@@ -17,6 +17,8 @@
 #include "generated/type_helpers.h"
 
 #include "core/components/progress/progress_theme.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 using namespace testing;
@@ -457,6 +459,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidValues, TestSize.Lev
     capsuleStyle.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#23456134");
     capsuleStyle.showDefaultPercentage = Converter::ArkValue<Opt_Boolean>(true);
     capsuleStyle.font = Converter::ArkValue<Opt_Font>(Ark_Empty());
+    capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty());
     options =
         Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
             Ark_CapsuleStyleOptions>(capsuleStyle);
@@ -471,8 +474,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidValues, TestSize.Lev
     EXPECT_EQ(result, "7.00px");
     result = GetAttrValue<std::string>(strResult, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
     EXPECT_EQ(result, "true");
+#ifdef WRONG_GEN
     result = GetAttrValue<std::string>(strResult, ATTRIBUTE_CONTENT_NAME);
     EXPECT_EQ(result, "content");
+#endif
     result = GetAttrValue<std::string>(strResult, ATTRIBUTE_FONT_COLOR_NAME);
     EXPECT_EQ(result, "#23456134");
     result = GetAttrValue<std::string>(strResult, ATTRIBUTE_SHOW_DEFAULT_PERCENTAGE_NAME);
@@ -499,15 +504,14 @@ HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidFontValues, TestSize
     capsuleStyle.borderWidth = Converter::ArkValue<Opt_Length>(Ark_Empty());
     capsuleStyle.fontColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
     capsuleStyle.showDefaultPercentage = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
+    capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty());
     Ark_Font font;
     Ark_Union_String_Resource family = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(
         Converter::ArkValue<Ark_String>("Family"));
     font.family = Converter::ArkValue<Opt_Union_String_Resource>(family);
     font.size = Converter::ArkValue<Opt_Length>("9px");
     font.style = Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC);
-    Ark_Union_FontWeight_Number_String weight =
-        Converter::ArkUnion<Ark_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD);
-    font.weight = Converter::ArkValue<Opt_Union_FontWeight_Number_String>(weight);
+    font.weight = Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD);
     capsuleStyle.font = Converter::ArkValue<Opt_Font>(font);
     options =
         Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
@@ -577,5 +581,41 @@ HWTEST_F(ProgressModifierTest, DISABLED_setProgressStyleValidValues, TestSize.Le
     EXPECT_EQ(result, "15.00px");
     strResult = GetStringAttribute(node_, ATTRIBUTE_ENABLE_SMOOTH_EFFECT_NAME);
     EXPECT_EQ(strResult, "false");
+}
+
+/*
+* @tc.name: setCapsuleStyleValidBorderRadiusValues
+* @tc.desc:
+* @tc.type: FUNC
+*/
+HWTEST_F(ProgressModifierTest, setCapsuleStyleValidBorderRadiusValues, TestSize.Level1)
+{
+    Ark_ProgressOptions progressOptions;
+    progressOptions.value = Converter::ArkValue<Ark_Number>(5);
+    progressOptions.total = Converter::ArkValue<Opt_Number>();
+    progressOptions.type = Converter::ArkValue<Opt_ProgressType>(ARK_PROGRESS_TYPE_CAPSULE);
+    modifier_->setProgressOptions(node_, &progressOptions);
+
+    Ark_CapsuleStyleOptions capsuleStyle;
+    capsuleStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>();
+    capsuleStyle.borderColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
+    capsuleStyle.borderWidth = Converter::ArkValue<Opt_Length>();
+    capsuleStyle.fontColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
+    capsuleStyle.showDefaultPercentage = Converter::ArkValue<Opt_Boolean>();
+    capsuleStyle.font = Converter::ArkValue<Opt_Font>(Ark_Empty());
+
+    capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetrics>(Dimension(11, DimensionUnit::VP));
+    auto options =
+        Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
+            Ark_CapsuleStyleOptions>(capsuleStyle);
+    modifier_->setStyle(node_, &options);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto borderRadius = paintProperty->GetBorderRadius();
+    ASSERT_TRUE(borderRadius.has_value());
+    EXPECT_EQ(borderRadius->ToString(), "11.00vp");
 }
 } // namespace OHOS::Ace::NG

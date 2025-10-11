@@ -539,7 +539,7 @@ export struct ToolBar {
         this.maxFontSizeScale = maxFontScale;
       }
     } catch (err) {
-      let code: undefined | number = (err as ClassCastError)?.code;
+      let code: undefined | int = (err as ClassCastError)?.code;
       let message: undefined | string = (err as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace',
         `Faild to toolBar getMaxFontScale, code: ${code}, message: ${message}`);
@@ -557,7 +557,7 @@ export struct ToolBar {
         .height(1)
         .attributeModifier(this.dividerModifier)
       Row() {
-        ForEach(this.toolBarList as ToolBarOption[], (item: ToolBarOption, index: number) => {
+        ForEach(this.toolBarList as ToolBarOption[], (item: ToolBarOption, index: int) => {
           if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH || index < this.moreIndex) {
             Row() {
               this.TabBuilder(index);
@@ -565,7 +565,7 @@ export struct ToolBar {
             .height('100%')
             .flexShrink(1)
           }
-        }, (item: ToolBarOption, index: number) => {
+        }, (item: ToolBarOption, index: int) => {
           return `${this.getUniqueId()}__${index}}`;
         })
         if (this.isRefreshData && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
@@ -609,14 +609,14 @@ struct ToolBarDialog {
   mainWindowStage: window.Window | undefined = undefined;
   controller?: CustomDialogController;
   screenWidth: number = 640;
-  verticalScreenLines: number = 6;
-  horizontalsScreenLines: number = 1;
+  verticalScreenLines: int = 6;
+  horizontalsScreenLines: int = 1;
   cancel: () => void = () => {
   };
   confirm: () => void = () => {
   };
   @PropRef fontSize: number = 1;
-  @State maxLines: number = 1;
+  @State maxLines: int = 1;
   @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
   @Observed
   @State symbolEffect: SymbolEffect = new SymbolEffect();
@@ -718,7 +718,7 @@ struct ToolBarDialog {
         }
       }
     } catch (err) {
-      let code: number | undefined = (err as ClassCastError)?.code;
+      let code: int | undefined = (err as ClassCastError)?.code;
       let message: string | undefined = (err as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace',
         `Faild to ToolBarDialog aboutToAppear, code: ${code}, message: ${message}`);

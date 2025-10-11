@@ -19,6 +19,7 @@
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
+#include "core/interfaces/native/implementation/custom_span_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
@@ -30,7 +31,7 @@
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
-#include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
+#include "core/interfaces/native/implementation/text_style_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "converter.h"
@@ -127,6 +128,44 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     };
 }
 
+void AssignArkValue(Ark_font_UIFontFallbackInfo& dst, const FallbackInfo& src, ConvContext* ctx)
+{
+    dst.family = Converter::ArkValue<Ark_String>(src.familyName, ctx);
+    dst.language = Converter::ArkValue<Ark_String>(src.font, ctx);
+}
+
+void AssignArkValue(Ark_font_UIFontFallbackGroupInfo& dst, const FallbackGroup& src, ConvContext* ctx)
+{
+    dst.fontSetName = Converter::ArkValue<Ark_String>(src.groupName, ctx);
+    dst.fallback = Converter::ArkValue<Array_font_UIFontFallbackInfo>(src.fallbackInfoSet, ctx);
+}
+
+void AssignArkValue(Ark_font_UIFontAdjustInfo& dst, const AdjustInfo& src)
+{
+    dst.weight = Converter::ArkValue<Ark_Float64>(src.origValue);
+    dst.to = Converter::ArkValue<Ark_Int32>(src.newValue);
+}
+
+void AssignArkValue(Ark_font_UIFontAliasInfo& dst, const AliasInfo& src, ConvContext* ctx)
+{
+    dst.name = Converter::ArkValue<Ark_String>(src.familyName, ctx);
+    dst.weight = Converter::ArkValue<Ark_Float64>(src.weight);
+}
+
+void AssignArkValue(Ark_font_UIFontGenericInfo& dst, const FontGenericInfo& src, ConvContext* ctx)
+{
+    dst.family = Converter::ArkValue<Ark_String>(src.familyName, ctx);
+    dst.alias = Converter::ArkValue<Array_font_UIFontAliasInfo>(src.aliasSet, ctx);
+    dst.adjust = Converter::ArkValue<Array_font_UIFontAdjustInfo>(src.adjustSet, ctx);
+}
+
+void AssignArkValue(Ark_font_UIFontConfig& dst, const FontConfigJsonInfo& src, ConvContext* ctx)
+{
+    dst.fontDir = Converter::ArkValue<Array_String>(src.fontDirSet, ctx);
+    dst.generic = Converter::ArkValue<Array_font_UIFontGenericInfo>(src.genericSet, ctx);
+    dst.fallbackGroups = Converter::ArkValue<Array_font_UIFontFallbackGroupInfo>(src.fallbackGroupSet, ctx);
+}
+
 void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx)
 {
     if (src.menuOptionsParam.content.has_value()) {
@@ -158,7 +197,11 @@ void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src)
 
 void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
 {
-    dst = LengthMetricsPeer::Create(src);
+    auto value = static_cast<float>(src.Value());
+    auto unit = static_cast<int32_t>(src.Unit());
+    
+    dst.unit = static_cast<Ark_LengthUnit>(unit);
+    dst.value = Converter::ArkValue<Ark_Number>(value);
 }
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
@@ -181,10 +224,10 @@ void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemGroupIndex& s
 
 void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src)
 {
-    dst.x = ArkValue<Ark_Number>(src.Left());
-    dst.y = ArkValue<Ark_Number>(src.Top());
-    dst.width = ArkValue<Ark_Number>(src.Width());
-    dst.height = ArkValue<Ark_Number>(src.Height());
+    dst.x = ArkValue<Ark_Float64>(src.Left());
+    dst.y = ArkValue<Ark_Float64>(src.Top());
+    dst.width = ArkValue<Ark_Float64>(src.Width());
+    dst.height = ArkValue<Ark_Float64>(src.Height());
 }
 
 void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src,
@@ -231,10 +274,10 @@ void AssignArkValue(Ark_LeadingMarginPlaceholder& dst, const LeadingMargin& src,
     dst.pixelMap = image_PixelMapPeer::Create(src.pixmap);
 }
 
-void AssignArkValue(Ark_Number& dst, const LeadingMargin& src)
+void AssignArkValue(Ark_Float64& dst, const LeadingMargin& src)
 {
     auto leadingMargin = Dimension(src.size.Width()).ConvertToVp();
-    dst = ArkValue<Ark_Number>(leadingMargin);
+    dst = ArkValue<Ark_Float64>(leadingMargin);
 }
 
 void AssignArkValue(Ark_String& dst, const Dimension& src, ConvContext *ctx)
@@ -370,13 +413,19 @@ void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src, ConvContext *c
 
 void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx)
 {
-    dst.offset = ArkValue<Ark_Number>(src.offset);
+    dst.offset = ArkValue<Ark_Int32>(src.offset);
     dst.value = ArkValue<Ark_String>(src.value, ctx);
 }
 
 void AssignArkValue(Ark_Number& dst, const Dimension& src)
 {
     auto value = static_cast<float>(src.ConvertToVp());
+    AssignArkValue(dst, value);
+}
+
+void AssignArkValue(Ark_Float64& dst, const Dimension& src)
+{
+    auto value = static_cast<double>(src.ConvertToVp());
     AssignArkValue(dst, value);
 }
 
@@ -461,7 +510,11 @@ template<>
 Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
 {
     DimensionUnit du = OptConvert<DimensionUnit>(unit).value_or(DimensionUnit::INVALID);
-    return LengthMetricsPeer::Create(Dimension(value, du));
+    auto duUnit = static_cast<int32_t>(du);
+    return {
+        .unit = static_cast<Ark_LengthUnit>(duUnit),
+        .value = ArkValue<Ark_Number>(value),
+    };
 }
 
 void AssignArkValue(Ark_Position& dst, const OffsetF& src, ConvContext *ctx)
@@ -478,10 +531,10 @@ void AssignArkValue(Ark_OffsetResult& dst, const Offset& src, ConvContext *ctx)
 
 void AssignArkValue(Ark_RectResult& dst, const RectF& src)
 {
-    dst.x = ArkValue<Ark_Number>(src.GetX());
-    dst.y = ArkValue<Ark_Number>(src.GetY());
-    dst.width = ArkValue<Ark_Number>(src.Width());
-    dst.height = ArkValue<Ark_Number>(src.Height());
+    dst.x = ArkValue<Ark_Float64>(src.GetX());
+    dst.y = ArkValue<Ark_Float64>(src.GetY());
+    dst.width = ArkValue<Ark_Float64>(src.Width());
+    dst.height = ArkValue<Ark_Float64>(src.Height());
 }
 
 template<typename PeerType, typename AceSpan>
@@ -494,8 +547,8 @@ void CreateStylePeer(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 
 void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 {
-    dst.start = Converter::ArkValue<Ark_Number>(src->GetStartIndex());
-    dst.length = Converter::ArkValue<Ark_Number>(src->GetEndIndex() - src->GetStartIndex());
+    dst.start = Converter::ArkValue<Ark_Int32>(src->GetStartIndex());
+    dst.length = Converter::ArkValue<Ark_Int32>(src->GetEndIndex() - src->GetStartIndex());
     dst.styledKey = Converter::ArkValue<Ark_StyledStringKey>(src->GetSpanType());
     switch (src->GetSpanType()) {
         case Ace::SpanType::Font:
@@ -531,10 +584,9 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
         case Ace::SpanType::Image:
             CreateStylePeer<ImageAttachmentPeer, OHOS::Ace::ImageSpan>(dst, src);
             break;
-        case Ace::SpanType::CustomSpan: {
-            LOGW("Converter::AssignArkValue(Ark_SpanStyle) the Ark_CustomSpan is not implemented.");
+        case Ace::SpanType::CustomSpan:
+            CreateStylePeer<CustomSpanPeer, OHOS::Ace::NG::CustomSpanImpl>(dst, src);
             break;
-        }
         case Ace::SpanType::ExtSpan: {
             LOGW("Converter::AssignArkValue(Ark_SpanStyle) the Ark_UserDataSpan is not implemented.");
             break;
@@ -573,8 +625,8 @@ void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src
 
 void AssignArkValue(Ark_TextRange& dst, const SelectionInfo& src)
 {
-    dst.start = ArkValue<Opt_Number>(src.GetSelection().selection[0]);
-    dst.end = ArkValue<Opt_Number>(src.GetSelection().selection[1]);
+    dst.start = ArkValue<Opt_Int32>(src.GetSelection().selection[0]);
+    dst.end = ArkValue<Opt_Int32>(src.GetSelection().selection[1]);
 }
 
 void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src)
@@ -626,21 +678,21 @@ void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
 
 void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
 {
-    dst.width = Converter::ArkValue<Ark_Number>(src.GetWidth());
-    dst.height = Converter::ArkValue<Ark_Number>(src.GetHeight());
-    dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
-    dst.componentHeight = Converter::ArkValue<Ark_Number>(src.GetComponentHeight());
-    dst.loadingStatus = Converter::ArkValue<Ark_Number>(src.GetLoadingStatus());
-    dst.contentWidth = Converter::ArkValue<Ark_Number>(src.GetContentWidth());
-    dst.contentHeight = Converter::ArkValue<Ark_Number>(src.GetContentHeight());
-    dst.contentOffsetX = Converter::ArkValue<Ark_Number>(src.GetContentOffsetX());
-    dst.contentOffsetY = Converter::ArkValue<Ark_Number>(src.GetContentOffsetY());
+    dst.width = Converter::ArkValue<Ark_Float64>(src.GetWidth());
+    dst.height = Converter::ArkValue<Ark_Float64>(src.GetHeight());
+    dst.componentWidth = Converter::ArkValue<Ark_Float64>(src.GetComponentWidth());
+    dst.componentHeight = Converter::ArkValue<Ark_Float64>(src.GetComponentHeight());
+    dst.loadingStatus = Converter::ArkValue<Ark_Float64>(src.GetLoadingStatus());
+    dst.contentWidth = Converter::ArkValue<Ark_Float64>(src.GetContentWidth());
+    dst.contentHeight = Converter::ArkValue<Ark_Float64>(src.GetContentHeight());
+    dst.contentOffsetX = Converter::ArkValue<Ark_Float64>(src.GetContentOffsetX());
+    dst.contentOffsetY = Converter::ArkValue<Ark_Float64>(src.GetContentOffsetY());
 }
 
 void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src, ConvContext *ctx)
 {
-    dst.fontSize = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(src.fontSize);
-    dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(src.fontWeight);
+    dst.fontSize = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(src.fontSize);
+    dst.fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(src.fontWeight);
     auto arkEffectStrategy = static_cast<Ark_SymbolEffectStrategy>(src.effectStrategy);
     dst.effectStrategy = Converter::ArkValue<Opt_SymbolEffectStrategy>(arkEffectStrategy);
     auto arkRenderingStrategy = static_cast<Ark_SymbolRenderingStrategy>(src.renderingStrategy);
@@ -749,8 +801,8 @@ void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
 
 void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleResult& src)
 {
-    dst.size.value0 = ArkValue<Ark_Number>(src.size[0]);
-    dst.size.value1 = ArkValue<Ark_Number>(src.size[1]);
+    dst.size.value0 = ArkValue<Ark_Int32>(src.size[0]);
+    dst.size.value1 = ArkValue<Ark_Int32>(src.size[1]);
     dst.verticalAlign = ArkValue<Ark_ImageSpanAlignment>(
         static_cast<OHOS::Ace::VerticalAlign>(src.verticalAlign));
     dst.objectFit = ArkValue<Ark_ImageFit>(
@@ -779,7 +831,7 @@ void AssignArkValue(Ark_NavContentInfo& dst, const RefPtr<NG::NavDestinationCont
         dst.param.tag = InteropTag::INTEROP_TAG_UNDEFINED;
         dst.mode.tag = InteropTag::INTEROP_TAG_UNDEFINED;
         dst.navDestinationId.tag = InteropTag::INTEROP_TAG_UNDEFINED;
-        dst.index = Converter::ArkValue<Ark_Number>(-1);
+        dst.index = Converter::ArkValue<Ark_Int32>(-1);
         return;
     }
     auto navPathInfo = src->GetNavPathInfo();
@@ -794,7 +846,7 @@ void AssignArkValue(Ark_NavContentInfo& dst, const RefPtr<NG::NavDestinationCont
         dst.param.tag = InteropTag::INTEROP_TAG_UNDEFINED;
     }
     auto index = src->GetIndex();
-    dst.index = Converter::ArkValue<Ark_Number>(index);
+    dst.index = Converter::ArkValue<Ark_Int32>(index);
     auto mode = src->GetMode();
     dst.mode.tag = InteropTag::INTEROP_TAG_INT32;
     dst.mode.value = static_cast<Ark_NavDestinationMode>(mode);
@@ -817,11 +869,11 @@ template<>
 Ark_Resource ArkCreate(int64_t id, ResourceType type)
 {
     return {
-        .id = ArkValue<Ark_Int64>(id),
-        .type = ArkValue<Opt_Int32>(static_cast<int32_t>(type)),
-        .moduleName = ArkValue<Ark_String>(""),
         .bundleName = ArkValue<Ark_String>(""),
+        .moduleName = ArkValue<Ark_String>(""),
+        .id = ArkValue<Ark_Int64>(id),
         .params = ArkValue<Opt_Array_Union_String_I32_I64_F64_Resource>(),
+        .type = ArkValue<Opt_Int32>(static_cast<int32_t>(type)),
     };
 }
 
@@ -830,18 +882,18 @@ Ark_Resource ArkCreate(std::string name, ResourceType type, ConvContext *ctx)
 {
     std::vector params = { ArkUnion<Ark_Union_String_I32_I64_F64_Resource, Ark_String>(name, ctx) };
     return {
-        .id = ArkValue<Ark_Int64>(static_cast<int64_t>(-1)),
-        .type = ArkValue<Opt_Int32>(static_cast<int32_t>(type)),
-        .moduleName = ArkValue<Ark_String>(""),
         .bundleName = ArkValue<Ark_String>(""),
+        .moduleName = ArkValue<Ark_String>(""),
+        .id = ArkValue<Ark_Int64>(static_cast<int64_t>(-1)),
         .params = ArkValue<Opt_Array_Union_String_I32_I64_F64_Resource>(params, ctx),
+        .type = ArkValue<Opt_Int32>(static_cast<int32_t>(type)),
     };
 }
 
 void AssignArkValue(Ark_TextRange& dst, const TextRange& src)
 {
-    dst.start = Converter::ArkValue<Opt_Number>(src.start);
-    dst.end = Converter::ArkValue<Opt_Number>(src.end);
+    dst.start = Converter::ArkValue<Opt_Int32>(src.start);
+    dst.end = Converter::ArkValue<Opt_Int32>(src.end);
 }
 
 void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
@@ -862,8 +914,8 @@ void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
             end = selectionRangeInfo->end_;
         }
     }
-    dst.start = Converter::ArkValue<Opt_Number>(start);
-    dst.end = Converter::ArkValue<Opt_Number>(end);
+    dst.start = Converter::ArkValue<Opt_Int32>(start);
+    dst.end = Converter::ArkValue<Opt_Int32>(end);
 }
 
 void AssignArkValue(Ark_TextChangeOptions& dst, const ChangeValueInfo& value, ConvContext *ctx)
@@ -874,4 +926,9 @@ void AssignArkValue(Ark_TextChangeOptions& dst, const ChangeValueInfo& value, Co
     dst.oldPreviewText = Converter::ArkValue<Ark_PreviewText>(value.oldPreviewText, ctx);
 }
 
+void AssignArkValue(Ark_LengthMetricsCustom& dst, const CalcDimension& src)
+{
+    dst.value = Converter::ArkValue<Ark_Number>(static_cast<float>(src.Value()));
+    dst.unit = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(src.Unit()));
+}
 } // namespace OHOS::Ace::NG::Converter

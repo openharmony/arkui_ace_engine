@@ -16,10 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("lazy_for_each_syntax_test_ng") {
   type = "new"
   module_output = "syntaxs"
-  sources = [
-    "arkoala_lazy_node_test.cpp",
-    "lazy_for_each_syntax_test_ng.cpp",
-  ]
+  sources = [ "lazy_for_each_syntax_test_ng.cpp" ]
 }
 
 group("lazy_for_each_linux_test") {
@@ -72,6 +69,15 @@ ace_unittest("repeat_virtual_2_test_ng") {
   sources = [ "repeat_virtual_2_test_ng.cpp" ]
 }
 
+ace_unittest("syntax_arkoala_test_ng") {
+  type = "new"
+  module_output = "syntaxs"
+  sources = [
+    "arkoala_for_each_test_ng.cpp",
+    "arkoala_lazy_test_ng.cpp",
+  ]
+}
+
 group("core_syntax_unittest") {
   testonly = true
   deps = [
@@ -82,5 +88,6 @@ group("core_syntax_unittest") {
     ":lazy_for_each_syntax_test_ng",
     ":repeat_virtual_2_test_ng",
     ":repeat_virtual_test_ng",
+    ":syntax_arkoala_test_ng",
   ]
 }

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSelectPeer, OnSelectCallback, ArrowPosition, MenuItemConfiguration, AvoidanceMode, MenuOutlineOptions, SelectAttribute, MenuAlignType } from "./component/select"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable, BlurStyle } from "./component/common"
@@ -97,8 +98,9 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
     _menuAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _menuAlign_0_0value?: MenuAlignType | undefined
     _menuAlign_0_1value?: Offset | undefined
-    applyModifierPatch(peer: ArkSelectPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkSelectPeer;
         if (this._selected_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._selected_0_flag) {
@@ -589,7 +591,7 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         {
             switch (this._menuAlign_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMenuAlignAttribute((this._menuAlign_0_0value as MenuAlignType | undefined), (this._menuAlign_0_1value as Offset | undefined));
+                    peer.setMenuAlignAttribute((this._menuAlign_0_0value as MenuAlignType | undefined), (this._menuAlign_0_1value as Offset | undefined | undefined));
                     this._menuAlign_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

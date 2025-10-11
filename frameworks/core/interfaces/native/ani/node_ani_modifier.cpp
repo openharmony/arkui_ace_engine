@@ -22,6 +22,7 @@
 #include "condition_scope_ani_modifier.h"
 #include "content_slot_ani_modifier.h"
 #include "custom_node_ani_modifier.h"
+#include "keyboard_avoid_mode_ani_modifier.h"
 #include "drag_ani_modifier.h"
 #include "drag_controller_ani_modifier.h"
 #include "image_ani_modifier.h"
@@ -31,7 +32,7 @@
 #include "list_ani_modifier.h"
 #include "node_adapter_ani_modifier.h"
 #include "rich_editor_ani_modifier.h"
-#include "search_ani_modifier.h"
+#include "text_based_ani_modifier.h"
 #include "shape_ani_modifier.h"
 #include "stateMgmt_ani_modifier.h"
 #include "styled_string_ani_modifier.h"
@@ -43,7 +44,7 @@
 #include "syntax_item_ani_modifier.h"
 #include "for_each_node_ani_modifier.h"
 #include "uinode_ani_modifier.h"
-
+#include "xbar_ani_modifier.h"
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
 {
@@ -54,6 +55,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getDragAniModifier = OHOS::Ace::NG::GetDragAniModifier,
         .getCommonAniModifier = OHOS::Ace::NG::GetCommonAniModifier,
         .getCustomNodeAniModifier = OHOS::Ace::NG::GetCustomNodeAniModifier,
+        .getKeyboardAvoidModeAniModifier = OHOS::Ace::NG::GetKeyboardAvoidModeAniModifier,
         .getLazyForEachNodeAniModifier = OHOS::Ace::NG::GetLazyForEachNodeAniModifier,
         .getContentSlotAniModifier = OHOS::Ace::NG::GetContentSlotAniModifier,
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,
@@ -64,7 +66,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getInteropAniModifier = OHOS::Ace::NG::GetInteropAniModifier,
         .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
         .getStyledStringAniModifier = OHOS::Ace::NG::GetStyledStringAniModifier,
-        .getSearchAniModifier = OHOS::Ace::NG::GetSearchAniModifier,
+        .getTextBasedAniModifier = OHOS::Ace::NG::GetTextBasedAniModifier,
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
         .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,
         .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
@@ -80,6 +82,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getSyntaxItemAniModifier = OHOS::Ace::NG::GetSyntaxItemAniModifier,
         .getForEachNodeAniModifier = OHOS::Ace::NG::GetForEachNodeAniModifier,
         .getComponent3DModifier = OHOS::Ace::NG::GetComponent3DModifier,
+        .getXBarAniModifier = OHOS::Ace::NG::GetXBarAniModifier,
     };
     return &impl;
 }

@@ -152,10 +152,11 @@ void ListModelStatic::SetInitialIndex(FrameNode* frameNode, const std::optional<
     }
 }
 
-void ListModelStatic::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
+void ListModelStatic::SetCachedCount(FrameNode* frameNode, const std::optional<int32_t>& cachedCount)
 {
-    if (cachedCount >= 0) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount, frameNode);
+    if (cachedCount.has_value()) {
+        int32_t count = cachedCount.value() < 0 ? 1 : cachedCount.value();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, frameNode);
     }
@@ -164,8 +165,9 @@ void ListModelStatic::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 void ListModelStatic::SetCachedCount(
         FrameNode* frameNode, const std::optional<int32_t>& count, const std::optional<bool>& show)
 {
-    if (count.has_value() && count.value() >= 0) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count.value(), frameNode);
+    if (count.has_value()) {
+        int32_t value = count.value() < 0 ? 1 : count.value();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, value, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, frameNode);
     }
@@ -216,7 +218,7 @@ void ListModelStatic::SetListSpace(FrameNode* frameNode, const std::optional<Dim
 void ListModelStatic::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScroll(std::move(onScroll));
 }
@@ -224,7 +226,7 @@ void ListModelStatic::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll
 void ListModelStatic::SetOnItemDelete(FrameNode* frameNode, OnItemDeleteEvent&& onItemDelete)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     LOGE("ListModelStatic::SetOnItemDelete, the ListEventHub does not support 'OnItemDelete' yet");
     ListModelStatic::AddDragFrameNodeToManager(frameNode);
@@ -282,7 +284,7 @@ void ListModelStatic::AddDragFrameNodeToManagerMultiThread(FrameNode* frameNode)
 void ListModelStatic::SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
@@ -290,7 +292,7 @@ void ListModelStatic::SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&
 void ListModelStatic::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachStart(std::move(onReachStart));
 }
@@ -298,7 +300,7 @@ void ListModelStatic::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onRea
 void ListModelStatic::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachEnd(std::move(onReachEnd));
 }
@@ -306,7 +308,7 @@ void ListModelStatic::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReach
 void ListModelStatic::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStart(std::move(onScrollStart));
 }
@@ -314,7 +316,7 @@ void ListModelStatic::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&
 void ListModelStatic::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
@@ -322,7 +324,7 @@ void ListModelStatic::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& 
 void ListModelStatic::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
 }
@@ -366,7 +368,7 @@ void ListModelStatic::SetOnScrollVisibleContentChange(
     FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollVisibleContentChange(std::move(onScrollVisibleContentChange));
 }
@@ -374,7 +376,7 @@ void ListModelStatic::SetOnScrollVisibleContentChange(
 void ListModelStatic::SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onItemMove)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemMove(std::move(onItemMove));
 
@@ -384,7 +386,7 @@ void ListModelStatic::SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onIt
 void ListModelStatic::SetOnItemDragStart(FrameNode* frameNode, OnItemDragStartFunc&& onItemDragStart)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragStart =
         [func = std::move(onItemDragStart)](const ItemDragInfo& dragInfo, int32_t index) -> RefPtr<AceType> {
@@ -405,7 +407,7 @@ void ListModelStatic::SetOnItemDragStart(FrameNode* frameNode, OnItemDragStartFu
 void ListModelStatic::SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFunc&& onItemDragEnter)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragEnter(std::move(onItemDragEnter));
 
@@ -415,7 +417,7 @@ void ListModelStatic::SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFu
 void ListModelStatic::SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&& onItemDragLeave)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragLeave(std::move(onItemDragLeave));
 
@@ -425,7 +427,7 @@ void ListModelStatic::SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFu
 void ListModelStatic::SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragMove(std::move(onItemDragMove));
 
@@ -435,7 +437,7 @@ void ListModelStatic::SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc
 void ListModelStatic::SetOnItemDrop(FrameNode* frameNode, OnItemDropFunc&& onItemDrop)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDrop(std::move(onItemDrop));
 
@@ -445,6 +447,13 @@ void ListModelStatic::SetOnItemDrop(FrameNode* frameNode, OnItemDropFunc&& onIte
 void ListModelStatic::SetLanes(FrameNode* frameNode, int32_t lanes)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Lanes, lanes, frameNode);
+}
+
+void ListModelStatic::ResetLanes(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, Lanes, PROPERTY_UPDATE_MEASURE, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMinLength, PROPERTY_UPDATE_MEASURE, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMaxLength, PROPERTY_UPDATE_MEASURE, frameNode);
 }
 
 void ListModelStatic::SetLaneConstrain(
@@ -510,7 +519,7 @@ void ListModelStatic::SetStackFromEnd(FrameNode* frameNode, const std::optional<
     if (isStackFromEnd.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, isStackFromEnd.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, StackFromEnd, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 } // namespace OHOS::Ace::NG

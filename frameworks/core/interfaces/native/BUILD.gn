@@ -150,17 +150,19 @@ template("ace_core_interfaces_native_node") {
       "ani/animation_ani_modifier.cpp",
       "ani/canvas_ani_modifier.cpp",
       "ani/common_ani_modifier.cpp",
+      "ani/component3d_ani_modifier.cpp",
       "ani/component_content_ani_modifier.cpp",
       "ani/component_snapshot_ani_modifier.cpp",
       "ani/content_slot_ani_modifier.cpp",
       "ani/custom_node_ani_modifier.cpp",
+      "ani/keyboard_avoid_mode_ani_modifier.cpp",
       "ani/drag_ani_modifier.cpp",
       "ani/node_adapter_ani_modifier.cpp",
       "ani/interop_ani_modifier.cpp",
       "ani/image_ani_modifier.cpp",
       "ani/image_span_ani_modifier.cpp",
       "ani/node_ani_modifier.cpp",
-      "ani/search_ani_modifier.cpp",
+      "ani/text_based_ani_modifier.cpp",
       "ani/styled_string_ani_modifier.cpp",
       "ani/trace_ani_modifier.cpp",
       "ani/web_ani_modifier.cpp",
@@ -169,6 +171,7 @@ template("ace_core_interfaces_native_node") {
       "ani/rich_editor_ani_modifier.cpp",
       "ani/shape_ani_modifier.cpp",
       "ani/stateMgmt_ani_modifier.cpp",
+      "ani/xbar_ani_modifier.cpp",
       "ani/xcomponent_ani_modifier.cpp",
       "ani/list_ani_modifier.cpp",
       "ani/condition_scope_ani_modifier.cpp",
@@ -179,6 +182,7 @@ template("ace_core_interfaces_native_node") {
         "ani/ani_theme.cpp",
         "ani/ani_theme_module.cpp",
         "ani/common_ani_modifier.cpp",
+        "ani/component3d_ani_modifier.cpp",
         "ani/custom_node_ani_modifier.cpp",
         "ani/node_ani_modifier.cpp",
         "ani/waterflow_ani_modifier.cpp",
@@ -203,10 +207,6 @@ template("ace_core_interfaces_native_node") {
       sources += [
         "ani/drag_controller_ani_modifier.cpp",
       ]
-    }
-
-    if (defined(config.model_component_support) && config.model_component_support && !build_ohos_sdk) {
-      sources += [ "ani/component3d_ani_modifier.cpp" ]
     }
 
     deps = [

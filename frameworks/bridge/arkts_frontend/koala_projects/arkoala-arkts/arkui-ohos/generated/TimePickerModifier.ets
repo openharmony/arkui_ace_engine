@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTimePickerPeer, OnTimePickerChangeCallback, TimePickerResult, TimePickerAttribute } from "./component/timePicker"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, PickerTextStyle } from "./component/common"
@@ -57,8 +58,9 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
     _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
     _enableCascade_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableCascade_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkTimePickerPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTimePickerPeer;
         if (this._useMilitaryTime_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._useMilitaryTime_0_flag) {

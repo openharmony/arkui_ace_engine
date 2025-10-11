@@ -81,15 +81,15 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolGlyphInterface_setSymbolGlyphOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontSizeAttribute(value: number | string | Resource | undefined): void {
+    setFontSizeAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -116,7 +116,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
                 if (valueTmpValueTmpElement instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as Color
-                    thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0.valueOf())
+                    thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0.getOrdinal())
                 } else if (valueTmpValueTmpElement instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
                     const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as number
@@ -137,15 +137,15 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: number | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
@@ -185,15 +185,27 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setRenderingStrategy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontScaleAttribute(value: number | Resource | undefined): void {
+    setSymbolEffect0Attribute(value: SymbolEffect | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            SymbolEffect_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setSymbolEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setMinFontScaleAttribute(value: double | Resource | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -205,15 +217,15 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setMinFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxFontScaleAttribute(value: number | Resource | undefined): void {
+    setMaxFontScaleAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -225,7 +237,26 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setMaxFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSymbolEffectAttribute(symbolEffect: SymbolEffect | undefined, triggerValue?: boolean | number): void {
+    setSymbolEffect1Attribute(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (symbolEffect !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const symbolEffectTmpValue  = symbolEffect!
+            SymbolEffect_serializer.write(thisSerializer, symbolEffectTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (isActive !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isActiveTmpValue  = isActive!
+            thisSerializer.writeBoolean(isActiveTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setSymbolEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setSymbolEffect2Attribute(symbolEffect: SymbolEffect | undefined, triggerValue: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (symbolEffect !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -237,19 +268,11 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         if (triggerValue !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const triggerValueTmpValue  = triggerValue!
-            if (triggerValueTmpValue instanceof boolean) {
-                thisSerializer.writeInt8((0).toChar())
-                const triggerValueTmpValueForIdx0  = triggerValueTmpValue as boolean
-                thisSerializer.writeBoolean(triggerValueTmpValueForIdx0)
-            } else if (triggerValueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
-                const triggerValueTmpValueForIdx1  = triggerValueTmpValue as number
-                thisSerializer.writeNumber(triggerValueTmpValueForIdx1)
-            }
+            thisSerializer.writeInt32(triggerValueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setSymbolEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setSymbolEffect2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -279,13 +302,13 @@ export interface SymbolGlyphAttribute extends CommonMethod {
     setSymbolGlyphOptions(value?: Resource): this {
         throw new Error("Unimplemented method setSymbolGlyphOptions")
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method fontSize")
     }
     fontColor(value: Array<ResourceColor> | undefined): this {
         throw new Error("Unimplemented method fontColor")
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     effectStrategy(value: SymbolEffectStrategy | undefined): this {
@@ -294,13 +317,19 @@ export interface SymbolGlyphAttribute extends CommonMethod {
     renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
         throw new Error("Unimplemented method renderingStrategy")
     }
-    minFontScale(value: number | Resource | undefined): this {
+    symbolEffect(value: SymbolEffect | undefined): this {
+        throw new Error("Unimplemented method symbolEffect")
+    }
+    minFontScale(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method minFontScale")
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method maxFontScale")
     }
-    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue?: boolean | number): this {
+    symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
+        throw new Error("Unimplemented method symbolEffect")
+    }
+    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue: int32 | undefined): this {
         throw new Error("Unimplemented method symbolEffect")
     }
     attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -308,24 +337,25 @@ export interface SymbolGlyphAttribute extends CommonMethod {
     }
 }
 export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolGlyphAttribute {
-    fontSize_value?: number | string | Resource | undefined
+    fontSize_value?: double | string | Resource | undefined
     fontColor_value?: Array<ResourceColor> | undefined
-    fontWeight_value?: number | FontWeight | string | undefined
+    fontWeight_value?: int32 | FontWeight | string | undefined
     effectStrategy_value?: SymbolEffectStrategy | undefined
     renderingStrategy_value?: SymbolRenderingStrategy | undefined
-    minFontScale_value?: number | Resource | undefined
-    maxFontScale_value?: number | Resource | undefined
+    symbolEffect_value?: SymbolEffect | undefined
+    minFontScale_value?: double | Resource | undefined
+    maxFontScale_value?: double | Resource | undefined
     attributeModifier_value?: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined
     setSymbolGlyphOptions(value?: Resource): this {
         return this
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         return this
     }
     fontColor(value: Array<ResourceColor> | undefined): this {
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         return this
     }
     effectStrategy(value: SymbolEffectStrategy | undefined): this {
@@ -334,13 +364,19 @@ export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolG
     renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
         return this
     }
-    minFontScale(value: number | Resource | undefined): this {
+    symbolEffect(value: SymbolEffect | undefined): this {
         return this
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         return this
     }
-    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue?: boolean | number): this {
+    maxFontScale(value: double | Resource | undefined): this {
+        return this
+    }
+    symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
+        return this
+    }
+    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue: int32 | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -363,9 +399,9 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    public fontSize(value: number | string | Resource | undefined): this {
+    public fontSize(value: double | string | Resource | undefined): this {
         if (this.checkPriority("fontSize")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setFontSizeAttribute(value_casted)
             return this
         }
@@ -379,9 +415,9 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | string | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }
@@ -403,27 +439,44 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    public minFontScale(value: number | Resource | undefined): this {
+    public symbolEffect(value: SymbolEffect | undefined): this {
+        if (this.checkPriority("symbolEffect")) {
+            const value_casted = value as (SymbolEffect | undefined)
+            this.getPeer()?.setSymbolEffect0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public minFontScale(value: double | Resource | undefined): this {
         if (this.checkPriority("minFontScale")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setMinFontScaleAttribute(value_casted)
             return this
         }
         return this
     }
-    public maxFontScale(value: number | Resource | undefined): this {
+    public maxFontScale(value: double | Resource | undefined): this {
         if (this.checkPriority("maxFontScale")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setMaxFontScaleAttribute(value_casted)
             return this
         }
         return this
     }
-    public symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue?: boolean | number): this {
+    public symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
         if (this.checkPriority("symbolEffect")) {
             const symbolEffect_casted = symbolEffect as (SymbolEffect | undefined)
-            const triggerValue_casted = triggerValue as (boolean | number | undefined)
-            this.getPeer()?.setSymbolEffectAttribute(symbolEffect_casted, triggerValue_casted)
+            const isActive_casted = isActive as (boolean | undefined)
+            this.getPeer()?.setSymbolEffect1Attribute(symbolEffect_casted, isActive_casted)
+            return this
+        }
+        return this
+    }
+    public symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue: int32 | undefined): this {
+        if (this.checkPriority("symbolEffect")) {
+            const symbolEffect_casted = symbolEffect as (SymbolEffect | undefined)
+            const triggerValue_casted = triggerValue as (int32 | undefined)
+            this.getPeer()?.setSymbolEffect2Attribute(symbolEffect_casted, triggerValue_casted)
             return this
         }
         return this

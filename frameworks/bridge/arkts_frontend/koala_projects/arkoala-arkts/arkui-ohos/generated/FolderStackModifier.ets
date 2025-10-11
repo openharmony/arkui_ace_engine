@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkFolderStackPeer, OnFoldStatusChangeCallback, OnFoldStatusChangeInfo, OnHoverStatusChangeCallback, HoverEventParam, FolderStackAttribute } from "./component/folderStack"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -44,8 +45,9 @@ export class FolderStackModifier extends CommonMethodModifier implements FolderS
     _enableAnimation_0_0value?: boolean | undefined
     _autoHalfFold_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _autoHalfFold_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkFolderStackPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkFolderStackPeer;
         if (this._alignContent_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._alignContent_0_flag) {

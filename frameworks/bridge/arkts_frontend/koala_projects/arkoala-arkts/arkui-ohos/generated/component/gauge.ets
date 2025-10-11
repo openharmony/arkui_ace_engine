@@ -100,7 +100,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                 if (valueTmpValueForIdx0 instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
-                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.valueOf())
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
@@ -131,7 +131,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                         if (valueTmpValueForIdx2TmpElement_0ForIdx0 instanceof Color) {
                             thisSerializer.writeInt8((0).toChar())
                             const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx0  = valueTmpValueForIdx2TmpElement_0ForIdx0 as Color
-                            thisSerializer.writeInt32(valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx0.valueOf())
+                            thisSerializer.writeInt32(valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx0.getOrdinal())
                         } else if (valueTmpValueForIdx2TmpElement_0ForIdx0 instanceof number) {
                             thisSerializer.writeInt8((1).toChar())
                             const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx1  = valueTmpValueForIdx2TmpElement_0ForIdx0 as number
@@ -234,7 +234,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
     }
 }
 export interface GaugeOptions {
-    value: number;
+    value: number | undefined;
     min?: number;
     max?: number;
 }
@@ -487,7 +487,13 @@ export class GaugeOptions_serializer {
     public static write(buffer: SerializerBase, value: GaugeOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForValue  = value.value
-        valueSerializer.writeNumber(valueHolderForValue)
+        if (valueHolderForValue !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForValueTmpValue  = valueHolderForValue!
+            valueSerializer.writeNumber(valueHolderForValueTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForMin  = value.min
         if (valueHolderForMin !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -507,7 +513,12 @@ export class GaugeOptions_serializer {
     }
     public static read(buffer: DeserializerBase): GaugeOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const valueTmpResult : number = (valueDeserializer.readNumber() as number)
+        const valueTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let valueTmpBuf : number | undefined = undefined
+        if ((valueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            valueTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const valueTmpResult : number | undefined = valueTmpBuf
         const minTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let minTmpBuf : number | undefined = undefined
         if ((minTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

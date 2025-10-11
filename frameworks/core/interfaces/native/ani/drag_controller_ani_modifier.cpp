@@ -40,15 +40,12 @@
 namespace OHOS::Ace::NG {
 using DragAction = OHOS::Ace::Ani::DragAction;
 namespace {
-constexpr int32_t PARAMETER_NUM = 2;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
 constexpr int32_t MOUSE_POINTER_ID = 1001;
 constexpr int32_t SOURCE_TOOL_PEN = 1;
 constexpr int32_t SOURCE_TYPE_TOUCH = 2;
 constexpr int32_t PEN_POINTER_ID = 102;
 constexpr int32_t CREATE_PIXELMAP_DELAY_TIME = 80;
-constexpr int32_t TWO_ARGS = 2;
-constexpr int32_t MAX_ESCAPE_NUM = 1;
 
 using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;

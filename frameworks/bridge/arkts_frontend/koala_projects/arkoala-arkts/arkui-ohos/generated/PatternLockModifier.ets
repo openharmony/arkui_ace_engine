@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkPatternLockPeer, CircleStyleOptions, PatternLockAttribute } from "./component/patternLock"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -62,8 +63,9 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
     _activateCircleStyle_0_0value?: CircleStyleOptions | undefined
     _skipUnselectedPoint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _skipUnselectedPoint_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkPatternLockPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkPatternLockPeer;
         if (this._sideLength_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._sideLength_0_flag) {

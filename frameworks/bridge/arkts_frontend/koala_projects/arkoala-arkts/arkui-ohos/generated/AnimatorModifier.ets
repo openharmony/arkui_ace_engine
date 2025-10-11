@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkAnimatorPeer, SpringMotion, FrictionMotion, ScrollMotion, AnimatorAttribute } from "./component/animator"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -63,8 +64,9 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
     _onFinish_0_0value?: (() => void) | undefined
     _onFrame_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onFrame_0_0value?: ((value: number) => void) | undefined
-    applyModifierPatch(peer: ArkAnimatorPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkAnimatorPeer;
         if (this._state_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._state_0_flag) {

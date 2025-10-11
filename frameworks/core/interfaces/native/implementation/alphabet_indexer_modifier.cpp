@@ -28,6 +28,8 @@ constexpr double POPUP_ITEM_DEFAULT_RADIUS = 24.0;
 constexpr double ITEM_DEFAULT_RADIUS = 8.0;
 constexpr double RADIUS_OFFSET = 4.0;
 constexpr Dimension DEFAULT_ITEM_SIZE = 16.0_vp;
+constexpr Dimension DEFAULT_POPUP_ITEM_BORDER_RADIUS = 24.0_vp;
+constexpr Dimension DEFAULT_ITEM_BORDER_RADIUS = 8.0_vp;
 } // namespace
 namespace Converter {
 
@@ -238,7 +240,7 @@ void SetOnSelectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        IndexerModelStatic::SetChangeEvent(frameNode, nullptr);
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)](
@@ -252,7 +254,7 @@ void SetOnRequestPopupDataImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        IndexerModelStatic::SetOnRequestPopupData(frameNode, nullptr);
         return;
     }
     auto onEvent = [callback = CallbackHelper(*optValue)](const int32_t selected) -> std::vector<std::string> {
@@ -274,7 +276,7 @@ void SetOnPopupSelectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        IndexerModelStatic::SetOnPopupSelected(frameNode, nullptr);
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)](
@@ -287,8 +289,9 @@ void SetSelectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
+    const int32_t index = 0;
     if (!optValue) {
-        // Implement Reset value
+        IndexerModelStatic::SetSelected(frameNode, index);
         return;
     }
     IndexerModelStatic::SetSelected(frameNode, ProcessBindableSelected(frameNode, *optValue));
@@ -318,6 +321,9 @@ void SetPopupItemBorderRadiusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto radius = Converter::OptConvertPtr<Dimension>(value);
+    if (!radius) {
+        IndexerModelStatic::SetPopupItemBorderRadius(frameNode, DEFAULT_POPUP_ITEM_BORDER_RADIUS);
+    }
     Validator::ValidateNonNegative(radius);
     IndexerModelStatic::SetPopupItemBorderRadius(frameNode, radius);
 }
@@ -327,6 +333,9 @@ void SetItemBorderRadiusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto radius = Converter::OptConvertPtr<Dimension>(value);
+    if (!radius) {
+        IndexerModelStatic::SetItemBorderRadius(frameNode, DEFAULT_ITEM_BORDER_RADIUS);
+    }
     Validator::ValidateNonNegative(radius);
     IndexerModelStatic::SetItemBorderRadius(frameNode, radius);
 }

@@ -72,7 +72,7 @@ void ScrollModelStatic::SetAxis(FrameNode* frameNode, const std::optional<Axis>&
 void ScrollModelStatic::SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScroll(std::move(event));
 }
@@ -80,7 +80,7 @@ void ScrollModelStatic::SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& even
 void ScrollModelStatic::SetOnWillScroll(FrameNode* frameNode, ScrollEventWithReturn&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillScrollEvent(std::move(event));
 }
@@ -88,7 +88,7 @@ void ScrollModelStatic::SetOnWillScroll(FrameNode* frameNode, ScrollEventWithRet
 void ScrollModelStatic::SetOnDidScroll(FrameNode* frameNode, ScrollEventWithState&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidScrollEvent(std::move(event));
 }
@@ -96,7 +96,7 @@ void ScrollModelStatic::SetOnDidScroll(FrameNode* frameNode, ScrollEventWithStat
 void ScrollModelStatic::SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollEdge(std::move(event));
 }
@@ -104,7 +104,7 @@ void ScrollModelStatic::SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEven
 void ScrollModelStatic::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStart(std::move(event));
 }
@@ -112,7 +112,7 @@ void ScrollModelStatic::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEven
 void ScrollModelStatic::SetOnScrollEnd(FrameNode* frameNode, ScrollEndEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollEnd(std::move(event));
 }
@@ -120,7 +120,7 @@ void ScrollModelStatic::SetOnScrollEnd(FrameNode* frameNode, ScrollEndEvent&& ev
 void ScrollModelStatic::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStop(std::move(event));
 }
@@ -139,23 +139,49 @@ void ScrollModelStatic::SetScrollBarColor(FrameNode* frameNode, const std::optio
     if (color) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ScrollablePaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER, frameNode);
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto scrollBarTheme = context->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(scrollBarTheme);
+        auto defaultScrollBarColor = scrollBarTheme->GetForegroundColor();
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollableScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        scrollBar->SetForegroundColor(defaultScrollBarColor);
     }
 }
 
 void ScrollModelStatic::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& dimension)
 {
     if (dimension) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth,  dimension.value(), frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ScrollablePaintProperty, ScrollBarWidth, PROPERTY_UPDATE_RENDER, frameNode);
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto scrollBarTheme = context->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(scrollBarTheme);
+        auto defaultScrollBarWidth = scrollBarTheme->GetNormalWidth();
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollableScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        scrollBar->SetActiveWidth(defaultScrollBarWidth);
+        scrollBar->SetTouchWidth(defaultScrollBarWidth);
+        scrollBar->SetInactiveWidth(defaultScrollBarWidth);
+        scrollBar->SetNormalWidth(defaultScrollBarWidth);
+        scrollBar->SetIsUserNormalWidth(false);
     }
 }
 
 void ScrollModelStatic::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollFrameBegin(std::move(event));
 }

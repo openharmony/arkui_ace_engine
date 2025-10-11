@@ -60,7 +60,7 @@ AnimatableExtendPropertyType GetPropertyType(ani_env* env, ani_object property)
     }
     ani_class arithmeticClass {};
     ani_boolean isArithmetic = ANI_FALSE;
-    if ((status = env->FindClass("Larkui/component/common/AnimatableArithmetic;", &arithmeticClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.component.common.AnimatableArithmetic", &arithmeticClass)) != ANI_OK) {
         HILOGW("cannot find AnimatableArithmetic class, errorCode:%{public}d", status);
         return AnimatableExtendPropertyType::UNKNOWN;
     }
@@ -212,7 +212,7 @@ bool ParseCurveObject(ani_env* env, ani_ref curveRef, ArkUIAniUnionCurveStringIC
     }
     // for Curve enum
     ani_enum curveEnum {};
-    if ((status = env->FindEnum("L@ohos/curves/curves/Curve;", &curveEnum)) != ANI_OK) {
+    if ((status = env->FindEnum("@ohos.curves.curves.Curve", &curveEnum)) != ANI_OK) {
         HILOGW("GetCurve enum class error, status:%{public}d", status);
         return false;
     }
@@ -302,7 +302,7 @@ bool GetRouteTypeEnum(ani_env* env, ArkUIAniRouteType type, ani_enum_item& item)
     }
     ani_enum enumType;
     ani_status status;
-    if ((status = env->FindEnum("Larkui/component/pageTransition/RouteType;", &enumType)) != ANI_OK) {
+    if ((status = env->FindEnum("arkui.component.pageTransition.RouteType", &enumType)) != ANI_OK) {
         HILOGW("find routeType class error, status:%{public}d", status);
         return false;
     }
@@ -322,7 +322,7 @@ void ParseNumberString(ani_env* env, ani_ref value, ArkUIAniNumberString& result
     }
     if (AniUtils::IsNumber(env, valueObj)) {
         ani_double doubleValue;
-        if (env->Object_CallMethodByName_Double(valueObj, "unboxed", ":d", &doubleValue) == ANI_OK) {
+        if (env->Object_CallMethodByName_Double(valueObj, "toDouble", ":d", &doubleValue) == ANI_OK) {
             result.selector = 0;
             result.value0 = doubleValue;
             return;
@@ -342,7 +342,7 @@ void HandleAnimatablePropertyFloat(
     ArkUINodeHandle frameNode, const std::string& name, ani_env* env, ani_object property, ani_fn_object callback)
 {
     ani_double valueAniDouble = 0.0;
-    if (env->Object_CallMethodByName_Double(property, "unboxed", ":d", &valueAniDouble) != ANI_OK) {
+    if (env->Object_CallMethodByName_Double(property, "toDouble", ":d", &valueAniDouble) != ANI_OK) {
         HILOGW("unbox double failed when %{public}s", __func__);
         return;
     }

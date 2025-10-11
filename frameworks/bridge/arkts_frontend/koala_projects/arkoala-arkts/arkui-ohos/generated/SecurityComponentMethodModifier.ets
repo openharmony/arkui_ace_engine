@@ -18,6 +18,7 @@
 
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSecurityComponentMethodPeer, SecurityComponentLayoutDirection, SecurityComponentMethod } from "./component/securityComponent"
 import { int32 } from "@koalaui/common"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, BorderRadiuses, Padding, Length, SizeOptions, ConstraintSizeOptions } from "./component/units"
@@ -104,7 +105,8 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
     _heightAdaptivePolicy_0_0value?: TextHeightAdaptivePolicy | undefined
     _enabled_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enabled_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkSecurityComponentMethodPeer): void {
+    applyModifierPatch(node: PeerNode): void {
+        const peer = node as ArkSecurityComponentMethodPeer;
         if (this._iconSize_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._iconSize_0_flag) {
