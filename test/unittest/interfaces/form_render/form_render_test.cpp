@@ -845,7 +845,7 @@ HWTEST_F(FormRenderTest, FormRenderTest033, TestSize.Level1)
     formJsInfo.uiSyntax = OHOS::AppExecFwk::FormType::ETS;
     formJsInfo.formData = "testData";
     formJsInfo.formId = 10;
-    formRenderer->OnSurfaceCreate(formJsInfo, false, false);
+    formRenderer->OnSurfaceCreate(formJsInfo, want);
     EXPECT_EQ(newFormJsInfo.formData, "");
 }
 } // namespace OHOS::Ace
