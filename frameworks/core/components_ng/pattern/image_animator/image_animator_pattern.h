@@ -161,6 +161,11 @@ public:
         return isAutoMonitorInvisibleArea_;
     }
 
+    void SetIsStatic(bool isStatic)
+    {
+        isStatic_ = isStatic;
+    }
+
     void SetAutoMonitorInvisibleArea(bool isAutoMonitorInvisibleArea)
     {
         isAutoMonitorInvisibleArea_ = isAutoMonitorInvisibleArea;
@@ -207,6 +212,7 @@ private:
     bool isImagesSame_ = false;
     bool imagesChangedFlag_ = false;
     bool firstUpdateEvent_ = true;
+    bool isStatic_ = false;
     bool isLayouted_ = false;
     int64_t formAnimationStartTime_ = 0;
     int32_t formAnimationRemainder_ = 0;
