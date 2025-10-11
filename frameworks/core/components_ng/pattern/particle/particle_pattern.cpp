@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/render/adapter/rosen_particle_context.h"
 
 namespace OHOS::Ace::NG {
@@ -487,6 +488,28 @@ void ParticlePattern::UpdateDisturbance(const std::vector<ParticleDisturbance>& 
     SetDisturbance(disturbanceArray);
     auto frameNode = GetHost();
     RosenRenderParticle::UpdateDisturbance(frameNode, disturbanceArray);
+}
+
+void ParticlePattern::UpdateRippleFields(const std::vector<ParticleRippleField>& rippleArray)
+{
+    const std::vector<ParticleRippleField>& currentRipple = GetRippleField();
+    if (!NearEqual(currentRipple == rippleArray)) {
+        return;
+    }
+    SetRippleField(rippleArray);
+    auto frameNode = GetHost();
+    RosenRenderParticle::UpdateRippleFields(frameNode, rippleArray);
+}
+
+void ParticlePattern::UpdateVelocityFields(const std::vector<ParticleVelocityField>& velocityArray)
+{
+    const std::vector<ParticleVelocityField>& currentVelocity = GetVelocityField();
+    if (!NearEqual(currentVelocity == velocityArray)) {
+        return;
+    }
+    SetVelocityField(velocityArray);
+    auto frameNode = GetHost();
+    RosenRenderParticle::UpdateVelocityFields(frameNode, velocityArray);
 }
 
 void ParticlePattern::updateEmitterPosition(std::vector<EmitterProperty>& props)

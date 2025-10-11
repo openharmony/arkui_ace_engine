@@ -24,6 +24,10 @@ public:
     static void DisturbanceField(const std::vector<ParticleDisturbance>& disturbanceArray, NG::FrameNode* frameNode);
     void updateEmitter(std::vector<EmitterProperty>& property) override;
     static void updateEmitter(std::vector<EmitterProperty>& property, NG::FrameNode* frameNode);
+    void RippleFields(const std::vector<ParticleRippleField>& rippleFields) override;
+    static void RippleFields(const std::vector<ParticleRippleField>& rippleFields, NG::FrameNode* frameNode);
+    void VelocityFields(const std::vector<ParticleVelocityField>& velocityFields) override;
+    static void VelocityFields(const std::vector<ParticleVelocityField>& velocityFields, NG::FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif

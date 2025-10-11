@@ -23,6 +23,10 @@ class RosenRenderParticle : public AceType {
 public:
     static void UpdateDisturbance(
         const RefPtr<FrameNode>& frameNode, const std::vector<ParticleDisturbance>& disturbanceArray);
+    static void UpdateRippleFields(
+        const RefPtr<FrameNode>& frameNode, const std::vector<ParticleRippleField>& rippleFields);
+    static void UpdateVelocityFields(
+        const RefPtr<FrameNode>& frameNode, const std::vector<ParticleVelocityField>& velocityFields);
     static void updateEmitterPosition(const RefPtr<FrameNode>& frameNode,
         std::vector<EmitterProperty>& props);
 };

@@ -33,6 +33,8 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     std::unique_ptr<JsonValue> ToEmitterPropertyJsonValue(const EmitterProperty& emitterProperty) const;
     void UpdateDisturbance(const std::vector<ParticleDisturbance>& disturbance);
+    void UpdateRippleFields(const std::vector<ParticleRippleField>& rippleFields);
+    void UpdateVelocityFields(const std::vector<ParticleVelocityField>& velocityFields);
     void updateEmitterPosition(std::vector<EmitterProperty>& property);
 
     bool HaveUnVisibleParent() const
@@ -53,6 +55,26 @@ public:
     void SetDisturbance(std::vector<ParticleDisturbance> disturbance)
     {
         disturbance_ = disturbance;
+    }
+
+    const std::vector<ParticleRippleField>& GetRippleField() const
+    {
+        return rippleField_;
+    }
+
+    void SetRippleField(std::vector<ParticleRippleField> rippleField)
+    {
+        rippleField_ = rippleField;
+    }
+
+    const std::vector<ParticleVelocityField>& GetVelocityField() const
+    {
+        return velocityFields_;
+    }
+
+    void SetVelocityField(std::vector<ParticleVelocityField> velocityFields)
+    {
+        velocityFields_ = velocityFields;
     }
 
     const std::vector<EmitterProperty>& GetEmitterProperty() const
@@ -92,6 +114,8 @@ private:
 
     bool haveUnVisibleParent_ = false;
     std::vector<ParticleDisturbance> disturbance_;
+    std::vector<ParticleRippleField> rippleField_;
+    std::vector<ParticleVelocityField> velocityFields_;
     std::vector<EmitterProperty> emitterProperty_;
     uint32_t emitterCount_ = 0;
 };

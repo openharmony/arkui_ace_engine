@@ -40,6 +40,49 @@ void RosenRenderParticle::UpdateDisturbance(
     rsNode->SetParticleNoiseFields(fields);
 }
 
+void RosenRenderParticle::UpdateRippleFields(
+    const RefPtr<FrameNode>& frameNode, const std::vector<ParticleRippleField>& rippleArray)
+{
+    auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    auto rsNode = renderContext->GetRSNode();
+    std::shared_ptr<Rosen::ParticleRippleFields> rippleFields = std::make_shared<Rosen::ParticleRippleFields>();
+    for (const auto& ripple : rippleArray) {
+        Rosen::Vector2f center = {ripple.center.first.ConvertToPx(), ripple.center.second.ConvertToPx()};
+        auto rsRipple = std::make_shared<Rosen::ParticleRippleField>(center, ripple.amplitude, ripple.wavelength,
+            ripple.waveSpeed, ripple.attenuation);
+        rsRipple->regionShape_  = static_cast<Rosen::ShapeType>(ripple.region.shape);
+        Rosen::Vector2f size =
+            {ripple.region.size.first.ConvertToPx(), ripple.region.size.second.ConvertToPx()};
+        rsRipple->regionSize_ = size;
+        Rosen::Vector2f position =
+            {ripple.region.position.first.ConvertToPx(), ripple.region.position.second.ConvertToPx()};
+        rsRipple->regionPosition_ = position;
+        rippleFields->AddRippleField(rsRipple);
+    }
+    rsNode->SetParticleRippleFields(rippleFields);
+}
+
+void RosenRenderParticle::UpdateVelocityFields(
+    const RefPtr<FrameNode>& frameNode, const std::vector<ParticleVelocityField>& velocityArray)
+{
+    auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    auto rsNode = renderContext->GetRSNode();
+    std::shared_ptr<Rosen::ParticleVelocityFields> velocityFields = std::make_shared<Rosen::ParticleVelocityFields>();
+    for (const auto& velocityField : velocityArray) {
+        Rosen::Vector2f velocity = {velocityField.velocity.first, velocityField.velocity.second};
+        auto rsVelocity = std::make_shared<Rosen::ParticleVelocityField>(velocity);
+        rsVelocity->regionShape_ = static_cast<Rosen::ShapeType>(velocityField.region.shape);
+        Rosen::Vector2f size =
+            {velocityField.region.size.first.ConvertToPx(), velocityField.region.size.second.ConvertToPx()};
+        rsVelocity->regionSize_ = size;
+        Rosen::Vector2f position =
+            {velocityField.region.position.first.ConvertToPx(), velocityField.region.position.second.ConvertToPx()};
+        rsVelocity->regionPosition_ = position;
+        velocityFields->AddVelocityField(rsVelocity);
+    }
+    rsNode->SetParticleVelocityFields(velocityFields);
+}
+
 void RosenRenderParticle::updateEmitterPosition(
     const RefPtr<FrameNode>& frameNode, std::vector<EmitterProperty>& props)
 {

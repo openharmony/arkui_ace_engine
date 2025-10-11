@@ -15,6 +15,7 @@
 #include "particle_modifier.h"
 
 #include "core/components_ng/pattern/particle/particle_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -48,6 +49,105 @@ void ResetDisturbanceField(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     std::vector<ParticleDisturbance> dataArray;
     ParticleModelNG::DisturbanceField(dataArray, frameNode);
+}
+
+void SetRippleField(ArkUINodeHandle node, const ArkRippleFieldOptions* values, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<ParticleRippleField> dataArray;
+    for (ArkUI_Int32 i = 0; i < length; i++) {
+        ParticleRippleField rippleField;
+        if (values[i].isSetAmplitude == 1) {
+            rippleField.amplitude = values[i].amplitude;
+        }
+        if (values[i].isSetWaveLength == 1) {
+            rippleField.wavelength = values[i].wavelength;
+        }
+        if (values[i].isSetWaveSpeed == 1) {
+            rippleField.waveSpeed = values[i].waveSpeed;
+        }
+        if (values[i].isSetAttenuation == 1) {
+            rippleField.attenuation = values[i].attenuation;
+        }
+        if (values[i].isSetCenter == 1) {
+            rippleField.center.first = static_cast<CalcDimension>(values[i].centerX);
+            rippleField.center.second = static_cast<CalcDimension>(values[i].centerY);
+        }
+        if (values[i].isSetRegion == 1) {
+            if (values[i].region.isSetShape == 1) {
+                auto shapeValue = values[i].region.shape;
+                rippleField.region.shape = shapeValue >= 0 && shapeValue < static_cast<int>(ParticleDisturbanceShapeType::MAX)
+                    ? static_cast<ParticleDisturbanceShapeType>(shapeValue)
+                    : ParticleDisturbanceShapeType::RECT;
+            }
+            if (values[i].region.isSetPosition == 1) {
+                rippleField.region.position.first =
+                    static_cast<CalcDimension>(values[i].region.positionX);
+                rippleField.region.position.second =
+                    static_cast<CalcDimension>(values[i].region.positionY);
+            }
+            if (values[i].region.isSetSize == 1) {
+                rippleField.region.size.first =
+                    static_cast<CalcDimension>(values[i].region.sizeWidth);
+                rippleField.region.size.second =
+                    static_cast<CalcDimension>(values[i].region.sizeHeight);
+            }
+        }
+        dataArray.push_back(rippleField);
+    }
+    ParticleModelNG::RippleFields(dataArray, frameNode);
+}
+
+void ResetRippleField(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<ParticleRippleField> dataArray;
+    ParticleModelNG::RippleFields(dataArray, frameNode);
+}
+
+void SetVelocityField(ArkUINodeHandle node, const ArkVelocityFieldOptions* values, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<ParticleVelocityField> dataArray;
+    for (ArkUI_Int32 i = 0; i < length; i++) {
+        ParticleVelocityField velocityField;
+        if (values[i].isSetVelocity == 1) {
+            velocityField.velocity.first = values[i].velocityX;
+            velocityField.velocity.second = values[i].velocityY;
+        }
+        if (values[i].isSetRegion == 1) {
+            velocityField.velocity.first = values[i].velocityX;
+            velocityField.velocity.second = values[i].velocityY;
+            if (values[i].region.isSetShape == 1) {
+                velocityField.region.shape = static_cast<ParticleDisturbanceShapeType>(values[i].region.shape);
+            }
+            if (values[i].region.isSetPosition == 1) {
+                velocityField.region.position.first =
+                    Dimension(values[i].region.positionX, DimensionUnit::VP);
+                velocityField.region.position.second =
+                    Dimension(values[i].region.positionY, DimensionUnit::VP);
+            }
+            if (values[i].region.isSetSize == 1) {
+                velocityField.region.size.first =
+                    Dimension(values[i].region.sizeWidth, DimensionUnit::VP);
+                velocityField.region.size.second =
+                    Dimension(values[i].region.sizeHeight, DimensionUnit::VP);
+            }
+        }
+        dataArray.push_back(velocityField);
+    }
+    ParticleModelNG::VelocityFields(dataArray, frameNode);
+}
+
+void ResetVelocityField(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<ParticleVelocityField> dataArray;
+    ParticleModelNG::VelocityFields(dataArray, frameNode);
 }
 
 void setEmitter(ArkUINodeHandle node, const ArkEmitterPropertyOptions* values, ArkUI_Int32 length)
@@ -124,6 +224,10 @@ const ArkUIParticleModifier* GetParticleModifier()
         .ResetDisturbanceField = ResetDisturbanceField,
         .SetEmitter = setEmitter,
         .ResetEmitter = resetEmitter,
+        .SetRippleField = SetRippleField,
+        .ResetRippleField = ResetRippleField,
+        .SetVelocityField = SetVelocityField,
+        .ResetVelocityField = ResetVelocityField,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

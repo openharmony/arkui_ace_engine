@@ -3802,20 +3802,16 @@ class ParticleEmitterModifier extends ModifierWithKey<object> {
           if (isObject(data.annulusRegion.center) &&
             isObject(data.annulusRegion.center.x) && isObject(data.annulusRegion.center.y)) {
             arkEmitterPropertyOptions.isSetCenter = 1;
-            arkEmitterPropertyOptions.centerXValue = data.annulusRegion.center.x.value;
-            arkEmitterPropertyOptions.centerXUnit = data.annulusRegion.center.x.unit;
-            arkEmitterPropertyOptions.centerYValue = data.annulusRegion.center.y.value;
-            arkEmitterPropertyOptions.centerYUnit = data.annulusRegion.center.y.unit;
+            arkEmitterPropertyOptions.centerX = data.annulusRegion.center.x;
+            arkEmitterPropertyOptions.centerY = data.annulusRegion.center.y;
           }
           if (isObject(data.annulusRegion.innerRadius)) {
             arkEmitterPropertyOptions.isSetInnerRadius = 1;
-            arkEmitterPropertyOptions.innerRadiusValue = data.annulusRegion.innerRadius.value;
-            arkEmitterPropertyOptions.innerRadiusUnit = data.annulusRegion.innerRadius.unit;
+            arkEmitterPropertyOptions.innerRadius = data.annulusRegion.innerRadius;
           }
           if (isObject(data.annulusRegion.outerRadius)) {
             arkEmitterPropertyOptions.isSetOuterRadius = 1;
-            arkEmitterPropertyOptions.outerRadiusValue = data.annulusRegion.outerRadius.value;
-            arkEmitterPropertyOptions.outerRadiusUnit = data.annulusRegion.outerRadius.unit;
+            arkEmitterPropertyOptions.outerRadius = data.annulusRegion.outerRadius.value;
           }
           if (isNumber(data.annulusRegion.startAngle)) {
             arkEmitterPropertyOptions.isSetStartAngle = 1;

@@ -1942,6 +1942,41 @@ struct ArkEmitterPropertyOptions {
     ArkUI_Float32 endAngle;
 };
 
+struct ArkFieldRegion {
+    ArkUI_Int32 isSetShape;
+    ArkUI_Int32 shape;
+    ArkUI_Int32 isSetPosition;
+    ArkUI_Float32 positionX;
+    ArkUI_Float32 positionY;
+    ArkUI_Int32 isSetSize;
+    ArkUI_Float32 sizeWidth;
+    ArkUI_Float32 sizeHeight;
+};
+
+struct ArkRippleFieldOptions {
+    ArkUI_Int32 isSetAmplitude;
+    ArkUI_Float32 amplitude;
+    ArkUI_Int32 isSetWaveLength;
+    ArkUI_Float32 wavelength;
+    ArkUI_Int32 isSetWaveSpeed;
+    ArkUI_Float32 waveSpeed;
+    ArkUI_Int32 isSetAttenuation;
+    ArkUI_Float32 attenuation;
+    ArkUI_Int32 isSetCenter;
+    ArkUI_Float32 centerX;
+    ArkUI_Float32 centerY;
+    ArkUI_Int32 isSetRegion;
+    ArkFieldRegion region;
+};
+
+struct ArkVelocityFieldOptions {
+    ArkUI_Int32 isSetVelocity;
+    ArkUI_Float32 velocityX;
+    ArkUI_Float32 velocityY;
+    ArkUI_Int32 isSetRegion;
+    ArkFieldRegion region;
+};
+
 typedef struct {
     ArkUIDragEvent* dragEvent;
     ArkUI_Int32 status;
@@ -3612,6 +3647,10 @@ struct ArkUIParticleModifier {
     void (*ResetDisturbanceField)(ArkUINodeHandle node);
     void (*SetEmitter)(ArkUINodeHandle node, const ArkEmitterPropertyOptions* valuesArray, ArkUI_Int32 length);
     void (*ResetEmitter)(ArkUINodeHandle node);
+    void (*SetRippleField)(ArkUINodeHandle node, const ArkRippleFieldOptions* valuesArray, ArkUI_Int32 length);
+    void (*ResetRippleField)(ArkUINodeHandle node);
+    void (*SetVelocityField)(ArkUINodeHandle node, const ArkVelocityFieldOptions* valuesArray, ArkUI_Int32 length);
+    void (*ResetVelocityField)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperModifier {

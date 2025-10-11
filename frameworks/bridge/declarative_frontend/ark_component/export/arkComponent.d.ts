@@ -2102,6 +2102,8 @@ declare class ArkParticleComponent extends ArkComponent implements ParticleAttri
     constructor(nativePtr: KNode, classType?: ModifierType);
     disturbanceFields(fields: Array<DisturbanceFieldsOptions>): ParticleAttribute;
     emitter(fields: Array<EmitterProperty>): ParticleAttribute;
+    rippleFields(fields: Array<RippleFieldOptions>): ParticleAttribute;
+    velocityFields(fields: Array<VelocityFieldOptions>): ParticleAttribute;
 }
 declare class CheckboxWidthModifier extends ModifierWithKey<Length> {}
 declare class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {}
