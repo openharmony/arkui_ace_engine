@@ -574,7 +574,7 @@ std::optional<uint32_t> ResourceConverter::ToSymbol()
             return static_cast<uint32_t>(strtol(result.value().c_str(), nullptr, 16));
         }
     }
-    if (id_ != -1) {
+    if (id_ != -1 && type_ == ResourceType::SYMBOL) {
         return resWrapper_->GetSymbolById(id_);
     } else if (auto name = GetResourceName(); name) {
         return resWrapper_->GetSymbolByName(name->c_str());
