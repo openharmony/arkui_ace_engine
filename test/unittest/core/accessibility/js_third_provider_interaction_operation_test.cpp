@@ -22,6 +22,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "accessibility_def.h"
 #include "accessibility_system_ability_client.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "adapter/ohos/osal/js_third_provider_interaction_operation.h"
@@ -101,7 +102,7 @@ public:
     }
 
     void SetFocusMoveSearchWithConditionResult(const std::list<AccessibilityElementInfo> &info,
-        const FocusMoveResult &result, const int32_t requestId) override
+        const Accessibility::FocusMoveResult &result, const int32_t requestId) override
     {
         mockInfos_ = info;
         mockResult_ = result;
