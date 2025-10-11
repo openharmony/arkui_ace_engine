@@ -23,7 +23,7 @@ namespace OHOS::Ace::Framework {
 
 class JSContainerPicker : public JSContainerBase {
 public:
-    static void Create();
+    static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
     static void SetCanLoop(const JSCallbackInfo& info);

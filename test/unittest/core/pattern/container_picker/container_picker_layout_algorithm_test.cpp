@@ -361,6 +361,151 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest004
+ * @tc.desc: Test MeasureWidth method with different content constraints
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
+     */
+    CreateContainerPickerNode(3);
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+
+    /**
+     * @tc.steps: step2. Test MeasureWidth with undefined cross size
+     * @tc.expected: step2. The width should be calculated correctly
+     */
+    OptionalSizeF contentIdealSize;
+    contentIdealSize.SetMainSize(500.0f, Axis::VERTICAL);
+
+    // Set item positions to simulate measured items
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
+
+    algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
+    EXPECT_TRUE(contentIdealSize.Width().has_value());
+}
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest005
+ * @tc.desc: Test MeasureWidth method with infinity cross size
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest005, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
+     */
+    CreateContainerPickerNode(3);
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+
+    /**
+     * @tc.steps: step2. Set infinity cross size
+     * @tc.expected: step2. The width should be set to child max width
+     */
+    OptionalSizeF contentIdealSize;
+    contentIdealSize.SetMainSize(500.0f, Axis::VERTICAL);
+    contentIdealSize.SetCrossSize(INFINITY, Axis::VERTICAL);
+
+    // Set item positions to simulate measured items
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
+
+    algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
+    EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_TRUE(algorithm_->crossMatchChild_);
+}
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest006
+ * @tc.desc: Test MeasureWidth method with negative cross size
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest006, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
+     */
+    CreateContainerPickerNode(3);
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+
+    /**
+     * @tc.steps: step2. Set negative cross size
+     * @tc.expected: step2. The width should be set to default width
+     */
+    OptionalSizeF contentIdealSize;
+    contentIdealSize.SetMainSize(500.0f, Axis::VERTICAL);
+    contentIdealSize.SetCrossSize(-100.0f, Axis::VERTICAL);
+
+    algorithm_->widthLayoutPolicy = LayoutCalPolicy::NO_MATCH;
+
+    algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
+    EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_TRUE(NearEqual(contentIdealSize.Width().value(), 300.0f)); // Default width
+}
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest007
+ * @tc.desc: Test MeasureWidth method with WRAP_CONTENT and parent cross size
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest007, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
+     */
+    CreateContainerPickerNode(3);
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+
+    /**
+     * @tc.steps: step2. Test WRAP_CONTENT with parent cross size constraint
+     * @tc.expected: step2. The width should be constrained by parent cross size
+     */
+    OptionalSizeF contentIdealSize;
+    contentIdealSize.SetMainSize(500.0f, Axis::VERTICAL);
+
+    // Set item positions to simulate measured items
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
+
+    algorithm_->widthLayoutPolicy = LayoutCalPolicy::WRAP_CONTENT;
+
+    algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
+    EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_TRUE(algorithm_->crossMatchChild_);
+}
+
+/**
  * @tc.name: ContainerPickerLayoutAlgorithm_CalcMainAndMiddlePosTest001
  * @tc.desc: Test CalcMainAndMiddlePos method of ContainerPickerLayoutAlgorithm with default height
  * @tc.type: FUNC
@@ -1080,4 +1225,67 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithmTrans
     EXPECT_TRUE(NearEqual(offset5.GetY(), originalY5));
 }
 
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_ResetOffscreenItemPositionTest001
+ * @tc.desc: Test ResetOffscreenItemPosition method of ContainerPickerLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_ResetOffscreenItemPositionTest001,
+    TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker with child nodes
+     */
+    CreateContainerPickerNode(3);
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    // Get child wrapper before reset
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+    auto childGeometryNode = childWrapper->GetGeometryNode();
+    ASSERT_NE(childGeometryNode, nullptr);
+
+    // Save original offset
+    OffsetF originalOffset = childGeometryNode->GetMarginFrameOffset();
+
+    /**
+     * @tc.steps: step2. Call ResetOffscreenItemPosition
+     * @tc.expected: step2. The offscreen item position should be reset correctly
+     */
+    algorithm_->ResetOffscreenItemPosition(layoutWrapper, 0);
+
+    // Check if offset is set to -PICKER_ITEM_DEFAULT_HEIGHT
+    auto newOffset = childGeometryNode->GetMarginFrameOffset();
+    EXPECT_TRUE(NearEqual(newOffset.GetX(), 0.0f));
+    EXPECT_TRUE(NearEqual(newOffset.GetY(), -130.0f));
+    EXPECT_FALSE(NearEqual(newOffset.GetY(), originalOffset.GetY()));
+}
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_ResetOffscreenItemPositionTest002
+ * @tc.desc: Test ResetOffscreenItemPosition method with nullptr check
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_ResetOffscreenItemPositionTest002,
+    TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Test with nullptr parameters (should not crash)
+     * @tc.expected: step1. The function should handle nullptr gracefully
+     */
+    // This test case verifies that the function handles nullptr gracefully without crashing
+    algorithm_->ResetOffscreenItemPosition(nullptr, 0);
+
+    // Create layout wrapper but test with invalid index
+    CreateContainerPickerNode(1);
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+
+    // Test with invalid index
+    algorithm_->ResetOffscreenItemPosition(layoutWrapper, 10);
+}
 } // namespace OHOS::Ace::NG
