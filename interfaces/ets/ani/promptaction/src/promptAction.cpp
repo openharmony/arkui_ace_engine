@@ -96,19 +96,20 @@ static ani_object OpenToast(ani_env* env, ani_object options)
     if (!GetShowToastOptions(env, options, toastInfo)) {
         return nullptr;
     }
+
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
-    asyncContext->env = env;
     ani_status status = env->GetVM(&asyncContext->vm);
     if (status != ANI_OK || asyncContext->vm == nullptr) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
         return nullptr;
     }
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
     ani_object result = {};
     status = env->Promise_New(&asyncContext->deferred, &result);
     if (status != ANI_OK) {
-        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] Promise_New fail. status: %{public}d", status);
     }
+
     std::function<void(int32_t)> toastCallback = GetToastPromise(asyncContext);
     if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService()) &&
         !OHOS::Ace::NG::ContainerIsScenceBoard() && toastInfo.showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
@@ -167,10 +168,9 @@ static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object 
     dialogProps.type = OHOS::Ace::DialogType::ALERT_DIALOG;
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
-    asyncContext->env = env;
     ani_status status = env->GetVM(&asyncContext->vm);
     if (status != ANI_OK || asyncContext->vm == nullptr) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
         return;
     }
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
@@ -201,17 +201,16 @@ static ani_object ShowDialog(ani_env* env, ani_object options, ani_object option
     dialogProps.type = OHOS::Ace::DialogType::ALERT_DIALOG;
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
-    asyncContext->env = env;
     ani_status status = env->GetVM(&asyncContext->vm);
     if (status != ANI_OK || asyncContext->vm == nullptr) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
         return nullptr;
     }
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
     ani_object result = {};
     status = env->Promise_New(&asyncContext->deferred, &result);
     if (status != ANI_OK) {
-        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] Promise_New fail. status: %{public}d", status);
     }
 
     std::function<void(int32_t, int32_t)> finishCallback = GetShowDialogPromise(asyncContext);
@@ -238,10 +237,9 @@ static void ShowActionMenuWithCallback(ani_env* env, ani_object options, ani_obj
     dialogProps.isMenu = true;
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
-    asyncContext->env = env;
     ani_status status = env->GetVM(&asyncContext->vm);
     if (status != ANI_OK || asyncContext->vm == nullptr) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
         return;
     }
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
@@ -272,17 +270,16 @@ static ani_object ShowActionMenu(ani_env* env, ani_object options)
     dialogProps.isMenu = true;
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
-    asyncContext->env = env;
     ani_status status = env->GetVM(&asyncContext->vm);
     if (status != ANI_OK || asyncContext->vm == nullptr) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
         return nullptr;
     }
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
     ani_object result = {};
     status = env->Promise_New(&asyncContext->deferred, &result);
     if (status != ANI_OK) {
-        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] Promise_New fail. status: %{public}d", status);
     }
 
     std::function<void(int32_t, int32_t)> finishCallback = GetShowActionMenuPromise(asyncContext);
@@ -314,17 +311,16 @@ static ani_object OpenCustomDialogContent(ani_env* env, ani_long content, ani_ob
     GetDialogOptionsInternal(env, optionsInternal, dialogProps);
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
-    asyncContext->env = env;
     ani_status status = env->GetVM(&asyncContext->vm);
     if (status != ANI_OK || asyncContext->vm == nullptr) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
         return nullptr;
     }
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
     ani_object result = {};
     status = env->Promise_New(&asyncContext->deferred, &result);
     if (status != ANI_OK) {
-        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] Promise_New fail. status: %{public}d", status);
     }
 
     std::function<void(int32_t)> finishCallback = GetCustomDialogContentPromise(asyncContext);
@@ -343,22 +339,21 @@ static ani_object OpenCustomDialog(ani_env* env, ani_object builderOptions, ani_
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialog enter.");
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
-    asyncContext->env = env;
     ani_status status = env->GetVM(&asyncContext->vm);
     if (status != ANI_OK || asyncContext->vm == nullptr) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
         return nullptr;
     }
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
     ani_object result = {};
     status = env->Promise_New(&asyncContext->deferred, &result);
     if (status != ANI_OK) {
-        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] Promise_New fail. status: %{public}d", status);
     }
 
     OHOS::Ace::DialogProperties dialogProps;
     bool builderResult = GetCustomBuilder(env, builderOptions, dialogProps.customBuilder);
-    bool destroyResult = GetDestroyCallback(asyncContext->vm, builderOptions, dialogProps.destroyCallback);
+    bool destroyResult = GetDestroyCallback(env, builderOptions, dialogProps.destroyCallback);
     if (!builderResult || !destroyResult) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse dialog builder options fail.");
         return nullptr;
@@ -403,17 +398,16 @@ static ani_object UpdateCustomDialog(ani_env* env, ani_long content, ani_object 
     dialogProps.isSysBlurStyle = false;
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
-    asyncContext->env = env;
     ani_status status = env->GetVM(&asyncContext->vm);
     if (status != ANI_OK || asyncContext->vm == nullptr) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
         return nullptr;
     }
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
     ani_object result = {};
     status = env->Promise_New(&asyncContext->deferred, &result);
     if (status != ANI_OK) {
-        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] Promise_New fail. status: %{public}d", status);
     }
 
     std::function<void(int32_t)> finishCallback = GetCustomDialogContentPromise(asyncContext);
@@ -446,17 +440,16 @@ static ani_object CloseCustomDialogContent(ani_env* env, ani_long content)
     auto contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
-    asyncContext->env = env;
     ani_status status = env->GetVM(&asyncContext->vm);
     if (status != ANI_OK || asyncContext->vm == nullptr) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
         return nullptr;
     }
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
     ani_object result = {};
     status = env->Promise_New(&asyncContext->deferred, &result);
     if (status != ANI_OK) {
-        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] Promise_New fail. status: %{public}d", status);
     }
 
     std::function<void(int32_t)> finishCallback = GetCustomDialogContentPromise(asyncContext);
@@ -472,10 +465,6 @@ static ani_object CloseCustomDialogContent(ani_env* env, ani_long content)
 static void CloseCustomDialog(ani_env* env, ani_double dialogId)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] CloseCustomDialog enter.");
-    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
-    asyncContext->env = env;
-    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
-
     int32_t customDialogId = static_cast<int32_t>(static_cast<double>(dialogId));
     if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
         && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
@@ -508,17 +497,16 @@ static ani_object OpenCustomDialogWithController(ani_env* env, ani_long content,
     GetDialogOptionsInternal(env, optionsInternal, dialogProps);
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
-    asyncContext->env = env;
     ani_status status = env->GetVM(&asyncContext->vm);
     if (status != ANI_OK || asyncContext->vm == nullptr) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
         return nullptr;
     }
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
     ani_object result;
     status = env->Promise_New(&asyncContext->deferred, &result);
     if (status != ANI_OK) {
-        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] Promise_New fail. status: %{public}d", status);
     }
 
     std::function<void(int32_t)> finishCallback = GetCustomDialogContentPromise(asyncContext);
@@ -536,28 +524,26 @@ static ani_object PresentCustomDialog(ani_env* env, ani_object builderOptions, a
     ani_object options, ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] PresentCustomDialog enter.");
+    OHOS::Ace::DialogProperties dialogProps;
+    bool builderResult = GetCustomBuilder(env, builderOptions, dialogProps.customBuilder);
+    bool destroyResult = GetDestroyCallback(env, builderOptions, dialogProps.destroyCallback);
+    bool builderWithIdResult = GetCustomBuilderWithId(env, builderOptions, dialogProps.customBuilderWithId);
+    if ((!builderResult && !builderWithIdResult) || !destroyResult) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse dialog builder options fail.");
+        return nullptr;
+    }
+
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
-    asyncContext->env = env;
     ani_status status = env->GetVM(&asyncContext->vm);
     if (status != ANI_OK || asyncContext->vm == nullptr) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
         return nullptr;
     }
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
     ani_object result;
     status = env->Promise_New(&asyncContext->deferred, &result);
     if (status != ANI_OK) {
-        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
-    }
-
-    OHOS::Ace::DialogProperties dialogProps;
-    bool builderResult = GetCustomBuilder(env, builderOptions, dialogProps.customBuilder);
-    bool destroyResult = GetDestroyCallback(asyncContext->vm, builderOptions, dialogProps.destroyCallback);
-    bool builderWithIdResult =
-        GetCustomBuilderWithId(asyncContext->vm, builderOptions, dialogProps.customBuilderWithId);
-    if ((!builderResult && !builderWithIdResult) || !destroyResult) {
-        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse dialog builder options fail.");
-        return nullptr;
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] Promise_New fail. status: %{public}d", status);
     }
 
     OHOS::Ace::Ani::GetDialogController(env, controller, dialogProps.dialogCallback);
@@ -576,27 +562,6 @@ static ani_object PresentCustomDialog(ani_env* env, ani_object builderOptions, a
     return result;
 }
 
-static ani_status CreateAniDouble(ani_env* env, double value, ani_object& result)
-{
-    ani_status state;
-    ani_class doubleClass;
-    if ((state = env->FindClass("std.core.Double", &doubleClass)) != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FindClass std/core/doubleClass failed, %{public}d", state);
-        return state;
-    }
-    ani_method doubleClassCtor;
-    if ((state = env->Class_FindMethod(doubleClass, "<ctor>", "d:", &doubleClassCtor)) != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "Class_FindMethod Double ctor failed, %{public}d", state);
-        return state;
-    }
-    ani_double aniValue = value;
-    if ((state = env->Object_New(doubleClass, doubleClassCtor, &result, aniValue)) != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "New Double object failed, %{public}d", state);
-        return state;
-    }
-    return state;
-}
-
 static ani_object GetTopOrder(ani_env* env)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] GetTopOrder enter.");
@@ -613,7 +578,7 @@ static ani_object GetTopOrder(ani_env* env)
     CHECK_NULL_RETURN(overlayManager, aniOrder);
     auto orderValue = overlayManager->GetTopOrder();
     if (orderValue.has_value()) {
-        CreateAniDouble(env, orderValue.value(), aniOrder);
+        aniOrder = CreateANIDoubleObject(env, orderValue.value());
     }
     return aniOrder;
 }
@@ -634,7 +599,7 @@ static ani_object GetBottomOrder(ani_env* env)
     CHECK_NULL_RETURN(overlayManager, aniOrder);
     auto orderValue = overlayManager->GetBottomOrder();
     if (orderValue.has_value()) {
-        CreateAniDouble(env, orderValue.value(), aniOrder);
+        aniOrder = CreateANIDoubleObject(env, orderValue.value());
     }
     return aniOrder;
 }
@@ -645,7 +610,7 @@ static ani_object GetDialogNode(ani_env* env, ani_long content)
     ani_ref undefinedRef = nullptr;
     ani_status status = env->GetUndefined(&undefinedRef);
     if (status != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetUndefined failed, %{public}d", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetUndefined fail. status: %{public}d", status);
         return nullptr;
     }
     ani_object result = static_cast<ani_object>(undefinedRef);
@@ -685,6 +650,8 @@ static ani_boolean SetDialogController(ani_env* env, ani_long dialog, ani_object
     ani_long nativePtr;
     ani_status status = env->Object_GetFieldByName_Long(controller, "nativePtr", &nativePtr);
     if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
+            "[ANI] Object_GetFieldByName_Long fail. status: %{public}d", status);
         return result;
     }
 

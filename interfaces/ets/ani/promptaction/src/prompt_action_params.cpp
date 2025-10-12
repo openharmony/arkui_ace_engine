@@ -424,27 +424,29 @@ bool GetFunctionParam(ani_env *env, ani_ref ref, std::function<void()>& result)
     ani_vm *vm = nullptr;
     status = env->GetVM(&vm);
     if (status != ANI_OK || vm == nullptr) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
         return false;
     }
+
     result = [vm, globalRef]() {
         if (!globalRef) {
             return;
         }
+
         ani_env* env = nullptr;
         ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
         if (status != ANI_OK || env == nullptr) {
-            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
-                "[ANI] GetEnv fail. status: %{public}d", status);
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetEnv fail. status: %{public}d", status);
             return;
         }
+
         ani_fn_object func = static_cast<ani_fn_object>(globalRef);
         std::vector<ani_ref> args;
         ani_ref fnReturnVal {};
         status = env->FunctionalObject_Call(func, args.size(), args.data(), &fnReturnVal);
         env->GlobalReference_Delete(globalRef);
         if (status != ANI_OK) {
-            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] FunctionalObject_Call fail. status: %{public}d", status);
         }
     };
     return true;

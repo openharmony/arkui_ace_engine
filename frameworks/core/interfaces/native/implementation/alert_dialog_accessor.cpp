@@ -262,7 +262,7 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const DialogPr
 }
 DialogProperties CreateDialogProperties(const DialogPropsForUpdate props)
 {
-    DialogProperties dialogProps { .type = DialogType::ALERT_DIALOG };
+    DialogProperties dialogProps { .type = DialogType::ALERT_DIALOG, .isAlertDialog = true };
     UpdateDynamicDialogProperties(dialogProps, props);
     auto gridCount = Converter::OptConvert<int32_t>(props.gridCount);
     if (gridCount) {
