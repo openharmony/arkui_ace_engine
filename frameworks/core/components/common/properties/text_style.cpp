@@ -113,24 +113,6 @@ std::string TextStyle::GetDeclarationString(
     return jsonSpanDeclaration->ToString();
 }
 
-void TextStyle::UpdateColorByResourceId()
-{
-    if (SystemProperties::ConfigChangePerform()) {
-        ReloadResources();
-        std::for_each(propTextShadows_.begin(), propTextShadows_.end(), [](Shadow& sd) { sd.ReloadResources(); });
-        if (propTextBackgroundStyle_.has_value()) {
-            propTextBackgroundStyle_->ReloadResources();
-        }
-        return;
-    }
-    propTextColor_.UpdateColorByResourceId();
-    propTextDecorationColor_.UpdateColorByResourceId();
-    if (propTextBackgroundStyle_.has_value()) {
-        propTextBackgroundStyle_->UpdateColorByResourceId();
-    }
-    std::for_each(propRenderColors_.begin(), propRenderColors_.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
-    std::for_each(propTextShadows_.begin(), propTextShadows_.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
-}
 
 void TextStyle::AddResource(
     const std::string& key,
@@ -162,6 +144,10 @@ void TextStyle::ReloadResources()
 {
     for (const auto& [key, resourceUpdater] : resMap_) {
         resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+    }
+    std::for_each(propTextShadows_.begin(), propTextShadows_.end(), [](Shadow& sd) { sd.ReloadResources(); });
+    if (propTextBackgroundStyle_.has_value()) {
+        propTextBackgroundStyle_->ReloadResources();
     }
 }
 

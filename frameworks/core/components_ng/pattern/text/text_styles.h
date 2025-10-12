@@ -142,6 +142,7 @@ struct SpanOptionBase {
     UserGestureOptions userGestureOption;
     UserMouseOptions userMouseOption;
     std::optional<Color> dragBackgroundColor;
+    RefPtr<ResourceObject> dragBackgroundColorResObj;
     bool isDragShadowNeeded = true;
     OptionSource optionSource = OptionSource::EXTERNAL_API;
 
@@ -225,8 +226,6 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
-
-    void UpdateColorByResourceId();
 
     TextDecoration GetTextDecorationFirst() const
     {
