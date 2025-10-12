@@ -33,6 +33,7 @@ import promptAction from '@ohos/promptAction';
 import { RecordData } from "@ohos.base"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
+import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 
 export class ReuseObject {
     readonly _raw: RecordData;
@@ -210,6 +211,8 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.setActiveCount(active);
         if (this.isViewActive()) {
             StateUpdateLoop.consumeFreezeTasks(this.getUniqueId());
+            ObserveSingleton.instance.unFreezeDelayedComputedProps();
+            ObserveSingleton.instance.unFreezeDelayedMonitorPaths();
         }
         const peer = this.getPeerNode() as PeerNode | undefined;
         if (peer) {
