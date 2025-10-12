@@ -161,3 +161,10 @@ function __Interop_transferCompatibleDynamicBuilder_Internal(builder: (...args: 
     }
     return InteropExtractorModule.transferCompatibleDynamicBuilder(builder);
 }
+
+function __Interop_createCompatibleStaticState_Internal(value: Object) {
+    if(InteropExtractorModule.createCompatibleStaticState === undefined) {
+        throw new Error("Non Method For createCompatibleStaticState");
+    }
+    return InteropExtractorModule.createCompatibleStaticState(value);
+}
