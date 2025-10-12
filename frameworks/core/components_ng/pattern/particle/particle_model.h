@@ -26,11 +26,55 @@
 #include "core/components_ng/property/particle_property.h"
 namespace OHOS::Ace {
 
-enum class ParticleDisturbanceShapeType :uint32_t { RECT, CIRCLE, ELLIPSE };
+enum class ParticleDisturbanceShapeType :uint32_t {
+    RECT,
+    CIRCLE,
+    ELLIPSE,
+    MAX
+};
 const CalcDimension DEFAULT_CENTER_VALUE = CalcDimension(0.5, DimensionUnit::PERCENT);
 constexpr float DEFAULT_RADIUS_VALUE = 0.0f;
 constexpr float DEFAULT_START_ANGLE_VALUE = 0.0f;
 constexpr float DEFAULT_END_ANGLE_VALUE = 360.0f;
+
+struct ParticleFieldRegion {
+    ParticleDisturbanceShapeType shape = ParticleDisturbanceShapeType::RECT;
+    std::pair<Dimension, Dimension> position;
+    std::pair<Dimension, Dimension> size;
+
+    bool operator==(const ParticleFieldRegion& data) const
+    {
+        return shape == data.shape && position == data.position &&
+               size == data.size;
+    }
+};
+
+struct ParticleVelocityField {
+    std::pair<float, float> velocity = { 0.0f, 0.0f };
+    ParticleFieldRegion region;
+
+    bool operator==(const ParticleVelocityField& data) const
+    {
+        return NearEqual(velocity.first, data.velocity.first) &&
+               NearEqual(velocity.second, data.velocity.second) && region == data.region;
+    }
+};
+
+struct ParticleRippleField {
+    float amplitude = 0;
+    float wavelength = 0;
+    float waveSpeed = 0;
+    float attenuation = 0;
+    std::pair<Dimension, Dimension> center;
+    ParticleFieldRegion region;
+
+    bool operator==(const ParticleRippleField& data) const
+    {
+        return NearEqual(amplitude, data.amplitude) && NearEqual(wavelength, data.wavelength) &&
+               NearEqual(waveSpeed, data.waveSpeed) && NearEqual(attenuation, data.attenuation) &&
+               center == data.center && region == data.region;
+    }
+};
 
 struct ParticleDisturbance {
     float strength = 0.0f;
@@ -66,6 +110,8 @@ public:
     virtual void Create(std::list<NG::ParticleOption>& arrayValue) = 0;
     virtual void DisturbanceField(const std::vector<ParticleDisturbance>& disturbanceArray) = 0;
     virtual void updateEmitter(std::vector<EmitterProperty>& property) = 0;
+    virtual void RippleFields(const std::vector<ParticleRippleField>& rippleFields) = 0;
+    virtual void VelocityFields(const std::vector<ParticleVelocityField>& velocityFields) = 0;
 
 private:
     static std::unique_ptr<ParticleModel> instance_;

@@ -27,4 +27,16 @@ void RosenRenderParticle::updateEmitterPosition(
 {
     return;
 }
+
+void RosenRenderParticle::UpdateVelocityFields(
+    const RefPtr<FrameNode>& frameNode, const std::vector<ParticleVelocityField>& velocityArray)
+{
+    return;
+}
+
+void RosenRenderParticle::UpdateRippleFields(
+    const RefPtr<FrameNode>& frameNode, const std::vector<ParticleRippleField>& rippleArray)
+{
+    return;
+}
 } // namespace OHOS::Ace::NG

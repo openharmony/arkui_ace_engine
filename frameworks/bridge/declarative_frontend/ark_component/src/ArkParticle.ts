@@ -27,6 +27,16 @@ class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     modifierWithKey(this._modifiersWithKeys, ParticleEmitterModifier.identity, ParticleEmitterModifier, value);
     return this;
   }
+
+  rippleFields(value: Array<RippleFieldOptions>): this {
+    modifierWithKey(this._modifiersWithKeys, ParticleRippleModifier.identity, ParticleRippleModifier, value);
+    return this;
+  }
+
+  velocityFields(value: Array<VelocityFieldOptions>): this {
+    modifierWithKey(this._modifiersWithKeys, ParticleVelocityModifier.identity, ParticleVelocityModifier, value);
+    return this;
+  }
 }
 
 class ParticleModifier extends ModifierWithKey<Array<DisturbanceFieldOptions>> {
@@ -163,6 +173,206 @@ class ParticleEmitterModifier extends ModifierWithKey<Array<EmitterProperty>> {
     } else {
       return true;
     }
+  }
+}
+
+class ArkRippleFieldOptions {
+  isSetAmplitude: number;
+  amplitude: number | undefined;
+  isSetWaveLength: number;
+  wavelength: number | undefined;
+  isSetWaveSpeed: number;
+  waveSpeed: number | undefined;
+  isSetAttenuation: number;
+  attenuation: number | undefined;
+  isSetCenter: number;
+  centerX: number | undefined;
+  centerY: number | undefined;
+  isSetRegion: number;
+  isSetShape: number;
+  shape: number | undefined;
+  isSetPosition: number;
+  positionX: number | undefined;
+  positionY: number | undefined;
+  isSetSize: number;
+  sizeWidth: number | undefined;
+  sizeHeight: number | undefined;
+
+  constructor() {
+    this.isSetAmplitude = 0;
+    this.amplitude = undefined;
+    this.isSetWaveLength = 0;
+    this.wavelength = undefined;
+    this.isSetWaveSpeed = 0;
+    this.waveSpeed = undefined;
+    this.isSetAttenuation = 0;
+    this.attenuation = undefined;
+    this.isSetCenter = 0;
+    this.centerX = undefined;
+    this.centerY = undefined;
+    this.isSetRegion = 0;
+    this.isSetShape = 0;
+    this.shape = undefined;
+    this.isSetPosition = 0;
+    this.positionX = undefined;
+    this.positionY = undefined;
+    this.isSetSize = 0;
+    this.sizeWidth = undefined;
+    this.sizeHeight = undefined;
+  }
+}
+
+class ParticleRippleModifier extends ModifierWithKey<Array<RippleFieldOptions>> {
+  constructor(value: Array<RippleFieldOptions>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('rippleFields');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().particle.resetRippleField(node);
+    } else {
+      let dataArray = [];
+      if (!Array.isArray(this.value)) {
+        return;
+      }
+      for (let i = 0; i < this.value.length; i++) {
+        let arkRippleFieldOptions = new ArkRippleFieldOptions();
+        let data = this.value[i];
+        if (!data) {
+          continue;
+        }
+        if (isNumber(data.amplitude)) {
+          arkRippleFieldOptions.isSetAmplitude = 1;
+          arkRippleFieldOptions.amplitude = data.amplitude;
+        }
+        if (isNumber(data.wavelength)) {
+          arkRippleFieldOptions.isSetWaveLength = 1;
+          arkRippleFieldOptions.wavelength = data.wavelength;
+        }
+        if (isNumber(data.waveSpeed)) {
+          arkRippleFieldOptions.isSetWaveSpeed = 1;
+          arkRippleFieldOptions.waveSpeed = data.waveSpeed;
+        }
+        if (isNumber(data.attenuation)) {
+          arkRippleFieldOptions.isSetAttenuation = 1;
+          arkRippleFieldOptions.attenuation = data.attenuation;
+        }
+        if (isObject(data.center)) {
+          arkRippleFieldOptions.isSetCenter = 1;
+          arkRippleFieldOptions.centerX = data.center.x;
+          arkRippleFieldOptions.centerY = data.center.y;
+        }
+        if (isObject(data.region)) {
+          arkRippleFieldOptions.isSetRegion = 1;
+          if (isNumber(data.region.shape)) {
+            arkRippleFieldOptions.isSetShape = 1;
+            arkRippleFieldOptions.shape = data.region.shape;
+          }
+
+          if (isObject(data.region.position)) {
+            arkRippleFieldOptions.isSetPosition = 1;
+            arkRippleFieldOptions.positionX = data.region.position.x;
+            arkRippleFieldOptions.positionY = data.region.position.y;
+          }
+
+          if (isObject(data.region.size)) {
+            arkRippleFieldOptions.isSetSize = 1;
+            arkRippleFieldOptions.sizeWidth = data.region.size.width;
+            arkRippleFieldOptions.sizeHeight = data.region.size.height;
+          }
+        }
+        dataArray.push(arkRippleFieldOptions);
+      }
+      getUINativeModule().particle.setRippleField(node, dataArray);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class ArkVelocityFieldOptions {
+  isSetVelocity: number;
+  velocityX: number | undefined;
+  velocityY: number | undefined;
+  isSetRegion: number;
+  isSetShape: number;
+  shape: number | undefined;
+  isSetPosition: number;
+  positionX: number | undefined;
+  positionY: number | undefined;
+  isSetSize: number;
+  sizeWidth: number | undefined;
+  sizeHeight: number | undefined;
+
+  constructor() {
+    this.isSetVelocity = 0;
+    this.velocityX = undefined;
+    this.velocityY = undefined;
+    this.isSetRegion = 0;
+    this.isSetShape = 0;
+    this.shape = undefined;
+    this.isSetPosition = 0;
+    this.positionX = undefined;
+    this.positionY = undefined;
+    this.isSetSize = 0;
+    this.sizeWidth = undefined;
+    this.sizeHeight = undefined;
+  }
+}
+
+class ParticleVelocityModifier extends ModifierWithKey<Array<VelocityFieldOptions>> {
+  constructor(value: Array<VelocityFieldOptions>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('velocityFields');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().particle.resetVelocityField(node);
+    } else {
+      let dataArray = [];
+      if (!Array.isArray(this.value)) {
+        return;
+      }
+      for (let i = 0; i < this.value.length; i++) {
+        let arkVelocityFieldOptions = new ArkVelocityFieldOptions();
+        let data = this.value[i];
+        if (!data) {
+          continue;
+        }
+        if (isObject(data.velocity)) {
+          arkVelocityFieldOptions.isSetVelocity = 1;
+          arkVelocityFieldOptions.velocityX = data.velocity.x;
+          arkVelocityFieldOptions.velocityY = data.velocity.y;
+        }
+        if (isObject(data.region)) {
+          arkVelocityFieldOptions.isSetRegion = 1;
+          if (isNumber(data.region.shape)) {
+            arkVelocityFieldOptions.isSetShape = 1;
+            arkVelocityFieldOptions.shape = data.region.shape;
+          }
+
+          if (isObject(data.region.position)) {
+            arkVelocityFieldOptions.arkVelocityFieldOptions = 1;
+            arkVelocityFieldOptions.positionX = data.region.position.x;
+            arkVelocityFieldOptions.positionY = data.region.position.y;
+          }
+
+          if (isObject(data.region.size)) {
+            arkVelocityFieldOptions.isSetSize = 1;
+            arkVelocityFieldOptions.sizeWidth = data.region.size.width;
+            arkVelocityFieldOptions.sizeHeight = data.region.size.height;
+          }
+        }
+        dataArray.push(arkVelocityFieldOptions);
+      }
+      getUINativeModule().particle.setVelocityField(node, dataArray);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 

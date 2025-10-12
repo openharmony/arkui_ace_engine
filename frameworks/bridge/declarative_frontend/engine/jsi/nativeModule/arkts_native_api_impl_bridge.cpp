@@ -3149,6 +3149,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ParticleBridge::SetEmitter));
     particle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEmitter"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ParticleBridge::ResetEmitter));
+    particle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRippleField"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ParticleBridge::SetRippleField));
+    particle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRippleField"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ParticleBridge::ResetRippleField));
+    particle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVelocityField"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ParticleBridge::SetVelocityField));
+    particle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVelocityField"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ParticleBridge::ResetVelocityField));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "particle"), particle);
 
     auto symbolGlyph = panda::ObjectRef::New(vm);
