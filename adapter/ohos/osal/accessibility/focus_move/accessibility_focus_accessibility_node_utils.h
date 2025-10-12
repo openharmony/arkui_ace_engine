@@ -13,22 +13,19 @@
 * limitations under the License.
 */
 
-#ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_FRAME_NODE_UTILS_H
-#define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_FRAME_NODE_UTILS_H
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_ACCESSIBILITY_NODE_UTILS_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_ACCESSIBILITY_NODE_UTILS_H
 
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
-#include "frameworks/core/components_ng/base/frame_node.h"
-#include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
+#include "frameworks/core/accessibility/accessibility_node.h"
 
 namespace OHOS::Ace::Framework {
 
-class FrameNodeRulesCheckNode : public FocusRulesCheckNode {
+class AccessibilityNodeRulesCheckNode : public FocusRulesCheckNode {
 public:
-    FrameNodeRulesCheckNode(const RefPtr<NG::FrameNode>& node, int64_t accessibilityId);
-    FrameNodeRulesCheckNode(
-        const RefPtr<NG::FrameNode>& node, int64_t accessibilityId, NG::FrameNodeHandleParam& handleParam)
-        : FocusRulesCheckNode(accessibilityId), handleParam_(handleParam), weakNode_(node) {}
-    ~FrameNodeRulesCheckNode() override = default;
+    AccessibilityNodeRulesCheckNode(const WeakPtr<AccessibilityNode>& node, int64_t accessibilityId);
+
+    ~AccessibilityNodeRulesCheckNode() override = default;
 
     bool GetPropText(Accessibility::PropValueStub& value) override;
 
@@ -58,39 +55,15 @@ public:
 
     std::shared_ptr<FocusRulesCheckNode> GetAceParent() override;
 
-    bool IsModalForPopup() override;
-
-    std::shared_ptr<Accessibility::ReadableRulesNodeStub> GetUserNextFocusNode() override;
-
-    std::shared_ptr<Accessibility::ReadableRulesNodeStub> GetUserPrevFocusNode() override;
-
-    bool IsAccessibiltyVisible() override;
-
-    bool IsChildTreeContainer() override;
-
-    bool IsEmbededTarget() override;
-
-    RefPtr<NG::FrameNode> GetFrameNode()
+    RefPtr<AccessibilityNode> GetAccessibilityNode()
     {
         return weakNode_.Upgrade();
     }
 
-    void SetNextFocusFrameNode(const RefPtr<NG::FrameNode>& frameNode)
-    {
-        nextNode_ = frameNode;
-    }
-
-    void SetPrevFocusFrameNode(const RefPtr<NG::FrameNode>& frameNode)
-    {
-        prevNode_ = frameNode;
-    }
 private:
     template<typename T>
     std::vector<std::shared_ptr<T>> GetChildrenTemplate();
-    NG::FrameNodeHandleParam handleParam_;
-    WeakPtr<NG::FrameNode> weakNode_;
-    WeakPtr<NG::FrameNode> nextNode_;
-    WeakPtr<NG::FrameNode> prevNode_;
+    WeakPtr<AccessibilityNode> weakNode_;
 };
 } // OHOS::Ace::Framework
-#endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_FRAME_NODE_UTILS_H
+#endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_ACCESSIBILITY_NODE_UTILS_H

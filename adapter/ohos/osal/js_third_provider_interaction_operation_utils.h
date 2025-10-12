@@ -22,7 +22,7 @@
 #include "frameworks/core/accessibility/native_interface_accessibility_impl.h"
 
 namespace OHOS::Ace::Framework {
-void TransformAccessbilityElementInfo(
+static void TransformAccessbilityElementInfo(
     const ArkUI_AccessibilityElementInfo& nativeInfo,
     OHOS::Accessibility::AccessibilityElementInfo& accessibilityElementInfo)
 {
@@ -98,7 +98,7 @@ void TransformAccessbilityElementInfo(
     accessibilityElementInfo.SetAccessibilityId(nativeInfo.GetElementId());
 }
 
-void TransformAccessbilityEventInfo(
+static void TransformAccessbilityEventInfo(
     const ArkUI_AccessibilityEventInfo& nativeEventInfo,
     OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo)
 {

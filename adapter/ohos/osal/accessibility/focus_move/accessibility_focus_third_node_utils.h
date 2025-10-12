@@ -13,22 +13,25 @@
 * limitations under the License.
 */
 
-#ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_FRAME_NODE_UTILS_H
-#define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_FRAME_NODE_UTILS_H
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_THIRD_NODE_UTILS_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_THIRD_NODE_UTILS_H
 
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
-#include "frameworks/core/components_ng/base/frame_node.h"
-#include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
+#include "frameworks/core/accessibility/native_interface_accessibility_impl.h"
+
+namespace OHOS::Ace {
+class AccessibilityProvider;
+}
 
 namespace OHOS::Ace::Framework {
 
-class FrameNodeRulesCheckNode : public FocusRulesCheckNode {
+class ThirdRulesCheckNode : public FocusRulesCheckNode {
 public:
-    FrameNodeRulesCheckNode(const RefPtr<NG::FrameNode>& node, int64_t accessibilityId);
-    FrameNodeRulesCheckNode(
-        const RefPtr<NG::FrameNode>& node, int64_t accessibilityId, NG::FrameNodeHandleParam& handleParam)
-        : FocusRulesCheckNode(accessibilityId), handleParam_(handleParam), weakNode_(node) {}
-    ~FrameNodeRulesCheckNode() override = default;
+    ThirdRulesCheckNode(std::shared_ptr<ArkUI_AccessibilityElementInfo> nodeInfo,
+        int64_t accessibilityId,
+        const WeakPtr<AccessibilityProvider>& accessibilityProvider);
+
+    ~ThirdRulesCheckNode() override = default;
 
     bool GetPropText(Accessibility::PropValueStub& value) override;
 
@@ -58,39 +61,16 @@ public:
 
     std::shared_ptr<FocusRulesCheckNode> GetAceParent() override;
 
-    bool IsModalForPopup() override;
-
-    std::shared_ptr<Accessibility::ReadableRulesNodeStub> GetUserNextFocusNode() override;
-
-    std::shared_ptr<Accessibility::ReadableRulesNodeStub> GetUserPrevFocusNode() override;
-
-    bool IsAccessibiltyVisible() override;
-
-    bool IsChildTreeContainer() override;
-
-    bool IsEmbededTarget() override;
-
-    RefPtr<NG::FrameNode> GetFrameNode()
+    std::shared_ptr<ArkUI_AccessibilityElementInfo>& GetNodeInfo()
     {
-        return weakNode_.Upgrade();
+        return nodeInfo_;
     }
 
-    void SetNextFocusFrameNode(const RefPtr<NG::FrameNode>& frameNode)
-    {
-        nextNode_ = frameNode;
-    }
-
-    void SetPrevFocusFrameNode(const RefPtr<NG::FrameNode>& frameNode)
-    {
-        prevNode_ = frameNode;
-    }
 private:
     template<typename T>
     std::vector<std::shared_ptr<T>> GetChildrenTemplate();
-    NG::FrameNodeHandleParam handleParam_;
-    WeakPtr<NG::FrameNode> weakNode_;
-    WeakPtr<NG::FrameNode> nextNode_;
-    WeakPtr<NG::FrameNode> prevNode_;
+    std::shared_ptr<ArkUI_AccessibilityElementInfo> nodeInfo_;
+    WeakPtr<AccessibilityProvider> accessibilityProvider_;
 };
 } // OHOS::Ace::Framework
-#endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_FRAME_NODE_UTILS_H
+#endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_THIRD_NODE_UTILS_H
