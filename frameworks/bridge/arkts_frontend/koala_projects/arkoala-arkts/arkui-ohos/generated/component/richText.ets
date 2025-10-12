@@ -17,12 +17,14 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
+import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookRichTextAttributeModifier, AttributeUpdater } from "#handwritten"
+import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -41,8 +43,19 @@ export class ArkRichTextPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setRichTextOptionsAttribute(content: string): void {
-        ArkUIGeneratedNativeModule._RichTextInterface_setRichTextOptions(this.peer.ptr, content)
+    setRichTextOptionsAttribute(content: string | Resource): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (content instanceof string) {
+            thisSerializer.writeInt8((0).toChar())
+            const contentForIdx0  = content as string
+            thisSerializer.writeString(contentForIdx0)
+        } else if (content instanceof Resource) {
+            thisSerializer.writeInt8((1).toChar())
+            const contentForIdx1  = content as Resource
+            Resource_serializer.write(thisSerializer, contentForIdx1)
+        }
+        ArkUIGeneratedNativeModule._RichTextInterface_setRichTextOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     setOnStartAttribute(value: (() => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -70,7 +83,7 @@ export class ArkRichTextPeer extends ArkCommonMethodPeer {
     }
 }
 export interface RichTextAttribute extends CommonMethod {
-    setRichTextOptions(content: string): this {
+    setRichTextOptions(content: string | Resource): this {
         throw new Error("Unimplemented method setRichTextOptions")
     }
     onStart(value: (() => void) | undefined): this {
@@ -87,7 +100,7 @@ export class ArkRichTextStyle extends ArkCommonMethodStyle implements RichTextAt
     onStart_value?: (() => void) | undefined
     onComplete_value?: (() => void) | undefined
     attributeModifier_value?: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined
-    setRichTextOptions(content: string): this {
+    setRichTextOptions(content: string | Resource): this {
         return this
     }
     onStart(value: (() => void) | undefined): this {
@@ -108,9 +121,9 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
         }
         return (this.peer as ArkRichTextPeer)
     }
-    public setRichTextOptions(content: string): this {
+    public setRichTextOptions(content: string | Resource): this {
         if (this.checkPriority("setRichTextOptions")) {
-            const content_casted = content as (string)
+            const content_casted = content as (string | Resource)
             this.getPeer()?.setRichTextOptionsAttribute(content_casted)
             return this
         }

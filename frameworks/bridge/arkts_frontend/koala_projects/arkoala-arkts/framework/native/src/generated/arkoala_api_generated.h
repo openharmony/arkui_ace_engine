@@ -865,6 +865,8 @@ typedef struct Array_Array_String Array_Array_String;
 typedef struct Opt_Array_Array_String Opt_Array_Array_String;
 typedef struct Array_BarrierStyle Array_BarrierStyle;
 typedef struct Opt_Array_BarrierStyle Opt_Array_BarrierStyle;
+typedef struct Array_BlankScreenDetectionMethod Array_BlankScreenDetectionMethod;
+typedef struct Opt_Array_BlankScreenDetectionMethod Opt_Array_BlankScreenDetectionMethod;
 typedef struct Array_Buffer Array_Buffer;
 typedef struct Opt_Array_Buffer Opt_Array_Buffer;
 typedef struct Array_bundleManager_SupportWindowMode Array_bundleManager_SupportWindowMode;
@@ -927,6 +929,8 @@ typedef struct Array_ModuleMetadata Array_ModuleMetadata;
 typedef struct Opt_Array_ModuleMetadata Opt_Array_ModuleMetadata;
 typedef struct Array_MouseButton Array_MouseButton;
 typedef struct Opt_Array_MouseButton Opt_Array_MouseButton;
+typedef struct Array_NativeEmbedParamItem Array_NativeEmbedParamItem;
+typedef struct Opt_Array_NativeEmbedParamItem Opt_Array_NativeEmbedParamItem;
 typedef struct Array_NavDestinationTransition Array_NavDestinationTransition;
 typedef struct Opt_Array_NavDestinationTransition Opt_Array_NavDestinationTransition;
 typedef struct Array_NavigationMenuItem Array_NavigationMenuItem;
@@ -1231,6 +1235,10 @@ typedef struct Callback_OnPageEndEvent_Void Callback_OnPageEndEvent_Void;
 typedef struct Opt_Callback_OnPageEndEvent_Void Opt_Callback_OnPageEndEvent_Void;
 typedef struct Callback_OnPageVisibleEvent_Void Callback_OnPageVisibleEvent_Void;
 typedef struct Opt_Callback_OnPageVisibleEvent_Void Opt_Callback_OnPageVisibleEvent_Void;
+typedef struct Callback_OnPdfLoadEvent_Void Callback_OnPdfLoadEvent_Void;
+typedef struct Opt_Callback_OnPdfLoadEvent_Void Opt_Callback_OnPdfLoadEvent_Void;
+typedef struct Callback_OnPdfScrollEvent_Void Callback_OnPdfScrollEvent_Void;
+typedef struct Opt_Callback_OnPdfScrollEvent_Void Opt_Callback_OnPdfScrollEvent_Void;
 typedef struct Callback_OnPermissionRequestEvent_Void Callback_OnPermissionRequestEvent_Void;
 typedef struct Opt_Callback_OnPermissionRequestEvent_Void Opt_Callback_OnPermissionRequestEvent_Void;
 typedef struct Callback_onPlaceChildren_Void Callback_onPlaceChildren_Void;
@@ -1459,6 +1467,8 @@ typedef struct MenuOnAppearCallback MenuOnAppearCallback;
 typedef struct Opt_MenuOnAppearCallback Opt_MenuOnAppearCallback;
 typedef struct ModifierKeyStateGetter ModifierKeyStateGetter;
 typedef struct Opt_ModifierKeyStateGetter Opt_ModifierKeyStateGetter;
+typedef struct MouseInfoCallback MouseInfoCallback;
+typedef struct Opt_MouseInfoCallback Opt_MouseInfoCallback;
 typedef struct NavDestinationTransitionDelegate NavDestinationTransitionDelegate;
 typedef struct Opt_NavDestinationTransitionDelegate Opt_NavDestinationTransitionDelegate;
 typedef struct NavExtender_CreateNavDestination NavExtender_CreateNavDestination;
@@ -1483,6 +1493,8 @@ typedef struct OnContextMenuHideCallback OnContextMenuHideCallback;
 typedef struct Opt_OnContextMenuHideCallback Opt_OnContextMenuHideCallback;
 typedef struct OnCreateMenuCallback OnCreateMenuCallback;
 typedef struct Opt_OnCreateMenuCallback Opt_OnCreateMenuCallback;
+typedef struct OnDetectBlankScreenCallback OnDetectBlankScreenCallback;
+typedef struct Opt_OnDetectBlankScreenCallback Opt_OnDetectBlankScreenCallback;
 typedef struct OnDidChangeCallback OnDidChangeCallback;
 typedef struct Opt_OnDidChangeCallback Opt_OnDidChangeCallback;
 typedef struct OnDragEventCallback OnDragEventCallback;
@@ -1509,10 +1521,14 @@ typedef struct OnMenuItemClickCallback OnMenuItemClickCallback;
 typedef struct Opt_OnMenuItemClickCallback Opt_OnMenuItemClickCallback;
 typedef struct OnMoveHandler OnMoveHandler;
 typedef struct Opt_OnMoveHandler Opt_OnMoveHandler;
+typedef struct OnNativeEmbedObjectParamChangeCallback OnNativeEmbedObjectParamChangeCallback;
+typedef struct Opt_OnNativeEmbedObjectParamChangeCallback Opt_OnNativeEmbedObjectParamChangeCallback;
 typedef struct OnNativeEmbedVisibilityChangeCallback OnNativeEmbedVisibilityChangeCallback;
 typedef struct Opt_OnNativeEmbedVisibilityChangeCallback Opt_OnNativeEmbedVisibilityChangeCallback;
 typedef struct OnNavigationEntryCommittedCallback OnNavigationEntryCommittedCallback;
 typedef struct Opt_OnNavigationEntryCommittedCallback Opt_OnNavigationEntryCommittedCallback;
+typedef struct OnOverrideErrorPageCallback OnOverrideErrorPageCallback;
+typedef struct Opt_OnOverrideErrorPageCallback Opt_OnOverrideErrorPageCallback;
 typedef struct OnOverrideUrlLoadingCallback OnOverrideUrlLoadingCallback;
 typedef struct Opt_OnOverrideUrlLoadingCallback Opt_OnOverrideUrlLoadingCallback;
 typedef struct OnPasteCallback OnPasteCallback;
@@ -1699,6 +1715,10 @@ typedef struct Ark_Bindable_Number Ark_Bindable_Number;
 typedef struct Opt_Bindable_Number Opt_Bindable_Number;
 typedef struct Ark_Bindable_String Ark_Bindable_String;
 typedef struct Opt_Bindable_String Opt_Bindable_String;
+typedef struct Ark_BlankScreenDetails Ark_BlankScreenDetails;
+typedef struct Opt_BlankScreenDetails Opt_BlankScreenDetails;
+typedef struct Ark_BlankScreenDetectionConfig Ark_BlankScreenDetectionConfig;
+typedef struct Opt_BlankScreenDetectionConfig Opt_BlankScreenDetectionConfig;
 typedef struct Ark_BlurOptions Ark_BlurOptions;
 typedef struct Opt_BlurOptions Opt_BlurOptions;
 typedef struct BounceSymbolEffectPeer BounceSymbolEffectPeer;
@@ -1987,6 +2007,10 @@ typedef struct Ark_MotionBlurOptions Ark_MotionBlurOptions;
 typedef struct Opt_MotionBlurOptions Opt_MotionBlurOptions;
 typedef struct Ark_MotionPathOptions Ark_MotionPathOptions;
 typedef struct Opt_MotionPathOptions Opt_MotionPathOptions;
+typedef struct Ark_NativeEmbedParamDataInfo Ark_NativeEmbedParamDataInfo;
+typedef struct Opt_NativeEmbedParamDataInfo Opt_NativeEmbedParamDataInfo;
+typedef struct Ark_NativeEmbedParamItem Ark_NativeEmbedParamItem;
+typedef struct Opt_NativeEmbedParamItem Opt_NativeEmbedParamItem;
 typedef struct Ark_NativeEmbedVisibilityInfo Ark_NativeEmbedVisibilityInfo;
 typedef struct Opt_NativeEmbedVisibilityInfo Opt_NativeEmbedVisibilityInfo;
 typedef struct Ark_NavContentInfo Ark_NavContentInfo;
@@ -2044,6 +2068,10 @@ typedef struct Ark_OnPageEndEvent Ark_OnPageEndEvent;
 typedef struct Opt_OnPageEndEvent Opt_OnPageEndEvent;
 typedef struct Ark_OnPageVisibleEvent Ark_OnPageVisibleEvent;
 typedef struct Opt_OnPageVisibleEvent Opt_OnPageVisibleEvent;
+typedef struct Ark_OnPdfLoadEvent Ark_OnPdfLoadEvent;
+typedef struct Opt_OnPdfLoadEvent Opt_OnPdfLoadEvent;
+typedef struct Ark_OnPdfScrollEvent Ark_OnPdfScrollEvent;
+typedef struct Opt_OnPdfScrollEvent Opt_OnPdfScrollEvent;
 typedef struct Ark_OnPermissionRequestEvent Ark_OnPermissionRequestEvent;
 typedef struct Opt_OnPermissionRequestEvent Opt_OnPermissionRequestEvent;
 typedef struct Ark_OnPromptEvent Ark_OnPromptEvent;
@@ -2452,6 +2480,8 @@ typedef struct Ark_Bindable_Arkui_Component_Units_ResourceStr Ark_Bindable_Arkui
 typedef struct Opt_Bindable_Arkui_Component_Units_ResourceStr Opt_Bindable_Arkui_Component_Units_ResourceStr;
 typedef struct Ark_Bindable_Global_Resource_Resource Ark_Bindable_Global_Resource_Resource;
 typedef struct Opt_Bindable_Global_Resource_Resource Opt_Bindable_Global_Resource_Resource;
+typedef struct Ark_BlankScreenDetectionEventInfo Ark_BlankScreenDetectionEventInfo;
+typedef struct Opt_BlankScreenDetectionEventInfo Opt_BlankScreenDetectionEventInfo;
 typedef struct Ark_ButtonIconOptions Ark_ButtonIconOptions;
 typedef struct Opt_ButtonIconOptions Opt_ButtonIconOptions;
 typedef struct Ark_CalendarOptions Ark_CalendarOptions;
@@ -3130,6 +3160,8 @@ typedef struct Ark_ImageAttachmentInterface Ark_ImageAttachmentInterface;
 typedef struct Opt_ImageAttachmentInterface Opt_ImageAttachmentInterface;
 typedef struct Ark_NativeEmbedDataInfo Ark_NativeEmbedDataInfo;
 typedef struct Opt_NativeEmbedDataInfo Opt_NativeEmbedDataInfo;
+typedef struct Ark_NativeEmbedMouseInfo Ark_NativeEmbedMouseInfo;
+typedef struct Opt_NativeEmbedMouseInfo Opt_NativeEmbedMouseInfo;
 typedef struct Ark_NativeEmbedTouchInfo Ark_NativeEmbedTouchInfo;
 typedef struct Opt_NativeEmbedTouchInfo Opt_NativeEmbedTouchInfo;
 typedef struct Ark_PopupOptions Ark_PopupOptions;
@@ -3529,6 +3561,13 @@ typedef struct Opt_BarStyle {
     Ark_Tag tag;
     Ark_BarStyle value;
 } Opt_BarStyle;
+typedef enum Ark_BlankScreenDetectionMethod {
+    ARK_BLANK_SCREEN_DETECTION_METHOD_DETECTION_CONTENTFUL_NODES_SEVENTEEN = 0,
+} Ark_BlankScreenDetectionMethod;
+typedef struct Opt_BlankScreenDetectionMethod {
+    Ark_Tag tag;
+    Ark_BlankScreenDetectionMethod value;
+} Opt_BlankScreenDetectionMethod;
 typedef enum Ark_BlendApplyType {
     ARK_BLEND_APPLY_TYPE_FAST = 0,
     ARK_BLEND_APPLY_TYPE_OFFSCREEN = 1,
@@ -3933,6 +3972,17 @@ typedef struct Opt_contextConstant_AreaMode {
     Ark_Tag tag;
     Ark_contextConstant_AreaMode value;
 } Opt_contextConstant_AreaMode;
+typedef enum Ark_ContextMenuDataMediaType {
+    ARK_CONTEXT_MENU_DATA_MEDIA_TYPE_NONE = 0,
+    ARK_CONTEXT_MENU_DATA_MEDIA_TYPE_IMAGE = 1,
+    ARK_CONTEXT_MENU_DATA_MEDIA_TYPE_VIDEO = 2,
+    ARK_CONTEXT_MENU_DATA_MEDIA_TYPE_AUDIO = 3,
+    ARK_CONTEXT_MENU_DATA_MEDIA_TYPE_CANVAS = 4,
+} Ark_ContextMenuDataMediaType;
+typedef struct Opt_ContextMenuDataMediaType {
+    Ark_Tag tag;
+    Ark_ContextMenuDataMediaType value;
+} Opt_ContextMenuDataMediaType;
 typedef enum Ark_ContextMenuEditStateFlags {
     ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_NONE = 0,
     ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_CUT = 1,
@@ -4044,6 +4094,14 @@ typedef struct Opt_DatePickerMode {
     Ark_Tag tag;
     Ark_DatePickerMode value;
 } Opt_DatePickerMode;
+typedef enum Ark_DetectedBlankScreenReason {
+    ARK_DETECTED_BLANK_SCREEN_REASON_NO_CONTENTFUL_NODES = 0,
+    ARK_DETECTED_BLANK_SCREEN_REASON_SUB_THRESHOLD_CONTENTFUL_NODES = 1,
+} Ark_DetectedBlankScreenReason;
+typedef struct Opt_DetectedBlankScreenReason {
+    Ark_Tag tag;
+    Ark_DetectedBlankScreenReason value;
+} Opt_DetectedBlankScreenReason;
 typedef enum Ark_DialogAlignment {
     ARK_DIALOG_ALIGNMENT_TOP = 0,
     ARK_DIALOG_ALIGNMENT_CENTER = 1,
@@ -4451,6 +4509,14 @@ typedef struct Opt_GestureControl_GestureType {
     Ark_Tag tag;
     Ark_GestureControl_GestureType value;
 } Opt_GestureControl_GestureType;
+typedef enum Ark_GestureFocusMode {
+    ARK_GESTURE_FOCUS_MODE_DEFAULT = 0,
+    ARK_GESTURE_FOCUS_MODE_GESTURE_TAP_AND_LONG_PRESS = 1,
+} Ark_GestureFocusMode;
+typedef struct Opt_GestureFocusMode {
+    Ark_Tag tag;
+    Ark_GestureFocusMode value;
+} Opt_GestureFocusMode;
 typedef enum Ark_GestureJudgeResult {
     ARK_GESTURE_JUDGE_RESULT_CONTINUE = 0,
     ARK_GESTURE_JUDGE_RESULT_REJECT = 1,
@@ -4573,20 +4639,6 @@ typedef struct Opt_HitTestMode {
     Ark_Tag tag;
     Ark_HitTestMode value;
 } Opt_HitTestMode;
-typedef enum Ark_HitTestType {
-    ARK_HIT_TEST_TYPE_EDIT_TEXT = 0,
-    ARK_HIT_TEST_TYPE_EMAIL = 1,
-    ARK_HIT_TEST_TYPE_HTTP_ANCHOR = 2,
-    ARK_HIT_TEST_TYPE_HTTP_ANCHOR_IMG = 3,
-    ARK_HIT_TEST_TYPE_IMG = 4,
-    ARK_HIT_TEST_TYPE_MAP = 5,
-    ARK_HIT_TEST_TYPE_PHONE = 6,
-    ARK_HIT_TEST_TYPE_UNKNOWN = 7,
-} Ark_HitTestType;
-typedef struct Opt_HitTestType {
-    Ark_Tag tag;
-    Ark_HitTestType value;
-} Opt_HitTestType;
 typedef enum Ark_HorizontalAlign {
     ARK_HORIZONTAL_ALIGN_START = 0,
     ARK_HORIZONTAL_ALIGN_CENTER = 1,
@@ -5144,6 +5196,15 @@ typedef struct Opt_MouseButton {
     Ark_Tag tag;
     Ark_MouseButton value;
 } Opt_MouseButton;
+typedef enum Ark_NativeEmbedParamStatus {
+    ARK_NATIVE_EMBED_PARAM_STATUS_ADD = 0,
+    ARK_NATIVE_EMBED_PARAM_STATUS_UPDATE = 1,
+    ARK_NATIVE_EMBED_PARAM_STATUS_DELETE = 2,
+} Ark_NativeEmbedParamStatus;
+typedef struct Opt_NativeEmbedParamStatus {
+    Ark_Tag tag;
+    Ark_NativeEmbedParamStatus value;
+} Opt_NativeEmbedParamStatus;
 typedef enum Ark_NativeEmbedStatus {
     ARK_NATIVE_EMBED_STATUS_CREATE = 0,
     ARK_NATIVE_EMBED_STATUS_UPDATE = 1,
@@ -5353,6 +5414,17 @@ typedef struct Opt_PatternLockChallengeResult {
     Ark_Tag tag;
     Ark_PatternLockChallengeResult value;
 } Opt_PatternLockChallengeResult;
+typedef enum Ark_PdfLoadResult {
+    ARK_PDF_LOAD_RESULT_LOAD_SUCCESS = 0,
+    ARK_PDF_LOAD_RESULT_PARSE_ERROR_FILE = 1,
+    ARK_PDF_LOAD_RESULT_PARSE_ERROR_FORMAT = 2,
+    ARK_PDF_LOAD_RESULT_PARSE_ERROR_PASSWORD = 3,
+    ARK_PDF_LOAD_RESULT_PARSE_ERROR_HANDLER = 4,
+} Ark_PdfLoadResult;
+typedef struct Opt_PdfLoadResult {
+    Ark_Tag tag;
+    Ark_PdfLoadResult value;
+} Opt_PdfLoadResult;
 typedef enum Ark_PerfMonitorActionType {
     ARK_PERF_MONITOR_ACTION_TYPE_LAST_DOWN = 0,
     ARK_PERF_MONITOR_ACTION_TYPE_LAST_UP = 1,
@@ -6614,6 +6686,14 @@ typedef struct Opt_WaterFlowLayoutMode {
     Ark_Tag tag;
     Ark_WaterFlowLayoutMode value;
 } Opt_WaterFlowLayoutMode;
+typedef enum Ark_WebBypassVsyncCondition {
+    ARK_WEB_BYPASS_VSYNC_CONDITION_NONE = 0,
+    ARK_WEB_BYPASS_VSYNC_CONDITION_SCROLLBY_FROM_ZERO_OFFSET = 1,
+} Ark_WebBypassVsyncCondition;
+typedef struct Opt_WebBypassVsyncCondition {
+    Ark_Tag tag;
+    Ark_WebBypassVsyncCondition value;
+} Opt_WebBypassVsyncCondition;
 typedef enum Ark_WebCaptureMode {
     ARK_WEB_CAPTURE_MODE_HOME_SCREEN = 0,
 } Ark_WebCaptureMode;
@@ -6633,6 +6713,7 @@ typedef struct Opt_WebDarkMode {
 typedef enum Ark_WebElementType {
     ARK_WEB_ELEMENT_TYPE_IMAGE = 1,
     ARK_WEB_ELEMENT_TYPE_LINK = 2,
+    ARK_WEB_ELEMENT_TYPE_TEXT = 3,
 } Ark_WebElementType;
 typedef struct Opt_WebElementType {
     Ark_Tag tag;
@@ -6642,6 +6723,7 @@ typedef enum Ark_WebKeyboardAvoidMode {
     ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_VISUAL = 0,
     ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_CONTENT = 1,
     ARK_WEB_KEYBOARD_AVOID_MODE_OVERLAYS_CONTENT = 2,
+    ARK_WEB_KEYBOARD_AVOID_MODE_RETURN_TO_UICONTEXT = 3,
 } Ark_WebKeyboardAvoidMode;
 typedef struct Opt_WebKeyboardAvoidMode {
     Ark_Tag tag;
@@ -6668,11 +6750,20 @@ typedef struct Opt_WebNavigationType {
 } Opt_WebNavigationType;
 typedef enum Ark_WebResponseType {
     ARK_WEB_RESPONSE_TYPE_LONG_PRESS = 1,
+    ARK_WEB_RESPONSE_TYPE_RIGHT_CLICK = 2,
 } Ark_WebResponseType;
 typedef struct Opt_WebResponseType {
     Ark_Tag tag;
     Ark_WebResponseType value;
 } Opt_WebResponseType;
+typedef enum Ark_WebRotateEffect {
+    ARK_WEB_ROTATE_EFFECT_TOPLEFT_EFFECT = 0,
+    ARK_WEB_ROTATE_EFFECT_RESIZE_COVER_EFFECT = 1,
+} Ark_WebRotateEffect;
+typedef struct Opt_WebRotateEffect {
+    Ark_Tag tag;
+    Ark_WebRotateEffect value;
+} Opt_WebRotateEffect;
 typedef enum Ark_Week {
     ARK_WEEK_MON = 0,
     ARK_WEEK_TUE = 1,
@@ -8356,6 +8447,15 @@ typedef struct Opt_Array_BarrierStyle {
     Ark_Tag tag;
     Array_BarrierStyle value;
 } Opt_Array_BarrierStyle;
+typedef struct Array_BlankScreenDetectionMethod {
+    /* kind: ContainerType */
+    Ark_BlankScreenDetectionMethod* array;
+    Ark_Int32 length;
+} Array_BlankScreenDetectionMethod;
+typedef struct Opt_Array_BlankScreenDetectionMethod {
+    Ark_Tag tag;
+    Array_BlankScreenDetectionMethod value;
+} Opt_Array_BlankScreenDetectionMethod;
 typedef struct Array_Buffer {
     /* kind: ContainerType */
     Ark_Buffer* array;
@@ -8635,6 +8735,15 @@ typedef struct Opt_Array_MouseButton {
     Ark_Tag tag;
     Array_MouseButton value;
 } Opt_Array_MouseButton;
+typedef struct Array_NativeEmbedParamItem {
+    /* kind: ContainerType */
+    Ark_NativeEmbedParamItem* array;
+    Ark_Int32 length;
+} Array_NativeEmbedParamItem;
+typedef struct Opt_Array_NativeEmbedParamItem {
+    Ark_Tag tag;
+    Array_NativeEmbedParamItem value;
+} Opt_Array_NativeEmbedParamItem;
 typedef struct Array_NavDestinationTransition {
     /* kind: ContainerType */
     Ark_NavDestinationTransition* array;
@@ -10106,6 +10215,26 @@ typedef struct Opt_Callback_OnPageVisibleEvent_Void {
     Ark_Tag tag;
     Callback_OnPageVisibleEvent_Void value;
 } Opt_Callback_OnPageVisibleEvent_Void;
+typedef struct Callback_OnPdfLoadEvent_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_OnPdfLoadEvent value0);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnPdfLoadEvent value0);
+} Callback_OnPdfLoadEvent_Void;
+typedef struct Opt_Callback_OnPdfLoadEvent_Void {
+    Ark_Tag tag;
+    Callback_OnPdfLoadEvent_Void value;
+} Opt_Callback_OnPdfLoadEvent_Void;
+typedef struct Callback_OnPdfScrollEvent_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_OnPdfScrollEvent value0);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnPdfScrollEvent value0);
+} Callback_OnPdfScrollEvent_Void;
+typedef struct Opt_Callback_OnPdfScrollEvent_Void {
+    Ark_Tag tag;
+    Callback_OnPdfScrollEvent_Void value;
+} Opt_Callback_OnPdfScrollEvent_Void;
 typedef struct Callback_OnPermissionRequestEvent_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -11246,6 +11375,16 @@ typedef struct Opt_ModifierKeyStateGetter {
     Ark_Tag tag;
     ModifierKeyStateGetter value;
 } Opt_ModifierKeyStateGetter;
+typedef struct MouseInfoCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_NativeEmbedMouseInfo event);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativeEmbedMouseInfo event);
+} MouseInfoCallback;
+typedef struct Opt_MouseInfoCallback {
+    Ark_Tag tag;
+    MouseInfoCallback value;
+} Opt_MouseInfoCallback;
 typedef struct NavDestinationTransitionDelegate {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -11366,6 +11505,16 @@ typedef struct Opt_OnCreateMenuCallback {
     Ark_Tag tag;
     OnCreateMenuCallback value;
 } Opt_OnCreateMenuCallback;
+typedef struct OnDetectBlankScreenCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_BlankScreenDetectionEventInfo event);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_BlankScreenDetectionEventInfo event);
+} OnDetectBlankScreenCallback;
+typedef struct Opt_OnDetectBlankScreenCallback {
+    Ark_Tag tag;
+    OnDetectBlankScreenCallback value;
+} Opt_OnDetectBlankScreenCallback;
 typedef struct OnDidChangeCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -11496,6 +11645,16 @@ typedef struct Opt_OnMoveHandler {
     Ark_Tag tag;
     OnMoveHandler value;
 } Opt_OnMoveHandler;
+typedef struct OnNativeEmbedObjectParamChangeCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_NativeEmbedParamDataInfo event);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativeEmbedParamDataInfo event);
+} OnNativeEmbedObjectParamChangeCallback;
+typedef struct Opt_OnNativeEmbedObjectParamChangeCallback {
+    Ark_Tag tag;
+    OnNativeEmbedObjectParamChangeCallback value;
+} Opt_OnNativeEmbedObjectParamChangeCallback;
 typedef struct OnNativeEmbedVisibilityChangeCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -11516,6 +11675,16 @@ typedef struct Opt_OnNavigationEntryCommittedCallback {
     Ark_Tag tag;
     OnNavigationEntryCommittedCallback value;
 } Opt_OnNavigationEntryCommittedCallback;
+typedef struct OnOverrideErrorPageCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_OnErrorReceiveEvent errorPageEvent, const Callback_String_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnErrorReceiveEvent errorPageEvent, const Callback_String_Void continuation);
+} OnOverrideErrorPageCallback;
+typedef struct Opt_OnOverrideErrorPageCallback {
+    Ark_Tag tag;
+    OnOverrideErrorPageCallback value;
+} Opt_OnOverrideErrorPageCallback;
 typedef struct OnOverrideUrlLoadingCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -12381,6 +12550,25 @@ typedef struct Opt_Bindable_String {
     Ark_Tag tag;
     Ark_Bindable_String value;
 } Opt_Bindable_String;
+typedef struct Ark_BlankScreenDetails {
+    /* kind: Interface */
+    Opt_Int32 detectedContentfulNodesCount;
+} Ark_BlankScreenDetails;
+typedef struct Opt_BlankScreenDetails {
+    Ark_Tag tag;
+    Ark_BlankScreenDetails value;
+} Opt_BlankScreenDetails;
+typedef struct Ark_BlankScreenDetectionConfig {
+    /* kind: Interface */
+    Ark_Boolean enable;
+    Opt_Array_Float64 detectionTiming;
+    Opt_Array_BlankScreenDetectionMethod detectionMethods;
+    Opt_Int32 contentfulNodesCountThreshold;
+} Ark_BlankScreenDetectionConfig;
+typedef struct Opt_BlankScreenDetectionConfig {
+    Ark_Tag tag;
+    Ark_BlankScreenDetectionConfig value;
+} Opt_BlankScreenDetectionConfig;
 typedef struct Ark_BlurOptions {
     /* kind: Interface */
     Ark_Tuple_Number_Number grayscale;
@@ -12852,6 +13040,7 @@ typedef struct Opt_EllipseOptions {
 typedef struct Ark_EmbedOptions {
     /* kind: Interface */
     Opt_Boolean supportDefaultIntrinsicSize;
+    Opt_Boolean supportCssDisplayChange;
 } Ark_EmbedOptions;
 typedef struct Opt_EmbedOptions {
     Ark_Tag tag;
@@ -13560,6 +13749,27 @@ typedef struct Opt_MotionPathOptions {
     Ark_Tag tag;
     Ark_MotionPathOptions value;
 } Opt_MotionPathOptions;
+typedef struct Ark_NativeEmbedParamDataInfo {
+    /* kind: Interface */
+    Ark_String embedId;
+    Opt_String objectAttributeId;
+    Opt_Array_NativeEmbedParamItem paramItems;
+} Ark_NativeEmbedParamDataInfo;
+typedef struct Opt_NativeEmbedParamDataInfo {
+    Ark_Tag tag;
+    Ark_NativeEmbedParamDataInfo value;
+} Opt_NativeEmbedParamDataInfo;
+typedef struct Ark_NativeEmbedParamItem {
+    /* kind: Interface */
+    Ark_NativeEmbedParamStatus status;
+    Ark_String id;
+    Opt_String name;
+    Opt_String value;
+} Ark_NativeEmbedParamItem;
+typedef struct Opt_NativeEmbedParamItem {
+    Ark_Tag tag;
+    Ark_NativeEmbedParamItem value;
+} Opt_NativeEmbedParamItem;
 typedef struct Ark_NativeEmbedVisibilityInfo {
     /* kind: Interface */
     Ark_Boolean visibility;
@@ -13823,6 +14033,23 @@ typedef struct Opt_OnPageVisibleEvent {
     Ark_Tag tag;
     Ark_OnPageVisibleEvent value;
 } Opt_OnPageVisibleEvent;
+typedef struct Ark_OnPdfLoadEvent {
+    /* kind: Interface */
+    Ark_PdfLoadResult result;
+    Ark_String url;
+} Ark_OnPdfLoadEvent;
+typedef struct Opt_OnPdfLoadEvent {
+    Ark_Tag tag;
+    Ark_OnPdfLoadEvent value;
+} Opt_OnPdfLoadEvent;
+typedef struct Ark_OnPdfScrollEvent {
+    /* kind: Interface */
+    Ark_String url;
+} Ark_OnPdfScrollEvent;
+typedef struct Opt_OnPdfScrollEvent {
+    Ark_Tag tag;
+    Ark_OnPdfScrollEvent value;
+} Opt_OnPdfScrollEvent;
 typedef struct Ark_OnPermissionRequestEvent {
     /* kind: Interface */
     Ark_PermissionRequest request;
@@ -13846,6 +14073,7 @@ typedef struct Ark_OnRefreshAccessedHistoryEvent {
     /* kind: Interface */
     Ark_String url;
     Ark_Boolean isRefreshed;
+    Opt_Boolean isMainFrame;
 } Ark_OnRefreshAccessedHistoryEvent;
 typedef struct Opt_OnRefreshAccessedHistoryEvent {
     Ark_Tag tag;
@@ -14442,6 +14670,7 @@ typedef struct Ark_SslErrorEvent {
     Ark_String referrer;
     Ark_Boolean isFatalError;
     Ark_Boolean isMainFrame;
+    Opt_Array_Buffer certChainData;
 } Ark_SslErrorEvent;
 typedef struct Opt_SslErrorEvent {
     Ark_Tag tag;
@@ -15932,6 +16161,16 @@ typedef struct Opt_Bindable_Global_Resource_Resource {
     Ark_Tag tag;
     Ark_Bindable_Global_Resource_Resource value;
 } Opt_Bindable_Global_Resource_Resource;
+typedef struct Ark_BlankScreenDetectionEventInfo {
+    /* kind: Interface */
+    Ark_String url;
+    Ark_DetectedBlankScreenReason blankScreenReason;
+    Opt_BlankScreenDetails blankScreenDetails;
+} Ark_BlankScreenDetectionEventInfo;
+typedef struct Opt_BlankScreenDetectionEventInfo {
+    Ark_Tag tag;
+    Ark_BlankScreenDetectionEventInfo value;
+} Opt_BlankScreenDetectionEventInfo;
 typedef struct Ark_ButtonIconOptions {
     /* kind: Interface */
     Ark_Union_String_PixelMap_Resource shown;
@@ -16730,6 +16969,8 @@ typedef struct Ark_SelectionMenuOptionsExt {
     Opt_CustomNodeBuilder preview;
     Opt_MenuType menuType;
     Opt_PreviewMenuOptions previewMenuOptions;
+    Opt_Callback_Void onMenuShow;
+    Opt_Callback_Void onMenuHide;
 } Ark_SelectionMenuOptionsExt;
 typedef struct Opt_SelectionMenuOptionsExt {
     Ark_Tag tag;
@@ -19676,6 +19917,16 @@ typedef struct Opt_NativeEmbedDataInfo {
     Ark_Tag tag;
     Ark_NativeEmbedDataInfo value;
 } Opt_NativeEmbedDataInfo;
+typedef struct Ark_NativeEmbedMouseInfo {
+    /* kind: Interface */
+    Opt_String embedId;
+    Opt_MouseEvent mouseEvent;
+    Opt_EventResult result;
+} Ark_NativeEmbedMouseInfo;
+typedef struct Opt_NativeEmbedMouseInfo {
+    Ark_Tag tag;
+    Ark_NativeEmbedMouseInfo value;
+} Opt_NativeEmbedMouseInfo;
 typedef struct Ark_NativeEmbedTouchInfo {
     /* kind: Interface */
     Opt_String embedId;
@@ -21891,7 +22142,7 @@ typedef struct GENERATED_ArkUIRichTextModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setRichTextOptions)(Ark_NativePointer node,
-                               const Ark_String* content);
+                               const Ark_Union_String_Resource* content);
     void (*setOnStart)(Ark_NativePointer node,
                        const Opt_Callback_Void* value);
     void (*setOnComplete)(Ark_NativePointer node,
@@ -23294,6 +23545,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                          const Opt_MixedMode* value);
     void (*setZoomAccess)(Ark_NativePointer node,
                           const Opt_Boolean* value);
+    void (*setRotateRenderEffect)(Ark_NativePointer node,
+                                  const Opt_WebRotateEffect* value);
     void (*setGeolocationAccess)(Ark_NativePointer node,
                                  const Opt_Boolean* value);
     void (*setJavaScriptProxy)(Ark_NativePointer node,
@@ -23352,6 +23605,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                               const Opt_Callback_OnErrorReceiveEvent_Void* value);
     void (*setOnHttpErrorReceive)(Ark_NativePointer node,
                                   const Opt_Callback_OnHttpErrorReceiveEvent_Void* value);
+    void (*setOnOverrideErrorPage)(Ark_NativePointer node,
+                                   const Opt_OnOverrideErrorPageCallback* value);
     void (*setOnDownloadStart)(Ark_NativePointer node,
                                const Opt_Callback_OnDownloadStartEvent_Void* value);
     void (*setOnRefreshAccessedHistory)(Ark_NativePointer node,
@@ -23456,7 +23711,13 @@ typedef struct GENERATED_ArkUIWebModifier {
                                     const Opt_Callback_Void* value);
     void (*setOnOverScroll)(Ark_NativePointer node,
                             const Opt_Callback_OnOverScrollEvent_Void* value);
+    void (*setOnPdfScrollAtBottom)(Ark_NativePointer node,
+                                   const Opt_Callback_OnPdfScrollEvent_Void* value);
+    void (*setOnPdfLoadEvent)(Ark_NativePointer node,
+                              const Opt_Callback_OnPdfLoadEvent_Void* value);
     void (*setOnSafeBrowsingCheckResult)(Ark_NativePointer node,
+                                         const Opt_OnSafeBrowsingCheckResultCallback* value);
+    void (*setOnSafeBrowsingCheckFinish)(Ark_NativePointer node,
                                          const Opt_OnSafeBrowsingCheckResultCallback* value);
     void (*setOnNavigationEntryCommitted)(Ark_NativePointer node,
                                           const Opt_OnNavigationEntryCommittedCallback* value);
@@ -23478,6 +23739,10 @@ typedef struct GENERATED_ArkUIWebModifier {
                                              const Opt_OnNativeEmbedVisibilityChangeCallback* value);
     void (*setOnNativeEmbedGestureEvent)(Ark_NativePointer node,
                                          const Opt_Callback_NativeEmbedTouchInfo_Void* value);
+    void (*setOnNativeEmbedMouseEvent)(Ark_NativePointer node,
+                                       const Opt_MouseInfoCallback* value);
+    void (*setOnNativeEmbedObjectParamChange)(Ark_NativePointer node,
+                                              const Opt_OnNativeEmbedObjectParamChangeCallback* value);
     void (*setCopyOptions)(Ark_NativePointer node,
                            const Opt_CopyOptions* value);
     void (*setOnOverrideUrlLoading)(Ark_NativePointer node,
@@ -23516,6 +23781,28 @@ typedef struct GENERATED_ArkUIWebModifier {
                                       const Opt_Array_ScriptItem* value);
     void (*setNativeEmbedOptions)(Ark_NativePointer node,
                                   const Opt_EmbedOptions* value);
+    void (*setEnableDataDetector)(Ark_NativePointer node,
+                                  const Opt_Boolean* value);
+    void (*setDataDetectorConfig)(Ark_NativePointer node,
+                                  const Opt_TextDataDetectorConfig* value);
+    void (*setOnActivateContent)(Ark_NativePointer node,
+                                 const Opt_VoidCallback* value);
+    void (*setBypassVsyncCondition)(Ark_NativePointer node,
+                                    const Opt_WebBypassVsyncCondition* value);
+    void (*setGestureFocusMode)(Ark_NativePointer node,
+                                const Opt_GestureFocusMode* value);
+    void (*setForceEnableZoom)(Ark_NativePointer node,
+                               const Opt_Boolean* value);
+    void (*setBackToTop)(Ark_NativePointer node,
+                         const Opt_Boolean* value);
+    void (*setOnDetectedBlankScreen)(Ark_NativePointer node,
+                                     const Opt_OnDetectBlankScreenCallback* value);
+    void (*setBlankScreenDetectionConfig)(Ark_NativePointer node,
+                                          const Opt_BlankScreenDetectionConfig* value);
+    void (*setZoomControlAccess)(Ark_NativePointer node,
+                                 const Opt_Boolean* value);
+    void (*setEnableSelectedDataDetector)(Ark_NativePointer node,
+                                          const Opt_Boolean* value);
     void (*setRegisterNativeEmbedRule)(Ark_NativePointer node,
                                        const Opt_String* tag,
                                        const Opt_String* type);
@@ -24417,6 +24704,9 @@ typedef struct GENERATED_ArkUIEventResultAccessor {
     void (*setGestureEventResult1)(Ark_EventResult peer,
                                    Ark_Boolean result,
                                    Ark_Boolean stopPropagation);
+    void (*setMouseEventResult)(Ark_EventResult peer,
+                                Ark_Boolean result,
+                                const Opt_Boolean* stopPropagation);
 } GENERATED_ArkUIEventResultAccessor;
 
 typedef struct GENERATED_ArkUIEventTargetInfoAccessor {
@@ -25870,7 +26160,9 @@ typedef struct GENERATED_ArkUISslErrorHandlerAccessor {
     Ark_SslErrorHandler (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*handleConfirm)(Ark_SslErrorHandler peer);
-    void (*handleCancel)(Ark_SslErrorHandler peer);
+    void (*handleCancel0)(Ark_SslErrorHandler peer);
+    void (*handleCancel1)(Ark_SslErrorHandler peer,
+                          Ark_Boolean abortLoading);
 } GENERATED_ArkUISslErrorHandlerAccessor;
 
 typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
@@ -26432,6 +26724,7 @@ typedef struct GENERATED_ArkUIWebContextMenuParamAccessor {
     Ark_Int32 (*getEditStateFlags)(Ark_WebContextMenuParam peer);
     Ark_Int32 (*getPreviewWidth)(Ark_WebContextMenuParam peer);
     Ark_Int32 (*getPreviewHeight)(Ark_WebContextMenuParam peer);
+    Ark_ContextMenuDataMediaType (*getContextMenuMediaType)(Ark_WebContextMenuParam peer);
 } GENERATED_ArkUIWebContextMenuParamAccessor;
 
 typedef struct GENERATED_ArkUIWebContextMenuResultAccessor {
@@ -26444,6 +26737,9 @@ typedef struct GENERATED_ArkUIWebContextMenuResultAccessor {
     void (*paste)(Ark_WebContextMenuResult peer);
     void (*cut)(Ark_WebContextMenuResult peer);
     void (*selectAll)(Ark_WebContextMenuResult peer);
+    void (*redo)(Ark_WebContextMenuResult peer);
+    void (*undo)(Ark_WebContextMenuResult peer);
+    void (*pasteAndMatchStyle)(Ark_WebContextMenuResult peer);
 } GENERATED_ArkUIWebContextMenuResultAccessor;
 
 typedef struct GENERATED_ArkUIWebKeyboardControllerAccessor {

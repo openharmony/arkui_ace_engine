@@ -20,11 +20,12 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkWebPeer, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageEndEvent, OnPageBeginEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnWindowNewEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from "./component/web"
+import { ArkWebPeer, MixedMode, WebRotateEffect, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageEndEvent, OnPageBeginEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnOverrideErrorPageCallback, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnWindowNewEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnPdfScrollEvent, OnPdfLoadEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, MouseInfoCallback, NativeEmbedMouseInfo, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebBypassVsyncCondition, GestureFocusMode, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo, BlankScreenDetectionConfig, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from "./component/web"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, KeyEvent, NestedScrollOptions } from "./component/common"
 import { CopyOptions } from "./component/enums"
-import { EditMenuOptions } from "./component/textCommon"
+import { EditMenuOptions, TextDataDetectorConfig } from "./component/textCommon"
+import { VoidCallback } from "./component/units"
 import { CustomBuilder } from "./component/builder"
 export class WebModifier extends CommonMethodModifier implements WebAttribute,AttributeModifier<WebAttribute> {
     _instanceId: number = -1;
@@ -51,6 +52,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _mixedMode_0_0value?: MixedMode | undefined
     _zoomAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _zoomAccess_0_0value?: boolean | undefined
+    _rotateRenderEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _rotateRenderEffect_0_0value?: WebRotateEffect | undefined
     _geolocationAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _geolocationAccess_0_0value?: boolean | undefined
     _javaScriptProxy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -109,6 +112,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _onErrorReceive_0_0value?: ((value0: OnErrorReceiveEvent) => void) | undefined
     _onHttpErrorReceive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onHttpErrorReceive_0_0value?: ((value0: OnHttpErrorReceiveEvent) => void) | undefined
+    _onOverrideErrorPage_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onOverrideErrorPage_0_0value?: OnOverrideErrorPageCallback | undefined
     _onDownloadStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDownloadStart_0_0value?: ((value0: OnDownloadStartEvent) => void) | undefined
     _onRefreshAccessedHistory_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -213,8 +218,14 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _onControllerAttached_0_0value?: (() => void) | undefined
     _onOverScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onOverScroll_0_0value?: ((value0: OnOverScrollEvent) => void) | undefined
+    _onPdfScrollAtBottom_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onPdfScrollAtBottom_0_0value?: ((value0: OnPdfScrollEvent) => void) | undefined
+    _onPdfLoadEvent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onPdfLoadEvent_0_0value?: ((value0: OnPdfLoadEvent) => void) | undefined
     _onSafeBrowsingCheckResult_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onSafeBrowsingCheckResult_0_0value?: OnSafeBrowsingCheckResultCallback | undefined
+    _onSafeBrowsingCheckFinish_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onSafeBrowsingCheckFinish_0_0value?: OnSafeBrowsingCheckResultCallback | undefined
     _onNavigationEntryCommitted_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onNavigationEntryCommitted_0_0value?: OnNavigationEntryCommittedCallback | undefined
     _onIntelligentTrackingPreventionResult_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -235,6 +246,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _onNativeEmbedVisibilityChange_0_0value?: OnNativeEmbedVisibilityChangeCallback | undefined
     _onNativeEmbedGestureEvent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onNativeEmbedGestureEvent_0_0value?: ((event: NativeEmbedTouchInfo) => void) | undefined
+    _onNativeEmbedMouseEvent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onNativeEmbedMouseEvent_0_0value?: MouseInfoCallback | undefined
+    _onNativeEmbedObjectParamChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onNativeEmbedObjectParamChange_0_0value?: OnNativeEmbedObjectParamChangeCallback | undefined
     _copyOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _copyOptions_0_0value?: CopyOptions | undefined
     _onOverrideUrlLoading_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -273,6 +288,28 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _runJavaScriptOnHeadEnd_0_0value?: Array<ScriptItem> | undefined
     _nativeEmbedOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _nativeEmbedOptions_0_0value?: EmbedOptions | undefined
+    _enableDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableDataDetector_0_0value?: boolean | undefined
+    _dataDetectorConfig_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _dataDetectorConfig_0_0value?: TextDataDetectorConfig | undefined
+    _onActivateContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onActivateContent_0_0value?: VoidCallback | undefined
+    _bypassVsyncCondition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _bypassVsyncCondition_0_0value?: WebBypassVsyncCondition | undefined
+    _gestureFocusMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _gestureFocusMode_0_0value?: GestureFocusMode | undefined
+    _forceEnableZoom_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _forceEnableZoom_0_0value?: boolean | undefined
+    _backToTop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _backToTop_0_0value?: boolean | undefined
+    _onDetectedBlankScreen_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDetectedBlankScreen_0_0value?: OnDetectBlankScreenCallback | undefined
+    _blankScreenDetectionConfig_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _blankScreenDetectionConfig_0_0value?: BlankScreenDetectionConfig | undefined
+    _zoomControlAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _zoomControlAccess_0_0value?: boolean | undefined
+    _enableSelectedDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableSelectedDataDetector_0_0value?: boolean | undefined
     _registerNativeEmbedRule_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _registerNativeEmbedRule_0_0value?: string | undefined
     _registerNativeEmbedRule_0_1value?: string | undefined
@@ -407,6 +444,24 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 default: {
                     this._zoomAccess_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setZoomAccessAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._rotateRenderEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._rotateRenderEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setRotateRenderEffectAttribute((this._rotateRenderEffect_0_0value as WebRotateEffect | undefined));
+                    this._rotateRenderEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._rotateRenderEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._rotateRenderEffect_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setRotateRenderEffectAttribute((undefined as WebRotateEffect | undefined));
                 }
             }
         }
@@ -929,6 +984,24 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 default: {
                     this._onHttpErrorReceive_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnHttpErrorReceiveAttribute((undefined as ((value0: OnHttpErrorReceiveEvent) => void) | undefined));
+                }
+            }
+        }
+        if (this._onOverrideErrorPage_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onOverrideErrorPage_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnOverrideErrorPageAttribute((this._onOverrideErrorPage_0_0value as OnOverrideErrorPageCallback | undefined));
+                    this._onOverrideErrorPage_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onOverrideErrorPage_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onOverrideErrorPage_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnOverrideErrorPageAttribute((undefined as OnOverrideErrorPageCallback | undefined));
                 }
             }
         }
@@ -1868,6 +1941,42 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (this._onPdfScrollAtBottom_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onPdfScrollAtBottom_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnPdfScrollAtBottomAttribute((this._onPdfScrollAtBottom_0_0value as ((value0: OnPdfScrollEvent) => void) | undefined));
+                    this._onPdfScrollAtBottom_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onPdfScrollAtBottom_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onPdfScrollAtBottom_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnPdfScrollAtBottomAttribute((undefined as ((value0: OnPdfScrollEvent) => void) | undefined));
+                }
+            }
+        }
+        if (this._onPdfLoadEvent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onPdfLoadEvent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnPdfLoadEventAttribute((this._onPdfLoadEvent_0_0value as ((value0: OnPdfLoadEvent) => void) | undefined));
+                    this._onPdfLoadEvent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onPdfLoadEvent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onPdfLoadEvent_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnPdfLoadEventAttribute((undefined as ((value0: OnPdfLoadEvent) => void) | undefined));
+                }
+            }
+        }
         if (this._onSafeBrowsingCheckResult_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onSafeBrowsingCheckResult_0_flag) {
@@ -1883,6 +1992,24 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 default: {
                     this._onSafeBrowsingCheckResult_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnSafeBrowsingCheckResultAttribute((undefined as OnSafeBrowsingCheckResultCallback | undefined));
+                }
+            }
+        }
+        if (this._onSafeBrowsingCheckFinish_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onSafeBrowsingCheckFinish_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnSafeBrowsingCheckFinishAttribute((this._onSafeBrowsingCheckFinish_0_0value as OnSafeBrowsingCheckResultCallback | undefined));
+                    this._onSafeBrowsingCheckFinish_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onSafeBrowsingCheckFinish_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onSafeBrowsingCheckFinish_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnSafeBrowsingCheckFinishAttribute((undefined as OnSafeBrowsingCheckResultCallback | undefined));
                 }
             }
         }
@@ -2063,6 +2190,42 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 default: {
                     this._onNativeEmbedGestureEvent_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnNativeEmbedGestureEventAttribute((undefined as ((event: NativeEmbedTouchInfo) => void) | undefined));
+                }
+            }
+        }
+        if (this._onNativeEmbedMouseEvent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onNativeEmbedMouseEvent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnNativeEmbedMouseEventAttribute((this._onNativeEmbedMouseEvent_0_0value as MouseInfoCallback | undefined));
+                    this._onNativeEmbedMouseEvent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onNativeEmbedMouseEvent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onNativeEmbedMouseEvent_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnNativeEmbedMouseEventAttribute((undefined as MouseInfoCallback | undefined));
+                }
+            }
+        }
+        if (this._onNativeEmbedObjectParamChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onNativeEmbedObjectParamChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnNativeEmbedObjectParamChangeAttribute((this._onNativeEmbedObjectParamChange_0_0value as OnNativeEmbedObjectParamChangeCallback | undefined));
+                    this._onNativeEmbedObjectParamChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onNativeEmbedObjectParamChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onNativeEmbedObjectParamChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnNativeEmbedObjectParamChangeAttribute((undefined as OnNativeEmbedObjectParamChangeCallback | undefined));
                 }
             }
         }
@@ -2408,6 +2571,204 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (this._enableDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableDataDetector_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableDataDetectorAttribute((this._enableDataDetector_0_0value as boolean | undefined));
+                    this._enableDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableDataDetector_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableDataDetectorAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._dataDetectorConfig_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._dataDetectorConfig_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDataDetectorConfigAttribute((this._dataDetectorConfig_0_0value as TextDataDetectorConfig | undefined));
+                    this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDataDetectorConfigAttribute((undefined as TextDataDetectorConfig | undefined));
+                }
+            }
+        }
+        if (this._onActivateContent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onActivateContent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnActivateContentAttribute((this._onActivateContent_0_0value as VoidCallback | undefined));
+                    this._onActivateContent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onActivateContent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onActivateContent_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnActivateContentAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._bypassVsyncCondition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._bypassVsyncCondition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBypassVsyncConditionAttribute((this._bypassVsyncCondition_0_0value as WebBypassVsyncCondition | undefined));
+                    this._bypassVsyncCondition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._bypassVsyncCondition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._bypassVsyncCondition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBypassVsyncConditionAttribute((undefined as WebBypassVsyncCondition | undefined));
+                }
+            }
+        }
+        if (this._gestureFocusMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._gestureFocusMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setGestureFocusModeAttribute((this._gestureFocusMode_0_0value as GestureFocusMode | undefined));
+                    this._gestureFocusMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._gestureFocusMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._gestureFocusMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setGestureFocusModeAttribute((undefined as GestureFocusMode | undefined));
+                }
+            }
+        }
+        if (this._forceEnableZoom_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._forceEnableZoom_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setForceEnableZoomAttribute((this._forceEnableZoom_0_0value as boolean | undefined));
+                    this._forceEnableZoom_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._forceEnableZoom_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._forceEnableZoom_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setForceEnableZoomAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._backToTop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._backToTop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBackToTopAttribute((this._backToTop_0_0value as boolean | undefined));
+                    this._backToTop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._backToTop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._backToTop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBackToTopAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._onDetectedBlankScreen_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDetectedBlankScreen_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDetectedBlankScreenAttribute((this._onDetectedBlankScreen_0_0value as OnDetectBlankScreenCallback | undefined));
+                    this._onDetectedBlankScreen_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDetectedBlankScreen_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDetectedBlankScreen_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDetectedBlankScreenAttribute((undefined as OnDetectBlankScreenCallback | undefined));
+                }
+            }
+        }
+        if (this._blankScreenDetectionConfig_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._blankScreenDetectionConfig_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBlankScreenDetectionConfigAttribute((this._blankScreenDetectionConfig_0_0value as BlankScreenDetectionConfig | undefined));
+                    this._blankScreenDetectionConfig_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._blankScreenDetectionConfig_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._blankScreenDetectionConfig_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBlankScreenDetectionConfigAttribute((undefined as BlankScreenDetectionConfig | undefined));
+                }
+            }
+        }
+        if (this._zoomControlAccess_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._zoomControlAccess_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setZoomControlAccessAttribute((this._zoomControlAccess_0_0value as boolean | undefined));
+                    this._zoomControlAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._zoomControlAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._zoomControlAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setZoomControlAccessAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableSelectedDataDetector_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableSelectedDataDetectorAttribute((this._enableSelectedDataDetector_0_0value as boolean | undefined));
+                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableSelectedDataDetectorAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._registerNativeEmbedRule_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._registerNativeEmbedRule_0_flag) {
@@ -2535,6 +2896,19 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
                 default: {
                     this.zoomAccess((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._rotateRenderEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._rotateRenderEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.rotateRenderEffect(modifier._rotateRenderEffect_0_0value);
+                    break;
+                }
+                default: {
+                    this.rotateRenderEffect((undefined as WebRotateEffect | undefined));
                 }
             }
         }
@@ -2912,6 +3286,19 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
                 default: {
                     this.onHttpErrorReceive((undefined as ((value0: OnHttpErrorReceiveEvent) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onOverrideErrorPage_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onOverrideErrorPage_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onOverrideErrorPage(modifier._onOverrideErrorPage_0_0value);
+                    break;
+                }
+                default: {
+                    this.onOverrideErrorPage((undefined as OnOverrideErrorPageCallback | undefined));
                 }
             }
         }
@@ -3591,6 +3978,32 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (modifier._onPdfScrollAtBottom_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onPdfScrollAtBottom_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onPdfScrollAtBottom(modifier._onPdfScrollAtBottom_0_0value);
+                    break;
+                }
+                default: {
+                    this.onPdfScrollAtBottom((undefined as ((value0: OnPdfScrollEvent) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onPdfLoadEvent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onPdfLoadEvent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onPdfLoadEvent(modifier._onPdfLoadEvent_0_0value);
+                    break;
+                }
+                default: {
+                    this.onPdfLoadEvent((undefined as ((value0: OnPdfLoadEvent) => void) | undefined));
+                }
+            }
+        }
         if (modifier._onSafeBrowsingCheckResult_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onSafeBrowsingCheckResult_0_flag) {
@@ -3601,6 +4014,19 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
                 default: {
                     this.onSafeBrowsingCheckResult((undefined as OnSafeBrowsingCheckResultCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onSafeBrowsingCheckFinish_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onSafeBrowsingCheckFinish_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onSafeBrowsingCheckFinish(modifier._onSafeBrowsingCheckFinish_0_0value);
+                    break;
+                }
+                default: {
+                    this.onSafeBrowsingCheckFinish((undefined as OnSafeBrowsingCheckResultCallback | undefined));
                 }
             }
         }
@@ -3731,6 +4157,32 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
                 default: {
                     this.onNativeEmbedGestureEvent((undefined as ((event: NativeEmbedTouchInfo) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onNativeEmbedMouseEvent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onNativeEmbedMouseEvent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onNativeEmbedMouseEvent(modifier._onNativeEmbedMouseEvent_0_0value);
+                    break;
+                }
+                default: {
+                    this.onNativeEmbedMouseEvent((undefined as MouseInfoCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onNativeEmbedObjectParamChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onNativeEmbedObjectParamChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onNativeEmbedObjectParamChange(modifier._onNativeEmbedObjectParamChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onNativeEmbedObjectParamChange((undefined as OnNativeEmbedObjectParamChangeCallback | undefined));
                 }
             }
         }
@@ -3981,6 +4433,149 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (modifier._enableDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableDataDetector_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableDataDetector(modifier._enableDataDetector_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableDataDetector((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._dataDetectorConfig_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._dataDetectorConfig_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.dataDetectorConfig(modifier._dataDetectorConfig_0_0value);
+                    break;
+                }
+                default: {
+                    this.dataDetectorConfig((undefined as TextDataDetectorConfig | undefined));
+                }
+            }
+        }
+        if (modifier._onActivateContent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onActivateContent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onActivateContent(modifier._onActivateContent_0_0value);
+                    break;
+                }
+                default: {
+                    this.onActivateContent((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._bypassVsyncCondition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._bypassVsyncCondition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.bypassVsyncCondition(modifier._bypassVsyncCondition_0_0value);
+                    break;
+                }
+                default: {
+                    this.bypassVsyncCondition((undefined as WebBypassVsyncCondition | undefined));
+                }
+            }
+        }
+        if (modifier._gestureFocusMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._gestureFocusMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.gestureFocusMode(modifier._gestureFocusMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.gestureFocusMode((undefined as GestureFocusMode | undefined));
+                }
+            }
+        }
+        if (modifier._forceEnableZoom_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._forceEnableZoom_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.forceEnableZoom(modifier._forceEnableZoom_0_0value);
+                    break;
+                }
+                default: {
+                    this.forceEnableZoom((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._backToTop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._backToTop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.backToTop(modifier._backToTop_0_0value);
+                    break;
+                }
+                default: {
+                    this.backToTop((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._onDetectedBlankScreen_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDetectedBlankScreen_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDetectedBlankScreen(modifier._onDetectedBlankScreen_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDetectedBlankScreen((undefined as OnDetectBlankScreenCallback | undefined));
+                }
+            }
+        }
+        if (modifier._blankScreenDetectionConfig_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._blankScreenDetectionConfig_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.blankScreenDetectionConfig(modifier._blankScreenDetectionConfig_0_0value);
+                    break;
+                }
+                default: {
+                    this.blankScreenDetectionConfig((undefined as BlankScreenDetectionConfig | undefined));
+                }
+            }
+        }
+        if (modifier._zoomControlAccess_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._zoomControlAccess_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.zoomControlAccess(modifier._zoomControlAccess_0_0value);
+                    break;
+                }
+                default: {
+                    this.zoomControlAccess((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableSelectedDataDetector_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableSelectedDataDetector(modifier._enableSelectedDataDetector_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableSelectedDataDetector((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._registerNativeEmbedRule_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._registerNativeEmbedRule_0_flag) {
@@ -4082,6 +4677,17 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         } else
         {
             this._zoomAccess_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    rotateRenderEffect(value: WebRotateEffect | undefined): this {
+        if (((this._rotateRenderEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._rotateRenderEffect_0_flag = AttributeUpdaterFlag.UPDATE
+            this._rotateRenderEffect_0_0value = value
+        } else
+        {
+            this._rotateRenderEffect_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -4401,6 +5007,17 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         } else
         {
             this._onHttpErrorReceive_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onOverrideErrorPage(value: OnOverrideErrorPageCallback | undefined): this {
+        if (((this._onOverrideErrorPage_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onOverrideErrorPage_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onOverrideErrorPage_0_0value = value
+        } else
+        {
+            this._onOverrideErrorPage_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -4976,6 +5593,28 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         }
         return this
     }
+    onPdfScrollAtBottom(value: ((value0: OnPdfScrollEvent) => void) | undefined): this {
+        if (((this._onPdfScrollAtBottom_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onPdfScrollAtBottom_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onPdfScrollAtBottom_0_0value = value
+        } else
+        {
+            this._onPdfScrollAtBottom_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onPdfLoadEvent(value: ((value0: OnPdfLoadEvent) => void) | undefined): this {
+        if (((this._onPdfLoadEvent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onPdfLoadEvent_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onPdfLoadEvent_0_0value = value
+        } else
+        {
+            this._onPdfLoadEvent_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
         if (((this._onSafeBrowsingCheckResult_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -4984,6 +5623,17 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         } else
         {
             this._onSafeBrowsingCheckResult_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onSafeBrowsingCheckFinish(value: OnSafeBrowsingCheckResultCallback | undefined): this {
+        if (((this._onSafeBrowsingCheckFinish_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onSafeBrowsingCheckFinish_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onSafeBrowsingCheckFinish_0_0value = value
+        } else
+        {
+            this._onSafeBrowsingCheckFinish_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -5094,6 +5744,28 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         } else
         {
             this._onNativeEmbedGestureEvent_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onNativeEmbedMouseEvent(value: MouseInfoCallback | undefined): this {
+        if (((this._onNativeEmbedMouseEvent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onNativeEmbedMouseEvent_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onNativeEmbedMouseEvent_0_0value = value
+        } else
+        {
+            this._onNativeEmbedMouseEvent_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onNativeEmbedObjectParamChange(value: OnNativeEmbedObjectParamChangeCallback | undefined): this {
+        if (((this._onNativeEmbedObjectParamChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onNativeEmbedObjectParamChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onNativeEmbedObjectParamChange_0_0value = value
+        } else
+        {
+            this._onNativeEmbedObjectParamChange_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -5303,6 +5975,127 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         } else
         {
             this._nativeEmbedOptions_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableDataDetector(value: boolean | undefined): this {
+        if (((this._enableDataDetector_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableDataDetector_0_0value) !== (value)))
+        {
+            this._enableDataDetector_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableDataDetector_0_0value = value
+        } else
+        {
+            this._enableDataDetector_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
+        if (((this._dataDetectorConfig_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.UPDATE
+            this._dataDetectorConfig_0_0value = value
+        } else
+        {
+            this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onActivateContent(value: VoidCallback | undefined): this {
+        if (((this._onActivateContent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onActivateContent_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onActivateContent_0_0value = value
+        } else
+        {
+            this._onActivateContent_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    bypassVsyncCondition(value: WebBypassVsyncCondition | undefined): this {
+        if (((this._bypassVsyncCondition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._bypassVsyncCondition_0_flag = AttributeUpdaterFlag.UPDATE
+            this._bypassVsyncCondition_0_0value = value
+        } else
+        {
+            this._bypassVsyncCondition_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    gestureFocusMode(value: GestureFocusMode | undefined): this {
+        if (((this._gestureFocusMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._gestureFocusMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._gestureFocusMode_0_0value = value
+        } else
+        {
+            this._gestureFocusMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    forceEnableZoom(value: boolean | undefined): this {
+        if (((this._forceEnableZoom_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._forceEnableZoom_0_0value) !== (value)))
+        {
+            this._forceEnableZoom_0_flag = AttributeUpdaterFlag.UPDATE
+            this._forceEnableZoom_0_0value = value
+        } else
+        {
+            this._forceEnableZoom_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    backToTop(value: boolean | undefined): this {
+        if (((this._backToTop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._backToTop_0_0value) !== (value)))
+        {
+            this._backToTop_0_flag = AttributeUpdaterFlag.UPDATE
+            this._backToTop_0_0value = value
+        } else
+        {
+            this._backToTop_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onDetectedBlankScreen(value: OnDetectBlankScreenCallback | undefined): this {
+        if (((this._onDetectedBlankScreen_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDetectedBlankScreen_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDetectedBlankScreen_0_0value = value
+        } else
+        {
+            this._onDetectedBlankScreen_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    blankScreenDetectionConfig(value: BlankScreenDetectionConfig | undefined): this {
+        if (((this._blankScreenDetectionConfig_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._blankScreenDetectionConfig_0_flag = AttributeUpdaterFlag.UPDATE
+            this._blankScreenDetectionConfig_0_0value = value
+        } else
+        {
+            this._blankScreenDetectionConfig_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    zoomControlAccess(value: boolean | undefined): this {
+        if (((this._zoomControlAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._zoomControlAccess_0_0value) !== (value)))
+        {
+            this._zoomControlAccess_0_flag = AttributeUpdaterFlag.UPDATE
+            this._zoomControlAccess_0_0value = value
+        } else
+        {
+            this._zoomControlAccess_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        if (((this._enableSelectedDataDetector_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableSelectedDataDetector_0_0value) !== (value)))
+        {
+            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableSelectedDataDetector_0_0value = value
+        } else
+        {
+            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

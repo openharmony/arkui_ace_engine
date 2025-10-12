@@ -24,17 +24,17 @@ import { extractors, AttributeModifier, hookWebAttributeModifier, AttributeUpdat
 import { default as webview } from "@ohos.web.webview"
 import { Resource_serializer } from "./../framework/resource"
 import { Resource } from "global.resource"
-import { NestedScrollOptions_serializer, ArkCommonMethodPeer, CommonMethod, KeyEvent, NestedScrollOptions, TouchEvent, ArkCommonMethodComponent, ArkCommonMethodStyle, TouchEvent_serializer } from "./common"
-import { EditMenuOptions_serializer, EditMenuOptions, MenuType } from "./textCommon"
+import { NestedScrollOptions_serializer, ArkCommonMethodPeer, CommonMethod, KeyEvent, NestedScrollOptions, TouchEvent, MouseEvent, ArkCommonMethodComponent, ArkCommonMethodStyle, MouseEvent_serializer, TouchEvent_serializer } from "./common"
+import { EditMenuOptions_serializer, TextDataDetectorConfig_serializer, EditMenuOptions, TextDataDetectorConfig, MenuType } from "./textCommon"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CopyOptions, NestedScrollMode } from "./enums"
+import { VoidCallback, Position, Position_serializer } from "./units"
 import { CustomBuilder } from "./builder"
 import { PreviewMenuOptions, PreviewMenuOptions_serializer } from "./richEditor"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { Position, Position_serializer } from "./units"
 import { default as image } from "@ohos.multimedia.image"
 import { WebModifier } from "./../WebModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -251,11 +251,29 @@ export class EventResult implements MaterializedBase {
         this.setGestureEventResult1_serialize(result_casted, stopPropagation_casted)
         return
     }
+    public setMouseEventResult(result: boolean, stopPropagation?: boolean): void {
+        const result_casted = result as (boolean)
+        const stopPropagation_casted = stopPropagation as (boolean | undefined)
+        this.setMouseEventResult_serialize(result_casted, stopPropagation_casted)
+        return
+    }
     setGestureEventResult0_serialize(result: boolean): void {
         ArkUIGeneratedNativeModule._EventResult_setGestureEventResult0(this.peer!.ptr, result ? 1 : 0)
     }
     setGestureEventResult1_serialize(result: boolean, stopPropagation: boolean): void {
         ArkUIGeneratedNativeModule._EventResult_setGestureEventResult1(this.peer!.ptr, result ? 1 : 0, stopPropagation ? 1 : 0)
+    }
+    setMouseEventResult_serialize(result: boolean, stopPropagation?: boolean): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (stopPropagation !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const stopPropagationTmpValue  = stopPropagation!
+            thisSerializer.writeBoolean(stopPropagationTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._EventResult_setMouseEventResult(this.peer!.ptr, result ? 1 : 0, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export class FileSelectorParamInternal {
@@ -672,14 +690,22 @@ export class SslErrorHandler implements MaterializedBase {
         return
     }
     public handleCancel(): void {
-        this.handleCancel_serialize()
+        this.handleCancel0_serialize()
+        return
+    }
+    public handleCancel(abortLoading: boolean): void {
+        const abortLoading_casted = abortLoading as (boolean)
+        this.handleCancel1_serialize(abortLoading_casted)
         return
     }
     handleConfirm_serialize(): void {
         ArkUIGeneratedNativeModule._SslErrorHandler_handleConfirm(this.peer!.ptr)
     }
-    handleCancel_serialize(): void {
-        ArkUIGeneratedNativeModule._SslErrorHandler_handleCancel(this.peer!.ptr)
+    handleCancel0_serialize(): void {
+        ArkUIGeneratedNativeModule._SslErrorHandler_handleCancel0(this.peer!.ptr)
+    }
+    handleCancel1_serialize(abortLoading: boolean): void {
+        ArkUIGeneratedNativeModule._SslErrorHandler_handleCancel1(this.peer!.ptr, abortLoading ? 1 : 0)
     }
 }
 export class WebContextMenuParamInternal {
@@ -747,6 +773,9 @@ export class WebContextMenuParam implements MaterializedBase {
     public getPreviewHeight(): int32 {
         return this.getPreviewHeight_serialize()
     }
+    public getContextMenuMediaType(): ContextMenuDataMediaType {
+        return this.getContextMenuMediaType_serialize()
+    }
     x_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_x(this.peer!.ptr)
         return retval
@@ -803,6 +832,10 @@ export class WebContextMenuParam implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getPreviewHeight(this.peer!.ptr)
         return retval
     }
+    getContextMenuMediaType_serialize(): ContextMenuDataMediaType {
+        const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getContextMenuMediaType(this.peer!.ptr)
+        return ContextMenuDataMediaType.fromValue(retval)
+    }
 }
 export class WebContextMenuResultInternal {
     public static fromPtr(ptr: KPointer): WebContextMenuResult {
@@ -851,6 +884,18 @@ export class WebContextMenuResult implements MaterializedBase {
         this.selectAll_serialize()
         return
     }
+    public redo(): void {
+        this.redo_serialize()
+        return
+    }
+    public undo(): void {
+        this.undo_serialize()
+        return
+    }
+    public pasteAndMatchStyle(): void {
+        this.pasteAndMatchStyle_serialize()
+        return
+    }
     closeContextMenu_serialize(): void {
         ArkUIGeneratedNativeModule._WebContextMenuResult_closeContextMenu(this.peer!.ptr)
     }
@@ -868,6 +913,15 @@ export class WebContextMenuResult implements MaterializedBase {
     }
     selectAll_serialize(): void {
         ArkUIGeneratedNativeModule._WebContextMenuResult_selectAll(this.peer!.ptr)
+    }
+    redo_serialize(): void {
+        ArkUIGeneratedNativeModule._WebContextMenuResult_redo(this.peer!.ptr)
+    }
+    undo_serialize(): void {
+        ArkUIGeneratedNativeModule._WebContextMenuResult_undo(this.peer!.ptr)
+    }
+    pasteAndMatchStyle_serialize(): void {
+        ArkUIGeneratedNativeModule._WebContextMenuResult_pasteAndMatchStyle(this.peer!.ptr)
     }
 }
 export class WebKeyboardControllerInternal {
@@ -1335,6 +1389,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setZoomAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setRotateRenderEffectAttribute(value: WebRotateEffect | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as WebRotateEffect)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setRotateRenderEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setGeolocationAccessAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1681,6 +1747,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setOnHttpErrorReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnOverrideErrorPageAttribute(value: OnOverrideErrorPageCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnOverrideErrorPage(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnDownloadStartAttribute(value: ((value0: OnDownloadStartEvent) => void) | undefined): void {
@@ -2307,6 +2385,30 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnOverScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnPdfScrollAtBottomAttribute(value: ((value0: OnPdfScrollEvent) => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnPdfScrollAtBottom(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnPdfLoadEventAttribute(value: ((value0: OnPdfLoadEvent) => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnPdfLoadEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnSafeBrowsingCheckResultAttribute(value: OnSafeBrowsingCheckResultCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -2317,6 +2419,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setOnSafeBrowsingCheckResult(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnSafeBrowsingCheckFinishAttribute(value: OnSafeBrowsingCheckResultCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnSafeBrowsingCheckFinish(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnNavigationEntryCommittedAttribute(value: OnNavigationEntryCommittedCallback | undefined): void {
@@ -2453,6 +2567,30 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setOnNativeEmbedGestureEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnNativeEmbedMouseEventAttribute(value: MouseInfoCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnNativeEmbedMouseEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnNativeEmbedObjectParamChangeAttribute(value: OnNativeEmbedObjectParamChangeCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnNativeEmbedObjectParamChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCopyOptionsAttribute(value: CopyOptions | undefined): void {
@@ -2695,6 +2833,138 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setNativeEmbedOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableDataDetectorAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setEnableDataDetector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setDataDetectorConfigAttribute(value: TextDataDetectorConfig | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            TextDataDetectorConfig_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setDataDetectorConfig(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnActivateContentAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnActivateContent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBypassVsyncConditionAttribute(value: WebBypassVsyncCondition | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as WebBypassVsyncCondition)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setBypassVsyncCondition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setGestureFocusModeAttribute(value: GestureFocusMode | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as GestureFocusMode)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setGestureFocusMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setForceEnableZoomAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setForceEnableZoom(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBackToTopAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setBackToTop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnDetectedBlankScreenAttribute(value: OnDetectBlankScreenCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnDetectedBlankScreen(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBlankScreenDetectionConfigAttribute(value: BlankScreenDetectionConfig | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            BlankScreenDetectionConfig_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setBlankScreenDetectionConfig(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setZoomControlAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setZoomControlAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableSelectedDataDetectorAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setEnableSelectedDataDetector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setRegisterNativeEmbedRuleAttribute(tag: string | undefined, type: string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (tag !== undefined) {
@@ -2751,6 +3021,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
 export type WebviewController = webview.WebviewController;
 export type OnNavigationEntryCommittedCallback = (loadCommittedDetails: LoadCommittedDetails) => void;
 export type OnSslErrorEventCallback = (sslErrorEvent: SslErrorEvent) => void;
+export type OnOverrideErrorPageCallback = (errorPageEvent: OnErrorReceiveEvent) => string;
 export type OnLargestContentfulPaintCallback = (largestContentfulPaint: LargestContentfulPaint) => void;
 export type OnFirstMeaningfulPaintCallback = (firstMeaningfulPaint: FirstMeaningfulPaint) => void;
 export type OnOverrideUrlLoadingCallback = (webResourceRequest: WebResourceRequest) => boolean;
@@ -2799,24 +3070,6 @@ export enum MixedMode {
     None = 2
 }
 export type OnSafeBrowsingCheckResultCallback = (threatType: ThreatType) => void;
-export enum HitTestType {
-    EDIT_TEXT = 0,
-    EditText = 0,
-    EMAIL = 1,
-    Email = 1,
-    HTTP_ANCHOR = 2,
-    HttpAnchor = 2,
-    HTTP_ANCHOR_IMG = 3,
-    HttpAnchorImg = 3,
-    IMG = 4,
-    Img = 4,
-    MAP = 5,
-    Map = 5,
-    PHONE = 6,
-    Phone = 6,
-    UNKNOWN = 7,
-    Unknown = 7
-}
 export enum CacheMode {
     DEFAULT = 0,
     Default = 0,
@@ -2843,6 +3096,10 @@ export enum WebDarkMode {
     AUTO = 2,
     Auto = 2
 }
+export enum WebRotateEffect {
+    TOPLEFT_EFFECT = 0,
+    RESIZE_COVER_EFFECT = 1
+}
 export enum WebCaptureMode {
     HOME_SCREEN = 0
 }
@@ -2866,6 +3123,8 @@ export interface FullScreenEnterEvent {
     videoHeight?: number;
 }
 export type OnFullScreenEnterCallback = (event: FullScreenEnterEvent) => void;
+export type MouseInfoCallback = (event: NativeEmbedMouseInfo) => void;
+export type OnNativeEmbedObjectParamChangeCallback = (event: NativeEmbedParamDataInfo) => void;
 export enum RenderExitReason {
     PROCESS_ABNORMAL_TERMINATION = 0,
     ProcessAbnormalTermination = 0,
@@ -2927,6 +3186,13 @@ export enum ContextMenuMediaType {
     None = 0,
     IMAGE = 1,
     Image = 1
+}
+export enum ContextMenuDataMediaType {
+    NONE = 0,
+    IMAGE = 1,
+    VIDEO = 2,
+    AUDIO = 3,
+    CANVAS = 4
 }
 export enum ContextMenuInputFieldType {
     NONE = 0,
@@ -3024,6 +3290,27 @@ export interface NativeEmbedTouchInfo {
     touchEvent?: TouchEvent;
     result?: EventResult;
 }
+export interface NativeEmbedMouseInfo {
+    embedId?: string;
+    mouseEvent?: MouseEvent;
+    result?: EventResult;
+}
+export enum NativeEmbedParamStatus {
+    ADD = 0,
+    UPDATE = 1,
+    DELETE = 2
+}
+export interface NativeEmbedParamItem {
+    status: NativeEmbedParamStatus;
+    id: string;
+    name?: string;
+    value?: string;
+}
+export interface NativeEmbedParamDataInfo {
+    embedId: string;
+    objectAttributeId?: string;
+    paramItems?: Array<NativeEmbedParamItem>;
+}
 export interface FirstMeaningfulPaint {
     navigationStartTime?: int64;
     firstMeaningfulPaintTime?: int64;
@@ -3107,6 +3394,7 @@ export interface OnDownloadStartEvent {
 export interface OnRefreshAccessedHistoryEvent {
     url: string;
     isRefreshed: boolean;
+    isMainFrame?: boolean;
 }
 export interface OnRenderExitedEvent {
     renderExitReason: RenderExitReason;
@@ -3194,6 +3482,13 @@ export interface OnOverScrollEvent {
     xOffset: double;
     yOffset: double;
 }
+export interface OnPdfScrollEvent {
+    url: string;
+}
+export interface OnPdfLoadEvent {
+    result: PdfLoadResult;
+    url: string;
+}
 export interface JavaScriptProxy {
     jsObject: Object;
     name: string;
@@ -3205,17 +3500,31 @@ export interface JavaScriptProxy {
 export enum WebKeyboardAvoidMode {
     RESIZE_VISUAL = 0,
     RESIZE_CONTENT = 1,
-    OVERLAYS_CONTENT = 2
+    OVERLAYS_CONTENT = 2,
+    RETURN_TO_UICONTEXT = 3
 }
 export enum WebElementType {
     IMAGE = 1,
-    LINK = 2
+    LINK = 2,
+    TEXT = 3
 }
 export enum WebResponseType {
-    LONG_PRESS = 1
+    LONG_PRESS = 1,
+    RIGHT_CLICK = 2
+}
+export enum WebBypassVsyncCondition {
+    NONE = 0,
+    SCROLLBY_FROM_ZERO_OFFSET = 1
 }
 export enum AudioSessionType {
     AMBIENT = 3
+}
+export enum PdfLoadResult {
+    LOAD_SUCCESS = 0,
+    PARSE_ERROR_FILE = 1,
+    PARSE_ERROR_FORMAT = 2,
+    PARSE_ERROR_PASSWORD = 3,
+    PARSE_ERROR_HANDLER = 4
 }
 export interface SelectionMenuOptionsExt {
     onAppear?: (() => void);
@@ -3223,6 +3532,30 @@ export interface SelectionMenuOptionsExt {
     preview?: CustomBuilder;
     menuType?: MenuType;
     previewMenuOptions?: PreviewMenuOptions;
+    onMenuShow?: (() => void);
+    onMenuHide?: (() => void);
+}
+export interface BlankScreenDetails {
+    detectedContentfulNodesCount?: int32;
+}
+export enum DetectedBlankScreenReason {
+    NO_CONTENTFUL_NODES = 0,
+    SUB_THRESHOLD_CONTENTFUL_NODES = 1
+}
+export interface BlankScreenDetectionEventInfo {
+    url: string;
+    blankScreenReason: DetectedBlankScreenReason;
+    blankScreenDetails?: BlankScreenDetails;
+}
+export type OnDetectBlankScreenCallback = (event: BlankScreenDetectionEventInfo) => void;
+export enum BlankScreenDetectionMethod {
+    DETECTION_CONTENTFUL_NODES_SEVENTEEN = 0
+}
+export interface BlankScreenDetectionConfig {
+    enable: boolean;
+    detectionTiming?: Array<double>;
+    detectionMethods?: Array<BlankScreenDetectionMethod>;
+    contentfulNodesCountThreshold?: int32;
 }
 export interface WebAttribute extends CommonMethod {
     setWebOptions(value: WebOptions): this {
@@ -3248,6 +3581,9 @@ export interface WebAttribute extends CommonMethod {
     }
     zoomAccess(value: boolean | undefined): this {
         throw new Error("Unimplemented method zoomAccess")
+    }
+    rotateRenderEffect(value: WebRotateEffect | undefined): this {
+        throw new Error("Unimplemented method rotateRenderEffect")
     }
     geolocationAccess(value: boolean | undefined): this {
         throw new Error("Unimplemented method geolocationAccess")
@@ -3335,6 +3671,9 @@ export interface WebAttribute extends CommonMethod {
     }
     onHttpErrorReceive(value: ((value0: OnHttpErrorReceiveEvent) => void) | undefined): this {
         throw new Error("Unimplemented method onHttpErrorReceive")
+    }
+    onOverrideErrorPage(value: OnOverrideErrorPageCallback | undefined): this {
+        throw new Error("Unimplemented method onOverrideErrorPage")
     }
     onDownloadStart(value: ((value0: OnDownloadStartEvent) => void) | undefined): this {
         throw new Error("Unimplemented method onDownloadStart")
@@ -3492,8 +3831,17 @@ export interface WebAttribute extends CommonMethod {
     onOverScroll(value: ((value0: OnOverScrollEvent) => void) | undefined): this {
         throw new Error("Unimplemented method onOverScroll")
     }
+    onPdfScrollAtBottom(value: ((value0: OnPdfScrollEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onPdfScrollAtBottom")
+    }
+    onPdfLoadEvent(value: ((value0: OnPdfLoadEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onPdfLoadEvent")
+    }
     onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
         throw new Error("Unimplemented method onSafeBrowsingCheckResult")
+    }
+    onSafeBrowsingCheckFinish(value: OnSafeBrowsingCheckResultCallback | undefined): this {
+        throw new Error("Unimplemented method onSafeBrowsingCheckFinish")
     }
     onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this {
         throw new Error("Unimplemented method onNavigationEntryCommitted")
@@ -3524,6 +3872,12 @@ export interface WebAttribute extends CommonMethod {
     }
     onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this {
         throw new Error("Unimplemented method onNativeEmbedGestureEvent")
+    }
+    onNativeEmbedMouseEvent(value: MouseInfoCallback | undefined): this {
+        throw new Error("Unimplemented method onNativeEmbedMouseEvent")
+    }
+    onNativeEmbedObjectParamChange(value: OnNativeEmbedObjectParamChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onNativeEmbedObjectParamChange")
     }
     copyOptions(value: CopyOptions | undefined): this {
         throw new Error("Unimplemented method copyOptions")
@@ -3582,6 +3936,39 @@ export interface WebAttribute extends CommonMethod {
     nativeEmbedOptions(value: EmbedOptions | undefined): this {
         throw new Error("Unimplemented method nativeEmbedOptions")
     }
+    enableDataDetector(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableDataDetector")
+    }
+    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
+        throw new Error("Unimplemented method dataDetectorConfig")
+    }
+    onActivateContent(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onActivateContent")
+    }
+    bypassVsyncCondition(value: WebBypassVsyncCondition | undefined): this {
+        throw new Error("Unimplemented method bypassVsyncCondition")
+    }
+    gestureFocusMode(value: GestureFocusMode | undefined): this {
+        throw new Error("Unimplemented method gestureFocusMode")
+    }
+    forceEnableZoom(value: boolean | undefined): this {
+        throw new Error("Unimplemented method forceEnableZoom")
+    }
+    backToTop(value: boolean | undefined): this {
+        throw new Error("Unimplemented method backToTop")
+    }
+    onDetectedBlankScreen(value: OnDetectBlankScreenCallback | undefined): this {
+        throw new Error("Unimplemented method onDetectedBlankScreen")
+    }
+    blankScreenDetectionConfig(value: BlankScreenDetectionConfig | undefined): this {
+        throw new Error("Unimplemented method blankScreenDetectionConfig")
+    }
+    zoomControlAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method zoomControlAccess")
+    }
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableSelectedDataDetector")
+    }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         throw new Error("Unimplemented method registerNativeEmbedRule")
     }
@@ -3600,6 +3987,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     imageAccess_value?: boolean | undefined
     mixedMode_value?: MixedMode | undefined
     zoomAccess_value?: boolean | undefined
+    rotateRenderEffect_value?: WebRotateEffect | undefined
     geolocationAccess_value?: boolean | undefined
     javaScriptProxy_value?: JavaScriptProxy | undefined
     cacheMode_value?: CacheMode | undefined
@@ -3629,6 +4017,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onConsole_value?: ((value0: OnConsoleEvent) => boolean) | undefined
     onErrorReceive_value?: ((value0: OnErrorReceiveEvent) => void) | undefined
     onHttpErrorReceive_value?: ((value0: OnHttpErrorReceiveEvent) => void) | undefined
+    onOverrideErrorPage_value?: OnOverrideErrorPageCallback | undefined
     onDownloadStart_value?: ((value0: OnDownloadStartEvent) => void) | undefined
     onRefreshAccessedHistory_value?: ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined
     onRenderExited_value?: ((value0: OnRenderExitedEvent) => void) | undefined
@@ -3681,7 +4070,10 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onLoadIntercept_value?: ((value0: OnLoadInterceptEvent) => boolean) | undefined
     onControllerAttached_value?: (() => void) | undefined
     onOverScroll_value?: ((value0: OnOverScrollEvent) => void) | undefined
+    onPdfScrollAtBottom_value?: ((value0: OnPdfScrollEvent) => void) | undefined
+    onPdfLoadEvent_value?: ((value0: OnPdfLoadEvent) => void) | undefined
     onSafeBrowsingCheckResult_value?: OnSafeBrowsingCheckResultCallback | undefined
+    onSafeBrowsingCheckFinish_value?: OnSafeBrowsingCheckResultCallback | undefined
     onNavigationEntryCommitted_value?: OnNavigationEntryCommittedCallback | undefined
     onIntelligentTrackingPreventionResult_value?: OnIntelligentTrackingPreventionCallback | undefined
     javaScriptOnDocumentStart_value?: Array<ScriptItem> | undefined
@@ -3692,6 +4084,8 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onNativeEmbedLifecycleChange_value?: ((event: NativeEmbedDataInfo) => void) | undefined
     onNativeEmbedVisibilityChange_value?: OnNativeEmbedVisibilityChangeCallback | undefined
     onNativeEmbedGestureEvent_value?: ((event: NativeEmbedTouchInfo) => void) | undefined
+    onNativeEmbedMouseEvent_value?: MouseInfoCallback | undefined
+    onNativeEmbedObjectParamChange_value?: OnNativeEmbedObjectParamChangeCallback | undefined
     copyOptions_value?: CopyOptions | undefined
     onOverrideUrlLoading_value?: OnOverrideUrlLoadingCallback | undefined
     textAutosizing_value?: boolean | undefined
@@ -3711,6 +4105,17 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     runJavaScriptOnDocumentEnd_value?: Array<ScriptItem> | undefined
     runJavaScriptOnHeadEnd_value?: Array<ScriptItem> | undefined
     nativeEmbedOptions_value?: EmbedOptions | undefined
+    enableDataDetector_value?: boolean | undefined
+    dataDetectorConfig_value?: TextDataDetectorConfig | undefined
+    onActivateContent_value?: VoidCallback | undefined
+    bypassVsyncCondition_value?: WebBypassVsyncCondition | undefined
+    gestureFocusMode_value?: GestureFocusMode | undefined
+    forceEnableZoom_value?: boolean | undefined
+    backToTop_value?: boolean | undefined
+    onDetectedBlankScreen_value?: OnDetectBlankScreenCallback | undefined
+    blankScreenDetectionConfig_value?: BlankScreenDetectionConfig | undefined
+    zoomControlAccess_value?: boolean | undefined
+    enableSelectedDataDetector_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined
     setWebOptions(value: WebOptions): this {
         return this
@@ -3734,6 +4139,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
         return this
     }
     zoomAccess(value: boolean | undefined): this {
+        return this
+    }
+    rotateRenderEffect(value: WebRotateEffect | undefined): this {
         return this
     }
     geolocationAccess(value: boolean | undefined): this {
@@ -3821,6 +4229,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
         return this
     }
     onHttpErrorReceive(value: ((value0: OnHttpErrorReceiveEvent) => void) | undefined): this {
+        return this
+    }
+    onOverrideErrorPage(value: OnOverrideErrorPageCallback | undefined): this {
         return this
     }
     onDownloadStart(value: ((value0: OnDownloadStartEvent) => void) | undefined): this {
@@ -3979,7 +4390,16 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onOverScroll(value: ((value0: OnOverScrollEvent) => void) | undefined): this {
         return this
     }
+    onPdfScrollAtBottom(value: ((value0: OnPdfScrollEvent) => void) | undefined): this {
+        return this
+    }
+    onPdfLoadEvent(value: ((value0: OnPdfLoadEvent) => void) | undefined): this {
+        return this
+    }
     onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
+        return this
+    }
+    onSafeBrowsingCheckFinish(value: OnSafeBrowsingCheckResultCallback | undefined): this {
         return this
     }
     onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this {
@@ -4010,6 +4430,12 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
         return this
     }
     onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this {
+        return this
+    }
+    onNativeEmbedMouseEvent(value: MouseInfoCallback | undefined): this {
+        return this
+    }
+    onNativeEmbedObjectParamChange(value: OnNativeEmbedObjectParamChangeCallback | undefined): this {
         return this
     }
     copyOptions(value: CopyOptions | undefined): this {
@@ -4069,6 +4495,39 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     nativeEmbedOptions(value: EmbedOptions | undefined): this {
         return this
     }
+    enableDataDetector(value: boolean | undefined): this {
+        return this
+    }
+    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
+        return this
+    }
+    onActivateContent(value: VoidCallback | undefined): this {
+        return this
+    }
+    bypassVsyncCondition(value: WebBypassVsyncCondition | undefined): this {
+        return this
+    }
+    gestureFocusMode(value: GestureFocusMode | undefined): this {
+        return this
+    }
+    forceEnableZoom(value: boolean | undefined): this {
+        return this
+    }
+    backToTop(value: boolean | undefined): this {
+        return this
+    }
+    onDetectedBlankScreen(value: OnDetectBlankScreenCallback | undefined): this {
+        return this
+    }
+    blankScreenDetectionConfig(value: BlankScreenDetectionConfig | undefined): this {
+        return this
+    }
+    zoomControlAccess(value: boolean | undefined): this {
+        return this
+    }
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        return this
+    }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         return this
     }
@@ -4087,6 +4546,7 @@ export interface SslErrorEvent {
     referrer: string;
     isFatalError: boolean;
     isMainFrame: boolean;
+    certChainData?: Array<ArrayBuffer>;
 }
 export interface NestedScrollOptionsExt {
     scrollUp?: NestedScrollMode;
@@ -4096,6 +4556,11 @@ export interface NestedScrollOptionsExt {
 }
 export interface EmbedOptions {
     supportDefaultIntrinsicSize?: boolean;
+    supportCssDisplayChange?: boolean;
+}
+export enum GestureFocusMode {
+    DEFAULT = 0,
+    GESTURE_TAP_AND_LONG_PRESS = 1
 }
 
 export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttribute {
@@ -4165,6 +4630,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("zoomAccess")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setZoomAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public rotateRenderEffect(value: WebRotateEffect | undefined): this {
+        if (this.checkPriority("rotateRenderEffect")) {
+            const value_casted = value as (WebRotateEffect | undefined)
+            this.getPeer()?.setRotateRenderEffectAttribute(value_casted)
             return this
         }
         return this
@@ -4397,6 +4870,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("onHttpErrorReceive")) {
             const value_casted = value as (((value0: OnHttpErrorReceiveEvent) => void) | undefined)
             this.getPeer()?.setOnHttpErrorReceiveAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onOverrideErrorPage(value: OnOverrideErrorPageCallback | undefined): this {
+        if (this.checkPriority("onOverrideErrorPage")) {
+            const value_casted = value as (OnOverrideErrorPageCallback | undefined)
+            this.getPeer()?.setOnOverrideErrorPageAttribute(value_casted)
             return this
         }
         return this
@@ -4817,10 +5298,34 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
+    public onPdfScrollAtBottom(value: ((value0: OnPdfScrollEvent) => void) | undefined): this {
+        if (this.checkPriority("onPdfScrollAtBottom")) {
+            const value_casted = value as (((value0: OnPdfScrollEvent) => void) | undefined)
+            this.getPeer()?.setOnPdfScrollAtBottomAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onPdfLoadEvent(value: ((value0: OnPdfLoadEvent) => void) | undefined): this {
+        if (this.checkPriority("onPdfLoadEvent")) {
+            const value_casted = value as (((value0: OnPdfLoadEvent) => void) | undefined)
+            this.getPeer()?.setOnPdfLoadEventAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
         if (this.checkPriority("onSafeBrowsingCheckResult")) {
             const value_casted = value as (OnSafeBrowsingCheckResultCallback | undefined)
             this.getPeer()?.setOnSafeBrowsingCheckResultAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onSafeBrowsingCheckFinish(value: OnSafeBrowsingCheckResultCallback | undefined): this {
+        if (this.checkPriority("onSafeBrowsingCheckFinish")) {
+            const value_casted = value as (OnSafeBrowsingCheckResultCallback | undefined)
+            this.getPeer()?.setOnSafeBrowsingCheckFinishAttribute(value_casted)
             return this
         }
         return this
@@ -4901,6 +5406,22 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("onNativeEmbedGestureEvent")) {
             const value_casted = value as (((event: NativeEmbedTouchInfo) => void) | undefined)
             this.getPeer()?.setOnNativeEmbedGestureEventAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onNativeEmbedMouseEvent(value: MouseInfoCallback | undefined): this {
+        if (this.checkPriority("onNativeEmbedMouseEvent")) {
+            const value_casted = value as (MouseInfoCallback | undefined)
+            this.getPeer()?.setOnNativeEmbedMouseEventAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onNativeEmbedObjectParamChange(value: OnNativeEmbedObjectParamChangeCallback | undefined): this {
+        if (this.checkPriority("onNativeEmbedObjectParamChange")) {
+            const value_casted = value as (OnNativeEmbedObjectParamChangeCallback | undefined)
+            this.getPeer()?.setOnNativeEmbedObjectParamChangeAttribute(value_casted)
             return this
         }
         return this
@@ -5053,6 +5574,94 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("nativeEmbedOptions")) {
             const value_casted = value as (EmbedOptions | undefined)
             this.getPeer()?.setNativeEmbedOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableDataDetector(value: boolean | undefined): this {
+        if (this.checkPriority("enableDataDetector")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableDataDetectorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
+        if (this.checkPriority("dataDetectorConfig")) {
+            const value_casted = value as (TextDataDetectorConfig | undefined)
+            this.getPeer()?.setDataDetectorConfigAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onActivateContent(value: VoidCallback | undefined): this {
+        if (this.checkPriority("onActivateContent")) {
+            const value_casted = value as (VoidCallback | undefined)
+            this.getPeer()?.setOnActivateContentAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public bypassVsyncCondition(value: WebBypassVsyncCondition | undefined): this {
+        if (this.checkPriority("bypassVsyncCondition")) {
+            const value_casted = value as (WebBypassVsyncCondition | undefined)
+            this.getPeer()?.setBypassVsyncConditionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public gestureFocusMode(value: GestureFocusMode | undefined): this {
+        if (this.checkPriority("gestureFocusMode")) {
+            const value_casted = value as (GestureFocusMode | undefined)
+            this.getPeer()?.setGestureFocusModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public forceEnableZoom(value: boolean | undefined): this {
+        if (this.checkPriority("forceEnableZoom")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setForceEnableZoomAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public backToTop(value: boolean | undefined): this {
+        if (this.checkPriority("backToTop")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setBackToTopAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onDetectedBlankScreen(value: OnDetectBlankScreenCallback | undefined): this {
+        if (this.checkPriority("onDetectedBlankScreen")) {
+            const value_casted = value as (OnDetectBlankScreenCallback | undefined)
+            this.getPeer()?.setOnDetectedBlankScreenAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public blankScreenDetectionConfig(value: BlankScreenDetectionConfig | undefined): this {
+        if (this.checkPriority("blankScreenDetectionConfig")) {
+            const value_casted = value as (BlankScreenDetectionConfig | undefined)
+            this.getPeer()?.setBlankScreenDetectionConfigAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public zoomControlAccess(value: boolean | undefined): this {
+        if (this.checkPriority("zoomControlAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setZoomControlAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableSelectedDataDetector(value: boolean | undefined): this {
+        if (this.checkPriority("enableSelectedDataDetector")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableSelectedDataDetectorAttribute(value_casted)
             return this
         }
         return this
@@ -5530,6 +6139,103 @@ export class AdsBlockedDetails_serializer {
         return value
     }
 }
+export class BlankScreenDetails_serializer {
+    public static write(buffer: SerializerBase, value: BlankScreenDetails): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForDetectedContentfulNodesCount  = value.detectedContentfulNodesCount
+        if (valueHolderForDetectedContentfulNodesCount !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDetectedContentfulNodesCountTmpValue  = valueHolderForDetectedContentfulNodesCount!
+            valueSerializer.writeInt32(valueHolderForDetectedContentfulNodesCountTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): BlankScreenDetails {
+        let valueDeserializer : DeserializerBase = buffer
+        const detectedContentfulNodesCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let detectedContentfulNodesCountTmpBuf : int32 | undefined = undefined
+        if ((detectedContentfulNodesCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            detectedContentfulNodesCountTmpBuf = valueDeserializer.readInt32()
+        }
+        const detectedContentfulNodesCountTmpResult : int32 | undefined = detectedContentfulNodesCountTmpBuf
+        let value : BlankScreenDetails = ({detectedContentfulNodesCount: detectedContentfulNodesCountTmpResult} as BlankScreenDetails)
+        return value
+    }
+}
+export class BlankScreenDetectionConfig_serializer {
+    public static write(buffer: SerializerBase, value: BlankScreenDetectionConfig): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForEnable  = value.enable
+        valueSerializer.writeBoolean(valueHolderForEnable)
+        const valueHolderForDetectionTiming  = value.detectionTiming
+        if (valueHolderForDetectionTiming !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDetectionTimingTmpValue  = valueHolderForDetectionTiming!
+            valueSerializer.writeInt32((valueHolderForDetectionTimingTmpValue.length).toInt())
+            for (let valueHolderForDetectionTimingTmpValueCounterI = 0; valueHolderForDetectionTimingTmpValueCounterI < valueHolderForDetectionTimingTmpValue.length; valueHolderForDetectionTimingTmpValueCounterI++) {
+                const valueHolderForDetectionTimingTmpValueTmpElement : double = valueHolderForDetectionTimingTmpValue[valueHolderForDetectionTimingTmpValueCounterI]
+                valueSerializer.writeFloat64(valueHolderForDetectionTimingTmpValueTmpElement)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForDetectionMethods  = value.detectionMethods
+        if (valueHolderForDetectionMethods !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDetectionMethodsTmpValue  = valueHolderForDetectionMethods!
+            valueSerializer.writeInt32((valueHolderForDetectionMethodsTmpValue.length).toInt())
+            for (let valueHolderForDetectionMethodsTmpValueCounterI = 0; valueHolderForDetectionMethodsTmpValueCounterI < valueHolderForDetectionMethodsTmpValue.length; valueHolderForDetectionMethodsTmpValueCounterI++) {
+                const valueHolderForDetectionMethodsTmpValueTmpElement : BlankScreenDetectionMethod = valueHolderForDetectionMethodsTmpValue[valueHolderForDetectionMethodsTmpValueCounterI]
+                valueSerializer.writeInt32(valueHolderForDetectionMethodsTmpValueTmpElement.valueOf())
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForContentfulNodesCountThreshold  = value.contentfulNodesCountThreshold
+        if (valueHolderForContentfulNodesCountThreshold !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForContentfulNodesCountThresholdTmpValue  = valueHolderForContentfulNodesCountThreshold!
+            valueSerializer.writeInt32(valueHolderForContentfulNodesCountThresholdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): BlankScreenDetectionConfig {
+        let valueDeserializer : DeserializerBase = buffer
+        const enableTmpResult : boolean = valueDeserializer.readBoolean()
+        const detectionTimingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let detectionTimingTmpBuf : Array<double> | undefined = undefined
+        if ((detectionTimingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const detectionTimingTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let detectionTimingTmpBuf_ : Array<double> = new Array<double>(detectionTimingTmpBuf_Length)
+            for (let detectionTimingTmpBuf_BufCounterI = 0; detectionTimingTmpBuf_BufCounterI < detectionTimingTmpBuf_Length; detectionTimingTmpBuf_BufCounterI++) {
+                detectionTimingTmpBuf_[detectionTimingTmpBuf_BufCounterI] = valueDeserializer.readFloat64()
+            }
+            detectionTimingTmpBuf = detectionTimingTmpBuf_
+        }
+        const detectionTimingTmpResult : Array<double> | undefined = detectionTimingTmpBuf
+        const detectionMethodsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let detectionMethodsTmpBuf : Array<BlankScreenDetectionMethod> | undefined = undefined
+        if ((detectionMethodsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const detectionMethodsTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let detectionMethodsTmpBuf_ : Array<BlankScreenDetectionMethod> = new Array<BlankScreenDetectionMethod>(detectionMethodsTmpBuf_Length)
+            for (let detectionMethodsTmpBuf_BufCounterI = 0; detectionMethodsTmpBuf_BufCounterI < detectionMethodsTmpBuf_Length; detectionMethodsTmpBuf_BufCounterI++) {
+                detectionMethodsTmpBuf_[detectionMethodsTmpBuf_BufCounterI] = BlankScreenDetectionMethod.fromValue(valueDeserializer.readInt32())
+            }
+            detectionMethodsTmpBuf = detectionMethodsTmpBuf_
+        }
+        const detectionMethodsTmpResult : Array<BlankScreenDetectionMethod> | undefined = detectionMethodsTmpBuf
+        const contentfulNodesCountThresholdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let contentfulNodesCountThresholdTmpBuf : int32 | undefined = undefined
+        if ((contentfulNodesCountThresholdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            contentfulNodesCountThresholdTmpBuf = valueDeserializer.readInt32()
+        }
+        const contentfulNodesCountThresholdTmpResult : int32 | undefined = contentfulNodesCountThresholdTmpBuf
+        let value : BlankScreenDetectionConfig = ({enable: enableTmpResult, detectionTiming: detectionTimingTmpResult, detectionMethods: detectionMethodsTmpResult, contentfulNodesCountThreshold: contentfulNodesCountThresholdTmpResult} as BlankScreenDetectionConfig)
+        return value
+    }
+}
 export class EmbedOptions_serializer {
     public static write(buffer: SerializerBase, value: EmbedOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -5538,6 +6244,14 @@ export class EmbedOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSupportDefaultIntrinsicSizeTmpValue  = valueHolderForSupportDefaultIntrinsicSize!
             valueSerializer.writeBoolean(valueHolderForSupportDefaultIntrinsicSizeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSupportCssDisplayChange  = value.supportCssDisplayChange
+        if (valueHolderForSupportCssDisplayChange !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSupportCssDisplayChangeTmpValue  = valueHolderForSupportCssDisplayChange!
+            valueSerializer.writeBoolean(valueHolderForSupportCssDisplayChangeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5550,7 +6264,13 @@ export class EmbedOptions_serializer {
             supportDefaultIntrinsicSizeTmpBuf = valueDeserializer.readBoolean()
         }
         const supportDefaultIntrinsicSizeTmpResult : boolean | undefined = supportDefaultIntrinsicSizeTmpBuf
-        let value : EmbedOptions = ({supportDefaultIntrinsicSize: supportDefaultIntrinsicSizeTmpResult} as EmbedOptions)
+        const supportCssDisplayChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let supportCssDisplayChangeTmpBuf : boolean | undefined = undefined
+        if ((supportCssDisplayChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            supportCssDisplayChangeTmpBuf = valueDeserializer.readBoolean()
+        }
+        const supportCssDisplayChangeTmpResult : boolean | undefined = supportCssDisplayChangeTmpBuf
+        let value : EmbedOptions = ({supportDefaultIntrinsicSize: supportDefaultIntrinsicSizeTmpResult, supportCssDisplayChange: supportCssDisplayChangeTmpResult} as EmbedOptions)
         return value
     }
 }
@@ -5849,6 +6569,100 @@ export class LoadCommittedDetails_serializer {
         const navigationTypeTmpResult : WebNavigationType = WebNavigationType.fromValue(valueDeserializer.readInt32())
         const urlTmpResult : string = (valueDeserializer.readString() as string)
         let value : LoadCommittedDetails = ({isMainFrame: isMainFrameTmpResult, isSameDocument: isSameDocumentTmpResult, didReplaceEntry: didReplaceEntryTmpResult, navigationType: navigationTypeTmpResult, url: urlTmpResult} as LoadCommittedDetails)
+        return value
+    }
+}
+export class NativeEmbedParamDataInfo_serializer {
+    public static write(buffer: SerializerBase, value: NativeEmbedParamDataInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForEmbedId  = value.embedId
+        valueSerializer.writeString(valueHolderForEmbedId)
+        const valueHolderForObjectAttributeId  = value.objectAttributeId
+        if (valueHolderForObjectAttributeId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForObjectAttributeIdTmpValue  = valueHolderForObjectAttributeId!
+            valueSerializer.writeString(valueHolderForObjectAttributeIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForParamItems  = value.paramItems
+        if (valueHolderForParamItems !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForParamItemsTmpValue  = valueHolderForParamItems!
+            valueSerializer.writeInt32((valueHolderForParamItemsTmpValue.length).toInt())
+            for (let valueHolderForParamItemsTmpValueCounterI = 0; valueHolderForParamItemsTmpValueCounterI < valueHolderForParamItemsTmpValue.length; valueHolderForParamItemsTmpValueCounterI++) {
+                const valueHolderForParamItemsTmpValueTmpElement : NativeEmbedParamItem = valueHolderForParamItemsTmpValue[valueHolderForParamItemsTmpValueCounterI]
+                NativeEmbedParamItem_serializer.write(valueSerializer, valueHolderForParamItemsTmpValueTmpElement)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): NativeEmbedParamDataInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const embedIdTmpResult : string = (valueDeserializer.readString() as string)
+        const objectAttributeIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let objectAttributeIdTmpBuf : string | undefined = undefined
+        if ((objectAttributeIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            objectAttributeIdTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const objectAttributeIdTmpResult : string | undefined = objectAttributeIdTmpBuf
+        const paramItemsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let paramItemsTmpBuf : Array<NativeEmbedParamItem> | undefined = undefined
+        if ((paramItemsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const paramItemsTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let paramItemsTmpBuf_ : Array<NativeEmbedParamItem> = new Array<NativeEmbedParamItem>(paramItemsTmpBuf_Length)
+            for (let paramItemsTmpBuf_BufCounterI = 0; paramItemsTmpBuf_BufCounterI < paramItemsTmpBuf_Length; paramItemsTmpBuf_BufCounterI++) {
+                paramItemsTmpBuf_[paramItemsTmpBuf_BufCounterI] = NativeEmbedParamItem_serializer.read(valueDeserializer)
+            }
+            paramItemsTmpBuf = paramItemsTmpBuf_
+        }
+        const paramItemsTmpResult : Array<NativeEmbedParamItem> | undefined = paramItemsTmpBuf
+        let value : NativeEmbedParamDataInfo = ({embedId: embedIdTmpResult, objectAttributeId: objectAttributeIdTmpResult, paramItems: paramItemsTmpResult} as NativeEmbedParamDataInfo)
+        return value
+    }
+}
+export class NativeEmbedParamItem_serializer {
+    public static write(buffer: SerializerBase, value: NativeEmbedParamItem): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForStatus  = value.status
+        valueSerializer.writeInt32(valueHolderForStatus.valueOf())
+        const valueHolderForId  = value.id
+        valueSerializer.writeString(valueHolderForId)
+        const valueHolderForName  = value.name
+        if (valueHolderForName !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForNameTmpValue  = valueHolderForName!
+            valueSerializer.writeString(valueHolderForNameTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForValue  = value.value
+        if (valueHolderForValue !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForValueTmpValue  = valueHolderForValue!
+            valueSerializer.writeString(valueHolderForValueTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): NativeEmbedParamItem {
+        let valueDeserializer : DeserializerBase = buffer
+        const statusTmpResult : NativeEmbedParamStatus = NativeEmbedParamStatus.fromValue(valueDeserializer.readInt32())
+        const idTmpResult : string = (valueDeserializer.readString() as string)
+        const nameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let nameTmpBuf : string | undefined = undefined
+        if ((nameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            nameTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const nameTmpResult : string | undefined = nameTmpBuf
+        const valueTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let valueTmpBuf : string | undefined = undefined
+        if ((valueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            valueTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const valueTmpResult : string | undefined = valueTmpBuf
+        let value : NativeEmbedParamItem = ({status: statusTmpResult, id: idTmpResult, name: nameTmpResult, value: valueTmpResult} as NativeEmbedParamItem)
         return value
     }
 }
@@ -6247,6 +7061,35 @@ export class OnPageVisibleEvent_serializer {
         return value
     }
 }
+export class OnPdfLoadEvent_serializer {
+    public static write(buffer: SerializerBase, value: OnPdfLoadEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForResult  = value.result
+        valueSerializer.writeInt32(valueHolderForResult.valueOf())
+        const valueHolderForUrl  = value.url
+        valueSerializer.writeString(valueHolderForUrl)
+    }
+    public static read(buffer: DeserializerBase): OnPdfLoadEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        const resultTmpResult : PdfLoadResult = PdfLoadResult.fromValue(valueDeserializer.readInt32())
+        const urlTmpResult : string = (valueDeserializer.readString() as string)
+        let value : OnPdfLoadEvent = ({result: resultTmpResult, url: urlTmpResult} as OnPdfLoadEvent)
+        return value
+    }
+}
+export class OnPdfScrollEvent_serializer {
+    public static write(buffer: SerializerBase, value: OnPdfScrollEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForUrl  = value.url
+        valueSerializer.writeString(valueHolderForUrl)
+    }
+    public static read(buffer: DeserializerBase): OnPdfScrollEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        const urlTmpResult : string = (valueDeserializer.readString() as string)
+        let value : OnPdfScrollEvent = ({url: urlTmpResult} as OnPdfScrollEvent)
+        return value
+    }
+}
 export class OnPermissionRequestEvent_serializer {
     public static write(buffer: SerializerBase, value: OnPermissionRequestEvent): void {
         let valueSerializer : SerializerBase = buffer
@@ -6289,12 +7132,26 @@ export class OnRefreshAccessedHistoryEvent_serializer {
         valueSerializer.writeString(valueHolderForUrl)
         const valueHolderForIsRefreshed  = value.isRefreshed
         valueSerializer.writeBoolean(valueHolderForIsRefreshed)
+        const valueHolderForIsMainFrame  = value.isMainFrame
+        if (valueHolderForIsMainFrame !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsMainFrameTmpValue  = valueHolderForIsMainFrame!
+            valueSerializer.writeBoolean(valueHolderForIsMainFrameTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): OnRefreshAccessedHistoryEvent {
         let valueDeserializer : DeserializerBase = buffer
         const urlTmpResult : string = (valueDeserializer.readString() as string)
         const isRefreshedTmpResult : boolean = valueDeserializer.readBoolean()
-        let value : OnRefreshAccessedHistoryEvent = ({url: urlTmpResult, isRefreshed: isRefreshedTmpResult} as OnRefreshAccessedHistoryEvent)
+        const isMainFrameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isMainFrameTmpBuf : boolean | undefined = undefined
+        if ((isMainFrameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isMainFrameTmpBuf = valueDeserializer.readBoolean()
+        }
+        const isMainFrameTmpResult : boolean | undefined = isMainFrameTmpBuf
+        let value : OnRefreshAccessedHistoryEvent = ({url: urlTmpResult, isRefreshed: isRefreshedTmpResult, isMainFrame: isMainFrameTmpResult} as OnRefreshAccessedHistoryEvent)
         return value
     }
 }
@@ -6515,6 +7372,18 @@ export class SslErrorEvent_serializer {
         valueSerializer.writeBoolean(valueHolderForIsFatalError)
         const valueHolderForIsMainFrame  = value.isMainFrame
         valueSerializer.writeBoolean(valueHolderForIsMainFrame)
+        const valueHolderForCertChainData  = value.certChainData
+        if (valueHolderForCertChainData !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCertChainDataTmpValue  = valueHolderForCertChainData!
+            valueSerializer.writeInt32((valueHolderForCertChainDataTmpValue.length).toInt())
+            for (let valueHolderForCertChainDataTmpValueCounterI = 0; valueHolderForCertChainDataTmpValueCounterI < valueHolderForCertChainDataTmpValue.length; valueHolderForCertChainDataTmpValueCounterI++) {
+                const valueHolderForCertChainDataTmpValueTmpElement : ArrayBuffer = valueHolderForCertChainDataTmpValue[valueHolderForCertChainDataTmpValueCounterI]
+                valueSerializer.writeBuffer(valueHolderForCertChainDataTmpValueTmpElement)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): SslErrorEvent {
         let valueDeserializer : DeserializerBase = buffer
@@ -6525,7 +7394,18 @@ export class SslErrorEvent_serializer {
         const referrerTmpResult : string = (valueDeserializer.readString() as string)
         const isFatalErrorTmpResult : boolean = valueDeserializer.readBoolean()
         const isMainFrameTmpResult : boolean = valueDeserializer.readBoolean()
-        let value : SslErrorEvent = ({handler: handlerTmpResult, error: errorTmpResult, url: urlTmpResult, originalUrl: originalUrlTmpResult, referrer: referrerTmpResult, isFatalError: isFatalErrorTmpResult, isMainFrame: isMainFrameTmpResult} as SslErrorEvent)
+        const certChainDataTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let certChainDataTmpBuf : Array<ArrayBuffer> | undefined = undefined
+        if ((certChainDataTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const certChainDataTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let certChainDataTmpBuf_ : Array<ArrayBuffer> = new Array<ArrayBuffer>(certChainDataTmpBuf_Length)
+            for (let certChainDataTmpBuf_BufCounterI = 0; certChainDataTmpBuf_BufCounterI < certChainDataTmpBuf_Length; certChainDataTmpBuf_BufCounterI++) {
+                certChainDataTmpBuf_[certChainDataTmpBuf_BufCounterI] = (valueDeserializer.readBuffer() as ArrayBuffer)
+            }
+            certChainDataTmpBuf = certChainDataTmpBuf_
+        }
+        const certChainDataTmpResult : Array<ArrayBuffer> | undefined = certChainDataTmpBuf
+        let value : SslErrorEvent = ({handler: handlerTmpResult, error: errorTmpResult, url: urlTmpResult, originalUrl: originalUrlTmpResult, referrer: referrerTmpResult, isFatalError: isFatalErrorTmpResult, isMainFrame: isMainFrameTmpResult, certChainData: certChainDataTmpResult} as SslErrorEvent)
         return value
     }
 }
@@ -6738,6 +7618,36 @@ export class WebOptions_serializer {
         return value
     }
 }
+export class BlankScreenDetectionEventInfo_serializer {
+    public static write(buffer: SerializerBase, value: BlankScreenDetectionEventInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForUrl  = value.url
+        valueSerializer.writeString(valueHolderForUrl)
+        const valueHolderForBlankScreenReason  = value.blankScreenReason
+        valueSerializer.writeInt32(valueHolderForBlankScreenReason.valueOf())
+        const valueHolderForBlankScreenDetails  = value.blankScreenDetails
+        if (valueHolderForBlankScreenDetails !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBlankScreenDetailsTmpValue  = valueHolderForBlankScreenDetails!
+            BlankScreenDetails_serializer.write(valueSerializer, valueHolderForBlankScreenDetailsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): BlankScreenDetectionEventInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const urlTmpResult : string = (valueDeserializer.readString() as string)
+        const blankScreenReasonTmpResult : DetectedBlankScreenReason = DetectedBlankScreenReason.fromValue(valueDeserializer.readInt32())
+        const blankScreenDetailsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let blankScreenDetailsTmpBuf : BlankScreenDetails | undefined = undefined
+        if ((blankScreenDetailsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            blankScreenDetailsTmpBuf = BlankScreenDetails_serializer.read(valueDeserializer)
+        }
+        const blankScreenDetailsTmpResult : BlankScreenDetails | undefined = blankScreenDetailsTmpBuf
+        let value : BlankScreenDetectionEventInfo = ({url: urlTmpResult, blankScreenReason: blankScreenReasonTmpResult, blankScreenDetails: blankScreenDetailsTmpResult} as BlankScreenDetectionEventInfo)
+        return value
+    }
+}
 export class SelectionMenuOptionsExt_serializer {
     public static write(buffer: SerializerBase, value: SelectionMenuOptionsExt): void {
         let valueSerializer : SerializerBase = buffer
@@ -6778,6 +7688,22 @@ export class SelectionMenuOptionsExt_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPreviewMenuOptionsTmpValue  = valueHolderForPreviewMenuOptions!
             PreviewMenuOptions_serializer.write(valueSerializer, valueHolderForPreviewMenuOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnMenuShow  = value.onMenuShow
+        if (valueHolderForOnMenuShow !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnMenuShowTmpValue  = valueHolderForOnMenuShow!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnMenuShowTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnMenuHide  = value.onMenuHide
+        if (valueHolderForOnMenuHide !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnMenuHideTmpValue  = valueHolderForOnMenuHide!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnMenuHideTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -6847,7 +7773,41 @@ export class SelectionMenuOptionsExt_serializer {
             previewMenuOptionsTmpBuf = PreviewMenuOptions_serializer.read(valueDeserializer)
         }
         const previewMenuOptionsTmpResult : PreviewMenuOptions | undefined = previewMenuOptionsTmpBuf
-        let value : SelectionMenuOptionsExt = ({onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, preview: previewTmpResult, menuType: menuTypeTmpResult, previewMenuOptions: previewMenuOptionsTmpResult} as SelectionMenuOptionsExt)
+        const onMenuShowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onMenuShowTmpBuf : (() => void) | undefined = undefined
+        if ((onMenuShowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onMenuShowTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onMenuShowTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onMenuShowTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onMenuShowTmpBuf = ():void => {
+                const onMenuShowTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onMenuShowTmpBuf_BufArgsSerializer.writeInt32(onMenuShowTmpBuf_BufResource.resourceId);
+                onMenuShowTmpBuf_BufArgsSerializer.writePointer(onMenuShowTmpBuf_BufCall);
+                onMenuShowTmpBuf_BufArgsSerializer.writePointer(onMenuShowTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onMenuShowTmpBuf_BufArgsSerializer.asBuffer(), onMenuShowTmpBuf_BufArgsSerializer.length());
+                onMenuShowTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onMenuShowTmpResult : (() => void) | undefined = onMenuShowTmpBuf
+        const onMenuHideTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onMenuHideTmpBuf : (() => void) | undefined = undefined
+        if ((onMenuHideTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onMenuHideTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onMenuHideTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onMenuHideTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onMenuHideTmpBuf = ():void => {
+                const onMenuHideTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onMenuHideTmpBuf_BufArgsSerializer.writeInt32(onMenuHideTmpBuf_BufResource.resourceId);
+                onMenuHideTmpBuf_BufArgsSerializer.writePointer(onMenuHideTmpBuf_BufCall);
+                onMenuHideTmpBuf_BufArgsSerializer.writePointer(onMenuHideTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onMenuHideTmpBuf_BufArgsSerializer.asBuffer(), onMenuHideTmpBuf_BufArgsSerializer.length());
+                onMenuHideTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onMenuHideTmpResult : (() => void) | undefined = onMenuHideTmpBuf
+        let value : SelectionMenuOptionsExt = ({onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, preview: previewTmpResult, menuType: menuTypeTmpResult, previewMenuOptions: previewMenuOptionsTmpResult, onMenuShow: onMenuShowTmpResult, onMenuHide: onMenuHideTmpResult} as SelectionMenuOptionsExt)
         return value
     }
 }
@@ -7064,6 +8024,58 @@ export class NativeEmbedDataInfo_serializer {
         }
         const infoTmpResult : NativeEmbedInfo | undefined = infoTmpBuf
         let value : NativeEmbedDataInfo = ({status: statusTmpResult, surfaceId: surfaceIdTmpResult, embedId: embedIdTmpResult, info: infoTmpResult} as NativeEmbedDataInfo)
+        return value
+    }
+}
+export class NativeEmbedMouseInfo_serializer {
+    public static write(buffer: SerializerBase, value: NativeEmbedMouseInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForEmbedId  = value.embedId
+        if (valueHolderForEmbedId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEmbedIdTmpValue  = valueHolderForEmbedId!
+            valueSerializer.writeString(valueHolderForEmbedIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMouseEvent  = value.mouseEvent
+        if (valueHolderForMouseEvent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMouseEventTmpValue  = valueHolderForMouseEvent!
+            MouseEvent_serializer.write(valueSerializer, valueHolderForMouseEventTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForResult  = value.result
+        if (valueHolderForResult !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForResultTmpValue  = valueHolderForResult!
+            EventResult_serializer.write(valueSerializer, valueHolderForResultTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): NativeEmbedMouseInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const embedIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let embedIdTmpBuf : string | undefined = undefined
+        if ((embedIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            embedIdTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const embedIdTmpResult : string | undefined = embedIdTmpBuf
+        const mouseEventTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let mouseEventTmpBuf : MouseEvent | undefined = undefined
+        if ((mouseEventTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            mouseEventTmpBuf = (MouseEvent_serializer.read(valueDeserializer) as MouseEvent)
+        }
+        const mouseEventTmpResult : MouseEvent | undefined = mouseEventTmpBuf
+        const resultTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let resultTmpBuf : EventResult | undefined = undefined
+        if ((resultTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            resultTmpBuf = (EventResult_serializer.read(valueDeserializer) as EventResult)
+        }
+        const resultTmpResult : EventResult | undefined = resultTmpBuf
+        let value : NativeEmbedMouseInfo = ({embedId: embedIdTmpResult, mouseEvent: mouseEventTmpResult, result: resultTmpResult} as NativeEmbedMouseInfo)
         return value
     }
 }
