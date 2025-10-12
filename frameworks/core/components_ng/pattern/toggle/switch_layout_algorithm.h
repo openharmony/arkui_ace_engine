@@ -47,6 +47,9 @@ public:
         return width_;
     }
 
+    void MeasureContentLayoutPolicy(const LayoutConstraintF& contentConstraint,
+        std::optional<NG::LayoutPolicyProperty> layoutPolicy, float& frameWidth, float& frameHeight);
+
     void LayoutPolicyIsMatchParent(const LayoutConstraintF& contentConstraint,
         std::optional<NG::LayoutPolicyProperty> layoutPolicy, float& frameWidth, float& frameHeight);
 
