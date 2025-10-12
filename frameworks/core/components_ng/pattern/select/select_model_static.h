@@ -56,6 +56,8 @@ public:
     static void SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize);
     static void ResetDividerStyle(FrameNode* frameNode);
     static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetOptionTextModifier(
+        FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_STATIC_H

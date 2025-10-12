@@ -412,7 +412,7 @@ void SetOptionWidthImpl(Ark_NativePointer node,
     }
     Converter::VisitUnion(arkUnion.value(),
         [frameNode](const Ark_Dimension& value) {
-            auto width = Converter::OptConvert<Dimension>(value);
+            auto width = Converter::OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(value);
             Validator::ValidateNonNegative(width);
             Validator::ValidateNonPercent(width);
             SelectModelNG::SetHasOptionWidth(frameNode, true);
@@ -431,7 +431,10 @@ void SetOptionHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    std::optional<Dimension> convValue = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        convValue = Converter::OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(value->value);
+    }
     Validator::ValidatePositive(convValue);
     Validator::ValidateNonPercent(convValue);
     SelectModelStatic::SetOptionHeight(frameNode, convValue);
