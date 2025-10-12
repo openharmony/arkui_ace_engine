@@ -613,4 +613,75 @@ HWTEST_F(ScrollPatternThreeTestNg, ResetPositionTest, TestSize.Level1)
     EXPECT_EQ(pattern_->currentOffset_, CONTENT_START_OFFSET);
     EXPECT_EQ(pattern_->lastOffset_, CONTENT_START_OFFSET);
 }
+
+/**
+ * @tc.name: CheckScrollableWithContentOffset
+ * @tc.desc: test ScrollPattern::CheckScrollable with contentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, CheckScrollableWithContentOffset, TestSize.Level1)
+{
+    CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent(HEIGHT - CONTENT_START_OFFSET - CONTENT_END_OFFSET + 1);
+    CreateScrollDone();
+
+    EXPECT_EQ(pattern_->scrollableDistance_, -CONTENT_START_OFFSET + 1);
+    // scrollableDistance_ + contentStartOffset_ > mainSize
+    pattern_->CheckScrollable();
+    EXPECT_TRUE(pattern_->GetScrollEnabled());
+}
+
+/**
+ * @tc.name: IsAtBottomWithContentOffset
+ * @tc.desc: test ScrollPattern::CheckScrollable with contentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, IsAtBottomWithContentOffset, TestSize.Level1)
+{
+    CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent(HEIGHT - CONTENT_START_OFFSET - CONTENT_END_OFFSET + 1);
+    CreateScrollDone();
+
+    EXPECT_EQ(pattern_->scrollableDistance_, -CONTENT_START_OFFSET + 1);
+    EXPECT_EQ(pattern_->currentOffset_, CONTENT_START_OFFSET);
+    EXPECT_FALSE(pattern_->IsAtBottom());
+
+    pattern_->currentOffset_ -= 1;
+    EXPECT_TRUE(pattern_->IsAtBottom());
+}
+
+/**
+ * @tc.name: EdgeEffectCallbackwithContentOffset
+ * @tc.desc: test ScrollPattern::CheckScrollable with contentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, EdgeEffectCallbackwithContentOffset, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(HEIGHT - CONTENT_START_OFFSET - CONTENT_END_OFFSET + 1);
+    CreateScrollDone();
+
+    EXPECT_EQ(pattern_->scrollableDistance_, -CONTENT_START_OFFSET + 1);
+    EXPECT_EQ(pattern_->currentOffset_, CONTENT_START_OFFSET);
+    auto edgeEffect = pattern_->GetScrollEdgeEffect();
+    ASSERT_NE(edgeEffect, nullptr);
+
+    EXPECT_EQ(edgeEffect->leadingCallback_(), CONTENT_START_OFFSET - 1);
+    EXPECT_EQ(edgeEffect->trailingCallback_(), CONTENT_START_OFFSET);
+    EXPECT_EQ(edgeEffect->initLeadingCallback_(), CONTENT_START_OFFSET - 1);
+    EXPECT_EQ(edgeEffect->initTrailingCallback_(), CONTENT_START_OFFSET);
+
+    pattern_->scrollableDistance_ -= 2;
+    EXPECT_EQ(edgeEffect->leadingCallback_(), CONTENT_START_OFFSET);
+    EXPECT_EQ(edgeEffect->trailingCallback_(), CONTENT_START_OFFSET);
+    EXPECT_EQ(edgeEffect->initLeadingCallback_(), CONTENT_START_OFFSET);
+    EXPECT_EQ(edgeEffect->initTrailingCallback_(), CONTENT_START_OFFSET);
+}
 } // namespace OHOS::Ace::NG
