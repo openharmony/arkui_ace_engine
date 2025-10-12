@@ -60,6 +60,9 @@ private:
     ~AcePerformanceCheck() = default;
 
     static std::unique_ptr<JsonValue> performanceInfo_;
+    static bool isPagesOfSharedLib_;
+    static bool isPagesOfSharedLibFirstReqOrPagesOfMainLib_;
+    static std::string preRuleType_;
 
     friend class AceScopedPerformanceCheck;
     ACE_DISALLOW_COPY_AND_MOVE(AcePerformanceCheck);
@@ -91,6 +94,7 @@ private:
     static bool CheckPage(const CodeInfo& codeInfo, const std::string& rule);
     static void RecordFunctionTimeout();
     static RefPtr<Framework::RevSourceMap> GetCurrentSourceMap();
+    static void SetPagesAboutNoEntry(bool isMainLibPage);
     static bool CheckIsRuleWebsocket(const std::string& ruleType);
     int64_t markTime_ = 0;
     std::string name_;
