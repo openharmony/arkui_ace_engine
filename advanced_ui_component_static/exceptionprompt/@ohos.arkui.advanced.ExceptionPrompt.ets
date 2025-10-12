@@ -32,8 +32,8 @@ import { Configuration } from '@ohos.app.ability.Configuration';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import ApplicationContext from 'application.ApplicationContext';
 
-const START_TIME: number = 250;
-const END_TIME: number = 200;
+const START_TIME: int = 250;
+const END_TIME: int = 200;
 const BORDER_RADIUS: number = 12;
 const ZINDEX_NUM: number = 9;
 const SYMBOL_SIZE: number = 24;

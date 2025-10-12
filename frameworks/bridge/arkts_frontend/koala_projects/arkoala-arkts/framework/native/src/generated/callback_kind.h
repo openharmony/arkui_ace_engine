@@ -182,6 +182,7 @@ typedef enum CallbackKind {
     Kind_Callback_T_Void_Array_String = 1527041367,
     Kind_Callback_T_Void_Boolean = 217914240,
     Kind_Callback_T_Void_Date = 1108733360,
+    Kind_Callback_T_Void_F64 = -747300352,
     Kind_Callback_T_Void_Global_Resource_Resource = -941798353,
     Kind_Callback_T_Void_I32 = -747290452,
     Kind_Callback_T_Void_Number = 1090440167,

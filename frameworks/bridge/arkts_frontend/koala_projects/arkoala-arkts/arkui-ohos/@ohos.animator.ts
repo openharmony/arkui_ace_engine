@@ -1,12 +1,14 @@
+import { float32, int32 } from "@koalaui/compat";
+
 export interface AnimatorOptions {
-    duration: number;
+    duration: int32;
     easing: string;
-    delay: number;
+    delay: int32;
     fill: "none" | "forwards" | "backwards" | "both";
     direction: "normal" | "reverse" | "alternate" | "alternate-reverse";
-    iterations: number;
-    begin: number;
-    end: number;
+    iterations: int32;
+    begin: double;
+    end: double;
 }
 
 export declare class SimpleAnimatorOptions {

@@ -204,6 +204,32 @@ bool ParseOption(ani_env* env, ani_object options, double& input, const char* pr
     return true;
 }
 
+bool ParseIntOption(ani_env* env, ani_object options, int32_t& input, const char* property, const char* className)
+{
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        return false;
+    }
+    ani_ref property_ref;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, property, &property_ref)) {
+        return false;
+    }
+    ani_boolean isUndefined;
+    if (ANI_OK != env->Reference_IsUndefined(property_ref, &isUndefined)) {
+        return false;
+    }
+    if (isUndefined) {
+        return false;
+    }
+    ani_int propertyValue;
+    if (ANI_OK != env->Object_CallMethodByName_Int(static_cast<ani_object>(property_ref),
+        "unboxed", nullptr, &propertyValue)) {
+        return false;
+    }
+    input = static_cast<int32_t>(propertyValue);
+    return true;
+}
+
 static ani_object Matrix4_Scale([[maybe_unused]] ani_env* env, ani_object object, ani_object options)
 {
     double xValue = 1.0;
@@ -326,12 +352,12 @@ void ParseArray([[maybe_unused]] ani_env* env, const char* property, ani_object 
 
 static ani_object Matrix4_SetPolyToPoly([[maybe_unused]] ani_env* env, ani_object object, ani_object options)
 {
-    double srcIndexInput = 0.0;
-    ParseOption(env, options, srcIndexInput, "srcIndex", "@ohos.matrix4.matrix4.PolyToPolyOptions");
-    double dstIndexInput = 0.0;
-    ParseOption(env, options, dstIndexInput, "dstIndex", "@ohos.matrix4.matrix4.PolyToPolyOptions");
-    double pointCountInput = 0.0;
-    ParseOption(env, options, pointCountInput, "pointCount", "@ohos.matrix4.matrix4.PolyToPolyOptions");
+    int32_t srcIndexInput = 0;
+    ParseIntOption(env, options, srcIndexInput, "srcIndex", "@ohos.matrix4.matrix4.PolyToPolyOptions");
+    int32_t dstIndexInput = 0;
+    ParseIntOption(env, options, dstIndexInput, "dstIndex", "@ohos.matrix4.matrix4.PolyToPolyOptions");
+    int32_t pointCountInput = 0;
+    ParseIntOption(env, options, pointCountInput, "pointCount", "@ohos.matrix4.matrix4.PolyToPolyOptions");
     int srcIndex = static_cast<int>(srcIndexInput);
     int dstIndex = static_cast<int>(dstIndexInput);
     int pointCount = static_cast<int>(pointCountInput);

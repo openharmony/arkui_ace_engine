@@ -22,30 +22,30 @@ export class SimpleAnimatorOptions {
 
   SimpleAnimatorOptionsResult:long = 0;
 
-  public native constructor(begin: number, end: number);
+  public native constructor(begin: double, end: double);
 
-  public native duration(duration: number): SimpleAnimatorOptions;
+  public native duration(duration: int): SimpleAnimatorOptions;
 
   public native easing(curve: string): SimpleAnimatorOptions;
 
-  public native delay(delay: number): SimpleAnimatorOptions;
+  public native delay(delay: int): SimpleAnimatorOptions;
 
   public native fill(fillMode: FillMode): SimpleAnimatorOptions;
 
   public native direction(direction: PlayMode): SimpleAnimatorOptions;
 
-  public native iterations(iterations: number): SimpleAnimatorOptions;
+  public native iterations(iterations: int): SimpleAnimatorOptions;
 }
 
 interface AnimatorOptions {
-    duration: number;
+    duration: int;
     easing: string;
-    delay: number;
+    delay: int;
     fill: "none" | "forwards" | "backwards" | "both";
     direction: "normal" | "reverse" | "alternate" | "alternate-reverse";
-    iterations: number;
-    begin: number;
-    end: number;
+    iterations: int;
+    begin: double;
+    end: double;
 }
 
 export default class Animator {
@@ -64,7 +64,7 @@ export interface AnimatorResult {
     onFinish: () => void;
     onCancel: () => void;
     onRepeat: () => void;
-    onFrame: (progress: number) => void;
+    onFrame: (progress: double) => void;
     setExpectedFrameRateRange(rateRange: ExpectedFrameRateRange) : void;
 }
 
@@ -139,11 +139,11 @@ class AnimatorResultInner implements AnimatorResult {
     }
 
     // set and get onFrame
-    private native setOnFrame(value: (progress: number) => void) : void;
-    set onFrame(value: (progress: number) => void) {
+    private native setOnFrame(value: (progress: double) => void) : void;
+    set onFrame(value: (progress: double) => void) {
         this.setOnFrame(value);
     }
-    get onFrame(): (progress: number) => void {
+    get onFrame(): (progress: double) => void {
         return this.onFrame;
     }
 }

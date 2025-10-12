@@ -5412,24 +5412,24 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TabContentTransitionProxy_finishTransition(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _TabContentTransitionProxy_getFrom(ptr: KPointer): number
+    native static _TabContentTransitionProxy_getFrom(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _TabContentTransitionProxy_setFrom(ptr: KPointer, from: number): void
+    native static _TabContentTransitionProxy_setFrom(ptr: KPointer, from: KInt): void
     @ani.unsafe.Direct
-    native static _TabContentTransitionProxy_getTo(ptr: KPointer): number
+    native static _TabContentTransitionProxy_getTo(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _TabContentTransitionProxy_setTo(ptr: KPointer, to: number): void
+    native static _TabContentTransitionProxy_setTo(ptr: KPointer, to: KInt): void
     @ani.unsafe.Direct
     native static _TabsController_construct(): KPointer
     @ani.unsafe.Direct
     native static _TabsController_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _TabsController_changeIndex(ptr: KPointer, value: number): void
+    native static _TabsController_changeIndex(ptr: KPointer, value: KInt): void
     native static _TabsController_preloadItems(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TabsController_setTabBarTranslate(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _TabsController_setTabBarOpacity(ptr: KPointer, opacity: number): void
+    @ani.unsafe.Quick
+    native static _TabsController_setTabBarOpacity(ptr: KPointer, opacity: KDouble): void
     @ani.unsafe.Direct
     native static _TapGestureEvent_construct(): KPointer
     @ani.unsafe.Direct
@@ -5638,8 +5638,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TouchEvent_setPreventDefault(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _TransitionEffect_construct0(type: KStringPtr): KPointer
-    @ani.unsafe.Direct
-    native static _TransitionEffect_construct1(effect: number): KPointer
+    @ani.unsafe.Quick
+    native static _TransitionEffect_construct1(effect: KDouble): KPointer
     @ani.unsafe.Direct
     native static _TransitionEffect_construct2(effect: KInt): KPointer
     @ani.unsafe.Direct
@@ -5658,8 +5658,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TransitionEffect_rotate(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _TransitionEffect_scale(thisArray: KSerializerBuffer, thisLength: int32): KPointer
-    @ani.unsafe.Direct
-    native static _TransitionEffect_opacity(alpha: number): KPointer
+    @ani.unsafe.Quick
+    native static _TransitionEffect_opacity(alpha: KDouble): KPointer
     @ani.unsafe.Direct
     native static _TransitionEffect_move(edge: KInt): KPointer
     @ani.unsafe.Direct
