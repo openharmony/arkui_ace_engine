@@ -501,6 +501,13 @@ std::optional<Dimension> ResourceConverter::ToDimension()
         } else {
             LOGE("ResourceConverter::ToDimension Unknown resource value");
         }
+    } else if (type_ == ResourceType::STRING) {
+        auto strValue = GetStringResource();
+        if (strValue.has_value()) {
+            return StringUtils::StringToDimensionWithUnit(strValue.value(), DimensionUnit::VP);
+        } else {
+            LOGE("ResourceConverter::ToDimension parse string type error");
+        }
     }
     return std::nullopt;
 }
