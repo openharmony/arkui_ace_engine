@@ -1392,6 +1392,14 @@ export class GestureOps {
     static clearGestures_serialize(node: KPointer): void {
         ArkUIGeneratedNativeModule._GestureOps_clearGestures(node)
     }
+    static getGestureEventType_serialize(event: KPointer): number {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_getGestureEventType(event)
+        return retval
+    }
+    static isScrollableComponent_serialize(event: KPointer): boolean {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_isScrollableComponent(event)
+        return retval
+    }
     public static createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: boolean): KPointer {
         const fingers_casted = fingers as (number)
         const count_casted = count as (number)
@@ -1514,6 +1522,14 @@ export class GestureOps {
         const node_casted = node as (KPointer)
         GestureOps.clearGestures_serialize(node_casted)
         return
+    }
+    public static getGestureEventType(event: KPointer): number {
+        const event_casted = event as (KPointer)
+        return GestureOps.getGestureEventType_serialize(event_casted)
+    }
+    public static isScrollableComponent(event: KPointer): boolean {
+        const event_casted = event as (KPointer)
+        return GestureOps.isScrollableComponent_serialize(event_casted)
     }
 }
 export class GlobalScope_ohos_arkui_componentSnapshot {
