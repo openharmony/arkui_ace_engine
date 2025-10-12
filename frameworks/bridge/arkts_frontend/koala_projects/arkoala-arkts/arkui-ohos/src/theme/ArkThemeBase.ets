@@ -23,7 +23,7 @@ import { ThemeInternal, CustomThemeInternal } from './index';
 /**
  * Theme counter used to generate next theme id
  */
-let themeCounter: int32 = 0;
+let themeCounter: int32 = 10000;
 
 /**
  * Base ArkTheme class

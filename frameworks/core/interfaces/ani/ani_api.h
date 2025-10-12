@@ -537,6 +537,7 @@ struct ArkUIAniCommonModifier {
     float (*getPx2VpWithCurrentDensity)(float px);
     void (*setImageCacheCount)(ani_int value, ani_int instanceId);
     void (*setImageRawDataCacheSize)(ani_int value, ani_int instanceId);
+    void (*applyThemeScopeId)(ani_env* env, ani_long ptr, ani_int themeScopeId);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;

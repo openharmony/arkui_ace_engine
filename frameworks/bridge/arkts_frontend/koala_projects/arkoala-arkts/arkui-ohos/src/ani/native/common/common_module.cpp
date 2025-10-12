@@ -1296,4 +1296,12 @@ ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_l
     CHECK_NULL_RETURN(contextPtr, {});
     return CreateDrawingContext(env, *contextPtr);
 }
+void ApplyThemeScopeId(ani_env* env, ani_object obj, ani_long ptr, ani_int themeScopeId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->applyThemeScopeId(env, ptr, themeScopeId);
+}
 } // namespace OHOS::Ace::Ani

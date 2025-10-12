@@ -1281,7 +1281,7 @@ export class UIContextImpl extends UIContext {
     isDebugMode_: boolean = false;
     updateParallelizeItemNodeCallback_?:() => void;
     callbacks: Array<() => void>;
-
+    isUpdateConfiguration_ = false;
 
     bufferSize = 4096
     buffer: KBuffer = new KBuffer(this.bufferSize)
@@ -1738,5 +1738,13 @@ export class UIContextImpl extends UIContext {
             callback?.()
         }
         this.callbacks.length = 0
+    }
+
+    public isUpdateConfiguration(): boolean {
+        return this.isUpdateConfiguration_;
+    }
+
+    public setUpdateConfiguration(value: boolean) {
+        this.isUpdateConfiguration_ = value;
     }
 }
