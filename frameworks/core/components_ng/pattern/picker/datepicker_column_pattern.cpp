@@ -104,8 +104,8 @@ void DatePickerColumnPattern::OnModifyDone()
             optionProperties_.emplace_back(prop);
             childIndex++;
         }
-        SetOptionShiftDistance();
     }
+    SetOptionShiftDistance();
 }
 
 void DatePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host)
