@@ -45,6 +45,8 @@ import { RouterExtender, PageRouterOptions } from "#generated"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { AsyncCallback } from "@ohos.base"
+import { UIContext } from "@ohos/arkui/UIContext"
+
 /**
  * THEORY OF OPERATIONS
  *
@@ -215,6 +217,16 @@ export interface Router {
 const CURRENT_ROUTER = "ohos.arkoala.router"
 const CURRENT_ROUTER_TRANSITION = "ohos.arkoala.router.transition"
 
+class MockEntryPoint extends EntryPoint {
+    constructor() {
+        super()
+    }
+
+    /** @memo */
+    entry(): void {
+    }
+}
+
 class RouterImpl implements Router {
     private readonly moduleName: string
     // list of jsViewNode
@@ -228,9 +240,17 @@ class RouterImpl implements Router {
     private rootState: Array<ComputableState<IncrementalNode>> = new Array<ComputableState<IncrementalNode>>()
     // map of namedRouter
     private namedRouter: Map<string, EntryPoint> = new Map<string, EntryPoint>
+    private runtimeLinker: RuntimeLinker | undefined = undefined;
 
     constructor(moduleName: string) {
         this.moduleName = moduleName
+    }
+
+    public GetRuntimeLinker(): RuntimeLinker | undefined {
+        return this.runtimeLinker;
+    }
+    public SetRuntimeLinker(linker: RuntimeLinker | undefined): void {
+        this.runtimeLinker = linker;
     }
 
     private getClassName(url: string): string {
@@ -259,7 +279,12 @@ class RouterImpl implements Router {
     private RunPage(url: string): EntryPoint | undefined {
         try {
             //@ts-ignore
-            let runtimeLinker = getNearestNonBootRuntimeLinker();
+            let runtimeLinker: RuntimeLinker | undefined = undefined;
+            if (this.runtimeLinker) {
+                runtimeLinker = this.runtimeLinker;
+            } else {
+                runtimeLinker = getNearestNonBootRuntimeLinker();
+            }
             let entryClass = runtimeLinker?.loadClass(url, false);
             if (!entryClass) {
                 InteropNativeModule._NativeLog("AceRouter: load entryClass failed")
@@ -310,6 +335,42 @@ class RouterImpl implements Router {
         }
     }
 
+    pushDynamic(options: router.RouterOptions): void {
+        let pageNode = RouterExtender.createDynamic(options.url, options.recoverable);
+        if (!pageNode) {
+            return;
+        }
+        let entryObject = new MockEntryPoint();
+        let manager = GlobalStateManager.instance
+        let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
+            const frozen = manager.frozen
+            manager.frozen = true
+            memoEntry<void>(context, 0, () => {
+            })
+            manager.frozen = frozen
+        })
+        this.rootState.push(stateNode)
+        let pagePushTransitionCallback = () => {
+            this.peerNodeList.pop();
+            this.visiblePages.pop();
+            let node = this.rootState.pop();
+            node?.dispose();
+            this.showingPageIndex = this.showingPageIndex - 1;
+        };
+        let newPage = new VisiblePage(entryObject.entry, options.url, this.getPathInfo(options.url), options.params);
+        this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
+        this.showingPageIndex += 1;
+        pageNode = RouterExtender.pushDynamic(pageNode, options.url, options.recoverable, pagePushTransitionCallback);
+        if (pageNode === nullptr) {
+            InteropNativeModule._NativeLog("AceRouter:push page failed")
+            this.visiblePages.pop();
+            this.rootState.pop()
+            this.showingPageIndex -= 1;
+            return
+        }
+        this.peerNodeList.splice(this.peerNodeList.length, 0, pageNode)
+    }
+
     push(options: router.RouterOptions): void {
         if (options.url === '/') {
             options.url = this.entryPage?.path! + this.entryPage?.url!;
@@ -356,6 +417,9 @@ class RouterImpl implements Router {
             this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
             this.showingPageIndex += 1;
             RouterExtender.push(jsViewNodePtr, options.url, options.recoverable, pagePushTransitionCallback);
+        } else {
+            // maybe new page is arkts1.1 page
+            this.pushDynamic(options);
         }
     }
 
@@ -513,6 +577,39 @@ class RouterImpl implements Router {
         }
     }
 
+    replaceDynamic(options: router.RouterOptions): void {
+        let pageNode = RouterExtender.createDynamic(options.url, options.recoverable);
+        if (!pageNode) {
+            return;
+        }
+        let entryObject = new MockEntryPoint();
+        let manager = GlobalStateManager.instance
+        let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
+            const frozen = manager.frozen
+            manager.frozen = true
+            memoEntry<void>(context, 0, () => {
+            })
+            manager.frozen = frozen
+        })
+        this.rootState.push(stateNode);
+        this.peerNodeList.push(pageNode)
+        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        context.getDetachedRootEntryManager().setDetachedRootNode(pageNode, stateNode);
+        let pageEnterTransitionCallback = (pageNode: KPointer) => {
+            let index = this.peerNodeList.indexOf(pageNode);
+            if (index !== -1) {
+                this.peerNodeList.splice(index, 1);
+                this.visiblePages.splice(index, 1);
+                this.rootState.splice(index, 1);
+                this.showingPageIndex = this.showingPageIndex - 1;
+            }
+        };
+        let newPage = new VisiblePage(entryObject.entry, options.url, this.getPathInfo(options.url), options.params)
+        this.visiblePages.push(newPage)
+        this.showingPageIndex += 1
+        RouterExtender.replaceDynamic(pageNode, options.url, options.recoverable, pageEnterTransitionCallback)
+    }
+
     replace(options: router.RouterOptions): void {
         if (options.url === '/') {
             options.url = this.entryPage?.path! + this.entryPage?.url!;
@@ -560,6 +657,9 @@ class RouterImpl implements Router {
             this.visiblePages.push(newPage)
             this.showingPageIndex += 1
             RouterExtender.replace(jsViewNodePtr, options.url, options.recoverable, pageEnterTransitionCallback)
+        } else {
+            // maybe new page is arkts1.1 page
+            this.replaceDynamic(options);
         }
     }
 
@@ -870,6 +970,131 @@ export function Routed(
     let routerImp = new RouterImpl(moduleName)
     // Init default global router.
     router.setRouter(routerImp)
+}
+
+export class RouterUtil {
+    static pushFromDynamic(instanceId: int32, url: string, params: string, linker?: RuntimeLinker): void {
+        let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
+        let router = context.getRouter();
+        let routerImpl = router.getRouter() as RouterImpl;
+        if (!routerImpl) {
+            return;
+        }
+        let objParams: Object | undefined = undefined;
+        if (params.length != 0) {
+            try {
+                let tempObj: Object | null | undefined = JSON.parse<Object>(params, Type.of(new Object()));
+                if (tempObj != null && tempObj != undefined) {
+                    objParams = tempObj!;
+                }
+            } catch (error) {
+                InteropNativeModule._NativeLog(`AceRouter failed to parse params: ${params} error:` + error)
+            }
+        }
+        let options: router.RouterOptions = { url: url, params: objParams };
+        let backupLinker = routerImpl.GetRuntimeLinker();
+        let tempLinker: RuntimeLinker = linker as RuntimeLinker;
+        routerImpl.SetRuntimeLinker(linker);
+        try {
+            router.pushUrl(options);
+        } catch (e: Error) {
+            console.log("AceRouter: pushUrl failed, name: " + e.name + " message: " + e.message);
+            console.log(e.stack);
+        }
+        routerImpl.SetRuntimeLinker(backupLinker);
+    }
+
+    static replaceFromDynamic(instanceId: int32, url: string, params: string, linker?: RuntimeLinker): void {
+        let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
+        let router = context.getRouter();
+        let routerImpl = router.getRouter() as RouterImpl;
+        if (!routerImpl) {
+            return;
+        }
+        let objParams: Object | undefined = undefined;
+        if (params.length != 0) {
+            try {
+                let tempObj: Object | null | undefined = JSON.parse<Object>(params, Type.of(new Object()));
+                if (tempObj != null && tempObj != undefined) {
+                    objParams = tempObj!;
+                }
+            } catch (error) {
+                InteropNativeModule._NativeLog(`AceRouter failed to parse params: ${params} error:` + error)
+            }
+        }
+        let options: router.RouterOptions = { url: url, params: objParams };
+        let backupLinker = routerImpl.GetRuntimeLinker();
+        let tempLinker: RuntimeLinker = linker as RuntimeLinker;
+        routerImpl.SetRuntimeLinker(linker);
+        try {
+            router.replaceUrl(options);
+        } catch (e: Error) {
+            console.log("AceRouter: replaceUrl failed, name: " + e.name + " message: " + e.message);
+            console.log(e.stack);
+        }
+        routerImpl.SetRuntimeLinker(backupLinker);
+    }
+
+    static backFromDynamic(instanceId: int32, url: string, params: string, linker?: RuntimeLinker): void {
+        let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
+        let router = context.getRouter();
+        let routerImpl = router.getRouter() as RouterImpl;
+        if (!routerImpl) {
+            return;
+        }
+        let objParams: Object | undefined = undefined;
+        if (params.length != 0) {
+            try {
+                let tempObj: Object | null | undefined = JSON.parse<Object>(params, Type.of(new Object()));
+                if (tempObj != null && tempObj != undefined) {
+                    objParams = tempObj!;
+                }
+            } catch (error) {
+                InteropNativeModule._NativeLog(`AceRouter failed to parse params: ${params} error:` + error)
+            }
+        }
+        let options: router.RouterOptions = { url: url, params: objParams };
+        let backupLinker = routerImpl.GetRuntimeLinker();
+        let tempLinker: RuntimeLinker = linker as RuntimeLinker;
+        routerImpl.SetRuntimeLinker(linker);
+        try {
+            router.back(options);
+        } catch (e: Error) {
+            console.log("AceRouter: back failed, name: " + e.name + " message: " + e.message);
+            console.log(e.stack);
+        }
+        routerImpl.SetRuntimeLinker(backupLinker);
+    }
+
+    static clearFromDynamic(instanceId: int32, linker?: RuntimeLinker): void {
+        let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
+        let router = context.getRouter();
+        let routerImpl = router.getRouter() as RouterImpl;
+        if (!routerImpl) {
+            return;
+        }
+        let backupLinker = routerImpl.GetRuntimeLinker();
+        let tempLinker: RuntimeLinker = linker as RuntimeLinker;
+        routerImpl.SetRuntimeLinker(linker);
+        try {
+            router.clear();
+        } catch (e: Error) {
+            console.log("AceRouter: clear failed, name: " + e.name + " message: " + e.message);
+            console.log(e.stack);
+        }
+        routerImpl.SetRuntimeLinker(backupLinker);
+    }
+
+    static getLengthFromDynamic(instanceId: int32): string {
+        let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
+        let router = context.getRouter();
+        let routerImpl = router.getRouter() as RouterImpl;
+        if (!routerImpl) {
+            return "0";
+        }
+        let len = routerImpl.getLength();
+        return len;
+    }
 }
 
 @memo

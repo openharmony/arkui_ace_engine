@@ -26030,6 +26030,16 @@ typedef struct GENERATED_ArkUIRouterExtenderAccessor {
                                const Ark_PageRouterOptions* options,
                                const Opt_RouterFinishCallback* finishCallback,
                                const Opt_AsyncCallback_Void* callback_);
+    Ark_NativePointer (*createDynamic)(const Ark_String* url,
+                                       const Opt_Boolean* recover);
+    Ark_NativePointer (*pushDynamic)(Ark_NativePointer pageNode,
+                                     const Ark_String* url,
+                                     const Opt_Boolean* recover,
+                                     const Opt_RouterFinishCallback* finishCallback);
+    Ark_NativePointer (*replaceDynamic)(Ark_NativePointer pageNode,
+                                        const Ark_String* url,
+                                        const Opt_Boolean* recover,
+                                        const Opt_RouterFinishCallback* finishCallback);
 } GENERATED_ArkUIRouterExtenderAccessor;
 
 typedef struct GENERATED_ArkUIScaleSymbolEffectAccessor {

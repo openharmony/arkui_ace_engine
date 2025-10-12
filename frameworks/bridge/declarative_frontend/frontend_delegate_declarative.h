@@ -403,6 +403,8 @@ public:
 
     std::string GetPagePathByUrl(const std::string& url) const;
 
+    void* CreateDynamicPage(int32_t pageId, const std::string& url, const std::string& params, bool recoverable);
+
 protected:
     bool isCardDelegate_ = false;
 

@@ -453,6 +453,55 @@ public:
     // For arkts 1.2
     virtual void NotifyArkoalaConfigurationChange(bool isNeedUpdate) {}
     virtual void InitXBarProxy() {}
+
+    // Create ArkTS1.1 page in ArkTS1.2
+    virtual void* CreateDynamicPage(int32_t pageId, const std::string& url, const std::string& params, bool recoverable)
+    {
+        return nullptr;
+    }
+    // ArkTS1.2 create ArkTS1.1 page
+    virtual void* CreateDynamicExtender(const std::string& url, bool recoverable)
+    {
+        return nullptr;
+    }
+    // ArkTS1.2 push ArkTS1.1
+    virtual void* PushDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback, void* pageNode)
+    {
+        return nullptr;
+    }
+    // ArkTS1.2 replace ArkTS1.1
+    virtual void* ReplaceDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback, void* pageNode)
+    {
+        return nullptr;
+    }
+    
+    // push from ArkTS1.1
+    virtual void PushFromDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
+        const std::function<void(const std::string&, int32_t)>& callback, uint32_t routerMode) {}
+    // replace from ArkTS1.1
+    virtual void ReplaceFromDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
+        const std::function<void(const std::string&, int32_t)>& callback, uint32_t routerMode) {}
+    // back from ArkTS1.1
+    virtual void BackFromDynamicExtender(const std::string& url, const std::string& params) {}
+    // clear from ArkTS1.1
+    virtual void ClearFromDynamicExtender() {}
+    // getLength from ArkTS1.1
+    virtual int32_t GetLengthFromDynamicExtender()
+    {
+        return 0;
+    }
+
+    void SetSubFrontend(const WeakPtr<Frontend>& subFrontend)
+    {
+        subFrontend_ = subFrontend;
+    }
+    bool IsUseSubFrontendManagerNeeded() const
+    {
+        return isUseSubFrontendManagerNeeded_;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     FrontendType type_ = FrontendType::JS;
@@ -463,6 +512,8 @@ protected:
     mutable std::recursive_mutex mutex_;
     mutable std::mutex destructMutex_;
     std::unordered_map<int32_t, void*> storageMap_;
+    WeakPtr<Frontend> subFrontend_;
+    bool isUseSubFrontendManagerNeeded_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -78,6 +78,7 @@ void AceContainer::InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFw
     subFrontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
     auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(subFrontend_);
 #endif
+    frontend_->SetSubFrontend(subFrontend_);
     auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
     RefPtr<Framework::JsEngine> jsEngine;
     if (GetSettings().usingSharedRuntime) {
@@ -154,7 +155,7 @@ void AceContainer::InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFw
         frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
 #endif
-
+        frontend_->SetSubFrontend(subFrontend_);
         if (!IsDialogContainer()) {
             auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
             RefPtr<Framework::JsEngine> jsEngine;
@@ -185,6 +186,7 @@ void AceContainer::InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFw
         }
     } else {
         frontend_ = OHOS::Ace::Platform::AceContainer::GetContainer(parentId_)->GetFrontend();
+        frontend_->SetSubFrontend(subFrontend_);
         return;
     }
 }

@@ -306,13 +306,19 @@ void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>&
         } else
 #endif
         {
+            auto frontend = container->GetFrontend();
+            CHECK_NULL_VOID(frontend);
+            if (frontend->IsUseSubFrontendManagerNeeded()) {
+                frontend = container->GetSubFrontend();
+                CHECK_NULL_VOID(frontend);
+            }
 #ifdef NG_BUILD
-            auto frontEnd = AceType::DynamicCast<DeclarativeFrontendNG>(container->GetFrontend());
+            auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend);
 #else
-            auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
+            auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend);
 #endif
-            CHECK_NULL_VOID(frontEnd);
-            auto pageRouterManager = frontEnd->GetPageRouterManager();
+            CHECK_NULL_VOID(declarativeFrontend);
+            auto pageRouterManager = declarativeFrontend->GetPageRouterManager();
             CHECK_NULL_VOID(pageRouterManager);
             pageNode = pageRouterManager->GetCurrentPageNode();
             CHECK_NULL_VOID(pageNode);
