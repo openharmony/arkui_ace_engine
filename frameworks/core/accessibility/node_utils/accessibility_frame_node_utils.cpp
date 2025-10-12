@@ -271,6 +271,7 @@ void AccessibilityFrameNodeUtils::GetChildrenFromFrameNode(
     const FrameNodeHandleParam& handleParam,
     const RefPtr<AccessibilityManager>& accessibilityManager)
 {
+    CHECK_NULL_VOID(node);
     auto accessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
     auto uiVirtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
     if (uiVirtualNode != nullptr) {
@@ -294,6 +295,7 @@ void AccessibilityFrameNodeUtils::GetLastestPageNodes(
     const RefPtr<FrameNode>& node,
     std::vector<WeakPtr<FrameNode>>& pageNodes)
 {
+    CHECK_NULL_VOID(node);
     auto context = node->GetContextRefPtr();
     auto ngPipeline = AceType::DynamicCast<PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
