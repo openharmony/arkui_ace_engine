@@ -98,7 +98,7 @@ static void TransformAccessbilityElementInfo(
     accessibilityElementInfo.SetAccessibilityId(nativeInfo.GetElementId());
 }
 
-static void TransformAccessbilityEventInfo(
+[[maybe_unused]] static void TransformAccessbilityEventInfo(
     const ArkUI_AccessibilityEventInfo& nativeEventInfo,
     OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo)
 {
