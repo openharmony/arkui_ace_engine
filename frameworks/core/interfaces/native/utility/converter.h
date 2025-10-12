@@ -356,6 +356,7 @@ namespace Converter {
 
     // Implementation is in cpp
     void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_Number *colors);
+    void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_F64 *colors);
     void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> linear,
         const GradientDirection &direction);
 
@@ -529,6 +530,7 @@ namespace Converter {
     template<> ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
     template<> CalcDimension Convert(const Ark_LengthMetrics& src);
     template<> CalcDimension Convert(const Ark_Number& src);
+    template<> CalcDimension Convert(const Ark_Float64& src);
     template<> CalcDimension Convert(const Ark_String& src);
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CalcLength Convert(const Ark_Number& src);
@@ -536,6 +538,7 @@ namespace Converter {
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> Color Convert(const Ark_Number& src);
     template<> Color Convert(const Ark_Int32& src);
+    template<> Color Convert(const Ark_Float64& src);
     template<> Color Convert(const Ark_String& src);
     template<> Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_LengthMetrics& src);
@@ -561,6 +564,7 @@ namespace Converter {
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradientOptions& value);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
+    template<> GradientColor Convert(const Ark_Tuple_ResourceColor_F64& value);
     template<> Header Convert(const Ark_Header& src);
     template<> ImageResizableSlice Convert(const Ark_EdgeWidths& src);
     template<> ImageSpanSize Convert(const Ark_SizeOptions& value);

@@ -1,21 +1,21 @@
 import { Position, SizeOptions, Length, ResourceColor } from 'arkui/framework'
 export interface ShapeSize {
 
-    width?: number | string;
+    width?: double | string;
 
-    height?: number | string;
+    height?: double | string;
 }
 
 export interface RectShapeOptions extends ShapeSize {
 
-    radius?: number | string | Array<number | string>;
+    radius?: double | string | Array<double | string>;
 }
 
 export interface RoundRectShapeOptions extends ShapeSize {
 
-    radiusWidth?: number | string;
+    radiusWidth?: double | string;
 
-    radiusHeight?: number | string;
+    radiusHeight?: double | string;
 }
 
 export interface PathShapeOptions {

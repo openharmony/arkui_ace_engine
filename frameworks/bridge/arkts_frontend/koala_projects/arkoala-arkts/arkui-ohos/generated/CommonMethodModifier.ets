@@ -91,7 +91,7 @@ export class CommonMethodModifier implements CommonMethod {
     _compositingFilter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _compositingFilter_0_0value?: uiEffect.Filter | undefined
     _opacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _opacity_0_0value?: number | Resource | undefined
+    _opacity_0_0value?: double | Resource | undefined
     _border_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _border_0_0value?: BorderOptions | undefined
     _borderStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -169,21 +169,21 @@ export class CommonMethodModifier implements CommonMethod {
     _motionBlur_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _motionBlur_0_0value?: MotionBlurOptions | undefined
     _brightness_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _brightness_0_0value?: number | undefined
+    _brightness_0_0value?: double | undefined
     _contrast_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _contrast_0_0value?: number | undefined
+    _contrast_0_0value?: double | undefined
     _grayscale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _grayscale_0_0value?: number | undefined
+    _grayscale_0_0value?: double | undefined
     _colorBlend_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _colorBlend_0_0value?: Color | string | Resource | undefined
     _saturate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _saturate_0_0value?: number | undefined
+    _saturate_0_0value?: double | undefined
     _sepia_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _sepia_0_0value?: number | undefined
+    _sepia_0_0value?: double | undefined
     _invert_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _invert_0_0value?: number | InvertOptions | undefined
+    _invert_0_0value?: double | InvertOptions | undefined
     _hueRotate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _hueRotate_0_0value?: number | string | undefined
+    _hueRotate_0_0value?: double | string | undefined
     _useShadowBatching_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _useShadowBatching_0_0value?: boolean | undefined
     _useEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -291,9 +291,9 @@ export class CommonMethodModifier implements CommonMethod {
     _restoreId_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _restoreId_0_0value?: number | undefined
     _sphericalEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _sphericalEffect_0_0value?: number | undefined
+    _sphericalEffect_0_0value?: double | undefined
     _lightUpEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _lightUpEffect_0_0value?: number | undefined
+    _lightUpEffect_0_0value?: double | undefined
     _pixelStretchEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _pixelStretchEffect_0_0value?: PixelStretchEffectOptions | undefined
     _accessibilityGroup_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -391,18 +391,18 @@ export class CommonMethodModifier implements CommonMethod {
     _transition_1_0value?: TransitionEffect | undefined
     _transition_1_1value?: TransitionFinishCallback | undefined
     _blur_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _blur_0_0value?: number | undefined
+    _blur_0_0value?: double | undefined
     _blur_0_1value?: BlurOptions | undefined
     _blur_0_2value?: SystemAdaptiveOptions | undefined
     _linearGradientBlur_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _linearGradientBlur_0_0value?: number | undefined
+    _linearGradientBlur_0_0value?: double | undefined
     _linearGradientBlur_0_1value?: LinearGradientBlurOptions | undefined
     _systemBarEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _useEffect_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _useEffect_1_0value?: boolean | undefined
     _useEffect_1_1value?: EffectType | undefined
     _backdropBlur_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _backdropBlur_0_0value?: number | undefined
+    _backdropBlur_0_0value?: double | undefined
     _backdropBlur_0_1value?: BlurOptions | undefined
     _backdropBlur_0_2value?: SystemAdaptiveOptions | undefined
     _sharedTransition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -919,7 +919,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._opacity_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOpacityAttribute((this._opacity_0_0value as number | Resource | undefined));
+                    peer.setOpacityAttribute((this._opacity_0_0value as double | Resource | undefined));
                     this._opacity_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -929,7 +929,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._opacity_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOpacityAttribute((undefined as number | Resource | undefined));
+                    peer.setOpacityAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -1621,7 +1621,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._brightness_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBrightnessAttribute((this._brightness_0_0value as number | undefined));
+                    peer.setBrightnessAttribute((this._brightness_0_0value as double | undefined));
                     this._brightness_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1631,7 +1631,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._brightness_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBrightnessAttribute((undefined as number | undefined));
+                    peer.setBrightnessAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -1639,7 +1639,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._contrast_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setContrastAttribute((this._contrast_0_0value as number | undefined));
+                    peer.setContrastAttribute((this._contrast_0_0value as double | undefined));
                     this._contrast_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1649,7 +1649,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._contrast_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setContrastAttribute((undefined as number | undefined));
+                    peer.setContrastAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -1657,7 +1657,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._grayscale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setGrayscaleAttribute((this._grayscale_0_0value as number | undefined));
+                    peer.setGrayscaleAttribute((this._grayscale_0_0value as double | undefined));
                     this._grayscale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1667,7 +1667,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._grayscale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setGrayscaleAttribute((undefined as number | undefined));
+                    peer.setGrayscaleAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -1693,7 +1693,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._saturate_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSaturateAttribute((this._saturate_0_0value as number | undefined));
+                    peer.setSaturateAttribute((this._saturate_0_0value as double | undefined));
                     this._saturate_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1703,7 +1703,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._saturate_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSaturateAttribute((undefined as number | undefined));
+                    peer.setSaturateAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -1711,7 +1711,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._sepia_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSepiaAttribute((this._sepia_0_0value as number | undefined));
+                    peer.setSepiaAttribute((this._sepia_0_0value as double | undefined));
                     this._sepia_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1721,7 +1721,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._sepia_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSepiaAttribute((undefined as number | undefined));
+                    peer.setSepiaAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -1729,7 +1729,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._invert_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setInvertAttribute((this._invert_0_0value as number | InvertOptions | undefined));
+                    peer.setInvertAttribute((this._invert_0_0value as double | InvertOptions | undefined));
                     this._invert_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1739,7 +1739,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._invert_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setInvertAttribute((undefined as number | InvertOptions | undefined));
+                    peer.setInvertAttribute((undefined as double | InvertOptions | undefined));
                 }
             }
         }
@@ -1747,7 +1747,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._hueRotate_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setHueRotateAttribute((this._hueRotate_0_0value as number | string | undefined));
+                    peer.setHueRotateAttribute((this._hueRotate_0_0value as double | string | undefined));
                     this._hueRotate_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1757,7 +1757,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._hueRotate_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setHueRotateAttribute((undefined as number | string | undefined));
+                    peer.setHueRotateAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -2719,7 +2719,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._sphericalEffect_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSphericalEffectAttribute((this._sphericalEffect_0_0value as number | undefined));
+                    peer.setSphericalEffectAttribute((this._sphericalEffect_0_0value as double | undefined));
                     this._sphericalEffect_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2729,7 +2729,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._sphericalEffect_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSphericalEffectAttribute((undefined as number | undefined));
+                    peer.setSphericalEffectAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -2737,7 +2737,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._lightUpEffect_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLightUpEffectAttribute((this._lightUpEffect_0_0value as number | undefined));
+                    peer.setLightUpEffectAttribute((this._lightUpEffect_0_0value as double | undefined));
                     this._lightUpEffect_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2747,7 +2747,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._lightUpEffect_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLightUpEffectAttribute((undefined as number | undefined));
+                    peer.setLightUpEffectAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -3493,7 +3493,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._blur_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBlurAttribute((this._blur_0_0value as number | undefined), (this._blur_0_1value as BlurOptions | undefined | undefined), (this._blur_0_2value as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setBlurAttribute((this._blur_0_0value as double | undefined), (this._blur_0_1value as BlurOptions | undefined | undefined), (this._blur_0_2value as SystemAdaptiveOptions | undefined | undefined));
                     this._blur_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3503,7 +3503,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._blur_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBlurAttribute((undefined as number | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setBlurAttribute((undefined as double | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
                 }
             }
         }
@@ -3511,7 +3511,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._linearGradientBlur_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLinearGradientBlurAttribute((this._linearGradientBlur_0_0value as number | undefined), (this._linearGradientBlur_0_1value as LinearGradientBlurOptions | undefined));
+                    peer.setLinearGradientBlurAttribute((this._linearGradientBlur_0_0value as double | undefined), (this._linearGradientBlur_0_1value as LinearGradientBlurOptions | undefined));
                     this._linearGradientBlur_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3521,7 +3521,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._linearGradientBlur_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLinearGradientBlurAttribute((undefined as number | undefined), (undefined as LinearGradientBlurOptions | undefined));
+                    peer.setLinearGradientBlurAttribute((undefined as double | undefined), (undefined as LinearGradientBlurOptions | undefined));
                 }
             }
         }
@@ -3565,7 +3565,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._backdropBlur_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackdropBlurAttribute((this._backdropBlur_0_0value as number | undefined), (this._backdropBlur_0_1value as BlurOptions | undefined | undefined), (this._backdropBlur_0_2value as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setBackdropBlurAttribute((this._backdropBlur_0_0value as double | undefined), (this._backdropBlur_0_1value as BlurOptions | undefined | undefined), (this._backdropBlur_0_2value as SystemAdaptiveOptions | undefined | undefined));
                     this._backdropBlur_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3575,7 +3575,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._backdropBlur_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBackdropBlurAttribute((undefined as number | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setBackdropBlurAttribute((undefined as double | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
                 }
             }
         }
@@ -4298,7 +4298,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.opacity((undefined as number | Resource | undefined));
+                    this.opacity((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -4805,7 +4805,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.brightness((undefined as number | undefined));
+                    this.brightness((undefined as double | undefined));
                 }
             }
         }
@@ -4818,7 +4818,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.contrast((undefined as number | undefined));
+                    this.contrast((undefined as double | undefined));
                 }
             }
         }
@@ -4831,7 +4831,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.grayscale((undefined as number | undefined));
+                    this.grayscale((undefined as double | undefined));
                 }
             }
         }
@@ -4857,7 +4857,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.saturate((undefined as number | undefined));
+                    this.saturate((undefined as double | undefined));
                 }
             }
         }
@@ -4870,7 +4870,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.sepia((undefined as number | undefined));
+                    this.sepia((undefined as double | undefined));
                 }
             }
         }
@@ -4883,7 +4883,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.invert((undefined as number | InvertOptions | undefined));
+                    this.invert((undefined as double | InvertOptions | undefined));
                 }
             }
         }
@@ -4896,7 +4896,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.hueRotate((undefined as number | string | undefined));
+                    this.hueRotate((undefined as double | string | undefined));
                 }
             }
         }
@@ -5598,7 +5598,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.sphericalEffect((undefined as number | undefined));
+                    this.sphericalEffect((undefined as double | undefined));
                 }
             }
         }
@@ -5611,7 +5611,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.lightUpEffect((undefined as number | undefined));
+                    this.lightUpEffect((undefined as double | undefined));
                 }
             }
         }
@@ -6157,7 +6157,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.blur((undefined as number | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                    this.blur((undefined as double | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
                 }
             }
         }
@@ -6170,7 +6170,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.linearGradientBlur((undefined as number | undefined), (undefined as LinearGradientBlurOptions | undefined));
+                    this.linearGradientBlur((undefined as double | undefined), (undefined as LinearGradientBlurOptions | undefined));
                 }
             }
         }
@@ -6209,7 +6209,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.backdropBlur((undefined as number | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                    this.backdropBlur((undefined as double | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
                 }
             }
         }
@@ -6764,7 +6764,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    opacity(value: number | Resource | undefined): this {
+    opacity(value: double | Resource | undefined): this {
         if (((this._opacity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._opacity_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7193,7 +7193,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    brightness(value: number | undefined): this {
+    brightness(value: double | undefined): this {
         if (((this._brightness_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._brightness_0_0value) !== (value)))
         {
             this._brightness_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7204,7 +7204,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    contrast(value: number | undefined): this {
+    contrast(value: double | undefined): this {
         if (((this._contrast_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contrast_0_0value) !== (value)))
         {
             this._contrast_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7215,7 +7215,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    grayscale(value: number | undefined): this {
+    grayscale(value: double | undefined): this {
         if (((this._grayscale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._grayscale_0_0value) !== (value)))
         {
             this._grayscale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7237,7 +7237,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    saturate(value: number | undefined): this {
+    saturate(value: double | undefined): this {
         if (((this._saturate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._saturate_0_0value) !== (value)))
         {
             this._saturate_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7248,7 +7248,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    sepia(value: number | undefined): this {
+    sepia(value: double | undefined): this {
         if (((this._sepia_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._sepia_0_0value) !== (value)))
         {
             this._sepia_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7259,7 +7259,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    invert(value: number | InvertOptions | undefined): this {
+    invert(value: double | InvertOptions | undefined): this {
         if (((this._invert_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._invert_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7270,7 +7270,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    hueRotate(value: number | string | undefined): this {
+    hueRotate(value: double | string | undefined): this {
         if (((this._hueRotate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._hueRotate_0_0value) !== (value)))
         {
             this._hueRotate_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7864,7 +7864,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    sphericalEffect(value: number | undefined): this {
+    sphericalEffect(value: double | undefined): this {
         if (((this._sphericalEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._sphericalEffect_0_0value) !== (value)))
         {
             this._sphericalEffect_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7875,7 +7875,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    lightUpEffect(value: number | undefined): this {
+    lightUpEffect(value: double | undefined): this {
         if (((this._lightUpEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._lightUpEffect_0_0value) !== (value)))
         {
             this._lightUpEffect_0_flag = AttributeUpdaterFlag.UPDATE
@@ -8364,7 +8364,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
+    linearGradientBlur(value: double | undefined, options: LinearGradientBlurOptions | undefined): this {
         if (((this._linearGradientBlur_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._linearGradientBlur_0_0value) !== (value)) || (true))
         {
             this._linearGradientBlur_0_flag = AttributeUpdaterFlag.UPDATE
@@ -8398,7 +8398,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    backdropBlur(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         if (((this._backdropBlur_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._backdropBlur_0_0value) !== (radius)) || (true) || (true))
         {
             this._backdropBlur_0_flag = AttributeUpdaterFlag.UPDATE

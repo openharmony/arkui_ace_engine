@@ -17,21 +17,21 @@ import { Position, SizeOptions, Length, ResourceColor }  from './arkui.component
 
 interface ShapeSize {
 
-    width?: number | string;
+    width?: double | string;
 
-    height?: number | string;
+    height?: double | string;
 }
 
 interface RectShapeOptions extends ShapeSize {
 
-    radius?: number | string | Array<number | string>;
+    radius?: double | string | Array<double | string>;
 }
 
 interface RoundRectShapeOptions extends ShapeSize {
 
-    radiusWidth?: number | string;
+    radiusWidth?: double | string;
 
-    radiusHeight?: number | string;
+    radiusHeight?: double | string;
 }
 
 interface PathShapeOptions {
@@ -67,7 +67,7 @@ export class RectShape extends BaseShape<RectShape> {
 
     public native radiusHeight(rHeight: number | string): RectShape;
 
-    public native radius(radius: number | string | Array<number | string>): RectShape;
+    public native radius(radius: double | string | Array<double | string>): RectShape;
 
     public native width(width: Length): RectShape;
 
