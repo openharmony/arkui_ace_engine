@@ -37891,6 +37891,66 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_NativePointer CreateDynamicImpl(const Ark_String* url,
+                                        const Opt_Boolean* recover)
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("createDynamic(");
+        WriteToString(&out, url);
+        out.append(", ");
+        WriteToString(&out, recover);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer PushDynamicImpl(Ark_NativePointer pageNode,
+                                      const Ark_String* url,
+                                      const Opt_Boolean* recover,
+                                      const Opt_RouterFinishCallback* finishCallback)
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("pushDynamic(");
+        WriteToString(&out, pageNode);
+        out.append(", ");
+        WriteToString(&out, url);
+        out.append(", ");
+        WriteToString(&out, recover);
+        out.append(", ");
+        WriteToString(&out, finishCallback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer ReplaceDynamicImpl(Ark_NativePointer pageNode,
+                                         const Ark_String* url,
+                                         const Opt_Boolean* recover,
+                                         const Opt_RouterFinishCallback* finishCallback)
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("replaceDynamic(");
+        WriteToString(&out, pageNode);
+        out.append(", ");
+        WriteToString(&out, url);
+        out.append(", ");
+        WriteToString(&out, recover);
+        out.append(", ");
+        WriteToString(&out, finishCallback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
     } // RouterExtenderAccessor
     namespace ScaleSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_ScaleSymbolEffect peer)
@@ -45799,6 +45859,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RouterExtenderAccessor::PushNamedRoute1Impl,
             RouterExtenderAccessor::ReplaceNamedRoute0Impl,
             RouterExtenderAccessor::ReplaceNamedRoute1Impl,
+            RouterExtenderAccessor::CreateDynamicImpl,
+            RouterExtenderAccessor::PushDynamicImpl,
+            RouterExtenderAccessor::ReplaceDynamicImpl,
         };
         return &RouterExtenderAccessorImpl;
     }

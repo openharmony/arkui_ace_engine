@@ -21,6 +21,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
+#include "napi/native_node_hybrid_api.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -544,6 +545,22 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     }
     delegate_->SetGroupJsBridge(jsEngine_->GetGroupJsBridge());
     if (Container::IsCurrentUseNewPipeline()) {
+        auto loadDynamicPageCallback =
+            [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+            const std::string& ohmUrl, const std::function<void(const std::string&, int32_t)>& errorCallback) {
+            auto jsEngine = weakEngine.Upgrade();
+            CHECK_NULL_RETURN(jsEngine, false);
+            auto env = reinterpret_cast<napi_env>(jsEngine->GetNativeEngine());
+            CHECK_NULL_RETURN(env, false);
+            napi_value result;
+            napi_status status;
+            if ((status = napi_load_module_with_module_request(env, ohmUrl.c_str(), &result)) != napi_ok) {
+                LOGE("AceRouter failed to load module with ohmUrl:%{public}s, status:%{public}d",
+                    ohmUrl.c_str(), (int32_t)status);
+                return false;
+            }
+            return true;
+        };
         auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url,
                                     const std::function<void(const std::string&, int32_t)>& errorCallback) {
             auto jsEngine = weakEngine.Upgrade();
@@ -636,6 +653,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         };
 
         auto pageRouterManager = NG::PageRouterManagerFactory::CreateManager();
+        pageRouterManager->SetLoadDynamicPageCallback(std::move(loadDynamicPageCallback));
         pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
         pageRouterManager->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
         pageRouterManager->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
@@ -1281,6 +1299,15 @@ std::string DeclarativeFrontend::GetPagePathByUrl(const std::string& url) const
         return "";
     }
     return delegate_->GetPagePathByUrl(url);
+}
+
+void* DeclarativeFrontend::CreateDynamicPage(
+    int32_t pageId, const std::string& url, const std::string& params, bool recoverable)
+{
+    if (!delegate_) {
+        return nullptr;
+    }
+    return delegate_->CreateDynamicPage(pageId, url, params, recoverable);
 }
 
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)

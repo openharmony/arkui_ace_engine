@@ -114,6 +114,20 @@ public:
     void ShowAlertBeforeBackPageExtender(const std::string& url) override;
     void HideAlertBeforeBackPageExtender() override;
 
+    void* CreateDynamicExtender(const std::string& url, bool recoverable) override;
+    void* PushDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback, void* pageNode) override;
+    void* ReplaceDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback, void* pageNode) override;
+
+    void PushFromDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
+        const std::function<void(const std::string&, int32_t)>& callback, uint32_t routerMode) override;
+    void ReplaceFromDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
+        const std::function<void(const std::string&, int32_t)>& callback, uint32_t routerMode) override;
+    void BackFromDynamicExtender(const std::string& url, const std::string& params) override;
+    void ClearFromDynamicExtender() override;
+    int32_t GetLengthFromDynamicExtender() override;
+
     RefPtr<AcePage> GetPage(int32_t /*pageId*/) const override
     {
         return nullptr;

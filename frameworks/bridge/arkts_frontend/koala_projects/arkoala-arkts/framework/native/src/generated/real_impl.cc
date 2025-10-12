@@ -15949,6 +15949,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
     }
+    Ark_NativePointer CreateDynamicImpl(const Ark_String* url,
+                                        const Opt_Boolean* recover)
+    {
+        return {};
+    }
+    Ark_NativePointer PushDynamicImpl(Ark_NativePointer pageNode,
+                                      const Ark_String* url,
+                                      const Opt_Boolean* recover,
+                                      const Opt_RouterFinishCallback* finishCallback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        return {};
+    }
+    Ark_NativePointer ReplaceDynamicImpl(Ark_NativePointer pageNode,
+                                         const Ark_String* url,
+                                         const Opt_Boolean* recover,
+                                         const Opt_RouterFinishCallback* finishCallback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        return {};
+    }
     } // RouterExtenderAccessor
     namespace ScaleSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_ScaleSymbolEffect peer)
@@ -20380,6 +20403,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RouterExtenderAccessor::PushNamedRoute1Impl,
             RouterExtenderAccessor::ReplaceNamedRoute0Impl,
             RouterExtenderAccessor::ReplaceNamedRoute1Impl,
+            RouterExtenderAccessor::CreateDynamicImpl,
+            RouterExtenderAccessor::PushDynamicImpl,
+            RouterExtenderAccessor::ReplaceDynamicImpl,
         };
         return &RouterExtenderAccessorImpl;
     }

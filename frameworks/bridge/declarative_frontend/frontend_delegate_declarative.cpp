@@ -916,6 +916,31 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
     Push(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
 }
 
+void* FrontendDelegateDeclarative::CreateDynamicPage(
+    int32_t pageId, const std::string& url, const std::string& params, bool recoverable)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    auto currentId = GetEffectiveContainerId();
+    CHECK_EQUAL_RETURN(currentId.has_value(), false, nullptr);
+    ContainerScope scope(currentId.value());
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = recoverable;
+    routerPageInfo.routerMode = NG::RouterMode::STANDARD;
+    routerPageInfo.errorCallback = [](const std::string& errorMsg, int32_t errorCode) {
+        LOGI("AceRouter failed to create dynamic page, code:%{public}d, msg:%{public}s",
+            errorCode, errorMsg.c_str());
+    };
+    auto pageNode = pageRouterManager_->CreateDynamicPage(pageId, routerPageInfo);
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    pageNode->IncRefCount();
+    return pageNode.GetRawPtr();
+}
+
 void FrontendDelegateDeclarative::PushNamedRoute(const std::string& uri, const std::string& params,
     bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {

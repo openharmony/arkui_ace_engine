@@ -266,6 +266,8 @@ protected:
 
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
+    void* CreateDynamicPage(int32_t pageId, const std::string& url,
+        const std::string& params, bool recoverable) override;
 
     RefPtr<AceEventHandler> handler_;
     RefPtr<Framework::JsEngine> jsEngine_;

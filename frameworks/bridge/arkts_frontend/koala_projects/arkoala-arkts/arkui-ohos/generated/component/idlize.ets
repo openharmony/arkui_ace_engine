@@ -2482,6 +2482,59 @@ export class RouterExtender {
         ArkUIGeneratedNativeModule._RouterExtender_replaceNamedRoute1(jsView, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    static createDynamic_serialize(url: string, recover?: boolean): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (recover !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const recoverTmpValue  = recover!
+            thisSerializer.writeBoolean(recoverTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._RouterExtender_createDynamic(url, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static pushDynamic_serialize(pageNode: KPointer, url: string, recover?: boolean, finishCallback?: RouterFinishCallback): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (recover !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const recoverTmpValue  = recover!
+            thisSerializer.writeBoolean(recoverTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (finishCallback !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const finishCallbackTmpValue  = finishCallback!
+            thisSerializer.holdAndWriteCallback(finishCallbackTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._RouterExtender_pushDynamic(pageNode, url, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static replaceDynamic_serialize(pageNode: KPointer, url: string, recover?: boolean, finishCallback?: RouterFinishCallback): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (recover !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const recoverTmpValue  = recover!
+            thisSerializer.writeBoolean(recoverTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (finishCallback !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const finishCallbackTmpValue  = finishCallback!
+            thisSerializer.holdAndWriteCallback(finishCallbackTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._RouterExtender_replaceDynamic(pageNode, url, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
     public static push(jsView: KPointer, url: string, recover?: boolean, finishCallback?: RouterFinishCallback): KPointer {
         const jsView_casted = jsView as (KPointer)
         const url_casted = url as (string)
@@ -2559,6 +2612,25 @@ export class RouterExtender {
         const callback__casted = callback_ as (AsyncCallback<void> | undefined)
         RouterExtender.replaceNamedRoute1_serialize(jsView_casted, options_casted, finishCallback_casted, callback__casted)
         return
+    }
+    public static createDynamic(url: string, recover?: boolean): KPointer {
+        const url_casted = url as (string)
+        const recover_casted = recover as (boolean | undefined)
+        return RouterExtender.createDynamic_serialize(url_casted, recover_casted)
+    }
+    public static pushDynamic(pageNode: KPointer, url: string, recover?: boolean, finishCallback?: RouterFinishCallback): KPointer {
+        const pageNode_casted = pageNode as (KPointer)
+        const url_casted = url as (string)
+        const recover_casted = recover as (boolean | undefined)
+        const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
+        return RouterExtender.pushDynamic_serialize(pageNode_casted, url_casted, recover_casted, finishCallback_casted)
+    }
+    public static replaceDynamic(pageNode: KPointer, url: string, recover?: boolean, finishCallback?: RouterFinishCallback): KPointer {
+        const pageNode_casted = pageNode as (KPointer)
+        const url_casted = url as (string)
+        const recover_casted = recover as (boolean | undefined)
+        const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
+        return RouterExtender.replaceDynamic_serialize(pageNode_casted, url_casted, recover_casted, finishCallback_casted)
     }
 }
 export class ScreenshotService {

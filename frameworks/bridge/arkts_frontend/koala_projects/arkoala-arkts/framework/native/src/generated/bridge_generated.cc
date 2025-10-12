@@ -33380,6 +33380,56 @@ void impl_RouterExtender_replaceNamedRoute1(Ark_NativePointer jsView, KSerialize
         GetAccessors()->getRouterExtenderAccessor()->replaceNamedRoute1(jsView, static_cast<Ark_PageRouterOptions*>(&optionsValueTemp), static_cast<Opt_RouterFinishCallback*>(&finishCallbackValueTemp), static_cast<Opt_AsyncCallback_Void*>(&callback_ValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(RouterExtender_replaceNamedRoute1, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_RouterExtender_createDynamic(const KStringPtr& url, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto recoverValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean recoverValueTempTmpBuf = {};
+        recoverValueTempTmpBuf.tag = recoverValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((recoverValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            recoverValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean recoverValueTemp = recoverValueTempTmpBuf;;
+        return GetAccessors()->getRouterExtenderAccessor()->createDynamic((const Ark_String*) (&url), static_cast<Opt_Boolean*>(&recoverValueTemp));
+}
+KOALA_INTEROP_3(RouterExtender_createDynamic, Ark_NativePointer, KStringPtr, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_RouterExtender_pushDynamic(Ark_NativePointer pageNode, const KStringPtr& url, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto recoverValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean recoverValueTempTmpBuf = {};
+        recoverValueTempTmpBuf.tag = recoverValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((recoverValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            recoverValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean recoverValueTemp = recoverValueTempTmpBuf;;
+        const auto finishCallbackValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_RouterFinishCallback finishCallbackValueTempTmpBuf = {};
+        finishCallbackValueTempTmpBuf.tag = finishCallbackValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((finishCallbackValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            finishCallbackValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_RouterFinishCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_RouterFinishCallback))))};
+        }
+        Opt_RouterFinishCallback finishCallbackValueTemp = finishCallbackValueTempTmpBuf;;
+        return GetAccessors()->getRouterExtenderAccessor()->pushDynamic(pageNode, (const Ark_String*) (&url), static_cast<Opt_Boolean*>(&recoverValueTemp), static_cast<Opt_RouterFinishCallback*>(&finishCallbackValueTemp));
+}
+KOALA_INTEROP_4(RouterExtender_pushDynamic, Ark_NativePointer, Ark_NativePointer, KStringPtr, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_RouterExtender_replaceDynamic(Ark_NativePointer pageNode, const KStringPtr& url, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto recoverValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean recoverValueTempTmpBuf = {};
+        recoverValueTempTmpBuf.tag = recoverValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((recoverValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            recoverValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean recoverValueTemp = recoverValueTempTmpBuf;;
+        const auto finishCallbackValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_RouterFinishCallback finishCallbackValueTempTmpBuf = {};
+        finishCallbackValueTempTmpBuf.tag = finishCallbackValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((finishCallbackValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            finishCallbackValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_RouterFinishCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_RouterFinishCallback))))};
+        }
+        Opt_RouterFinishCallback finishCallbackValueTemp = finishCallbackValueTempTmpBuf;;
+        return GetAccessors()->getRouterExtenderAccessor()->replaceDynamic(pageNode, (const Ark_String*) (&url), static_cast<Opt_Boolean*>(&recoverValueTemp), static_cast<Opt_RouterFinishCallback*>(&finishCallbackValueTemp));
+}
+KOALA_INTEROP_4(RouterExtender_replaceDynamic, Ark_NativePointer, Ark_NativePointer, KStringPtr, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_ScaleSymbolEffect_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto scopeValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
