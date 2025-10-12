@@ -2067,6 +2067,37 @@ HWTEST_F(WebModelStaticTest, SetOnFileSelectorShow001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOnDetectedBlankScreen
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnDetectedBlankScreen, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return true;
+    };
+    BlankScreenDetectionConfig detectConfig;
+    WebModelStatic::SetBlankScreenDetectionConfig(AccessibilityManager::RawPtr(frameNode), detectConfig);
+    WebModelStatic::SetOnDetectedBlankScreen(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnDetectedBlankScreenEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
  * @tc.name: SetOnHttpAuthRequest001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC

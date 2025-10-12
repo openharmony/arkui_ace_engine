@@ -41,6 +41,7 @@ void EraseSpace(std::string& data)
         }
     }
 }
+const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0, 3.0, 5.0 };
 #endif // WEB_SUPPORTED
 } // namespace
 
@@ -2444,11 +2445,68 @@ void SetBackToTopImpl(Ark_NativePointer node,
 void SetOnDetectedBlankScreenImpl(Ark_NativePointer node,
                                   const Opt_OnDetectBlankScreenCallback* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onDetectedBlankScreen = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> void {
+        OnDetectedBlankScreen(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnDetectedBlankScreen(frameNode, onDetectedBlankScreen);
+#endif // WEB_SUPPORTED
 }
 
 void SetBlankScreenDetectionConfigImpl(Ark_NativePointer node,
                                        const Opt_BlankScreenDetectionConfig* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto enable = Converter::Convert<bool>(optValue->enable);
+    std::vector<double> detectionTiming;
+    std::vector<int32_t> detectionMethods;
+    auto arkDetectionTiming = Converter::OptConvert<std::vector<Ark_Float64>>(optValue->detectionTiming)
+                                  .value_or(std::vector<Ark_Float64> {});
+    auto arkDetectionMethods =
+        Converter::OptConvert<std::vector<Ark_BlankScreenDetectionMethod>>(optValue->detectionMethods)
+            .value_or(std::vector<Ark_BlankScreenDetectionMethod> {});
+    for (auto timing : arkDetectionTiming) {
+        auto time = Converter::Convert<double>(timing);
+        if (time > 0.0) {
+            detectionTiming.push_back(time);
+        }
+    }
+    if (detectionTiming.size() > 0) {
+        std::sort(detectionTiming.begin(), detectionTiming.end());
+    } else {
+        detectionTiming = BLANK_SCREEN_DETECTION_DEFAULT_TIMING;
+    }
+    for (auto method : arkDetectionMethods) {
+        if (method == ARK_BLANK_SCREEN_DETECTION_METHOD_DETECTION_CONTENTFUL_NODES_SEVENTEEN) {
+            detectionMethods.push_back(method);
+        }
+    }
+    if (detectionMethods.size() == 0) {
+        detectionMethods = { 0 };
+    }
+    auto contentfulNodesCountThreshold = *(Converter::OptConvert<int32_t>(optValue->contentfulNodesCountThreshold));
+    contentfulNodesCountThreshold = contentfulNodesCountThreshold < 0 ? 0 : contentfulNodesCountThreshold;
+
+    BlankScreenDetectionConfig config{enable, detectionTiming, detectionMethods, contentfulNodesCountThreshold};
+    WebModelStatic::SetBlankScreenDetectionConfig(frameNode, config);
+#endif // WEB_SUPPORTED
 }
 
 void SetZoomControlAccessImpl(Ark_NativePointer node,
