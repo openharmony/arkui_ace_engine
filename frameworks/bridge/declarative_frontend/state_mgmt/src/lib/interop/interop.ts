@@ -138,3 +138,17 @@ function __Interop_transferCompatibleDynamicBuilder_Internal(builder: (...args: 
     }
     return InteropExtractorModule.transferCompatibleDynamicBuilder(builder);
 }
+
+function __Interop_createCompatibleStaticState_Internal(value: Object) {
+    if(InteropExtractorModule.createCompatibleStaticState === undefined) {
+        throw new Error("Non Method For createCompatibleStaticState");
+    }
+    return InteropExtractorModule.createCompatibleStaticState(value);
+}
+
+function __Interop_TransferCompatibleUpdatableBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleUpdatableBuilder === undefined) {
+        throw new Error("Non Method For Transfer CompatibleUpdatableBuilder");
+    }
+    return InteropExtractorModule.transferCompatibleUpdatableBuilder(builder);
+}

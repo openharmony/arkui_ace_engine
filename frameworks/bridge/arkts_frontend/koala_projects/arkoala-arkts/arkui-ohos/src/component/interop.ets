@@ -29,7 +29,8 @@ import {
     uiUtils,
     IObservedObject,
     OBSERVE,
-    ObserveSingleton
+    ObserveSingleton,
+    IStateDecoratedVariable
 } from '../stateManagement';
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
@@ -146,6 +147,8 @@ function openInterop(): void {
     registerResetInteropExtendableComponent();
     registerTransferCompatibleBuilderCallback();
     registertransferCompatibleDynamicBuilderCallback();
+    registerCreateCompatibleStaticState();
+    registerTransferCompatibleUpdatableBuilderCallback();
 }
 
 function closeInterop(): void {
@@ -303,6 +306,13 @@ export function registerTransferCompatibleBuilderCallback(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerTransferCompatibleBuilderCallback');
     const callback = (builder: Any) => { return transferCompatibleBuilder(builder).unwrap()!};
+    registerCallback.invoke(callback);
+}
+
+export function registerTransferCompatibleUpdatableBuilderCallback(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerTransferCompatibleUpdatableBuilderCallback');
+    const callback = (builder: (args: Any) => void) => { return transferCompatibleUpdatableBuilder(builder).unwrap()!};
     registerCallback.invoke(callback);
 }
 
@@ -544,10 +554,47 @@ function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) =>
             for (let i = 0; i < args.length; i++) {
                 if (args[i] instanceof ESValue) {
                     argsESValue[i] = args[i] as ESValue;
+                } else {
+                    argsESValue[i] = ESValue.wrap(args[i]);
                 }
-                argsESValue[i] = ESValue.wrap(args[i]);
             }
             compatibleWrappedBuilderInternal(builder, ...argsESValue);
         }
     )
+}
+
+export function registerCreateCompatibleStaticState(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerCreateCompatibleStaticState');
+    registerCallback.invoke(createCompatibleStaticState);
+}
+
+function createCompatibleStaticState<T>(dynamicValue: Object): IStateDecoratedVariable<T> {
+    const value = ESValue.wrap(dynamicValue);
+    const getProxy = value.invokeMethod('getProxy').unwrap();
+    if (getProxy === undefined) {
+        const stateVar = new StateDecoratedVariable<T>(null, 'proxy', uiUtils.makeObserved(value.invokeMethod('get').unwrap()) as T);
+        value.invokeMethod('setProxy', ESValue.wrap(stateVar));
+        const setProxyValue = ((newVal: T): void => {
+            value.invokeMethod('set', ESValue.wrap(newVal));
+        });
+        stateVar.setProxyValue = setProxyValue;
+        const global = ESValue.getGlobal();
+        const setSource = ((newVal: T): void => {
+            stateVar.set(newVal);
+        });
+        const fireChange = (): void => {
+            stateVar.fireChange();
+        }
+        global.getProperty('updateNotifyCallback').invoke(value, ESValue.wrap(fireChange));
+        const notifyProxy = (): void => {
+            value.invokeMethod('syncPeerHasChanged');
+        };
+        stateVar.addWatch(notifyProxy);
+        global.getProperty('updateSetValueCallback').invoke(value, ESValue.wrap(setSource));
+        return stateVar;
+    }
+    else {
+        return getProxy as IStateDecoratedVariable<T>
+    }
 }
