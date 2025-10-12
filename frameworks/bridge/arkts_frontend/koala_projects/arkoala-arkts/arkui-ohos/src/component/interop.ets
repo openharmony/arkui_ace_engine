@@ -92,13 +92,25 @@ export function compatibleComponent(
     });
 }
 
+function getInstantiateImplMethod(param: ClassType): Method {
+    for (let methodIdx = 0; methodIdx < param.getMethodsNum(); ++methodIdx) {
+        const method = param.getMethod(methodIdx);
+        if (method.getName() === '_instantiateImpl') {
+            return method;
+        }
+    }
+    throw new Error('cannot find method _instantiateImpl');
+}
+
 export function compatibleStaticComponent<T extends CustomComponent<T, T_Options>, T_Options>(
     factory: () => T,
     options?: () => T_Options,
     content?: () => void
 ): [() => void, number] {
     const instantiateImpl = /** @memo */ (): void => {
-        T._instantiateImpl(undefined, factory, options ? options() : undefined, undefined, content);
+        const instance = factory();
+        const method = getInstantiateImplMethod(Type.of(instance) as ClassType);
+        method.invoke(null, [__context(), __id(), undefined, factory, options ? options() : undefined, undefined, content]);
     };
 
     const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
