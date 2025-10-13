@@ -88,7 +88,7 @@ void SetGridItemOptionsImpl(Ark_NativePointer node,
 } // GridItemInterfaceModifier
 namespace GridItemAttributeModifier {
 void SetRowStartImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -100,7 +100,7 @@ void SetRowStartImpl(Ark_NativePointer node,
     GridItemModelStatic::SetRowStart(frameNode, *convValue);
 }
 void SetRowEndImpl(Ark_NativePointer node,
-                   const Opt_Number* value)
+                   const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -112,7 +112,7 @@ void SetRowEndImpl(Ark_NativePointer node,
     GridItemModelStatic::SetRowEnd(frameNode, *convValue);
 }
 void SetColumnStartImpl(Ark_NativePointer node,
-                        const Opt_Number* value)
+                        const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -124,7 +124,7 @@ void SetColumnStartImpl(Ark_NativePointer node,
     GridItemModelStatic::SetColumnStart(frameNode, *convValue);
 }
 void SetColumnEndImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

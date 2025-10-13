@@ -135,12 +135,12 @@ HWTEST_F(RefreshModifierTest, setRefreshOffsetTestDefaultValues, TestSize.Level1
 }
 
 // Valid values for attribute 'refreshOffset' of method 'refreshOffset'
-static std::vector<std::tuple<std::string, Ark_Number, std::string>> refreshOffsetRefreshOffsetValidValues = {
-    { "-1", Converter::ArkValue<Ark_Number>(-1), "-1.00vp" },
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.00vp" },
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.00vp" },
-    { "10", Converter::ArkValue<Ark_Number>(10), "10.00vp" },
-    { "50", Converter::ArkValue<Ark_Number>(50), "50.00vp" },
+static std::vector<std::tuple<std::string, Ark_Float64, std::string>> refreshOffsetRefreshOffsetValidValues = {
+    { "-1", Converter::ArkValue<Ark_Float64>(-1), "-1.00vp" },
+    { "0", Converter::ArkValue<Ark_Float64>(0), "0.00vp" },
+    { "1", Converter::ArkValue<Ark_Float64>(1), "1.00vp" },
+    { "10", Converter::ArkValue<Ark_Float64>(10), "10.00vp" },
+    { "50", Converter::ArkValue<Ark_Float64>(50), "50.00vp" },
 };
 
 /*
@@ -153,8 +153,8 @@ HWTEST_F(RefreshModifierTest, setRefreshOffsetTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Number inputValueRefreshOffset;
-    Ark_Number initValueRefreshOffset;
+    Ark_Float64 inputValueRefreshOffset;
+    Ark_Float64 initValueRefreshOffset;
 
     // Initial setup
     initValueRefreshOffset = std::get<1>(refreshOffsetRefreshOffsetValidValues[0]);
@@ -163,7 +163,7 @@ HWTEST_F(RefreshModifierTest, setRefreshOffsetTestValidValues, TestSize.Level1)
     inputValueRefreshOffset = initValueRefreshOffset;
     for (auto&& value: refreshOffsetRefreshOffsetValidValues) {
         inputValueRefreshOffset = std::get<1>(value);
-        auto optInputValueRefreshOffset = Converter::ArkValue<Opt_Number>(inputValueRefreshOffset);
+        auto optInputValueRefreshOffset = Converter::ArkValue<Opt_Float64>(inputValueRefreshOffset);
         modifier_->setRefreshOffset(node_, &optInputValueRefreshOffset);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REFRESH_OFFSET_NAME);
@@ -237,10 +237,10 @@ HWTEST_F(RefreshModifierTest, setOnOffsetChangeTest, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<float> expected = std::nullopt;
-    auto onOffsetChange = [](const Ark_Int32 resourceId, Ark_Number parameter) {
+    auto onOffsetChange = [](const Ark_Int32 resourceId, Ark_Float64 parameter) {
         expected = Converter::Convert<float>(parameter);
     };
-    Callback_Number_Void func = {
+    Callback_F64_Void func = {
         .resource = Ark_CallbackResource {
             .resourceId = frameNode->GetId(),
             .hold = nullptr,
@@ -248,7 +248,7 @@ HWTEST_F(RefreshModifierTest, setOnOffsetChangeTest, TestSize.Level1)
         },
         .call = onOffsetChange
     };
-    auto optFunc = Converter::ArkValue<Opt_Callback_Number_Void>(func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_F64_Void>(func);
     modifier_->setOnOffsetChange(node_, &optFunc);
 
     for (const auto& testValue : OFFSET_CHANGE_EVENT_TEST_PLAN) {
@@ -272,13 +272,13 @@ HWTEST_F(RefreshModifierTest, setPullDownRatioTestDefaultValues, TestSize.Level1
 }
 
 // Valid values for attribute 'pullDownRatioRatio' of method 'pullDownRatio'
-static std::vector<std::tuple<std::string, Opt_Number, double>> pullDownRatioPullDownRatioRatioValidValues = {
-    { "0", Converter::ArkValue<Opt_Number>(0), 0 },
-    { "0.5", Converter::ArkValue<Opt_Number>(0.5f), 0.5 },
-    { "1", Converter::ArkValue<Opt_Number>(1), 1 },
-    { "-20", Converter::ArkValue<Opt_Number>(-20), 0 },
-    { "12.4", Converter::ArkValue<Opt_Number>(12.4f), 1 },
-    { "22.5", Converter::ArkValue<Opt_Number>(22.5f), 1 },
+static std::vector<std::tuple<std::string, Opt_Float64, double>> pullDownRatioPullDownRatioRatioValidValues = {
+    { "0", Converter::ArkValue<Opt_Float64>(0), 0 },
+    { "0.5", Converter::ArkValue<Opt_Float64>(0.5f), 0.5 },
+    { "1", Converter::ArkValue<Opt_Float64>(1), 1 },
+    { "-20", Converter::ArkValue<Opt_Float64>(-20), 0 },
+    { "12.4", Converter::ArkValue<Opt_Float64>(12.4f), 1 },
+    { "22.5", Converter::ArkValue<Opt_Float64>(22.5f), 1 },
 };
 
 /*
@@ -291,8 +291,8 @@ HWTEST_F(RefreshModifierTest, setPullDownRatioTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     double result;
     double expected;
-    Opt_Number initValuePullDownRatioRatio;
-    Opt_Number inputValuePullDownRatioRatio;
+    Opt_Float64 initValuePullDownRatioRatio;
+    Opt_Float64 inputValuePullDownRatioRatio;
 
     // Initial setup
     initValuePullDownRatioRatio = std::get<1>(pullDownRatioPullDownRatioRatioValidValues[0]);
@@ -308,7 +308,7 @@ HWTEST_F(RefreshModifierTest, setPullDownRatioTestValidValues, TestSize.Level1)
     }
 
     // Verifying Ark_Empty value
-    inputValuePullDownRatioRatio = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    inputValuePullDownRatioRatio = Converter::ArkValue<Opt_Float64>(Ark_Empty());
     modifier_->setPullDownRatio(node_, &inputValuePullDownRatioRatio);
     jsonValue = GetJsonValue(node_);
     std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PULL_DOWN_RATIO_RATIO_NAME);

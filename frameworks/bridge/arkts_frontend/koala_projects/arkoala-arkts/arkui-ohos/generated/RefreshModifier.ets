@@ -39,13 +39,13 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
     _onRefreshing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onRefreshing_0_0value?: (() => void) | undefined
     _refreshOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _refreshOffset_0_0value?: number | undefined
+    _refreshOffset_0_0value?: double | undefined
     _pullToRefresh_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _pullToRefresh_0_0value?: boolean | undefined
     _onOffsetChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onOffsetChange_0_0value?: ((value0: number) => void) | undefined
+    _onOffsetChange_0_0value?: ((value0: double) => void) | undefined
     _pullDownRatio_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _pullDownRatio_0_0value?: number | undefined
+    _pullDownRatio_0_0value?: double | undefined
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkRefreshPeer;
@@ -89,7 +89,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             switch (this._refreshOffset_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setRefreshOffsetAttribute((this._refreshOffset_0_0value as number | undefined));
+                    peer.setRefreshOffsetAttribute((this._refreshOffset_0_0value as double | undefined));
                     this._refreshOffset_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -99,7 +99,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
                 default: {
                     this._refreshOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setRefreshOffsetAttribute((undefined as number | undefined));
+                    peer.setRefreshOffsetAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -125,7 +125,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             switch (this._onOffsetChange_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnOffsetChangeAttribute((this._onOffsetChange_0_0value as ((value0: number) => void) | undefined));
+                    peer.setOnOffsetChangeAttribute((this._onOffsetChange_0_0value as ((value0: double) => void) | undefined));
                     this._onOffsetChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -135,7 +135,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
                 default: {
                     this._onOffsetChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnOffsetChangeAttribute((undefined as ((value0: number) => void) | undefined));
+                    peer.setOnOffsetChangeAttribute((undefined as ((value0: double) => void) | undefined));
                 }
             }
         }
@@ -143,7 +143,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             switch (this._pullDownRatio_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setPullDownRatioAttribute((this._pullDownRatio_0_0value as number | undefined));
+                    peer.setPullDownRatioAttribute((this._pullDownRatio_0_0value as double | undefined));
                     this._pullDownRatio_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -153,7 +153,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
                 default: {
                     this._pullDownRatio_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setPullDownRatioAttribute((undefined as number | undefined));
+                    peer.setPullDownRatioAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -195,7 +195,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                     break;
                 }
                 default: {
-                    this.refreshOffset((undefined as number | undefined));
+                    this.refreshOffset((undefined as double | undefined));
                 }
             }
         }
@@ -221,7 +221,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                     break;
                 }
                 default: {
-                    this.onOffsetChange((undefined as ((value0: number) => void) | undefined));
+                    this.onOffsetChange((undefined as ((value0: double) => void) | undefined));
                 }
             }
         }
@@ -234,7 +234,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                     break;
                 }
                 default: {
-                    this.pullDownRatio((undefined as number | undefined));
+                    this.pullDownRatio((undefined as double | undefined));
                 }
             }
         }
@@ -261,7 +261,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         }
         return this
     }
-    refreshOffset(value: number | undefined): this {
+    refreshOffset(value: double | undefined): this {
         if (((this._refreshOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._refreshOffset_0_0value) !== (value)))
         {
             this._refreshOffset_0_flag = AttributeUpdaterFlag.UPDATE
@@ -283,7 +283,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         }
         return this
     }
-    onOffsetChange(value: ((value0: number) => void) | undefined): this {
+    onOffsetChange(value: ((value0: double) => void) | undefined): this {
         if (((this._onOffsetChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onOffsetChange_0_flag = AttributeUpdaterFlag.UPDATE
@@ -294,7 +294,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         }
         return this
     }
-    pullDownRatio(value: number | undefined): this {
+    pullDownRatio(value: double | undefined): this {
         if (((this._pullDownRatio_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._pullDownRatio_0_0value) !== (value)))
         {
             this._pullDownRatio_0_flag = AttributeUpdaterFlag.UPDATE

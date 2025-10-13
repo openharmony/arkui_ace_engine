@@ -55,9 +55,9 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
     _scrollBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBar_0_0value?: BarState | undefined
     _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarColor_0_0value?: Color | number | string | undefined
+    _scrollBarColor_0_0value?: Color | int32 | string | undefined
     _scrollBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarWidth_0_0value?: number | string | undefined
+    _scrollBarWidth_0_0value?: double | string | undefined
     _onScrollFrameBegin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollFrameBegin_0_0value?: OnScrollFrameBeginCallback | undefined
     _nestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -65,7 +65,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
     _enableScrollInteraction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableScrollInteraction_0_0value?: boolean | undefined
     _friction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _friction_0_0value?: number | Resource | undefined
+    _friction_0_0value?: double | Resource | undefined
     _scrollSnap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollSnap_0_0value?: ScrollSnapOptions | undefined
     _enablePaging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -223,7 +223,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             switch (this._scrollBarColor_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | number | string | undefined));
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | int32 | string | undefined));
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -233,7 +233,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarColorAttribute((undefined as Color | number | string | undefined));
+                    peer.setScrollBarColorAttribute((undefined as Color | int32 | string | undefined));
                 }
             }
         }
@@ -241,7 +241,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             switch (this._scrollBarWidth_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarWidthAttribute((this._scrollBarWidth_0_0value as number | string | undefined));
+                    peer.setScrollBarWidthAttribute((this._scrollBarWidth_0_0value as double | string | undefined));
                     this._scrollBarWidth_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -251,7 +251,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     this._scrollBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarWidthAttribute((undefined as number | string | undefined));
+                    peer.setScrollBarWidthAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -313,7 +313,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             switch (this._friction_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFrictionAttribute((this._friction_0_0value as number | Resource | undefined));
+                    peer.setFrictionAttribute((this._friction_0_0value as double | Resource | undefined));
                     this._friction_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -323,7 +323,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     this._friction_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFrictionAttribute((undefined as number | Resource | undefined));
+                    peer.setFrictionAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -628,7 +628,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                     break;
                 }
                 default: {
-                    this.scrollBarColor((undefined as Color | number | string | undefined));
+                    this.scrollBarColor((undefined as Color | int32 | string | undefined));
                 }
             }
         }
@@ -641,7 +641,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                     break;
                 }
                 default: {
-                    this.scrollBarWidth((undefined as number | string | undefined));
+                    this.scrollBarWidth((undefined as double | string | undefined));
                 }
             }
         }
@@ -693,7 +693,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                     break;
                 }
                 default: {
-                    this.friction((undefined as number | Resource | undefined));
+                    this.friction((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -918,7 +918,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         }
         return this
     }
-    scrollBarColor(value: Color | number | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | undefined): this {
         if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
@@ -929,7 +929,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         }
         return this
     }
-    scrollBarWidth(value: number | string | undefined): this {
+    scrollBarWidth(value: double | string | undefined): this {
         if (((this._scrollBarWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._scrollBarWidth_0_0value) !== (value)))
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
@@ -973,7 +973,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         }
         return this
     }
-    friction(value: number | Resource | undefined): this {
+    friction(value: double | Resource | undefined): this {
         if (((this._friction_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._friction_0_flag = AttributeUpdaterFlag.UPDATE

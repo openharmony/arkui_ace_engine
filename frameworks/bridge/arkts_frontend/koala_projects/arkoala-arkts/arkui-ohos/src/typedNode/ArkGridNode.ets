@@ -14,6 +14,7 @@
  */
 
 import { RuntimeType, runtimeType } from "@koalaui/interop";
+import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ArkScrollableNode } from "./ArkScrollableNode";
 import { Length } from "../component/units";
 import { Color, BarState, EdgeEffect } from "../component/enums";
@@ -78,14 +79,14 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         this.markDirty()
         return this
     }
-    scrollBarWidth(value: number | string | undefined): this {
-        const value_casted = value as (number | string | undefined)
+    scrollBarWidth(value: double | string | undefined): this {
+        const value_casted = value as (double | string | undefined)
         this.getPeer()?.setScrollBarWidthAttribute(value_casted)
         this.markDirty()
         return this
     }
-    scrollBarColor(value: Color | number | string | undefined): this {
-        const value_casted = value as (Color | number | string | undefined)
+    scrollBarColor(value: Color | int32 | string | undefined): this {
+        const value_casted = value as (Color | int32 | string | undefined)
         this.getPeer()?.setScrollBarColorAttribute(value_casted)
         this.markDirty()
         return this
@@ -96,35 +97,35 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         this.markDirty()
         return this
     }
-    onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this {
-        const value_casted = value as (((index: number,offset: number) => ComputedBarAttribute) | undefined)
+    onScrollBarUpdate(value: ((index: int32, offset: double) => ComputedBarAttribute) | undefined): this {
+        const value_casted = value as (((index: int32, offset: double) => ComputedBarAttribute) | undefined)
         this.getPeer()?.setOnScrollBarUpdateAttribute(value_casted)
         this.markDirty()
         return this
     }
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
-        const value_casted = value as (((first: number,last: number) => void) | undefined)
+    onScrollIndex(value: ((first: int32, last: int32) => void) | undefined): this {
+        const value_casted = value as (((first: int32, last: int32) => void) | undefined)
         this.getPeer()?.setOnScrollIndexAttribute(value_casted)
         this.markDirty()
         return this
     }
-    cachedCount(value: number | undefined): this  {
-        const value_casted = value as (number | undefined)
+    cachedCount(value: int32 | undefined): this  {
+        const value_casted = value as (int32 | undefined)
         this.getPeer()?.setCachedCount0Attribute(value_casted)
         this.markDirty()
         return this
     }
-    cachedCount(count: number | undefined, show: boolean | undefined): this {
+    cachedCount(count: int32 | undefined, show: boolean | undefined): this {
         const count_type = runtimeType(count)
         const show_type = runtimeType(show)
         if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && (RuntimeType.UNDEFINED == show_type)) {
-            const value_casted = count as (number | undefined)
+            const value_casted = count as (int32 | undefined)
             this.getPeer()?.setCachedCount0Attribute(value_casted)
             this.markDirty()
             return this
         }
         if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && ((RuntimeType.BOOLEAN == show_type) || (RuntimeType.UNDEFINED == show_type))) {
-            const count_casted = count as (number | undefined)
+            const count_casted = count as (int32 | undefined)
             const show_casted = show as (boolean | undefined)
             this.getPeer()?.setCachedCount1Attribute(count_casted, show_casted)
             this.markDirty()
@@ -144,20 +145,20 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         this.markDirty()
         return this
     }
-    maxCount(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    maxCount(value: int32 | undefined): this {
+        const value_casted = value as (int32 | undefined)
         this.getPeer()?.setMaxCountAttribute(value_casted)
         this.markDirty()
         return this
     }
-    minCount(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    minCount(value: int32 | undefined): this {
+        const value_casted = value as (int32 | undefined)
         this.getPeer()?.setMinCountAttribute(value_casted)
         this.markDirty()
         return this
     }
-    cellLength(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    cellLength(value: double | undefined): this {
+        const value_casted = value as (double | undefined)
         this.getPeer()?.setCellLengthAttribute(value_casted)
         this.markDirty()
         return this
@@ -174,8 +175,8 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         this.markDirty()
         return this
     }
-    onItemDragStart(value: ((event: ItemDragInfo,itemIndex: number) => CustomBuilder) | undefined): this {
-        const value_casted = value as (((event: ItemDragInfo,itemIndex: number) => CustomBuilder) | undefined)
+    onItemDragStart(value: ((event: ItemDragInfo,itemIndex: int32) => CustomBuilder) | undefined): this {
+        const value_casted = value as (((event: ItemDragInfo,itemIndex: int32) => CustomBuilder) | undefined)
         this.getPeer()?.setOnItemDragStartAttribute(value_casted)
         this.markDirty()
         return this
@@ -186,20 +187,20 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         this.markDirty()
         return this
     }
-    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
-        const value_casted = value as (((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined)
+    onItemDragMove(value: ((event: ItemDragInfo, itemIndex: int32, insertIndex: int32) => void) | undefined): this {
+        const value_casted = value as (((event: ItemDragInfo, itemIndex: int32, insertIndex: int32) => void) | undefined)
         this.getPeer()?.setOnItemDragMoveAttribute(value_casted)
         this.markDirty()
         return this
     }
-    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
-        const value_casted = value as (((event: ItemDragInfo,itemIndex: number) => void) | undefined)
+    onItemDragLeave(value: ((event: ItemDragInfo, itemIndex: int32) => void) | undefined): this {
+        const value_casted = value as (((event: ItemDragInfo,itemIndex: int32) => void) | undefined)
         this.getPeer()?.setOnItemDragLeaveAttribute(value_casted)
         this.markDirty()
         return this
     }
-    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
-        const value_casted = value as (((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined)
+    onItemDrop(value: ((event: ItemDragInfo,itemIndex: int32, insertIndex: int32, isSuccess: boolean) => void) | undefined): this {
+        const value_casted = value as (((event: ItemDragInfo,itemIndex: int32, insertIndex: int32, isSuccess: boolean) => void) | undefined)
         this.getPeer()?.setOnItemDropAttribute(value_casted)
         this.markDirty()
         return this
@@ -216,8 +217,8 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         this.markDirty()
         return this
     }
-    friction(value: number | Resource | undefined): this {
-        const value_casted = value as (number | Resource | undefined)
+    friction(value: double | Resource | undefined): this {
+        const value_casted = value as (double | Resource | undefined)
         this.getPeer()?.setFrictionAttribute(value_casted)
         this.markDirty()
         return this

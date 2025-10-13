@@ -25,7 +25,7 @@ struct ChildrenMainSizePeer {
 public:
     ChildrenMainSizePeer() = default;
     ~ChildrenMainSizePeer() = default;
-    explicit ChildrenMainSizePeer(float defaultSize) : defaultSize_(defaultSize) {};
+    explicit ChildrenMainSizePeer(double defaultSize) : defaultSize_(defaultSize) {};
 
     const ohos::Ace::RefPtr<ohos::Ace::NG::ListChildrenMainSize>& GetHandler() const
     {
@@ -42,12 +42,12 @@ public:
         }
     }
 
-    std::optional<float> GetDefaultSize()
+    std::optional<double> GetDefaultSize()
     {
         return defaultSize_;
     }
 
-    void SetDefaultSize(float defaultSize)
+    void SetDefaultSize(double defaultSize)
     {
         defaultSize_ = defaultSize;
         handler_->UpdateDefaultSize(defaultSize);
@@ -56,7 +56,7 @@ public:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ChildrenMainSizePeer);
     ohos::Ace::RefPtr<ohos::Ace::NG::ListChildrenMainSize> handler_;
-    std::optional<float> defaultSize_;
+    std::optional<double> defaultSize_;
 };
 
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CHILDREN_MAIN_SIZE_PEER_H

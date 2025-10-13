@@ -33,16 +33,16 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetOffsetRemainImpl(Ark_ScrollResult peer)
+Ark_Float64 GetOffsetRemainImpl(Ark_ScrollResult peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    return Converter::ArkValue<Ark_Number>(peer->offsetRemain);
+    return Converter::ArkValue<Ark_Float64>(peer->offsetRemain);
 }
 void SetOffsetRemainImpl(Ark_ScrollResult peer,
-                         const Ark_Number* offsetRemain)
+                         Ark_Float64 offsetRemain)
 {
-    CHECK_NULL_VOID(peer && offsetRemain);
-    peer->offsetRemain = Converter::Convert<float>(*offsetRemain);
+    CHECK_NULL_VOID(peer);
+    peer->offsetRemain = Converter::Convert<double>(offsetRemain);
 }
 } // ScrollResultAccessor
 const GENERATED_ArkUIScrollResultAccessor* GetScrollResultAccessor()

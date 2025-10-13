@@ -46,13 +46,11 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_RectResult GetItemRectInGroupImpl(Ark_ListScroller peer,
-                                      const Ark_Number* index,
-                                      const Ark_Number* indexInGroup)
+                                      Ark_Int32 index,
+                                      Ark_Int32 indexInGroup)
 {
     auto errValue = Converter::ArkValue<Ark_RectResult>(Rect{});
     CHECK_NULL_RETURN(peer, errValue);
-    CHECK_NULL_RETURN(index, errValue);
-    CHECK_NULL_RETURN(indexInGroup, errValue);
 
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
@@ -60,20 +58,18 @@ Ark_RectResult GetItemRectInGroupImpl(Ark_ListScroller peer,
         return errValue;
     }
 
-    int32_t convIndex = Converter::Convert<int32_t>(*index);
-    int32_t convIndexInGroup = Converter::Convert<int32_t>(*indexInGroup);
+    int32_t convIndex = Converter::Convert<int32_t>(index);
+    int32_t convIndexInGroup = Converter::Convert<int32_t>(indexInGroup);
     auto rect = scrollController->GetItemRectInGroup(convIndex, convIndexInGroup);
     return Converter::ArkValue<Ark_RectResult>(rect);
 }
 void ScrollToItemInGroupImpl(Ark_ListScroller peer,
-                             const Ark_Number* index,
-                             const Ark_Number* indexInGroup,
+                             Ark_Int32 index,
+                             Ark_Int32 indexInGroup,
                              const Opt_Boolean* smooth,
                              const Opt_ScrollAlign* align)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(index);
-    CHECK_NULL_VOID(indexInGroup);
 
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
@@ -81,8 +77,8 @@ void ScrollToItemInGroupImpl(Ark_ListScroller peer,
         return;
     }
 
-    int32_t indexValue = Converter::Convert<int32_t>(*index);
-    int32_t indexInGroupValue = Converter::Convert<int32_t>(*indexInGroup);
+    int32_t indexValue = Converter::Convert<int32_t>(index);
+    int32_t indexInGroupValue = Converter::Convert<int32_t>(indexInGroup);
     auto smoothValue = Converter::OptConvertPtr<bool>(smooth);
     auto alignValue = Converter::OptConvertPtr<ScrollAlign>(align);
     scrollController->JumpToItemInGroup(indexValue, indexInGroupValue,
@@ -107,13 +103,11 @@ void CloseAllSwipeActionsImpl(Ark_ListScroller peer,
     }
 }
 Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_ListScroller peer,
-                                                         const Ark_Number* x,
-                                                         const Ark_Number* y)
+                                                         Ark_Float64 x,
+                                                         Ark_Float64 y)
 {
     auto errValue = Converter::ArkValue<Ark_VisibleListContentInfo>(ListItemGroupIndex{});
     CHECK_NULL_RETURN(peer, errValue);
-    CHECK_NULL_RETURN(x, errValue);
-    CHECK_NULL_RETURN(y, errValue);
 
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
@@ -121,8 +115,8 @@ Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_ListScroller peer,
         return errValue;
     }
 
-    auto convX = Converter::Convert<float>(*x);
-    auto convY = Converter::Convert<float>(*y);
+    auto convX = Converter::Convert<double>(x);
+    auto convY = Converter::Convert<double>(y);
     auto retVal = scrollController->GetItemIndexInGroup(convX, convY);
     return Converter::ArkValue<Ark_VisibleListContentInfo>(retVal);
 }

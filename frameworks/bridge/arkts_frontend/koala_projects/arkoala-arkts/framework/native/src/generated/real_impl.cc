@@ -2952,11 +2952,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetScrollBarWidthImpl(Ark_NativePointer node,
-                               const Opt_Union_Number_String* value)
+                               const Opt_Union_F64_String* value)
     {
     }
     void SetScrollBarColorImpl(Ark_NativePointer node,
-                               const Opt_Union_Color_Number_String* value)
+                               const Opt_Union_Color_I32_String* value)
     {
     }
     void SetScrollBarImpl(Ark_NativePointer node,
@@ -2964,15 +2964,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnScrollBarUpdateImpl(Ark_NativePointer node,
-                                  const Opt_Callback_Number_Number_ComputedBarAttribute* value)
+                                  const Opt_Callback_I32_F64_ComputedBarAttribute* value)
     {
     }
     void SetOnScrollIndexImpl(Ark_NativePointer node,
-                              const Opt_Callback_Number_Number_Void* value)
+                              const Opt_Callback_I32_I32_Void* value)
     {
     }
     void SetCachedCount0Impl(Ark_NativePointer node,
-                             const Opt_Number* value)
+                             const Opt_Int32* value)
     {
     }
     void SetEditModeImpl(Ark_NativePointer node,
@@ -2984,15 +2984,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMaxCountImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
     }
     void SetMinCountImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
     }
     void SetCellLengthImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
+                           const Opt_Float64* value)
     {
     }
     void SetLayoutDirectionImpl(Ark_NativePointer node,
@@ -3012,15 +3012,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnItemDragMoveImpl(Ark_NativePointer node,
-                               const Opt_Callback_ItemDragInfo_Number_Number_Void* value)
+                               const Opt_Callback_ItemDragInfo_I32_I32_Void* value)
     {
     }
     void SetOnItemDragLeaveImpl(Ark_NativePointer node,
-                                const Opt_Callback_ItemDragInfo_Number_Void* value)
+                                const Opt_Callback_ItemDragInfo_I32_Void* value)
     {
     }
     void SetOnItemDropImpl(Ark_NativePointer node,
-                           const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
+                           const Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void* value)
     {
     }
     void SetNestedScrollImpl(Ark_NativePointer node,
@@ -3032,7 +3032,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFrictionImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
     {
     }
     void SetAlignItemsImpl(Ark_NativePointer node,
@@ -3052,7 +3052,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetCachedCount1Impl(Ark_NativePointer node,
-                             const Opt_Number* count,
+                             const Opt_Int32* count,
                              const Opt_Boolean* show)
     {
     }
@@ -3104,19 +3104,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // GridItemInterfaceModifier
     namespace GridItemAttributeModifier {
     void SetRowStartImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
     }
     void SetRowEndImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+                       const Opt_Int32* value)
     {
     }
     void SetColumnStartImpl(Ark_NativePointer node,
-                            const Opt_Number* value)
+                            const Opt_Int32* value)
     {
     }
     void SetColumnEndImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Int32* value)
     {
     }
     void SetSelectableImpl(Ark_NativePointer node,
@@ -3443,6 +3443,39 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // IndicatorComponentAttributeModifier
+    namespace LazyGridLayoutAttributeModifier {
+    Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                    Ark_Int32 flags)
+    {
+        return {};
+    }
+    void SetRowsGapImpl(Ark_NativePointer node,
+                        const Opt_LengthMetrics* value)
+    {
+    }
+    void SetColumnsGapImpl(Ark_NativePointer node,
+                           const Opt_LengthMetrics* value)
+    {
+    }
+    } // LazyGridLayoutAttributeModifier
+    namespace LazyVGridLayoutModifier {
+    Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                    Ark_Int32 flags)
+    {
+        return {};
+    }
+    } // LazyVGridLayoutModifier
+    namespace LazyVGridLayoutInterfaceModifier {
+    void SetLazyVGridLayoutOptionsImpl(Ark_NativePointer node)
+    {
+    }
+    } // LazyVGridLayoutInterfaceModifier
+    namespace LazyVGridLayoutAttributeModifier {
+    void SetColumnsTemplateImpl(Ark_NativePointer node,
+                                const Opt_String* value)
+    {
+    }
+    } // LazyVGridLayoutAttributeModifier
     namespace LineModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -3517,11 +3550,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetContentStartOffsetImpl(Ark_NativePointer node,
-                                   const Opt_Number* value)
+                                   const Opt_Float64* value)
     {
     }
     void SetContentEndOffsetImpl(Ark_NativePointer node,
-                                 const Opt_Number* value)
+                                 const Opt_Float64* value)
     {
     }
     void SetDividerImpl(Ark_NativePointer node,
@@ -3533,7 +3566,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetCachedCount0Impl(Ark_NativePointer node,
-                             const Opt_Number* value)
+                             const Opt_Int32* value)
     {
     }
     void SetChainAnimationImpl(Ark_NativePointer node,
@@ -3565,7 +3598,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnScrollIndexImpl(Ark_NativePointer node,
-                              const Opt_Callback_Number_Number_Number_Void* value)
+                              const Opt_Callback_I32_I32_I32_Void* value)
     {
     }
     void SetOnScrollVisibleContentChangeImpl(Ark_NativePointer node,
@@ -3573,7 +3606,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnItemMoveImpl(Ark_NativePointer node,
-                           const Opt_Callback_Number_Number_Boolean* value)
+                           const Opt_Callback_I32_I32_Boolean* value)
     {
     }
     void SetOnItemDragStartImpl(Ark_NativePointer node,
@@ -3585,15 +3618,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnItemDragMoveImpl(Ark_NativePointer node,
-                               const Opt_Callback_ItemDragInfo_Number_Number_Void* value)
+                               const Opt_Callback_ItemDragInfo_I32_I32_Void* value)
     {
     }
     void SetOnItemDragLeaveImpl(Ark_NativePointer node,
-                                const Opt_Callback_ItemDragInfo_Number_Void* value)
+                                const Opt_Callback_ItemDragInfo_I32_Void* value)
     {
     }
     void SetOnItemDropImpl(Ark_NativePointer node,
-                           const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
+                           const Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void* value)
     {
     }
     void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
@@ -3609,12 +3642,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetLanesImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_LengthConstrain* value,
+                      const Opt_Union_I32_LengthConstrain* value,
                       const Opt_Dimension* gutter)
     {
     }
     void SetCachedCount1Impl(Ark_NativePointer node,
-                             const Opt_Number* count,
+                             const Opt_Int32* count,
                              const Opt_Boolean* show)
     {
     }
@@ -4486,7 +4519,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetRefreshOffsetImpl(Ark_NativePointer node,
-                              const Opt_Number* value)
+                              const Opt_Float64* value)
     {
     }
     void SetPullToRefreshImpl(Ark_NativePointer node,
@@ -4494,11 +4527,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnOffsetChangeImpl(Ark_NativePointer node,
-                               const Opt_Callback_Number_Void* value)
+                               const Opt_Callback_F64_Void* value)
     {
     }
     void SetPullDownRatioImpl(Ark_NativePointer node,
-                              const Opt_Number* value)
+                              const Opt_Float64* value)
     {
     }
     } // RefreshAttributeModifier
@@ -4872,11 +4905,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetScrollBarColorImpl(Ark_NativePointer node,
-                               const Opt_Union_Color_Number_String* value)
+                               const Opt_Union_Color_I32_String* value)
     {
     }
     void SetScrollBarWidthImpl(Ark_NativePointer node,
-                               const Opt_Union_Number_String* value)
+                               const Opt_Union_F64_String* value)
     {
     }
     void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
@@ -4892,7 +4925,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFrictionImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
     {
     }
     void SetScrollSnapImpl(Ark_NativePointer node,
@@ -7447,7 +7480,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetCachedCount0Impl(Ark_NativePointer node,
-                             const Opt_Number* value)
+                             const Opt_Int32* value)
     {
     }
     void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
@@ -7455,7 +7488,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnScrollIndexImpl(Ark_NativePointer node,
-                              const Opt_Callback_Number_Number_Void* value)
+                              const Opt_Callback_I32_I32_Void* value)
     {
     }
     void SetOnWillScrollImpl(Ark_NativePointer node,
@@ -7467,7 +7500,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetCachedCount1Impl(Ark_NativePointer node,
-                             const Opt_Number* count,
+                             const Opt_Int32* count,
                              const Opt_Boolean* show)
     {
     }
@@ -8850,6 +8883,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IndicatorComponentAttributeModifier::SetOnChangeImpl,
         };
         return &ArkUIIndicatorComponentModifierImpl;
+    }
+
+    const GENERATED_ArkUILazyGridLayoutAttributeModifier* GetLazyGridLayoutAttributeModifier()
+    {
+        static const GENERATED_ArkUILazyGridLayoutAttributeModifier ArkUILazyGridLayoutAttributeModifierImpl {
+            LazyGridLayoutAttributeModifier::ConstructImpl,
+            LazyGridLayoutAttributeModifier::SetRowsGapImpl,
+            LazyGridLayoutAttributeModifier::SetColumnsGapImpl,
+        };
+        return &ArkUILazyGridLayoutAttributeModifierImpl;
+    }
+
+    const GENERATED_ArkUILazyVGridLayoutModifier* GetLazyVGridLayoutModifier()
+    {
+        static const GENERATED_ArkUILazyVGridLayoutModifier ArkUILazyVGridLayoutModifierImpl {
+            LazyVGridLayoutModifier::ConstructImpl,
+            LazyVGridLayoutInterfaceModifier::SetLazyVGridLayoutOptionsImpl,
+            LazyVGridLayoutAttributeModifier::SetColumnsTemplateImpl,
+        };
+        return &ArkUILazyVGridLayoutModifierImpl;
     }
 
     const GENERATED_ArkUILineModifier* GetLineModifier()
@@ -10406,6 +10459,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetImageAnimatorModifier,
             GetImageSpanModifier,
             GetIndicatorComponentModifier,
+            GetLazyGridLayoutAttributeModifier,
+            GetLazyVGridLayoutModifier,
             GetLineModifier,
             GetLinearIndicatorModifier,
             GetListModifier,
@@ -11669,7 +11724,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_ChildrenMainSize ConstructImpl(const Ark_Number* childDefaultSize)
+    Ark_ChildrenMainSize ConstructImpl(Ark_Float64 childDefaultSize)
     {
         return {};
     }
@@ -11678,22 +11733,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     void SpliceImpl(Ark_ChildrenMainSize peer,
-                    const Ark_Number* start,
-                    const Opt_Number* deleteCount,
-                    const Opt_Array_Number* childrenSize)
+                    Ark_Int32 start,
+                    const Opt_Int32* deleteCount,
+                    const Opt_Array_Float64* childrenSize)
     {
     }
     void UpdateImpl(Ark_ChildrenMainSize peer,
-                    const Ark_Number* index,
-                    const Ark_Number* childSize)
+                    Ark_Int32 index,
+                    Ark_Float64 childSize)
     {
     }
-    Ark_Number GetChildDefaultSizeImpl(Ark_ChildrenMainSize peer)
+    Ark_Float64 GetChildDefaultSizeImpl(Ark_ChildrenMainSize peer)
     {
         return {};
     }
     void SetChildDefaultSizeImpl(Ark_ChildrenMainSize peer,
-                                 const Ark_Number* childDefaultSize)
+                                 Ark_Float64 childDefaultSize)
     {
     }
     } // ChildrenMainSizeAccessor
@@ -13986,14 +14041,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     Ark_RectResult GetItemRectInGroupImpl(Ark_ListScroller peer,
-                                          const Ark_Number* index,
-                                          const Ark_Number* indexInGroup)
+                                          Ark_Int32 index,
+                                          Ark_Int32 indexInGroup)
     {
         return {};
     }
     void ScrollToItemInGroupImpl(Ark_ListScroller peer,
-                                 const Ark_Number* index,
-                                 const Ark_Number* indexInGroup,
+                                 Ark_Int32 index,
+                                 Ark_Int32 indexInGroup,
                                  const Opt_Boolean* smooth,
                                  const Opt_ScrollAlign* align)
     {
@@ -14003,8 +14058,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_ListScroller peer,
-                                                             const Ark_Number* x,
-                                                             const Ark_Number* y)
+                                                             Ark_Float64 x,
+                                                             Ark_Float64 y)
     {
         return {};
     }
@@ -16094,7 +16149,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void FlingImpl(Ark_Scroller peer,
-                   const Ark_Number* velocity)
+                   Ark_Float64 velocity)
     {
     }
     void ScrollPageImpl(Ark_Scroller peer,
@@ -16106,7 +16161,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void ScrollToIndexImpl(Ark_Scroller peer,
-                           const Ark_Number* value,
+                           Ark_Int32 value,
                            const Opt_Boolean* smooth,
                            const Opt_ScrollAlign* align,
                            const Opt_ScrollToIndexOptions* options)
@@ -16122,13 +16177,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Ark_RectResult GetItemRectImpl(Ark_Scroller peer,
-                                   const Ark_Number* index)
+                                   Ark_Int32 index)
     {
         return {};
     }
-    Ark_Number GetItemIndexImpl(Ark_Scroller peer,
-                                const Ark_Number* x,
-                                const Ark_Number* y)
+    Ark_Int32 GetItemIndexImpl(Ark_Scroller peer,
+                               Ark_Float64 x,
+                               Ark_Float64 y)
     {
         return {};
     }
@@ -16170,12 +16225,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetOffsetRemainImpl(Ark_ScrollResult peer)
+    Ark_Float64 GetOffsetRemainImpl(Ark_ScrollResult peer)
     {
         return {};
     }
     void SetOffsetRemainImpl(Ark_ScrollResult peer,
-                             const Ark_Number* offsetRemain)
+                             Ark_Float64 offsetRemain)
     {
     }
     } // ScrollResultAccessor
@@ -17660,8 +17715,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     Ark_Boolean SpliceImpl(Ark_WaterFlowSections peer,
-                           const Ark_Number* start,
-                           const Opt_Number* deleteCount,
+                           Ark_Int32 start,
+                           const Opt_Int32* deleteCount,
                            const Opt_Array_SectionOptions* sections)
     {
         return {};
@@ -17672,7 +17727,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Ark_Boolean UpdateImpl(Ark_WaterFlowSections peer,
-                           const Ark_Number* sectionIndex,
+                           Ark_Int32 sectionIndex,
                            const Ark_SectionOptions* section)
     {
         return {};
@@ -17681,7 +17736,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number LengthImpl(Ark_WaterFlowSections peer)
+    Ark_Int32 LengthImpl(Ark_WaterFlowSections peer)
     {
         return {};
     }

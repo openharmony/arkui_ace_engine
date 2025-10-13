@@ -35,7 +35,7 @@ namespace Converter {
 inline void AssignArkValue(Ark_OnScrollFrameBeginHandlerResult& dst, const ScrollFrameResult& src,
     ConvContext *ctx)
 {
-    dst.offsetRemain = Converter::ArkValue<Ark_Number>(src.offset);
+    dst.offsetRemain = Converter::ArkValue<Ark_Float64>(src.offset);
 }
 } // Converter
 
@@ -119,7 +119,7 @@ HWTEST_F(ScrollModifierTest, Scrollable_SetBadDirectionOnSlide, testing::ext::Te
 HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Number_Number_Void func{};
+    Callback_F64_F64_Void func{};
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -127,12 +127,12 @@ HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1
 
     struct ScrollData
     {
-        Ark_Number x;
-        Ark_Number y;
+        Ark_Float64 x;
+        Ark_Float64 y;
         Ark_Int32  nodeId;
     };
     static std::optional<ScrollData> data;
-    EventsTracker::eventsReceiver.onScroll = [] (Ark_Int32 nodeId, const Ark_Number x, const Ark_Number y)
+    EventsTracker::eventsReceiver.onScroll = [] (Ark_Int32 nodeId, const Ark_Float64 x, const Ark_Float64 y)
     {
         data = {x, y, nodeId};
     };
@@ -264,7 +264,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorString, testing::ext::TestSi
 {
     std::string testColor = "#11123456";
     Ark_String str = Converter::ArkValue<Ark_String>(testColor);
-    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>(str);
+    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_String>(str);
     modifier_->setScrollBarColor(node_, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -279,7 +279,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorString, testing::ext::TestSi
 HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorEnum, testing::ext::TestSize.Level1)
 {
     int32_t testColor = 0xff008000;
-    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
+    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
     modifier_->setScrollBarColor(node_, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -295,8 +295,8 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorEnum, testing::ext::TestSize
 HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorFloat, testing::ext::TestSize.Level1)
 {
     float testColor = 286405718.0;
-    auto testNumber = Converter::ArkValue<Ark_Number>(testColor);
-    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(testNumber);
+    auto testNumber = Converter::ArkValue<Ark_Int32>(testColor);
+    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_Int32>(testNumber);
     modifier_->setScrollBarColor(node_, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -317,13 +317,13 @@ HWTEST_F(ScrollModifierTest, DISABLED_ScrollBarColor_SetBadColorString, testing:
     // empty color string
     std::string testColor = "";
     Ark_String str = Converter::ArkValue<Ark_String>(testColor);
-    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>(str);
+    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_String>(str);
     modifier_->setScrollBarColor(node_, &colorUnion);
     auto after = GetStringAttribute(node_, jsonKey);
     EXPECT_EQ(before, after);
     // nullptr to data
     str = {.length = 12334, .chars = nullptr};
-    colorUnion = Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>(str);
+    colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_String>(str);
     modifier_->setScrollBarColor(node_, &colorUnion);
     after = GetStringAttribute(node_, jsonKey);
     EXPECT_EQ(before, after);
@@ -342,15 +342,15 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetWidth, testing::ext::TestSize.Lev
 {
     std::string jsonKey = "scrollBarWidth";
     Dimension testValue(33.56, DimensionUnit::VP);
-    auto testNumber = Converter::ArkValue<Ark_Number>(testValue.ConvertToVp());
-    auto arkVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(testNumber);
+    auto testNumber = Converter::ArkValue<Ark_Float64>(testValue.ConvertToVp());
+    auto arkVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(testNumber);
 
     modifier_->setScrollBarWidth(node_, &arkVal);
     auto setVal = GetStringAttribute(node_, jsonKey);
     EXPECT_EQ(setVal, testValue.ToString());
 
     auto strVal = std::string("222.99px");
-    arkVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(strVal);
+    arkVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(strVal);
 
     modifier_->setScrollBarWidth(node_, &arkVal);
     setVal = GetStringAttribute(node_, jsonKey);
@@ -374,15 +374,15 @@ HWTEST_F(ScrollModifierTest, DISABLED_ScrollBarWidth_SetDefectiveWidth, testing:
     EXPECT_EQ(testVal, defaultVal);
 
     Ark_String str = Converter::ArkValue<Ark_String>("");
-    auto emptyString = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(str);
+    auto emptyString = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(str);
     modifier_->setScrollBarWidth(node_, &emptyString);
 
     testVal = GetStringAttribute(node_, jsonKey);
     Dimension testValDim = Dimension::FromString(testVal);
     EXPECT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
 
-    auto testNumber = Converter::ArkValue<Ark_Number>(-1.0f);
-    auto defectiveNumber = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(testNumber);
+    auto testNumber = Converter::ArkValue<Ark_Float64>(-1.0f);
+    auto defectiveNumber = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(testNumber);
     modifier_->setScrollBarWidth(node_, &defectiveNumber);
 
     testVal = GetStringAttribute(node_, jsonKey);
@@ -390,7 +390,7 @@ HWTEST_F(ScrollModifierTest, DISABLED_ScrollBarWidth_SetDefectiveWidth, testing:
     EXPECT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
 
     auto testStr = Converter::ArkValue<Ark_String>("33%");
-    defectiveNumber = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(testStr);
+    defectiveNumber = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(testStr);
     modifier_->setScrollBarWidth(node_, &defectiveNumber);
 
     testVal = GetStringAttribute(node_, jsonKey);
@@ -423,8 +423,8 @@ HWTEST_F(ScrollModifierTest, DISABLED_Friction_SetNullValue, testing::ext::TestS
 HWTEST_F(ScrollModifierTest, Friction_SetAValue, testing::ext::TestSize.Level1)
 {
     float testValue = 0.13;
-    auto testNumber = Converter::ArkValue<Ark_Number>(testValue);
-    auto friction = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(testNumber);
+    auto testNumber = Converter::ArkValue<Ark_Float64>(testValue);
+    auto friction = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(testNumber);
 
     modifier_->setFriction(node_, &friction);
     auto json = GetJsonValue(node_);
@@ -443,7 +443,7 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValueFromResource, testing::ext::TestS
     std::string resName = "app.float.friction";
     AddResource(resName, testVal);
     auto RES_NAME = NamedResourceId{resName.c_str(), ResourceType::FLOAT};
-    auto friction = CreateResourceUnion<Opt_Union_Number_Resource>(RES_NAME);
+    auto friction = CreateResourceUnion<Opt_Union_I32_Resource>(RES_NAME);
 
     modifier_->setFriction(node_, &friction);
     auto json = GetJsonValue(node_);
@@ -1225,7 +1225,7 @@ HWTEST_F(ScrollModifierTest, setOnScrollFrameBeginTest, testing::ext::TestSize.L
 
     static const Ark_Int32 expectedResId = 123;
     auto onScrollFrameBegin = [](Ark_VMContext context, const Ark_Int32 resourceId,
-        const Ark_Number offset, Ark_ScrollState state,
+        const Ark_Float64 offset, Ark_ScrollState state,
         const Callback_OnScrollFrameBeginHandlerResult_Void cbReturn) {
         EXPECT_EQ(resourceId, expectedResId);
         EXPECT_EQ(Converter::Convert<float>(offset), TEST_OFFSET);
@@ -1266,8 +1266,8 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Le
     auto callback = [](
         Ark_VMContext context,
         const Ark_Int32 resourceId,
-        const Ark_Number xOffset,
-        const Ark_Number yOffset,
+        const Ark_Float64 xOffset,
+        const Ark_Float64 yOffset,
         Ark_ScrollState scrollState,
         Ark_ScrollSource scrollSource,
         const Callback_Opt_OffsetResult_Void continuation) {
@@ -1331,14 +1331,14 @@ HWTEST_F(ScrollModifierTest, OnDidScroll_SetCallback, testing::ext::TestSize.Lev
 
     struct resultData {
         Ark_Int32 resourceId;
-        Ark_Number x;
-        Ark_Number y;
+        Ark_Float64 x;
+        Ark_Float64 y;
         Ark_ScrollState state;
     };
     static std::optional<resultData> result;
 
     auto callback = [](
-        const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState) {
+        const Ark_Int32 resourceId, const Ark_Float64 xOffset, const Ark_Float64 yOffset, Ark_ScrollState scrollState) {
             result = {resourceId, xOffset, yOffset, scrollState};
     };
 

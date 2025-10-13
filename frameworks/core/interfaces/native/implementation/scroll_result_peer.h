@@ -19,6 +19,6 @@
 #include "arkoala_api_generated.h"
 
 struct ScrollResultPeer {
-    int32_t offsetRemain = 0;
+    double offsetRemain = 0;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SCROLL_RESULT_PEER_H

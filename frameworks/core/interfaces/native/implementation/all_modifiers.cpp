@@ -122,6 +122,8 @@ const GENERATED_ArkUIImageModifier* GetImageModifier();
 const GENERATED_ArkUIImageAnimatorModifier* GetImageAnimatorModifier();
 const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier();
 const GENERATED_ArkUIIndicatorComponentModifier* GetIndicatorComponentModifier();
+const GENERATED_ArkUILazyGridLayoutAttributeModifier* GetLazyGridLayoutAttributeModifier();
+const GENERATED_ArkUILazyVGridLayoutModifier* GetLazyVGridLayoutModifier();
 const GENERATED_ArkUILineModifier* GetLineModifier();
 const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier();
 const GENERATED_ArkUIListModifier* GetListModifier();
@@ -419,6 +421,8 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetImageAnimatorModifier,
         GetImageSpanModifier,
         GetIndicatorComponentModifier,
+        GetLazyGridLayoutAttributeModifier,
+        GetLazyVGridLayoutModifier,
         GetLineModifier,
         GetLinearIndicatorModifier,
         GetListModifier,

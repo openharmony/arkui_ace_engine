@@ -48,7 +48,7 @@ void ScrollEdgeImpl(Ark_Scroller peer,
     peer->TriggerScrollEdge(value, options);
 }
 void FlingImpl(Ark_Scroller peer,
-               const Ark_Number* velocity)
+               Ark_Float64 velocity)
 {
     CHECK_NULL_VOID(peer);
     peer->TriggerFling(velocity);
@@ -65,7 +65,7 @@ Ark_OffsetResult CurrentOffsetImpl(Ark_Scroller peer)
     return peer->TriggerCurrentOffset();
 }
 void ScrollToIndexImpl(Ark_Scroller peer,
-                       const Ark_Number* value,
+                       Ark_Int32 value,
                        const Opt_Boolean* smooth,
                        const Opt_ScrollAlign* align,
                        const Opt_ScrollToIndexOptions* options)
@@ -90,19 +90,19 @@ Ark_Boolean IsAtEndImpl(Ark_Scroller peer)
     return peer->TriggerIsAtEnd();
 }
 Ark_RectResult GetItemRectImpl(Ark_Scroller peer,
-                               const Ark_Number* index)
+                               Ark_Int32 index)
 {
     CHECK_NULL_RETURN(peer, {}); // need to fix default value
     return peer->TriggerGetItemRect(index);
 }
-Ark_Number GetItemIndexImpl(Ark_Scroller peer,
-                            const Ark_Number* x,
-                            const Ark_Number* y)
+Ark_Int32 GetItemIndexImpl(Ark_Scroller peer,
+                           Ark_Float64 x,
+                           Ark_Float64 y)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(-1);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(-1);
     CHECK_NULL_RETURN(peer, errValue); // need to fix default value
     auto res = peer->TriggerGetItemIndex(x, y);
-    return Converter::ArkValue<Ark_Number>(res);
+    return Converter::ArkValue<Ark_Int32>(res);
 }
 } // ScrollerAccessor
 const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
