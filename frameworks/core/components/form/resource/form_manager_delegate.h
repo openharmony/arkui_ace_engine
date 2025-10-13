@@ -170,6 +170,7 @@ public:
     void ProcessLockForm(bool lock);
 #endif
     void HandleCachedClickEvents();
+    void ReAddForm();
     std::mutex& GetRecycleMutex()
     {
         return this->recycleMutex_;
@@ -185,7 +186,6 @@ private:
     void OnFormAcquired(const std::string& param);
     void OnFormUpdate(const std::string& param);
     void OnFormError(const std::string& param);
-    void ReAddForm();
     void HandleUnTrustFormCallback();
     void HandleSnapshotCallback(const uint32_t& delayTime);
     bool ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want);
