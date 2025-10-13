@@ -103,11 +103,8 @@ void ImageModelStatic::SetImageRenderMode(FrameNode* frameNode, const std::optio
 
 void ImageModelStatic::SetImageMatrix(FrameNode* frameNode, const std::optional<Matrix4>& value)
 {
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix,
+        value.value_or(Matrix4::CreateIdentity()), frameNode);
 }
 
 void ImageModelStatic::SetImageFit(FrameNode* frameNode, const std::optional<ImageFit>& value)

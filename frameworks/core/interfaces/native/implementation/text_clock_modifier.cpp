@@ -29,6 +29,10 @@ constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 const std::vector<std::string> DEFAULT_FONT_FAMILY = { "HarmonyOS Sans" };
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
+const std::string FORM_FORMAT = "hh:mm";
+const std::string FORM_FORMAT_24H = "HH:mm";
+const std::string DEFAULT_FORMAT = "aa hh:mm:ss";
+const std::string DEFAULT_FORMAT_24H = "HH:mm:ss";
 struct TextClockOptions {
     std::optional<float> timeZoneOffset = std::nullopt;
     TextClockControllerPeer* peerController = nullptr;
@@ -86,6 +90,30 @@ void SetFormatImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
+    if (!convValue) {
+        bool isForm = false;
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto container = Container::Current();
+        bool isDynamicComponent = container && container->IsDynamicRender();
+        isForm = context->IsFormRender() && !isDynamicComponent;
+        std::string defaultFormat;
+        if (isForm) {
+            defaultFormat = FORM_FORMAT;
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
+                SystemProperties::Is24HourClock()) {
+                defaultFormat = FORM_FORMAT_24H;
+            }
+        } else {
+            defaultFormat = DEFAULT_FORMAT;
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
+                SystemProperties::Is24HourClock()) {
+                defaultFormat = DEFAULT_FORMAT_24H;
+            }
+        }
+        TextClockModelStatic::SetFormat(frameNode, std::optional<std::string>(defaultFormat));
+        return;
+    }
     TextClockModelStatic::SetFormat(frameNode, convValue);
 }
 void SetOnDateChangeImpl(Ark_NativePointer node,
