@@ -241,7 +241,9 @@ void SetOnSubmitImpl(Ark_NativePointer node,
             };
             TextFieldModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
         },
-        [] {});
+        [frameNode] {
+            TextFieldModelNG::SetOnSubmit(frameNode, nullptr);
+        });
 }
 void OnSubmit0Impl(Ark_NativePointer node,
                    const Opt_Callback_EnterKeyType_Void* value)
