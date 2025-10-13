@@ -87,7 +87,7 @@ export struct SelectTitleBar {
   options: Array<SelectOption> = [] as Array<SelectOption>;
   menuItems: Array<SelectTitleBarMenuItem> = [] as Array<SelectTitleBarMenuItem>;
   subtitle: ResourceStr = '';
-  badgeValue: number = 0;
+  badgeValue: int = 0;
   hidesBackButton: boolean = false;
   messageDesc: string = '';
   onSelected: ((index: number) => void) = (index: number) => {
