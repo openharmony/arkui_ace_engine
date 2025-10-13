@@ -1035,4 +1035,100 @@ HWTEST_F(TextFieldAlgorithmTest, StyledPlaceholderMeasureContent001, TestSize.Le
     EXPECT_EQ(ret.value(), SizeF(100.0f, 10.0f));
     EXPECT_TRUE(textInputLayoutAlgorithm->IsStyledPlaceholder(pattern_));
 }
+
+/**
+ * @tc.name: GetPlaceHolder001
+ * @tc.desc: Test the function GetPlaceHolder
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, GetPlaceHolder001, TestSize.Level1)
+{
+    CreateTextField("", "12345");
+
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"0123456789");
+    pattern_->SetPlaceholderStyledString(spanString);
+    auto placeholderResponseArea = pattern_->GetPlaceholderResponseArea();
+    ASSERT_NE(placeholderResponseArea, nullptr);
+
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(100.0f);
+    contentConstraint.maxSize.SetHeight(10.0f);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+
+    // 确认布局后Text挂到了父节点，且布局出大小受contentConstraint约束
+    EXPECT_FALSE(pattern_->IsStyledPlaceholder());
+    textInputLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode_));
+
+    EXPECT_EQ(pattern_->GetPlaceHolder(), u"0123456789");
+}
+
+/**
+ * @tc.name: IsHint001
+ * @tc.desc: Test the function IsHint
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, IsHint001, TestSize.Level1)
+{
+    CreateTextField("", "");
+
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"0123456789");
+    pattern_->SetPlaceholderStyledString(spanString);
+
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(100.0f);
+    contentConstraint.maxSize.SetHeight(10.0f);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+
+    // 确认布局后Text挂到了父节点，且布局出大小受contentConstraint约束
+    EXPECT_FALSE(pattern_->IsStyledPlaceholder());
+    textInputLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode_));
+
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->IsHint());
+}
+
+/**
+ * @tc.name: IsHint002
+ * @tc.desc: Test the function IsHint
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, IsHint002, TestSize.Level1)
+{
+    CreateTextField("", "123456");
+
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"0123456789");
+    pattern_->SetPlaceholderStyledString(spanString);
+
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(100.0f);
+    contentConstraint.maxSize.SetHeight(10.0f);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+
+    // 确认布局后Text挂到了父节点，且布局出大小受contentConstraint约束
+    EXPECT_FALSE(pattern_->IsStyledPlaceholder());
+    textInputLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode_));
+
+    EXPECT_TRUE(accessibilityProperty->IsHint());
+    layoutProperty_->UpdateValue(StringUtils::Str8ToStr16(DEFAULT_TEXT));
+    EXPECT_FALSE(accessibilityProperty->IsHint());
+}
 } // namespace OHOS::Ace::NG //
