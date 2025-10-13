@@ -28,6 +28,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t CALL_ARG_3 = 3;
 ColorMode MapJsColorModeToColorMode(int32_t jsColorMode)
 {
     switch (jsColorMode) {
@@ -185,7 +186,10 @@ ArkUINativeModuleValue ResourceBridge::GetResourceId(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-
+    int32_t argCount = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
+    if (argCount != CALL_ARG_3) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsString(vm)) {
         return panda::NumberRef::New(vm, -1);

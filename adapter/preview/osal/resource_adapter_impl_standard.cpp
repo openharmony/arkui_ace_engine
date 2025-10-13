@@ -602,4 +602,16 @@ RefPtr<ResourceAdapter> ResourceAdapterImpl::GetOverrideResourceAdapter(
     auto overrideResMgr = resourceManager_->GetOverrideResourceManager(overrideResConfig);
     return AceType::MakeRefPtr<ResourceAdapterImpl>(overrideResMgr);
 }
+
+uint32_t ResourceAdapterImpl::GetResId(const std::string &resTypeName) const
+{
+    uint32_t resId = -1;
+    CHECK_NULL_RETURN(resourceManager_, -1);
+    auto state = resourceManager_->GetResId(resTypeName, resId);
+    if (state != Global::Resource::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get resId by name error, name=%s, errorCode=%{public}d",
+            resTypeName.c_str(), state);
+    }
+    return resId;
+}
 } // namespace OHOS::Ace

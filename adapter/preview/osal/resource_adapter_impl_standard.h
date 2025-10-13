@@ -66,6 +66,7 @@ public:
     void SetAppHasDarkRes(bool hasDarkRes);
     RefPtr<ResourceAdapter> GetOverrideResourceAdapter(
         const ResourceConfiguration& config, const ConfigurationChange& configurationChange) override;
+    uint32_t GetResId(const std::string &resTypeName) const override;
 private:
     static std::string GetActualResourceName(const std::string& resName);
 
