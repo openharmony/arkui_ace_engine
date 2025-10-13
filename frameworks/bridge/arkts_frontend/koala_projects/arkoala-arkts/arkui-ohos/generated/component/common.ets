@@ -21921,7 +21921,7 @@ export interface AxisEvent {
     x: number
     y: number
     scrollStep?: number | undefined
-    propagation: (() => void)
+    propagation(): void
     getHorizontalAxisValue(): number
     getVerticalAxisValue(): number
 }
@@ -21975,11 +21975,9 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         const scrollStep_NonNull  = (scrollStep as number)
         this.setScrollStep(scrollStep_NonNull)
     }
-    get propagation(): (() => void) {
-        return this.getPropagation()
-    }
-    set propagation(propagation: (() => void)) {
-        this.setPropagation(propagation)
+    public propagation(): void {
+        this.propagation_serialize()
+        return
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -22067,14 +22065,6 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         this.setScrollStep_serialize(scrollStep_casted)
         return
     }
-    private getPropagation(): (() => void) {
-        return this.getPropagation_serialize()
-    }
-    private setPropagation(propagation: (() => void)): void {
-        const propagation_casted = propagation as ((() => void))
-        this.setPropagation_serialize(propagation_casted)
-        return
-    }
     getHorizontalAxisValue_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getHorizontalAxisValue(this.peer!.ptr)
         return retval
@@ -22155,15 +22145,8 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         ArkUIGeneratedNativeModule._AxisEvent_setScrollStep(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setPropagation_serialize(propagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(propagation)
-        ArkUIGeneratedNativeModule._AxisEvent_setPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    propagation_serialize(): void {
+        ArkUIGeneratedNativeModule._AxisEvent_propagation(this.peer!.ptr)
     }
 }
 export interface ClickEvent {
@@ -22384,7 +22367,7 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
 }
 export interface FocusAxisEvent {
     axisMap: Map<AxisModel, number>
-    stopPropagation: (() => void)
+    stopPropagation(): void
 }
 export class FocusAxisEventInternal extends BaseEventInternal implements MaterializedBase,FocusAxisEvent {
     get axisMap(): Map<AxisModel, number> {
@@ -22393,11 +22376,9 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
     set axisMap(axisMap: Map<AxisModel, number>) {
         this.setAxisMap(axisMap)
     }
-    get stopPropagation(): (() => void) {
-        return this.getStopPropagation()
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
+        return
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -22421,14 +22402,6 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
     private setAxisMap(axisMap: Map<AxisModel, number>): void {
         const axisMap_casted = axisMap as (Map<AxisModel, number>)
         this.setAxisMap_serialize(axisMap_casted)
-        return
-    }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
         return
     }
     private getAxisMap_serialize(): Map<AxisModel, number> {
@@ -22457,15 +22430,8 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
         ArkUIGeneratedNativeModule._FocusAxisEvent_setAxisMap(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._FocusAxisEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._FocusAxisEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._FocusAxisEvent_stopPropagation(this.peer!.ptr)
     }
 }
 export interface HoverEvent {

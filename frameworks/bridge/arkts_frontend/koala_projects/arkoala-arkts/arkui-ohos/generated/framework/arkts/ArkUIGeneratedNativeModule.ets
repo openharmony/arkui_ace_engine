@@ -3215,9 +3215,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _AxisEvent_setScrollStep(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _AxisEvent_getPropagation(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _AxisEvent_setPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _AxisEvent_propagation(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _BackgroundColorStyle_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -3954,9 +3952,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FocusAxisEvent_setAxisMap(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _FocusAxisEvent_getStopPropagation(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _FocusAxisEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _FocusAxisEvent_stopPropagation(ptr: KPointer): void
     @ani.unsafe.Quick
     native static _FocusController_requestFocus(key: KStringPtr): void
     @ani.unsafe.Direct

@@ -23939,9 +23939,7 @@ typedef struct GENERATED_ArkUIAxisEventAccessor {
     Opt_Number (*getScrollStep)(Ark_AxisEvent peer);
     void (*setScrollStep)(Ark_AxisEvent peer,
                           const Opt_Number* scrollStep);
-    Callback_Void (*getPropagation)(Ark_AxisEvent peer);
-    void (*setPropagation)(Ark_AxisEvent peer,
-                           const Callback_Void* propagation);
+    void (*propagation)(Ark_AxisEvent peer);
 } GENERATED_ArkUIAxisEventAccessor;
 
 typedef struct GENERATED_ArkUIBackgroundColorStyleAccessor {
@@ -24753,9 +24751,7 @@ typedef struct GENERATED_ArkUIFocusAxisEventAccessor {
     Map_AxisModel_Number (*getAxisMap)(Ark_FocusAxisEvent peer);
     void (*setAxisMap)(Ark_FocusAxisEvent peer,
                        const Map_AxisModel_Number* axisMap);
-    Callback_Void (*getStopPropagation)(Ark_FocusAxisEvent peer);
-    void (*setStopPropagation)(Ark_FocusAxisEvent peer,
-                               const Callback_Void* stopPropagation);
+    void (*stopPropagation)(Ark_FocusAxisEvent peer);
 } GENERATED_ArkUIFocusAxisEventAccessor;
 
 typedef struct GENERATED_ArkUIFocusControllerAccessor {
