@@ -747,6 +747,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToSymbolGlyphModifierPtr)
         },
         ani_native_function {
+            "_Extractors_FromTextModifierPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromTextModifierPtr)
+        },
+        ani_native_function {
+            "_Extractors_ToTextModifierPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToTextModifierPtr)
+        },
+        ani_native_function {
             "_ImageSpan_Set_PixelMap",
             "lC{@ohos.multimedia.image.image.PixelMap}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetImageSpanPixelMap)
