@@ -28,7 +28,7 @@ public:
         ON_DETACH,
         UNKNOWN
     };
-    using CanvasCallbackList = std::list<CallbackHelper<Callback_Void>>;
+    using CanvasCallbackList = std::list<CallbackHelper<VoidCallback>>;
     using CanvasCallbackIterator = CanvasCallbackList::const_iterator;
     CanvasRenderingContext2DPeerImpl();
     ~CanvasRenderingContext2DPeerImpl() override = default;
@@ -41,15 +41,15 @@ public:
     void StopImageAnalyzer();
     double GetHeight();
     double GetWidth();
-    void On(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
-    void Off(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
+    void On(CallbackHelper<VoidCallback> &&callback, const CanvasCallbackType& type);
+    void Off(CallbackHelper<VoidCallback> &&callback, const CanvasCallbackType& type);
     int32_t GetCanvasId();
 
 private:
     CanvasCallbackList::const_iterator FindCallbackInList(const CanvasCallbackList& callbackFuncPairList,
-    const CallbackHelper<Callback_Void>& callback) const;
-    void DeleteCallbackFromList(const CallbackHelper<Callback_Void>& callback, const CanvasCallbackType& type);
-    void AddCallbackToList(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
+    const CallbackHelper<VoidCallback>& callback) const;
+    void DeleteCallbackFromList(const CallbackHelper<VoidCallback>& callback, const CanvasCallbackType& type);
+    void AddCallbackToList(CallbackHelper<VoidCallback> &&callback, const CanvasCallbackType& type);
 
     bool isImageAnalyzing_ = false;
     ImageAnalyzerConfig config_;

@@ -26417,11 +26417,25 @@ Ark_NativePointer impl_CanvasGradient_getFinalizer() {
         return GetAccessors()->getCanvasGradientAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(CanvasGradient_getFinalizer, Ark_NativePointer)
-void impl_CanvasGradient_addColorStop(Ark_NativePointer thisPtr, KInteropNumber offset, const KStringPtr& color) {
+void impl_CanvasGradient_addColorStop(Ark_NativePointer thisPtr, KDouble offset, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_CanvasGradient self = reinterpret_cast<Ark_CanvasGradient>(thisPtr);
-        GetAccessors()->getCanvasGradientAccessor()->addColorStop(self, (const Ark_Number*) (&offset), (const Ark_String*) (&color));
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 colorValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
+        Ark_Union_String_ColorMetrics colorValueTempTmpBuf = {};
+        colorValueTempTmpBuf.selector = colorValueTempTmpBufUnionSelector;
+        if (colorValueTempTmpBufUnionSelector == 0) {
+            colorValueTempTmpBuf.selector = 0;
+            colorValueTempTmpBuf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        } else if (colorValueTempTmpBufUnionSelector == 1) {
+            colorValueTempTmpBuf.selector = 1;
+            colorValueTempTmpBuf.value1 = static_cast<Ark_ColorMetrics>(ColorMetrics_serializer::read(thisDeserializer));
+        } else {
+            INTEROP_FATAL("One of the branches for colorValueTempTmpBuf has to be chosen through deserialisation.");
+        }
+        Ark_Union_String_ColorMetrics colorValueTemp = static_cast<Ark_Union_String_ColorMetrics>(colorValueTempTmpBuf);;
+        GetAccessors()->getCanvasGradientAccessor()->addColorStop(self, offset, static_cast<Ark_Union_String_ColorMetrics*>(&colorValueTemp));
 }
-KOALA_INTEROP_V3(CanvasGradient_addColorStop, Ark_NativePointer, KInteropNumber, KStringPtr)
+KOALA_INTEROP_V4(CanvasGradient_addColorStop, Ark_NativePointer, KDouble, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_CanvasPath_construct() {
         return GetAccessors()->getCanvasPathAccessor()->construct();
 }
@@ -27369,46 +27383,46 @@ void impl_CanvasRenderingContext2D_stopImageAnalyzer(Ark_NativePointer thisPtr) 
         GetAccessors()->getCanvasRenderingContext2DAccessor()->stopImageAnalyzer(self);
 }
 KOALA_INTEROP_DIRECT_V1(CanvasRenderingContext2D_stopImageAnalyzer, Ark_NativePointer)
-void impl_CanvasRenderingContext2D_onOnAttach(KVMContext vmContext, Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_CanvasRenderingContext2D_onAttach(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_CanvasRenderingContext2D self = reinterpret_cast<Ark_CanvasRenderingContext2D>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_Void callback_ValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
-        GetAccessors()->getCanvasRenderingContext2DAccessor()->onOnAttach(reinterpret_cast<Ark_VMContext>(vmContext), self, static_cast<Callback_Void*>(&callback_ValueTemp));
+        VoidCallback callback_ValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_VoidCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_VoidCallback))))};;
+        GetAccessors()->getCanvasRenderingContext2DAccessor()->onAttach(self, static_cast<VoidCallback*>(&callback_ValueTemp));
 }
-KOALA_INTEROP_CTX_V3(CanvasRenderingContext2D_onOnAttach, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CanvasRenderingContext2D_offOnAttach(KVMContext vmContext, Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_CanvasRenderingContext2D self = reinterpret_cast<Ark_CanvasRenderingContext2D>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto callback_ValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_Void callback_ValueTempTmpBuf = {};
-        callback_ValueTempTmpBuf.tag = callback_ValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((callback_ValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            callback_ValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};
-        }
-        Opt_Callback_Void callback_ValueTemp = callback_ValueTempTmpBuf;;
-        GetAccessors()->getCanvasRenderingContext2DAccessor()->offOnAttach(reinterpret_cast<Ark_VMContext>(vmContext), self, static_cast<Opt_Callback_Void*>(&callback_ValueTemp));
-}
-KOALA_INTEROP_CTX_V3(CanvasRenderingContext2D_offOnAttach, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CanvasRenderingContext2D_onOnDetach(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_CanvasRenderingContext2D self = reinterpret_cast<Ark_CanvasRenderingContext2D>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_Void callback_ValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
-        GetAccessors()->getCanvasRenderingContext2DAccessor()->onOnDetach(self, static_cast<Callback_Void*>(&callback_ValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(CanvasRenderingContext2D_onOnDetach, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CanvasRenderingContext2D_offOnDetach(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_DIRECT_V3(CanvasRenderingContext2D_onAttach, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CanvasRenderingContext2D_offAttach(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_CanvasRenderingContext2D self = reinterpret_cast<Ark_CanvasRenderingContext2D>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto callback_ValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_Void callback_ValueTempTmpBuf = {};
+        Opt_VoidCallback callback_ValueTempTmpBuf = {};
         callback_ValueTempTmpBuf.tag = callback_ValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((callback_ValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            callback_ValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};
+            callback_ValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_VoidCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_VoidCallback))))};
         }
-        Opt_Callback_Void callback_ValueTemp = callback_ValueTempTmpBuf;;
-        GetAccessors()->getCanvasRenderingContext2DAccessor()->offOnDetach(self, static_cast<Opt_Callback_Void*>(&callback_ValueTemp));
+        Opt_VoidCallback callback_ValueTemp = callback_ValueTempTmpBuf;;
+        GetAccessors()->getCanvasRenderingContext2DAccessor()->offAttach(self, static_cast<Opt_VoidCallback*>(&callback_ValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(CanvasRenderingContext2D_offOnDetach, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(CanvasRenderingContext2D_offAttach, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CanvasRenderingContext2D_onDetach(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_CanvasRenderingContext2D self = reinterpret_cast<Ark_CanvasRenderingContext2D>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        VoidCallback callback_ValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_VoidCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_VoidCallback))))};;
+        GetAccessors()->getCanvasRenderingContext2DAccessor()->onDetach(self, static_cast<VoidCallback*>(&callback_ValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CanvasRenderingContext2D_onDetach, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CanvasRenderingContext2D_offDetach(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_CanvasRenderingContext2D self = reinterpret_cast<Ark_CanvasRenderingContext2D>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto callback_ValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_VoidCallback callback_ValueTempTmpBuf = {};
+        callback_ValueTempTmpBuf.tag = callback_ValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((callback_ValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            callback_ValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_VoidCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_VoidCallback))))};
+        }
+        Opt_VoidCallback callback_ValueTemp = callback_ValueTempTmpBuf;;
+        GetAccessors()->getCanvasRenderingContext2DAccessor()->offDetach(self, static_cast<Opt_VoidCallback*>(&callback_ValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CanvasRenderingContext2D_offDetach, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_Number impl_CanvasRenderingContext2D_getHeight(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderingContext2D self = reinterpret_cast<Ark_CanvasRenderingContext2D>(thisPtr);
         return GetAccessors()->getCanvasRenderingContext2DAccessor()->getHeight(self);
@@ -30392,14 +30406,18 @@ Ark_Number impl_LongPressRecognizer_getDuration(Ark_NativePointer thisPtr) {
         return GetAccessors()->getLongPressRecognizerAccessor()->getDuration(self);
 }
 KOALA_INTEROP_DIRECT_1(LongPressRecognizer_getDuration, KInteropNumber, Ark_NativePointer)
-Ark_NativePointer impl_Matrix2D_construct0() {
-        return GetAccessors()->getMatrix2DAccessor()->construct0();
+Ark_NativePointer impl_Matrix2D_construct(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto unitValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_LengthMetricsUnit unitValueTempTmpBuf = {};
+        unitValueTempTmpBuf.tag = unitValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((unitValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            unitValueTempTmpBuf.value = static_cast<Ark_LengthMetricsUnit>(thisDeserializer.readInt32());
+        }
+        Opt_LengthMetricsUnit unitValueTemp = unitValueTempTmpBuf;;
+        return GetAccessors()->getMatrix2DAccessor()->construct(static_cast<Opt_LengthMetricsUnit*>(&unitValueTemp));
 }
-KOALA_INTEROP_DIRECT_0(Matrix2D_construct0, Ark_NativePointer)
-Ark_NativePointer impl_Matrix2D_construct1(Ark_Int32 unit) {
-        return GetAccessors()->getMatrix2DAccessor()->construct1(static_cast<Ark_LengthMetricsUnit>(unit));
-}
-KOALA_INTEROP_DIRECT_1(Matrix2D_construct1, Ark_NativePointer, Ark_Int32)
+KOALA_INTEROP_DIRECT_2(Matrix2D_construct, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Matrix2D_getFinalizer() {
         return GetAccessors()->getMatrix2DAccessor()->getFinalizer();
 }
@@ -35783,16 +35801,19 @@ void impl_VideoController_exitFullscreen(Ark_NativePointer thisPtr) {
         GetAccessors()->getVideoControllerAccessor()->exitFullscreen(self);
 }
 KOALA_INTEROP_DIRECT_V1(VideoController_exitFullscreen, Ark_NativePointer)
-void impl_VideoController_setCurrentTimeDefault(Ark_NativePointer thisPtr, KDouble value) {
+void impl_VideoController_setCurrentTime(Ark_NativePointer thisPtr, KDouble value, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_VideoController self = reinterpret_cast<Ark_VideoController>(thisPtr);
-        GetAccessors()->getVideoControllerAccessor()->setCurrentTimeDefault(self, value);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto seekModeValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_SeekMode seekModeValueTempTmpBuf = {};
+        seekModeValueTempTmpBuf.tag = seekModeValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((seekModeValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            seekModeValueTempTmpBuf.value = static_cast<Ark_SeekMode>(thisDeserializer.readInt32());
+        }
+        Opt_SeekMode seekModeValueTemp = seekModeValueTempTmpBuf;;
+        GetAccessors()->getVideoControllerAccessor()->setCurrentTime(self, value, static_cast<Opt_SeekMode*>(&seekModeValueTemp));
 }
-KOALA_INTEROP_V2(VideoController_setCurrentTimeDefault, Ark_NativePointer, KDouble)
-void impl_VideoController_setCurrentTimeWithMode(Ark_NativePointer thisPtr, KDouble value, Ark_Int32 seekMode) {
-        Ark_VideoController self = reinterpret_cast<Ark_VideoController>(thisPtr);
-        GetAccessors()->getVideoControllerAccessor()->setCurrentTimeWithMode(self, value, static_cast<Ark_SeekMode>(seekMode));
-}
-KOALA_INTEROP_V3(VideoController_setCurrentTimeWithMode, Ark_NativePointer, KDouble, Ark_Int32)
+KOALA_INTEROP_V4(VideoController_setCurrentTime, Ark_NativePointer, KDouble, KSerializerBuffer, int32_t)
 void impl_VideoController_reset(Ark_NativePointer thisPtr) {
         Ark_VideoController self = reinterpret_cast<Ark_VideoController>(thisPtr);
         GetAccessors()->getVideoControllerAccessor()->reset(self);

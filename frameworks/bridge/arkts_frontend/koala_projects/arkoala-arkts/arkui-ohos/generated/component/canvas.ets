@@ -21,17 +21,17 @@ import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Matrix2D_serializer, Matrix2D, Matrix2DInternal } from "./matrix2d"
-import { Size_serializer, LengthMetrics_serializer } from "./../Graphics"
+import { ColorMetrics_serializer, Size_serializer, LengthMetrics_serializer } from "./../Graphics"
 import { drawing_Canvas_serializer } from "./../framework/ohos.graphics.drawing"
-import { Size, LengthMetricsUnit, LengthMetrics } from "arkui.Graphics"
-import { extractors, AttributeModifier, hookCanvasAttributeModifier, AttributeUpdater, hookCreateImageData, hookGetImageData, hookPutImageData, hookGetContext, hookOn, hookOff } from "#handwritten"
+import { ColorMetrics, Size, LengthMetricsUnit, LengthMetrics } from "arkui.Graphics"
+import { extractors, AttributeModifier, hookCanvasAttributeModifier, AttributeUpdater, hookCreateImageData, hookGetImageData, hookPutImageData, hookGetContext } from "#handwritten"
 import { default as drawing } from "@ohos.graphics.drawing"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { default as image } from "@ohos.multimedia.image"
 import { ImageAIOptions_serializer, ImageAIOptions, ImageAnalyzerConfig_serializer, ImageAnalyzerConfig } from "./imageCommon"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Callback } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VoidCallback } from "./units"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -63,14 +63,25 @@ export class CanvasGradient implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._CanvasGradient_getFinalizer()
     }
-    public addColorStop(offset: number, color: string): void {
-        const offset_casted = offset as (number)
-        const color_casted = color as (string)
+    public addColorStop(offset: double, color: string | ColorMetrics): void {
+        const offset_casted = offset as (double)
+        const color_casted = color as (string | ColorMetrics)
         this.addColorStop_serialize(offset_casted, color_casted)
         return
     }
-    addColorStop_serialize(offset: number, color: string): void {
-        ArkUIGeneratedNativeModule._CanvasGradient_addColorStop(this.peer!.ptr, offset, color)
+    addColorStop_serialize(offset: double, color: string | ColorMetrics): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (color instanceof string) {
+            thisSerializer.writeInt8((0).toChar())
+            const colorForIdx0  = color as string
+            thisSerializer.writeString(colorForIdx0)
+        } else if (color instanceof ColorMetrics) {
+            thisSerializer.writeInt8((1).toChar())
+            const colorForIdx1  = color as ColorMetrics
+            ColorMetrics_serializer.write(thisSerializer, colorForIdx1)
+        }
+        ArkUIGeneratedNativeModule._CanvasGradient_addColorStop(this.peer!.ptr, offset, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export class CanvasPathInternal {
@@ -2185,24 +2196,24 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         this.stopImageAnalyzer_serialize()
         return
     }
-    public onOnAttach(callback_: Callback<void>): void {
-        const callback__casted = callback_ as (Callback<void>)
-        this.onOnAttach_serialize(callback__casted)
+    public onAttach(callback_: VoidCallback): void {
+        const callback__casted = callback_ as (VoidCallback)
+        this.onAttach_serialize(callback__casted)
         return
     }
-    public offOnAttach(callback_?: Callback<void>): void {
-        const callback__casted = callback_ as (Callback<void> | undefined)
-        this.offOnAttach_serialize(callback__casted)
+    public offAttach(callback_?: VoidCallback): void {
+        const callback__casted = callback_ as (VoidCallback | undefined)
+        this.offAttach_serialize(callback__casted)
         return
     }
-    public onOnDetach(callback_: Callback<void>): void {
-        const callback__casted = callback_ as (Callback<void>)
-        this.onOnDetach_serialize(callback__casted)
+    public onDetach(callback_: VoidCallback): void {
+        const callback__casted = callback_ as (VoidCallback)
+        this.onDetach_serialize(callback__casted)
         return
     }
-    public offOnDetach(callback_?: Callback<void>): void {
-        const callback__casted = callback_ as (Callback<void> | undefined)
-        this.offOnDetach_serialize(callback__casted)
+    public offDetach(callback_?: VoidCallback): void {
+        const callback__casted = callback_ as (VoidCallback | undefined)
+        this.offDetach_serialize(callback__casted)
         return
     }
     private getHeight(): number {
@@ -2228,12 +2239,6 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         const canvas_casted = canvas as (FrameNode)
         this.setCanvas_serialize(canvas_casted)
         return
-    }
-    on(type: string, callback_: Callback<void>): void {
-        hookOn(this, type, callback_)
-    }
-    off(type: string, callback_: Callback<void>): void {
-        hookOff(this, type, callback_)
     }
     toDataURL_serialize(type?: string, quality?: number): string {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -2266,13 +2271,13 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     stopImageAnalyzer_serialize(): void {
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_stopImageAnalyzer(this.peer!.ptr)
     }
-    onOnAttach_serialize(callback_: Callback<void>): void {
+    onAttach_serialize(callback_: VoidCallback): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onOnAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    offOnAttach_serialize(callback_?: Callback<void>): void {
+    offAttach_serialize(callback_?: VoidCallback): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (callback_ !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2281,16 +2286,16 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offOnAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onOnDetach_serialize(callback_: Callback<void>): void {
+    onDetach_serialize(callback_: VoidCallback): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onOnDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    offOnDetach_serialize(callback_?: Callback<void>): void {
+    offDetach_serialize(callback_?: VoidCallback): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (callback_ !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2299,7 +2304,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offOnDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getHeight_serialize(): number {

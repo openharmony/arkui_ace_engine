@@ -37,17 +37,25 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void AddColorStopImpl(Ark_CanvasGradient peer,
-                      const Ark_Number* offset,
-                      const Ark_String* color)
+                      Ark_Float64 offset,
+                      const Ark_Union_String_ColorMetrics* color)
 {
     CHECK_NULL_VOID(peer);
-    auto opt = Converter::OptConvertPtr<Color>(color);
-    if (!offset || !opt) {
-        peer->AddColorStop(DEFAULT_NEGATIVE_OFFSET, Color::TRANSPARENT);
-        return;
-    }
-    auto value = Converter::Convert<float>(*offset);
-    peer->AddColorStop(value, *opt);
+    CHECK_NULL_VOID(color);
+    auto value = Converter::Convert<double>(offset);
+    Converter::VisitUnion(
+        *color,
+        [value, peer](const Ark_String& opt) {
+            auto colorValue = Converter::OptConvert<Color>(opt);
+            if (!colorValue) {
+                peer->AddColorStop(DEFAULT_NEGATIVE_OFFSET, Color::TRANSPARENT);
+            } else {
+                peer->AddColorStop(value, colorValue.value());
+            }
+        },
+        [value, peer](const Ark_ColorMetrics& opt) {
+        },
+        []() {});
 }
 } // CanvasGradientAccessor
 const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor()

@@ -2403,6 +2403,7 @@ typedef struct Ark_Union_String_Array_String Ark_Union_String_Array_String;
 typedef struct Opt_Union_String_Array_String Opt_Union_String_Array_String;
 typedef struct Ark_Union_String_Bindable Ark_Union_String_Bindable;
 typedef struct Opt_Union_String_Bindable Opt_Union_String_Bindable;
+typedef struct Ark_Union_String_ColorMetrics Ark_Union_String_ColorMetrics;
 typedef struct Ark_Union_String_CustomBuilder_ComponentContent Ark_Union_String_CustomBuilder_ComponentContent;
 typedef struct Opt_Union_String_CustomBuilder_ComponentContent Opt_Union_String_CustomBuilder_ComponentContent;
 typedef struct Ark_Union_String_I32_Buffer_Resource Ark_Union_String_I32_Buffer_Resource;
@@ -15753,6 +15754,18 @@ typedef struct Opt_Union_String_Bindable {
     Ark_Tag tag;
     Ark_Union_String_Bindable value;
 } Opt_Union_String_Bindable;
+typedef struct Ark_Union_String_ColorMetrics {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_String value0;
+        Ark_ColorMetrics value1;
+    };
+} Ark_Union_String_ColorMetrics;
+typedef struct Opt_Union_String_ColorMetrics {
+    Ark_Tag tag;
+    Ark_Union_String_ColorMetrics value;
+} Opt_Union_String_ColorMetrics;
 typedef struct Ark_Union_String_CustomBuilder_ComponentContent {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -24015,8 +24028,8 @@ typedef struct GENERATED_ArkUICanvasGradientAccessor {
     Ark_CanvasGradient (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*addColorStop)(Ark_CanvasGradient peer,
-                         const Ark_Number* offset,
-                         const Ark_String* color);
+                         Ark_Float64 offset,
+                         const Ark_Union_String_ColorMetrics* color);
 } GENERATED_ArkUICanvasGradientAccessor;
 
 typedef struct GENERATED_ArkUICanvasPathAccessor {
@@ -24306,16 +24319,14 @@ typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
                                const Ark_ImageAnalyzerConfig* config,
                                const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
     void (*stopImageAnalyzer)(Ark_CanvasRenderingContext2D peer);
-    void (*onOnAttach)(Ark_VMContext vmContext,
-                       Ark_CanvasRenderingContext2D peer,
-                       const Callback_Void* callback_);
-    void (*offOnAttach)(Ark_VMContext vmContext,
-                        Ark_CanvasRenderingContext2D peer,
-                        const Opt_Callback_Void* callback_);
-    void (*onOnDetach)(Ark_CanvasRenderingContext2D peer,
-                       const Callback_Void* callback_);
-    void (*offOnDetach)(Ark_CanvasRenderingContext2D peer,
-                        const Opt_Callback_Void* callback_);
+    void (*onAttach)(Ark_CanvasRenderingContext2D peer,
+                     const VoidCallback* callback_);
+    void (*offAttach)(Ark_CanvasRenderingContext2D peer,
+                      const Opt_VoidCallback* callback_);
+    void (*onDetach)(Ark_CanvasRenderingContext2D peer,
+                     const VoidCallback* callback_);
+    void (*offDetach)(Ark_CanvasRenderingContext2D peer,
+                      const Opt_VoidCallback* callback_);
     Ark_Number (*getHeight)(Ark_CanvasRenderingContext2D peer);
     void (*setHeight)(Ark_CanvasRenderingContext2D peer,
                       const Ark_Number* height);
@@ -25255,8 +25266,7 @@ typedef struct GENERATED_ArkUILongPressRecognizerAccessor {
 
 typedef struct GENERATED_ArkUIMatrix2DAccessor {
     void (*destroyPeer)(Ark_Matrix2D peer);
-    Ark_Matrix2D (*construct0)();
-    Ark_Matrix2D (*construct1)(Ark_LengthMetricsUnit unit);
+    Ark_Matrix2D (*construct)(const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_Matrix2D (*identity)(Ark_Matrix2D peer);
     Ark_Matrix2D (*invert)(Ark_Matrix2D peer);
@@ -26701,11 +26711,9 @@ typedef struct GENERATED_ArkUIVideoControllerAccessor {
     void (*requestFullscreen)(Ark_VideoController peer,
                               Ark_Boolean value);
     void (*exitFullscreen)(Ark_VideoController peer);
-    void (*setCurrentTimeDefault)(Ark_VideoController peer,
-                                  Ark_Float64 value);
-    void (*setCurrentTimeWithMode)(Ark_VideoController peer,
-                                   Ark_Float64 value,
-                                   Ark_SeekMode seekMode);
+    void (*setCurrentTime)(Ark_VideoController peer,
+                           Ark_Float64 value,
+                           const Opt_SeekMode* seekMode);
     void (*reset)(Ark_VideoController peer);
 } GENERATED_ArkUIVideoControllerAccessor;
 

@@ -31,7 +31,7 @@ struct CanvasGradientPeer {
         gradient_ = gradient;
     }
 
-    virtual void AddColorStop(const float& offset, const OHOS::Ace::Color& color)
+    virtual void AddColorStop(const double& offset, const OHOS::Ace::Color& color)
     {
         CHECK_NULL_VOID(gradient_);
         if (!isColorStopValid && gradient_->GetColors().empty()) {
