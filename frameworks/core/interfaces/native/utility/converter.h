@@ -853,6 +853,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src);
     template<> void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src);
     template<> void AssignCast(std::optional<VisibleType>& dst, const Ark_Visibility& src);
+    template<> void AssignCast(std::optional<WebBypassVsyncCondition>& dst, const Ark_WebBypassVsyncCondition& src);
     template<> void AssignCast(std::optional<WebCacheMode>& dst, const Ark_CacheMode& src);
     template<> void AssignCast(std::optional<WebDarkMode>& dst, const Ark_WebDarkMode& src);
     template<> void AssignCast(std::optional<WebElementType>& dst, const Ark_WebElementType& src);

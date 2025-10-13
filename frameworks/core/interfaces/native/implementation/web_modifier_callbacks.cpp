@@ -1115,6 +1115,25 @@ void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_V
     arkCallback.InvokeSync(parameter);
 }
 
+void OnNativeEmbedMouseInfo(const CallbackHelper<MouseInfoCallback>& arkCallback,
+    int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbeadMouseInfo>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_NativeEmbedMouseInfo parameter;
+    parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
+    auto mouseEventInfo = eventInfo->GetMouseEventInfo();
+    const auto event = Converter::ArkMouseEventSync(mouseEventInfo);
+    parameter.mouseEvent = Converter::ArkValue<Opt_MouseEvent>(event.ArkValue());
+    Ark_EventResult arkEventResult;
+    auto peer = new EventResultPeer();
+    peer->handler = eventInfo->GetResult();
+    arkEventResult = peer;
+    parameter.result = Converter::ArkValue<Opt_EventResult>(arkEventResult);
+    arkCallback.InvokeSync(parameter);
+}
+
 bool OnOverrideUrlLoading(const CallbackHelper<OnOverrideUrlLoadingCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {

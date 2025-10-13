@@ -1168,6 +1168,17 @@ void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_Sli
 }
 
 template<>
+void AssignCast(std::optional<WebBypassVsyncCondition>& dst, const Ark_WebBypassVsyncCondition& src)
+{
+    switch (src) {
+        case ARK_WEB_BYPASS_VSYNC_CONDITION_NONE: dst = WebBypassVsyncCondition::NONE; break;
+        case ARK_WEB_BYPASS_VSYNC_CONDITION_SCROLLBY_FROM_ZERO_OFFSET:
+                                                dst = WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET; break;
+        default: LOGE("Unexpected enum value in Ark_WebBypassVsyncCondition: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<WebDarkMode>& dst, const Ark_WebDarkMode& src)
 {
     switch (src) {
