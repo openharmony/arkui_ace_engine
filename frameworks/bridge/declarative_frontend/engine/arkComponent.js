@@ -11965,9 +11965,6 @@ class ArkSearchComponent extends ArkComponent {
     return this;
   }
   selectedDataDetectorConfig(config) {
-    if (config === undefined || config === null) {
-      return this;
-    }
     modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorConfigModifier.identity, SearchSelectDetectorConfigModifier, config);
     return this;
   }
@@ -14704,9 +14701,6 @@ class ArkTextComponent extends ArkComponent {
     return this;
   }
   selectedDataDetectorConfig(config) {
-    if (config === undefined || config === null) {
-      return this;
-    }
     modifierWithKey(this._modifiersWithKeys, TextSelectDetectorConfigModifier.identity, TextSelectDetectorConfigModifier, config);
     return this;
   }
@@ -16386,9 +16380,6 @@ class ArkTextAreaComponent extends ArkComponent {
     return this;
   }
   selectedDataDetectorConfig(config) {
-    if (config === undefined || config === null) {
-      return this;
-    }
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorConfigModifier.identity, TextAreaSelectDetectorConfigModifier, config);
     return this;
   }
@@ -18437,9 +18428,6 @@ class ArkTextInputComponent extends ArkComponent {
     return this;
   }
   selectedDataDetectorConfig(config) {
-    if (config === undefined || config === null) {
-      return this;
-    }
     modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorConfigModifier.identity, TextInputSelectDetectorConfigModifier, config);
     return this;
   }

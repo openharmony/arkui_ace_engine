@@ -36,6 +36,7 @@ constexpr uint8_t ALL_DETECT_FINISH = URL_DETECT_FINISH | OTHER_DETECT_FINISH;
 const std::string ALL_TEXT_DETECT_TYPES = "phoneNum,url,email,location,datetime";
 const std::string TEXT_DETECT_TYPES_WITHOUT_URL = "phoneNum,email,location,datetime";
 const std::string ASK_CELIA_TAG = "askCelia";
+const std::u16string DETECT_NULL_STRING = u"NULL";
 
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
@@ -597,10 +598,14 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
 
 void DataDetectorAdapter::StartAITask(bool clearAISpanMap, bool isSelectDetect)
 {
-    if (textForAI_.empty() || (!typeChanged_ && lastTextForAI_ == textForAI_) ||
-        (isSelectDetect && textForAI_.size() > AI_TEXT_SELECT_DETECT_MAX_LENGTH)) {
+    if (!isSelectDetect && (textForAI_.empty() || (!typeChanged_ && lastTextForAI_ == textForAI_))) {
         MarkDirtyNode();
         return;
+    }
+    if (isSelectDetect && (textForAI_.size() > AI_TEXT_SELECT_DETECT_MAX_LENGTH || lastTextForAI_ == textForAI_)) {
+        if (textForAI_.size() > AI_TEXT_SELECT_DETECT_MAX_LENGTH) {
+            textForAI_ = DETECT_NULL_STRING;
+        }
     }
     std::map<int32_t, AISpan> aiSpanMapCopy;
     if (!typeChanged_ && !isSelectDetect) {

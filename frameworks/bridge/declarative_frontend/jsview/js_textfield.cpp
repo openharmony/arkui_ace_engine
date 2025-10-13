@@ -453,6 +453,10 @@ void JSTextField::SetTextAlign(int32_t value)
 
 void JSTextField::SetSelectDetectEnable(const JSCallbackInfo& info)
 {
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->ResetSelectDetectEnable();
+        return;
+    }
     if (info[0]->IsBoolean()) {
         auto enabled = info[0]->ToBoolean();
         TextFieldModel::GetInstance()->SetSelectDetectEnable(enabled);
@@ -461,6 +465,10 @@ void JSTextField::SetSelectDetectEnable(const JSCallbackInfo& info)
 
 void JSTextField::SetSelectDetectConfig(const JSCallbackInfo& info)
 {
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->ResetSelectDetectConfig();
+        return;
+    }
     std::vector<TextDataDetectType> typesList;
     if (!info[0]->IsObject()) {
         return;

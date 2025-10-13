@@ -147,6 +147,40 @@ function valueToArkBorder(value: BorderOptions): ArkBorder {
   return borderValue;
 }
 
+class TextAreaSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaSelectDetectorEnable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetSelectDetectorEnable(node);
+    } else {
+      getUINativeModule().textArea.setSelectDetectorEnable(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaSelectDetectorConfigModifier extends ModifierWithKey<SelectDetectorConfig> {
+  constructor(value: SelectDetectorConfig) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaSelectDetectorConfig');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetSelectDetectorConfig(node);
+    } else {
+      getUINativeModule().textArea.setSelectDetectorConfig(node, this.value.types);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
+  }
+}
+
 class TextAreaFontStyleModifier extends ModifierWithKey<FontStyle> {
   static identity: Symbol = Symbol('textAreaFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
@@ -1486,6 +1520,14 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     if (value.length === 1 && isObject(value[0])) {
       modifierWithKey(this._modifiersWithKeys, TextAreaInitializeModifier.identity, TextAreaInitializeModifier, value[0]);
     }
+    return this;
+  }
+  enableSelectedDataDetector(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorEnableModifier.identity, TextAreaSelectDetectorEnableModifier, value);
+    return this;
+  }
+  selectedDataDetectorConfig(config) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorConfigModifier.identity, TextAreaSelectDetectorConfigModifier, config);
     return this;
   }
   type(value: TextAreaType): TextAreaAttribute {

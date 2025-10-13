@@ -71,6 +71,8 @@ public:
     void SetBackBorder() override;
     void SetSelectDetectEnable(bool value) override;
     void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
+    void ResetSelectDetectEnable() override;
+    void ResetSelectDetectConfig() override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
     void SetOnSubmit(std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit) override {};
     void SetOnChange(std::function<void(const ChangeValueInfo&)>&& onChange) override {};

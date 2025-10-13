@@ -2231,6 +2231,17 @@ bool SearchModelNG::GetSelectDetectEnable(FrameNode* frameNode)
     return pattern->GetSelectDetectEnable();
 }
 
+void SearchModelNG::ResetSelectDetectEnable()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectEnable();
+}
+
 void SearchModelNG::ResetSelectDetectEnable(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2270,6 +2281,17 @@ std::vector<TextDataDetectType> SearchModelNG::GetSelectDetectConfig(FrameNode* 
     auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, std::vector<TextDataDetectType>());
     return pattern->GetSelectDetectConfig();
+}
+
+void SearchModelNG::ResetSelectDetectConfig()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectConfig();
 }
 
 void SearchModelNG::ResetSelectDetectConfig(FrameNode* frameNode)
