@@ -2165,9 +2165,7 @@ std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src, DimensionUnit 
         [&dimension, defaultUnit](const Ark_Resource& value) {
             dimension = OptConvertFromArkResource(value, defaultUnit);
         },
-        [&dimension]() {
-            dimension = Dimension();
-        });
+        []() {});
 
     return dimension;
 }
@@ -2175,6 +2173,7 @@ template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Union_F64_Strin
     const Ark_Union_F64_String_Resource&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(const Ark_Dimension&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(const Ark_Length&, DimensionUnit);
+template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(const Opt_Length&, DimensionUnit);
 
 std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
 {

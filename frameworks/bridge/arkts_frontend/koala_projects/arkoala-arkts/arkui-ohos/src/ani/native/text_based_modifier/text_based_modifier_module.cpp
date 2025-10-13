@@ -59,7 +59,7 @@ ani_long ExtractorsToSymbolGlyphModifierPtr(ani_env* env, [[maybe_unused]] ani_o
     ani_object symbolModifierAni)
 {
     const auto* modifier = GetNodeAniModifier();
-    CHECK_NULL_RETURN(modifier || fnObj, 0);
+    CHECK_NULL_RETURN(modifier && fnObj, 0);
 
     auto callbackAni = std::make_shared<TextBasedComponentCallbackAni>(env, fnObj);
     std::function<void(WeakPtr<NG::FrameNode>)> symbolApply =
