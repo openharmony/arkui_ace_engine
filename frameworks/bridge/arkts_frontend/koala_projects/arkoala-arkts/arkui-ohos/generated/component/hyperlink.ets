@@ -44,16 +44,22 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setHyperlinkOptionsAttribute(address: string | Resource, content?: string | Resource): void {
+    setHyperlinkOptionsAttribute(address: string | Resource | undefined, content?: string | Resource): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (address instanceof string) {
-            thisSerializer.writeInt8((0).toByte())
-            const addressForIdx0  = address as string
-            thisSerializer.writeString(addressForIdx0)
-        } else if (address instanceof Resource) {
-            thisSerializer.writeInt8((1).toByte())
-            const addressForIdx1  = address as Resource
-            Resource_serializer.write(thisSerializer, addressForIdx1)
+        if (address !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const addressTmpValue  = address!
+            if (addressTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const addressTmpValueForIdx0  = addressTmpValue as string
+                thisSerializer.writeString(addressTmpValueForIdx0)
+            } else if (addressTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const addressTmpValueForIdx1  = addressTmpValue as Resource
+                Resource_serializer.write(thisSerializer, addressTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -103,7 +109,7 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
     }
 }
 export interface HyperlinkAttribute extends CommonMethod {
-    setHyperlinkOptions(address: string | Resource, content?: string | Resource): this {
+    setHyperlinkOptions(address: string | Resource | undefined, content?: string | Resource): this {
         throw new Error("Unimplemented method setHyperlinkOptions")
     }
     color(value: Color | int32 | string | Resource | undefined): this {
@@ -116,7 +122,7 @@ export interface HyperlinkAttribute extends CommonMethod {
 export class ArkHyperlinkStyle extends ArkCommonMethodStyle implements HyperlinkAttribute {
     color_value?: Color | int32 | string | Resource | undefined
     attributeModifier_value?: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined
-    setHyperlinkOptions(address: string | Resource, content?: string | Resource): this {
+    setHyperlinkOptions(address: string | Resource | undefined, content?: string | Resource): this {
         return this
     }
     color(value: Color | int32 | string | Resource | undefined): this {
@@ -134,9 +140,9 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements H
         }
         return (this.peer as ArkHyperlinkPeer)
     }
-    public setHyperlinkOptions(address: string | Resource, content?: string | Resource): this {
+    public setHyperlinkOptions(address: string | Resource | undefined, content?: string | Resource): this {
         if (this.checkPriority("setHyperlinkOptions")) {
-            const address_casted = address as (string | Resource)
+            const address_casted = address as (string | Resource | undefined)
             const content_casted = content as (string | Resource | undefined)
             this.getPeer()?.setHyperlinkOptionsAttribute(address_casted, content_casted)
             return this

@@ -16,7 +16,9 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text/symbol_span_model_static.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 #include "frameworks/core/components_ng/pattern/symbol/constants.h"
@@ -100,6 +102,26 @@ void SetRenderingStrategyImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<Converter::RenderingStrategy>(value);
     SymbolSpanModelStatic::SetSymbolRenderingStrategy(frameNode, EnumToInt(convValue));
 }
+void SetKeyImpl(Ark_NativePointer node,
+                const Opt_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<std::string>(value);
+    if (!convValue) {
+        // keep the same processing
+        return;
+    }
+    ViewAbstract::SetInspectorId(frameNode, *convValue);
+}
+void SetIdImpl(Ark_NativePointer node,
+               const Opt_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto id = Converter::OptConvertPtr<std::string>(value);
+    ViewAbstract::SetInspectorId(frameNode, *id);
+}
 } // SymbolSpanAttributeModifier
 const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier()
 {
@@ -111,6 +133,8 @@ const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier()
         SymbolSpanAttributeModifier::SetFontWeightImpl,
         SymbolSpanAttributeModifier::SetEffectStrategyImpl,
         SymbolSpanAttributeModifier::SetRenderingStrategyImpl,
+        SymbolSpanAttributeModifier::SetKeyImpl,
+        SymbolSpanAttributeModifier::SetIdImpl,
     };
     return &ArkUISymbolSpanModifierImpl;
 }

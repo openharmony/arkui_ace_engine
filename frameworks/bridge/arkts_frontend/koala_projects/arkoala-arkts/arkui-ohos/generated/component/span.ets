@@ -22,14 +22,14 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ShadowOptions_serializer, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ShadowOptions_serializer, ShadowOptions, ClickEvent, HoverCallback, HoverEvent, BaseEvent, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { LengthMetrics } from "arkui.Graphics"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer } from "./../framework/resource"
 import { Font_serializer, Font, ResourceColor, Length, Dimension, BorderRadiuses, BorderRadiuses_serializer } from "./units"
 import { DecorationStyleInterface_serializer, DecorationStyleInterface } from "./styledString"
-import { Color, FontStyle, FontWeight, TextCase } from "./enums"
+import { Color, FontStyle, FontWeight, TextCase, InteractionHand } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookBaseSpanAttributeModifier, AttributeUpdater, hookSpanAttributeModifier } from "#handwritten"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -74,7 +74,7 @@ export class ArkBaseSpanPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
 }
-export class ArkSpanPeer extends ArkBaseSpanPeer {
+export class ArkSpanPeer extends PeerNode {
     attributeSet?: SpanModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -312,6 +312,97 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         ArkUIGeneratedNativeModule._SpanAttribute_setTextShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setTextBackgroundStyleAttribute(value: TextBackgroundStyle | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            TextBackgroundStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setTextBackgroundStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBaselineOffsetAttribute(value: LengthMetrics | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setBaselineOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setKeyAttribute(value: string | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeString(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setKey(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setIdAttribute(value: string | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeString(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setId(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnClick0Attribute(value: ((value0: ClickEvent) => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setOnClick0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnHoverAttribute(value: HoverCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setOnHover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnClick1Attribute(event: ((value0: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (event !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const eventTmpValue  = event!
+            thisSerializer.holdAndWriteCallback(eventTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (distanceThreshold !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const distanceThresholdTmpValue  = distanceThreshold!
+            thisSerializer.writeFloat64(distanceThresholdTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setOnClick1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface TextBackgroundStyle {
     color?: ResourceColor;
@@ -341,7 +432,7 @@ export class ArkBaseSpanStyle extends ArkCommonMethodStyle implements BaseSpan {
         throw new Error("Not implemented")
     }
 }
-export interface SpanAttribute extends BaseSpan {
+export interface SpanAttribute {
     setSpanOptions(value: string | Resource): this {
         throw new Error("Unimplemented method setSpanOptions")
     }
@@ -378,11 +469,32 @@ export interface SpanAttribute extends BaseSpan {
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         throw new Error("Unimplemented method textShadow")
     }
-    attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
+    textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
+        throw new Error("Unimplemented method textBackgroundStyle")
+    }
+    baselineOffset(value: LengthMetrics | undefined): this {
+        throw new Error("Unimplemented method baselineOffset")
+    }
+    key(value: string | undefined): this {
+        throw new Error("Unimplemented method key")
+    }
+    id(value: string | undefined): this {
+        throw new Error("Unimplemented method id")
+    }
+    onClick(value: ((value0: ClickEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onClick")
+    }
+    onHover(value: HoverCallback | undefined): this {
+        throw new Error("Unimplemented method onHover")
+    }
+    onClick(event: ((value0: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
+        throw new Error("Unimplemented method onClick")
+    }
+    attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
-export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
+export class ArkSpanStyle implements SpanAttribute {
     font_value?: Font | undefined
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: double | string | Resource | undefined
@@ -394,7 +506,13 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     textCase_value?: TextCase | undefined
     lineHeight_value?: Length | undefined
     textShadow_value?: ShadowOptions | Array<ShadowOptions> | undefined
-    attributeModifier_value?: AttributeModifier<SpanAttribute> | AttributeModifier<CommonMethod> | undefined
+    textBackgroundStyle_value?: TextBackgroundStyle | undefined
+    baselineOffset_value?: LengthMetrics | undefined
+    key_value?: string | undefined
+    id_value?: string | undefined
+    onClick_value?: ((value0: ClickEvent) => void) | undefined
+    onHover_value?: HoverCallback | undefined
+    attributeModifier_value?: AttributeModifier<SpanAttribute> | undefined
     setSpanOptions(value: string | Resource): this {
         return this
     }
@@ -431,7 +549,28 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         return this
     }
-    public attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
+    textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
+        return this
+    }
+    baselineOffset(value: LengthMetrics | undefined): this {
+        return this
+    }
+    key(value: string | undefined): this {
+        return this
+    }
+    id(value: string | undefined): this {
+        return this
+    }
+    onClick(value: ((value0: ClickEvent) => void) | undefined): this {
+        return this
+    }
+    onHover(value: HoverCallback | undefined): this {
+        return this
+    }
+    onClick(event: ((value0: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         throw new Error("Not implemented")
     }
 }
@@ -468,7 +607,7 @@ export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements Ba
         super.applyAttributesFinish()
     }
 }
-export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttribute {
+export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
     getPeer(): ArkSpanPeer {
         if (!this.peer) {
             throw new Error("Attribute function should be called in memo context")
@@ -571,7 +710,64 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttrib
         }
         return this
     }
-    public attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
+    public textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
+        if (this.checkPriority("textBackgroundStyle")) {
+            const value_casted = value as (TextBackgroundStyle | undefined)
+            this.getPeer()?.setTextBackgroundStyleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public baselineOffset(value: LengthMetrics | undefined): this {
+        if (this.checkPriority("baselineOffset")) {
+            const value_casted = value as (LengthMetrics | undefined)
+            this.getPeer()?.setBaselineOffsetAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public key(value: string | undefined): this {
+        if (this.checkPriority("key")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.setKeyAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public id(value: string | undefined): this {
+        if (this.checkPriority("id")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.setIdAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onClick(value: ((value0: ClickEvent) => void) | undefined): this {
+        if (this.checkPriority("onClick")) {
+            const value_casted = value as (((value0: ClickEvent) => void) | undefined)
+            this.getPeer()?.setOnClick0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onHover(value: HoverCallback | undefined): this {
+        if (this.checkPriority("onHover")) {
+            const value_casted = value as (HoverCallback | undefined)
+            this.getPeer()?.setOnHoverAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onClick(event: ((value0: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
+        if (this.checkPriority("onClick")) {
+            const event_casted = event as (((value0: ClickEvent) => void) | undefined)
+            const distanceThreshold_casted = distanceThreshold as (double | undefined)
+            this.getPeer()?.setOnClick1Attribute(event_casted, distanceThreshold_casted)
+            return this
+        }
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         hookSpanAttributeModifier(this, value);
         return this
     }

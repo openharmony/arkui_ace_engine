@@ -36,7 +36,11 @@ constexpr float MAX_FONT_SCALE = 2.0;
 void TextModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     if (value.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value.value(), frameNode);
+        if (!value.value().IsValid()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, Dimension(), frameNode);
+        } else {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value.value(), frameNode);
+        }
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, FontSize, PROPERTY_UPDATE_MEASURE, frameNode);
     }

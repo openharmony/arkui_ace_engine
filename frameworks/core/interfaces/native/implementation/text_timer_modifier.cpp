@@ -31,7 +31,7 @@ constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
 struct TextTimerOptions {
     std::optional<bool> isCountDown;
-    std::optional<double> count;
+    std::optional<int64_t> count;
     std::optional<Ark_TextTimerController> controller;
 };
 
@@ -41,9 +41,7 @@ TextTimerOptions Convert(const Ark_TextTimerOptions& src)
 {
     TextTimerOptions dst;
     dst.isCountDown = Converter::OptConvert<bool>(src.isCountDown);
-#ifdef WRONG_GEN
-    dst.count = Converter::OptConvert<float>(src.count);
-#endif
+    dst.count = Converter::OptConvert<int64_t>(src.count);
     dst.controller = Converter::OptConvert<Ark_TextTimerController>(src.controller);
     return dst;
 }

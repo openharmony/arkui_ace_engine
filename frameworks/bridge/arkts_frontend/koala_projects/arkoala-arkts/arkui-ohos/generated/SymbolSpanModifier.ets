@@ -22,12 +22,20 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkSymbolSpanPeer, SymbolSpanAttribute } from "./component/symbolSpan"
 import { int32 } from "@koalaui/common"
-import { CommonMethod } from "./component/common"
 import { Resource } from "global.resource"
 import { ResourceColor } from "./component/units"
 import { Color, FontWeight } from "./component/enums"
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./component/symbolglyph"
-export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSpanAttribute,AttributeModifier<SymbolSpanAttribute> {
+import { RuntimeType, runtimeType } from "@koalaui/interop"
+export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier<SymbolSpanAttribute> {
+    constructor(src?: Resource) {
+        super()
+        let src_type: int32 = RuntimeType.UNDEFINED
+        src_type = runtimeType(src)
+        if (RuntimeType.UNDEFINED != src_type) {
+            this.setSymbolSpanOptions(src)
+        }
+    }
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
@@ -38,6 +46,8 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
     applyFocusedAttribute(instance: SymbolSpanAttribute): void { }
     applyDisabledAttribute(instance: SymbolSpanAttribute): void { }
     applySelectedAttribute(instance: SymbolSpanAttribute): void { }
+    _setSymbolSpanOptions_flag:  AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _setSymbolSpanOptions0_value?: Resource | undefined
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontSize_0_0value?: double | string | Resource | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -48,9 +58,28 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
     _effectStrategy_0_0value?: SymbolEffectStrategy | undefined
     _renderingStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _renderingStrategy_0_0value?: SymbolRenderingStrategy | undefined
+    _key_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _key_0_0value?: string | undefined
+    _id_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _id_0_0value?: string | undefined
     applyModifierPatch(node: PeerNode): void {
-        super.applyModifierPatch(node)
         const peer = node as ArkSymbolSpanPeer;
+        if (this._setSymbolSpanOptions_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (this._setSymbolSpanOptions_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSymbolSpanOptionsAttribute((this._setSymbolSpanOptions0_value! as Resource))
+                    this._setSymbolSpanOptions_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._setSymbolSpanOptions_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                default: {
+                    this._setSymbolSpanOptions_flag = AttributeUpdaterFlag.INITIAL
+                }
+            }
+        }
         if (this._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._fontSize_0_flag) {
@@ -141,9 +170,53 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
                 }
             }
         }
+        if (this._key_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._key_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setKeyAttribute((this._key_0_0value as string | undefined));
+                    this._key_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._key_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._key_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setKeyAttribute((undefined as string | undefined));
+                }
+            }
+        }
+        if (this._id_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._id_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIdAttribute((this._id_0_0value as string | undefined));
+                    this._id_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._id_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._id_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIdAttribute((undefined as string | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: SymbolSpanModifier): void {
-        super.mergeModifier(modifier)
+        if (modifier._setSymbolSpanOptions_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (modifier._setSymbolSpanOptions_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.setSymbolSpanOptions(modifier._setSymbolSpanOptions0_value!)
+                    break
+                }
+            }
+        }
         if (modifier._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._fontSize_0_flag) {
@@ -209,6 +282,42 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
                 }
             }
         }
+        if (modifier._key_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._key_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.key(modifier._key_0_0value);
+                    break;
+                }
+                default: {
+                    this.key((undefined as string | undefined));
+                }
+            }
+        }
+        if (modifier._id_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._id_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.id(modifier._id_0_0value);
+                    break;
+                }
+                default: {
+                    this.id((undefined as string | undefined));
+                }
+            }
+        }
+    }
+    setSymbolSpanOptions(value: Resource | undefined): this {
+        if (this._setSymbolSpanOptions_flag === AttributeUpdaterFlag.INITIAL ||
+            this._setSymbolSpanOptions0_value !== value || !Type.of(value).isPrimitive()) {
+            this._setSymbolSpanOptions0_value = value
+            this._setSymbolSpanOptions_flag = AttributeUpdaterFlag.UPDATE
+        } else {
+            this._setSymbolSpanOptions_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
     }
     fontSize(value: double | string | Resource | undefined): this {
         if (((this._fontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -265,7 +374,29 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
         }
         return this
     }
-    public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+    key(value: string | undefined): this {
+        if (((this._key_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._key_0_0value) !== (value)))
+        {
+            this._key_0_flag = AttributeUpdaterFlag.UPDATE
+            this._key_0_0value = value
+        } else
+        {
+            this._key_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    id(value: string | undefined): this {
+        if (((this._id_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._id_0_0value) !== (value)))
+        {
+            this._id_0_flag = AttributeUpdaterFlag.UPDATE
+            this._id_0_0value = value
+        } else
+        {
+            this._id_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | undefined): this {
         throw new Error("Not implemented")
     }
 }

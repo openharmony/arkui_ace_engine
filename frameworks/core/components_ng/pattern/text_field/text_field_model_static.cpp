@@ -900,4 +900,16 @@ void TextFieldModelStatic::SetBackBorder(FrameNode* frameNode)
             TextFieldPaintProperty, BorderStyleFlagByUser, renderContext->GetBorderStyle().value(), frameNode);
     }
 }
+
+void TextFieldModelStatic::SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc,
+    bool supportAvoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    if (textFieldPattern) {
+        textFieldPattern->SetCustomKeyboard(std::move(buildFunc));
+        textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
+    }
+}
+
 } // namespace OHOS::Ace::NG

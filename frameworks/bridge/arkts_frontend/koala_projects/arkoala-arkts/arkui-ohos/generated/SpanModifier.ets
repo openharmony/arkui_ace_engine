@@ -16,20 +16,18 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethod, ShadowOptions } from "./component/common"
-import { TextBackgroundStyle, BaseSpan, ArkSpanPeer, SpanAttribute } from "./component/span"
-import { LengthMetrics } from "arkui.Graphics"
-import { BaseSpanModifier } from "./BaseSpanModifier"
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
+import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
+import { ArkSpanPeer, TextBackgroundStyle, SpanAttribute } from "./component/span"
 import { int32 } from "@koalaui/common"
 import { Font, ResourceColor, Length } from "./component/units"
 import { Color, FontStyle, FontWeight, TextCase } from "./component/enums"
 import { Resource } from "global.resource"
 import { DecorationStyleInterface } from "./component/styledString"
-export class SpanModifier extends CommonMethodModifier implements SpanAttribute,AttributeModifier<SpanAttribute> {
+import { ShadowOptions, ClickEvent, HoverCallback, HoverEvent } from "./component/common"
+import { LengthMetrics } from "arkui.Graphics"
+export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
@@ -66,8 +64,18 @@ export class SpanModifier extends CommonMethodModifier implements SpanAttribute,
     _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
     _baselineOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _baselineOffset_0_0value?: LengthMetrics | undefined
+    _key_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _key_0_0value?: string | undefined
+    _id_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _id_0_0value?: string | undefined
+    _onClick_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onClick_0_0value?: ((value0: ClickEvent) => void) | undefined
+    _onHover_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onHover_0_0value?: HoverCallback | undefined
+    _onClick_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onClick_1_0value?: ((value0: ClickEvent) => void) | undefined
+    _onClick_1_1value?: double | undefined
     applyModifierPatch(node: PeerNode): void {
-        super.applyModifierPatch(node)
         const peer = node as ArkSpanPeer;
         if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
@@ -303,9 +311,98 @@ export class SpanModifier extends CommonMethodModifier implements SpanAttribute,
                 }
             }
         }
+        if (this._key_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._key_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setKeyAttribute((this._key_0_0value as string | undefined));
+                    this._key_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._key_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._key_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setKeyAttribute((undefined as string | undefined));
+                }
+            }
+        }
+        if (this._id_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._id_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIdAttribute((this._id_0_0value as string | undefined));
+                    this._id_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._id_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._id_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIdAttribute((undefined as string | undefined));
+                }
+            }
+        }
+        if (this._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onClick_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnClick0Attribute((this._onClick_0_0value as ((value0: ClickEvent) => void) | undefined));
+                    this._onClick_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onClick_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onClick_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnClick0Attribute((undefined as ((value0: ClickEvent) => void) | undefined));
+                }
+            }
+        }
+        if (this._onHover_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onHover_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnHoverAttribute((this._onHover_0_0value as HoverCallback | undefined));
+                    this._onHover_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onHover_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onHover_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnHoverAttribute((undefined as HoverCallback | undefined));
+                }
+            }
+        }
+        if (this._onClick_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onClick_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnClick1Attribute((this._onClick_1_0value as ((value0: ClickEvent) => void) | undefined), (this._onClick_1_1value as double | undefined));
+                    this._onClick_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onClick_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onClick_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnClick1Attribute((undefined as ((value0: ClickEvent) => void) | undefined), (undefined as double | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: SpanModifier): void {
-        super.mergeModifier(modifier)
         if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._font_0_flag) {
@@ -475,6 +572,71 @@ export class SpanModifier extends CommonMethodModifier implements SpanAttribute,
                 }
             }
         }
+        if (modifier._key_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._key_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.key(modifier._key_0_0value);
+                    break;
+                }
+                default: {
+                    this.key((undefined as string | undefined));
+                }
+            }
+        }
+        if (modifier._id_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._id_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.id(modifier._id_0_0value);
+                    break;
+                }
+                default: {
+                    this.id((undefined as string | undefined));
+                }
+            }
+        }
+        if (modifier._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onClick_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onClick(modifier._onClick_0_0value);
+                    break;
+                }
+                default: {
+                    this.onClick((undefined as ((value0: ClickEvent) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onHover_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onHover_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onHover(modifier._onHover_0_0value);
+                    break;
+                }
+                default: {
+                    this.onHover((undefined as HoverCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onClick_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onClick_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onClick(modifier._onClick_1_0value, modifier._onClick_1_1value);
+                    break;
+                }
+                default: {
+                    this.onClick((undefined as ((value0: ClickEvent) => void) | undefined), (undefined as double | undefined));
+                }
+            }
+        }
     }
     font(value: Font | undefined): this {
         if (((this._font_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -619,7 +781,63 @@ export class SpanModifier extends CommonMethodModifier implements SpanAttribute,
         }
         return this
     }
-    public attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
+    key(value: string | undefined): this {
+        if (((this._key_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._key_0_0value) !== (value)))
+        {
+            this._key_0_flag = AttributeUpdaterFlag.UPDATE
+            this._key_0_0value = value
+        } else
+        {
+            this._key_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    id(value: string | undefined): this {
+        if (((this._id_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._id_0_0value) !== (value)))
+        {
+            this._id_0_flag = AttributeUpdaterFlag.UPDATE
+            this._id_0_0value = value
+        } else
+        {
+            this._id_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onClick(value: ((value0: ClickEvent) => void) | undefined): this {
+        if (((this._onClick_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onClick_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onClick_0_0value = value
+        } else
+        {
+            this._onClick_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onHover(value: HoverCallback | undefined): this {
+        if (((this._onHover_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onHover_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onHover_0_0value = value
+        } else
+        {
+            this._onHover_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onClick(event: ((value0: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
+        if (((this._onClick_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._onClick_1_1value) !== (distanceThreshold)))
+        {
+            this._onClick_1_flag = AttributeUpdaterFlag.UPDATE
+            this._onClick_1_0value = event
+            this._onClick_1_1value = distanceThreshold
+        } else
+        {
+            this._onClick_1_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         throw new Error("Not implemented")
     }
 }
