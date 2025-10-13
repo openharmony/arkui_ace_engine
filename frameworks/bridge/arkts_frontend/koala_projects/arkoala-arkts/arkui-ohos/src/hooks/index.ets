@@ -127,7 +127,36 @@ export function hookCustomPropertyImpl(component: ArkCommonMethodComponent, name
         }
         return undefined;
     };
-    ArkUIAniModule._Common_SetCustomPropertyCallBack(component.getPeer().getPeerPtr(), removeCallback, getCallback);
+    const getAllCustomPropertiesCallback: () => string = () => {
+        if (ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
+            let allProperties: Record<string, CustomProperty> = new Record<string, CustomProperty>();
+            const nodeCustomProperties = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
+            if (nodeCustomProperties === undefined || nodeCustomProperties === null) {
+                return ""
+            }
+            const allKeys = Array.from(nodeCustomProperties!.keys());
+            for (let key of allKeys) {
+                try {
+                    const propertyValue = nodeCustomProperties!.get(key);
+                    if (propertyValue === undefined) {
+                        allProperties.set(key, 'Unsupported Type')
+                    } else {
+                        allProperties.set(key, propertyValue)
+                    }
+                } catch (e) {
+                    allProperties.set(key, 'Unsupported Type')
+                }   
+            }
+            try {
+                return JSON.stringify(allProperties);
+            } catch (e) {
+                return "";
+            }
+        }
+        return "";
+    };
+    ArkUIAniModule._Common_SetCustomPropertyCallBack(component.getPeer().getPeerPtr(), removeCallback, getCallback,
+        getAllCustomPropertiesCallback);
 }
 
 export * from "./modifiers";

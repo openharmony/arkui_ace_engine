@@ -388,7 +388,8 @@ void SetParallelScoped(ani_boolean parallel)
 }
 
 static void SetCustomPropertyCallBack(ArkUINodeHandle node, std::function<void()>&& func,
-    std::function<std::string(const std::string&)>&& getFunc)
+    std::function<std::string(const std::string&)>&& getFunc,
+    std::function<std::string()>&& getAllCustomPropertiesFunc)
 {
     auto id = Container::CurrentIdSafelyWithCheck();
     ContainerScope scope(id);
@@ -398,7 +399,7 @@ static void SetCustomPropertyCallBack(ArkUINodeHandle node, std::function<void()
     }
     auto frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetCustomPropertyCallback(std::move(func), std::move(getFunc));
+    frameNode->SetCustomPropertyCallback(std::move(func), std::move(getFunc), std::move(getAllCustomPropertiesFunc));
 }
 
 static std::optional<std::string> GetCustomProperty(ani_env* env, ArkUINodeHandle node, const std::string& key)
