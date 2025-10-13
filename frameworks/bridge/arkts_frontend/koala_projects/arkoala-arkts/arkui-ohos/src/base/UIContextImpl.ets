@@ -68,6 +68,8 @@ import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
 import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender,
     SystemOps } from '../framework';
+import { EntryPoint, NavInterface } from "../component/customComponent"
+import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -231,7 +233,7 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
     }
 
     //@ts-ignore
-    public get(id: string, callback: AsyncCallback<PixelMap>, options?: componentSnapshot.SnapshotOptions): void {
+    public get(id: string, callback: routerAsyncCallback<PixelMap>, options?: componentSnapshot.SnapshotOptions): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         componentSnapshot.get(id, callback, options);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -483,11 +485,75 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = new Promise<void>((resolve, reject) => {
-            this.router_!.push(options)
-        })
+        let result = this.router_!.push(options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
+    }
+
+    public pushUrl(options: router.RouterOptions, mode: router.RouterMode): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.push(options, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public pushUrl(options: router.RouterOptions, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        // this.router_!.push(options, callback);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public pushUrl(options: router.RouterOptions, mode: router.RouterMode, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        // this.router_!.push(options, callback, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public pushNamedRoute(options: router.NamedRouterOptions): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.pushNamedRoute(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public pushNamedRoute(options: router.NamedRouterOptions, mode: router.RouterMode): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.pushNamedRoute(options, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public pushNamedRoute(options: router.NamedRouterOptions, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        // this.router_!.pushNamedRoute(options, callback);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public pushNamedRoute(options: router.NamedRouterOptions, mode: router.RouterMode, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        // this.router_!.pushNamedRoute(options, callback, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public replaceUrl(options: router.RouterOptions): Promise<void> {
@@ -495,11 +561,75 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = new Promise<void>((resolve, reject) => {
-            this.router_!.replace(options);
-        });
+        let result = this.router_!.replace(options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
+    }
+
+    public replaceUrl(options: router.RouterOptions, mode: router.RouterMode): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.replace(options, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public replaceUrl(options: router.RouterOptions, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        // this.router_!.replace(options, callback);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public replaceUrl(options: router.RouterOptions, mode: router.RouterMode, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        // this.router_!.replace(options, callback, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public replaceNamedRoute(options: router.NamedRouterOptions): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.replaceNamedRoute(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public replaceNamedRoute(options: router.NamedRouterOptions, mode: router.RouterMode): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.replaceNamedRoute(options, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public replaceNamedRoute(options: router.NamedRouterOptions, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        // this.router_!.replaceNamedRoute(options, callback);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public replaceNamedRoute(options: router.NamedRouterOptions, mode: router.RouterMode, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        // this.router_!.replaceNamedRoute(options, callback, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public back(options?:router.RouterOptions): void {
@@ -508,6 +638,15 @@ export class RouterImpl extends Router {
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         this.router_!.back(options)
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public back(index: int, params?: Object): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.back(index, params);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -572,8 +711,7 @@ export class RouterImpl extends Router {
 
     public getStateRoot(): ComputableState<IncrementalNode> | undefined {
         if (this.router_ === undefined) {
-            return undefined;
-            // throw Error("router set in uiContext is empty");
+            throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let result = this.router_!.getEntryRootValue();
@@ -583,13 +721,21 @@ export class RouterImpl extends Router {
 
     public getPreState(): ComputableState<IncrementalNode> | undefined {
         if (this.router_ === undefined) {
-            return undefined;
-            // throw Error("router set in uiContext is empty");
+            throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let result = this.router_!.getPreState();
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
+    }
+
+    public registerNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.registerNamedRouter(routerName, instance, param);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
@@ -1077,7 +1223,11 @@ export class DetachedRootEntryManager {
 
     public getDetachedRoots() : Map<KPointer, DetachedRootEntry> {
          return this.detachedRoots_;
-     }
+    }
+
+    public setDetachedRootNode(nativeNode: KPointer, rootNode: ComputableState<IncrementalNode>): void {
+        this.detachedRoots_.set(nativeNode, new DetachedRootEntryImpl<IncrementalNode>(rootNode));
+    }
 
     public createUiDetachedRoot(
         peerFactory: () => PeerNode,

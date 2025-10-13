@@ -5161,24 +5161,40 @@ export class ArkUIGeneratedNativeModule {
     native static _RotationRecognizer_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _RotationRecognizer_getAngle(ptr: KPointer): number
-    @ani.unsafe.Quick
-    native static _RouterExtender_push(jsView: KPointer, url: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): KPointer
-    @ani.unsafe.Quick
-    native static _RouterExtender_replace(jsView: KPointer, url: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    native static _RouterExtender_push0(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _RouterExtender_moveCommonUnderPageNode(commonNode: KPointer, pageNode: KPointer): void
+    native static _RouterExtender_push1(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _RouterExtender_replace0(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _RouterExtender_back(): void
-    @ani.unsafe.Quick
-    native static _RouterExtender_backWithOptions(url: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Quick
-    native static _RouterExtender_runPage(jsView: KPointer, url: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    native static _RouterExtender_replace1(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RouterExtender_back0(thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RouterExtender_back1(index: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RouterExtender_runPage(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RouterExtender_clear(): void
     @ani.unsafe.Quick
     native static _RouterExtender_showAlertBeforeBackPage(message: KStringPtr): void
     @ani.unsafe.Direct
     native static _RouterExtender_hideAlertBeforeBackPage(): void
+    @ani.unsafe.Quick
+    native static _RouterExtender_getLength(): string
+    @ani.unsafe.Quick
+    native static _RouterExtender_getState(): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _RouterExtender_getStateByIndex(index: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _RouterExtender_getStateByUrl(url: KStringPtr): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _RouterExtender_getParams(): Object
+    native static _RouterExtender_pushNamedRoute0(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RouterExtender_pushNamedRoute1(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _RouterExtender_replaceNamedRoute0(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RouterExtender_replaceNamedRoute1(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ScaleSymbolEffect_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct

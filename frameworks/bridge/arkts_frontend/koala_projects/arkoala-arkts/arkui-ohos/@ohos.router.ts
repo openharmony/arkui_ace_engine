@@ -43,6 +43,12 @@ namespace router {
         message: string;
     }
 
+    export interface NamedRouterOptions {
+        name: string;
+        params?: Object;
+        recoverable?: boolean;
+    }
+
     export function error(prefix: string, e: Object|null|undefined): string {
         throw new Error("TBD")
     }
