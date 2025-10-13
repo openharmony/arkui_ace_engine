@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -387,6 +388,8 @@ void SetBackButtonIconImpl(Ark_NativePointer node,
                 break;
             }
             case symbolType: {
+                iconSymbol = icon->value.value3->symbolApply;
+                PeerUtils::DestroyPeer(icon->value.value3);
                 break;
             }
             default:
