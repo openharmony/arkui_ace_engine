@@ -52,6 +52,9 @@ class BaseNode extends ViewBuildNodeBase {
     create(builder, params, update, updateConfiguration, supportLazyBuild) {
         return this.builderBaseNode_.create(builder.bind(this), params, update.bind(this), updateConfiguration.bind(this), supportLazyBuild, this);
     }
+    createReactive(builder, params, update, updateConfiguration, supportLazyBuild) {
+        return this.builderBaseNode_.createReactive(builder.bind(this), params, update.bind(this), updateConfiguration.bind(this), supportLazyBuild, this);
+    }
     finishUpdateFunc() {
         return this.builderBaseNode_.finishUpdateFunc();
     }
@@ -91,34 +94,40 @@ class BaseNode extends ViewBuildNodeBase {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
-/// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 class Disposable {
     constructor() {
-        this.isDisposed_  = false;
+        this.isDisposed_ = false;
     }
     dispose() {
-        this.isDisposed_  = true;
+        this.isDisposed_ = true;
     }
     isDisposed() {
-        return this.isDisposed_ ;
+        return this.isDisposed_;
     }
 }
-class BuilderNode extends Disposable {
-    constructor(uiContext, options) {
+/*
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
+/// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
+/// <reference path="./disposable.ts" />
+class BuilderNodeCommonBase extends Disposable {
+    constructor() {
         super();
-        let jsBuilderNode = new JSBuilderNode(uiContext, options);
-        this._JSBuilderNode = jsBuilderNode;
-        let id = Symbol('BuilderRootFrameNode');
-        BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
-        BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderRootFrameNode', idOfNode: id });
     }
     update(params) {
         this._JSBuilderNode.update(params);
-    }
-    build(builder, params, options) {
-        this._JSBuilderNode.build(builder, params, options);
-        this.nodePtr_ = this._JSBuilderNode.getNodePtr();
     }
     getNodePtr() {
         return this._JSBuilderNode.getValidNodePtr();
@@ -168,6 +177,20 @@ class BuilderNode extends Disposable {
     }
     inheritFreezeOptions(enable) {
         this._JSBuilderNode.inheritFreezeOptions(enable);
+    }
+}
+class BuilderNode extends BuilderNodeCommonBase {
+    constructor(uiContext, options) {
+        super();
+        let jsBuilderNode = new JSBuilderNode(uiContext, options);
+        this._JSBuilderNode = jsBuilderNode;
+        let id = Symbol('BuilderRootFrameNode');
+        BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
+        BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderRootFrameNode', idOfNode: id });
+    }
+    build(builder, params, options) {
+        this._JSBuilderNode.build(builder, params, options);
+        this.nodePtr_ = this._JSBuilderNode.getNodePtr();
     }
 }
 class JSBuilderNode extends BaseNode {
@@ -457,7 +480,7 @@ class JSBuilderNode extends BaseNode {
                 // update + initial render calls, like in if and ForEach case, convert to stack as well
                 ObserveV2.getObserve().startRecordDependencies(this, elmtId, true);
             }
-            if (this._supportNestingBuilder) {
+            if (this._supportNestingBuilder || this.isReactiveBuilderNode()) {
                 compilerAssignedUpdateFunc(elmtId, isFirstRender);
             }
             else {
@@ -611,6 +634,67 @@ class JSBuilderNode extends BaseNode {
     ifElseBranchUpdateFunctionDirtyRetaken() { }
     forceCompleteRerender(deep) { }
     forceRerenderNode(elmtId) { }
+}
+class ReactiveBuilderNode extends BuilderNodeCommonBase {
+    constructor(uiContext, options) {
+        super();
+        let jsBuilderNode = new ReactiveBuilderNodeBase(uiContext, options);
+        this._JSBuilderNode = jsBuilderNode;
+        let id = Symbol('BuilderRootFrameNode');
+        BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
+        BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderRootFrameNode', idOfNode: id });
+    }
+    build(builder, options, ...params) {
+        this._JSBuilderNode.build(builder, params, options);
+        this.nodePtr_ = this._JSBuilderNode.getNodePtr();
+    }
+    flushState() {
+        if (this._JSBuilderNode instanceof ReactiveBuilderNodeBase) {
+            this._JSBuilderNode?.flushState();
+        }
+    }
+}
+class ReactiveBuilderNodeBase extends JSBuilderNode {
+    constructor(uiContext, options) {
+        super(uiContext, options);
+    }
+    buildWithNestingBuilder(builder, supportLazyBuild) {
+        if (this.isArray(this.params_)) {
+            this.nodePtr_ = super.createReactive(builder.builder?.bind(this), this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+        }
+    }
+    isReactiveBuilderNode() {
+        return true;
+    }
+    isArray(param) {
+        const typeName = Object.prototype.toString.call(param);
+        const objectName = `[object Array]`;
+        if (typeName === objectName) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    flushState() {
+        if (this.isFreeze) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.updateStart();
+        try {
+            this.purgeDeletedElmtIds();
+            Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
+                return (a < b) ? -1 : (a > b) ? 1 : 0;
+            }).forEach(elmtId => this.UpdateElement(elmtId));
+        }
+        catch (err) {
+            this.updateEnd();
+            throw err;
+        }
+        this.updateEnd();
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -810,7 +894,7 @@ class BuilderNodeFinalizationRegisterProxy {
             if (heldValue.name === 'BuilderRootFrameNode') {
                 const builderNode = BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.get(heldValue.idOfNode);
                 BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.delete(heldValue.idOfNode);
-                builderNode.dispose();
+                builderNode?.dispose();
             }
         });
     }
@@ -916,7 +1000,6 @@ var ExpandMode;
     ExpandMode[ExpandMode["EXPAND"] = 1] = "EXPAND";
     ExpandMode[ExpandMode["LAZY_EXPAND"] = 2] = "LAZY_EXPAND";
 })(ExpandMode || (ExpandMode = {}));
-
 var UIState;
 (function (UIState) {
     UIState[UIState["NORMAL"] = 0] = "NORMAL";
@@ -3192,12 +3275,9 @@ class Content {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class ComponentContent extends Content {
-    constructor(uiContext, builder, params, options) {
+class ComponentContentCommonBase extends Content {
+    constructor() {
         super();
-        let builderNode = new BuilderNode(uiContext, {});
-        this.builderNode_ = builderNode;
-        this.builderNode_.build(builder, params ?? undefined, options);
         this.disposable_ = new Disposable();
     }
     update(params) {
@@ -3265,6 +3345,27 @@ class ComponentContent extends Content {
     }
     inheritFreezeOptions(enable) {
         this.builderNode_.inheritFreezeOptions(enable);
+    }
+}
+class ComponentContent extends ComponentContentCommonBase {
+    constructor(uiContext, builder, params, options) {
+        super();
+        let builderNode = new BuilderNode(uiContext, {});
+        this.builderNode_ = builderNode;
+        this.builderNode_.build(builder, params ?? undefined, options);
+    }
+}
+class ReactiveComponentContent extends ComponentContentCommonBase {
+    constructor(uiContext, builder, options, ...params) {
+        super();
+        let reactiveBuilderNode = new ReactiveBuilderNode(uiContext, {});
+        this.builderNode_ = reactiveBuilderNode;
+        this.builderNode_.build(builder, options, ...params);
+    }
+    flushState() {
+        if (this.builderNode_ instanceof ReactiveBuilderNode) {
+            this.builderNode_?.flushState();
+        }
     }
 }
 /*
@@ -3387,5 +3488,5 @@ export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter, ExpandMode, UIState, getFrameNodeRawPtr
+    typeNode, NodeAdapter, ExpandMode, UIState, getFrameNodeRawPtr, ReactiveBuilderNode, ReactiveComponentContent
 };

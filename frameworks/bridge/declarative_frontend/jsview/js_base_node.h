@@ -41,7 +41,9 @@ public:
     static void DestructorCallback(JSBaseNode* node);
     void FinishUpdateFunc(const JSCallbackInfo& info);
     void Create(const JSCallbackInfo& info);
+    void CreateReactive(const JSCallbackInfo& info);
     void BuildNode(const JSCallbackInfo& info);
+    void BuildReactiveNode(const JSCallbackInfo& info);
     void ProccessNode(bool isSupportExportTexture, bool isSupportLazyBuild);
     void PostTouchEvent(const JSCallbackInfo& info);
     void PostInputEvent(const JSCallbackInfo& info);
@@ -65,6 +67,11 @@ private:
     bool ParamMouseEvent(const JSCallbackInfo& info, MouseEvent& mouseEvent);
     bool ParamAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent);
     bool GetChangedTouches(const JSCallbackInfo& info, TouchEvent& touchEvent);
+    RefPtr<NG::UINode> GetAndExecBuilderFunc(const JSCallbackInfo& info);
+    RefPtr<NG::UINode> GetAndExecMultiArgsBuilderFunc(const JSCallbackInfo& info);
+    void SetNodeFunc(RefPtr<NG::UINode> newNode, const JSCallbackInfo& info);
+    void SetUpdateNodeFunc(const JSCallbackInfo& info);
+    void GetAndRegisterUpdateInstanceFunc(const JSCallbackInfo& info);
     RefPtr<NG::FrameNode> viewNode_;
     WeakPtr<NG::UINode> realNode_;
     NG::OptionalSizeF size_;

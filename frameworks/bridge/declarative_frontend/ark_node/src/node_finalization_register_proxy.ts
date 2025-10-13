@@ -19,11 +19,11 @@ class BuilderNodeFinalizationRegisterProxy {
       if (heldValue.name === 'BuilderRootFrameNode') {
         const builderNode = BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.get(heldValue.idOfNode);
         BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.delete(heldValue.idOfNode);
-        builderNode.dispose();
+        builderNode?.dispose();
       }
     });
   }
-  public static register(target: BuilderNode, heldValue: RegisterParams) {
+  public static register(target: BuilderNodeCommonBase, heldValue: RegisterParams): void {
     BuilderNodeFinalizationRegisterProxy.instance_.finalizationRegistry_.register(target, heldValue);
   }
 
@@ -57,7 +57,7 @@ class NodeControllerRegisterProxy {
   public static __NodeControllerMap__ = new Map<number, NodeController>();
 }
 
-globalThis.__AddToNodeControllerMap__ = function __AddToNodeControllerMap__(containerId: number, nodeController:NodeController): void {
+globalThis.__AddToNodeControllerMap__ = function __AddToNodeControllerMap__(containerId: number, nodeController: NodeController): void {
   NodeControllerRegisterProxy.__NodeControllerMap__.set(containerId, nodeController);
 };
 

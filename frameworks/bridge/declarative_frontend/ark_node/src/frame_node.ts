@@ -794,14 +794,6 @@ class ProxyFrameNode extends ImmutableFrameNode {
     }
     return this.nodePtr_;
   }
-  dispose(): void {
-    this.isDisposed_ = true;
-    this.renderNode_?.dispose();
-    FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
-    this._nodeId = -1;
-    this._nativeRef = undefined;
-    this.nodePtr_ = undefined;
-  }
   moveTo(targetParent: FrameNode, index?: number): void {
     throw { message: 'The FrameNode is not modifiable.', code: 100021 };
   }

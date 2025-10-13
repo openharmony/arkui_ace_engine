@@ -55,19 +55,28 @@ constexpr int32_t BUILD_PARAM_INDEX_TWO = 2;
 constexpr int32_t BUILD_PARAM_INDEX_THREE = 3;
 constexpr int32_t BUILD_PARAM_INDEX_FOUR = 4;
 constexpr int32_t BUILD_PARAM_INDEX_THIS_OBJ = 5;
+
+bool GetSupportLazyBuild(const JSCallbackInfo& info)
+{
+    if (info.Length() >= BUILD_PARAM_INDEX_FOUR + 1) {
+        auto jsLazyBuildSupported = info[BUILD_PARAM_INDEX_FOUR];
+        if (jsLazyBuildSupported->IsBoolean()) {
+            return jsLazyBuildSupported->ToBoolean();
+        }
+    }
+    return false;
+}
 } // namespace
 
-void JSBaseNode::BuildNode(const JSCallbackInfo& info)
+RefPtr<NG::UINode> JSBaseNode::GetAndExecBuilderFunc(const JSCallbackInfo& info)
 {
-    ACE_REUSE_DETECTION_SCOPED_TRACE("JSBaseNode:BuildNode");
     auto builder = info[0];
-    CHECK_NULL_VOID(builder->IsFunction());
     auto buildFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builder));
-
     auto infoLen = info.Length();
     JSRef<JSVal> param;
-    if (infoLen >= INFO_LENGTH_LIMIT && (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
-        || (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) && info[1]->IsObject()))) {
+    if (infoLen >= INFO_LENGTH_LIMIT &&
+        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ||
+            (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) && info[1]->IsObject()))) {
         param = info[1];
     }
 
@@ -83,14 +92,44 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     lazyBuilderFunc();
-    auto parent = viewNode_ ? viewNode_->GetParent() : nullptr;
     auto newNode = NG::ViewStackProcessor::GetInstance()->Finish();
     realNode_ = newNode;
     if (newNode) {
         newNode->SetBuilderFunc(std::move(lazyBuilderFunc));
     }
+    return newNode;
+}
 
-    if (newNode && (infoLen >= BUILD_PARAM_INDEX_TWO + 1)) {
+RefPtr<NG::UINode> JSBaseNode::GetAndExecMultiArgsBuilderFunc(const JSCallbackInfo& info)
+{
+    auto builder = info[0];
+    auto buildFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builder));
+    JSRef<JSArray> jsParams = JSRef<JSArray>::Cast(info[1]);
+    auto lazyBuilderFunc = [buildFunc, jsParams, renderType = renderType_]() mutable {
+        NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
+        NG::ViewStackProcessor::GetInstance()->SetIsExportTexture(renderType == NodeRenderType::RENDER_TYPE_TEXTURE);
+        int length = static_cast<int>(jsParams->Length());
+        std::vector<JSRef<JSVal>> params;
+        for (int i = 0; i < length; i++) {
+            JSRef<JSVal> jsParam = jsParams->GetValueAt(i);
+            params.emplace_back(jsParam);
+        }
+        buildFunc->ExecuteJS(length, params.data());
+    };
+
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
+    lazyBuilderFunc();
+    auto newNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    if (newNode) {
+        newNode->SetBuilderFunc(std::move(lazyBuilderFunc));
+    }
+    return newNode;
+}
+
+void JSBaseNode::SetUpdateNodeFunc(const JSCallbackInfo& info)
+{
+    auto newNode = realNode_.Upgrade();
+    if (newNode && (info.Length() >= BUILD_PARAM_INDEX_TWO + 1)) {
         auto updateTsNodeBuilder = info[BUILD_PARAM_INDEX_TWO];
         CHECK_NULL_VOID(updateTsNodeBuilder->IsFunction());
         EcmaVM* vm = info.GetVm();
@@ -103,18 +142,13 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         };
         newNode->SetUpdateNodeFunc(std::move(updateNodeFunc));
     }
-
-    bool isSupportLazyBuild = false;
-    if (infoLen >= BUILD_PARAM_INDEX_FOUR + 1) {
-        auto jsLazyBuildSupported = info[BUILD_PARAM_INDEX_FOUR];
-        if (jsLazyBuildSupported->IsBoolean()) {
-            isSupportLazyBuild = jsLazyBuildSupported->ToBoolean();
-        }
-    }
-
+}
+void JSBaseNode::SetNodeFunc(RefPtr<NG::UINode> newNode, const JSCallbackInfo& info)
+{
+    SetUpdateNodeFunc(info);
+    auto isSupportExportTexture = newNode ? EXPORT_TEXTURE_SUPPORT_TYPES.count(newNode->GetTag()) > 0 : false;
     // If the node is a UINode, amount it to a BuilderProxyNode if needProxy.
     auto flag = AceType::InstanceOf<NG::FrameNode>(newNode);
-    auto isSupportExportTexture = newNode ? EXPORT_TEXTURE_SUPPORT_TYPES.count(newNode->GetTag()) > 0 : false;
     if (!flag && newNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
@@ -124,8 +158,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         proxyNode->AddChild(newNode);
         newNode = proxyNode;
     }
-
-    if (newNode && (infoLen >= BUILD_PARAM_INDEX_THREE + 1)) {
+    if (newNode && (info.Length() >= BUILD_PARAM_INDEX_THREE + 1)) {
         auto updateTsNodeConfig = info[BUILD_PARAM_INDEX_THREE];
         if (!updateTsNodeConfig->IsFunction()) {
             return;
@@ -135,6 +168,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         auto updateNodeConfig = [updateTsConfig, vm]() mutable { updateTsConfig->ExecuteJS(); };
         newNode->SetUpdateNodeConfig(std::move(updateNodeConfig));
     }
+    auto parent = viewNode_ ? viewNode_->GetParent() : nullptr;
     if (parent) {
         if (newNode) {
             parent->ReplaceChild(viewNode_, newNode);
@@ -146,10 +180,14 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     }
     viewNode_ = newNode ? AceType::DynamicCast<NG::FrameNode>(newNode) : nullptr;
     CHECK_NULL_VOID(viewNode_);
-    ProccessNode(isSupportExportTexture, isSupportLazyBuild);
+    ProccessNode(isSupportExportTexture, GetSupportLazyBuild(info));
     UpdateEnd(info);
-    CHECK_NULL_VOID(viewNode_);
+    GetAndRegisterUpdateInstanceFunc(info);
+}
 
+void JSBaseNode::GetAndRegisterUpdateInstanceFunc(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(viewNode_);
     JSRef<JSObject> thisObj = info[BUILD_PARAM_INDEX_THIS_OBJ];
     auto updateInstance = thisObj->GetProperty("updateInstance");
     if (!updateInstance->IsFunction()) {
@@ -164,6 +202,29 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         updateInstanceFunc->ExecuteJS(1, &jsVal);
     };
     viewNode_->RegisterUpdateJSInstanceCallback(updateJSInstanceCallback);
+}
+
+void JSBaseNode::BuildNode(const JSCallbackInfo& info)
+{
+    ACE_REUSE_DETECTION_SCOPED_TRACE("JSBaseNode:BuildNode");
+    auto builder = info[0];
+    CHECK_NULL_VOID(builder->IsFunction());
+    auto newNode = GetAndExecBuilderFunc(info);
+    SetNodeFunc(newNode, info);
+}
+
+void JSBaseNode::BuildReactiveNode(const JSCallbackInfo& info)
+{
+    ACE_REUSE_DETECTION_SCOPED_TRACE("JSBaseNode:BuildReactiveNode");
+    auto builder = info[0];
+    CHECK_NULL_VOID(builder->IsFunction());
+    auto infoLen = info.Length();
+    if (infoLen < INFO_LENGTH_LIMIT) {
+        return;
+    }
+    CHECK_NULL_VOID(info[1]->IsArray());
+    auto newNode = GetAndExecMultiArgsBuilderFunc(info);
+    SetNodeFunc(newNode, info);
 }
 
 void JSBaseNode::ProccessNode(bool isSupportExportTexture, bool isSupportLazyBuild)
@@ -195,6 +256,16 @@ void JSBaseNode::Create(const JSCallbackInfo& info)
         return;
     }
     BuildNode(info);
+    EcmaVM* vm = info.GetVm();
+    info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, AceType::RawPtr(viewNode_))));
+}
+
+void JSBaseNode::CreateReactive(const JSCallbackInfo& info)
+{
+    if (info.Length() >= 1 && !info[0]->IsFunction()) {
+        return;
+    }
+    BuildReactiveNode(info);
     EcmaVM* vm = info.GetVm();
     info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, AceType::RawPtr(viewNode_))));
 }
@@ -928,6 +999,7 @@ void JSBaseNode::JSBind(BindingTarget globalObj)
     JSClass<JSBaseNode>::Declare("__JSBaseNode__");
 
     JSClass<JSBaseNode>::CustomMethod("create", &JSBaseNode::Create);
+    JSClass<JSBaseNode>::CustomMethod("createReactive", &JSBaseNode::CreateReactive);
     JSClass<JSBaseNode>::CustomMethod("finishUpdateFunc", &JSBaseNode::FinishUpdateFunc);
     JSClass<JSBaseNode>::CustomMethod("postTouchEvent", &JSBaseNode::PostTouchEvent);
     JSClass<JSBaseNode>::CustomMethod("disposeNode", &JSBaseNode::Dispose);
