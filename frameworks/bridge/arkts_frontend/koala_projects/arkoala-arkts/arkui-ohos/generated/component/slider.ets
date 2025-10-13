@@ -27,13 +27,15 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Number_serializer } from "./common"
 import { Color, CrownSensitivity, Axis } from "./enums"
 import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookSliderContentModifier, hookSliderAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookSliderContentModifier, extractors, hookSliderAttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
 import { SliderModifier } from "./../SliderModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
 export class ArkSliderPeer extends ArkCommonMethodPeer {
     attributeSet?: SliderModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -513,6 +515,7 @@ export enum SliderBlockType {
 export interface SliderBlockStyle {
     type: SliderBlockType;
     image?: ResourceStr;
+    shape?: CircleShape | EllipseShape | PathShape | RectShape;
 }
 export type SliderTriggerChangeCallback = (value: number, mode: SliderChangeMode) => void;
 export interface SliderConfiguration extends CommonConfiguration<SliderConfiguration> {
@@ -999,6 +1002,30 @@ export class SliderBlockStyle_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForShape  = value.shape
+        if (valueHolderForShape !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShapeTmpValue  = valueHolderForShape!
+            if (valueHolderForShapeTmpValue instanceof CircleShape) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForShapeTmpValueForIdx0  = valueHolderForShapeTmpValue as CircleShape
+                CircleShape_serializer.write(valueSerializer, valueHolderForShapeTmpValueForIdx0)
+            } else if (valueHolderForShapeTmpValue instanceof EllipseShape) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForShapeTmpValueForIdx1  = valueHolderForShapeTmpValue as EllipseShape
+                EllipseShape_serializer.write(valueSerializer, valueHolderForShapeTmpValueForIdx1)
+            } else if (valueHolderForShapeTmpValue instanceof PathShape) {
+                valueSerializer.writeInt8((2).toChar())
+                const valueHolderForShapeTmpValueForIdx2  = valueHolderForShapeTmpValue as PathShape
+                PathShape_serializer.write(valueSerializer, valueHolderForShapeTmpValueForIdx2)
+            } else if (valueHolderForShapeTmpValue instanceof RectShape) {
+                valueSerializer.writeInt8((3).toChar())
+                const valueHolderForShapeTmpValueForIdx3  = valueHolderForShapeTmpValue as RectShape
+                RectShape_serializer.write(valueSerializer, valueHolderForShapeTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): SliderBlockStyle {
         let valueDeserializer : DeserializerBase = buffer
@@ -1018,7 +1045,26 @@ export class SliderBlockStyle_serializer {
             imageTmpBuf = (imageTmpBuf_ as string | Resource)
         }
         const imageTmpResult : ResourceStr | undefined = imageTmpBuf
-        let value : SliderBlockStyle = ({type: typeTmpResult, image: imageTmpResult} as SliderBlockStyle)
+        const shapeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let shapeTmpBuf : CircleShape | EllipseShape | PathShape | RectShape | undefined = undefined
+        if ((shapeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const shapeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let shapeTmpBuf_ : CircleShape | EllipseShape | PathShape | RectShape | undefined
+            if (shapeTmpBuf_UnionSelector == (0).toChar()) {
+                shapeTmpBuf_ = (CircleShape_serializer.read(valueDeserializer) as CircleShape)
+            } else if (shapeTmpBuf_UnionSelector == (1).toChar()) {
+                shapeTmpBuf_ = (EllipseShape_serializer.read(valueDeserializer) as EllipseShape)
+            } else if (shapeTmpBuf_UnionSelector == (2).toChar()) {
+                shapeTmpBuf_ = (PathShape_serializer.read(valueDeserializer) as PathShape)
+            } else if (shapeTmpBuf_UnionSelector == (3).toChar()) {
+                shapeTmpBuf_ = (RectShape_serializer.read(valueDeserializer) as RectShape)
+            } else {
+                throw new Error("One of the branches for shapeTmpBuf_ has to be chosen through deserialisation.")
+            }
+            shapeTmpBuf = (shapeTmpBuf_ as CircleShape | EllipseShape | PathShape | RectShape)
+        }
+        const shapeTmpResult : CircleShape | EllipseShape | PathShape | RectShape | undefined = shapeTmpBuf
+        let value : SliderBlockStyle = ({type: typeTmpResult, image: imageTmpResult, shape: shapeTmpResult} as SliderBlockStyle)
         return value
     }
 }
