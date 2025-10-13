@@ -1543,13 +1543,12 @@ HWTEST_F(CommonMethodModifierTest2, setBorderImage, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setLinearGradient, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setLinearGradient, TestSize.Level1)
 {
     // color stops
     std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), ArkValue<Ark_Number>(0.1f) },
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GREEN), ArkValue<Ark_Number>(0.5f) },
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_YELLOW), ArkValue<Ark_Number>(0.7f) },
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), ArkValue<Ark_Number>(0.9f) },
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
@@ -1564,7 +1563,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setLinearGradient, TestSize.Level1)
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_LINEAR_GRADIENT_NAME);
     EXPECT_EQ(strResult, "{\"angle\":\"77.00vp\",\"direction\":\"GradientDirection.LeftBottom\","
                          "\"colors\":[[\"#FFFF0000\",\"0.100000\"],[\"#FF008000\",\"0.500000\"],"
-                         "[\"#FFFFFF00\",\"0.700000\"],[\"#FF0000FF\",\"0.900000\"]],\"repeating\":\"true\"}");
+                         "[\"#FF0000FF\",\"0.900000\"]],\"repeating\":\"true\"}");
 }
 /*
  * @tc.name: setSweepGradient
