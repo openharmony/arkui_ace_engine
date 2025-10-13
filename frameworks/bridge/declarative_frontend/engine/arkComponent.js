@@ -22909,6 +22909,10 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, AvoidanceModifier.identity, AvoidanceModifier, mode);
     return this;
   }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, SelectBackgroundColorModifier.identity, SelectBackgroundColorModifier, value);
+    return this;
+  }
 }
 
 class SelectOptionsModifier extends ModifierWithKey {
@@ -23481,7 +23485,23 @@ class AvoidanceModifier extends ModifierWithKey {
   }
 }
 AvoidanceModifier.identity = Symbol('selectAvoidance');
-
+class SelectBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().select.setBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SelectBackgroundColorModifier.identity = Symbol('selectBackgroundColor');
 class SelectOnSelectModifier extends ModifierWithKey{
   constructor(value) {
     super(value);

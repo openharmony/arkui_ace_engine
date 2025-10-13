@@ -1111,6 +1111,22 @@ void SelectModelNG::ResetBackgroundColor()
     ACE_UPDATE_PAINT_PROPERTY(SelectPaintProperty, BackgroundColorSetByUser, false);
 }
 
+void SelectModelNG::BackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, BackgroundColor, color, frameNode);
+    ViewAbstract::SetBackgroundColor(frameNode, color);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, BackgroundColorSetByUser, true, frameNode);
+}
+
+void SelectModelNG::ResetBackgroundColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SelectPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, BackgroundColorSetByUser, false, frameNode);
+}
+
 void SelectModelNG::SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();

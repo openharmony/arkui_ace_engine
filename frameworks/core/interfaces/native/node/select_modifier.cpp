@@ -689,6 +689,50 @@ void SetMenuBgColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void* menuBgCol
     }
 }
 
+void SetSelectBackgroundColor(ArkUINodeHandle node, uint32_t color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::BackgroundColor(frameNode, Color(color));
+}
+
+void SetSelectBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    SelectModelNG::BackgroundColor(frameNode, backgroundColor);
+}
+
+void SetSelectBackgroundColorWithColorSpacePtr(ArkUINodeHandle node, ArkUI_Uint32 color,
+    ArkUI_Int32 colorSpace, void* colorRawPtr)
+{
+    CHECK_NULL_VOID(node);
+    SetSelectBackgroundColorWithColorSpace(node, color, colorSpace);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+        auto colorResObj = AceType::Claim(color);
+        SelectModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SelectColorType::BACKGROUND_COLOR);
+    }
+}
+
+void ResetSelectBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::ResetBackgroundColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::BACKGROUND_COLOR);
+    }
+}
+
 void ResetMenuBgColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1021,6 +1065,10 @@ const ArkUISelectModifier* GetSelectModifier()
         .setMenuBgColorPtr = SetMenuBgColorPtr,
         .setArrowColor = SetArrowColor,
         .setShowDefaultSelectedIcon = SetShowDefaultSelectedIcon,
+        .setSelectBackgroundColor = SetSelectBackgroundColor,
+        .setSelectBackgroundColorWithColorSpace = SetSelectBackgroundColorWithColorSpace,
+        .resetSelectBackgroundColor = ResetSelectBackgroundColor,
+        .setSelectBackgroundColorWithColorSpacePtr = SetSelectBackgroundColorWithColorSpacePtr,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

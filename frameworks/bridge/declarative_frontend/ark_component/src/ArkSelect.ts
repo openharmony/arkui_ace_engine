@@ -182,6 +182,10 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
       this._modifiersWithKeys, AvoidanceModifier.identity, AvoidanceModifier, mode);
     return this;
   }
+  backgroundColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, SelectBackgroundColorModifier.identity, SelectBackgroundColorModifier, value);
+    return this;
+  }
   menuOutline(outline: MenuOutlineOptions): this {
     modifierWithKey(
       this._modifiersWithKeys, MenuOutlineModifier.identity, MenuOutlineModifier, outline);
@@ -708,6 +712,24 @@ class AvoidanceModifier extends ModifierWithKey<AvoidanceMode> {
   }
   checkObjectDiff(): boolean {
     return this.stageValue !== this.value;
+  }
+}
+
+class SelectBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetBackgroundColor(node);
+    } else {
+      getUINativeModule().select.setBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
