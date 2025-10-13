@@ -104,7 +104,11 @@ export enum TouchType {
     MOVE = 2,
     Move = 2,
     CANCEL = 3,
-    Cancel = 3
+    Cancel = 3,
+    HOVER_ENTER = 9,
+    HOVER_MOVE = 10,
+    HOVER_EXIT = 11,
+    HOVER_CANCEL = 12
 }
 export enum InteractionHand {
     NONE = 0,
@@ -112,28 +116,28 @@ export enum InteractionHand {
     RIGHT = 2
 }
 export enum MouseButton {
-    LEFT = 0,
-    Left = 0,
-    RIGHT = 1,
-    Right = 1,
-    MIDDLE = 2,
-    Middle = 2,
-    BACK = 3,
-    Back = 3,
-    FORWARD = 4,
-    Forward = 4,
-    NONE = 5,
-    None = 5
+    LEFT = 1,
+    Left = 1,
+    RIGHT = 2,
+    Right = 2,
+    MIDDLE = 4,
+    Middle = 4,
+    BACK = 8,
+    Back = 8,
+    FORWARD = 16,
+    Forward = 16,
+    NONE = 0,
+    None = 0
 }
 export enum MouseAction {
-    PRESS = 0,
-    Press = 0,
-    RELEASE = 1,
-    Release = 1,
-    MOVE = 2,
-    Move = 2,
-    HOVER = 3,
-    Hover = 3,
+    PRESS = 1,
+    Press = 1,
+    RELEASE = 2,
+    Release = 2,
+    MOVE = 3,
+    Move = 3,
+    HOVER = 4,
+    Hover = 4,
     CANCEL = 13
 }
 export enum AnimationStatus {
@@ -176,9 +180,9 @@ export enum KeyType {
 export enum KeySource {
     UNKNOWN = 0,
     Unknown = 0,
-    KEYBOARD = 1,
-    Keyboard = 1,
-    JOYSTICK = 2
+    KEYBOARD = 4,
+    Keyboard = 4,
+    JOYSTICK = 5
 }
 export enum Edge {
     TOP = 0,
@@ -363,12 +367,12 @@ export enum ImageRepeat {
     XY = 3
 }
 export enum ImageSize {
-    AUTO = 0,
-    Auto = 0,
+    AUTO = 2,
+    Auto = 2,
     COVER = 1,
     Cover = 1,
-    CONTAIN = 2,
-    Contain = 2,
+    CONTAIN = 0,
+    Contain = 0,
     FILL = 3
 }
 export enum GradientDirection {
@@ -521,7 +525,9 @@ export enum HitTestMode {
     TRANSPARENT = 2,
     Transparent = 2,
     NONE = 3,
-    None = 3
+    None = 3,
+    BLOCK_HIERARCHY = 4,
+    BLOCK_DESCENDANTS = 5
 }
 export enum TitleHeight {
     MAIN_ONLY = 0,
