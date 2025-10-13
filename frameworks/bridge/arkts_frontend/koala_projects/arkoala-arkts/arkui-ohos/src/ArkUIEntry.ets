@@ -205,7 +205,7 @@ export class Application {
     private startUrl: string = ""
     private startParam: string = ""
     private instanceId: int32 = -1
-
+    private plugin = false
     private withLog = false
     private useNativeLog = true
     private rootPointer: KPointer = nullptr
@@ -244,7 +244,9 @@ export class Application {
         return result
     }
 
-    start(): pointer {
+    start(plugin: boolean): pointer {
+        InteropNativeModule._NativeLog("ArkTS Application.start plugin: " + plugin)
+        this.plugin = plugin
         RuntimeProfiler.initTrace(AceTrace.begin, AceTrace.end)
         RuntimeProfiler.initNativeLog(InteropNativeModule._NativeLog)
         if (this.withLog) UserView.startNativeLog(1)
@@ -273,10 +275,18 @@ export class Application {
             } else {
                 throw new Error("Invalid EntryPoint")
             }
-            Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
+            if (plugin) {
+                this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {
+                    const frozen = this.manager!.frozen
+                    this.manager!.frozen = true
+                    memoEntry<void>(context, 0, builder)
+                    this.manager!.frozen = frozen
+                })
+            } else {
+                Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
+                this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {})
+            }
             InteropNativeModule._NativeLog(`ArkTS Application.start before computeRoot`)
-            const manager = GlobalStateManager.instance
-            this.rootState = manager.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {})
             root = this.rootState!.value
             InteropNativeModule._NativeLog(`ArkTS Application.start after computeRoot`)
         } catch (e) {
@@ -325,6 +335,10 @@ export class Application {
         let uiContextRouter = this.uiContext!.getRouter();
         let rootState = uiContextRouter.getStateRoot();
         let preState = uiContextRouter.getPreState();
+        if (this.plugin) {
+            rootState = this.rootState as ComputableState<IncrementalNode> | undefined;
+            preState = undefined;
+        }
         ObserveSingleton.instance.updateDirty();
         this.updateStates(this.manager!, rootState, preState);
         ObserveSingleton.instance.makeDelayedMutableStateChanges();
