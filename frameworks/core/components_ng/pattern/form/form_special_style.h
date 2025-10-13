@@ -53,6 +53,16 @@ enum class FormStyleAttribution : int32_t {
      * Developer mode tips.
      */
     DEVELOPER_MODE_TIPS,
+
+    /**
+     * Due disable
+     */
+    DUE_DISABLE,
+ 
+    /**
+     * Due remove
+     */
+    DUE_REMOVE,
 };
 class FormSpecialStyle {
 public:
@@ -71,6 +81,10 @@ public:
     bool IsInited() const;
     void SetIsMultiAppForm(AppExecFwk::FormInfo &formInfo);
     bool IsMultiAppForm() const;
+    void SetIsDisableByDue(bool isDueDisable);
+    bool IsDueDisabled() const;
+    void SetIsRemoveByDue(bool isDueRemove);
+    bool IsDueRemoved() const;
 private:
     bool isForbiddenByParentControl_ = false;
 
@@ -81,6 +95,10 @@ private:
     bool isMultiAppForm_ = false;
 
     bool isShowDeveloperTips_ = false;
+
+    bool isDueDisabled_ = false;
+ 
+    bool isDueRemoved_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -78,6 +78,7 @@ constexpr float MAX_FONT_SCALE = 1.3f;
 constexpr char TIME_LIMIT_RESOURCE_NAME[] = "form_disable_time_limit";
 constexpr char APP_LOCKED_RESOURCE_NAME[] = "form_disable_app_locked";
 constexpr char DEVELOPER_MODE_TIPS_RESOURCE_NAME[] = "desc_developer_mode_tips";
+constexpr char DUE_CONTROL_RESOURCE_NAME[] = "due_control_form";
 constexpr float FORBIDDEN_STYLE_PADDING = 12;
 constexpr uint32_t ROOT_BG_COLOR_DARK = 0xFF2E3033;
 constexpr uint32_t ROOT_BG_COLOR_LIGHT = 0xFFF1F3F5;
@@ -918,17 +919,24 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
         isShowDeveloperTips = IsFormBundleDebugSignature(info.bundleName);
     }
     cardInfo_.obscuredMode |= isFormBundleForbidden || isFormProtected || isShowDeveloperTips;
+    bool isDueDisable =
+        IsFormDueDisable(info.bundleName, info.moduleName, info.abilityName, info.cardName, info.dimension);
+    bool isDueRemove =
+        IsFormDueRemove(info.bundleName, info.moduleName, info.abilityName, info.cardName, info.dimension);
 #if OHOS_STANDARD_SYSTEM
     formManagerBridge_->AddForm(pipeline, cardInfo_, formInfo);
 #else
     formManagerBridge_->AddForm(pipeline, cardInfo_);
 #endif
 
-    if (!info.exemptAppLock && (isFormProtected || isFormBundleForbidden || isShowDeveloperTips))  {
+    if (!info.exemptAppLock && (isFormProtected || isFormBundleForbidden || isShowDeveloperTips ||
+        isDueDisable || isDueRemove))  {
         auto newFormSpecialStyle = formSpecialStyle_;
         newFormSpecialStyle.SetIsLockedByAppLock(isFormProtected);
         newFormSpecialStyle.SetIsForbiddenByParentControl(isFormBundleForbidden);
         newFormSpecialStyle.SetIsShowDeveloperTips(isShowDeveloperTips);
+        newFormSpecialStyle.SetIsDisableByDue(isDueDisable);
+        newFormSpecialStyle.SetIsRemoveByDue(isDueRemove);
         newFormSpecialStyle.SetInitDone();
         PostUITask([weak = WeakClaim(this), info, newFormSpecialStyle] {
             ACE_SCOPED_TRACE("ArkUILoadDisableFormStyle");
@@ -1118,6 +1126,10 @@ void FormPattern::UpdateSpecialStyleCfg()
         UpdateForbiddenIcon(FormChildNodeType::DEVELOPER_MODE_TIPS_IMAGE_NODE);
         UpdateForbiddenText(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE);
     }
+    if (attribution == FormStyleAttribution::DUE_DISABLE || attribution == FormStyleAttribution::DUE_REMOVE) {
+        UpdateForbiddenIcon(FormChildNodeType::DUE_CONTROL_IMAGE_NODE);
+        UpdateForbiddenText(FormChildNodeType::DUE_CONTROL_TEXT_NODE);
+    }
 }
 
 void FormPattern::UpdateForbiddenText(FormChildNodeType nodeType)
@@ -1242,6 +1254,10 @@ RefPtr<FrameNode> FormPattern::CreateIconNode(bool isRowStyle)
         imageNode = CreateForbiddenImageNode(InternalResource::ResourceId::APP_LOCK_SVG, isRowStyle);
         AddFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_IMAGE_NODE, imageNode);
     }
+    if (attribution == FormStyleAttribution::DUE_DISABLE || attribution == FormStyleAttribution::DUE_REMOVE) {
+        imageNode = CreateForbiddenImageNode(InternalResource::ResourceId::IC_DUE_CONTROL_SVG, isRowStyle);
+        AddFormChildNode(FormChildNodeType::DUE_CONTROL_IMAGE_NODE, imageNode);
+    }
     return imageNode;
 }
 
@@ -1261,6 +1277,10 @@ RefPtr<FrameNode> FormPattern::CreateTextNode(bool isRowStyle)
         textNode = CreateForbiddenTextNode(DEVELOPER_MODE_TIPS_RESOURCE_NAME, isRowStyle);
         AddFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE, textNode);
     }
+    if (attribution == FormStyleAttribution::DUE_DISABLE || attribution == FormStyleAttribution::DUE_REMOVE) {
+        textNode = CreateForbiddenTextNode(DUE_CONTROL_RESOURCE_NAME, isRowStyle);
+        AddFormChildNode(FormChildNodeType::DUE_CONTROL_TEXT_NODE, textNode);
+    }
     return textNode;
 }
 
@@ -1271,13 +1291,7 @@ void FormPattern::RemoveDisableFormStyle(const RequestFormInfo& info)
         UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
         UpdateChildNodeOpacity(FormChildNodeType::FORM_STATIC_IMAGE_NODE, NON_TRANSPARENT_VAL);
         UpdateChildNodeOpacity(FormChildNodeType::FORM_SKELETON_NODE, CONTENT_BG_OPACITY);
-        RemoveFormChildNode(FormChildNodeType::APP_LOCKED_IMAGE_NODE);
-        RemoveFormChildNode(FormChildNodeType::APP_LOCKED_TEXT_NODE);
-        RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
-        RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_IMAGE_NODE);
-        RemoveFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE);
-        RemoveFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_IMAGE_NODE);
-        RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+        RemoveFormStyleChildNode();
         return;
     }
     if (!formManagerBridge_) {
@@ -1656,6 +1670,7 @@ void FormPattern::InitFormManagerDelegate()
     InitAddUnTrustAndSnapshotCallback(instanceID);
     InitOtherCallback(instanceID);
     InitUpdateFormDoneCallback(instanceID);
+    InitDueControlFormCallback(instanceID);
     const std::function<void(bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback =
         [this](bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
             FormManager::GetInstance().NotifyIsSizeChangeByRotate(isRotate, rsTransaction);
@@ -3014,6 +3029,8 @@ void FormPattern::RemoveFormStyleChildNode()
     RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_IMAGE_NODE);
     RemoveFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE);
     RemoveFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_IMAGE_NODE);
+    RemoveFormChildNode(FormChildNodeType::DUE_CONTROL_IMAGE_NODE);
+    RemoveFormChildNode(FormChildNodeType::DUE_CONTROL_TEXT_NODE);
     RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
 }
 
@@ -3092,5 +3109,65 @@ bool FormPattern::OnAccessibilityStateChange(bool state)
         pattern->formManagerBridge_->ReAddForm();
         }, "ReAddForm");
     return true;
+}
+
+void FormPattern::InitDueControlFormCallback(int32_t instanceID)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    formManagerBridge_->AddDueDisableFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool isDisable) {
+        ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([weak, instanceID, isDisable] {
+            ContainerScope scope(instanceID);
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->HandleFormDueDisable(isDisable);
+            }, "ArkUIFormHandleDueDisableEvent");
+    });
+
+    formManagerBridge_->AddDueRemoveFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool isRemove) {
+        ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([weak, instanceID, isRemove] {
+            ContainerScope scope(instanceID);
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->HandleFormDueRemove(isRemove);
+            }, "ArkUIFormHandleDueRemoveEvent");
+    });
+}
+
+void FormPattern::HandleFormDueDisable(bool isDisable)
+{
+    auto newFormSpecialStyle = formSpecialStyle_;
+    newFormSpecialStyle.SetIsDisableByDue(isDisable);
+    HandleFormStyleOperation(newFormSpecialStyle);
+}
+
+bool FormPattern::IsFormDueDisable(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &formName, const int32_t dimension)
+{
+    CHECK_NULL_RETURN(formManagerBridge_, false);
+    return formManagerBridge_->CheckFormDueDisable(bundleName, moduleName, abilityName, formName, dimension);
+}
+
+void FormPattern::HandleFormDueRemove(bool isRemove)
+{
+    auto newFormSpecialStyle = formSpecialStyle_;
+    newFormSpecialStyle.SetIsRemoveByDue(isRemove);
+    HandleFormStyleOperation(newFormSpecialStyle);
+}
+
+bool FormPattern::IsFormDueRemove(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &formName, const int32_t dimension)
+{
+    CHECK_NULL_RETURN(formManagerBridge_, false);
+    return formManagerBridge_->CheckFormDueRemove(bundleName, moduleName, abilityName, formName, dimension);
 }
 } // namespace OHOS::Ace::NG

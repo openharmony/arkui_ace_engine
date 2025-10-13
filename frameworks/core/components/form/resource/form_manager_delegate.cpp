@@ -1269,5 +1269,67 @@ void FormManagerDelegate::ProcessLockForm(bool lock)
     TAG_LOGI(AceLogTag::ACE_FORM, "ProcessLockForm, formId is %{public}" PRId64, runningCardId_);
     HandleLockFormCallback(lock);
 }
+
+void FormManagerDelegate::AddDueDisableFormCallback(DueDisableFormCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        return;
+    }
+    dueDisableFormCallback_ = std::move(callback);
+}
+ 
+void FormManagerDelegate::HandleDueDisableForm(bool isDisable)
+{
+    if (!dueDisableFormCallback_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "dueDisableFormCallback_ is null");
+        return;
+    }
+    dueDisableFormCallback_(isDisable);
+}
+ 
+void FormManagerDelegate::ProcessDueDisableForm(bool isDisable)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessDueDisableForm, isDisable:%{public}d, formId:%{public}" PRId64,
+        isDisable, runningCardId_);
+    HandleDueDisableForm(isDisable);
+}
+ 
+bool FormManagerDelegate::CheckFormDueDisable(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &formName, const int32_t dimension)
+{
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormDueDisable(
+        bundleName, moduleName, abilityName, formName, dimension);
+}
+ 
+void FormManagerDelegate::AddDueRemoveFormCallback(DueRemoveFormCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        return;
+    }
+    dueRemoveFormCallback_ = std::move(callback);
+}
+ 
+void FormManagerDelegate::HandleDueRemoveForm(bool isRemove)
+{
+    if (!dueRemoveFormCallback_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "dueRemoveFormCallback_ is null");
+        return;
+    }
+    dueRemoveFormCallback_(isRemove);
+}
+ 
+void FormManagerDelegate::ProcessDueRemoveForm(bool isRemove)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessDueRemoveForm, isRemove:%{public}d, formId:%{public}" PRId64,
+        isRemove, runningCardId_);
+    HandleDueRemoveForm(isRemove);
+}
+ 
+bool FormManagerDelegate::CheckFormDueRemove(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &formName, const int32_t dimension)
+{
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormDueRemove(
+        bundleName, moduleName, abilityName, formName, dimension);
+}
 #endif
 } // namespace OHOS::Ace

@@ -118,7 +118,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_TIME_LIMIT_SVG, "ic_time_limit_picture"},
     { InternalResource::ResourceId::IC_PERSON_FILL_SVG, "ic_person_fill"},
     { InternalResource::ResourceId::IC_LINK_SVG, "ic_link"},
-    { InternalResource::ResourceId::IC_LOACTION_SVG, "ic_location"}};
+    { InternalResource::ResourceId::IC_LOACTION_SVG, "ic_location"},
+    { InternalResource::ResourceId::IC_DUE_CONTROL_SVG, "ic_due_control_picture"}};
 }
 
 RefPtr<IconTheme> IconTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const

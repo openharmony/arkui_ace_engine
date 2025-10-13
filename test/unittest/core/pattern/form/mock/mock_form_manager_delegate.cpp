@@ -145,7 +145,19 @@ bool FormManagerDelegate::IsFormBundleDebugSignature(const std::string &bundleNa
 }
 
 void FormManagerDelegate::AddFormUpdateDoneCallback(UpdateFormDoneCallback&& callback) {}
-
 void FormManagerDelegate::OnFormUpdateDone(const int64_t formId) {}
 void FormManagerDelegate::ReAddForm() {}
+
+void FormManagerDelegate::AddDueDisableFormCallback(DueDisableFormCallback &&callback) {}
+void FormManagerDelegate::AddDueRemoveFormCallback(DueRemoveFormCallback &&callback) {}
+bool FormManagerDelegate::CheckFormDueDisable(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &formName, const int32_t dimension)
+{
+    return false;
+}
+bool FormManagerDelegate::CheckFormDueRemove(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &formName, const int32_t dimension)
+{
+    return false;
+}
 } // namespace OHOS::Ace

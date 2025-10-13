@@ -73,6 +73,8 @@ public:
     using EnableFormCallback = std::function<void(const bool enable)>;
     using LockFormCallback = std::function<void(const bool lock)>;
     using UpdateFormDoneCallback = std::function<void(const int64_t formId)>;
+    using DueDisableFormCallback = std::function<void(const bool isDisable)>;
+    using DueRemoveFormCallback = std::function<void(const bool isRemove)>;
 
     enum class State : char {
         WAITINGFORSIZE,
@@ -126,6 +128,8 @@ public:
     void AddEnableFormCallback(EnableFormCallback&& callback);
     void AddLockFormCallback(LockFormCallback&& callback);
     void AddFormUpdateDoneCallback(UpdateFormDoneCallback&& callback);
+    void AddDueDisableFormCallback(DueDisableFormCallback &&callback);
+    void AddDueRemoveFormCallback(DueRemoveFormCallback &&callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
     void OnActionEvent(const std::string& action);
@@ -168,6 +172,8 @@ public:
     void ProcessRecycleForm();
     void ProcessEnableForm(bool enable);
     void ProcessLockForm(bool lock);
+    void ProcessDueDisableForm(bool isDisable);
+    void ProcessDueRemoveForm(bool isRemove);
 #endif
     void HandleCachedClickEvents();
     void ReAddForm();
@@ -175,6 +181,10 @@ public:
     {
         return this->recycleMutex_;
     }
+    bool CheckFormDueDisable(const std::string &bundleName, const std::string &moduleName,
+        const std::string &abilityName, const std::string &formName, const int32_t dimension);
+    bool CheckFormDueRemove(const std::string &bundleName, const std::string &moduleName,
+        const std::string &abilityName, const std::string &formName, const int32_t dimension);
 
 private:
     void CreatePlatformResource(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info);
@@ -194,6 +204,8 @@ private:
     void SetGestureInnerFlag();
     void CheckWhetherSurfaceChangeFailed();
     void UpdateFormSizeWantCache(float width, float height, float layoutWidth, float layoutHeight, float borderWidth);
+    void HandleDueDisableForm(bool isDisable);
+    void HandleDueRemoveForm(bool isRemove);
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;
@@ -212,6 +224,8 @@ private:
     EnableFormCallback enableFormCallback_;
     LockFormCallback lockFormCallback_;
     UpdateFormDoneCallback updateFormDoneCallback_;
+    DueDisableFormCallback dueDisableFormCallback_;
+    DueRemoveFormCallback dueRemoveFormCallback_;
 
     State state_ { State::WAITINGFORSIZE };
     bool isDynamic_ = true;

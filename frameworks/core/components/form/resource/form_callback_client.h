@@ -162,6 +162,46 @@ public:
             TaskExecutor::TaskType::UI, "ArkUIFormProcessLockForm");
     }
 
+    void ProcessDueDisableForm(bool isDisable) override
+    {
+        TAG_LOGI(AceLogTag::ACE_FORM, "FormCallbackClient::ProcessDueDisableForm");
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId_);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [delegate = delegate_, isDisable]() {
+                auto formManagerDelegate = delegate.Upgrade();
+                if (!formManagerDelegate) {
+                    TAG_LOGE(AceLogTag::ACE_FORM, "formManagerDelegate is nullptr");
+                    return;
+                }
+                formManagerDelegate->ProcessDueDisableForm(isDisable);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIFormProcessDueDisableForm");
+    }
+
+    void ProcessDueRemoveForm(bool isRemove) override
+    {
+        TAG_LOGI(AceLogTag::ACE_FORM, "FormCallbackClient::ProcessDueRemoveForm");
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId_);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [delegate = delegate_, isRemove]() {
+                auto formManagerDelegate = delegate.Upgrade();
+                if (!formManagerDelegate) {
+                    TAG_LOGE(AceLogTag::ACE_FORM, "formManagerDelegate is nullptr");
+                    return;
+                }
+                formManagerDelegate->ProcessDueRemoveForm(isRemove);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIFormProcessDueRemoveForm");
+    }
+
 private:
     int32_t instanceId_ = -1;
     WeakPtr<FormManagerDelegate> delegate_;
