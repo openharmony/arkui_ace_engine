@@ -38,6 +38,7 @@ export struct SliderIndex {
     { name: 'SliderLevel13', path: 'SliderLevel13' },
     { name: 'SliderLevel14', path: 'SliderLevel14' },
     { name: 'SliderLevel15', path: 'SliderLevel15' },
+    { name: 'SliderPrefixSuffix', path: 'SliderPrefixSuffix' },
   ]
 
   build() {
