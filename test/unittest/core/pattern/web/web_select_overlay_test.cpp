@@ -6624,4 +6624,89 @@ HWTEST_F(WebSelectOverlayTest, ComputeSelectAreaRectTest002, TestSize.Level1)
     bool y = NearEqual(ret.GetY(), offset.GetY());
     EXPECT_TRUE(x & y);
 }
+
+/**
+ * @tc.name: IsMouseInHandleRect
+ * @tc.desc: Test IsMouseInHandleRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, IsMouseInHandleRect, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    WebSelectOverlay overlay(webPattern);
+    RectF handleRect;
+    overlay.OnHandleMoveDone(handleRect, true);
+    webPattern->overlayCreating_ = true;
+    webPattern->imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::IMAGE);
+    overlay.OnHandleMoveDone(handleRect, true);
+    overlay.endSelectionHandle_ = nullptr;
+    overlay.startSelectionHandle_ = std::make_shared<NWebTouchHandleStateTestImpl>();
+    overlay.OnHandleMoveDone(handleRect, true);
+
+    float offsetY = 0.0f;
+    MouseInfo event;
+    overlay.IsMouseInHandleRect(event, overlay.startSelectionHandle_, offsetY);
+    auto ret1 = NearEqual(offsetY, 0.0f, NEW_EPSILON);
+    EXPECT_TRUE(ret1);
+
+    overlay.startSelectionHandle_ = nullptr;
+    overlay.endSelectionHandle_ = std::make_shared<NWebTouchHandleStateEndTestImpl>();
+    overlay.OnHandleMoveDone(handleRect, true);
+
+    overlay.IsMouseInHandleRect(event, overlay.endSelectionHandle_, offsetY);
+    auto ret2 = NearEqual(offsetY, 0.0f, NEW_EPSILON);
+    EXPECT_TRUE(ret2);
+#endif
+}
+
+/**
+ * @tc.name: OnOverlayMouseEvent
+ * @tc.desc: Test OnOverlayMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, OnOverlayMouseEvent, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    WebSelectOverlay overlay(webPattern);
+    EXPECT_NE(webPattern->delegate_, nullptr);
+
+    RectF handleRect;
+    overlay.OnHandleMoveDone(handleRect, true);
+    webPattern->overlayCreating_ = true;
+    webPattern->imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::IMAGE);
+    overlay.OnHandleMoveDone(handleRect, true);
+    overlay.endSelectionHandle_ = nullptr;
+    overlay.startSelectionHandle_ = std::make_shared<NWebTouchHandleStateTestImpl>();
+    overlay.OnHandleMoveDone(handleRect, true);
+
+    MouseInfo event;
+    event.SetButton(MouseButton::LEFT_BUTTON);
+    overlay.OnOverlayMouseEvent(event);
+
+    event.SetButton(MouseButton::LEFT_BUTTON);
+    event.SetAction(MouseAction::PRESS);
+    overlay.OnOverlayMouseEvent(event);
+
+    EXPECT_EQ(overlay.startSelectionHandle_->GetX(), 0);
+    EXPECT_EQ(overlay.startSelectionHandle_->GetY(), 0);
+#endif
+}
 } // namespace OHOS::Ace::NG

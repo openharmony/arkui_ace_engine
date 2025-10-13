@@ -26,11 +26,12 @@ class WebModelImpl : public OHOS::Ace::WebModel {
 public:
     void Create(const std::string& src, const RefPtr<WebController>& webController,
         RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
-        const std::string& sharedRenderProcessToken = "") override;
+        const std::string& sharedRenderProcessToken = "", bool emulateTouchFromMouseEvent = false) override;
     void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
         std::function<void(const std::string&)>&& setHapPathCallback,
         int32_t parentWebId, bool popup, RenderMode renderMode = RenderMode::ASYNC_RENDER,
-        bool incognitoMode = false, const std::string& sharedRenderProcessToken = "") override;
+        bool incognitoMode = false, const std::string& sharedRenderProcessToken = "",
+        bool emulateTouchFromMouseEvent = false) override;
     void SetCustomScheme(const std::string& cmdLine) override;
     void SetFocusable(bool focusable) override;
     void SetFocusNode(bool isFocusNode) override;
