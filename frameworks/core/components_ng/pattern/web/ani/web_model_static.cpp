@@ -1241,6 +1241,30 @@ void WebModelStatic::SetOnOverrideUrlLoading(
     webEventHub->SetOnOverrideUrlLoadingEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetOnPdfScrollAtBottom(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) {
+        return func(info.get());
+    };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnPdfScrollAtBottomEvent(std::move(uiCallback));
+}
+
+void WebModelStatic::SetOnPdfLoadEvent(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) {
+        return func(info.get());
+    };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnPdfLoadEvent(std::move(uiCallback));
+}
+
 void WebModelStatic::SetRenderProcessNotRespondingId(
     FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
 {
