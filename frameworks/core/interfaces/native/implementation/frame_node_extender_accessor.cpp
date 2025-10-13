@@ -784,8 +784,6 @@ Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
 Ark_NativePointer GetRenderNodeImpl(Ark_NativePointer peer)
 {
     auto nodePeer = reinterpret_cast<FrameNodePeer*>(peer);
-    // auto currentNode = FrameNodePeer::GetFrameNodeByPeer(nodePeer);
-    // CHECK_NULL_RETURN(currentNode, nullptr);
     return nodePeer->GetRenderNodePeer();
 }
 } // FrameNodeExtenderAccessor
