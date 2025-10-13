@@ -1407,7 +1407,7 @@ HWTEST_F(ScrollLayoutTestNg, ContentOffset002, TestSize.Level1)
 
     EXPECT_EQ(layoutProperty_->GetContentStartOffset(), contentOffset);
     EXPECT_EQ(layoutProperty_->GetContentEndOffset(), contentOffset);
-    EXPECT_EQ(pattern_->scrollableDistance_, CONTENT_MAIN_SIZE - HEIGHT + contentOffset);
+    EXPECT_EQ(pattern_->scrollableDistance_, CONTENT_MAIN_SIZE - HEIGHT + contentOffset * 2);
 }
 
 /**
@@ -1418,8 +1418,8 @@ HWTEST_F(ScrollLayoutTestNg, ContentOffset002, TestSize.Level1)
 HWTEST_F(ScrollLayoutTestNg, ContentOffset003, TestSize.Level1)
 {
     CreateScroll();
-    ScrollableModelNG::SetContentStartOffset(HEIGHT/2);
-    ScrollableModelNG::SetContentEndOffset(HEIGHT/2);
+    ScrollableModelNG::SetContentStartOffset(HEIGHT / 2);
+    ScrollableModelNG::SetContentEndOffset(HEIGHT / 2);
     CreateContent();
     CreateScrollDone();
 
@@ -1442,14 +1442,14 @@ HWTEST_F(ScrollLayoutTestNg, ContentOffset004, TestSize.Level1)
     CreateContent();
     CreateScrollDone();
 
-    EXPECT_EQ(pattern_->currentOffset_, contentOffset);
+    EXPECT_EQ(pattern_->currentOffset_, 0.0);
     EXPECT_EQ(pattern_->GetTotalOffset(), -contentOffset);
     EXPECT_TRUE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
 
     pattern_->ScrollBy(0, -640, false);
     FlushUITasks();
-    EXPECT_EQ(pattern_->currentOffset_, -620.f);
+    EXPECT_EQ(pattern_->currentOffset_, -640.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 620.f);
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_TRUE(pattern_->IsAtBottom());
@@ -1461,24 +1461,6 @@ HWTEST_F(ScrollLayoutTestNg, ContentOffset004, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollLayoutTestNg, ContentOffset005, TestSize.Level1)
-{
-    CreateScroll();
-    ScrollableModelNG::SetContentStartOffset(HEIGHT/2);
-    ScrollableModelNG::SetContentEndOffset(HEIGHT/2);
-    CreateContent();
-    CreateScrollDone();
-
-    EXPECT_EQ(pattern_->contentEndOffset_, 0);
-    EXPECT_EQ(pattern_->contentStartOffset_, 0);
-    EXPECT_EQ(pattern_->scrollableDistance_, CONTENT_MAIN_SIZE - HEIGHT);
-}
-
-/**
- * @tc.name: ContentOffset005
- * @tc.desc: Test Scroll ContentStartOffset and ContentEndOffset
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollLayoutTestNg, ContentOffset006, TestSize.Level1)
 {
     int32_t isToEdge = 0;
     int32_t isReachStart = 0;
@@ -1504,7 +1486,7 @@ HWTEST_F(ScrollLayoutTestNg, ContentOffset006, TestSize.Level1)
     EXPECT_EQ(isReachEnd, 0);
     EXPECT_EQ(isToEdge, 0);
     EXPECT_EQ(pattern_->GetTotalOffset(), -contentOffset);
-    EXPECT_EQ(pattern_->currentOffset_, contentOffset);
+    EXPECT_EQ(pattern_->currentOffset_, 0.0);
     EXPECT_EQ(isReachStart, 1);
 
     /**
@@ -1514,10 +1496,10 @@ HWTEST_F(ScrollLayoutTestNg, ContentOffset006, TestSize.Level1)
     ScrollTo(0);
     FlushUITasks();
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
-    EXPECT_EQ(pattern_->currentOffset_, 0.0f);
+    EXPECT_EQ(pattern_->currentOffset_, -contentOffset);
 
     /**
-     * @tc.steps: step2. ScrollTo bottom
+     * @tc.steps: step3. ScrollTo bottom
      * @tc.expected: Trigger scrollEdgeEvent/reachEndEvent
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
@@ -1541,5 +1523,26 @@ HWTEST_F(ScrollLayoutTestNg, ContentOffset006, TestSize.Level1)
     EXPECT_EQ(isReachStart, 2);
     EXPECT_EQ(isReachEnd, 2);
     EXPECT_EQ(isToEdge, 3);
+}
+
+/**
+ * @tc.name: ContentOffsetWithInitialOffset
+ * @tc.desc: Test Scroll ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffsetWithInitialOffset, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(5.f)));
+    CreateContent();
+    CreateScrollDone();
+
+    EXPECT_EQ(pattern_->GetInitialOffset().GetX().ToString(), "0.00px");
+    EXPECT_EQ(pattern_->GetInitialOffset().GetY().ToString(), "5.00px");
+
+    EXPECT_EQ(pattern_->currentOffset_, -CONTENT_START_OFFSET - 5.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 5.f);
 }
 } // namespace OHOS::Ace::NG

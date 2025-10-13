@@ -246,7 +246,7 @@ void ScrollPattern::CheckScrollable()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (GreatNotEqual(scrollableDistance_ + contentStartOffset_, 0.0f)) {
+    if (GreatNotEqual(scrollableDistance_, 0.0f)) {
         SetScrollEnabled(layoutProperty->GetScrollEnabled().value_or(true));
     } else {
         SetScrollEnabled(layoutProperty->GetScrollEnabled().value_or(true) && GetAlwaysEnabled());
@@ -295,22 +295,19 @@ void ScrollPattern::OnScrollEndCallback()
 
 void ScrollPattern::ResetPosition()
 {
-    currentOffset_ = contentStartOffset_;
-    lastOffset_ = contentStartOffset_;
+    currentOffset_ = 0.0;
+    lastOffset_ = 0.0;
 }
 
 bool ScrollPattern::IsAtTop() const
 {
-    return GreatOrEqual(currentOffset_, contentStartOffset_);
+    return NonNegative(currentOffset_);
 }
 
 bool ScrollPattern::IsAtBottom(bool considerRepeat) const
 {
     if (LessNotEqual(scrollableDistance_, 0.0)) {
-        if (GreatNotEqual(scrollableDistance_ + contentStartOffset_, 0.0)) {
-            return LessOrEqual(currentOffset_ + scrollableDistance_, 0.0);
-        }
-        return LessOrEqual(currentOffset_, contentStartOffset_);
+        return LessOrEqual(currentOffset_, 0.0);
     }
     return LessOrEqual(currentOffset_, -scrollableDistance_);
 }
@@ -318,7 +315,7 @@ bool ScrollPattern::IsAtBottom(bool considerRepeat) const
 OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
 {
     OverScrollOffset offset = { 0, 0 };
-    auto startPos = currentOffset_ - contentStartOffset_;
+    auto startPos = currentOffset_;
     auto newStartPos = startPos + delta;
     if (startPos > 0 && newStartPos > 0) {
         offset.start = delta;
@@ -332,7 +329,7 @@ OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
 
     auto endPos = currentOffset_;
     auto newEndPos = endPos + delta;
-    auto endRefences = GreatOrEqual(scrollableDistance_, 0.0f) ? -scrollableDistance_ : contentStartOffset_;
+    auto endRefences = GreatOrEqual(scrollableDistance_, 0.0f) ? -scrollableDistance_ : 0.0f;
     if (endPos < endRefences && newEndPos < endRefences) {
         offset.end = delta;
     }
@@ -348,10 +345,9 @@ OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
 bool ScrollPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
     if (Positive(scrollableDistance_)) {
-        return GreatNotEqual(currentOffset_, contentStartOffset_) ||
-               LessNotEqual(currentOffset_, -scrollableDistance_ + contentStartOffset_);
+        return Positive(currentOffset_) || LessNotEqual(currentOffset_, -scrollableDistance_);
     } else {
-        return !NearEqual(currentOffset_, contentStartOffset_);
+        return !NearZero(currentOffset_);
     }
 }
 
@@ -372,13 +368,11 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     float overScrollPastEnd = 0.0f;
     float overScrollPast = 0.0f;
     // not consider rowReverse or colReverse
-    overScrollPastStart = std::max(currentOffset_ - contentStartOffset_, 0.0);
+    overScrollPastStart = std::max(currentOffset_, 0.0);
     if (Positive(scrollableDistance_)) {
-        overScrollPastEnd = std::max(-scrollableDistance_ + contentStartOffset_ - currentOffset_, 0.0);
-    } else if (Positive(scrollableDistance_ + contentStartOffset_)) {
         overScrollPastEnd = std::max(-scrollableDistance_ - currentOffset_, 0.0);
     } else {
-        overScrollPastEnd = std::abs(std::min(currentOffset_ - contentStartOffset_, 0.0));
+        overScrollPastEnd = std::abs(std::min(currentOffset_, 0.0));
     }
     overScrollPast = std::max(overScrollPastStart, overScrollPastEnd);
     if (overScrollPast == 0.0f) {
@@ -390,7 +384,7 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
 
 double ScrollPattern::ValidateOffset(int32_t source, double willScrollOffset)
 {
-    if (LessOrEqual(scrollableDistance_ + contentStartOffset_, 0.0) || source == SCROLL_FROM_JUMP) {
+    if (LessOrEqual(scrollableDistance_, 0.0) || source == SCROLL_FROM_JUMP) {
         return willScrollOffset;
     }
 
@@ -399,12 +393,12 @@ double ScrollPattern::ValidateOffset(int32_t source, double willScrollOffset)
         source == SCROLL_FROM_ROTATE || source == SCROLL_FROM_AXIS) {
         if (GetAxis() == Axis::HORIZONTAL) {
             if (IsRowReverse()) {
-                willScrollOffset = std::clamp(willScrollOffset, 0.0 - contentStartOffset_, scrollableDistance_);
+                willScrollOffset = std::clamp(willScrollOffset, 0.0, scrollableDistance_);
             } else {
-                willScrollOffset = std::clamp(willScrollOffset, -scrollableDistance_, 0.0 + contentStartOffset_);
+                willScrollOffset = std::clamp(willScrollOffset, -scrollableDistance_, 0.0);
             }
         } else {
-            willScrollOffset = std::clamp(willScrollOffset, -scrollableDistance_, 0.0 + contentStartOffset_);
+            willScrollOffset = std::clamp(willScrollOffset, -scrollableDistance_, 0.0);
         }
     }
     return willScrollOffset;
@@ -421,12 +415,12 @@ void ScrollPattern::ValidateOffset(int32_t source)
         source == SCROLL_FROM_ROTATE || source == SCROLL_FROM_AXIS) {
         if (GetAxis() == Axis::HORIZONTAL) {
             if (IsRowReverse()) {
-                currentOffset_ = std::clamp(currentOffset_, 0.0 - contentStartOffset_, scrollableDistance_);
+                currentOffset_ = std::clamp(currentOffset_, 0.0, scrollableDistance_);
             } else {
-                currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0 + contentStartOffset_);
+                currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0);
             }
         } else {
-            currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0 + contentStartOffset_);
+            currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0);
         }
     }
 }
@@ -579,10 +573,8 @@ void ScrollPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReach
 
 bool ScrollPattern::IsCrashTop() const
 {
-    bool scrollUpToReachTop =
-        LessNotEqual(lastOffset_, contentStartOffset_) && GreatOrEqual(currentOffset_, contentStartOffset_);
-    bool scrollDownToReachTop =
-        GreatNotEqual(lastOffset_, contentStartOffset_) && LessOrEqual(currentOffset_, contentStartOffset_);
+    bool scrollUpToReachTop = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
+    bool scrollDownToReachTop = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
     return scrollUpToReachTop || scrollDownToReachTop;
 }
 
@@ -596,10 +588,8 @@ bool ScrollPattern::IsCrashBottom() const
 
 bool ScrollPattern::ReachStart(bool firstLayout) const
 {
-    bool scrollUpToReachTop = (LessNotEqual(prevOffset_, contentStartOffset_) || firstLayout) &&
-                              GreatOrEqual(currentOffset_, contentStartOffset_);
-    bool scrollDownToReachTop =
-        GreatNotEqual(prevOffset_, contentStartOffset_) && LessOrEqual(currentOffset_, contentStartOffset_);
+    bool scrollUpToReachTop = (LessNotEqual(prevOffset_, 0.0) || firstLayout) && GreatOrEqual(currentOffset_, 0.0);
+    bool scrollDownToReachTop = GreatNotEqual(prevOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
     return scrollUpToReachTop || scrollDownToReachTop;
 }
 
@@ -735,8 +725,8 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     if (LessOrEqual(scrollableDistance_, 0.0)) {
         return;
     }
-    float distance = scrollEdgeType == ScrollEdgeType::SCROLL_TOP ? -currentOffset_ + contentStartOffset_
-                                                                  : (-scrollableDistance_ - currentOffset_);
+    float distance =
+        scrollEdgeType == ScrollEdgeType::SCROLL_TOP ? -currentOffset_ : (-scrollableDistance_ - currentOffset_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("Scroll ScrollToEdge scrollEdgeType:%zu, offset:%f, id:%d", scrollEdgeType, distance,
@@ -795,14 +785,14 @@ void ScrollPattern::JumpToPosition(float position, int32_t source)
 void ScrollPattern::ScrollTo(float position)
 {
     SetAnimateCanOverScroll(GetCanStayOverScroll());
-    JumpToPosition(-position, SCROLL_FROM_JUMP);
+    JumpToPosition(-position - contentStartOffset_, SCROLL_FROM_JUMP);
     SetIsOverScroll(GetCanStayOverScroll());
 }
 
 void ScrollPattern::DoJump(float position, int32_t source)
 {
     float setPosition = (GetAxis() == Axis::HORIZONTAL && IsRowReverse()) ? -position : position;
-    if ((!NearEqual(currentOffset_, setPosition) && GreatOrEqual(scrollableDistance_ + contentStartOffset_, 0.0f)) ||
+    if ((!NearEqual(currentOffset_, setPosition) && GreatOrEqual(scrollableDistance_, 0.0f)) ||
         GetCanStayOverScroll()) {
         UpdateCurrentOffset(setPosition - currentOffset_, source);
     }
@@ -817,11 +807,13 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     });
     scrollEffect->SetLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
-        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse() &&
-            scroll->GetScrollableDistance() + scroll->GetContentStartOffset() > 0) {
+        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse()) {
+            if (Negative(scroll->GetScrollableDistance())) {
+                return 0.0;
+            }
             return -scroll->GetScrollableDistance();
         }
-        return scroll->GetContentStartOffset();
+        return 0.0;
     });
     scrollEffect->SetTrailingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
@@ -829,13 +821,12 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
         if (scroll->IsRowReverse() || scroll->IsColReverse()) {
             return scroll->GetScrollableDistance();
         }
-        return scroll->GetContentStartOffset();
+        return 0.0;
     });
     scrollEffect->SetInitLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
-        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse() &&
-            scroll->GetScrollableDistance() + scroll->GetContentStartOffset() > 0) {
-            return -scroll->GetScrollableDistance();
+        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse()) {
+            return 0.0;
         }
         return scroll->GetContentStartOffset();
     });
@@ -845,7 +836,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
         if (scroll->IsRowReverse() || scroll->IsColReverse()) {
             return scroll->GetScrollableDistance();
         }
-        return scroll->GetContentStartOffset();
+        return 0.0;
     });
 }
 
@@ -860,11 +851,12 @@ void ScrollPattern::UpdateScrollBarOffset()
     }
 
     float scrollBarOutBoundaryExtent = 0.0f;
-    if (currentOffset_ > contentStartOffset_) {
-        scrollBarOutBoundaryExtent = currentOffset_ - contentStartOffset_;
-    } else if ((-currentOffset_) >= (GetMainSize(viewPortExtent_) + contentEndOffset_ - GetMainSize(viewPort_))) {
-        scrollBarOutBoundaryExtent =
-            -currentOffset_ - (GetMainSize(viewPortExtent_) + contentEndOffset_ - GetMainSize(viewPort_));
+    if (currentOffset_ > 0.0) {
+        scrollBarOutBoundaryExtent = currentOffset_;
+    } else if ((-currentOffset_) >=
+               (GetMainSize(viewPortExtent_) + contentStartOffset_ + contentEndOffset_ - GetMainSize(viewPort_))) {
+        scrollBarOutBoundaryExtent = -currentOffset_ - (GetMainSize(viewPortExtent_) + contentStartOffset_ +
+                                                           contentEndOffset_ - GetMainSize(viewPort_));
     }
     HandleScrollBarOutBoundary(scrollBarOutBoundaryExtent);
 
@@ -877,7 +869,7 @@ void ScrollPattern::UpdateScrollBarOffset()
     auto viewPortExtent = viewPortExtent_;
     AddPaddingToSize(padding, viewPortExtent);
     auto estimatedHeight = (GetAxis() == Axis::HORIZONTAL) ? viewPortExtent.Width() : viewPortExtent.Height();
-    UpdateScrollBarRegion(-currentOffset_ + contentStartOffset_,
+    UpdateScrollBarRegion(-currentOffset_,
         estimatedHeight + contentStartOffset_ + contentEndOffset_, size, Offset(0.0f, 0.0f));
 }
 
@@ -994,7 +986,7 @@ std::optional<float> ScrollPattern::CalcPredictSnapOffset(
     if (snapDirection != SnapDirection::NONE) {
         return CalcPredictNextSnapOffset(delta, snapDirection);
     }
-    float finalPosition = currentOffset_ - contentStartOffset_ + delta;
+    float finalPosition = currentOffset_ + delta;
     if (IsEnablePagingValid()) {
         finalPosition = GetPagingOffset(delta, dragDistance, velocity);
     }
@@ -1032,7 +1024,7 @@ std::optional<float> ScrollPattern::CalcPredictSnapOffset(
         }
     }
     if (predictSnapOffset.has_value()) {
-        predictSnapOffset = predictSnapOffset.value() - (currentOffset_ - contentStartOffset_);
+        predictSnapOffset = predictSnapOffset.value() - currentOffset_;
     }
     return predictSnapOffset;
 }
