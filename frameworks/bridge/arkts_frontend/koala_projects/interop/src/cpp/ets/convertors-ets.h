@@ -144,7 +144,7 @@ struct InteropTypeConverter<KStringPtr> {
         return result;
     }
     static InteropType convertTo(EtsEnv* env, const KStringPtr& value) {
-      return env->NewStringUTF(value.c_str());
+        return env->NewStringUTF(value.c_str());
     }
     static void release(EtsEnv* env, InteropType value, const KStringPtr& converted) {}
 };
