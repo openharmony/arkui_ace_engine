@@ -3300,7 +3300,7 @@ class WaterFlowSections {
     this.sectionArray = [];
     // native waterflow section, implement in cpp
     this.nativeSection = undefined;
-    this.changeArray = [];
+    this.changeFlag = true;
   }
 
   setNativeSection(section) {
@@ -3364,9 +3364,8 @@ class WaterFlowSections {
 
     if (this.nativeSection) {
       this.nativeSection.onSectionChanged({ start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : [] });
-    } else {
-      this.changeArray.push({ start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : [] });
     }
+    this.changeFlag = !this.changeFlag;
     return true;
   }
 
@@ -3378,9 +3377,8 @@ class WaterFlowSections {
     this.sectionArray.push(section);
     if (this.nativeSection) {
       this.nativeSection.onSectionChanged({ start: oldLength, deleteCount: 0, sections: [section] });
-    } else {
-      this.changeArray.push({ start: oldLength, deleteCount: 0, sections: [section] });
     }
+    this.changeFlag = !this.changeFlag;
     return true;
   }
 
@@ -3394,9 +3392,8 @@ class WaterFlowSections {
     let intStart = this.toArrayIndex(sectionIndex, oldLength);
     if (this.nativeSection) {
       this.nativeSection.onSectionChanged({ start: intStart, deleteCount: 1, sections: [section] });
-    } else {
-      this.changeArray.push({ start: intStart, deleteCount: 1, sections: [section] });
     }
+    this.changeFlag = !this.changeFlag;
     return true;
   }
 
@@ -3409,7 +3406,7 @@ class WaterFlowSections {
   }
 
   clearChanges() {
-    UIUtilsImpl.instance().getTarget(this).changeArray.splice(0);
+
   }
 }
 

@@ -184,10 +184,10 @@ void JSWaterFlowSections::SetNativeWaterFlowSection(JSRef<JSObject> jsSection, J
         return;
     }
 
-    auto setNativeSetionFunc = JSRef<JSFunc>::Cast(property);
+    auto setNativeSectionFunc = JSRef<JSFunc>::Cast(property);
     JSRef<JSVal> params[1];
     params[0] = JSRef<JSVal>::Cast(nativeSection);
-    setNativeSetionFunc->Call(jsSection, 1, params);
+    setNativeSectionFunc->Call(jsSection, 1, params);
 }
 
 void JSWaterFlowSections::Constructor(const JSCallbackInfo& info)
