@@ -359,10 +359,6 @@ typedef struct ArkUIAniPageTransitionOption {
 } ArkUIAniPageTransitionOption;
 
 struct ArkUIXComponentParams {
-    std::string id;
-    ArkUI_Int32 type;
-    void* controller = nullptr;
-    std::function<void(void*)> nativeHandler = nullptr;
     std::function<void(const std::string&)> onSurfaceCreated = nullptr;
     std::function<void(const std::string&, float, float, float, float)> onSurfaceChanged = nullptr;
     std::function<void(const std::string&)> onSurfaceDestroyed = nullptr;
@@ -657,7 +653,7 @@ struct ArkUIAniStateMgmtModifier {
     std::string (*getLanguageCode)();
 };
 struct ArkUIAniXComponentModifier {
-    void (*setXComponentInitParameters)(ArkUINodeHandle node, const ArkUIXComponentParams& params);
+    void (*setXComponentControllerCallback)(void* peer, const ArkUIXComponentParams& params);
     void (*setScreenId)(ArkUINodeHandle node, uint64_t screenId);
     void (*markBindNative)(ArkUINodeHandle node);
 };

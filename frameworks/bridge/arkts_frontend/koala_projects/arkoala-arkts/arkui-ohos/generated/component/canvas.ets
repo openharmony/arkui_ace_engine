@@ -24,7 +24,7 @@ import { Matrix2D_serializer, Matrix2D, Matrix2DInternal } from "./matrix2d"
 import { Size_serializer, LengthMetrics_serializer } from "./../Graphics"
 import { Size, LengthMetricsUnit, LengthMetrics } from "arkui.Graphics"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
-import { extractors, AttributeModifier, hookCanvasAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookCanvasAttributeModifier, AttributeUpdater, hookSetCanvasOptions, hookCanvasStartImageAnalyzer } from "#handwritten"
 import { default as image } from "@ohos.multimedia.image"
 import { ImageAIOptions_serializer, ImageAIOptions, ImageAnalyzerConfig_serializer, ImageAnalyzerConfig } from "./imageCommon"
 import { ComponentBase } from "./../ComponentBase"
@@ -818,6 +818,7 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements Canv
     }
     public setCanvasOptions(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setCanvasOptions")) {
+            hookSetCanvasOptions(this, context, imageAIOptions)
             const context_casted = context as (CanvasRenderingContext2D | DrawingRenderingContext | undefined)
             const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
             this.getPeer()?.setCanvasOptionsAttribute(context_casted, imageAIOptions_casted)
@@ -2359,6 +2360,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         return this.toDataURL_serialize(type_casted, quality_casted)
     }
     public startImageAnalyzer(config: ImageAnalyzerConfig): Promise<void> {
+        return hookCanvasStartImageAnalyzer(this, config)
         const config_casted = config as (ImageAnalyzerConfig)
         return this.startImageAnalyzer_serialize(config_casted)
     }

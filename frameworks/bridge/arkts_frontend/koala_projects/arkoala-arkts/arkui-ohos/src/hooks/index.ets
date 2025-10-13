@@ -56,6 +56,12 @@ import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions } from "#generated";
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
+import { ArkCanvasComponent, CanvasRenderingContext2D, DrawingRenderingContext } from "#generated";
+import { ArkVideoComponent, VideoOptions } from "#generated";
+import { ArkXComponentComponent, XComponentOptions, XComponentParameters, NativeXComponentParameters, XComponentController, ImageAnalyzerConfig } from "#generated";
+import { CanvasOpsHandWritten } from "./CanvasOpsHandWritten";
+import { VideoOpsHandWritten } from "./VideoOpsHandWritten";
+import { XComponentOpsHandWritten } from "./XComponentOpsHandWritten";
 
 export function hookId(component: object, value?: string) {}
 
@@ -173,4 +179,32 @@ export function hookSetNavigationOptions(component: ArkNavigationComponent, path
 
 export function hookSetNavDestination(component: ArkNavigationComponent, value: PageMapBuilder | undefined): void {
   NavigationOpsHandWritten.hookSetNavDestinationImpl(component, value);
+}
+
+export function hookSetCanvasOptions(component: ArkCanvasComponent,
+  context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): void {
+  CanvasOpsHandWritten.hookSetCanvasOptionsImpl(component, context, imageAIOptions);
+}
+
+export function hookCanvasStartImageAnalyzer(
+  context: CanvasRenderingContext2D, config: ImageAnalyzerConfig): Promise<void> {
+  return CanvasOpsHandWritten.hookCanvasStartImageAnalyzerImpl(context, config);
+}
+
+export function hookSetVideoOptions(component: ArkVideoComponent, value: VideoOptions): void {
+  VideoOpsHandWritten.hookSetVideoOptionsImpl(component, value);
+}
+
+export function hookVideoAnalyzerConfig(component: ArkVideoComponent, config: ImageAnalyzerConfig | undefined): void {
+  VideoOpsHandWritten.hookSetVideoAnalyzerConfigImpl(component, config);
+}
+
+export function hookSetXComponentOptions(component: ArkXComponentComponent,
+  params: XComponentParameters | XComponentOptions | NativeXComponentParameters): void {
+  XComponentOpsHandWritten.hookSetXComponentOptionsImpl(component, params);
+}
+
+export function hookXComponentStartImageAnalyzer(
+  controller: XComponentController, config: ImageAnalyzerConfig): Promise<void> {
+  return XComponentOpsHandWritten.hookXComponentStartImageAnalyzerImpl(controller, config);
 }
