@@ -20,6 +20,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_model_static.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -103,6 +104,11 @@ SelectParam Convert(const Ark_SelectOption& src)
     auto icon = OptConvert<std::string>(src.icon);
     if (icon) {
         param.icon = icon.value();
+    }
+    auto symbolIcon = Converter::OptConvert<Ark_SymbolGlyphModifier>(src.symbolIcon);
+    if (symbolIcon && *symbolIcon) {
+        param.symbolIcon = (*symbolIcon)->symbolApply;
+        PeerUtils::DestroyPeer(*symbolIcon);
     }
     return param;
 }
@@ -522,9 +528,10 @@ void SetArrowModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto symbolModifier = Converter::OptConvert<Ark_SymbolGlyphModifier>(*value);
-    if (symbolModifier && *symbolModifier) {
-        SelectModelStatic::SetArrowModifierApply(frameNode, (*symbolModifier)->symbolApply);
+    auto symbolIcon = Converter::OptConvert<Ark_SymbolGlyphModifier>(*value);
+    if (symbolIcon && *symbolIcon) {
+        SelectModelStatic::SetArrowModifierApply(frameNode, (*symbolIcon)->symbolApply);
+        PeerUtils::DestroyPeer(*symbolIcon);
         return;
     }
     SelectModelStatic::SetArrowModifierApply(frameNode, nullptr);
