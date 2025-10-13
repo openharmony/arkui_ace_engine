@@ -24880,6 +24880,8 @@ typedef struct GENERATED_ArkUIGestureOpsAccessor {
     void (*removeGestureByTag)(Ark_NativePointer node,
                                const Ark_String* tag);
     void (*clearGestures)(Ark_NativePointer node);
+    Ark_Number (*getGestureEventType)(Ark_NativePointer event);
+    Ark_Boolean (*isScrollableComponent)(Ark_NativePointer event);
 } GENERATED_ArkUIGestureOpsAccessor;
 
 typedef struct GENERATED_ArkUIGestureRecognizerAccessor {

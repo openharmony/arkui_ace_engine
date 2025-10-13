@@ -51,11 +51,6 @@ void SetFingerListImpl(Ark_BaseGestureEvent peer,
     eventInfo->SetFingerList(list);
 }
 
-Ark_GestureControl_GestureType GetTypeImpl(Ark_BaseGestureEvent peer)
-{
-    CHECK_NULL_RETURN(peer, static_cast<Ark_GestureControl_GestureType>(-1));
-    return Converter::ArkValue<Ark_GestureControl_GestureType>(peer->GetRecognizerType());
-}
 } // BaseGestureEventAccessor
 const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
 {

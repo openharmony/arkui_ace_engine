@@ -42,12 +42,6 @@ Ark_String GetIdImpl(Ark_EventTargetInfo peer)
     CHECK_NULL_RETURN(peer, {});
     return Converter::ArkValue<Ark_String>(peer->id, Converter::FC);
 }
-Ark_Boolean IsScrollableComponentImpl(Ark_EventTargetInfo peer)
-{
-    auto defaultResult = Converter::ArkValue<Ark_Boolean>(true);
-    CHECK_NULL_RETURN(peer, defaultResult);
-    return Converter::ArkValue<Ark_Boolean>(peer->isScrollableComponent_);
-}
 } // EventTargetInfoAccessor
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()
 {

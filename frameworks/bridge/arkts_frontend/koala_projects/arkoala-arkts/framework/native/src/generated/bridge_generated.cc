@@ -29127,6 +29127,14 @@ void impl_GestureOps_clearGestures(Ark_NativePointer node) {
         GetAccessors()->getGestureOpsAccessor()->clearGestures(node);
 }
 KOALA_INTEROP_DIRECT_V1(GestureOps_clearGestures, Ark_NativePointer)
+Ark_Number impl_GestureOps_getGestureEventType(Ark_NativePointer event) {
+        return GetAccessors()->getGestureOpsAccessor()->getGestureEventType(event);
+}
+KOALA_INTEROP_DIRECT_1(GestureOps_getGestureEventType, KInteropNumber, Ark_NativePointer)
+Ark_Boolean impl_GestureOps_isScrollableComponent(Ark_NativePointer event) {
+        return GetAccessors()->getGestureOpsAccessor()->isScrollableComponent(event);
+}
+KOALA_INTEROP_DIRECT_1(GestureOps_isScrollableComponent, Ark_Boolean, Ark_NativePointer)
 Ark_NativePointer impl_GestureRecognizer_construct() {
         return GetAccessors()->getGestureRecognizerAccessor()->construct();
 }

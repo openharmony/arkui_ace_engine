@@ -7,6 +7,7 @@ import { KeyEventInternal, TouchTestInfo } from "arkui/component/common"
 import { TypeChecker } from "#components"
 import { ArkUIAniModule } from "arkui.ani"
 
+export type GestureType = Gesture | GestureGroup;
 export class GestureHandler {
     gestureTag: string | undefined;
     types: Array<SourceTool> | undefined;
