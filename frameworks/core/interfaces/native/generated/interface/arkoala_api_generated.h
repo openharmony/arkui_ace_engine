@@ -17149,7 +17149,7 @@ typedef struct Opt_TextChangeOptions {
 } Opt_TextChangeOptions;
 typedef struct Ark_TextDecorationOptions {
     /* kind: Interface */
-    Ark_TextDecorationType type;
+    Opt_TextDecorationType type;
     Opt_ResourceColor color;
     Opt_TextDecorationStyle style;
 } Ark_TextDecorationOptions;
