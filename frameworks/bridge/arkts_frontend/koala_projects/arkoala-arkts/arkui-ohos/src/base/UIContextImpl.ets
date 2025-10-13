@@ -58,7 +58,7 @@ import { UIContextAtomicServiceBar } from "#generated"
 import { GlobalScope } from "#generated"
 import { default as mediaquery } from '@ohos/mediaquery'
 import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework'
-import { AsyncCallback } from 'arkui/base';
+import { AsyncCallback } from "#generated";
 import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
 import { PeerNode, findPeerNode } from 'arkui/PeerNode';
 import { KBuffer } from '@koalaui/interop';
@@ -249,17 +249,17 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
     public createFromBuilder(builder: CustomBuilder, callback: AsyncCallback<PixelMap>,
                              delay?: number, checkImageStatus?: boolean,
                              options?: componentSnapshot.SnapshotOptions): void {
-        // ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // const peerNode = createUiDetachedRoot((): PeerNode => {
-        //     return ArkComponentRootPeer.create(undefined);
-        // }, builder, this.instanceId_);
-        // let rootNode = peerNode.peer.ptr;
-        // const destroyCallback = (): void => {
-        //     destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
-        // }
-        // ArkUIAniModule._ComponentSnapshot_createFromBuilderWithCallback(
-        //     rootNode, destroyCallback, callback, delay, checkImageStatus, options);
-        // ArkUIAniModule._Common_Restore_InstanceId();
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const peerNode = createUiDetachedRoot((): PeerNode => {
+            return ArkComponentRootPeer.create(undefined);
+        }, builder, this.instanceId_);
+        let rootNode = peerNode.peer.ptr;
+        const destroyCallback = (): void => {
+            destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
+        }
+        ArkUIAniModule._ComponentSnapshot_createFromBuilderWithCallback(
+            rootNode, destroyCallback, callback, delay, checkImageStatus, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     // @ts-ignore
@@ -299,20 +299,20 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         return pixmap;
     }
 
-    // public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number,
-    //     checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
-    //     ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-    //     let node = content.getFrameNode();
-    //     if (node === undefined || node === null) {
-    //         throw Error("The type of parameters is incorrect.");
-    //     }
-    //     let frameNode = node as FrameNode
-    //     const destroyCallback = (): void => {}
-    //     let pixmap = ArkUIAniModule._ComponentSnapshot_createFromComponentWithPromise(
-    //         toPeerPtr(frameNode), destroyCallback, delay, checkImageStatus, options);
-    //     ArkUIAniModule._Common_Restore_InstanceId();
-    //     return pixmap;
-    // }
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number,
+        checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let node = content.getFrameNode();
+        if (node === undefined || node === null) {
+            throw Error("The type of parameters is incorrect.");
+        }
+        let frameNode = node as FrameNode
+        const destroyCallback = (): void => {}
+        let pixmap = ArkUIAniModule._ComponentSnapshot_createFromComponentWithPromise(
+            toPeerPtr(frameNode), destroyCallback, delay, checkImageStatus, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return pixmap;
+    }
 }
 
 export class DragControllerImpl extends DragController {
@@ -325,39 +325,39 @@ export class DragControllerImpl extends DragController {
     //@ts-ignore
     public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo,
         callback: AsyncCallback<dragController.DragEventParam>): void {
-        // ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // if (typeof custom === "function") {
-        //     const peerNode = createUiDetachedRoot((): PeerNode => {
-        //         return ArkComponentRootPeer.create(undefined);
-        //     }, custom as CustomBuilder);
-        //     let rootNode = peerNode.peer.ptr;
-        //     const destroyCallback = (): void => {
-        //         destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
-        //     }
-        //     let dragItemInfoNull: DragItemInfo = {};
-        //     ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
-        //         destroyCallback, dragInfo, callback);
-        // } else {
-        //     let destroyCallback = (): void => { };
-        //     let customDragInfo = custom as DragItemInfo;
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        if (typeof custom === "function") {
+            const peerNode = createUiDetachedRoot((): PeerNode => {
+                return ArkComponentRootPeer.create(undefined);
+            }, custom as CustomBuilder);
+            let rootNode = peerNode.peer.ptr;
+            const destroyCallback = (): void => {
+                destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
+            }
+            let dragItemInfoNull: DragItemInfo = {};
+            ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
+                destroyCallback, dragInfo, callback);
+        } else {
+            let destroyCallback = (): void => { };
+            let customDragInfo = custom as DragItemInfo;
 
-        //     if (customDragInfo.pixelMap !== undefined) {
-        //         ArkUIAniModule._DragController_executeDragWithCallback(custom as DragItemInfo, nullptr,
-        //             destroyCallback, dragInfo, callback);
-        //     } else {
-        //         const peerNode = createUiDetachedRoot((): PeerNode => {
-        //             return ArkComponentRootPeer.create(undefined);
-        //         }, customDragInfo.builder as CustomBuilder);
-        //         let rootNode = peerNode.peer.ptr;
-        //         destroyCallback = (): void => {
-        //             destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
-        //         }
-        //         let dragItemInfoNull: DragItemInfo = {};
-        //         ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
-        //             destroyCallback, dragInfo, callback);
-        //     }
-        // }
-        // ArkUIAniModule._Common_Restore_InstanceId();
+            if (customDragInfo.pixelMap !== undefined) {
+                ArkUIAniModule._DragController_executeDragWithCallback(custom as DragItemInfo, nullptr,
+                    destroyCallback, dragInfo, callback);
+            } else {
+                const peerNode = createUiDetachedRoot((): PeerNode => {
+                    return ArkComponentRootPeer.create(undefined);
+                }, customDragInfo.builder as CustomBuilder);
+                let rootNode = peerNode.peer.ptr;
+                destroyCallback = (): void => {
+                    destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
+                }
+                let dragItemInfoNull: DragItemInfo = {};
+                ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
+                    destroyCallback, dragInfo, callback);
+            }
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     // @ts-ignore
