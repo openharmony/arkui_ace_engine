@@ -5957,6 +5957,14 @@ JSRef<JSVal> JSWeb::CreateNativeEmbedGestureHandler(const NativeEmbeadTouchInfo&
     return requestObj;
 }
 
+JSRef<JSVal> JSWeb::CreateNativeEmbedMouseHandler(const NativeEmbeadMouseInfo& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSNativeEmbedMouseRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedMouseRequest>());
+    requestEvent->SetResult(eventInfo.GetResult());
+    return requestObj;
+}
+
 void JSWeb::OnNativeEmbedGestureEvent(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {

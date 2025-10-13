@@ -32008,6 +32008,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedGestureEventModifier.identity, WebOnNativeEmbedGestureEventModifier, event);
     return this;
   }
+  onNativeEmbedMouseEvent(event) {
+    modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedMouseEventModifier.identity, WebOnNativeEmbedMouseEventModifier, event);
+    return this;
+  }
   onNativeEmbedObjectParamChange(event) {
     modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedObjectParamChangeModifier.identity, WebOnNativeEmbedObjectParamChangeModifier, event);
     return this;
@@ -32746,6 +32750,20 @@ class WebOnNativeEmbedGestureEventModifier extends ModifierWithKey {
   }
 }
 WebOnNativeEmbedGestureEventModifier.identity = Symbol('webOnNativeEmbedGestureEventModifier');
+
+class WebOnNativeEmbedMouseEventModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnNativeEmbedMouseEvent(node);
+    } else {
+      getUINativeModule().web.setOnNativeEmbedMouseEvent(node, this.value);
+    }
+  }
+}
+WebOnNativeEmbedMouseEventModifier.identity = Symbol('webOnNativeEmbedMouseEventModifier');
 
 class WebOnNativeEmbedObjectParamChangeModifier extends ModifierWithKey {
   constructor (value) {

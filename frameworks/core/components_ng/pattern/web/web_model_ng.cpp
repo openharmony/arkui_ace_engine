@@ -1897,6 +1897,16 @@ void WebModelNG::SetNativeEmbedGestureEventId(
     webEventHub->SetOnNativeEmbedGestureEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetNativeEmbedMouseEventId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnNativeEmbedMouseEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetNativeEmbedObjectParamChangeId(
     FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
