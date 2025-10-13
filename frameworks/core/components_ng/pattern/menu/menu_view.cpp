@@ -2059,7 +2059,7 @@ RefPtr<FrameNode> MenuView::CreateSymbol(const std::function<void(WeakPtr<NG::Fr
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    props->UpdateFontSize(theme->GetIconSideLength());
+    props->UpdateFontSize(theme->GetEndIconWidth());
     props->UpdateSymbolColorList({theme->GetMenuIconColor()});
     props->UpdateAlignment(Alignment::CENTER_LEFT);
     MarginProperty margin;
