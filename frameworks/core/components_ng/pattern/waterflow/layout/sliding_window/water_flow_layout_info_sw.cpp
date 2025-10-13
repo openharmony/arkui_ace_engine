@@ -178,17 +178,24 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
 
 float WaterFlowLayoutInfoSW::CalcOverScroll(float mainSize, float delta) const
 {
-    if (lanes_.empty()) {
+    if (lanes_.empty() || (!itemStart_ && !offsetEnd_)) {
         return 0.0f;
     }
-    float res = 0.0f;
+
+    float startOverScroll = 0.0f;
+    float endOverScroll = 0.0f;
     if (itemStart_) {
-        res = StartPosWithMargin() + delta;
+        startOverScroll = StartPosWithMargin() + delta;
     }
     if (offsetEnd_) {
-        res = mainSize - (EndPosWithMargin() + footerHeight_ + contentEndOffset_ + delta);
+        endOverScroll = mainSize - (EndPosWithMargin() + footerHeight_ + contentEndOffset_ + delta);
     }
-    return res;
+
+    // content doesn't fill viewport
+    if (itemStart_ && offsetEnd_) {
+        return (delta < 0.0f) ? startOverScroll : endOverScroll;
+    }
+    return itemStart_ ? startOverScroll : endOverScroll;
 }
 
 namespace {
