@@ -62,7 +62,7 @@ void SetOnFolderStateChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        FolderStackModelNGStatic::SetOnFolderStateChange(frameNode, nullptr);
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](const FolderEventInfo& folderEventInfo) {
@@ -79,7 +79,7 @@ void SetOnHoverStatusChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        FolderStackModelNGStatic::SetOnHoverStatusChange(frameNode, nullptr);
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](const FolderEventInfo& folderEventInfo) {
@@ -96,7 +96,7 @@ void SetEnableAnimationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        FolderStackModelNG::SetEnableAnimation(frameNode, true);
         return;
     }
     FolderStackModelNG::SetEnableAnimation(frameNode, *convValue);
@@ -108,7 +108,7 @@ void SetAutoHalfFoldImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        FolderStackModelNG::SetAutoHalfFold(frameNode, true);
         return;
     }
     FolderStackModelNG::SetAutoHalfFold(frameNode, *convValue);

@@ -86,14 +86,24 @@ void SetAlignItemsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ColumnModelNGStatic::SetAlignItems(frameNode, Converter::OptConvertPtr<FlexAlign>(value));
+
+    auto flexAlign = Converter::OptConvertPtr<FlexAlign>(value);
+    if (!flexAlign.has_value()) {
+        flexAlign = FlexAlign::CENTER;
+    }
+
+    ColumnModelNGStatic::SetAlignItems(frameNode, flexAlign);
 }
 void SetJustifyContentImpl(Ark_NativePointer node,
                            const Opt_FlexAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ColumnModelNGStatic::SetJustifyContent(frameNode, Converter::OptConvertPtr<FlexAlign>(value));
+    auto flexAlign = Converter::OptConvertPtr<FlexAlign>(value);
+    if (!flexAlign.has_value()) {
+        flexAlign = FlexAlign::FLEX_START;
+    }
+    ColumnModelNGStatic::SetJustifyContent(frameNode, flexAlign);
 }
 void SetPointLightImpl(Ark_NativePointer node,
                        const Opt_PointLightStyle* value)
@@ -136,9 +146,10 @@ void SetReverseImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // Implement Reset value
     if (auto reversed = Converter::OptConvertPtr<bool>(value); reversed) {
         ColumnModelNG::SetIsReverse(frameNode, *reversed);
+    } else {
+        ColumnModelNG::SetIsReverse(frameNode, true);
     }
 }
 } // ColumnAttributeModifier

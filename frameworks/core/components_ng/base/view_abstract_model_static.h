@@ -255,6 +255,7 @@ public:
         std::function<RefPtr<UINode>()>&& buildFunc, const std::optional<Alignment>& align);
     static void SetFlexGrow(FrameNode* frameNode, float value);
     static void SetFlexShrink(FrameNode* frameNode, float value);
+    static void ResetFlexShrink(FrameNode* frameNode);
     static void SetFlexBasis(FrameNode* frameNode, const std::optional<Dimension>& optValue);
     static void SetPadding(FrameNode* frameNode, const std::optional<PaddingProperty>& value);
     static void SetMargin(FrameNode* frameNode, const std::optional<PaddingProperty>& value);

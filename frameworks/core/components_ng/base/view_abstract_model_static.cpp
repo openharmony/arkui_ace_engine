@@ -915,6 +915,12 @@ void ViewAbstractModelStatic::SetFlexShrink(FrameNode* frameNode, float value)
     ViewAbstract::SetFlexShrink(frameNode, value);
 }
 
+void ViewAbstractModelStatic::ResetFlexShrink(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetFlexShrink(frameNode);
+}
+
 void ViewAbstractModelStatic::SetFlexBasis(FrameNode* frameNode, const std::optional<Dimension>& optValue)
 {
     CHECK_NULL_VOID(frameNode);
@@ -926,7 +932,7 @@ void ViewAbstractModelStatic::SetFlexBasis(FrameNode* frameNode, const std::opti
         }
         ViewAbstract::SetFlexBasis(frameNode, value);
     } else {
-        // ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, frameNode);
+        ViewAbstract::SetFlexBasis(frameNode, Dimension(0));
     }
 }
 
@@ -936,7 +942,9 @@ void ViewAbstractModelStatic::SetPadding(FrameNode* frameNode, const std::option
     if (value) {
         ViewAbstract::SetPadding(frameNode, value.value());
     } else {
-        // ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, frameNode);
+        PaddingProperty padding;
+        padding.SetEdges(CalcLength(0.0));
+        ViewAbstract::SetPadding(frameNode, padding);
     }
 }
 
@@ -946,7 +954,9 @@ void ViewAbstractModelStatic::SetMargin(FrameNode* frameNode, const std::optiona
     if (value) {
         ViewAbstract::SetMargin(frameNode, ConstraintPaddingPropertyNonNegative(value.value()));
     } else {
-        // ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, frameNode);
+        PaddingProperty padding;
+        padding.SetEdges(CalcLength(0.0));
+        ViewAbstract::SetMargin(frameNode, padding);
     }
 }
 
