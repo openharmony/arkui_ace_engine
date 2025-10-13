@@ -499,7 +499,7 @@ export struct SelectDialog {
   currentFocusIndex?: number = -1;
   radioHeight: number = 0;
   itemHeight: number = 0;
-  @State selectedIndex?: number = -1;
+  @State selectedIndex?: int = -1;
   @BuilderParam contentBuilder: () => void = this.buildContent;
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State dividerColorWithTheme: ResourceColor = $r('sys.color.comp_divider');

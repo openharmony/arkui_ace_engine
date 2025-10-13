@@ -477,8 +477,8 @@ struct ContentItemStruct {
   }
 }
 
-class CreateIconParam {
-  public icon?: OperateIcon;
+interface CreateIconParam {
+  icon?: OperateIcon;
 }
 
 class OperateItemStructController {

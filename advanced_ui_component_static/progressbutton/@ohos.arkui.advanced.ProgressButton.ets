@@ -31,7 +31,7 @@ export interface ProgressButtonColorOptions {
 }
 
 const EMPTY_STRING: string = '';
-const MAX_PROGRESS: number = 100;
+const MAX_PROGRESS: double = 100;
 const MAX_PERCENTAGE: string = '100%';
 const MIN_PERCENTAGE: string = '0%';
 const TEXT_OPACITY: number = 0.4;
@@ -48,7 +48,7 @@ const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasiz
 
 @Component
 export struct ProgressButton {
-  @PropRef @Watch('getProgressContext') progress: number;
+  @PropRef @Watch('getProgressContext') progress: double;
   @State textProgress: string = EMPTY_STRING as string;
   @PropRef content: ResourceStr = EMPTY_STRING as string;
   @State @Watch('getLoadingProgress') isLoading: boolean = false;
@@ -69,7 +69,7 @@ export struct ProgressButton {
     this.containerBackgroundColor = theme.colors.iconOnFourth;
   }
 
-  private getButtonProgress(): number {
+  private getButtonProgress(): double {
     if (this.progress < 0) {
       return 0;
     } else if (this.progress > MAX_PROGRESS) {

@@ -23,7 +23,7 @@ import { LengthUnit, LengthMetrics } from '@ohos.arkui.node';
 import { Theme } from '@ohos.arkui.theme';
 
 const EMPTY_STRING: string = '';
-const MAX_PROGRESS: number = 100;
+const MAX_PROGRESS: double = 100;
 const MAX_PERCENTAGE: string = '100%';
 const MIN_PERCENTAGE: string = '0%';
 const TEXT_OPACITY: number = 0.4;
@@ -41,7 +41,7 @@ const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasiz
 
 @ComponentV2
 export struct ProgressButtonV2 {
-  @Param @Require progress: number;
+  @Param @Require progress: double;
   @Param content: ResourceStr = EMPTY_STRING as string;
   @Param @Once progressButtonWidth?: LengthMetrics = LengthMetrics.vp(BUTTON_NORMARL_WIDTH);
   @Param onClicked: ClickCallback = () => {};
@@ -62,7 +62,7 @@ export struct ProgressButtonV2 {
     this.containerBackgroundColor = theme.colors.iconOnFourth;
   }
 
-  private getButtonProgress(): number {
+  private getButtonProgress(): double {
     if (this.progress < 0) {
       return 0;
     } else if (this.progress > MAX_PROGRESS) {

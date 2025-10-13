@@ -147,14 +147,14 @@ export interface ToolBarV2ItemImageOptions {
   activatedColor?: ColorMetrics;
 }
 
-export type ToolBarV2ItemAction = (index: number) => void;
+export type ToolBarV2ItemAction = (index: int) => void;
 
 @ObservedV2
 export class ToolBarV2Item {
   @Trace
   public content: ToolBarV2ItemText = new ToolBarV2ItemText({ text: '' });
   @Trace
-  public action?: (index: number) => void = undefined;
+  public action?: (index: int) => void = undefined;
   @Trace
   public icon?: ToolBarV2ItemIconType = undefined;
   @Trace
@@ -198,7 +198,7 @@ export class ToolBarV2Item {
 
 export interface ToolBarV2ItemOptions {
   content: ToolBarV2ItemText;
-  action?: (index: number) => void;
+  action?: (index: int) => void;
   icon?: ToolBarV2ItemIconType;
   state?: ToolBarV2ItemState;
   accessibilityText?: ResourceStr;
@@ -260,7 +260,7 @@ export struct ToolBarV2 {
   @Require @Param
   toolBarList: ToolBarV2Item[] = [] as ToolBarV2Item[];
   @Param
-  activatedIndex?: number = -1;
+  activatedIndex?: int = -1;
   @Param
   dividerModifier?: DividerModifier = new DividerModifier();
   @Param
@@ -271,7 +271,7 @@ export struct ToolBarV2 {
       .height(LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT))
       .backgroundColor(ColorMetrics.resourceColor($r('sys.color.ohos_id_color_toolbar_bg')));
   @Local
-  localActivatedIndex: number = -1;
+  localActivatedIndex: int = -1;
   @Local
   fontSize: number = 1;
   @Local
@@ -286,11 +286,11 @@ export struct ToolBarV2 {
         src: ''
       })
     });
-  gestureIndex: number = -1;
+  gestureIndex: int = -1;
 
   @Monitor(['activatedIndex'])
   onActivateIndexChange(monitor: IMonitor) {
-    this.localActivatedIndex = monitor.value<number>('activatedIndex')?.now ?? -1;
+    this.localActivatedIndex = monitor.value<int>('activatedIndex')?.now ?? -1;
   }
 
   @Computed
@@ -301,12 +301,12 @@ export struct ToolBarV2 {
         menuContent.push({
           value: this.toolBarList[index].content.text,
           action: () => {
-            let callback: ToolBarV2ItemAction | undefined = this.toolBarList[Double.toInt(index)].action;
+            let callback: ToolBarV2ItemAction | undefined = this.toolBarList[index].action;
             if (callback) {
               callback(index);
             }
           },
-          enabled: this.toolBarList[Double.toInt(index)].state !== ToolBarV2ItemState.DISABLE,
+          enabled: this.toolBarList[index].state !== ToolBarV2ItemState.DISABLE,
         });
       }
     })
@@ -401,26 +401,26 @@ export struct ToolBarV2 {
         this.toolBarList[Double.toInt(index)].backgroundColor : $r('sys.color.ohos_id_color_click_effect'))
       }
     })
-    .gestureModifier(this.getItemGestureModifier(this.moreItem, index))
+    .gestureModifier(this.getItemGestureModifier(this.moreItem, Double.toInt(index)))
   }
 
   @Builder
-  TabBuilder(index: number): void {
+  TabBuilder(index: int): void {
     Button({ type: ButtonType.Normal, stateEffect: false } as ButtonOptions) {
       Column() {
-        if (this.toolBarList[Double.toInt(index)]?.symbol) {
+        if (this.toolBarList[index]?.symbol) {
           SymbolGlyph()
             .fontSize(IMAGE_SIZE)
             .symbolEffect(new SymbolEffect(), false)
             .attributeModifier(this.getToolBarSymbolModifier(index))
             .margin({ bottom: $r('sys.float.padding_level1') } as Margin)
-        } else if (Util.isSymbolResource(this.toolBarList[Double.toInt(index)]?.image?.src)) {
-          SymbolGlyph(this.toolBarList[Double.toInt(index)]?.image?.src as Resource)
+        } else if (Util.isSymbolResource(this.toolBarList[index]?.image?.src)) {
+          SymbolGlyph(this.toolBarList[index]?.image?.src as Resource)
             .fontSize(IMAGE_SIZE)
             .fontColor([this.getIconColor(index)])
             .margin({ bottom: $r('sys.float.padding_level1') } as Margin)
         } else {
-          Image(this.toolBarList[Double.toInt(index)]?.image?.src as ResourceStr)
+          Image(this.toolBarList[index]?.image?.src as ResourceStr)
             .width(IMAGE_SIZE)
             .height(IMAGE_SIZE)
             .fillColor(this.getIconColor(index))
@@ -428,7 +428,7 @@ export struct ToolBarV2 {
             .objectFit(ImageFit.Contain)
             .draggable(false)
         }
-        Text(this.toolBarList[Double.toInt(index)]?.content.text)
+        Text(this.toolBarList[index]?.content.text)
           .fontColor(this.getTextColor(index))
           .fontSize($r('sys.float.ohos_id_text_size_caption'))
           .maxFontSize($r('sys.float.ohos_id_text_size_caption'))
@@ -437,8 +437,8 @@ export struct ToolBarV2 {
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .textAlign(TextAlign.Center)
-          .focusable(!(this.toolBarList[Double.toInt(index)]?.state === ToolBarV2ItemState.DISABLE))
-          .focusOnTouch(!(this.toolBarList[Double.toInt(index)]?.state === ToolBarV2ItemState.DISABLE))
+          .focusable(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE))
+          .focusOnTouch(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE))
       }
       .justifyContent(FlexAlign.Center)
       .width('100%')
@@ -451,40 +451,40 @@ export struct ToolBarV2 {
     }
     .accessibilityGroup(true)
     .accessibilityText(
-      this.toAccessibilityText(this.toolBarList[Double.toInt(index)]?.accessibilityText, index))
+      this.toAccessibilityText(this.toolBarList[index]?.accessibilityText, index))
     .accessibilityDescription(
-      this.toStringFormat(this.toolBarList[Double.toInt(index)]?.accessibilityDescription))
-    .accessibilityLevel(this.toolBarList[Double.toInt(index)]?.accessibilityLevel ?? 'auto')
-    .enabled(this.toolBarList[Double.toInt(index)]?.state !== ToolBarV2ItemState.DISABLE)
+      this.toStringFormat(this.toolBarList[index]?.accessibilityDescription))
+    .accessibilityLevel(this.toolBarList[index]?.accessibilityLevel ?? 'auto')
+    .enabled(this.toolBarList[index]?.state !== ToolBarV2ItemState.DISABLE)
     .width('100%')
     .height('100%')
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
-    .focusable(!(this.toolBarList[Double.toInt(index)]?.state === ToolBarV2ItemState.DISABLE))
-    .focusOnTouch(!(this.toolBarList[Double.toInt(index)]?.state === ToolBarV2ItemState.DISABLE))
+    .focusable(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE))
+    .focusOnTouch(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE))
     .focusBox({
       margin: LengthMetrics.vp(FOCUS_BOX_MARGIN),
       strokeWidth: LengthMetrics.vp(FOCUS_BOX_BORDER_WIDTH),
       strokeColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_focused_outline'))
     })
-    .backgroundColor(this.toolBarList[Double.toInt(index)].backgroundColor)
+    .backgroundColor(this.toolBarList[index].backgroundColor)
     .onHover((isHover: boolean): void => {
-      if (isHover && this.toolBarList[Double.toInt(index)]?.state !== ToolBarV2ItemState.DISABLE) {
-        this.toolBarList[Double.toInt(index)].backgroundColor = $r('sys.color.ohos_id_color_hover');
+      if (isHover && this.toolBarList[index]?.state !== ToolBarV2ItemState.DISABLE) {
+        this.toolBarList[index].backgroundColor = $r('sys.color.ohos_id_color_hover');
       } else {
-        this.toolBarList[Double.toInt(index)].backgroundColor = Color.Transparent;
+        this.toolBarList[index].backgroundColor = Color.Transparent;
       }
     })
     .stateStyles({
       pressed: (instance: CommonMethod): void => {
-        instance.backgroundColor((this.toolBarList[Double.toInt(index)]?.state === ToolBarV2ItemState.DISABLE) ||
+        instance.backgroundColor((this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE) ||
           (!this.toolBarModifier?.stateEffectValue) ?
-        this.toolBarList[Double.toInt(index)].backgroundColor : $r('sys.color.ohos_id_color_click_effect'))
+        this.toolBarList[index].backgroundColor : $r('sys.color.ohos_id_color_click_effect'))
       }
     })
     .onClick((event: ClickEvent) => {
       this.clickEventAction(index);
     })
-    .gestureModifier(this.getItemGestureModifier(this.toolBarList[Double.toInt(index)], index))
+    .gestureModifier(this.getItemGestureModifier(this.toolBarList[index], index))
   }
 
   @Builder
@@ -560,11 +560,11 @@ export struct ToolBarV2 {
     }
   }
 
-  private toAccessibilityText(resource: ResourceStr | undefined, index: number): string {
+  private toAccessibilityText(resource: ResourceStr | undefined, index: int): string {
     if (typeof resource === 'string') {
       return resource as string;
     } else if (typeof resource === 'undefined') {
-      return this.toStringFormat(this.toolBarList[Double.toInt(index)]?.content?.text);
+      return this.toStringFormat(this.toolBarList[index]?.content?.text);
     } else {
       let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
       getStringSync((resource as Resource).id)
@@ -597,31 +597,31 @@ export struct ToolBarV2 {
     }
   }
 
-  private isItemActivating(index: number): boolean {
+  private isItemActivating(index: int): boolean {
     return this.localActivatedIndex === index &&
-      (this.toolBarList[Double.toInt(index)]?.state === ToolBarV2ItemState.ACTIVATE);
+      (this.toolBarList[index]?.state === ToolBarV2ItemState.ACTIVATE);
   }
 
-  private getToolBarSymbolModifier(index: number): SymbolGlyphModifier | undefined {
+  private getToolBarSymbolModifier(index: int): SymbolGlyphModifier | undefined {
     if (this.isItemActivating(index)) {
-      return this.toolBarList[Double.toInt(index)]?.symbol?.activated;
+      return this.toolBarList[index]?.symbol?.activated;
     }
-    return this.toolBarList[Double.toInt(index)]?.symbol?.normal;
+    return this.toolBarList[index]?.symbol?.normal;
   }
 
-  private getIconColor(index: number): ResourceColor {
+  private getIconColor(index: int): ResourceColor {
     if (this.isItemActivating(index)) {
-      return this.toolBarList[Double.toInt(index)]?.image?.activatedColor?.color ?? this.theme.iconActivePrimaryColor;
+      return this.toolBarList[index]?.image?.activatedColor?.color ?? this.theme.iconActivePrimaryColor;
     }
-    return this.toolBarList[Double.toInt(index)]?.image?.color?.color ?? this.theme.iconPrimaryColor;
+    return this.toolBarList[index]?.image?.color?.color ?? this.theme.iconPrimaryColor;
   }
 
-  private getTextColor(index: number): ResourceColor {
+  private getTextColor(index: int): ResourceColor {
     if (this.isItemActivating(index)) {
-      return this.toolBarList[Double.toInt(index)]?.content.activatedColor?.color ??
+      return this.toolBarList[index]?.content.activatedColor?.color ??
       this.theme.fontActivatedPrimaryColor;
     }
-    return this.toolBarList[Double.toInt(index)]?.content.color?.color ?? this.theme.fontPrimaryColor;
+    return this.toolBarList[index]?.content.color?.color ?? this.theme.fontPrimaryColor;
   }
 
   private toLengthString(value?: LengthMetrics): string {
@@ -653,8 +653,8 @@ export struct ToolBarV2 {
     return lengthString;
   }
 
-  private clickEventAction(index: number): void {
-    let toolbar = this.toolBarList[Double.toInt(index)];
+  private clickEventAction(index: int): void {
+    let toolbar = this.toolBarList[index];
     if (toolbar.state === ToolBarV2ItemState.ACTIVATE) {
       if (this.localActivatedIndex === index) {
         this.localActivatedIndex = -1;
@@ -669,7 +669,7 @@ export struct ToolBarV2 {
     }
   }
 
-  private getItemGestureModifier(item: ToolBarV2Item, index: number): ButtonGestureModifier | undefined {
+  private getItemGestureModifier(item: ToolBarV2Item, index: int): ButtonGestureModifier | undefined {
     if (!item?.icon) {
       return undefined;
     }
