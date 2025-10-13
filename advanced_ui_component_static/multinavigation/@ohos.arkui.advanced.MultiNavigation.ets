@@ -984,76 +984,7 @@ export class MultiNavPathStack extends NavPathStack {
     return size;
   }
 
-  public pop(animated?: boolean): NavPathInfo | undefined {
-    animated = typeof animated === 'undefined' ? true : animated
-    let totalSize = this.totalStack.length;
-    let subStackLength = this.subStackList.length;
-    if (totalSize < 1 || subStackLength < 1) {
-      console.log('MultiNavPathStack pop fail stack is empty!');
-      return undefined;
-    }
-    console.log('MultiNavPathStack pop totalSize=' + totalSize +
-      ', subStackLength' + subStackLength);
-
-    if (this.keepBottomPageFlag && (totalSize === 1 ||
-      (this.placeHolderPolicyInfo !== undefined && totalSize === 2 &&
-        this.totalStack[1].policy === SplitPolicy.PlACE_HOLDER_PAGE))) {
-      console.log('MultiNavPathStack pop fail for keep bottom');
-      return undefined;
-    }
-    let currentPath = this.totalStack[totalSize - 1].navInfo;
-    let allInfoLength = this.subStackList[subStackLength - 1].getAllInfoLength();
-    if (allInfoLength < 1) {
-      console.log('MultiNavPathStack pop fail sub stack is empty');
-      return undefined;
-    }
-    let secondaryStackFirstPolice: SplitPolicy | undefined = undefined;
-    if (allInfoLength > 1) {
-      secondaryStackFirstPolice = this.subStackList[subStackLength - 1].getSecondaryInfoList()[0].policy;
-    }
-    console.log('MultiNavPathStack pop allInfoLength=' + allInfoLength +
-      ', secondaryStackFirstPolice' + secondaryStackFirstPolice);
-    this.totalStack.pop();
-    if (allInfoLength === 1) {
-      // pop home
-      this.outerStack.popInner(animated);
-      let subStack = this.subStackList.pop();
-      setTimeout(() => {
-        subStack?.pop(false);
-        subStack = undefined;
-      }, 300);
-    } else {
-      if (allInfoLength === 2) {
-        if (this.placeHolderPolicyInfo !== undefined) {
-          if (secondaryStackFirstPolice === SplitPolicy.PlACE_HOLDER_PAGE) {
-            this.outerStack.popInner(animated);
-            let subStack = this.subStackList.pop();
-            setTimeout(() => {
-              subStack?.clear(false);
-              subStack = undefined;
-            }, 300);
-            currentPath = this.totalStack.pop()?.navInfo;
-          } else {
-            if (this.needShowPlaceHolder()) {
-              this.subStackList[subStackLength - 1].pop(animated);
-              this.pushPlaceHolder(subStackLength - 1)
-            } else {
-              this.subStackList[subStackLength - 1].pop(animated);
-            }
-          }
-        } else {
-          this.subStackList[subStackLength - 1].pop(animated);
-        }
-      } else {
-        this.subStackList[subStackLength - 1].pop(animated);
-      }
-    }
-    this.handleRefreshPlaceHolderIfNeeded();
-    this.checkAndNotifyHomeChange();
-    console.log('MultiNavPathStack pop stackSize = ' + this.totalStack.length);
-    return currentPath;
-  }
-  public pop(result?: Object, animated?: boolean): NavPathInfo | undefined {
+  public pop(result?: Object | boolean, animated?: boolean): NavPathInfo | undefined {
     animated = typeof animated === 'undefined' ? true : animated
     let totalSize = this.totalStack.length;
     let subStackLength = this.subStackList.length;
@@ -1119,7 +1050,7 @@ export class MultiNavPathStack extends NavPathStack {
     }
     console.log('MultiNavPathStack pop currentPath.name = ' + currentPath?.name);
 
-    if (result !== undefined &&
+    if (result !== undefined && typeof result !== 'boolean' &&
       currentPath !== undefined && currentPath.onPop !== undefined) {
       let popInfo: PopInfo = {
         info: currentPath,

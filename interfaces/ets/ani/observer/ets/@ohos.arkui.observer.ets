@@ -36,6 +36,29 @@ import hilog from '@ohos.hilog'
         offScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
         onScrollEvent(callback: Callback<ScrollEventInfo>): void;
         offScrollEvent(callback: Callback<ScrollEventInfo>): void;
+
+        onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
+        offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
+        onNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationInfo>
+        ): void;
+        offNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationInfo>
+        ): void;
+        onRouterPageUpdate(callback: Callback<RouterPageInfo>): void;
+        offRouterPageUpdate(callback?: Callback<RouterPageInfo>): void;
+        onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
+        offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
+        onNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationSwitchInfo>
+          ): void;
+        offNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationSwitchInfo>
+          ): void;
     }
     
     class UIObserverImpl implements UIObserver
@@ -58,6 +81,31 @@ import hilog from '@ohos.hilog'
         public native offScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
         public native onScrollEvent(callback: Callback<ScrollEventInfo>): void;
         public native offScrollEvent(callback: Callback<ScrollEventInfo>): void;
+
+        public native onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
+        public native offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
+        public native onNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationInfo>
+        ): void;
+        public native offNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationInfo>
+        ): void;
+
+        public native onRouterPageUpdate(callback: Callback<RouterPageInfo>): void;
+        public native offRouterPageUpdate(callback?: Callback<RouterPageInfo>): void;
+
+        public native onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
+        public native offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
+        public native onNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationSwitchInfo>
+          ): void;
+        public native offNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationSwitchInfo>
+          ): void;
     }
 
     export interface NavigationInfo {
