@@ -6021,10 +6021,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _UrlStyle_getUrl(ptr: KPointer): string
     @ani.unsafe.Direct
-    native static _UserDataSpan_construct(): KPointer
-    @ani.unsafe.Direct
-    native static _UserDataSpan_getFinalizer(): KPointer
-    @ani.unsafe.Direct
     native static _VideoController_construct(): KPointer
     @ani.unsafe.Direct
     native static _VideoController_getFinalizer(): KPointer

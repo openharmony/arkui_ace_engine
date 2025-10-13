@@ -381,7 +381,6 @@ const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServic
 const GENERATED_ArkUIUIContextGetInfoAccessor* GetUIContextGetInfoAccessor();
 const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor();
 const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor();
-const GENERATED_ArkUIUserDataSpanAccessor* GetUserDataSpanAccessor();
 const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor();
 const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsAccessor();
 const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor();
@@ -702,7 +701,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetUIContextGetInfoAccessor,
         GetUIExtensionProxyAccessor,
         GetUrlStyleAccessor,
-        GetUserDataSpanAccessor,
         GetVideoControllerAccessor,
         GetWaterFlowSectionsAccessor,
         GetWebContextMenuParamAccessor,

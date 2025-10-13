@@ -318,7 +318,6 @@ generated_sources = [
   "implementation/ui_extension_proxy_accessor.cpp",
   "implementation/ui_extension_proxy_peer.cpp",
   "implementation/url_style_accessor.cpp",
-  "implementation/user_data_span_accessor.cpp",
   "implementation/video_controller_accessor.cpp",
   "implementation/video_modifier.cpp",
   "implementation/water_flow_modifier.cpp",
