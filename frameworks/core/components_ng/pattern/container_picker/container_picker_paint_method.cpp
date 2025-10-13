@@ -32,11 +32,13 @@ void ContainerPickerPaintMethod::ClipPadding(PaintWrapper* paintWrapper, RSCanva
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetPaddingSize();
-    OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+    frameSize.AddWidth(safeAreaPadding_.left.value_or(0.0f) + safeAreaPadding_.right.value_or(0.0f));
+    OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset() -
+                            OffsetF(safeAreaPadding_.left.value_or(0.0f), 0.0f);
     auto renderContext = paintWrapper->GetRenderContext();
     if (!renderContext || renderContext->GetClipEdge().value_or(true)) {
         auto clipRect = RSRect(paddingOffset.GetX(), paddingOffset.GetY(), frameSize.Width() + paddingOffset.GetX(),
-                    paddingOffset.GetY() + frameSize.Height());
+            paddingOffset.GetY() + frameSize.Height());
         canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
     }
 }

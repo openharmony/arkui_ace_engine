@@ -53,14 +53,23 @@ RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
 
 RefPtr<NodePaintMethod> ContainerPickerPattern::CreateNodePaintMethod()
 {
+    const auto props = GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_RETURN(props, nullptr);
+    auto safeAreaPaddingProperty = props->GetOrCreateSafeAreaPadding();
     auto paint = MakeRefPtr<ContainerPickerPaintMethod>();
+    paint->SetSafeAreaPadding(safeAreaPaddingProperty);
     return paint;
 }
 
 PaddingPropertyF ContainerPickerPattern::CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate)
 {
-    safeAreaPadding.top = std::nullopt;
-    safeAreaPadding.bottom = std::nullopt;
+    if (!needRotate) {
+        safeAreaPadding.top = std::nullopt;
+        safeAreaPadding.bottom = std::nullopt;
+    } else {
+        safeAreaPadding.left = std::nullopt;
+        safeAreaPadding.right = std::nullopt;
+    }
     return safeAreaPadding;
 }
 
@@ -212,8 +221,9 @@ void ContainerPickerPattern::OnModifyDone()
     containerPickerId_ = host->GetId();
     totalItemCount_ = host->TotalChildCount();
     isLoop_ = IsLoop();
-    host->MarkDirtyNode((crossMatchChild_ ? PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD : PROPERTY_UPDATE_MEASURE_SELF) |
-                        PROPERTY_UPDATE_RENDER);
+    
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void ContainerPickerPattern::FireChangeEvent()

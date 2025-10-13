@@ -115,6 +115,11 @@ protected:
         return true;
     }
 
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
+    }
+
     bool NeedCustomizeSafeAreaPadding() override
     {
         return true;

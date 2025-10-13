@@ -128,7 +128,7 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
     float width;
     auto crossSize = contentIdealSize.CrossSize(axis_);
     // when matchParent, idealSize'crossSize Keep the original value
-    if (!layoutPolicy->IsWidthMatch()) {
+    if (layoutPolicy.has_value() && !layoutPolicy->IsWidthMatch()) {
         if ((crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) || !crossSize.has_value()) {
             width = GetChildMaxWidth(layoutWrapper);
             contentIdealSize.SetCrossSize(width, axis_);
@@ -140,7 +140,7 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
         width = NonNegative(crossSize.value()) ? crossSize.value() : PICKER_DEFAULT_WIDTH;
     }
 
-    if (layoutPolicy->IsWidthWrap()) {
+    if (layoutPolicy.has_value() && layoutPolicy->IsWidthWrap()) {
         auto parentCrossSize =
             CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_CROSS_AXIS)
                 .CrossSize(axis_);
@@ -154,7 +154,7 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
         crossMatchChild_ = true;
     }
 
-    if (layoutPolicy->IsWidthFix()) {
+    if (layoutPolicy.has_value() && layoutPolicy->IsWidthFix()) {
         width = GetChildMaxWidth(layoutWrapper);
         crossMatchChild_ = true;
     }
@@ -406,13 +406,9 @@ void ContainerPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pickerLayoutProperty);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-
-    axis_ = Axis::VERTICAL;
-    auto size = geometryNode->GetFrameSize();
     CalcMainAndMiddlePos();
     auto padding = pickerLayoutProperty->CreatePaddingAndBorder();
     topPadding_ = padding.top.value_or(0.0);
-    MinusPaddingToSize(padding, size);
     auto paddingOffset = padding.Offset();
 
     // layout items.
