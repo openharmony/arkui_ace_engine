@@ -120,6 +120,13 @@ public:
         }
     }
 
+    void Clear()
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        cacheMap_.clear();
+        accessQueue_.clear();
+    }
+
 private:
     struct CacheNode {
         ValueType value;
