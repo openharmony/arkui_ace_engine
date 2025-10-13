@@ -251,7 +251,7 @@ function fixPropertyLines(code: string): string {
     this function wraps this back to `readonly name = false;`
 
     */
-    return code.replaceAll(/(private|public)(.*)?<property>(.*?)\n((.*?)\n){9}/g, (match, p1, p2, p3) => {
+    return code.replaceAll(/(private|public)(.*)?%%property-(.*?)\n((.*?)\n){9}/g, (match, p1, p2, p3) => {
         return `public ${p2} ${p3}`
     })
 }
@@ -272,8 +272,8 @@ function fixDuplicateSettersInInterfaces(code: string): string {
 
 function excludePartialInterfaces(code: string): string {
     return code
-    .replaceAll(/export interface (.*)\$partial<>([\s\S]*?)}/g, '')
-    .replaceAll(/interface (.*)\$partial<>([\s\S]*?)}/g, '')
+    .replaceAll(/export interface %%partial-(.*)<>([\s\S]*?)}/g, '')
+    .replaceAll(/interface %%partial-(.*)<>([\s\S]*?)}/g, '')
 }
 
 function fixNamespace(code: string) {

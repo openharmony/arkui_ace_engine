@@ -60,7 +60,7 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
             return value;
         }
         const varName = method.getName().substring(5);
-        const SETTER_PREFIX = '<set>';
+        const SETTER_PREFIX = '%%set-';
         const targetType = Type.of(this._target) as ClassType;
         try {
             const setter = targetType.getMethodByName(SETTER_PREFIX + varName);
@@ -74,7 +74,7 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
     }
     set (target: Object, method: reflect.InstanceMethod, newValue: Any): void {
         const varName = method.getName().substring(5);
-        const GETTER_PREFIX = '<get>';
+        const GETTER_PREFIX = '%%get-';
         const targetType = Type.of(this._target) as ClassType;
         try {
             const getter = targetType.getMethodByName(GETTER_PREFIX + varName);
