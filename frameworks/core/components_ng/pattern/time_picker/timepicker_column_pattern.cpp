@@ -98,8 +98,8 @@ void TimePickerColumnPattern::OnModifyDone()
             optionProperties_.emplace_back(prop);
             childIndex++;
         }
-        SetOptionShiftDistance();
     }
+    SetOptionShiftDistance();
     InitHapticController(host);
 }
 
