@@ -59,3 +59,11 @@ ace_unittest("water_flow_test_sw") {
   ]
   sources += COMMON_SRC
 }
+
+ace_unittest("water_flow_static_test") {
+  type = "new"
+  sources = [
+    "water_flow_test_ng.cpp",
+    "water_flow_static_test.cpp",
+  ]
+}

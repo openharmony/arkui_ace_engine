@@ -216,7 +216,7 @@ void SetContentStartOffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
-        // Implement Reset value
+        ListModelStatic::SetContentStartOffset(frameNode, 0);
         return;
     }
     ListModelStatic::SetContentStartOffset(frameNode, *convValue);
@@ -228,7 +228,7 @@ void SetContentEndOffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
-        // Implement Reset value
+        ListModelStatic::SetContentEndOffset(frameNode, 0);
         return;
     }
     ListModelStatic::SetContentEndOffset(frameNode, *convValue);
@@ -269,7 +269,7 @@ void SetMultiSelectableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        ListModelStatic::SetMultiSelectable(frameNode, false);
         return;
     }
     ListModelStatic::SetMultiSelectable(frameNode, *convValue);
@@ -281,10 +281,10 @@ void SetCachedCount0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int>(value);
     if (!convValue) {
-        // Implement Reset value
+        ListModelStatic::SetCachedCount(frameNode, std::nullopt);
         return;
     }
-    ListModelStatic::SetCachedCount(frameNode, *convValue);
+    ListModelStatic::SetCachedCount(frameNode, convValue);
 }
 void SetChainAnimationImpl(Ark_NativePointer node,
                            const Opt_Boolean* value)
@@ -293,7 +293,7 @@ void SetChainAnimationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        ListModelStatic::SetChainAnimation(frameNode, false);
         return;
     }
     ListModelStatic::SetChainAnimation(frameNode, *convValue);
@@ -332,7 +332,7 @@ void SetChildrenMainSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListModelStatic::ResetListChildrenMainSize(frameNode);
         return;
     }
     auto peer = *optValue;
@@ -363,7 +363,7 @@ void SetOnScrollIndexImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListModelStatic::SetOnScrollIndex(frameNode, nullptr);
         return;
     }
     auto onScrollIndex = [arkCallback = CallbackHelper(*optValue)]
@@ -382,7 +382,7 @@ void SetOnScrollVisibleContentChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListModelStatic::SetOnScrollVisibleContentChange(frameNode, nullptr);
         return;
     }
     auto onScrollVisibleContentChange = [arkCallback = CallbackHelper(*optValue)]
@@ -400,7 +400,7 @@ void SetOnItemMoveImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListModelStatic::SetOnItemMove(frameNode, nullptr);
         return;
     }
     auto onItemMove = [callback = CallbackHelper(*optValue)](int32_t from, int32_t to) {
@@ -418,7 +418,7 @@ void SetOnItemDragStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListModelStatic::SetOnItemDragStart(frameNode, nullptr);
         return;
     }
     auto onItemDragStart = [callback = CallbackHelper(*optValue), frameNode, node](
@@ -440,7 +440,7 @@ void SetOnItemDragEnterImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListModelStatic::SetOnItemDragEnter(frameNode, nullptr);
         return;
     }
     auto onItemDragEnter = [arkCallback = CallbackHelper(*optValue)](const ItemDragInfo& dragInfo) {
@@ -456,7 +456,7 @@ void SetOnItemDragMoveImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListModelStatic::SetOnItemDragMove(frameNode, nullptr);
         return;
     }
     auto onItemDragMove = [arkCallback = CallbackHelper(*optValue)](const ItemDragInfo& dragInfo,
@@ -475,7 +475,7 @@ void SetOnItemDragLeaveImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListModelStatic::SetOnItemDragLeave(frameNode, nullptr);
         return;
     }
     auto onItemDragLeave = [arkCallback = CallbackHelper(*optValue)](const ItemDragInfo& dragInfo, int32_t itemIndex) {
@@ -492,7 +492,7 @@ void SetOnItemDropImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListModelStatic::SetOnItemDrop(frameNode, nullptr);
         return;
     }
     auto onItemDrop = [arkCallback = CallbackHelper(*optValue)](const ItemDragInfo& dragInfo,
@@ -512,7 +512,7 @@ void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ListModelStatic::SetOnScrollFrameBegin(frameNode, nullptr);
         return;
     }
     auto onScrollFrameEvent = [callback = CallbackHelper(*optValue)](
@@ -560,6 +560,7 @@ void SetOnDidScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto callValue = Converter::OptConvert<OnScrollCallback>(*value);
     if (!callValue.has_value()) {
+        ScrollableModelStatic::SetOnDidScroll(frameNode, nullptr);
         return;
     }
     auto onDidScroll = [arkCallback = CallbackHelper(callValue.value())](
@@ -588,11 +589,15 @@ void SetLanesImpl(Ark_NativePointer node,
             ListModelStatic::SetLanes(frameNode, 1);
             ListModelStatic::SetLaneConstrain(frameNode, std::get<0>(dimensions), std::get<1>(dimensions));
         }
+    } else {
+        ListModelStatic::ResetLanes(frameNode);
     }
 
     auto gutterOpt = Converter::OptConvertPtr<Dimension>(gutter);
     if (gutterOpt.has_value()) {
         ListModelStatic::SetLaneGutter(frameNode, gutterOpt);
+    } else {
+        ListModelStatic::SetLaneGutter(frameNode, 0.0_vp);
     }
 }
 void SetCachedCount1Impl(Ark_NativePointer node,

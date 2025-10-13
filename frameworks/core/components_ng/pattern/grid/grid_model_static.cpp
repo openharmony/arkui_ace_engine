@@ -40,22 +40,30 @@ void GridModelStatic::SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, LayoutOptions, options, frameNode);
 }
 
-void GridModelStatic::SetColumnsTemplate(FrameNode* frameNode, const std::string& columnsTemplate)
+void GridModelStatic::SetColumnsTemplate(FrameNode* frameNode, const std::optional<std::string>& columnsTemplate)
 {
-    if (columnsTemplate.empty()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, "1fr", frameNode);
+    if (!columnsTemplate) {
+        CHECK_NULL_VOID(frameNode);
+        auto layout = frameNode->GetLayoutPropertyPtr<GridLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        layout->ResetColumnsTemplate();
+        layout->OnColumnsTemplateUpdate("");
         return;
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, columnsTemplate, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, columnsTemplate.value(), frameNode);
 }
 
-void GridModelStatic::SetRowsTemplate(FrameNode* frameNode, const std::string& rowsTemplate)
+void GridModelStatic::SetRowsTemplate(FrameNode* frameNode, const std::optional<std::string>& rowsTemplate)
 {
-    if (rowsTemplate.empty()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, "1fr", frameNode);
+    if (!rowsTemplate) {
+        CHECK_NULL_VOID(frameNode);
+        auto layout = frameNode->GetLayoutPropertyPtr<GridLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        layout->ResetRowsTemplate();
+        layout->OnRowsTemplateUpdate("");
         return;
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, rowsTemplate, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, rowsTemplate.value(), frameNode);
 }
 
 void GridModelStatic::SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value)
@@ -74,23 +82,32 @@ void GridModelStatic::SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& o
     eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
 
-void GridModelStatic::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
+void GridModelStatic::SetCachedCount(FrameNode* frameNode, const std::optional<int32_t>& cachedCount)
 {
-    if (cachedCount >= 0) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, cachedCount, frameNode);
+    if (cachedCount) {
+        int32_t value = cachedCount.value() < 0 ? 1 : cachedCount.value();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, value, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, frameNode);
     }
 }
 
-void GridModelStatic::SetShowCached(FrameNode* frameNode, bool show)
+void GridModelStatic::SetShowCached(FrameNode* frameNode, const std::optional<bool>& show)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ShowCachedItems, show, frameNode);
+    if (show) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ShowCachedItems, show.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ShowCachedItems, frameNode);
+    }
 }
 
-void GridModelStatic::SetEditable(FrameNode* frameNode, bool editMode)
+void GridModelStatic::SetEditable(FrameNode* frameNode, const std::optional<bool>& editMode)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, Editable, editMode, frameNode);
+    if (editMode) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, Editable, editMode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, Editable, frameNode);
+    }
 }
 
 void GridModelStatic::SetMultiSelectable(FrameNode* frameNode, bool multiSelectable)
@@ -100,27 +117,43 @@ void GridModelStatic::SetMultiSelectable(FrameNode* frameNode, bool multiSelecta
     pattern->SetMultiSelectable(multiSelectable);
 }
 
-void GridModelStatic::SetMaxCount(FrameNode* frameNode, int32_t maxCount)
+void GridModelStatic::SetMaxCount(FrameNode* frameNode, const std::optional<int32_t>& maxCount)
 {
-    if (maxCount >= 1) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, MaxCount, maxCount, frameNode);
+    if (maxCount.has_value() && maxCount.value() >= 1) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, MaxCount, maxCount.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, MaxCount, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto layout = frameNode->GetLayoutPropertyPtr<GridLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        layout->ResetMaxCount();
+        layout->OnMaxCountUpdate(0);
     }
 }
 
-void GridModelStatic::SetMinCount(FrameNode* frameNode, int32_t minCount)
+void GridModelStatic::SetMinCount(FrameNode* frameNode, const std::optional<int32_t>& minCount)
 {
-    if (minCount >= 1) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, MinCount, minCount, frameNode);
+    if (minCount.has_value() && minCount.value() >= 1) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, MinCount, minCount.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, MinCount, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto layout = frameNode->GetLayoutPropertyPtr<GridLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        layout->ResetMinCount();
+        layout->OnMinCountUpdate(0);
     }
 }
 
-void GridModelStatic::SetCellLength(FrameNode* frameNode, int32_t cellLength)
+void GridModelStatic::SetCellLength(FrameNode* frameNode, const std::optional<int32_t>& cellLength)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CellLength, cellLength, frameNode);
+    if (cellLength) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CellLength, cellLength.value(), frameNode);
+    } else {
+        CHECK_NULL_VOID(frameNode);
+        auto layout = frameNode->GetLayoutPropertyPtr<GridLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        layout->ResetCellLength();
+        layout->OnCellLengthUpdate(0);
+    }
 }
 
 void GridModelStatic::SetSupportAnimation(FrameNode* frameNode, bool supportAnimation)
@@ -184,7 +217,11 @@ void GridModelStatic::SetLayoutDirection(FrameNode* frameNode, const std::option
     if (layoutDirection) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, GridDirection, layoutDirection.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, GridDirection, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto layout = frameNode->GetLayoutPropertyPtr<GridLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        layout->ResetGridDirection();
+        layout->OnGridDirectionUpdate(FlexDirection::ROW);
     }
 }
 
@@ -216,7 +253,11 @@ void GridModelStatic::SetAlignItems(FrameNode* frameNode, const std::optional<Gr
     if (itemAlign) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, AlignItems, itemAlign.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, AlignItems, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto layout = frameNode->GetLayoutPropertyPtr<GridLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        layout->ResetAlignItems();
+        layout->OnAlignItemsUpdate(GridItemAlignment::DEFAULT);
     }
 }
 
