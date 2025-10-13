@@ -59,7 +59,7 @@ export class InteropExtendableComponent extends ExtendableComponent {
     }
 
     override findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | null {
-        const value = this.dynamicComponent.invokeMethod('findProvidePU', ESValue.wrap(providedPropName));
+        const value = this.dynamicComponent.invokeMethod('findProvidePU__', ESValue.wrap(providedPropName));
         if (value.unwrap() == undefined) {
             return null;
         }
@@ -105,6 +105,10 @@ export class InteropExtendableComponent extends ExtendableComponent {
     }
 
     override addProvidedVar<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean | undefined): void {}
+
+    override isViewActive(): boolean {
+        return this.dynamicComponent.invokeMethod('isViewActive').unwrap() as boolean;
+    }
 }
 
 export function updateInteropExtendableComponent(dynamicComponent: Object): void {
