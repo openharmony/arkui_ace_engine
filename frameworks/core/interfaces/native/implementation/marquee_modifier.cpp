@@ -97,12 +97,8 @@ void SetMarqueeOptionsImpl(Ark_NativePointer node,
         loopOpt = loop;
         MarqueeModelNG::SetLoop(frameNode, loopOpt);
     }
-    if (marqueeOptions.src) {
-        MarqueeModelNG::SetValue(frameNode, marqueeOptions.src);
-    }
-    if (marqueeOptions.start) {
-        MarqueeModelNG::SetPlayerStatus(frameNode, marqueeOptions.start);
-    }
+    MarqueeModelNG::SetValue(frameNode, marqueeOptions.src.value_or(""));
+    MarqueeModelNG::SetPlayerStatus(frameNode, marqueeOptions.start.value_or(false));
     if (marqueeOptions.direction) {
         MarqueeModelNG::SetDirection(frameNode, marqueeOptions.direction);
     }

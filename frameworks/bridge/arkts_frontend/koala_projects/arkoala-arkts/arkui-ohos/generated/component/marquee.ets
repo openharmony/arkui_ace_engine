@@ -209,11 +209,11 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
     }
 }
 export interface MarqueeOptions {
-    start: boolean;
+    start: boolean | undefined;
     step?: double;
     loop?: int32;
     fromStart?: boolean;
-    src: string;
+    src: string | undefined;
 }
 export interface MarqueeAttribute extends CommonMethod {
     setMarqueeOptions(options: MarqueeOptions): this {
@@ -415,7 +415,13 @@ export class MarqueeOptions_serializer {
     public static write(buffer: SerializerBase, value: MarqueeOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForStart  = value.start
-        valueSerializer.writeBoolean(valueHolderForStart)
+        if (valueHolderForStart !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStartTmpValue  = valueHolderForStart!
+            valueSerializer.writeBoolean(valueHolderForStartTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForStep  = value.step
         if (valueHolderForStep !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -441,11 +447,22 @@ export class MarqueeOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForSrc  = value.src
-        valueSerializer.writeString(valueHolderForSrc)
+        if (valueHolderForSrc !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSrcTmpValue  = valueHolderForSrc!
+            valueSerializer.writeString(valueHolderForSrcTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): MarqueeOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const startTmpResult : boolean = valueDeserializer.readBoolean()
+        const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let startTmpBuf : boolean | undefined = undefined
+        if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            startTmpBuf = valueDeserializer.readBoolean()
+        }
+        const startTmpResult : boolean | undefined = startTmpBuf
         const stepTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let stepTmpBuf : double | undefined = undefined
         if ((stepTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -464,7 +481,12 @@ export class MarqueeOptions_serializer {
             fromStartTmpBuf = valueDeserializer.readBoolean()
         }
         const fromStartTmpResult : boolean | undefined = fromStartTmpBuf
-        const srcTmpResult : string = (valueDeserializer.readString() as string)
+        const srcTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let srcTmpBuf : string | undefined = undefined
+        if ((srcTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            srcTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const srcTmpResult : string | undefined = srcTmpBuf
         let value : MarqueeOptions = ({start: startTmpResult, step: stepTmpResult, loop: loopTmpResult, fromStart: fromStartTmpResult, src: srcTmpResult} as MarqueeOptions)
         return value
     }

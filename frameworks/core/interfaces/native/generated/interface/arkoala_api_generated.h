@@ -13782,11 +13782,11 @@ typedef struct Opt_LocalizedVerticalAlignParam {
 } Opt_LocalizedVerticalAlignParam;
 typedef struct Ark_MarqueeOptions {
     /* kind: Interface */
-    Ark_Boolean start;
+    Opt_Boolean start;
     Opt_Float64 step;
     Opt_Int32 loop;
     Opt_Boolean fromStart;
-    Ark_String src;
+    Opt_String src;
 } Ark_MarqueeOptions;
 typedef struct Opt_MarqueeOptions {
     Ark_Tag tag;
@@ -18370,7 +18370,7 @@ typedef struct Opt_TextAreaOptions {
 } Opt_TextAreaOptions;
 typedef struct Ark_TextDataDetectorConfig {
     /* kind: Interface */
-    Array_TextDataDetectorType types;
+    Opt_Array_TextDataDetectorType types;
     Opt_Callback_String_Void onDetectResultUpdate;
     Opt_ResourceColor color;
     Opt_DecorationStyleInterface decoration;
@@ -21484,7 +21484,7 @@ typedef struct GENERATED_ArkUIHyperlinkModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setHyperlinkOptions)(Ark_NativePointer node,
-                                const Ark_Union_String_Resource* address,
+                                const Opt_Union_String_Resource* address,
                                 const Opt_Union_String_Resource* content);
     void (*setColor)(Ark_NativePointer node,
                      const Opt_Union_Color_I32_String_Resource* value);

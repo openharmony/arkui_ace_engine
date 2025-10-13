@@ -7984,19 +7984,25 @@ KOALA_INTEROP_DIRECT_2(Hyperlink_construct, Ark_NativePointer, Ark_Int32, Ark_In
 void impl_HyperlinkInterface_setHyperlinkOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
-        const Ark_Int8 addressValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_String_Resource addressValueTempTmpBuf = {};
-        addressValueTempTmpBuf.selector = addressValueTempTmpBufUnionSelector;
-        if (addressValueTempTmpBufUnionSelector == 0) {
-            addressValueTempTmpBuf.selector = 0;
-            addressValueTempTmpBuf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
-        } else if (addressValueTempTmpBufUnionSelector == 1) {
-            addressValueTempTmpBuf.selector = 1;
-            addressValueTempTmpBuf.value1 = Resource_serializer::read(thisDeserializer);
-        } else {
-            INTEROP_FATAL("One of the branches for addressValueTempTmpBuf has to be chosen through deserialisation.");
+        const auto addressValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_String_Resource addressValueTempTmpBuf = {};
+        addressValueTempTmpBuf.tag = addressValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((addressValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int8 addressValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Union_String_Resource addressValueTempTmpBuf_ = {};
+            addressValueTempTmpBuf_.selector = addressValueTempTmpBuf_UnionSelector;
+            if (addressValueTempTmpBuf_UnionSelector == 0) {
+                addressValueTempTmpBuf_.selector = 0;
+                addressValueTempTmpBuf_.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+            } else if (addressValueTempTmpBuf_UnionSelector == 1) {
+                addressValueTempTmpBuf_.selector = 1;
+                addressValueTempTmpBuf_.value1 = Resource_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for addressValueTempTmpBuf_ has to be chosen through deserialisation.");
+            }
+            addressValueTempTmpBuf.value = static_cast<Ark_Union_String_Resource>(addressValueTempTmpBuf_);
         }
-        Ark_Union_String_Resource addressValueTemp = static_cast<Ark_Union_String_Resource>(addressValueTempTmpBuf);;
+        Opt_Union_String_Resource addressValueTemp = addressValueTempTmpBuf;;
         const auto contentValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_Union_String_Resource contentValueTempTmpBuf = {};
         contentValueTempTmpBuf.tag = contentValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -8016,7 +8022,7 @@ void impl_HyperlinkInterface_setHyperlinkOptions(Ark_NativePointer thisPtr, KSer
             contentValueTempTmpBuf.value = static_cast<Ark_Union_String_Resource>(contentValueTempTmpBuf_);
         }
         Opt_Union_String_Resource contentValueTemp = contentValueTempTmpBuf;;
-        GetNodeModifiers()->getHyperlinkModifier()->setHyperlinkOptions(self, static_cast<Ark_Union_String_Resource*>(&addressValueTemp), static_cast<Opt_Union_String_Resource*>(&contentValueTemp));
+        GetNodeModifiers()->getHyperlinkModifier()->setHyperlinkOptions(self, static_cast<Opt_Union_String_Resource*>(&addressValueTemp), static_cast<Opt_Union_String_Resource*>(&contentValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(HyperlinkInterface_setHyperlinkOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_HyperlinkAttribute_setColor(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
