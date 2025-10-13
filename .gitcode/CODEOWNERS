@@ -1626,7 +1626,7 @@ frameworks/bridge/declarative_frontend/jsview/models/xcomponent_model_impl.h @ar
 frameworks/bridge/declarative_frontend/jsview/scroll_bar/  @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/text_menu/js_text_menu.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/text_menu/js_text_menu.h @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/window_scene/
+frameworks/bridge/declarative_frontend/jsview/window_scene/ @window_scene
 frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/ng/entry_page_info.h @arkuicodepulse
@@ -2614,7 +2614,7 @@ frameworks/core/components_ng/pattern/video/ @arkuieco3
 frameworks/core/components_ng/pattern/view_context/ @arkuicodepulse
 frameworks/core/components_ng/pattern/waterflow/ @arkuiscroll
 frameworks/core/components_ng/pattern/web/ @arkweb-committer-group
-frameworks/core/components_ng/pattern/window_scene/
+frameworks/core/components_ng/pattern/window_scene/ @window_scene
 frameworks/core/components_ng/pattern/xcomponent/ @arkuieco3
 frameworks/core/components_ng/svg/ @arkui001
 frameworks/core/components_ng/syntax/ @arkuieco3
