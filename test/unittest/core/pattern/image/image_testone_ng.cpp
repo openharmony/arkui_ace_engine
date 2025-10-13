@@ -2076,7 +2076,7 @@ HWTEST_F(ImageTestOneNg, ParseImageModelStaticFillColor001, TestSize.Level1)
 
 /**
  * @tc.name: SetImageModelStaticSrc001
- * @tc.desc: parse fill color
+ * @tc.desc: parse src
  * @tc.type: FUNC
  */
 HWTEST_F(ImageTestOneNg, SetImageModelStaticSrc001, TestSize.Level1)
