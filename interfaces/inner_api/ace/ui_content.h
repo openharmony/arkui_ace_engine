@@ -248,7 +248,7 @@ public:
 
     virtual void SetFormWidth(const float width) = 0;
     virtual void SetFormHeight(const float height) = 0;
-    virtual void SetFormViewScale(float width, float height, float layoutWidth, float layoutHeight) {}
+    virtual void SetFormViewScale(float width, float height, float formViewScale) {}
     virtual float GetFormWidth() = 0;
     virtual float GetFormHeight() = 0;
     virtual void ReloadForm(const std::string& url) {};

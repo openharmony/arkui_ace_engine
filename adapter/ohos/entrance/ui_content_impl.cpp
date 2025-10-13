@@ -4611,23 +4611,15 @@ void UIContentImpl::UpdateFormSharedImage(const std::map<std::string, sptr<OHOS:
     }
 }
 
-void UIContentImpl::SetFormViewScale(float width, float height, float layoutWidth, float layoutHeight)
+void UIContentImpl::SetFormViewScale(float width, float height, float formViewScale)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    bool isDefaultScale = NearZero(width) || NearZero(height) || NearZero(layoutWidth) || NearZero(layoutHeight);
-    if (isDefaultScale) {
-        pipelineContext->SetViewScale(DEFAULT_VIEW_SCALE);
-        return;
-    }
-    float widthScale = NearEqual(layoutWidth, width) ? DEFAULT_VIEW_SCALE : layoutWidth / width;
-    float heightScale = NearEqual(layoutHeight, height) ?  DEFAULT_VIEW_SCALE : layoutHeight / height;
-    float viewScale = (widthScale >= heightScale) ? widthScale : heightScale;
-    viewScale = (viewScale <= DEFAULT_VIEW_SCALE) ? DEFAULT_VIEW_SCALE :
-        ((viewScale >= MAX_FORM_VIEW_SCALE) ? MAX_FORM_VIEW_SCALE : viewScale);
+    float viewScale = (formViewScale <= DEFAULT_VIEW_SCALE) ? DEFAULT_VIEW_SCALE :
+        ((formViewScale >= MAX_FORM_VIEW_SCALE) ? MAX_FORM_VIEW_SCALE : formViewScale);
 
     TAG_LOGD(AceLogTag::ACE_FORM, "SetFormViewScale viewScale: %{public}f", viewScale);
     pipelineContext->SetViewScale(viewScale);

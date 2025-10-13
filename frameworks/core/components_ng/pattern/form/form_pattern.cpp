@@ -804,16 +804,17 @@ void FormPattern::GetWantParam(RequestFormInfo& info)
     float width = static_cast<float>(info.width.Value());
     float height = static_cast<float>(info.height.Value());
     float layoutWidth = GetNumberFromParams(want, OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY, width);
-    info.layoutWidth = NearEqual(layoutWidth, width) ? layoutWidth :
+    layoutWidth = NearEqual(layoutWidth, width) ? layoutWidth :
         static_cast<float>(Dimension(layoutWidth, DimensionUnit::VP).ConvertToPx());
     float layoutHeight = GetNumberFromParams(want, OHOS::AppExecFwk::Constants::PARAM_LAYOUT_HEIGHT_KEY, height);
-    info.layoutHeight = NearEqual(layoutHeight, height) ? layoutHeight :
+    layoutHeight = NearEqual(layoutHeight, height) ? layoutHeight :
         static_cast<float>(Dimension(layoutHeight, DimensionUnit::VP).ConvertToPx());
     bool isEnable = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false);
-    formViewScale_ = CalculateViewScale(width, height, info.layoutWidth, info.layoutHeight);
+    formViewScale_ = CalculateViewScale(width, height, layoutWidth, layoutHeight);
+    info.formViewScale = formViewScale_;
     TAG_LOGD(AceLogTag::ACE_FORM, "FormPattern::GetWantParam FORM_ENABLE_SKELETON_KEY %{public}d,"
         " layoutWidth %{public}f, layoutHeight %{public}f, viewScale: %{public}f", isEnable,
-        info.layoutWidth, info.layoutHeight, formViewScale_);
+        layoutWidth, layoutHeight, formViewScale_);
 }
 
 float FormPattern::CalculateViewScale(float width, float height, float layoutWidth, float layoutHeight)
@@ -870,8 +871,7 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         return;
     }
     TAG_LOGW(AceLogTag::ACE_FORM, "width: %{public}f   height: %{public}f  borderWidth: %{public}f"
-        "  layoutWidth: %{public}f layoutHeight: %{public}f", info.width.Value(), info.height.Value(),
-        info.borderWidth, info.layoutWidth, info.layoutHeight);
+        "  formViewScale: %{public}f", info.width.Value(), info.height.Value(), info.borderWidth, info.formViewScale);
     cardInfo_ = info;
     if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)
         || info.shape == FORM_SHAPE_CIRCLE) {
@@ -992,8 +992,7 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
         }
     }
     if (cardInfo_.width != info.width || cardInfo_.height != info.height ||
-        cardInfo_.borderWidth != info.borderWidth || !NearEqual(cardInfo_.layoutWidth, info.layoutWidth) ||
-        !NearEqual(cardInfo_.layoutHeight, info.layoutHeight)) {
+        cardInfo_.borderWidth != info.borderWidth || !NearEqual(cardInfo_.formViewScale, info.formViewScale)) {
         UpdateFormComponentSize(info);
     }
     if (cardInfo_.obscuredMode != info.obscuredMode) {
@@ -1026,8 +1025,8 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
 {
     TAG_LOGI(AceLogTag::ACE_FORM,
         "update size, id: %{public}" PRId64 "  width: %{public}f  height: %{public}f  borderWidth: %{public}f"
-        "  layoutWidth: %{public}f layoutHeight: %{public}f", info.id, info.width.Value(), info.height.Value(),
-        info.borderWidth, info.layoutWidth, info.layoutHeight);
+        "  formViewScale: %{public}f.", info.id, info.width.Value(), info.height.Value(),
+        info.borderWidth, info.formViewScale);
     UpdateFormSurface(info);
 
     auto imageNode = GetFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
@@ -1069,8 +1068,7 @@ void FormPattern::UpdateFormSurface(const RequestFormInfo& info)
 {
     cardInfo_.width = info.width;
     cardInfo_.height = info.height;
-    cardInfo_.layoutWidth = info.layoutWidth;
-    cardInfo_.layoutHeight = info.layoutHeight;
+    cardInfo_.formViewScale = info.formViewScale;
     cardInfo_.borderWidth = info.borderWidth;
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
@@ -1082,8 +1080,7 @@ void FormPattern::UpdateFormSurface(const RequestFormInfo& info)
     OHOS::AppExecFwk::FormSurfaceInfo formSurfaceInfo;
     formSurfaceInfo.width = info.width.Value();
     formSurfaceInfo.height = info.height.Value();
-    formSurfaceInfo.layoutWidth = info.layoutWidth;
-    formSurfaceInfo.layoutHeight = info.layoutHeight;
+    formSurfaceInfo.formViewScale = info.formViewScale;
     formSurfaceInfo.borderWidth = info.borderWidth;
     if (formManagerBridge_) {
         formManagerBridge_->NotifySurfaceChange(formSurfaceInfo);

@@ -212,7 +212,7 @@ void FormRendererDispatcherImpl::UpdateFormSurface(const std::shared_ptr<UIConte
     float uiHeight = formSurfaceInfo.height - formSurfaceInfo.borderWidth * DOUBLE;
     uiContent->SetFormWidth(uiWidth);
     uiContent->SetFormHeight(uiHeight);
-    uiContent->SetFormViewScale(uiWidth, uiHeight, formSurfaceInfo.layoutWidth, formSurfaceInfo.layoutHeight);
+    uiContent->SetFormViewScale(uiWidth, uiHeight, formSurfaceInfo.formViewScale);
     uiContent->OnFormSurfaceChange(uiWidth, uiHeight, static_cast<OHOS::Rosen::WindowSizeChangeReason>(reason),
         rsTransaction);
 }
