@@ -1536,6 +1536,9 @@ export class UIContextImpl extends UIContext {
          return ArkUIAniModule._Common_px2lpx(value, this.instanceId_);
     }
 
+    public getId() : int32 {
+        return this.instanceId_;
+    }
     private getWindowName_serialize(): string | undefined {
         throw new Error("no impl");
         
