@@ -2178,7 +2178,7 @@ template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Length, Ark_Num
 
 std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
 {
-    std::optional<Dimension> dimension;
+    std::optional<Dimension> dimension = std::nullopt;
     Converter::VisitUnion(src,
         [&dimension](const Ark_Number& value) {
             dimension = Converter::Convert<Dimension>(value);
@@ -2189,11 +2189,7 @@ std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, Dimensio
         [&dimension, defaultUnit](const Ark_Resource& value) {
             dimension = OptConvertFromArkLengthResource(value, defaultUnit);
         },
-        [&dimension]() {
-            dimension = Dimension();
-        });
-
-    dimension->SetUnit(defaultUnit);
+        [&dimension]() {});
     return dimension;
 }
 
