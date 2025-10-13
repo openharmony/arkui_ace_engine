@@ -137,7 +137,7 @@ public:
 
 private:
     void LayoutItem(LayoutWrapper* layoutWrapper, OffsetF offset, std::pair<int32_t, PickerItemInfo> pos);
-    void MeasureSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
+    void HandleLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     void MeasureHeight(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     void MeasureWidth(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     float GetChildMaxWidth(LayoutWrapper* layoutWrapper) const;
@@ -161,10 +161,8 @@ private:
     void TranslateAndRotate(RefPtr<FrameNode> node, OffsetF& offset);
 
     LayoutConstraintF childLayoutConstraint_;
-    LayoutCalPolicy widthLayoutPolicy = LayoutCalPolicy::NO_MATCH;
     ContainerPickerUtils::PositionMap itemPosition_;
     ContainerPickerUtils::PositionMap prevItemPosition_;
-    ContainerPickerUtils::PositionMap itemPositionInAnimation_;
     Axis axis_ = Axis::VERTICAL;
 
     std::optional<int32_t> targetIndex_;
@@ -182,10 +180,7 @@ private:
     float middleItemEndPos_ = 0.0f;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
-    float dividerSpacingFontScale_ = 1.0f;
-    float gradientFontScale_ = 1.0f;
     bool crossMatchChild_ = false;
-    bool mainSizeIsMeasured_ = false;
     bool measured_ = false;
     bool isLoop_ = false;
     bool overScrollFeature_ = false;

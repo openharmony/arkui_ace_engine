@@ -24,14 +24,10 @@
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-
 namespace OHOS::Ace::NG {
 namespace {
-const float PICKER_DEFAULT_HEIGHT = 910.0f;
-const float PICKER_DEFAULT_WIDTH = 300.0f;
 const float UNDEFINED_SIZE = -1.0f;
 const float HALF = 2.0;
-const Dimension PICKER_DEFAULT_ITEM_HEIGHT = 40.0_vp;
 const int32_t ITEM_COUNTS = 10;
 const float HORIZONTAL_ANGLE = 180.0f;
 const float VERTICAL_ANGLE = 90.0f;
@@ -50,7 +46,8 @@ void ContainerPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     OptionalSizeF contentIdealSize =
         CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_MAIN_AXIS);
 
-    MeasureSize(layoutWrapper, contentIdealSize);
+    HandleLayoutPolicy(layoutWrapper, contentIdealSize);
+    MeasureHeight(layoutWrapper, contentIdealSize);
 
     CalcMainAndMiddlePos();
     auto childLayoutConstraint = ContainerPickerUtils::CreateChildConstraint(pickerLayoutProperty, contentIdealSize);
@@ -60,6 +57,7 @@ void ContainerPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         itemPosition_.clear();
     }
+    MeasureWidth(layoutWrapper, contentIdealSize);
 
     const auto& padding = pickerLayoutProperty->CreatePaddingAndBorder();
     AddPaddingToSize(padding, contentIdealSize);
@@ -71,7 +69,7 @@ void ContainerPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     SetPatternContentMainSize(layoutWrapper);
 }
 
-void ContainerPickerLayoutAlgorithm::MeasureSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize)
+void ContainerPickerLayoutAlgorithm::HandleLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto pickerLayoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -81,7 +79,7 @@ void ContainerPickerLayoutAlgorithm::MeasureSize(LayoutWrapper* layoutWrapper, O
     // handle layout policy.
     auto layoutPolicy = pickerLayoutProperty->GetLayoutPolicyProperty();
     if (layoutPolicy.has_value()) {
-        widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
         // when the main/cross axis is set matchParent, Update contentIdealSize
         if (layoutPolicy->IsWidthMatch()) {
             auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
@@ -89,8 +87,6 @@ void ContainerPickerLayoutAlgorithm::MeasureSize(LayoutWrapper* layoutWrapper, O
             contentIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
         }
     }
-    MeasureHeight(layoutWrapper, contentIdealSize);
-    MeasureWidth(layoutWrapper, contentIdealSize);
 }
 
 void ContainerPickerLayoutAlgorithm::MeasureHeight(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize)
@@ -106,7 +102,7 @@ void ContainerPickerLayoutAlgorithm::MeasureHeight(LayoutWrapper* layoutWrapper,
     // measure height
     if (!isHeightDefined) {
         auto parentMaxHeight = GetMainAxisSize(contentConstraint.maxSize, axis_);
-        height = std::min(parentMaxHeight, PICKER_DEFAULT_HEIGHT);
+        height = std::min(parentMaxHeight, static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx()));
     }
 
     if (!NearEqual(height, height_)) {
@@ -114,7 +110,7 @@ void ContainerPickerLayoutAlgorithm::MeasureHeight(LayoutWrapper* layoutWrapper,
         itemPosition_.clear();
     }
     SetHeight(height);
-    contentMainSize_ = std::min(height, PICKER_DEFAULT_HEIGHT);
+    contentMainSize_ = std::min(height, static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx()));
     contentIdealSize.SetMainSize(height, axis_);
 }
 
@@ -125,49 +121,47 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
     auto layoutPolicy = pickerLayoutProperty->GetLayoutPolicyProperty();
 
     // measure width
+    auto crossSize = contentIdealSize.CrossSize(axis_).value_or(UNDEFINED_SIZE);
     float width;
-    auto crossSize = contentIdealSize.CrossSize(axis_);
-    // when matchParent, idealSize'crossSize Keep the original value
-    if (layoutPolicy.has_value() && !layoutPolicy->IsWidthMatch()) {
-        if ((crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) || !crossSize.has_value()) {
+    if (layoutPolicy.has_value()) {
+        if (layoutPolicy->IsWidthWrap()) {
+            auto parentCrossSize =
+                CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_CROSS_AXIS)
+                    .CrossSize(axis_);
             width = GetChildMaxWidth(layoutWrapper);
-            contentIdealSize.SetCrossSize(width, axis_);
+            if (parentCrossSize.has_value()) {
+                width = std::min(width, parentCrossSize.value());
+            }
+            crossMatchChild_ = true;
+        }else if (layoutPolicy->IsWidthFix()) {
+            width = GetChildMaxWidth(layoutWrapper);
             crossMatchChild_ = true;
         } else {
-            width = NonNegative(crossSize.value()) ? crossSize.value() : PICKER_DEFAULT_WIDTH;
+            if ((NonNegative(crossSize) && GreaterOrEqualToInfinity(crossSize)) || Negative(crossSize)) {
+                width = GetChildMaxWidth(layoutWrapper);
+                crossMatchChild_ = true;
+            } else {
+                width = crossSize;
+            }
         }
     } else {
-        width = NonNegative(crossSize.value()) ? crossSize.value() : PICKER_DEFAULT_WIDTH;
-    }
-
-    if (layoutPolicy.has_value() && layoutPolicy->IsWidthWrap()) {
-        auto parentCrossSize =
-            CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_CROSS_AXIS)
-                .CrossSize(axis_);
-        width = GetChildMaxWidth(layoutWrapper);
-        if (!parentCrossSize.has_value()) {
-            contentIdealSize.SetCrossSize(width, axis_);
+        if ((NonNegative(crossSize) && GreaterOrEqualToInfinity(crossSize)) || Negative(crossSize)) {
+            width = GetChildMaxWidth(layoutWrapper);
+            crossMatchChild_ = true;
         } else {
-            contentIdealSize.SetCrossSize(std::min(width, parentCrossSize.value()), axis_);
-            width = std::min(width, parentCrossSize.value());
+            width = crossSize;
         }
-        crossMatchChild_ = true;
     }
-
-    if (layoutPolicy.has_value() && layoutPolicy->IsWidthFix()) {
-        width = GetChildMaxWidth(layoutWrapper);
-        crossMatchChild_ = true;
-    }
-
     contentIdealSize.SetCrossSize(width, axis_);
 }
 
 void ContainerPickerLayoutAlgorithm::CalcMainAndMiddlePos()
 {
-    startMainPos_ = std::max((height_ - PICKER_DEFAULT_HEIGHT) / HALF, 0.0f);
-    endMainPos_ = startMainPos_ + std::min(height_, PICKER_DEFAULT_HEIGHT);
-    middleItemStartPos_ = (height_ - PICKER_ITEM_DEFAULT_HEIGHT) / HALF;
-    middleItemEndPos_ = (height_ + PICKER_ITEM_DEFAULT_HEIGHT) / HALF;
+    auto defaulfItemHeight = static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx());
+    startMainPos_ = std::max((height_ - static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx())) / HALF, 0.0f);
+    endMainPos_ = startMainPos_ + std::min(height_, static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx()));
+    middleItemStartPos_ = (height_ - defaulfItemHeight) / HALF;
+    middleItemEndPos_ = (height_ + defaulfItemHeight) / HALF;
 }
 
 float ContainerPickerLayoutAlgorithm::GetChildMaxWidth(LayoutWrapper* layoutWrapper) const
@@ -246,7 +240,7 @@ void ContainerPickerLayoutAlgorithm::ResetOffscreenItemPosition(LayoutWrapper* l
     CHECK_NULL_VOID(childGeometryNode);
 
     OffsetF offset(0.0f, 0.0f);
-    offset.SetY(-PICKER_ITEM_DEFAULT_HEIGHT);
+    offset.SetY(-static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx()));
 
     childGeometryNode->SetMarginFrameOffset(offset);
     childWrapper->Layout();
@@ -437,9 +431,9 @@ void ContainerPickerLayoutAlgorithm::TranslateAndRotate(RefPtr<FrameNode> node, 
 {
     float offsetY = offset.GetY() - middleItemStartPos_ - topPadding_;
     const float pi = 3.14159;
-    double itemHeight = PICKER_DEFAULT_ITEM_HEIGHT.ConvertToPx();
+    double itemHeight = PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx();
     float radius = itemHeight * ITEM_COUNTS / (HALF * pi);
-    float yScale = (pi * radius) / PICKER_DEFAULT_HEIGHT;
+    float yScale = (pi * radius) / static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx());
     float radian = (offsetY * yScale) / radius;
     float angle = radian * (HORIZONTAL_ANGLE / pi);
     float correctFactor = angle > 0 ? 1.0 : -1.0;

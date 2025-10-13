@@ -33,7 +33,8 @@ struct PickerItemInfo {
 };
 
 namespace {
-const float PICKER_ITEM_DEFAULT_HEIGHT = 130.0f;
+const Dimension PICKER_DEFAULT_HEIGHT = 280.0_vp;
+const Dimension PICKER_ITEM_DEFAULT_HEIGHT = 40.0_vp;
 } // namespace
 class ContainerPickerUtils {
 public:
@@ -48,9 +49,17 @@ public:
         auto layoutConstraint = property->CreateChildConstraint();
         layoutConstraint.parentIdealSize = idealSize;
         auto childSelfIdealSize = idealSize;
-        auto width = idealSize.CrossSize(Axis::VERTICAL);
-        childSelfIdealSize.SetWidth(width);
-        childSelfIdealSize.SetHeight(PICKER_ITEM_DEFAULT_HEIGHT);
+
+        auto layoutPolicy = property->GetLayoutPolicyProperty();
+        if (layoutPolicy.has_value() && layoutPolicy->IsWidthMatch()) {
+            auto widthOpt = childSelfIdealSize.Width();
+            if (widthOpt.has_value()) {
+                layoutConstraint.maxSize.SetWidth(widthOpt.value());
+            }
+        }
+        
+        childSelfIdealSize.Reset();
+        childSelfIdealSize.SetHeight(static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx()));
         layoutConstraint.selfIdealSize = childSelfIdealSize;
         return layoutConstraint;
     }

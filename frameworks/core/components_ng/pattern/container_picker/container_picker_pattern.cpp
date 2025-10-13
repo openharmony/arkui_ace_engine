@@ -111,15 +111,16 @@ bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
 
 float ContainerPickerPattern::ShortestDistanceBetweenCurrentAndTarget()
 {
+    auto defaulfItemHeight = static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx());
     int32_t targetIndex = targetIndex_.value();
     if (!isLoop_) {
         auto deltaIndex = targetIndex - selectedIndex_;
-        return PICKER_ITEM_DEFAULT_HEIGHT * deltaIndex;
+        return defaulfItemHeight * deltaIndex;
     }
     auto forwardDelta = (targetIndex - selectedIndex_ + totalItemCount_) % totalItemCount_;
     auto backwardDelta = (selectedIndex_ - targetIndex + totalItemCount_) % totalItemCount_;
-    return forwardDelta <= backwardDelta ? forwardDelta * PICKER_ITEM_DEFAULT_HEIGHT
-                                         : backwardDelta * PICKER_ITEM_DEFAULT_HEIGHT * -1;
+    return forwardDelta <= backwardDelta ? forwardDelta * defaulfItemHeight
+                                         : backwardDelta * defaulfItemHeight * -1;
 }
 
 void ContainerPickerPattern::HandleTargetIndex(
@@ -223,7 +224,7 @@ void ContainerPickerPattern::OnModifyDone()
     isLoop_ = IsLoop();
     
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    PickerMarkDirty();
 }
 
 void ContainerPickerPattern::FireChangeEvent()

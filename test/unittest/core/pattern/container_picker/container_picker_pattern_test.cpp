@@ -28,6 +28,7 @@
 
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
+#include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -449,15 +450,22 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CustomizeSafeAre
 
     // Set initial padding values
     PaddingPropertyF padding { 10, 10, 10, 10 };
-    padding = pattern->CustomizeSafeAreaPadding(padding, true);
+    PaddingPropertyF padding1 = pattern->CustomizeSafeAreaPadding(padding, false);
 
     // Verify results
-    EXPECT_EQ(padding.top, std::nullopt);
-    EXPECT_EQ(padding.bottom, std::nullopt);
-    EXPECT_EQ(padding.left, 10);
-    EXPECT_EQ(padding.right, 10);
-}
+    EXPECT_EQ(padding1.top, std::nullopt);
+    EXPECT_EQ(padding1.bottom, std::nullopt);
+    EXPECT_EQ(padding1.left, 10);
+    EXPECT_EQ(padding1.right, 10);
 
+    PaddingPropertyF padding2 = pattern->CustomizeSafeAreaPadding(padding, true);
+
+    // Verify results
+    EXPECT_EQ(padding2.top, 10);
+    EXPECT_EQ(padding2.bottom, 10);
+    EXPECT_EQ(padding2.left, std::nullopt);
+    EXPECT_EQ(padding2.right, std::nullopt);
+}
 /**
  * @tc.name: ContainerPickerPatternTest_ShortestDistanceBetweenCurrentAndTarget001
  * @tc.desc: Test ShortestDistanceBetweenCurrentAndTarget function with non-loop mode
@@ -644,6 +652,142 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SwipeTo002, Test
 
     pattern->SwipeTo(3);
     EXPECT_EQ(pattern->targetIndex_, 0); // Should not change targetIndex_ when animation is running
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_PostIdleTask_EmptyOffScreenItems001
+ * @tc.desc: Test PostIdleTask function with empty offScreenItemsIndex_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_PostIdleTask_EmptyOffScreenItems001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Ensure offScreenItemsIndex_ is empty and call PostIdleTask.
+     * @tc.expected: step2. Function should return immediately without adding any task.
+     */
+    pattern->offScreenItemsIndex_.clear();
+    auto pipe = MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(pipe);
+
+    pattern->PostIdleTask(frameNode);
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_AccumulatingTerminateHelper001
+ * @tc.desc: Test AccumulatingTerminateHelper function with normal case
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_AccumulatingTerminateHelper001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up parameters and call AccumulatingTerminateHelper.
+     * @tc.expected: step2. Function returns true and updates totalExpand correctly.
+     */
+    frameNode->isScrollableAxis_ = false;
+    ExpandEdges padding {10, 20, 30, 40};
+    RectF rect {};
+
+    // Call function under test
+    bool result = pattern->AccumulatingTerminateHelper(rect, padding);
+
+    // Verify results
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_AccumulatingTerminateHelper_ScrollableAxisInsensitive002
+ * @tc.desc: Test AccumulatingTerminateHelper function when host is scrollable axis insensitive
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest,
+    ContainerPickerPatternTest_AccumulatingTerminateHelper_ScrollableAxisInsensitive002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Mock IsScrollableAxisInsensitive to return true and call AccumulatingTerminateHelper.
+     * @tc.expected: step2. Function returns false.
+     */
+    frameNode->isScrollableAxis_ = true;
+    ExpandEdges padding {10, 20, 30, 40};
+    RectF rect {};
+
+    // Call function under test
+    bool result = pattern->AccumulatingTerminateHelper(rect, padding);
+
+    // Verify results
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternCreateNodePaintMethodTest001
+ * @tc.desc: Test that ContainerPickerPattern::CreateNodePaintMethod returns non-null object
+ * @tc.type: FUNC
+ */
+TEST_F(ContainerPickerPatternTest, ContainerPickerPatternCreateNodePaintMethodTest001)
+{
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    // Act
+    RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
+
+    // Assert
+    EXPECT_NE(paintMethod, nullptr);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternCreateNodePaintMethodTest002
+ * @tc.desc: Test that ContainerPickerPattern::CreateNodePaintMethod returns object of correct type
+ * @tc.type: FUNC
+ */
+TEST_F(ContainerPickerPatternTest, ContainerPickerPatternCreateNodePaintMethodTest002)
+{
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    // Act
+    RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
+    RefPtr<ContainerPickerPaintMethod> containerPickerPaintMethod =
+        AceType::DynamicCast<ContainerPickerPaintMethod>(paintMethod);
+
+    // Assert
+    EXPECT_NE(containerPickerPaintMethod, nullptr);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternCreateNodePaintMethodTest003
+ * @tc.desc: Test that ContainerPickerPattern::CreateNodePaintMethod returns different instances on multiple calls
+ * @tc.type: FUNC
+ */
+TEST_F(ContainerPickerPatternTest, ContainerPickerPatternCreateNodePaintMethodTest003)
+{
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    // Act
+    RefPtr<NodePaintMethod> paintMethod1 = pattern->CreateNodePaintMethod();
+    RefPtr<NodePaintMethod> paintMethod2 = pattern->CreateNodePaintMethod();
+
+    // Assert
+    EXPECT_NE(paintMethod1, paintMethod2);
 }
 
 } // namespace OHOS::Ace::NG
