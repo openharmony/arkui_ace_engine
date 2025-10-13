@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-import { PeerNode } from 'arkui.PeerNode';
+import { PeerNode } from 'arkui/PeerNode';
 import {
     __memo_context_type as __memo_context_type,
     __memo_id_type as __memo_id_type,
 } from 'arkui.stateManagement.runtime';
 
+type KPointer = long;
 type int32 = int;
 
 let _undefinedInstanceId : int32 = -1000
@@ -30,3 +31,5 @@ export declare function createUiDetachedRoot(
     builder: (__memo_context: __memo_context_type, __memo_id: __memo_id_type) => void,
     instanceId: int32 = _undefinedInstanceId
 ): PeerNode;
+
+export declare function destroyUiDetachedRoot(ptr: KPointer, instanceId: int32): boolean;
