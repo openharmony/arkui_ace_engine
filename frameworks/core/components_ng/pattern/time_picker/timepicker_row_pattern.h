@@ -763,6 +763,7 @@ private:
     void SetCallBack();
     void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
     Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+    bool OnThemeScopeUpdateMultiThread();
 
     void UpdateTextStyleCommon(
         const PickerTextStyle& textStyle,

@@ -1964,4 +1964,38 @@ HWTEST_F(DataPanelContentModifierTestNg, DataPanelPaintPropertyTest016, TestSize
     ASSERT_NE(dataPanelPaintProperty4, nullptr);
     EXPECT_EQ(dataPanelPaintProperty4->GetShadowOptionValue(), shadowOption4);
 }
+
+/**
+ * @tc.name: DataPanelPatternMultiThreadTest001
+ * @tc.desc: SetBuilderFuncMultiThread and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelContentModifierTestNg, DataPanelPatternMultiThreadTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init DataPanel node
+     */
+    DataPanelModelNG dataPanelModelNG;
+    dataPanelModelNG.Create(VALUES, MAX_DEFAULT, TYPE_CYCLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DataPanelPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Make builderFunc.
+     */
+    auto node = [](DataPanelConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(VALUES, config.values_);
+        EXPECT_EQ(MAX_DEFAULT, config.maxValue_);
+        return nullptr;
+    };
+
+    /**
+     * @tc.steps: step3. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFuncMultiThread();
+    pattern->SetBuilderFunc(node);
+    pattern->SetBuilderFuncMultiThread();
+}
 } // namespace OHOS::Ace::NG

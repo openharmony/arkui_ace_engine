@@ -57,4 +57,27 @@ void ImagePattern::OnDetachFromMainTreeMultiThread()
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
 }
+
+void ImagePattern::RegisterVisibleAreaChangeMultiThread(bool isCalcClip)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weak = WeakClaim(this), isCalcClip]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto pipeline = pattern->GetContext();
+        // register to onVisibleAreaChange
+        CHECK_NULL_VOID(pipeline);
+        auto callback = [weak](bool visible, double ratio) {
+            auto self = weak.Upgrade();
+            CHECK_NULL_VOID(self);
+            self->OnVisibleAreaChange(visible, ratio);
+        };
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        // add visibleAreaChangeNode(inner callback)
+        std::vector<double> ratioList = { 0.0 };
+        pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, isCalcClip);
+    });
+}
 } // namespace OHOS::Ace::NG

@@ -270,6 +270,7 @@ void ImagePattern::RegisterVisibleAreaChange(bool isCalcClip)
     CHECK_NULL_VOID(host);
     // add visibleAreaChangeNode(inner callback)
     std::vector<double> ratioList = { 0.0 };
+    FREE_NODE_CHECK(host, RegisterVisibleAreaChange, isCalcClip);
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, isCalcClip);
 }
 

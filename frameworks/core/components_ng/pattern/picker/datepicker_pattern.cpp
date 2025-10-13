@@ -23,6 +23,7 @@
 
 #include "base/i18n/date_time_sequence.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components/theme/icon_theme.h"
@@ -709,6 +710,7 @@ bool DatePickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         (!pickerProperty->HasSelectedColor())) {
         result = true;
     }
+    FREE_NODE_CHECK(host, OnThemeScopeUpdate);
     OnModifyDone();
     return result;
 }
