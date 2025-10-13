@@ -2169,6 +2169,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     auto sharedRenderProcessToken =
         useNewPipe ? webPattern->GetSharedRenderProcessToken() : webCom->GetSharedRenderProcessToken();
     sharedRenderProcessToken_ = sharedRenderProcessToken ? sharedRenderProcessToken.value() : "";
+    auto emulateTouchFromMouseEvent =
+        useNewPipe ? webPattern->GetEmulateTouchFromMouseEvent() : webCom->GetEmulateTouchFromMouseEvent();
+    emulateTouchFromMouseEvent_ = emulateTouchFromMouseEvent;
     context_ = context;
     RegisterSurfacePositionChangedCallback();
     auto pipelineContext = context.Upgrade();
@@ -2929,6 +2932,8 @@ void WebDelegate::InitWebViewWithWindow()
             }
 
             initArgs->SetSharedRenderProcessToken(delegate->sharedRenderProcessToken_);
+            initArgs->SetEmulateTouchFromMouseEvent(delegate->emulateTouchFromMouseEvent_);
+
             delegate->nweb_ =
                 OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
                     delegate->window_.GetRefPtr(), initArgs,
@@ -3398,6 +3403,7 @@ void WebDelegate::InitWebViewWithSurface()
             initArgs->SetIsEnhanceSurface(isEnhanceSurface);
             initArgs->SetIsPopup(delegate->isPopup_);
             initArgs->SetSharedRenderProcessToken(delegate->sharedRenderProcessToken_);
+            initArgs->SetEmulateTouchFromMouseEvent(delegate->emulateTouchFromMouseEvent_);
 
             if (!delegate->hapPath_.empty()) {
                 initArgs->AddArg(std::string("--user-hap-path=").append(delegate->hapPath_));
@@ -7679,7 +7685,8 @@ bool WebDelegate::SetTouchEventInfoFromMouse(const MouseInfo &mouseInfo, TouchEv
     touchLocationInfo.SetScreenLocation(Offset(mouseInfo.GetScreenLocation()));
     touchLocationInfo.SetGlobalLocation(Offset(mouseInfo.GetScreenLocation()));
     touchLocationInfo.SetTimeStamp(mouseInfo.GetTimeStamp());
-    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
+    TouchLocationInfo changedTouchLocationInfo = touchLocationInfo;
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(changedTouchLocationInfo));
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
     touchEventInfo.SetSourceDevice(SourceType::TOUCH);
 

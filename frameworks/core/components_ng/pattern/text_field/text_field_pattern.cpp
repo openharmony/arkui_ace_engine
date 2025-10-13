@@ -5636,9 +5636,9 @@ float TextFieldPattern::FontSizeConvertToPx(const Dimension& fontSize)
     return fontSize.ConvertToPx();
 }
 
-float TextFieldPattern::PreferredLineHeight(bool isAlgorithmMeasure, bool isStyelPlaceholder)
+float TextFieldPattern::PreferredLineHeight(bool isAlgorithmMeasure, bool isStyledPlaceholder)
 {
-    return PreferredTextHeight(contentController_->IsEmpty() && !isStyelPlaceholder, isAlgorithmMeasure);
+    return PreferredTextHeight(contentController_->IsEmpty() && !isStyledPlaceholder, isAlgorithmMeasure);
 }
 
 void TextFieldPattern::OnCursorMoveDone(TextAffinity textAffinity, std::optional<Offset> offset)

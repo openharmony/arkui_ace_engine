@@ -277,12 +277,21 @@ void SelectOverlayManager::HandleGlobalEvent(
         point.SetX(lastTouchDownPoint.x - rootOffset.GetX());
         point.SetY(lastTouchDownPoint.y - rootOffset.GetY());
     }
-
     // handle global mouse event.
     if ((touchPoint.type != TouchType::DOWN || touchPoint.sourceType != SourceType::MOUSE) && !acceptTouchUp) {
         return;
     }
-    if (EventInfoConvertor::MatchCompatibleCondition() &&
+
+    auto emulateTouchFromMouseEvent = false;
+    auto host = host_.Upgrade();
+    if (host) {
+        auto pattern = DynamicCast<Pattern>(host);
+        if (pattern) {
+            emulateTouchFromMouseEvent = pattern->GetEmulateTouchFromMouseEvent();
+        }
+    }
+
+    if ((EventInfoConvertor::MatchCompatibleCondition() || emulateTouchFromMouseEvent) &&
         (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::MOUSE) && !acceptTouchUp) {
         return;
     }

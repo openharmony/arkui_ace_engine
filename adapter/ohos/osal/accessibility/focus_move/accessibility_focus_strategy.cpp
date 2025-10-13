@@ -63,7 +63,7 @@ bool IsSupportScroll(
 }
 
 AceFocusMoveResult FindScrollAncestor(
-    AceFocusMoveDetailCondtion condtion,
+    AceFocusMoveDetailCondition condition,
     const std::shared_ptr<FocusRulesCheckNode>& currentNode,
     std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes,
     std::string scrollActionName)
@@ -104,6 +104,28 @@ const std::map<AceAction, std::string> AccessibilityFocusStrategy::aceActionToFo
     { AceAction::ACTION_PREVIOUS_HTML_ITEM, "previoustHtmlItem" },
 };
 
+const std::map<OHOS::Accessibility::ActionType, std::string> AccessibilityFocusStrategy::actionToFocusActionName = {
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_CLICK, "click" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_LONG_CLICK, "longClick" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD, "scrollForward" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD, "scrollBackward" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_FOCUS, "focus" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_CLEAR_FOCUS, "clearFocus" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, "accessibilityFocus" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, "clearAccessibilityFocus" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_SET_TEXT, "setText" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_COPY, "copy" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_PASTE, "paste" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_CUT, "cut" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_SELECT, "select" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_SET_SELECTION, "setSelection" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION, "clearSelection" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION, "setCursorPosition" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK, "spanClick" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_NEXT_HTML_ITEM, "nextHtmlItem" },
+    { OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_PREVIOUS_HTML_ITEM, "previoustHtmlItem" },
+};
+
 bool AccessibilityFocusStrategy::CanAccessibilityFocus(const std::shared_ptr<FocusRulesCheckNode>& currentNode)
 {
     CHECK_NULL_RETURN(currentNode, false);
@@ -140,7 +162,7 @@ std::shared_ptr<FocusRulesCheckNode> AccessibilityFocusStrategy::GetParentNodeSt
 }
 
 AceFocusMoveResult AccessibilityFocusStrategy::FindNextReadableNodeBySelfAndSameLevel(
-    AceFocusMoveDetailCondtion condtion,
+    AceFocusMoveDetailCondition condition,
     const std::shared_ptr<FocusRulesCheckNode>& currentNode,
     const std::vector<std::shared_ptr<FocusRulesCheckNode>>& samenLevelNodes,
     std::shared_ptr<FocusRulesCheckNode>& targetNode)
@@ -149,7 +171,7 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindNextReadableNodeBySelfAndSame
 }
 
 AceFocusMoveResult AccessibilityFocusStrategy::FindNextReadableNode(
-    AceFocusMoveDetailCondtion condtion,
+    AceFocusMoveDetailCondition condition,
     const std::shared_ptr<FocusRulesCheckNode>& currentNode,
     std::shared_ptr<FocusRulesCheckNode>& targetNode)
 {
@@ -164,7 +186,7 @@ AceFocusMoveResult FindPrevReadableNodeByChildAndSelf(
 }
 
 AceFocusMoveResult AccessibilityFocusStrategy::FindPrevReadableNode(
-    AceFocusMoveDetailCondtion condtion,
+    AceFocusMoveDetailCondition condition,
     const std::shared_ptr<FocusRulesCheckNode>& currentNode,
     std::shared_ptr<FocusRulesCheckNode>& targetNode)
 {
@@ -172,7 +194,7 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindPrevReadableNode(
 }
 
 AceFocusMoveResult AccessibilityFocusStrategy::FindLastNodeWithoutCheck(
-    AceFocusMoveDetailCondtion condtion,
+    AceFocusMoveDetailCondition condition,
     const std::shared_ptr<FocusRulesCheckNode>& currentNode,
     std::shared_ptr<FocusRulesCheckNode>& targetNode)
 {
@@ -188,18 +210,18 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindLastNodeWithoutCheck(
 }
 
 AceFocusMoveResult AccessibilityFocusStrategy::FindForwardScrollAncestor(
-    AceFocusMoveDetailCondtion condtion,
+    AceFocusMoveDetailCondition condition,
     const std::shared_ptr<FocusRulesCheckNode>& currentNode,
     std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes)
 {
-    return FindScrollAncestor(condtion, currentNode, targetNodes, "scrollForward");
+    return FindScrollAncestor(condition, currentNode, targetNodes, "scrollForward");
 }
 
 AceFocusMoveResult AccessibilityFocusStrategy::FindBackwardScrollAncestor(
-    AceFocusMoveDetailCondtion condtion,
+    AceFocusMoveDetailCondition condition,
     const std::shared_ptr<FocusRulesCheckNode>& currentNode,
     std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes)
 {
-    return FindScrollAncestor(condtion, currentNode, targetNodes, "scrollBackward");
+    return FindScrollAncestor(condition, currentNode, targetNodes, "scrollBackward");
 }
 } // OHOS::Ace::Framework

@@ -163,6 +163,9 @@ void WebDataDetectorAdapter::Init()
         return;
     }
     bool flag = config_.enable != newConfig_.enable || !hasInit_;
+    if (resultCache_ && config_.types != newConfig_.types) {
+        resultCache_->Clear();
+    }
     config_ = newConfig_;
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::Init config changed = %{public}d, enable = %{public}d", flag,
         config_.enable);

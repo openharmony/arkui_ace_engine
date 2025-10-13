@@ -3616,3 +3616,12 @@ frameworks/core/interfaces/native/implementation/rich_editor_styled_string_contr
 frameworks/core/interfaces/native/implementation/rich_editor_base_controller_peer_impl.h @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/rich_editor_controller_peer_impl.h @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/rich_editor_styled_string_controller_peer_impl.h @arkui_rich_editor
+
+[StateMgmt ArkTS1.2]
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/ @arkui_statemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/customComponent.ets @arkui_statemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/extendableComponent.ets @arkui_statemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/staticComponents.ets @arkui_statemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/conditionScope.ets @arkui_statemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/builder.ets @arkui_statemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets @arkui_statemgmt

@@ -110,6 +110,16 @@ public:
         return shared_render_process_token_;
     }
 
+    void SetEmulateTouchFromMouseEvent(bool emulateTouchFromMouseEvent)
+    {
+        emulateTouchFromMouseEvent_ = emulateTouchFromMouseEvent;
+    }
+
+    bool GetEmulateTouchFromMouseEvent() const
+    {
+        return emulateTouchFromMouseEvent_;
+    }
+
     void SetData(const std::string& data)
     {
         CHECK_NULL_VOID(declaration_);
@@ -1308,6 +1318,7 @@ private:
     CopyOptions CopyOptionMode_ = CopyOptions::Distributed;
     std::tuple<bool, bool> native_video_player_config_{false, false};
     std::string shared_render_process_token_;
+    bool emulateTouchFromMouseEvent_ = false;
     bool isParserBudgetOptimized_ = false;
     bool isForceEnableZoom_ = true;
 };

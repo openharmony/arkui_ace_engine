@@ -418,6 +418,7 @@ private:
     void SetRedrawCallback(const RefPtr<CanvasImage>& image);
     void SetOnFinishCallback(const RefPtr<CanvasImage>& image);
     void RegisterVisibleAreaChange(bool isCalcClip = true);
+    void RegisterVisibleAreaChangeMultiThread(bool isCalcClip);
     void TriggerVisibleAreaChangeForChild(const RefPtr<UINode>& node, bool visible, double ratio);
 
     void InitCopy();

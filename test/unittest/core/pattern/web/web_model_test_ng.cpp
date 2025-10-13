@@ -3905,6 +3905,32 @@ HWTEST_F(WebModelTestNg, SetNativeEmbedGestureEventId019, TestSize.Level1)
 }
 
  /**
+  * @tc.name: SetNativeEmbedMouseEventId
+  * @tc.desc: Test web_model_ng.cpp
+  * @tc.type: FUNC
+  */
+HWTEST_F(WebModelTestNg, SetNativeEmbedMouseEventId, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    int callCount = 0;
+    WebModelNG webModelNG;
+    auto NativeEmbedMouseEventId = [&callCount](const BaseEventInfo* info) { callCount++; };
+    webModelNG.SetNativeEmbedMouseEventId(AccessibilityManager::RawPtr(frameNode), NativeEmbedMouseEventId);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnNativeEmbedMouseEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+ /**
   * @tc.name: SetPermissionRequestEventId028
   * @tc.desc: Test web_model_ng.cpp
   * @tc.type: FUNC

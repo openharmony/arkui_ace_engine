@@ -35,7 +35,7 @@ import {
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { DetachedRootEntryImpl, UIContextImpl } from 'arkui/base/UIContextImpl';
-import { CustomComponent, CustomDelegate } from './customComponent';
+import { CustomComponent, CustomDelegate, BaseCustomComponent } from './customComponent';
 import { setNeedCreate } from '../ArkComponentRoot';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { ArkContentSlotPeer } from './contentSlot';
@@ -102,7 +102,7 @@ function getInstantiateImplMethod(param: ClassType): Method {
     throw new Error('cannot find method _instantiateImpl');
 }
 
-export function compatibleStaticComponent<T extends CustomComponent<T, T_Options>, T_Options>(
+export function compatibleStaticComponent<T extends BaseCustomComponent<T_Options>, T_Options>(
     factory: () => T,
     options?: () => T_Options,
     content?: () => void

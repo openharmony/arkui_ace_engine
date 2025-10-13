@@ -60,15 +60,15 @@ public:
 
     bool IsModalForPopup() override;
 
-    std::shared_ptr<Accessibility::ReadableRulesNodeStub> GetUserNextFocusNode();
+    std::shared_ptr<Accessibility::ReadableRulesNodeStub> GetUserNextFocusNode() override;
 
-    std::shared_ptr<Accessibility::ReadableRulesNodeStub> GetUserPrevFocusNode();
+    std::shared_ptr<Accessibility::ReadableRulesNodeStub> GetUserPrevFocusNode() override;
 
-    bool IsAccessibiltyVisible();
+    bool IsAccessibiltyVisible() override;
 
-    bool IsChildTreeContainer();
+    bool IsChildTreeContainer() override;
 
-    bool IsEmbededTarget();
+    bool IsEmbededTarget() override;
 
     RefPtr<NG::FrameNode> GetFrameNode()
     {

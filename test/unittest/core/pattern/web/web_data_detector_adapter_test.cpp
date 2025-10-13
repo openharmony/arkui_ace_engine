@@ -275,6 +275,35 @@ HWTEST_F(WebDataDetectorAdapterTest, DataDetectorInit_001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: DataDetectorInit_002
+ * @tc.desc: Test Init.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebDataDetectorAdapterTest, DataDetectorInit_002, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto adapter = AceType::MakeRefPtr<WebDataDetectorAdapter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)), 0);
+    adapter->aiSupportStatus_ = AISupportStatus::SUPPORTED;
+    ASSERT_EQ(adapter->resultCache_, nullptr);
+    adapter->Init();
+
+    // resultCache_ clear test
+    adapter->resultCache_ = AceType::MakeRefPtr<WebDataDetectorCache<std::string, DataDetectorResult>>(2);
+    ASSERT_NE(adapter->resultCache_, nullptr);
+
+    adapter->resultCache_->Put("test", DataDetectorResult {});
+    adapter->Init();
+    EXPECT_FALSE(adapter->resultCache_->cacheMap_.empty());
+    EXPECT_FALSE(adapter->resultCache_->accessQueue_.empty());
+
+    adapter->newConfig_.types = "phoneNum";
+    adapter->Init();
+    EXPECT_TRUE(adapter->resultCache_->cacheMap_.empty());
+    EXPECT_TRUE(adapter->resultCache_->accessQueue_.empty());
+#endif
+}
+
+/**
  * @tc.name: SetAndRemoveRequestContext_001
  * @tc.desc: Test SetRequestContext and RemoveRequestContext.
  * @tc.type: FUNC

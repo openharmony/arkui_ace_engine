@@ -63,6 +63,7 @@ std::optional<bool> ProcessBindableSelected(FrameNode* frameNode, const Opt_Unio
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const int32_t DEFAULT_GRID_ITEM_UNDEFINED = -1;
 namespace GridItemModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -93,7 +94,7 @@ void SetRowStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int32_t>(value);
     if (!convValue) {
-        // Implement Reset value
+        GridItemModelStatic::SetRowStart(frameNode, DEFAULT_GRID_ITEM_UNDEFINED);
         return;
     }
     GridItemModelStatic::SetRowStart(frameNode, *convValue);
@@ -105,7 +106,7 @@ void SetRowEndImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int32_t>(value);
     if (!convValue) {
-        // Implement Reset value
+        GridItemModelStatic::SetRowEnd(frameNode, DEFAULT_GRID_ITEM_UNDEFINED);
         return;
     }
     GridItemModelStatic::SetRowEnd(frameNode, *convValue);
@@ -117,7 +118,7 @@ void SetColumnStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int32_t>(value);
     if (!convValue) {
-        // Implement Reset value
+        GridItemModelStatic::SetColumnStart(frameNode, DEFAULT_GRID_ITEM_UNDEFINED);
         return;
     }
     GridItemModelStatic::SetColumnStart(frameNode, *convValue);
@@ -129,7 +130,7 @@ void SetColumnEndImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int32_t>(value);
     if (!convValue) {
-        // Implement Reset value
+        GridItemModelStatic::SetColumnEnd(frameNode, DEFAULT_GRID_ITEM_UNDEFINED);
         return;
     }
     GridItemModelStatic::SetColumnEnd(frameNode, *convValue);
@@ -141,7 +142,7 @@ void SetSelectableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        GridItemModelStatic::SetSelectable(frameNode, true);
         return;
     }
     GridItemModelStatic::SetSelectable(frameNode, *convValue);
@@ -166,7 +167,7 @@ void SetOnSelectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        GridItemModelStatic::SetOnSelect(frameNode, nullptr);
         return;
     }
     auto onSelect = [arkCallback = CallbackHelper(*optValue)](bool isSelected) {

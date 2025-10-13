@@ -120,7 +120,7 @@ enum class AceFocusMoveResult : int32_t {
     FIND_FAIL_IN_SCROLL,
 };
 
-struct AceFocusMoveDetailCondtion {
+struct AceFocusMoveDetailCondition {
     bool bypassSelf = true;
     bool bypassDescendants = false;
 };
@@ -167,6 +167,7 @@ public:
     virtual ~AccessibilityFocusStrategy() = default;
 
     static const std::map<AceAction, std::string> aceActionToFocusActionName;
+    static const std::map<OHOS::Accessibility::ActionType, std::string> actionToFocusActionName;
 
     bool CanAccessibilityFocus(const std::shared_ptr<FocusRulesCheckNode>& currentNode);
 
@@ -174,32 +175,32 @@ public:
         const std::shared_ptr<FocusRulesCheckNode>& currentNode);
 
     AceFocusMoveResult FindNextReadableNode (
-        AceFocusMoveDetailCondtion condtion,
+        AceFocusMoveDetailCondition condition,
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
         std::shared_ptr<FocusRulesCheckNode>& targetNode);
 
     AceFocusMoveResult FindPrevReadableNode (
-        AceFocusMoveDetailCondtion condtion,
+        AceFocusMoveDetailCondition condition,
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
         std::shared_ptr<FocusRulesCheckNode>& targetNode);
 
     AceFocusMoveResult FindLastNodeWithoutCheck (
-        AceFocusMoveDetailCondtion condtion,
+        AceFocusMoveDetailCondition condition,
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
         std::shared_ptr<FocusRulesCheckNode>& targetNode);
 
     AceFocusMoveResult FindForwardScrollAncestor (
-        AceFocusMoveDetailCondtion condtion,
+        AceFocusMoveDetailCondition condition,
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
         std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes);
 
     AceFocusMoveResult FindBackwardScrollAncestor (
-        AceFocusMoveDetailCondtion condtion,
+        AceFocusMoveDetailCondition condition,
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
         std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes);
 private:
     AceFocusMoveResult FindNextReadableNodeBySelfAndSameLevel (
-        AceFocusMoveDetailCondtion condtion,
+        AceFocusMoveDetailCondition condition,
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
         const std::vector<std::shared_ptr<FocusRulesCheckNode>>& samenLevelNodes,
         std::shared_ptr<FocusRulesCheckNode>& targetNode);

@@ -147,4 +147,5 @@ bool FormManagerDelegate::IsFormBundleDebugSignature(const std::string &bundleNa
 void FormManagerDelegate::AddFormUpdateDoneCallback(UpdateFormDoneCallback&& callback) {}
 
 void FormManagerDelegate::OnFormUpdateDone(const int64_t formId) {}
+void FormManagerDelegate::ReAddForm() {}
 } // namespace OHOS::Ace

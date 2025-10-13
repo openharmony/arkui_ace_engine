@@ -2135,4 +2135,28 @@ HWTEST_F(FormPatternTest, FormPatternTest_060, TestSize.Level0)
         DEFAULT_VIEW_SCALE);
     EXPECT_TRUE(NearEqual(result, DEFAULT_VIEW_SCALE));
 }
+
+/**
+ * @tc.name: FormPatternTest_061
+ * @tc.desc: OnAccessibilityStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_061, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    // accessibilityState_ == state, return false
+    pattern->accessibilityState_ = false;
+    EXPECT_FALSE(pattern->OnAccessibilityStateChange(false));
+
+    // isDynamic_ is true, return false
+    pattern->isDynamic_ = true;
+    EXPECT_FALSE(pattern->OnAccessibilityStateChange(true));
+    EXPECT_TRUE(pattern->IsAccessibilityState());
+
+    pattern->SetAccessibilityState(false);
+    EXPECT_FALSE(pattern->IsAccessibilityState());
+}
 } // namespace OHOS::Ace::NG

@@ -165,6 +165,15 @@ void WebSelectOverlay::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
         CHECK_NULL_VOID(overlay);
         overlay->OnOverlayClick(info, isFirst);
     };
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetEmulateTouchFromMouseEvent()) {
+        selectInfo.onMouseEvent = [weak = AceType::WeakClaim(this)](const MouseInfo& info) {
+            auto overlay = weak.Upgrade();
+            CHECK_NULL_VOID(overlay);
+            overlay->OnOverlayMouseEvent(info);
+        };
+    }
 }
 
 void WebSelectOverlay::SetEditMenuOptions(SelectOverlayInfo& selectInfo)
@@ -1100,6 +1109,67 @@ void WebSelectOverlay::AfterCloseOverlay()
     isShowHandle_ = false;
 }
 
+bool WebSelectOverlay::IsMouseInHandleRect(
+    const MouseInfo& mouseInfo, std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>& selectionHandle, float& offsetY)
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    auto delegate = pattern->delegate_;
+    CHECK_NULL_RETURN(delegate, false);
+    if (!focusHub->IsFocusable()) {
+        return false;
+    }
+
+    bool isInRegion = false;
+    if (IsTouchHandleValid(selectionHandle)) {
+        auto globalLocation = mouseInfo.GetGlobalLocation();
+        TouchInfo touchPoint;
+        touchPoint.id = 0;
+        touchPoint.x = globalLocation.GetX() - pattern->webOffset_.GetX();
+        touchPoint.y = globalLocation.GetY() - pattern->webOffset_.GetY();
+        auto pipeline = host->GetContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto theme = pipeline->GetTheme<TextOverlayTheme>();
+        CHECK_NULL_RETURN(theme, false);
+        float hotZone = theme->GetHandleHotZoneRadius().ConvertToPx();
+        RectF edgeRect;
+        if (selectionHandle->GetTouchHandleType() == OHOS::NWeb::NWebTouchHandleState::SELECTION_BEGIN_HANDLE) {
+            edgeRect = RectF(selectionHandle->GetX() - hotZone,
+                selectionHandle->GetY() - selectionHandle->GetEdgeHeight() - hotZone, hotZone,
+                selectionHandle->GetEdgeHeight() + hotZone);
+            offsetY = hotZone;
+        } else if (selectionHandle->GetTouchHandleType() == OHOS::NWeb::NWebTouchHandleState::SELECTION_END_HANDLE) {
+            edgeRect =
+                RectF(selectionHandle->GetX() - hotZone, selectionHandle->GetY() - selectionHandle->GetEdgeHeight(),
+                    hotZone, selectionHandle->GetEdgeHeight() + hotZone);
+            offsetY = -hotZone;
+        }
+        isInRegion = edgeRect.IsInRegion({ touchPoint.x, touchPoint.y });
+        if (!isInRegion) {
+            offsetY = 0.0f;
+        }
+    }
+    return isInRegion;
+}
+
+void WebSelectOverlay::OnOverlayMouseEvent(const MouseInfo& info)
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    float touchHandleOffsetY = 0.0f;
+    if ((info.GetButton() == MouseButton::LEFT_BUTTON) && (info.GetAction() == MouseAction::PRESS) &&
+        !(info.GetAction() == MouseAction::MOVE)) {
+        if (IsMouseInHandleRect(info, startSelectionHandle_, touchHandleOffsetY)) {
+        } else if (IsMouseInHandleRect(info, endSelectionHandle_, touchHandleOffsetY)) {
+        }
+    }
+    pattern->HandleMouseToTouchEvent(touchHandleOffsetY, true, info);
+}
+
 void WebSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isClickCaret)
 {
     auto pattern = GetPattern<WebPattern>();
@@ -1161,6 +1231,12 @@ void WebSelectOverlay::OnHandleReverse(bool isReverse)
 
 void WebSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->emulateTouchFromMouseEvent_) {
+        return;
+    }
+
     if (EventInfoConvertor::MatchCompatibleCondition() && IsMouseClickDown(sourceType, touchType)) {
         return;
     }
@@ -1190,6 +1266,10 @@ void WebSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo &selectInfo, 
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->CopySelectionMenuParams(selectInfo, WebElementType::TEXT, ResponseType::LONG_PRESS);
+
+    if (pattern->GetEmulateTouchFromMouseEvent() && webSelectInfo_.onMouseEvent) {
+        selectInfo.onMouseEvent = webSelectInfo_.onMouseEvent;
+    }
 }
 
 void WebSelectOverlay::OnHandleMarkInfoChange(

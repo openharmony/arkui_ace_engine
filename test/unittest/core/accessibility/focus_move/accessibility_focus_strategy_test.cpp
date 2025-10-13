@@ -103,10 +103,10 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindLastNodeWithoutCheck001, TestSize.L
     frameNode->SetActive(true, false);
     auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
     std::shared_ptr<FocusRulesCheckNode> targetNode;
-    AceFocusMoveDetailCondtion condtion = {.bypassSelf = true, .bypassDescendants = false};
+    AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
     AccessibilityFocusStrategy focusStrategy;
     // 1. get self when has no children
-    focusStrategy.FindLastNodeWithoutCheck(condtion, checkNode, targetNode);
+    focusStrategy.FindLastNodeWithoutCheck(condition, checkNode, targetNode);
     ASSERT_NE(targetNode, nullptr);
     EXPECT_EQ(frameNode->GetAccessibilityId(), targetNode->GetAccessibilityId());
     // 2. get child when has  children
@@ -116,7 +116,7 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindLastNodeWithoutCheck001, TestSize.L
     frameNode1->SetActive(true, false);
     frameNode->AddChild(frameNode1);
     targetNode = nullptr;
-    auto result = focusStrategy.FindLastNodeWithoutCheck(condtion, checkNode, targetNode);
+    auto result = focusStrategy.FindLastNodeWithoutCheck(condition, checkNode, targetNode);
     ASSERT_NE(targetNode, nullptr);
     EXPECT_EQ(frameNode1->GetAccessibilityId(), targetNode->GetAccessibilityId());
     EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
@@ -124,7 +124,7 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindLastNodeWithoutCheck001, TestSize.L
     auto accessibilityProperty1 = frameNode1->GetAccessibilityProperty<NG::AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty1, nullptr);
     accessibilityProperty1->SetChildTreeId(1);
-    result = focusStrategy.FindLastNodeWithoutCheck(condtion, checkNode, targetNode);
+    result = focusStrategy.FindLastNodeWithoutCheck(condition, checkNode, targetNode);
     EXPECT_EQ(result, AceFocusMoveResult::FIND_CHILDTREE);
 }
 
@@ -143,10 +143,10 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindForwardScrollAncestor001, TestSize.
     frameNode1->MountToParent(frameNode);
     AccessibilityFocusStrategy focusStrategy;
     std::list<std::shared_ptr<FocusRulesCheckNode>> targetNodes;
-    AceFocusMoveDetailCondtion condtion = {.bypassSelf = true, .bypassDescendants = false};
+    AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
     auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode1, frameNode1->GetAccessibilityId());
     // 1. no fowardScrollAncestor
-    auto result = focusStrategy.FindForwardScrollAncestor(condtion, checkNode, targetNodes);
+    auto result = focusStrategy.FindForwardScrollAncestor(condition, checkNode, targetNodes);
     EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
     EXPECT_EQ(targetNodes.size(), 0);
     // 2. parent is fowardScrollAncestor
@@ -159,7 +159,7 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindForwardScrollAncestor001, TestSize.
         accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
     });
     
-    result = focusStrategy.FindForwardScrollAncestor(condtion, checkNode, targetNodes);
+    result = focusStrategy.FindForwardScrollAncestor(condition, checkNode, targetNodes);
     EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
     ASSERT_EQ(targetNodes.size(), 1);
     auto targetNode = targetNodes.front();
@@ -182,7 +182,7 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindForwardScrollAncestor002, TestSize.
     frameNode1->MountToParent(frameNode);
     AccessibilityFocusStrategy focusStrategy;
     std::list<std::shared_ptr<FocusRulesCheckNode>> targetNodes;
-    AceFocusMoveDetailCondtion condtion = {.bypassSelf = true, .bypassDescendants = false};
+    AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
     auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode1, frameNode1->GetAccessibilityId());
     // 1. parent is fowardScrollAncestor but not visiable
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -198,7 +198,7 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindForwardScrollAncestor002, TestSize.
     auto rect = std::make_shared<NG::RectF>(0.0, 0.0, 0, 0);
     renderContext->retf = rect;
     frameNode->renderContext_ = renderContext;
-    auto result = focusStrategy.FindForwardScrollAncestor(condtion, checkNode, targetNodes);
+    auto result = focusStrategy.FindForwardScrollAncestor(condition, checkNode, targetNodes);
     EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
     EXPECT_EQ(targetNodes.size(), 0);
 }
@@ -218,11 +218,11 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindForwardScrollAncestor003, TestSize.
     frameNode1->MountToParent(frameNode);
     AccessibilityFocusStrategy focusStrategy;
     std::list<std::shared_ptr<FocusRulesCheckNode>> targetNodes;
-    AceFocusMoveDetailCondtion condtion = {.bypassSelf = true, .bypassDescendants = false};
+    AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
     auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode1, frameNode1->GetAccessibilityId());
     // 1. parent can not GetPropActionName
     frameNode->accessibilityProperty_ = nullptr;
-    auto result = focusStrategy.FindForwardScrollAncestor(condtion, checkNode, targetNodes);
+    auto result = focusStrategy.FindForwardScrollAncestor(condition, checkNode, targetNodes);
     EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
     EXPECT_EQ(targetNodes.size(), 0);
 }
@@ -238,7 +238,7 @@ HWTEST_F(AccessibilityFocusStrategyTest, CanAccessibilityFocus001, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
 
     AccessibilityFocusStrategy focusStrategy;
-    AceFocusMoveDetailCondtion condtion = {.bypassSelf = true, .bypassDescendants = false};
+    AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
     auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
     // 1. node is visible
     auto result = focusStrategy.CanAccessibilityFocus(checkNode);
@@ -336,7 +336,7 @@ HWTEST_F(AccessibilityFocusStrategyTest, GetPropActionNames002, TestSize.Level1)
     EXPECT_EQ(result, true);
     findRet = value1.valueArray.find("click");
     EXPECT_TRUE(findRet != value1.valueArray.end());
-    findRet = value.valueArray.find("longClick");
+    findRet = value1.valueArray.find("longClick");
     EXPECT_TRUE(findRet != value1.valueArray.end());
 }
 

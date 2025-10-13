@@ -5281,6 +5281,8 @@ struct ArkUIWebModifier {
     void (*resetOnNativeEmbedLifecycleChange)(ArkUINodeHandle node);
     void (*setOnNativeEmbedGestureEvent)(ArkUINodeHandle node, void* callback);
     void (*resetOnNativeEmbedGestureEvent)(ArkUINodeHandle node);
+    void (*setOnNativeEmbedMouseEvent)(ArkUINodeHandle node, void* callback);
+    void (*resetOnNativeEmbedMouseEvent)(ArkUINodeHandle node);
     void (*setOnNativeEmbedObjectParamChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnNativeEmbedObjectParamChange)(ArkUINodeHandle node);
     void (*setRegisterNativeEmbedRule)(ArkUINodeHandle node, ArkUI_CharPtr tag, ArkUI_CharPtr type);

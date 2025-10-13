@@ -299,7 +299,7 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         content->SetOffset(offsetBase);
     }
 
-    StyledPlaceHodlerLayout(layoutWrapper, pattern);
+    StyledPlaceholderLayout(layoutWrapper, pattern);
 
     // CounterNode Layout.
     auto isInlineStyle = pattern->IsNormalInlineState();

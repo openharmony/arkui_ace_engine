@@ -106,11 +106,7 @@ void SetColumnsTemplateImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
-    WaterFlowModelStatic::SetColumnsTemplate(frameNode, *convValue);
+    WaterFlowModelStatic::SetColumnsTemplate(frameNode, convValue);
 }
 void SetItemConstraintSizeImpl(Ark_NativePointer node,
                                const Opt_ConstraintSizeOptions* value)
@@ -143,11 +139,7 @@ void SetRowsTemplateImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
-    WaterFlowModelStatic::SetRowsTemplate(frameNode, *convValue);
+    WaterFlowModelStatic::SetRowsTemplate(frameNode, convValue);
 }
 void SetColumnsGapImpl(Ark_NativePointer node,
                        const Opt_Length* value)
@@ -193,7 +185,7 @@ void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        WaterFlowModelStatic::SetOnScrollFrameBegin(frameNode, nullptr);
         return;
     }
     auto onScrollFrameEvent = [callback = CallbackHelper(*optValue)](
@@ -216,7 +208,7 @@ void SetOnScrollIndexImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        WaterFlowModelStatic::SetOnScrollIndex(frameNode, nullptr);
         return;
     }
     auto onScrollIndex = [arkCallback = CallbackHelper(*optValue)](const int32_t first, const int32_t last) {
@@ -243,6 +235,10 @@ void SetCachedCount1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto countValue = Converter::OptConvertPtr<int32_t>(count);
+    auto showValue = Converter::OptConvertPtr<bool>(show);
+    WaterFlowModelStatic::SetCachedCount(frameNode, countValue);
+    WaterFlowModelStatic::SetShowCached(frameNode, showValue);
 }
 } // WaterFlowAttributeModifier
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()

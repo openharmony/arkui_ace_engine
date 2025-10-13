@@ -6829,6 +6829,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnNativeEmbedGestureEvent));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNativeEmbedGestureEvent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnNativeEmbedGestureEvent));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnNativeEmbedMouseEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnNativeEmbedMouseEvent));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNativeEmbedMouseEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnNativeEmbedMouseEvent));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnNativeEmbedObjectParamChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnNativeEmbedObjectParamChange));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNativeEmbedObjectParamChange"),

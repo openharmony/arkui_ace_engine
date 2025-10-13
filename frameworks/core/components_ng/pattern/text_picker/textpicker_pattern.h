@@ -640,6 +640,7 @@ private:
         std::function<void(const Dimension&)> updateMinFontSizeFunc,
         std::function<void(const Dimension&)> updateMaxFontSizeFunc);
 
+    bool OnThemeScopeUpdateMultiThread();
     void ParseRangeResult(NG::TextCascadePickerOptions& option);
     void GetRealSelectedIndex(const std::vector<NG::TextCascadePickerOptions>& rangeOptions,
         const std::vector<std::string>& valueArr, uint32_t depth, std::vector<uint32_t>& selectedArray);

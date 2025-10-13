@@ -46,6 +46,7 @@ ace_unittest("list_test_ng") {
     "list_scroller_test_ng.cpp",
     "list_scroller_visible_content_change_test_ng.cpp",
     "list_scroller_visible_content_test_ng.cpp",
+    "list_static_test_ng.cpp",
     "list_swipe_test_ng.cpp",
     "list_sync_load_test_ng.cpp",
     "list_test_ng.cpp",
