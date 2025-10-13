@@ -254,7 +254,7 @@ void SetOnBreakpointChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        GridRowModelNG::SetOnBreakPointChange(frameNode, nullptr);
         return;
     }
     auto onBreakpointChange = [arkCallback = CallbackHelper(*optValue)](const std::string& breakpoint) {

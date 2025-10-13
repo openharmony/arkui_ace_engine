@@ -45,7 +45,7 @@ void SetVerticalImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        DividerModelNG::SetVertical(frameNode, false);
         return;
     }
     DividerModelNG::SetVertical(frameNode, *convValue);
@@ -64,6 +64,10 @@ void SetStrokeWidthImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonPercent(optValue);
+    if (!optValue) {
+        DividerModelNGStatic::StrokeWidth(frameNode, std::make_optional<Dimension>(1));
+        return;
+    }
     DividerModelNGStatic::StrokeWidth(frameNode, optValue);
 }
 void SetLineCapImpl(Ark_NativePointer node,
@@ -71,6 +75,11 @@ void SetLineCapImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<LineCap>(value);
+    if (!convValue) {
+        DividerModelNGStatic::LineCap(frameNode, std::make_optional<LineCap>(LineCap::BUTT));
+        return;
+    }
     DividerModelNGStatic::LineCap(frameNode, Converter::OptConvertPtr<LineCap>(value));
 }
 } // DividerAttributeModifier

@@ -104,7 +104,7 @@ void SetGuideLineImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<std::vector<GuidelineInfo>>(*value);
     if (!convValue) {
-        // Implement Reset value
+        RelativeContainerModelNG::ResetGuideline(frameNode);
         return;
     }
     RelativeContainerModelNG::SetGuideline(frameNode, *convValue);
@@ -116,7 +116,7 @@ void SetBarrierImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<std::vector<BarrierInfo>>(*value);
     if (!convValue) {
-        // Implement Reset value
+        RelativeContainerModelNG::ResetBarrier(frameNode);
         return;
     }
     RelativeContainerModelNG::SetBarrier(frameNode, *convValue);
