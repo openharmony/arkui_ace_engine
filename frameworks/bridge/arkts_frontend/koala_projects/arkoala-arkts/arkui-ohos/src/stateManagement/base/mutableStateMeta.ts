@@ -56,6 +56,9 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
     private bindingRefs_: Set<WeakRef<ITrackedDecoratorRef>>;
     weakThis: WeakRef<IBindingSource>;
     metaValue: int32;
+    enableDynamicCompatible: boolean = false;
+    dynamicAddRefFunc?: () => void;
+    dynamicFireChangeFunc?: () => void;
 
     constructor(info: string, metaDependency?: MutableState<int32>) {
         super(info);
@@ -63,6 +66,12 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
         this.bindingRefs_ = new Set<WeakRef<ITrackedDecoratorRef>>();
         this.weakThis = new WeakRef<IBindingSource>(this);
         this.metaValue = 0;
+    }
+
+    public registerDynamicHookFunc(addRef: () => void, fireChange: () => void) {
+        this.enableDynamicCompatible = true;
+        this.dynamicAddRefFunc = addRef;
+        this.dynamicFireChangeFunc = fireChange;
     }
 
     public addRef(): void {
@@ -75,6 +84,9 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
             ObserveSingleton.instance.renderingComponentRef!.reverseBindings.add(this.weakThis);
         } else {
             this.__metaDependency!.value;
+        }
+        if (this.enableDynamicCompatible) {
+            this.dynamicAddRefFunc?.();
         }
     }
 
@@ -98,6 +110,9 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
                 ArkUIAniModule._CustomNode_RequestFrame();
                 StateUpdateLoop.canRequestFrame = false;
             }
+        }
+        if (this.enableDynamicCompatible) {
+            this.dynamicFireChangeFunc?.();
         }
     }
 

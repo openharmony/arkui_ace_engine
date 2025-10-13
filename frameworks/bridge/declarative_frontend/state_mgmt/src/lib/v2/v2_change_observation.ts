@@ -146,6 +146,8 @@ class ObserveV2 {
 
   private static obsInstance_: ObserveV2;
 
+  public __interopInStaticRendering_internal_ : boolean = false;
+
   public static getObserve(): ObserveV2 {
     if (!this.obsInstance_) {
       this.obsInstance_ = new ObserveV2();
@@ -350,7 +352,29 @@ class ObserveV2 {
   // to current this.bindId
   public addRef(target: object, attrName: string): void {
     const bound = this.stackOfRenderedComponents_.top();
-    if (!bound || this.disableRecording_) {
+    if (this.disableRecording_) {
+      return;
+    }
+    if (InteropConfigureStateMgmt.needsInterop()) {
+      let inStaticIntrop: boolean = !bound;
+      if (!inStaticIntrop) {
+        inStaticIntrop = this.__interopInStaticRendering_internal_;
+      }
+      if (inStaticIntrop) {
+          let staticCompatibleFunc = target['__staticCompatibleFunc__'];
+          if (!staticCompatibleFunc) {
+            return;
+          }
+          let staticStatic = target['__staticStatic__' + attrName];
+          if (!staticStatic) {
+            staticStatic = staticCompatibleFunc[0]();
+            target['__staticStatic__' + attrName] = staticStatic;
+          }
+          staticCompatibleFunc[1](staticStatic);
+          return;
+      }
+    }
+    if (!bound) {
       return;
     }
     if (bound[0] === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
@@ -522,7 +546,21 @@ class ObserveV2 {
     // enable to get more fine grained traces
     // including 2 (!) .end calls.
 
-    if (!target[ObserveV2.SYMBOL_REFS] || this.disabled_) {
+    if (this.disabled_) {
+      return;
+    }
+
+    if (InteropConfigureStateMgmt.needsInterop()) {
+      let staticCompatibleFunc = target['__staticCompatibleFunc__'];
+      if (staticCompatibleFunc) {
+        let staticStatic = target['__staticStatic__' + attrName];
+        if (staticStatic) {
+          staticCompatibleFunc[2](staticStatic);
+        }
+      }
+    }
+
+    if (!target[ObserveV2.SYMBOL_REFS]) {
       return;
     }
 
@@ -1193,9 +1231,22 @@ class ObserveV2 {
       delete this.id2Others_[id];
     });
   }
-
+  
+  public static setStaticCompatibleFuncInVal(target: Object, val: any): any {
+    let staticCompatibleFunc = target['__staticCompatibleFunc__'];
+    if (staticCompatibleFunc && typeof (val) === 'object') {
+      if (!(Array.isArray(val) || val instanceof Set || val instanceof Map || val instanceof Date)) {
+        val['__staticCompatibleFunc__'] = staticCompatibleFunc;
+        return val;
+      }
+    }
+    return val;
+  }
   public static autoProxyObject(target: Object, key: string | symbol): any {
     let val = target[key];
+    if (InteropConfigureStateMgmt.needsInterop()) {
+      val = ObserveV2.setStaticCompatibleFuncInVal(target, val);
+    }
     // Not an object, not a collection, no proxy required
     if (!val || typeof (val) !== 'object' ||
       !(Array.isArray(val) || val instanceof Set || val instanceof Map || val instanceof Date)) {
