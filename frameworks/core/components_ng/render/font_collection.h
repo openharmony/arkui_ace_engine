@@ -31,6 +31,7 @@ class ACE_EXPORT FontCollection : public virtual AceType {
     DECLARE_ACE_TYPE(FontCollection, AceType);
 public:
     static RefPtr<FontCollection> Current();
+    static RefPtr<FontCollection> Global();
 
     const std::list<LoadFontCallback>& GetUnloadFontFinishCallback()
     {
