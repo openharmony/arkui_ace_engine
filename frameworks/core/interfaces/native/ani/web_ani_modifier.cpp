@@ -510,7 +510,7 @@ const ArkUIAniWebModifier* GetWebAniModifier()
         .transferWebResourceRequestToStatic = OHOS::Ace::NG::TransferWebResourceRequestToStatic,
         .transferConsoleMessageToStatic = OHOS::Ace::NG::TransferConsoleMessageToStatic,
         .transferDataResubmissionHandlerToStatic = OHOS::Ace::NG::TransferDataResubmissionHandlerToStatic,
-        .transferClientAuthenticationHandlerToStatic = OHOS::Ace::NG::TransferDataResubmissionHandlerToStatic,
+        .transferClientAuthenticationHandlerToStatic = OHOS::Ace::NG::TransferClientAuthenticationHandlerToStatic,
         .transferSslErrorHandlerToStatic = OHOS::Ace::NG::TransferSslErrorHandlerToStatic,
         .transferPermissionRequestToStatic = OHOS::Ace::NG::TransferPermissionRequestToStatic,
         .transferControllerHandlerToStatic = OHOS::Ace::NG::TransferControllerHandlerToStatic,
