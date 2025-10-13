@@ -151,7 +151,7 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     CHECK_NULL_VOID(context);
     bool isCard = context->IsFormRender();
 
-    if (args[0]->IsObject() && IsImageAltObject(args[0])) {
+    if (IsImageAltObject(args[0])) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args[0]);
         if (jsObj->HasProperty("placeholder")) {
             JSRef<JSVal> placeholderVal = jsObj->GetProperty("placeholder");
@@ -161,7 +161,6 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
             JSRef<JSVal> errorVal = jsObj->GetProperty("error");
             ParseAltImageAlt(errorVal, isCard, IMAGE_ALT_ERROR);
         }
-        return;
     } else {
         ParseAltImageAlt(args[0], isCard, IMAGE_ALT_NORMAL);
     }
@@ -1261,7 +1260,7 @@ void JSImage::ParseAltImageAlt(JSRef<JSVal> val, bool isCard, int32_t type)
         return;
     }
     int32_t resId = 0;
-    if (val->IsObject() && !IsImageAltObject(val)) {
+    if (val->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(val);
         JSRef<JSVal> tmp = jsObj->GetProperty("id");
         if (!tmp->IsNull() && tmp->IsNumber()) {
