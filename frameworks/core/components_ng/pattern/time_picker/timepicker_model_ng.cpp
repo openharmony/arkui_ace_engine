@@ -343,7 +343,7 @@ void TimePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, 
     CHECK_NULL_VOID(theme);
 
     if (SystemProperties::ConfigChangePerform()) {
-        ParseDisappearTextStyleResObj(value);
+        ParseDisappearTextStyleResObj(frameNode, value);
     }
     auto disappearStyle = theme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
@@ -375,7 +375,7 @@ void TimePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, con
     CHECK_NULL_VOID(theme);
 
     if (SystemProperties::ConfigChangePerform()) {
-        ParseNormalTextStyleResObj(value);
+        ParseNormalTextStyleResObj(frameNode, value);
     }
     auto normalStyle = theme->GetOptionStyle(false, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
@@ -406,7 +406,7 @@ void TimePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
     CHECK_NULL_VOID(theme);
 
     if (SystemProperties::ConfigChangePerform()) {
-        ParseSelectedTextStyleResObj(value);
+        ParseSelectedTextStyleResObj(frameNode, value);
     }
     auto selectedStyle = theme->GetOptionStyle(true, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
@@ -600,7 +600,7 @@ void TimePickerModelNG::SetDisappearTextStyle(
 {
     CHECK_NULL_VOID(theme);
     if (SystemProperties::ConfigChangePerform()) {
-        ParseDisappearTextStyleResObj(value);
+        ParseDisappearTextStyleResObj(frameNode, value);
     }
     auto disappearStyle = theme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
@@ -633,7 +633,7 @@ void TimePickerModelNG::SetNormalTextStyle(
 {
     CHECK_NULL_VOID(theme);
     if (SystemProperties::ConfigChangePerform()) {
-        ParseNormalTextStyleResObj(value);
+        ParseNormalTextStyleResObj(frameNode, value);
     }
     auto normalStyle = theme->GetOptionStyle(false, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
@@ -660,7 +660,7 @@ void TimePickerModelNG::SetSelectedTextStyle(
 {
     CHECK_NULL_VOID(theme);
     if (SystemProperties::ConfigChangePerform()) {
-        ParseSelectedTextStyleResObj(value);
+        ParseSelectedTextStyleResObj(frameNode, value);
     }
     auto selectedStyle = theme->GetOptionStyle(true, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
@@ -952,12 +952,10 @@ void TimePickerModelNG::UpdateUserSetSelectColor()
     timePickerPattern->UpdateUserSetSelectColor();
 }
 
-void TimePickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
-    std::function<void(const PickerTextStyle&)> updateTextStyleFunc)
+void TimePickerModelNG::ParseResTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyleOpt,
+    const std::string& textStyleType, std::function<void(const PickerTextStyle&)> updateTextStyleFunc)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
     auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
@@ -993,45 +991,42 @@ void TimePickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, c
     pickerPattern->AddResObj(textStyleType, resObj, std::move(updateFunc));
 }
 
-void TimePickerModelNG::ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt)
+void TimePickerModelNG::ParseDisappearTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
     auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
     ParseResTextStyle(
+        frameNode,
         textStyleOpt,
         "TimePickerDisappearTextStyle",
         [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateDisappearTextStyle(textStyle); }
     );
 }
 
-void TimePickerModelNG::ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt)
+void TimePickerModelNG::ParseSelectedTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
     auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
     ParseResTextStyle(
+        frameNode,
         textStyleOpt,
         "TimePickerSelectedTextStyle",
         [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateSelectedTextStyle(textStyle); }
     );
 }
 
-void TimePickerModelNG::ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt)
+void TimePickerModelNG::ParseNormalTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
     auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
     ParseResTextStyle(
+        frameNode,
         textStyleOpt,
         "TimePickerNormalTextStyle",
         [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateNormalTextStyle(textStyle); }
