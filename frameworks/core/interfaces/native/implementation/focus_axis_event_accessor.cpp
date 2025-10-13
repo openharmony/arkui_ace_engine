@@ -51,14 +51,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Map_AxisModel_Number GetAxisMapImpl(Ark_FocusAxisEvent peer)
+Map_AxisModel_Float64 GetAxisMapImpl(Ark_FocusAxisEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetEventInfo(), {});
     auto eventInfo = peer->GetEventInfo();
-    return Converter::ArkValue<Map_AxisModel_Number>(getAxisMapFromInfo(*eventInfo), Converter::FC);
+    return Converter::ArkValue<Map_AxisModel_Float64>(getAxisMapFromInfo(*eventInfo), Converter::FC);
 }
 void SetAxisMapImpl(Ark_FocusAxisEvent peer,
-                    const Map_AxisModel_Number* axisMap)
+                    const Map_AxisModel_Float64* axisMap)
 {
     LOGW("ARKOALA KeyEventAccessor::SetAxisMapImpl doesn't have sense.");
 }

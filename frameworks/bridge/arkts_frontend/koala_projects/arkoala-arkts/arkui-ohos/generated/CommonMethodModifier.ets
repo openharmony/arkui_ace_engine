@@ -289,7 +289,7 @@ export class CommonMethodModifier implements CommonMethod {
     _geometryTransition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _geometryTransition_0_0value?: string | undefined
     _restoreId_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _restoreId_0_0value?: number | undefined
+    _restoreId_0_0value?: int32 | undefined
     _sphericalEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _sphericalEffect_0_0value?: double | undefined
     _lightUpEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -379,7 +379,7 @@ export class CommonMethodModifier implements CommonMethod {
     _foregroundBlurStyle_0_2value?: SystemAdaptiveOptions | undefined
     _onClick_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onClick_1_0value?: ((event: ClickEvent) => void) | undefined
-    _onClick_1_1value?: number | undefined
+    _onClick_1_1value?: double | undefined
     _focusScopeId_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _focusScopeId_0_0value?: string | undefined
     _focusScopeId_0_1value?: boolean | undefined
@@ -466,7 +466,7 @@ export class CommonMethodModifier implements CommonMethod {
     _bindSheet_0_1value?: CustomBuilder | undefined
     _bindSheet_0_2value?: SheetOptions | undefined
     _onVisibleAreaChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onVisibleAreaChange_0_0value?: Array<number> | undefined
+    _onVisibleAreaChange_0_0value?: Array<double> | undefined
     _onVisibleAreaChange_0_1value?: VisibleAreaChangeCallback | undefined
     _onVisibleAreaApproximateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onVisibleAreaApproximateChange_0_0value?: VisibleAreaEventOptions | undefined
@@ -2701,7 +2701,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._restoreId_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setRestoreIdAttribute((this._restoreId_0_0value as number | undefined));
+                    peer.setRestoreIdAttribute((this._restoreId_0_0value as int32 | undefined));
                     this._restoreId_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2711,7 +2711,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._restoreId_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setRestoreIdAttribute((undefined as number | undefined));
+                    peer.setRestoreIdAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -3421,7 +3421,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._onClick_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnClick1Attribute((this._onClick_1_0value as ((event: ClickEvent) => void) | undefined), (this._onClick_1_1value as number | undefined));
+                    peer.setOnClick1Attribute((this._onClick_1_0value as ((event: ClickEvent) => void) | undefined), (this._onClick_1_1value as double | undefined));
                     this._onClick_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3431,7 +3431,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._onClick_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnClick1Attribute((undefined as ((event: ClickEvent) => void) | undefined), (undefined as number | undefined));
+                    peer.setOnClick1Attribute((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
                 }
             }
         }
@@ -3889,7 +3889,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._onVisibleAreaChange_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnVisibleAreaChangeAttribute((this._onVisibleAreaChange_0_0value as Array<number> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
+                    peer.setOnVisibleAreaChangeAttribute((this._onVisibleAreaChange_0_0value as Array<double> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
                     this._onVisibleAreaChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3899,7 +3899,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._onVisibleAreaChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnVisibleAreaChangeAttribute((undefined as Array<number> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                    peer.setOnVisibleAreaChangeAttribute((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
                 }
             }
         }
@@ -5585,7 +5585,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.restoreId((undefined as number | undefined));
+                    this.restoreId((undefined as int32 | undefined));
                 }
             }
         }
@@ -6105,7 +6105,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onClick((undefined as ((event: ClickEvent) => void) | undefined), (undefined as number | undefined));
+                    this.onClick((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
                 }
             }
         }
@@ -6443,7 +6443,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onVisibleAreaChange((undefined as Array<number> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                    this.onVisibleAreaChange((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
                 }
             }
         }
@@ -7853,7 +7853,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    restoreId(value: number | undefined): this {
+    restoreId(value: int32 | undefined): this {
         if (((this._restoreId_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._restoreId_0_0value) !== (value)))
         {
             this._restoreId_0_flag = AttributeUpdaterFlag.UPDATE
@@ -8302,7 +8302,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
         if (((this._onClick_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._onClick_1_1value) !== (distanceThreshold)))
         {
             this._onClick_1_flag = AttributeUpdaterFlag.UPDATE
@@ -8624,7 +8624,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         if (((this._onVisibleAreaChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._onVisibleAreaChange_0_0value) !== (ratios)) || (true))
         {
             this._onVisibleAreaChange_0_flag = AttributeUpdaterFlag.UPDATE

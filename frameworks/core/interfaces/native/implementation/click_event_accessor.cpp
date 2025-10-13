@@ -43,18 +43,18 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetDisplayXImpl(Ark_ClickEvent peer)
+Ark_Float64 GetDisplayXImpl(Ark_ClickEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     const auto* info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& offset = info->GetScreenLocation();
     const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-    return Converter::ArkValue<Ark_Number>(x);
+    return Converter::ArkValue<Ark_Float64>(x);
 }
 void SetDisplayXImpl(Ark_ClickEvent peer,
-                     const Ark_Number* displayX)
+                     const Ark_Float64* displayX)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(displayX);
@@ -67,18 +67,18 @@ void SetDisplayXImpl(Ark_ClickEvent peer,
     offset.SetX(x, animation);
     info->SetScreenLocation(offset);
 }
-Ark_Number GetDisplayYImpl(Ark_ClickEvent peer)
+Ark_Float64 GetDisplayYImpl(Ark_ClickEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     const auto* info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& offset = info->GetScreenLocation();
     const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
-    return Converter::ArkValue<Ark_Number>(y);
+    return Converter::ArkValue<Ark_Float64>(y);
 }
 void SetDisplayYImpl(Ark_ClickEvent peer,
-                     const Ark_Number* displayY)
+                     const Ark_Float64* displayY)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(displayY);
@@ -91,18 +91,18 @@ void SetDisplayYImpl(Ark_ClickEvent peer,
     offset.SetY(y, animation);
     info->SetScreenLocation(offset);
 }
-Ark_Number GetWindowXImpl(Ark_ClickEvent peer)
+Ark_Float64 GetWindowXImpl(Ark_ClickEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     const auto* info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& offset = info->GetGlobalLocation();
     const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-    return Converter::ArkValue<Ark_Number>(x);
+    return Converter::ArkValue<Ark_Float64>(x);
 }
 void SetWindowXImpl(Ark_ClickEvent peer,
-                    const Ark_Number* windowX)
+                    const Ark_Float64* windowX)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(windowX);
@@ -115,18 +115,18 @@ void SetWindowXImpl(Ark_ClickEvent peer,
     offset.SetX(x, animation);
     info->SetGlobalLocation(offset);
 }
-Ark_Number GetWindowYImpl(Ark_ClickEvent peer)
+Ark_Float64 GetWindowYImpl(Ark_ClickEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     const auto* info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& offset = info->GetGlobalLocation();
     const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
-    return Converter::ArkValue<Ark_Number>(y);
+    return Converter::ArkValue<Ark_Float64>(y);
 }
 void SetWindowYImpl(Ark_ClickEvent peer,
-                    const Ark_Number* windowY)
+                    const Ark_Float64* windowY)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(windowY);
@@ -139,18 +139,18 @@ void SetWindowYImpl(Ark_ClickEvent peer,
     offset.SetY(y, animation);
     info->SetGlobalLocation(offset);
 }
-Ark_Number GetXImpl(Ark_ClickEvent peer)
+Ark_Float64 GetXImpl(Ark_ClickEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     const auto* info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& offset = info->GetLocalLocation();
     const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-    return Converter::ArkValue<Ark_Number>(x);
+    return Converter::ArkValue<Ark_Float64>(x);
 }
 void SetXImpl(Ark_ClickEvent peer,
-              const Ark_Number* x)
+              const Ark_Float64* x)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(x);
@@ -163,18 +163,18 @@ void SetXImpl(Ark_ClickEvent peer,
     offset.SetX(newX, animation);
     info->SetLocalLocation(offset);
 }
-Ark_Number GetYImpl(Ark_ClickEvent peer)
+Ark_Float64 GetYImpl(Ark_ClickEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     const auto* info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& offset = info->GetLocalLocation();
     const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
-    return Converter::ArkValue<Ark_Number>(y);
+    return Converter::ArkValue<Ark_Float64>(y);
 }
 void SetYImpl(Ark_ClickEvent peer,
-              const Ark_Number* y)
+              const Ark_Float64* y)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(y);
