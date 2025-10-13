@@ -93,6 +93,7 @@ void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrappe
     auto geometryNode = buttonWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(SizeF(componentWidth_, componentHeight_));
+    HandleSecCompBorderRadius(layoutWrapper);
 }
 
 void SecurityComponentLayoutAlgorithm::InitPadding(RefPtr<SecurityComponentLayoutProperty>& property)
@@ -904,6 +905,24 @@ void SecurityComponentLayoutAlgorithm::InitLayoutWrapper(LayoutWrapper* layoutWr
 
     auto textWrapper = GetChildWrapper(layoutWrapper, V2::TEXT_ETS_TAG);
     text_.Init(securityComponentLayoutProperty, textWrapper);
+}
+
+void SecurityComponentLayoutAlgorithm::HandleSecCompBorderRadius(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty =
+        AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(layoutProperty->GetFocusBoxFlag());
+    auto scNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(scNode);
+    auto renderContext = scNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto buttonNode = GetSecCompChildNode(scNode, V2::BUTTON_ETS_TAG);
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonRenderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(buttonRenderContext);
+    renderContext->UpdateBorderRadius(buttonRenderContext->GetBorderRadius().value_or(BorderRadiusProperty()));
 }
 
 void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

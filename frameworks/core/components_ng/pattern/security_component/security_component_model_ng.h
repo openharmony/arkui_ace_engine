@@ -110,6 +110,7 @@ public:
     static void SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value);
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, const std::optional<TextHeightAdaptivePolicy>& value);
+    static void SetFocusBox();
 
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
     {
