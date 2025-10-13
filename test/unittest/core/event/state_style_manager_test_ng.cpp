@@ -87,7 +87,6 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest001, TestSize.Level1)
      * @tc.steps: step2. Create touch down event and execute it.
      * @tc.expected: Should change to pressed state.
      */
-
     TouchEventInfo touchEventInfo = TouchEventInfo("touch");
     TouchLocationInfo touchLocationInfo = TouchLocationInfo(1);
     touchLocationInfo.SetLocalLocation(Offset(100.0, 100.0));
@@ -102,7 +101,6 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest001, TestSize.Level1)
      * @tc.steps: step3. Create touch up event and execute it.
      * @tc.expected: Should cancel pressed state.
      */
-
     touchLocationInfo.SetTouchType(TouchType::UP);
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
     touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
