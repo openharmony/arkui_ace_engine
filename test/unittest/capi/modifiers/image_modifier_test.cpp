@@ -250,13 +250,16 @@ HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
     const auto width = 0.5f;
     const auto height = 0.6f;
     const auto error = "error_test";
-    LoadImageFailEvent event(width, height, error);
+    ImageErrorInfo info = {.errorCode = ImageErrorCode::DEFAULT, .errorMessage = ""};
+    }
+    LoadImageFailEvent event(width, height, error, info);
 
     struct CheckEvent {
         int32_t nodeId;
         double width;
         double height;
         std::string error;
+        ImageErrorInfo info;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     ImageErrorCallback onChangeCallback = {
@@ -267,7 +270,8 @@ HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
                 .nodeId = nodeId,
                 .width = event.GetComponentWidth(),
                 .height = event.GetComponentHeight(),
-                .error = event.GetErrorMessage()
+                .error = event.GetErrorMessage(),
+                .info =  event.GetErrorInfo()
             };
         }
     };
@@ -281,6 +285,8 @@ HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
     EXPECT_NEAR(checkEvent->width, width, FLT_EPSILON);
     EXPECT_NEAR(checkEvent->height, height, FLT_EPSILON);
     EXPECT_EQ(checkEvent->error, error);
+    EXPECT_EQ(checkEvent->info.errorCode, info.errorCode);
+    EXPECT_EQ(checkEvent->info.errorMessage, info.errorMessage);
 }
 
 /**
