@@ -626,9 +626,7 @@ void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo
     AssignArkValue(dst.touchObject, src);
     dst.size = ArkValue<Ark_Number>(src.GetSize());
     dst.force = ArkValue<Ark_Number>(src.GetForce());
-#ifdef WRONG_GEN
-    dst.timestamp = src.GetTimeStamp().time_since_epoch().count();
-#endif
+    dst.timestamp = ArkValue<Ark_Number>(static_cast<int64_t>(src.GetTimeStamp().time_since_epoch().count()));
 }
 
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
