@@ -22,6 +22,7 @@
 #define protected public
 
 #include "test/mock/base/mock_foldable_window.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -2462,6 +2463,66 @@ HWTEST_F(SheetPresentationTestThreeNg, UpdateSheetBackgroundColor001, TestSize.L
     ASSERT_NE(renderContext, nullptr);
     auto hasBackgroundColor = renderContext->HasBackgroundColor();
     EXPECT_EQ(hasBackgroundColor, false);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: UpdateSheetBackgroundBlurStyle001
+ * @tc.desc: Branch: if (sheetStyle.backgroundBlurStyle.has_value()).
+ *           Condition: 1.sheetStyle.backgroundBlurStyle.has_value()=>true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, UpdateSheetBackgroundBlurStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, before test "UpdateSheetBackgroundBlurStyle".
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("sheetNode", 001,
+        AceType::MakeRefPtr<SheetPresentationPattern>(002, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto scrollNode =
+        FrameNode::CreateFrameNode("scrollNode", 003, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode("sheetContentNode", 004,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+    
+    /**
+     * @tc.steps: step2. get sheetPattern, before test "UpdateSheetBackgroundBlurStyle".
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. init SheetStyle, before test "UpdateSheetBackgroundBlurStyle".
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::LARGE;
+    sheetStyle.sheetTitle = "Title";
+    sheetStyle.sheetSubtitle = "SubTitle";
+    BlurStyleOption options;
+    options.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK_WINDOW;
+    sheetStyle.backgroundBlurStyle = options;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step4. test "UpdateSheetBackgroundBlurStyle",
+     * @tc.expected: GetBackBlurStyle = BlurStyle::COMPONENT_ULTRA_THICK_WINDOW.
+     */
+    g_isConfigChangePerform = true;
+    sheetPattern->UpdateSheetBackgroundBlurStyle();
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_ULTRA_THICK_WINDOW);
+    g_isConfigChangePerform = false;
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG
