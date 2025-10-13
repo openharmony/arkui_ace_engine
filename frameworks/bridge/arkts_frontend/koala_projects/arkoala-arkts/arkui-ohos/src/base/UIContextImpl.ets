@@ -647,7 +647,8 @@ export class RouterImpl extends Router {
 
     public getStateRoot(): ComputableState<IncrementalNode> | undefined {
         if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
+            return undefined
+            // throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let result = this.router_!.getEntryRootValue();
@@ -657,7 +658,8 @@ export class RouterImpl extends Router {
 
     public getPreState(): ComputableState<IncrementalNode> | undefined {
         if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
+            return undefined;
+            // throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let result = this.router_!.getPreState();
