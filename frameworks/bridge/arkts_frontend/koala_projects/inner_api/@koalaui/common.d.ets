@@ -13,5 +13,5 @@
  * limitations under the License.
  */
 
-export { KoalaCallsiteKey, KoalaCallsiteKeys } from '@koalaui.common.koalaKey';
-export { int32 } from '@koalaui.compat';
+export { KoalaCallsiteKey, KoalaCallsiteKeys } from '@koalaui/common/koalaKey';
+export { int32 } from '@koalaui/compat';
