@@ -1847,7 +1847,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -1895,7 +1895,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -1907,7 +1907,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3533,7 +3533,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetZIndexImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+                       const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -10609,7 +10609,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // RatingInterfaceModifier
     namespace RatingAttributeModifier {
     void SetStarsImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -10621,7 +10621,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetStepSizeImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -13299,7 +13299,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // SelectInterfaceModifier
     namespace SelectAttributeModifier {
     void SetSelectedImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource_Bindable_Bindable* value)
+                         const Opt_Union_I32_Resource_Bindable_Bindable* value)
     {
         if (!needGroupedLog(1))
         {
@@ -14118,7 +14118,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Number_SliderChangeMode_Void* value)
+                         const Opt_Callback_F64_SliderChangeMode_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -14238,7 +14238,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinResponsiveDistanceImpl(Ark_NativePointer node,
-                                      const Opt_Number* value)
+                                      const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {

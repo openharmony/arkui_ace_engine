@@ -314,7 +314,7 @@ export struct ToolBarV2 {
   }
 
   private itemCardTextMaxLine: int = 1;
-  private itemDialogId?: number = undefined;
+  private itemDialogId?: int = undefined;
   private isFollowSystem?: boolean = false;
   private maxFontSizeScale?: number = 3.2;
   private moreItem: ToolBarV2Item = new ToolBarV2Item({
@@ -712,7 +712,7 @@ export struct ToolBarV2 {
                   cornerRadius: $r('sys.float.corner_radius_level10'),
                   width: this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG
                 } as promptAction.CustomDialogOptions
-                ).then((dialogId: number) => {
+                ).then((dialogId: int) => {
                   this.itemDialogId = dialogId;
                 });
               } catch (error: ClassCastError) {
@@ -725,7 +725,7 @@ export struct ToolBarV2 {
             .onActionEnd(() => {
               if (this.itemDialogId) {
                 try {
-                  this.getUIContext().getPromptAction().closeCustomDialog(this.itemDialogId as Double)
+                  this.getUIContext().getPromptAction().closeCustomDialog(this.itemDialogId as int)
                 } catch (error: ClassCastError) {
                   let message = (error as ClassCastError).message;
                   let code = (error as ClassCastError).code;
@@ -736,7 +736,7 @@ export struct ToolBarV2 {
             .onActionCancel(() => {
               if (this.itemDialogId) {
                 try {
-                  this.getUIContext().getPromptAction().closeCustomDialog(this.itemDialogId as Double)
+                  this.getUIContext().getPromptAction().closeCustomDialog(this.itemDialogId as int)
                 } catch (error: ClassCastError) {
                   let message = (error as ClassCastError).message;
                   let code = (error as ClassCastError).code;

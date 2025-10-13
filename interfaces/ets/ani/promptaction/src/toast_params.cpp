@@ -112,9 +112,8 @@ bool GetShowToastOptions(ani_env* env, ani_object object, OHOS::Ace::NG::ToastIn
     }
 
     GetResourceStrParam(env, object, "message", result.message);
-    double duration = -1.0f;
-    GetDoubleParam(env, object, "duration", duration);
-    result.duration = static_cast<int32_t>(duration);
+    result.duration = -1;
+    GetInt32Param(env, object, "duration", result.duration);
     GetToastBottom(env, object, result.bottom);
     GetToastShowMode(env, object, result.showMode);
     GetToastAlignment(env, object, result.alignment);

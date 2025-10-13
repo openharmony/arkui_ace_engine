@@ -42,7 +42,7 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
     applyDisabledAttribute(instance: SelectAttribute): void { }
     applySelectedAttribute(instance: SelectAttribute): void { }
     _selected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selected_0_0value?: number | Resource | Bindable<number> | Bindable<Resource> | undefined
+    _selected_0_0value?: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined
     _value_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _value_0_0value?: ResourceStr | Bindable<string> | Bindable<Resource> | undefined
     _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -105,7 +105,7 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         {
             switch (this._selected_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSelectedAttribute((this._selected_0_0value as number | Resource | Bindable<number> | Bindable<Resource> | undefined));
+                    peer.setSelectedAttribute((this._selected_0_0value as int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined));
                     this._selected_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -115,7 +115,7 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
                 default: {
                     this._selected_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSelectedAttribute((undefined as number | Resource | Bindable<number> | Bindable<Resource> | undefined));
+                    peer.setSelectedAttribute((undefined as int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined));
                 }
             }
         }
@@ -617,7 +617,7 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                     break;
                 }
                 default: {
-                    this.selected((undefined as number | Resource | Bindable<number> | Bindable<Resource> | undefined));
+                    this.selected((undefined as int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined));
                 }
             }
         }
@@ -973,7 +973,7 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
             }
         }
     }
-    selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
+    selected(value: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined): this {
         if (((this._selected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._selected_0_flag = AttributeUpdaterFlag.UPDATE

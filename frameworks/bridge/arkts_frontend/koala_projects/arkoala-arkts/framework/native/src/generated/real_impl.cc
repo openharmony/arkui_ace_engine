@@ -1337,7 +1337,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
     }
     void SetFontStyleImpl(Ark_NativePointer node,
@@ -1353,11 +1353,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMinFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
     }
     void SetMaxFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
     }
     } // ButtonAttributeModifier
@@ -1924,7 +1924,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetZIndexImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+                       const Opt_Int32* value)
     {
     }
     void SetDirectionImpl(Ark_NativePointer node,
@@ -4453,11 +4453,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // RatingInterfaceModifier
     namespace RatingAttributeModifier {
     void SetStarsImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Int32* value)
     {
     }
     void SetStepSizeImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Float64* value)
     {
     }
     void SetStarStyleImpl(Ark_NativePointer node,
@@ -5403,7 +5403,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // SelectInterfaceModifier
     namespace SelectAttributeModifier {
     void SetSelectedImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource_Bindable_Bindable* value)
+                         const Opt_Union_I32_Resource_Bindable_Bindable* value)
     {
     }
     void SetValueImpl(Ark_NativePointer node,
@@ -5687,7 +5687,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Number_SliderChangeMode_Void* value)
+                         const Opt_Callback_F64_SliderChangeMode_Void* value)
     {
     }
     void SetBlockBorderColorImpl(Ark_NativePointer node,
@@ -5727,7 +5727,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMinResponsiveDistanceImpl(Ark_NativePointer node,
-                                      const Opt_Number* value)
+                                      const Opt_Float64* value)
     {
     }
     void SetSlideRangeImpl(Ark_NativePointer node,

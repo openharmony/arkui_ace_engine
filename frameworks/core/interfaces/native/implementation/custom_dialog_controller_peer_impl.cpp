@@ -301,7 +301,7 @@ Opt_Boolean CustomDialogControllerPeerImpl::GetCustomStyle()
     return Converter::ArkValue<Opt_Boolean>(dialogProperties_.customStyle);
 }
 
-void CustomDialogControllerPeerImpl::SetGridCount(Opt_Number gridCount)
+void CustomDialogControllerPeerImpl::SetGridCount(Opt_Int32 gridCount)
 {
     auto result = Converter::OptConvert<int32_t>(gridCount);
     if (result) {
@@ -557,7 +557,7 @@ void CustomDialogControllerPeerImpl::SetLevelMode(Opt_Boolean showInSubWindow, O
     }
 }
 
-void CustomDialogControllerPeerImpl::SetLevelUniqueId(Opt_Number levelUniqueId)
+void CustomDialogControllerPeerImpl::SetLevelUniqueId(Opt_Int32 levelUniqueId)
 {
     auto result = Converter::OptConvert<int32_t>(levelUniqueId);
     if (result.has_value()) {

@@ -22,7 +22,7 @@ export default namespace overlayManager {
 
     export native function getOverlayManagerOptions(): OverlayManagerOptions;
 
-    export native function addComponentContent(contentNode: long, index: number): void;
+    export native function addComponentContent(contentNode: long, index: int): void;
 
     export native function addComponentContentWithOrder(contentNode: long, levelOrder: LevelOrder): void;
 

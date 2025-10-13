@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { int32 } from "@koalaui/compat";
 import { KPointer } from "@koalaui/interop"
 import { OverlayManagerOptions } from "@ohos/arkui/UIContext"
 import { LevelOrder } from "@ohos/promptAction"
@@ -24,7 +25,7 @@ export default declare namespace overlayManager {
 
     export function getOverlayManagerOptions(): OverlayManagerOptions;
 
-    export function addComponentContent(contentNode: KPointer, index: number): void;
+    export function addComponentContent(contentNode: KPointer, index: int32): void;
 
     export function addComponentContentWithOrder(contentNode: KPointer, levelOrder: LevelOrder): void;
 

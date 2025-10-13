@@ -49,7 +49,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
     _trackThickness_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _trackThickness_0_0value?: Length | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onChange_0_0value?: ((value: number,mode: SliderChangeMode) => void) | undefined
+    _onChange_0_0value?: ((value: double,mode: SliderChangeMode) => void) | undefined
     _blockBorderColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _blockBorderColor_0_0value?: ResourceColor | undefined
     _blockBorderWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -69,7 +69,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
     _sliderInteractionMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _sliderInteractionMode_0_0value?: SliderInteraction | undefined
     _minResponsiveDistance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minResponsiveDistance_0_0value?: number | undefined
+    _minResponsiveDistance_0_0value?: double | undefined
     _slideRange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _slideRange_0_0value?: SlideRange | undefined
     _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -176,7 +176,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             switch (this._onChange_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value: number,mode: SliderChangeMode) => void) | undefined));
+                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value: double,mode: SliderChangeMode) => void) | undefined));
                     this._onChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -186,7 +186,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
                 default: {
                     this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnChangeAttribute((undefined as ((value: number,mode: SliderChangeMode) => void) | undefined));
+                    peer.setOnChangeAttribute((undefined as ((value: double,mode: SliderChangeMode) => void) | undefined));
                 }
             }
         }
@@ -356,7 +356,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             switch (this._minResponsiveDistance_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinResponsiveDistanceAttribute((this._minResponsiveDistance_0_0value as number | undefined));
+                    peer.setMinResponsiveDistanceAttribute((this._minResponsiveDistance_0_0value as double | undefined));
                     this._minResponsiveDistance_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -366,7 +366,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
                 default: {
                     this._minResponsiveDistance_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinResponsiveDistanceAttribute((undefined as number | undefined));
+                    peer.setMinResponsiveDistanceAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -519,7 +519,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                     break;
                 }
                 default: {
-                    this.onChange((undefined as ((value: number,mode: SliderChangeMode) => void) | undefined));
+                    this.onChange((undefined as ((value: double,mode: SliderChangeMode) => void) | undefined));
                 }
             }
         }
@@ -649,7 +649,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                     break;
                 }
                 default: {
-                    this.minResponsiveDistance((undefined as number | undefined));
+                    this.minResponsiveDistance((undefined as double | undefined));
                 }
             }
         }
@@ -761,7 +761,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         }
         return this
     }
-    onChange(value: ((value: number,mode: SliderChangeMode) => void) | undefined): this {
+    onChange(value: ((value: double,mode: SliderChangeMode) => void) | undefined): this {
         if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
@@ -871,7 +871,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         }
         return this
     }
-    minResponsiveDistance(value: number | undefined): this {
+    minResponsiveDistance(value: double | undefined): this {
         if (((this._minResponsiveDistance_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._minResponsiveDistance_0_0value) !== (value)))
         {
             this._minResponsiveDistance_0_flag = AttributeUpdaterFlag.UPDATE

@@ -81,9 +81,9 @@ export class OperationOption {
 
 export class SelectOptions {
   public options: Array<SelectOption> = [] as Array<SelectOption>;
-  public selected?: number;
+  public selected?: int;
   public value?: ResourceStr;
-  public onSelect?: (index: number, value?: string) => void;
+  public onSelect?: (index: int, value?: string) => void;
   public defaultFocus?: boolean;
 }
 
@@ -233,7 +233,7 @@ export struct SubHeader {
   // 内部变量
   @State textArrowBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State buttonBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-  @State selectedIndex: number = -1;
+  @State selectedIndex: int = -1;
   @State selectValue: ResourceStr | undefined = '';
   @BuilderParam titleBuilder?: () => void;
   @PropRef contentMargin?: LocalizedMargin;
@@ -349,7 +349,7 @@ export struct SubHeader {
       this.subHeaderModifier.isAgeing = this.ageing;
     }
     if (this.select) {
-      this.selectedIndex = this.select?.selected as number;
+      this.selectedIndex = this.select?.selected as int;
       this.selectValue = this.select?.value as string;
     }
   }
@@ -769,13 +769,13 @@ export struct SubHeader {
       .selected(this.selectedIndex)
       .value(this.selectValue)
       .defaultFocus(selectParam.defaultFocus)
-      .onSelect((index: number, value?: string): void => {
+      .onSelect((index: int, value?: string): void => {
         this.selectedIndex = index;
         if (value) {
           this.selectValue = value;
         }
         if (selectParam.onSelect) {
-          (selectParam?.onSelect as (index: number, value?: string) => void)(index, value);
+          (selectParam?.onSelect as (index: int, value?: string) => void)(index, value);
         }
       })
       .font({

@@ -166,10 +166,10 @@ void deserializeAndCallButtonTriggerClickCallback(KSerializerBuffer thisArray, A
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number xPos, const Ark_Number yPos)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ButtonTriggerClickCallback))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Float64 xPos, const Ark_Float64 yPos)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ButtonTriggerClickCallback))));
     thisDeserializer.readPointer();
-    Ark_Number xPos = static_cast<Ark_Number>(thisDeserializer.readNumber());
-    Ark_Number yPos = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    Ark_Float64 xPos = thisDeserializer.readFloat64();
+    Ark_Float64 yPos = thisDeserializer.readFloat64();
     _call(_resourceId, xPos, yPos);
 }
 void deserializeAndCallSyncButtonTriggerClickCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -177,9 +177,9 @@ void deserializeAndCallSyncButtonTriggerClickCallback(Ark_VMContext vmContext, K
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number xPos, const Ark_Number yPos)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ButtonTriggerClickCallback))));
-    Ark_Number xPos = static_cast<Ark_Number>(thisDeserializer.readNumber());
-    Ark_Number yPos = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Float64 xPos, const Ark_Float64 yPos)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ButtonTriggerClickCallback))));
+    Ark_Float64 xPos = thisDeserializer.readFloat64();
+    Ark_Float64 yPos = thisDeserializer.readFloat64();
     callSyncMethod(vmContext, resourceId, xPos, yPos);
 }
 void deserializeAndCallCallback_AccessibilityActionInterceptResult_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -898,6 +898,26 @@ void deserializeAndCallSyncCallback_F64_Void(Ark_VMContext vmContext, KSerialize
     Ark_Float64 offset = thisDeserializer.readFloat64();
     callSyncMethod(vmContext, resourceId, offset);
 }
+void deserializeAndCallCallback_F64_SliderChangeMode_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Float64 value, Ark_SliderChangeMode mode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_F64_SliderChangeMode_Void))));
+    thisDeserializer.readPointer();
+    Ark_Float64 value = thisDeserializer.readFloat64();
+    Ark_SliderChangeMode mode = static_cast<Ark_SliderChangeMode>(thisDeserializer.readInt32());
+    _call(_resourceId, value, mode);
+}
+void deserializeAndCallSyncCallback_F64_SliderChangeMode_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Float64 value, Ark_SliderChangeMode mode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_F64_SliderChangeMode_Void))));
+    Ark_Float64 value = thisDeserializer.readFloat64();
+    Ark_SliderChangeMode mode = static_cast<Ark_SliderChangeMode>(thisDeserializer.readInt32());
+    callSyncMethod(vmContext, resourceId, value, mode);
+}
 void deserializeAndCallCallback_FocusAxisEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -1615,26 +1635,6 @@ void deserializeAndCallSyncCallback_Number_Number_Void(Ark_VMContext vmContext, 
     Ark_Number prevIndex = static_cast<Ark_Number>(thisDeserializer.readNumber());
     Ark_Number index = static_cast<Ark_Number>(thisDeserializer.readNumber());
     callSyncMethod(vmContext, resourceId, prevIndex, index);
-}
-void deserializeAndCallCallback_Number_SliderChangeMode_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
-{
-    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
-    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value, Ark_SliderChangeMode mode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_SliderChangeMode_Void))));
-    thisDeserializer.readPointer();
-    Ark_Number value = static_cast<Ark_Number>(thisDeserializer.readNumber());
-    Ark_SliderChangeMode mode = static_cast<Ark_SliderChangeMode>(thisDeserializer.readInt32());
-    _call(_resourceId, value, mode);
-}
-void deserializeAndCallSyncCallback_Number_SliderChangeMode_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
-{
-    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
-    const Ark_Int32 resourceId = thisDeserializer.readInt32();
-    thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value, Ark_SliderChangeMode mode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_SliderChangeMode_Void))));
-    Ark_Number value = static_cast<Ark_Number>(thisDeserializer.readNumber());
-    Ark_SliderChangeMode mode = static_cast<Ark_SliderChangeMode>(thisDeserializer.readInt32());
-    callSyncMethod(vmContext, resourceId, value, mode);
 }
 void deserializeAndCallCallback_Number_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -4040,22 +4040,22 @@ void deserializeAndCallSyncContentWillScrollCallback(Ark_VMContext vmContext, KS
     Callback_Boolean_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
     callSyncMethod(vmContext, resourceId, result, continuationResult);
 }
-void deserializeAndCallCustomBuilderT_Number(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+void deserializeAndCallCustomBuilderT_I32(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number t)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomBuilderT_Number))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 t)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomBuilderT_I32))));
     thisDeserializer.readPointer();
-    Ark_Number t = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    Ark_Int32 t = thisDeserializer.readInt32();
     _call(_resourceId, t);
 }
-void deserializeAndCallSyncCustomBuilderT_Number(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+void deserializeAndCallSyncCustomBuilderT_I32(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number t)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomBuilderT_Number))));
-    Ark_Number t = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 t)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomBuilderT_I32))));
+    Ark_Int32 t = thisDeserializer.readInt32();
     callSyncMethod(vmContext, resourceId, t);
 }
 void deserializeAndCallCustomNodeBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -5118,9 +5118,9 @@ void deserializeAndCallOnRatingChangeCallback(KSerializerBuffer thisArray, Ark_I
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number rating)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnRatingChangeCallback))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Float64 rating)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnRatingChangeCallback))));
     thisDeserializer.readPointer();
-    Ark_Number rating = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    Ark_Float64 rating = thisDeserializer.readFloat64();
     _call(_resourceId, rating);
 }
 void deserializeAndCallSyncOnRatingChangeCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -5128,8 +5128,8 @@ void deserializeAndCallSyncOnRatingChangeCallback(Ark_VMContext vmContext, KSeri
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number rating)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnRatingChangeCallback))));
-    Ark_Number rating = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Float64 rating)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnRatingChangeCallback))));
+    Ark_Float64 rating = thisDeserializer.readFloat64();
     callSyncMethod(vmContext, resourceId, rating);
 }
 void deserializeAndCallOnRenderProcessNotRespondingCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -5268,9 +5268,9 @@ void deserializeAndCallOnSelectCallback(KSerializerBuffer thisArray, Ark_Int32 t
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number index, const Ark_String selectStr)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnSelectCallback))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 index, const Ark_String selectStr)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnSelectCallback))));
     thisDeserializer.readPointer();
-    Ark_Number index = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    Ark_Int32 index = thisDeserializer.readInt32();
     Ark_String selectStr = static_cast<Ark_String>(thisDeserializer.readString());
     _call(_resourceId, index, selectStr);
 }
@@ -5279,8 +5279,8 @@ void deserializeAndCallSyncOnSelectCallback(Ark_VMContext vmContext, KSerializer
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index, const Ark_String selectStr)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnSelectCallback))));
-    Ark_Number index = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Ark_String selectStr)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnSelectCallback))));
+    Ark_Int32 index = thisDeserializer.readInt32();
     Ark_String selectStr = static_cast<Ark_String>(thisDeserializer.readString());
     callSyncMethod(vmContext, resourceId, index, selectStr);
 }
@@ -6166,9 +6166,9 @@ void deserializeAndCallSliderTriggerChangeCallback(KSerializerBuffer thisArray, 
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value, Ark_SliderChangeMode mode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SliderTriggerChangeCallback))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Float64 value, Ark_SliderChangeMode mode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SliderTriggerChangeCallback))));
     thisDeserializer.readPointer();
-    Ark_Number value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    Ark_Float64 value = thisDeserializer.readFloat64();
     Ark_SliderChangeMode mode = static_cast<Ark_SliderChangeMode>(thisDeserializer.readInt32());
     _call(_resourceId, value, mode);
 }
@@ -6177,8 +6177,8 @@ void deserializeAndCallSyncSliderTriggerChangeCallback(Ark_VMContext vmContext, 
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value, Ark_SliderChangeMode mode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SliderTriggerChangeCallback))));
-    Ark_Number value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Float64 value, Ark_SliderChangeMode mode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SliderTriggerChangeCallback))));
+    Ark_Float64 value = thisDeserializer.readFloat64();
     Ark_SliderChangeMode mode = static_cast<Ark_SliderChangeMode>(thisDeserializer.readInt32());
     callSyncMethod(vmContext, resourceId, value, mode);
 }
@@ -6808,6 +6808,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_Extender_OnFinish: return deserializeAndCallCallback_Extender_OnFinish(thisArray, thisLength);
         case Kind_Callback_Extender_OnProgress: return deserializeAndCallCallback_Extender_OnProgress(thisArray, thisLength);
         case Kind_Callback_F64_F64_Void: return deserializeAndCallCallback_F64_F64_Void(thisArray, thisLength);
+        case Kind_Callback_F64_SliderChangeMode_Void: return deserializeAndCallCallback_F64_SliderChangeMode_Void(thisArray, thisLength);
         case Kind_Callback_F64_Void: return deserializeAndCallCallback_F64_Void(thisArray, thisLength);
         case Kind_Callback_FocusAxisEvent_Void: return deserializeAndCallCallback_FocusAxisEvent_Void(thisArray, thisLength);
         case Kind_Callback_FormCallbackInfo_Void: return deserializeAndCallCallback_FormCallbackInfo_Void(thisArray, thisLength);
@@ -6845,7 +6846,6 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_NavigationTitleMode_Void: return deserializeAndCallCallback_NavigationTitleMode_Void(thisArray, thisLength);
         case Kind_Callback_NavigationTransitionProxy_Void: return deserializeAndCallCallback_NavigationTransitionProxy_Void(thisArray, thisLength);
         case Kind_Callback_Number_Number_Void: return deserializeAndCallCallback_Number_Number_Void(thisArray, thisLength);
-        case Kind_Callback_Number_SliderChangeMode_Void: return deserializeAndCallCallback_Number_SliderChangeMode_Void(thisArray, thisLength);
         case Kind_Callback_Number_Void: return deserializeAndCallCallback_Number_Void(thisArray, thisLength);
         case Kind_Callback_Object_Void: return deserializeAndCallCallback_Object_Void(thisArray, thisLength);
         case Kind_Callback_OnAlertEvent_Boolean: return deserializeAndCallCallback_OnAlertEvent_Boolean(thisArray, thisLength);
@@ -6956,7 +6956,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_CheckBoxModifierBuilder: return deserializeAndCallCheckBoxModifierBuilder(thisArray, thisLength);
         case Kind_ContentDidScrollCallback: return deserializeAndCallContentDidScrollCallback(thisArray, thisLength);
         case Kind_ContentWillScrollCallback: return deserializeAndCallContentWillScrollCallback(thisArray, thisLength);
-        case Kind_CustomBuilderT_Number: return deserializeAndCallCustomBuilderT_Number(thisArray, thisLength);
+        case Kind_CustomBuilderT_I32: return deserializeAndCallCustomBuilderT_I32(thisArray, thisLength);
         case Kind_CustomNodeBuilder: return deserializeAndCallCustomNodeBuilder(thisArray, thisLength);
         case Kind_DataPanelModifierBuilder: return deserializeAndCallDataPanelModifierBuilder(thisArray, thisLength);
         case Kind_EditableTextOnChangeCallback: return deserializeAndCallEditableTextOnChangeCallback(thisArray, thisLength);
@@ -7117,6 +7117,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_Extender_OnFinish: return deserializeAndCallSyncCallback_Extender_OnFinish(vmContext, thisArray, thisLength);
         case Kind_Callback_Extender_OnProgress: return deserializeAndCallSyncCallback_Extender_OnProgress(vmContext, thisArray, thisLength);
         case Kind_Callback_F64_F64_Void: return deserializeAndCallSyncCallback_F64_F64_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_F64_SliderChangeMode_Void: return deserializeAndCallSyncCallback_F64_SliderChangeMode_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_F64_Void: return deserializeAndCallSyncCallback_F64_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_FocusAxisEvent_Void: return deserializeAndCallSyncCallback_FocusAxisEvent_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_FormCallbackInfo_Void: return deserializeAndCallSyncCallback_FormCallbackInfo_Void(vmContext, thisArray, thisLength);
@@ -7154,7 +7155,6 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_NavigationTitleMode_Void: return deserializeAndCallSyncCallback_NavigationTitleMode_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_NavigationTransitionProxy_Void: return deserializeAndCallSyncCallback_NavigationTransitionProxy_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Number_Number_Void: return deserializeAndCallSyncCallback_Number_Number_Void(vmContext, thisArray, thisLength);
-        case Kind_Callback_Number_SliderChangeMode_Void: return deserializeAndCallSyncCallback_Number_SliderChangeMode_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Number_Void: return deserializeAndCallSyncCallback_Number_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Object_Void: return deserializeAndCallSyncCallback_Object_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_OnAlertEvent_Boolean: return deserializeAndCallSyncCallback_OnAlertEvent_Boolean(vmContext, thisArray, thisLength);
@@ -7264,7 +7264,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_CheckBoxModifierBuilder: return deserializeAndCallSyncCheckBoxModifierBuilder(vmContext, thisArray, thisLength);
         case Kind_ContentDidScrollCallback: return deserializeAndCallSyncContentDidScrollCallback(vmContext, thisArray, thisLength);
         case Kind_ContentWillScrollCallback: return deserializeAndCallSyncContentWillScrollCallback(vmContext, thisArray, thisLength);
-        case Kind_CustomBuilderT_Number: return deserializeAndCallSyncCustomBuilderT_Number(vmContext, thisArray, thisLength);
+        case Kind_CustomBuilderT_I32: return deserializeAndCallSyncCustomBuilderT_I32(vmContext, thisArray, thisLength);
         case Kind_CustomNodeBuilder: return deserializeAndCallSyncCustomNodeBuilder(vmContext, thisArray, thisLength);
         case Kind_DataPanelModifierBuilder: return deserializeAndCallSyncDataPanelModifierBuilder(vmContext, thisArray, thisLength);
         case Kind_EditableTextOnChangeCallback: return deserializeAndCallSyncEditableTextOnChangeCallback(vmContext, thisArray, thisLength);
