@@ -19,6 +19,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -498,6 +499,8 @@ void SetBackButtonIconImpl(Ark_NativePointer node,
                 break;
             }
             case symbolType: {
+                iconSymbol = icon->value.value2->symbolApply;
+                PeerUtils::DestroyPeer(icon->value.value2);
                 break;
             }
             default:
