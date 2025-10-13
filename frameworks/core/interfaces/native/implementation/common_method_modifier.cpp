@@ -3996,7 +3996,8 @@ void SetKeyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
-        // keep the same processing
+        std::string defaultStr = "";
+        ViewAbstract::SetInspectorId(frameNode, defaultStr);
         return;
     }
     ViewAbstract::SetInspectorId(frameNode, *convValue);
@@ -4032,7 +4033,8 @@ void SetRestoreIdImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int32_t>(value);
     if (!convValue) {
-        // Implement Reset value
+        int32_t index = -1;
+        ViewAbstract::SetRestoreId(frameNode, index);
         return;
     }
     ViewAbstract::SetRestoreId(frameNode, *convValue);
