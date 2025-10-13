@@ -47,6 +47,11 @@ public:
 
     void SetOnComplete(CompleteEvent&& completeEvent)
     {
+#if defined(IOS_PLATFORM)
+        if (completeEvent_) {
+            return;
+        }
+#endif
         completeEvent_ = std::move(completeEvent);
     }
 
