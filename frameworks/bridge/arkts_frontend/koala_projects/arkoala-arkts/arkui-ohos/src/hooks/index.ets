@@ -43,7 +43,7 @@ import { SymbolGlyphModifier } from "../SymbolGlyphModifier";
 import { TextModifier } from "../TextModifier";
 import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
-import { CommonMethod, StateStyles, ArkCommonMethodComponent, CustomProperty } from "#generated";
+import { CommonMethod, StateStyles, ArkCommonMethodComponent, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent } from "#generated";
 
 import { AnimateParam } from "#generated";
 import { GestureModifier } from "#generated";
@@ -59,10 +59,50 @@ import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
 
 export function hookId(component: object, value?: string) {}
 
-export function hookGestureModifier(
-  receiver: CommonMethod,
-  value: GestureModifier | undefined
-) {}
+export function hookGesture(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
+    if (gesture instanceof Gesture) {
+        let singleGesture = gesture as Gesture;
+        singleGesture.setGesture(0, commonMethod.getPeer(), mask);
+    } else {
+        let gestureGroup = gesture as GestureGroup;
+        gestureGroup.addGestureGroupToNode(0, commonMethod.getPeer(), mask)
+    }
+}
+
+export function hookPriorityGesture(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
+    if (gesture instanceof Gesture) {
+        let singleGesture = gesture as Gesture;
+        singleGesture.setGesture(1, commonMethod.getPeer(), mask);
+    } else {
+        let gestureGroup = gesture as GestureGroup;
+        gestureGroup.addGestureGroupToNode(1, commonMethod.getPeer(), mask)
+    }
+}
+
+export function hookParallelGesture(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
+    if (gesture instanceof Gesture) {
+        let singleGesture = gesture as Gesture;
+        singleGesture.setGesture(2, commonMethod.getPeer(), mask);
+    } else {
+        let gestureGroup = gesture as GestureGroup;
+        gestureGroup.addGestureGroupToNode(2, commonMethod.getPeer(), mask)
+    }
+}
+
+export function hookGestureModifier(commonMethod: ArkCommonMethodComponent, value: GestureModifier | undefined): void {
+    if (value === undefined) {
+        return;
+    }
+    const value_casted = value as GestureModifier
+    let gestureEvent: UIGestureEvent | undefined = undefined;
+    if (commonMethod.getGestureEvent() === undefined) {
+        gestureEvent = new UIGestureEvent();
+        gestureEvent.setPeer(commonMethod.getPeer());
+        commonMethod.setGestureEvent(gestureEvent);
+    }
+    gestureEvent!.clearGestures();
+    value_casted.applyGesture(gestureEvent as UIGestureEvent);
+}
 
 export function hookStateStyleImpl(
   receiver: CommonMethod,

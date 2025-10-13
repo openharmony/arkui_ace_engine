@@ -22,7 +22,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from "./alertDialog"
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
 import { Resource_serializer } from "./../framework/resource"
 import { SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from "./units"
 import { Resource } from "global.resource"
@@ -45,6 +45,7 @@ import { Size_serializer, Frame_serializer, LengthMetrics_serializer } from "./.
 import { LayoutConstraint_serializer } from "./../FrameNode"
 import { FrameNode, LayoutConstraint } from "arkui.FrameNode"
 import { Size, Frame, LengthMetrics } from "arkui.Graphics"
+import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask } from "./gesture"
 import { default as image } from "@ohos.multimedia.image"
 import { MeasureOptions_serializer } from "./../framework/ohos.measure"
 import { MeasureOptions } from "@ohos.measure"
@@ -1294,6 +1295,225 @@ export class FrameNodeExtender {
     public static getCommonEvent(peer: FrameNode): UICommonEvent {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getCommonEvent_serialize(peer_casted)
+    }
+}
+export class GestureOps {
+    static createTapGesture_serialize(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: boolean): KPointer {
+        console.log("zcb createTapGesture_serialize");
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createTapGesture(fingers, count, distanceThreshold, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    static createLongPressGesture_serialize(fingers: number, repeat: boolean, duration: number, isFingerCountLimited: boolean): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createLongPressGesture(fingers, repeat ? 1 : 0, duration, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    static createPanGesture_serialize(fingers: number, direction: PanDirection, distance: number, isFingerCountLimited: boolean): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createPanGesture(fingers, direction.valueOf(), distance, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    static createPanGestureWithPanGestureOptions_serialize(panGestureOptions: KPointer): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createPanGestureWithPanGestureOptions(panGestureOptions)
+        return retval
+    }
+    static createPinchGesture_serialize(fingers: number, distance: number, isFingerCountLimited: boolean): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createPinchGesture(fingers, distance, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    static createRotationGesture_serialize(fingers: number, angle: number, isFingerCountLimited: boolean): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createRotationGesture(fingers, angle, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    static createSwipeGesture_serialize(fingers: number, direction: SwipeDirection, speed: number, isFingerCountLimited: boolean): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createSwipeGesture(fingers, direction.valueOf(), speed, isFingerCountLimited ? 1 : 0)
+        return retval
+    }
+    static createGestureGroup_serialize(mode: GestureMode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_createGestureGroup(mode.valueOf())
+        return retval
+    }
+    static setOnAction_serialize(gesture: KPointer, onAction: ((value0: GestureEvent) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onAction)
+        ArkUIGeneratedNativeModule._GestureOps_setOnAction(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOnActionStart_serialize(gesture: KPointer, onActionStart: ((value0: GestureEvent) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onActionStart)
+        ArkUIGeneratedNativeModule._GestureOps_setOnActionStart(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOnActionUpdate_serialize(gesture: KPointer, onActionUpdate: ((value0: GestureEvent) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onActionUpdate)
+        ArkUIGeneratedNativeModule._GestureOps_setOnActionUpdate(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOnActionEnd_serialize(gesture: KPointer, onActionEnd: ((value0: GestureEvent) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onActionEnd)
+        ArkUIGeneratedNativeModule._GestureOps_setOnActionEnd(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOnActionCancel_serialize(gesture: KPointer, onActionCancel: ((value0: GestureEvent) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onActionCancel)
+        ArkUIGeneratedNativeModule._GestureOps_setOnActionCancel(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setOnCancel_serialize(gesture: KPointer, onCancel: (() => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onCancel)
+        ArkUIGeneratedNativeModule._GestureOps_setOnCancel(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setGestureTag_serialize(gesture: KPointer, tag: string): void {
+        ArkUIGeneratedNativeModule._GestureOps_setGestureTag(gesture, tag)
+    }
+    static setAllowedTypes_serialize(gesture: KPointer, types: Array<SourceTool>): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((types.length).toInt())
+        for (let typesCounterI = 0; typesCounterI < types.length; typesCounterI++) {
+            const typesTmpElement : SourceTool = types[typesCounterI]
+            thisSerializer.writeInt32(typesTmpElement.valueOf())
+        }
+        ArkUIGeneratedNativeModule._GestureOps_setAllowedTypes(gesture, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static addGestureToNode_serialize(node: KPointer, priority: number, mask: GestureMask, gesture: KPointer, isModifier: boolean): void {
+        ArkUIGeneratedNativeModule._GestureOps_addGestureToNode(node, priority, mask.valueOf(), gesture, isModifier ? 1 : 0)
+    }
+    static addGestureToGroup_serialize(group: KPointer, gesture: KPointer): void {
+        ArkUIGeneratedNativeModule._GestureOps_addGestureToGroup(group, gesture)
+    }
+    static removeGestureByTag_serialize(node: KPointer, tag: string): void {
+        ArkUIGeneratedNativeModule._GestureOps_removeGestureByTag(node, tag)
+    }
+    static clearGestures_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._GestureOps_clearGestures(node)
+    }
+    public static createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: boolean): KPointer {
+        const fingers_casted = fingers as (number)
+        const count_casted = count as (number)
+        const distanceThreshold_casted = distanceThreshold as (number)
+        const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
+        return GestureOps.createTapGesture_serialize(fingers_casted, count_casted, distanceThreshold_casted, isFingerCountLimited_casted)
+    }
+    public static createLongPressGesture(fingers: number, repeat: boolean, duration: number, isFingerCountLimited: boolean): KPointer {
+        const fingers_casted = fingers as (number)
+        const repeat_casted = repeat as (boolean)
+        const duration_casted = duration as (number)
+        const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
+        return GestureOps.createLongPressGesture_serialize(fingers_casted, repeat_casted, duration_casted, isFingerCountLimited_casted)
+    }
+    public static createPanGesture(fingers: number, direction: PanDirection, distance: number, isFingerCountLimited: boolean): KPointer {
+        const fingers_casted = fingers as (number)
+        const direction_casted = direction as (PanDirection)
+        const distance_casted = distance as (number)
+        const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
+        return GestureOps.createPanGesture_serialize(fingers_casted, direction_casted, distance_casted, isFingerCountLimited_casted)
+    }
+    public static createPanGestureWithPanGestureOptions(panGestureOptions: KPointer): KPointer {
+        const panGestureOptions_casted = panGestureOptions as (KPointer)
+        return GestureOps.createPanGestureWithPanGestureOptions_serialize(panGestureOptions_casted)
+    }
+    public static createPinchGesture(fingers: number, distance: number, isFingerCountLimited: boolean): KPointer {
+        const fingers_casted = fingers as (number)
+        const distance_casted = distance as (number)
+        const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
+        return GestureOps.createPinchGesture_serialize(fingers_casted, distance_casted, isFingerCountLimited_casted)
+    }
+    public static createRotationGesture(fingers: number, angle: number, isFingerCountLimited: boolean): KPointer {
+        const fingers_casted = fingers as (number)
+        const angle_casted = angle as (number)
+        const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
+        return GestureOps.createRotationGesture_serialize(fingers_casted, angle_casted, isFingerCountLimited_casted)
+    }
+    public static createSwipeGesture(fingers: number, direction: SwipeDirection, speed: number, isFingerCountLimited: boolean): KPointer {
+        const fingers_casted = fingers as (number)
+        const direction_casted = direction as (SwipeDirection)
+        const speed_casted = speed as (number)
+        const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
+        return GestureOps.createSwipeGesture_serialize(fingers_casted, direction_casted, speed_casted, isFingerCountLimited_casted)
+    }
+    public static createGestureGroup(mode: GestureMode): KPointer {
+        const mode_casted = mode as (GestureMode)
+        return GestureOps.createGestureGroup_serialize(mode_casted)
+    }
+    public static setOnAction(gesture: KPointer, onAction: ((value0: GestureEvent) => void)): void {
+        const gesture_casted = gesture as (KPointer)
+        const onAction_casted = onAction as (((value0: GestureEvent) => void))
+        GestureOps.setOnAction_serialize(gesture_casted, onAction_casted)
+        return
+    }
+    public static setOnActionStart(gesture: KPointer, onActionStart: ((value0: GestureEvent) => void)): void {
+        const gesture_casted = gesture as (KPointer)
+        const onActionStart_casted = onActionStart as (((value0: GestureEvent) => void))
+        GestureOps.setOnActionStart_serialize(gesture_casted, onActionStart_casted)
+        return
+    }
+    public static setOnActionUpdate(gesture: KPointer, onActionUpdate: ((value0: GestureEvent) => void)): void {
+        const gesture_casted = gesture as (KPointer)
+        const onActionUpdate_casted = onActionUpdate as (((value0: GestureEvent) => void))
+        GestureOps.setOnActionUpdate_serialize(gesture_casted, onActionUpdate_casted)
+        return
+    }
+    public static setOnActionEnd(gesture: KPointer, onActionEnd: ((value0: GestureEvent) => void)): void {
+        const gesture_casted = gesture as (KPointer)
+        const onActionEnd_casted = onActionEnd as (((value0: GestureEvent) => void))
+        GestureOps.setOnActionEnd_serialize(gesture_casted, onActionEnd_casted)
+        return
+    }
+    public static setOnActionCancel(gesture: KPointer, onActionCancel: ((value0: GestureEvent) => void)): void {
+        const gesture_casted = gesture as (KPointer)
+        const onActionCancel_casted = onActionCancel as (((value0: GestureEvent) => void))
+        GestureOps.setOnActionCancel_serialize(gesture_casted, onActionCancel_casted)
+        return
+    }
+    public static setOnCancel(gesture: KPointer, onCancel: (() => void)): void {
+        const gesture_casted = gesture as (KPointer)
+        const onCancel_casted = onCancel as ((() => void))
+        GestureOps.setOnCancel_serialize(gesture_casted, onCancel_casted)
+        return
+    }
+    public static setGestureTag(gesture: KPointer, tag: string): void {
+        const gesture_casted = gesture as (KPointer)
+        const tag_casted = tag as (string)
+        GestureOps.setGestureTag_serialize(gesture_casted, tag_casted)
+        return
+    }
+    public static setAllowedTypes(gesture: KPointer, types: Array<SourceTool>): void {
+        const gesture_casted = gesture as (KPointer)
+        const types_casted = types as (Array<SourceTool>)
+        GestureOps.setAllowedTypes_serialize(gesture_casted, types_casted)
+        return
+    }
+    public static addGestureToNode(node: KPointer, priority: number, mask: GestureMask, gesture: KPointer, isModifier: boolean): void {
+        console.log("zcb addGestureToNode");
+        const node_casted = node as (KPointer)
+        const priority_casted = priority as (number)
+        const mask_casted = mask as (GestureMask)
+        const gesture_casted = gesture as (KPointer)
+        const isModifier_casted = isModifier as (boolean)
+        GestureOps.addGestureToNode_serialize(node_casted, priority_casted, mask_casted, gesture_casted, isModifier_casted)
+        return
+    }
+    public static addGestureToGroup(group: KPointer, gesture: KPointer): void {
+        const group_casted = group as (KPointer)
+        const gesture_casted = gesture as (KPointer)
+        GestureOps.addGestureToGroup_serialize(group_casted, gesture_casted)
+        return
+    }
+    public static removeGestureByTag(node: KPointer, tag: string): void {
+        const node_casted = node as (KPointer)
+        const tag_casted = tag as (string)
+        GestureOps.removeGestureByTag_serialize(node_casted, tag_casted)
+        return
+    }
+    public static clearGestures(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        GestureOps.clearGestures_serialize(node_casted)
+        return
     }
 }
 export class GlobalScope_ohos_arkui_componentSnapshot {

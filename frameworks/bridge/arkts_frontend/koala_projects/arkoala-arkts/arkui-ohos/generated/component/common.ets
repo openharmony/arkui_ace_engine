@@ -20,7 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGestureModifier, hookCustomPropertyImpl, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from "#handwritten"
+import { extractors, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from "#handwritten"
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics } from "arkui.Graphics"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisModel, MouseButton, MouseAction } from "./enums"
@@ -36,7 +36,6 @@ import { FocusBoxStyle_serializer, FocusBoxStyle, FocusPriority } from "./focus"
 import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
-import { Gesture_serializer, GestureGroup_serializer, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, Gesture, GestureGroup, GestureMask, GestureMode, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
 import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -45,6 +44,7 @@ import { default as matrix4 } from "@ohos.matrix4"
 import { CustomBuilder, CustomBuilderT } from "./builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
 import { AsyncCallback, BusinessError } from "@ohos.base"
@@ -4987,87 +4987,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setTransition1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setGestureAttribute(gesture: GestureType | undefined, mask?: GestureMask): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (gesture !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const gestureTmpValue  = gesture!
-            if (gestureTmpValue instanceof Gesture) {
-                thisSerializer.writeInt8((0).toChar())
-                const gestureTmpValueForIdx0  = gestureTmpValue as Gesture
-                Gesture_serializer.write(thisSerializer, gestureTmpValueForIdx0)
-            } else if (gestureTmpValue instanceof GestureGroup) {
-                thisSerializer.writeInt8((1).toChar())
-                const gestureTmpValueForIdx1  = gestureTmpValue as GestureGroup
-                GestureGroup_serializer.write(thisSerializer, gestureTmpValueForIdx1)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (mask !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const maskTmpValue  = (mask as GestureMask)
-            thisSerializer.writeInt32(maskTmpValue.valueOf())
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setPriorityGestureAttribute(gesture: GestureType | undefined, mask?: GestureMask): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (gesture !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const gestureTmpValue  = gesture!
-            if (gestureTmpValue instanceof Gesture) {
-                thisSerializer.writeInt8((0).toChar())
-                const gestureTmpValueForIdx0  = gestureTmpValue as Gesture
-                Gesture_serializer.write(thisSerializer, gestureTmpValueForIdx0)
-            } else if (gestureTmpValue instanceof GestureGroup) {
-                thisSerializer.writeInt8((1).toChar())
-                const gestureTmpValueForIdx1  = gestureTmpValue as GestureGroup
-                GestureGroup_serializer.write(thisSerializer, gestureTmpValueForIdx1)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (mask !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const maskTmpValue  = (mask as GestureMask)
-            thisSerializer.writeInt32(maskTmpValue.valueOf())
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setPriorityGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setParallelGestureAttribute(gesture: GestureType | undefined, mask?: GestureMask): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (gesture !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const gestureTmpValue  = gesture!
-            if (gestureTmpValue instanceof Gesture) {
-                thisSerializer.writeInt8((0).toChar())
-                const gestureTmpValueForIdx0  = gestureTmpValue as Gesture
-                Gesture_serializer.write(thisSerializer, gestureTmpValueForIdx0)
-            } else if (gestureTmpValue instanceof GestureGroup) {
-                thisSerializer.writeInt8((1).toChar())
-                const gestureTmpValueForIdx1  = gestureTmpValue as GestureGroup
-                GestureGroup_serializer.write(thisSerializer, gestureTmpValueForIdx1)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (mask !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const maskTmpValue  = (mask as GestureMask)
-            thisSerializer.writeInt32(maskTmpValue.valueOf())
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setParallelGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBlurAttribute(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
@@ -10341,28 +10260,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("gesture")) {
-            const gesture_casted = gesture as (GestureType | undefined)
-            const mask_casted = mask as (GestureMask | undefined)
-            this.getPeer()?.setGestureAttribute(gesture_casted, mask_casted)
-            return this
+            hookGesture(this, gesture, mask)
         }
         return this
     }
     public priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("priorityGesture")) {
-            const gesture_casted = gesture as (GestureType | undefined)
-            const mask_casted = mask as (GestureMask | undefined)
-            this.getPeer()?.setPriorityGestureAttribute(gesture_casted, mask_casted)
-            return this
+            hookPriorityGesture(this, gesture, mask)
         }
         return this
     }
     public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("parallelGesture")) {
-            const gesture_casted = gesture as (GestureType | undefined)
-            const mask_casted = mask as (GestureMask | undefined)
-            this.getPeer()?.setParallelGestureAttribute(gesture_casted, mask_casted)
-            return this
+            hookParallelGesture(this, gesture, mask)
         }
         return this
     }
@@ -15581,15 +15491,15 @@ export class DividerStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStrokeWidthTmpValue  = valueHolderForStrokeWidth!
             if (valueHolderForStrokeWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toChar())
                 const valueHolderForStrokeWidthTmpValueForIdx0  = valueHolderForStrokeWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForStrokeWidthTmpValueForIdx0)
             } else if (valueHolderForStrokeWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toChar())
                 const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForStrokeWidthTmpValueForIdx1)
             } else if (valueHolderForStrokeWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toChar())
                 const valueHolderForStrokeWidthTmpValueForIdx2  = valueHolderForStrokeWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueForIdx2)
             }
@@ -15674,9 +15584,9 @@ export class DividerStyle_serializer {
                 strokeWidthTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (strokeWidthTmpBuf_UnionSelector == (2).toChar()) {
                 strokeWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
-            } else {
+        } else {
                 throw new Error("One of the branches for strokeWidthTmpBuf_ has to be chosen through deserialisation.")
-            }
+        }
             strokeWidthTmpBuf = (strokeWidthTmpBuf_ as string | number | Resource)
         }
         const strokeWidthTmpResult : Length | undefined = strokeWidthTmpBuf

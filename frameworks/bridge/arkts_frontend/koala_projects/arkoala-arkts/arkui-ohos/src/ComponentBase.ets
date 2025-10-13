@@ -24,8 +24,18 @@ export class ComponentBase implements UICommonBase {
     protected peer?: PeerNode
     protected isFirstBuild: boolean = true
     public isFirstRender: boolean = true
+    protected gestureEvent: UIGestureEvent | undefined = undefined
     setPeer(peer: PeerNode | undefined) {
         this.peer = peer
+    }
+    getPeer(): PeerNode | undefined {
+        return this.peer;
+    }
+    setGestureEvent(gestureEvent: UIGestureEvent) {
+        this.gestureEvent = gestureEvent
+    }
+    getGestureEvent(): UIGestureEvent | undefined {
+        return this.gestureEvent
     }
     protected checkPriority(name: string): boolean {
         return true
