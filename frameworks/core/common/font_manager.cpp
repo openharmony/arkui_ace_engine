@@ -406,8 +406,15 @@ void FontManager::RegisterTextEngineLoadCallback(
         auto engine = EngineHelper::GetCurrentEngine();
         NativeEngine* nativeEngine = engine ? engine->GetNativeEngine() : nullptr;
         uint64_t runtimeId = nativeEngine ? static_cast<uint64_t>(reinterpret_cast<uintptr_t>(nativeEngine)) : 0;
-        FormLoadFontCallbackInfo formCallbackInfo = { std::make_pair(familyName, callback), runtimeId };
-        formLoadCallbacks_.emplace(node, formCallbackInfo);
+        FormLoadFontCallbackInfo formCallbackInfo = { callback, runtimeId };
+        auto iter = formLoadCallbacks_.find(node);
+        if (iter != formLoadCallbacks_.end()) {
+            iter->second.emplace(familyName, formCallbackInfo);
+        } else {
+            std::map<std::string, FormLoadFontCallbackInfo> familyMap;
+            familyMap.emplace(familyName, formCallbackInfo);
+            formLoadCallbacks_.emplace(node, familyMap);
+        }
     }
     auto iter = externalLoadCallbacks_.find(node);
     if (iter != externalLoadCallbacks_.end()) {
@@ -509,15 +516,7 @@ void FontManager::NotifyFontChange(const std::string& fontName, uint64_t runtime
 {
     // form font change event.
     if (runtimeId > 0) {
-        for (const auto& element : formLoadCallbacks_) {
-            FormLoadFontCallbackInfo callbackInfo = element.second;
-            auto formFontName = callbackInfo.fontCallbackPair.first;
-            auto callback = callbackInfo.fontCallbackPair.second;
-            if (formFontName == fontName && callback && callbackInfo.formRuntimeId > 0 &&
-                callbackInfo.formRuntimeId == runtimeId) {
-                callback();
-            }
-        }
+        NotifyFormFontChange(fontName, runtimeId);
         return;
     }
     // global font change event.
@@ -526,6 +525,19 @@ void FontManager::NotifyFontChange(const std::string& fontName, uint64_t runtime
             if (family.first == fontName && family.second) {
                 family.second();
             }
+        }
+    }
+}
+
+void FontManager::NotifyFormFontChange(const std::string& fontName, uint64_t runtimeId)
+{
+    for (const auto& element : formLoadCallbacks_) {
+        for (const auto& [currentFontName, callbackInfo] : element.second) {
+            if (currentFontName != fontName || !callbackInfo.callback || callbackInfo.formRuntimeId == 0 ||
+                callbackInfo.formRuntimeId != runtimeId) {
+                continue;
+            }
+            callbackInfo.callback();
         }
     }
 }
