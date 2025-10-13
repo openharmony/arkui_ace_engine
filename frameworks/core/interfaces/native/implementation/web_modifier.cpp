@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #ifdef WEB_SUPPORTED
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #include "core/components_ng/pattern/web/ani/web_model_static.h"
 #include "core/interfaces/native/implementation/webview_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/web_modifier_callbacks.h"
@@ -2231,11 +2232,12 @@ void SetNativeEmbedOptionsImpl(Ark_NativePointer node,
         return;
     }
     auto supportDefaultIntrinsicSize = Converter::OptConvert<bool>(convValue.value().supportDefaultIntrinsicSize);
-    if (!supportDefaultIntrinsicSize) {
-        // Implement Reset value
-        return;
+    auto supportCssDisplayChange = Converter::OptConvert<bool>(convValue.value().supportCssDisplayChange);
+    if (supportCssDisplayChange.has_value()) {
+        RETURN_IF_CALLING_FROM_M114();
     }
-    WebModelStatic::SetNativeEmbedOptions(frameNode, *supportDefaultIntrinsicSize);
+
+    WebModelStatic::SetNativeEmbedOptions(frameNode, *supportDefaultIntrinsicSize, *supportCssDisplayChange);
 #endif // WEB_SUPPORTED
 }
 void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
@@ -2383,6 +2385,21 @@ void SetOnSafeBrowsingCheckFinishImpl(Ark_NativePointer node,
 void SetOnNativeEmbedMouseEventImpl(Ark_NativePointer node,
                                     const Opt_MouseInfoCallback* value)
 {
+#ifdef WEB_SUPPORTED
+    RETURN_IF_CALLING_FROM_M114();
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    auto onNativeEmbedMouseEvent = [callback = CallbackHelper(*optValue), instanceId](
+        const BaseEventInfo* info) {
+        OnNativeEmbedMouseInfo(callback, instanceId, info);
+    };
+    WebModelStatic::SetNativeEmbedMouseEventId(frameNode, onNativeEmbedMouseEvent);
+#endif // WEB_SUPPORTED
 }
 
 void SetOnNativeEmbedObjectParamChangeImpl(Ark_NativePointer node,
@@ -2424,6 +2441,13 @@ void SetOnActivateContentImpl(Ark_NativePointer node,
 void SetBypassVsyncConditionImpl(Ark_NativePointer node,
                                  const Opt_WebBypassVsyncCondition* value)
 {
+#ifdef WEB_SUPPORTED
+    RETURN_IF_CALLING_FROM_M114();
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<WebBypassVsyncCondition>(*value);
+    WebModelStatic::SetBypassVsyncCondition(frameNode, convValue.value_or(WebBypassVsyncCondition::NONE));
+#endif // WEB_SUPPORTED
 }
 
 void SetGestureFocusModeImpl(Ark_NativePointer node,

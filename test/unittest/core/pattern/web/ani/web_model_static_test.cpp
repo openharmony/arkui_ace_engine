@@ -967,8 +967,53 @@ HWTEST_F(WebModelStaticTest, SetNativeEmbedOptions001, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), false);
-    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckIntrinsicSizeEnabled(false), false);
+    WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), true, true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckIntrinsicSizeEnabled(true), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckCssDisplayChangeEnabled(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetNativeEmbedOptions002
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetNativeEmbedOptions002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), true, false);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckIntrinsicSizeEnabled(true), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckCssDisplayChangeEnabled(false), true);
+#endif
+}
+
+/**
+ * @tc.name: SetBypassVsyncCondition001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetBypassVsyncCondition001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    WebModelStatic::SetBypassVsyncCondition(AccessibilityManager::RawPtr(frameNode),
+                                            WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET);
+    EXPECT_EQ(webPatternStatic->webBypassVsyncCondition_, WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET);
 #endif
 }
 
@@ -1460,6 +1505,29 @@ HWTEST_F(WebModelStaticTest, SetNativeEmbedGestureEventId019, TestSize.Level1)
     WebModelStatic::SetNativeEmbedGestureEventId(AccessibilityManager::RawPtr(frameNode), NativeEmbedGestureEventId);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnNativeEmbedGestureEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetNativeEmbedMouseEventId001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetNativeEmbedMouseEventId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    int callCount = 0;
+    auto NativeEmbedMouseEventId = [&callCount](const BaseEventInfo* info) { callCount++; };
+    WebModelStatic::SetNativeEmbedMouseEventId(AccessibilityManager::RawPtr(frameNode), NativeEmbedMouseEventId);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnNativeEmbedMouseEvent_(nullptr);
     EXPECT_NE(callCount, 0);
 #endif
 }

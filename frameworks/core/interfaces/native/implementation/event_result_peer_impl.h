@@ -15,9 +15,13 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_EVENT_RESULT_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_EVENT_RESULT_PEER_IMPL_H
 
+#include <variant>
 #include "core/event/touch_event.h"
 
 struct EventResultPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::GestureEventResult> handler;
+    std::optional<std::variant<
+        OHOS::Ace::RefPtr<OHOS::Ace::GestureEventResult>,
+        OHOS::Ace::RefPtr<OHOS::Ace::MouseEventResult>
+    >> handler;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_EVENT_RESULT_PEER_IMPL_H
