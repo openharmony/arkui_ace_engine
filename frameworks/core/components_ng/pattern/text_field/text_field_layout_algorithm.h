@@ -138,10 +138,10 @@ protected:
     SizeF StyledPlaceHolderMeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool adapter = false);
     void StyledPlaceHolderCounterNodeMeasure(const LayoutConstraintF& textContentConstraint,
-        LayoutWrapper* layoutWrapper, const RefPtr<TextFieldPattern>& textFieldPattern, SizeF& conetentSize);
+        LayoutWrapper* layoutWrapper, const RefPtr<TextFieldPattern>& textFieldPattern, SizeF& contentSize);
     SizeF TextInputMeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth);
-    void StyledPlaceHodlerLayout(LayoutWrapper* layoutWrapper, const RefPtr<TextFieldPattern>& pattern);
+    void StyledPlaceholderLayout(LayoutWrapper* layoutWrapper, const RefPtr<TextFieldPattern>& pattern);
     SizeF TextAreaMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     bool AddAdaptFontSizeAndAnimations(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
@@ -189,9 +189,9 @@ private:
     void UpdateStyledPlaceholderHeightAdaptivePolicy(const RefPtr<TextFieldPattern>& pattern);
     void PlaceholderRemoveFromParent(const RefPtr<TextFieldPattern>& pattern);
     void StylePlaceHolderMeasure(LayoutWrapper* layoutWrapper, const LayoutConstraintF& textContentConstraint,
-        SizeF& conetentSize);
+        SizeF& contentSize);
     void StylePlaceHolderReMeasure(LayoutWrapper* layoutWrapper, LayoutConstraintF textContentConstraint,
-        float counterNodeHeight, SizeF& conetentSize);
+        float counterNodeHeight, SizeF& contentSize);
     void InlineFocusMeasure(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         double& safeBoundary, float& contentWidth);
     static void UpdateTextStyleSetTextColor(const RefPtr<FrameNode>& frameNode,

@@ -211,7 +211,7 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     };
     UpdateTextRect(updateTextRectParams);
 
-    StyledPlaceHodlerLayout(layoutWrapper, pattern);
+    StyledPlaceholderLayout(layoutWrapper, pattern);
 
     bool isInlineStyle = pattern->IsNormalInlineState();
     if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength() && !isInlineStyle) {

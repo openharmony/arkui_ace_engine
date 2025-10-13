@@ -311,12 +311,10 @@ void JSTextEditableController::StopEditing()
 void JSTextEditableController::SetPlaceholderStyledString(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsObject()) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
     if (!spanString) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto spanStringController = spanString->GetController();

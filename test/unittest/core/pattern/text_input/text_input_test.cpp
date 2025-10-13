@@ -33,7 +33,7 @@ public:
 HWTEST_F(TextFieldUXTest, UpdateCaretByTouchMove001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize textInput and focusHub
+     * @tc.steps: step1. Initialize textInput and focusHub.
      */
     CreateTextField();
     GetFocus();
