@@ -206,6 +206,28 @@ HWTEST_F(AccessibilityFocusMoveTest, AccessibilityNodeUtilsTest002, TestSize.Lev
 }
 
 /**
+ * @tc.name: AccessibilityNodeUtilsTest003
+ * @tc.desc: GetPropHintText
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, AccessibilityNodeUtilsTest003, TestSize.Level1)
+{
+    int32_t nodeId = 1;
+    auto accessibilityNode = AceType::MakeRefPtr<AccessibilityNode>(nodeId, "test");
+    ASSERT_NE(accessibilityNode, nullptr);
+    std::string testStr = "hello";
+    accessibilityNode->SetHintText(testStr);
+    auto checkNode = std::make_shared<AccessibilityNodeRulesCheckNode>(
+        accessibilityNode, static_cast<int64_t>(accessibilityNode->GetNodeId()));
+    ASSERT_NE(checkNode, nullptr);
+    Accessibility::PropValueStub value;
+    auto result = checkNode->GetPropHintText(value);
+    ASSERT_TRUE(result);
+    ASSERT_EQ(value.valueType, Accessibility::ValueTypeStub::STRING);
+    ASSERT_EQ(value.valueStr, testStr);
+}
+
+/**
  * @tc.name: FocusStrategyOsalNGTest001
  * @tc.desc: SetNextFocusIdToElementInfo  SetPrevFocusIdToElementInfo
  * @tc.type: FUNC
