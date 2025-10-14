@@ -2695,6 +2695,8 @@ frameworks/core/components_ng/render/adapter/render_surface_impl.cpp @arkuieco3
 frameworks/core/components_ng/render/adapter/render_surface_impl.h @arkuieco3
 frameworks/core/components_ng/render/adapter/render_texture_impl.cpp @arkuieco3
 frameworks/core/components_ng/render/adapter/render_texture_impl.h @arkuieco3
+frameworks/core/components_ng/render/adapter/rich_editor_paragraph.cpp @arkui_rich_editor
+frameworks/core/components_ng/render/adapter/rich_editor_paragraph.h @arkui_rich_editor
 frameworks/core/components_ng/render/adapter/rosen_animation_utils.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/drawing_decoration_painter.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/drawing_decoration_painter.h @arkuicodepulse
