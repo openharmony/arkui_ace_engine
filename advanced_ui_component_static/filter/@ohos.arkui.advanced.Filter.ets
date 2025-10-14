@@ -75,27 +75,15 @@ enum FilterAccessibilityType {
   SEND_ACCESSIBILITY,
 }
 
-@Observed
-export class FilterParams {
+export interface FilterParams {
   name: ResourceStr;
   options: Array<ResourceStr>;
-
-  constructor(name: ResourceStr, options: Array<ResourceStr>) {
-    this.name = name;
-    this.options = options
-  }
 }
 
-export class FilterResult {
+export interface FilterResult {
   name: ResourceStr;
-  index: number;
+  index: int;
   value: ResourceStr;
-
-  constructor(name: ResourceStr, index: number, value: ResourceStr) {
-    this.name = name;
-    this.index = index;
-    this.value = value
-  }
 }
 
 type FontWeightArray = Array<FontWeight>;
@@ -172,7 +160,7 @@ struct ListFilterRow {
   @PropRef isBackgroundHoverRow: BooleanArray;
   @PropRef isSelectedRow: BooleanArray;
   @ObjectLink filterAccessibilityText: FilterAccessibilityText;
-  filterRow: FilterParams = new FilterParams('', []);
+  filterRow: FilterParams = { name: '', options: [], } as FilterParams;
   onItemClick: (colIndex: number) => void = () => {};
   rowIndex: number = 0;
   maxAppFontScale: number = 1;
@@ -1101,7 +1089,7 @@ export struct Filter {
       }
       this.colorRefresh = (!this.colorRefresh) as boolean;
       (this.selectedFilters as Array<FilterResult>)[rowIndex.toInt()].value = selectedFilterValue as ResourceStr;
-      (this.selectedFilters as Array<FilterResult>)[rowIndex.toInt()].index = colIndex;
+      (this.selectedFilters as Array<FilterResult>)[rowIndex.toInt()].index = colIndex.toInt();
       let filterChanged: ((filterResults: Array<FilterResult>) => void) | null = this.onFilterChanged;
       if (filterChanged) {
         filterChanged(this.selectedFilters as Array<FilterResult>);
@@ -1192,7 +1180,7 @@ export struct Filter {
     if (!this.selectedFilters) {
       this.selectedFilters = [];
       for (let filter of (this.multiFilters as Array<FilterParams>)) {
-        let result: FilterResult = new FilterResult(filter.name, -1, '');
+        let result: FilterResult = { name: filter.name, index: -1, value: '' } as FilterResult;
         if (filter.options.length > 0) {
           result.index = 0;
           result.value = filter.options[0];
@@ -1200,7 +1188,8 @@ export struct Filter {
         this.selectedFilters?.push(result);
       }
       if (this.additionFilters && this.additionFilters?.name) {
-        let result: FilterResult = new FilterResult(this.additionFilters?.name as ResourceStr, -1, '');
+        let result: FilterResult =
+          { name: this.additionFilters?.name as ResourceStr, index: -1, value: '' } as FilterResult;
         this.selectedFilters?.push(result);
       }
       this.refreshFloatFilterBarText();
@@ -1362,7 +1351,7 @@ export struct Filter {
       if ((this.selectedFilters as Array<FilterResult>)[additionRowIndex.toInt()].index === -1) {
         (this.selectedFilters as Array<FilterResult>)[additionRowIndex.toInt()].value =
           this.additionFilters ? this.additionFilters?.options[index.toInt()] as ResourceStr : '' as ResourceStr;
-          (this.selectedFilters as Array<FilterResult>)[additionRowIndex.toInt()].index = index;
+          (this.selectedFilters as Array<FilterResult>)[additionRowIndex.toInt()].index = index.toInt();
         this.additionFiltersSelectedIndex = index;
       } else {
         let lastIndex: number = (this.selectedFilters as Array<FilterResult>)[additionRowIndex.toInt()].index;
@@ -1373,7 +1362,8 @@ export struct Filter {
         this.selectedFilters &&
           ((this.selectedFilters as Array<FilterResult>)[additionRowIndex.toInt()].value = this.additionFilters ?
             this.additionFilters?.options[index.toInt()] as ResourceStr : '');
-        this.selectedFilters && ((this.selectedFilters as Array<FilterResult>)[additionRowIndex.toInt()].index = index);
+        this.selectedFilters &&
+          ((this.selectedFilters as Array<FilterResult>)[additionRowIndex.toInt()].index = index.toInt());
         this.additionFiltersSelectedIndex = index;
       }
     } else {

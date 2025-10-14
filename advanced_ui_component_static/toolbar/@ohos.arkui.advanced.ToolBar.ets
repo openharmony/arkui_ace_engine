@@ -171,7 +171,7 @@ class ToolBarTheme {
 export struct ToolBar {
   @ObjectLink @Watch('onToolBarListChanged') toolBarList: Array<ToolBarOption>;
   controller: TabsController = new TabsController();
-  @PropRef activateIndex: number = -1;
+  @PropRef activateIndex: int = -1;
   @Observed
   @PropRef dividerModifier: DividerModifier;
   @Observed
@@ -393,21 +393,24 @@ export struct ToolBar {
       (!this.toolBarList[Double.toInt(index)]?.toolBarSymbolOptions?.normal)) {
       return undefined;
     }
-    if (this.activateIndex === index && (this.toolBarList[Double.toInt(index)]?.state === ItemState.ACTIVATE)) {
+    if (this.activateIndex === Double.toInt(index) &&
+      (this.toolBarList[Double.toInt(index)]?.state === ItemState.ACTIVATE)) {
       return this.toolBarList[Double.toInt(index)]?.toolBarSymbolOptions?.activated;
     }
     return this.toolBarList[Double.toInt(index)]?.toolBarSymbolOptions?.normal;
   }
 
   private getIconColor(index: number): ResourceColor {
-    if (this.activateIndex === index && (this.toolBarList[Double.toInt(index)]?.state === ItemState.ACTIVATE)) {
+    if (this.activateIndex === Double.toInt(index) &&
+      (this.toolBarList[Double.toInt(index)]?.state === ItemState.ACTIVATE)) {
       return this.toolBarList[Double.toInt(index)]?.activatedIconColor ?? this.toolBarTheme.iconActivePrimaryColor;
     }
     return this.toolBarList[Double.toInt(index)]?.iconColor ?? this.toolBarTheme.iconPrimaryColor;
   }
 
   private getTextColor(index: number): ResourceColor {
-    if (this.activateIndex === index && (this.toolBarList[Double.toInt(index)]?.state === ItemState.ACTIVATE)) {
+    if (this.activateIndex === Double.toInt(index) &&
+      (this.toolBarList[Double.toInt(index)]?.state === ItemState.ACTIVATE)) {
       return this.toolBarList[Double.toInt(index)]?.activatedTextColor ?? this.toolBarTheme.fontActivatedPrimaryColor;
     }
     return this.toolBarList[Double.toInt(index)]?.textColor ?? this.toolBarTheme.fontPrimaryColor;
@@ -448,10 +451,10 @@ export struct ToolBar {
   private clickEventAction(index: number): void {
     let toolbar = this.toolBarList[Double.toInt(index)];
     if (toolbar.state === ItemState.ACTIVATE) {
-      if (this.activateIndex === index) {
+      if (this.activateIndex === Double.toInt(index)) {
         this.activateIndex = -1;
       } else {
-        this.activateIndex = index;
+        this.activateIndex = Double.toInt(index);
       }
     }
     if (!(toolbar.state === ItemState.DISABLE)) {

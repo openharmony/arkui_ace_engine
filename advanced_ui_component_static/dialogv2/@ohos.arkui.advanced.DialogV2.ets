@@ -478,12 +478,12 @@ export struct SelectDialogV2 {
   @Param content?: ResourceStr = '';
   @Param confirm?: AdvancedDialogV2Button | null = null;
   @Require @Param radioContent: SheetInfo[] = [] as Array<SheetInfo>;
-  @Param selectedIndex?: number = -1;
-  @Local selectedIndexInner?: number = -1;
+  @Param selectedIndex?: int = -1;
+  @Local selectedIndexInner?: int = -1;
 
   @Monitor(['selectedIndex'])
   selectedIndexMonitor(monitor: IMonitor) {
-    this.selectedIndexInner = monitor.value<number>('selectedIndex')?.now;
+    this.selectedIndexInner = monitor.value<int>('selectedIndex')?.now;
   }
 
   @Local isFocus: boolean = false;
