@@ -277,18 +277,35 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
 
     env->GlobalReference_Create(appLocal, &app_);
 
-    ani_method start;
-    if (env->Class_FindMethod(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig, &start) !=
-        ANI_OK) {
-        LOGE("find start method returned null");
-        return UIContentErrorCode::INVALID_URL;
+    if (taskExecutor_ == nullptr) {
+        LOGE("taskExecutor is nullptr");
+        return UIContentErrorCode::NULL_POINTER;
     }
+    taskExecutor_->PostTask([weak = WeakClaim(this)]() {
+        auto frontend = weak.Upgrade();
+        CHECK_NULL_VOID(frontend);
+        auto* env = Ani::AniUtils::GetAniEnv(frontend->GetVM());
+        CHECK_NULL_VOID(env);
+        ani_class appClass;
+        if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
+            LOGE("Cannot load main class %{public}s", KOALA_APP_INFO.className);
+            return;
+        }
 
-    ani_long result;
-    if (env->Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result, ANI_FALSE) != ANI_OK) {
-        LOGE("call start method returned null");
-        return UIContentErrorCode::INVALID_URL;
-    }
+        ani_method start;
+        if (env->Class_FindMethod(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig, &start) !=
+            ANI_OK) {
+            LOGE("find start method returned null");
+            return;
+        }
+
+        ani_long result;
+        if (env->Object_CallMethod_Long(static_cast<ani_object>(frontend->GetApp()), start, &result, ANI_FALSE) !=
+            ANI_OK) {
+            LOGE("call start method returned null");
+            return;
+        }
+        }, TaskExecutor::TaskType::JS, "ArkUIRunPageUrl");
 
     // TODO: init event loop
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
@@ -365,6 +382,11 @@ ani_object ArktsFrontend::GetUIContext(int32_t instanceId)
 void* ArktsFrontend::GetEnv()
 {
     return Ani::AniUtils::GetAniEnv(vm_);
+}
+
+ani_ref ArktsFrontend::GetApp()
+{
+    return app_;
 }
 
 ani_vm *ArktsFrontend::GetVM()
