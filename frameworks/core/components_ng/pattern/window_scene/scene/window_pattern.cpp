@@ -158,6 +158,13 @@ public:
         windowPattern->OnPreLoadStartingWindowFinished();
     }
 
+    void OnRestart() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnRestart();
+    }
+
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };
@@ -220,6 +227,7 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
 
+    CHECK_EQUAL_VOID(CheckAndHandleRestartApp(), true);
     CHECK_EQUAL_VOID(CheckAndAddStartingWindowAboveLocked(), true);
 
     if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
@@ -468,6 +476,18 @@ void WindowPattern::UpdateStartingWindowProperty(const Rosen::SessionInfo& sessi
         auto pixelMap = PixelMap::CreatePixelMap(&(sessionInfo.startWindowOption->startWindowIcon));
         sourceInfo = ImageSourceInfo(pixelMap);
     }
+}
+
+bool WindowPattern::CheckAndHandleRestartApp()
+{
+    CHECK_EQUAL_RETURN(session_->GetSessionInfo().isRestartApp_, false, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckAndHandleRestartApp id: %{public}d, node id: %{public}d",
+        session_->GetPersistentId(), host->GetId());
+    CreateStartingWindow();
+    AddChild(host, startingWindow_, startingWindowName_);
+    return true;
 }
 
 bool WindowPattern::CheckAndAddStartingWindowAboveLocked()
