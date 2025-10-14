@@ -82,18 +82,17 @@ struct SliderBlockImageInfo {
 struct SliderBlockStyle {
     std::optional<SliderModel::BlockStyleType> type;
     std::optional<ImageSourceInfo> image;
-    std::optional<std::string> shape;
+    std::optional<RefPtr<BasicShape>> shape;
 };
 
 template<>
 SliderBlockStyle Convert(const Ark_SliderBlockStyle& src)
 {
+    const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* shape = &(src.shape);
     return {
         .type = Converter::OptConvert<SliderModel::BlockStyleType>(src.type),
         .image = Converter::OptConvert<ImageSourceInfo>(src.image),
-#ifdef WRONG_GEN
-        .shape = Converter::OptConvert<std::string>(src.shape)
-#endif
+        .shape = Converter::OptConvertPtr<RefPtr<BasicShape>>(shape)
     };
 }
 } // namespace Converter
@@ -278,10 +277,9 @@ void SetBlockSizeImpl(Ark_NativePointer node,
         .value_or(Converter::SliderBlockSizeOptions{});
     SliderModelStatic::SetBlockSize(frameNode, convValue.width, convValue.height);
 }
-void SetBlockStyleImpl(Ark_NativePointer node,
-                       const Opt_SliderBlockStyle* value)
+void SetBlockStyleImpl(Ark_NativePointer node, const Opt_SliderBlockStyle* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Converter::SliderBlockStyle>(value);
     if (convValue.has_value()) {
@@ -289,8 +287,11 @@ void SetBlockStyleImpl(Ark_NativePointer node,
         if (convValue.value().image.has_value()) {
             SliderModelNG::SetBlockImage(frameNode, convValue.value().image->GetSrc(),
                 convValue.value().image->GetBundleName(), convValue.value().image->GetModuleName());
+        } else if (convValue.value().shape.has_value()) {
+            SliderModelNG::SetBlockShape(frameNode, convValue.value().shape.value());
         } else {
             SliderModelNG::ResetBlockImage(frameNode);
+            SliderModelNG::ResetBlockShape(frameNode);
         }
         LOGE("SliderModifier::BlockStyleImpl is not implemented, raw pointer is not supported!");
     } else {
