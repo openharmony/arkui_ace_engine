@@ -5247,12 +5247,12 @@ typedef struct Opt_ImageContent {
     Ark_ImageContent value;
 } Opt_ImageContent;
 typedef enum Ark_ImageFit {
-    ARK_IMAGE_FIT_CONTAIN = 0,
-    ARK_IMAGE_FIT_COVER = 1,
-    ARK_IMAGE_FIT_AUTO = 2,
-    ARK_IMAGE_FIT_FILL = 3,
-    ARK_IMAGE_FIT_SCALE_DOWN = 4,
+    ARK_IMAGE_FIT_FILL = 0,
+    ARK_IMAGE_FIT_CONTAIN = 1,
+    ARK_IMAGE_FIT_COVER = 2,
+    ARK_IMAGE_FIT_AUTO = 3,
     ARK_IMAGE_FIT_NONE = 5,
+    ARK_IMAGE_FIT_SCALE_DOWN = 6,
     ARK_IMAGE_FIT_TOP_START = 7,
     ARK_IMAGE_FIT_TOP = 8,
     ARK_IMAGE_FIT_TOP_END = 9,
