@@ -59,9 +59,10 @@ void ScrollPageImpl(Ark_Scroller peer,
     CHECK_NULL_VOID(peer);
     peer->TriggerScrollPage0(value);
 }
-Ark_OffsetResult CurrentOffsetImpl(Ark_Scroller peer)
+Opt_OffsetResult CurrentOffsetImpl(Ark_Scroller peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    auto invalid = Converter::ArkValue<Opt_OffsetResult>();
+    CHECK_NULL_RETURN(peer, invalid);
     return peer->TriggerCurrentOffset();
 }
 void ScrollToIndexImpl(Ark_Scroller peer,

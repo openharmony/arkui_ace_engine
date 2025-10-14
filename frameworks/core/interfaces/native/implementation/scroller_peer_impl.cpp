@@ -218,16 +218,16 @@ void ScrollerPeerImpl::TriggerScrollPage1(bool next)
     scrollController->ScrollPage(!next, false);
 }
 
-Ark_OffsetResult ScrollerPeerImpl::TriggerCurrentOffset()
+Opt_OffsetResult ScrollerPeerImpl::TriggerCurrentOffset()
 {
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerCurrentOffset Controller not bound to component.");
-        return {};
+        return Converter::ArkValue<Opt_OffsetResult>();
     }
     ContainerScope scope(instanceId_);
     auto offset = scrollController->GetCurrentOffset(); // the result of GetCurrentOffset need to be returned
-    return Converter::ArkValue<Ark_OffsetResult>(offset);
+    return Converter::ArkValue<Opt_OffsetResult>(offset);
 }
 
 void ScrollerPeerImpl::TriggerScrollToIndex(const Ark_Int32 value, const Opt_Boolean* smoothValue,
