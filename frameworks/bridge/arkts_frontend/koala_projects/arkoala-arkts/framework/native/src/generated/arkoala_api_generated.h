@@ -378,6 +378,8 @@ typedef struct Ark_ForegroundEffectOptions Ark_ForegroundEffectOptions;
 typedef struct Opt_ForegroundEffectOptions Opt_ForegroundEffectOptions;
 typedef struct Ark_FormSize Ark_FormSize;
 typedef struct Opt_FormSize Opt_FormSize;
+typedef struct Ark_FractionStop Ark_FractionStop;
+typedef struct Opt_FractionStop Opt_FractionStop;
 typedef struct FrictionMotionPeer FrictionMotionPeer;
 typedef struct FrictionMotionPeer* Ark_FrictionMotion;
 typedef struct Opt_FrictionMotion Opt_FrictionMotion;
@@ -1895,8 +1897,6 @@ typedef struct Ark_FormCallbackInfo Ark_FormCallbackInfo;
 typedef struct Opt_FormCallbackInfo Opt_FormCallbackInfo;
 typedef struct Ark_FormLinkOptions Ark_FormLinkOptions;
 typedef struct Opt_FormLinkOptions Opt_FormLinkOptions;
-typedef struct Ark_FractionStop Ark_FractionStop;
-typedef struct Opt_FractionStop Opt_FractionStop;
 typedef struct Ark_Frame Ark_Frame;
 typedef struct Opt_Frame Opt_Frame;
 typedef struct FrameNodePeer FrameNodePeer;
@@ -7019,6 +7019,15 @@ typedef struct Opt_FormSize {
     Ark_Tag tag;
     Ark_FormSize value;
 } Opt_FormSize;
+typedef struct Ark_FractionStop {
+    /* kind: Interface */
+    Ark_Float64 value0;
+    Ark_Float64 value1;
+} Ark_FractionStop;
+typedef struct Opt_FractionStop {
+    Ark_Tag tag;
+    Ark_FractionStop value;
+} Opt_FractionStop;
 typedef struct Opt_FrictionMotion {
     Ark_Tag tag;
     Ark_FrictionMotion value;
@@ -12445,8 +12454,8 @@ typedef struct Opt_AutoPlayOptions {
 } Opt_AutoPlayOptions;
 typedef struct Ark_BackgroundBrightnessOptions {
     /* kind: Interface */
-    Ark_Number rate;
-    Ark_Number lightUpDegree;
+    Ark_Float64 rate;
+    Ark_Float64 lightUpDegree;
 } Ark_BackgroundBrightnessOptions;
 typedef struct Opt_BackgroundBrightnessOptions {
     Ark_Tag tag;
@@ -13140,9 +13149,9 @@ typedef struct Opt_Event {
 } Opt_Event;
 typedef struct Ark_ExpectedFrameRateRange {
     /* kind: Interface */
-    Ark_Number min;
-    Ark_Number max;
-    Ark_Number expected;
+    Ark_Int32 min;
+    Ark_Int32 max;
+    Ark_Int32 expected;
 } Ark_ExpectedFrameRateRange;
 typedef struct Opt_ExpectedFrameRateRange {
     Ark_Tag tag;
@@ -13296,15 +13305,6 @@ typedef struct Opt_FormLinkOptions {
     Ark_Tag tag;
     Ark_FormLinkOptions value;
 } Opt_FormLinkOptions;
-typedef struct Ark_FractionStop {
-    /* kind: Interface */
-    Ark_Number value0;
-    Ark_Number value1;
-} Ark_FractionStop;
-typedef struct Opt_FractionStop {
-    Ark_Tag tag;
-    Ark_FractionStop value;
-} Opt_FractionStop;
 typedef struct Ark_Frame {
     /* kind: Interface */
     Ark_Number x;
@@ -16215,7 +16215,7 @@ typedef struct Ark_BackgroundBlurStyleOptions {
     /* kind: Interface */
     Opt_ThemeColorMode colorMode;
     Opt_AdaptiveColor adaptiveColor;
-    Opt_Number scale;
+    Opt_Float64 scale;
     Opt_BlurOptions blurOptions;
     Opt_BlurStyleActivePolicy policy;
     Opt_ResourceColor inactiveColor;
@@ -16357,8 +16357,8 @@ typedef struct Opt_CutEvent {
 typedef struct Ark_DataPanelShadowOptions {
     /* kind: Interface */
     Opt_Union_Number_Resource radius;
-    Opt_Union_Number_Resource offsetX;
-    Opt_Union_Number_Resource offsetY;
+    Opt_Union_F64_Resource offsetX;
+    Opt_Union_F64_Resource offsetY;
     Opt_Array_Union_ResourceColor_LinearGradient colors;
 } Ark_DataPanelShadowOptions;
 typedef struct Opt_DataPanelShadowOptions {
@@ -16486,7 +16486,7 @@ typedef struct Ark_ForegroundBlurStyleOptions {
     /* kind: Interface */
     Opt_ThemeColorMode colorMode;
     Opt_AdaptiveColor adaptiveColor;
-    Opt_Number scale;
+    Opt_Float64 scale;
     Opt_BlurOptions blurOptions;
 } Ark_ForegroundBlurStyleOptions;
 typedef struct Opt_ForegroundBlurStyleOptions {
@@ -16513,8 +16513,8 @@ typedef struct Opt_FormInfo {
 typedef struct Ark_GaugeShadowOptions {
     /* kind: Interface */
     Opt_Union_Number_Resource radius;
-    Opt_Union_Number_Resource offsetX;
-    Opt_Union_Number_Resource offsetY;
+    Opt_Union_F64_Resource offsetX;
+    Opt_Union_F64_Resource offsetY;
 } Ark_GaugeShadowOptions;
 typedef struct Opt_GaugeShadowOptions {
     Ark_Tag tag;
@@ -20426,7 +20426,7 @@ typedef struct GENERATED_ArkUIAlphabetIndexerModifier {
     void (*setPopupItemBorderRadius)(Ark_NativePointer node,
                                      const Opt_Float64* value);
     void (*setItemBorderRadius)(Ark_NativePointer node,
-                                const Opt_Number* value);
+                                const Opt_Float64* value);
     void (*setPopupBackgroundBlurStyle)(Ark_NativePointer node,
                                         const Opt_BlurStyle* value);
     void (*setPopupTitleBackground)(Ark_NativePointer node,
@@ -25847,12 +25847,12 @@ typedef struct GENERATED_ArkUIPixelMapMockAccessor {
 
 typedef struct GENERATED_ArkUIProgressMaskAccessor {
     void (*destroyPeer)(Ark_ProgressMask peer);
-    Ark_ProgressMask (*construct)(const Ark_Number* value,
-                                  const Ark_Number* total,
+    Ark_ProgressMask (*construct)(Ark_Float64 value,
+                                  Ark_Float64 total,
                                   const Ark_ResourceColor* color);
     Ark_NativePointer (*getFinalizer)();
     void (*updateProgress)(Ark_ProgressMask peer,
-                           const Ark_Number* value);
+                           Ark_Float64 value);
     void (*updateColor)(Ark_ProgressMask peer,
                         const Ark_ResourceColor* value);
     void (*enableBreathingAnimation)(Ark_ProgressMask peer,

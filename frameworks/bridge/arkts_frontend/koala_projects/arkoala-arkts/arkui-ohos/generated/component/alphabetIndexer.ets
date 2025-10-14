@@ -447,12 +447,12 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._AlphabetIndexerAttribute_setPopupItemBorderRadius(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setItemBorderRadiusAttribute(value: number | undefined): void {
+    setItemBorderRadiusAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -625,7 +625,7 @@ export interface AlphabetIndexerAttribute extends CommonMethod {
     popupItemBorderRadius(value: double | undefined): this {
         throw new Error("Unimplemented method popupItemBorderRadius")
     }
-    itemBorderRadius(value: number | undefined): this {
+    itemBorderRadius(value: double | undefined): this {
         throw new Error("Unimplemented method itemBorderRadius")
     }
     popupBackgroundBlurStyle(value: BlurStyle | undefined): this {
@@ -666,7 +666,7 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
     popupPosition_value?: Position | undefined
     autoCollapse_value?: boolean | undefined
     popupItemBorderRadius_value?: double | undefined
-    itemBorderRadius_value?: int32 | undefined
+    itemBorderRadius_value?: double | undefined
     popupBackgroundBlurStyle_value?: BlurStyle | undefined
     popupTitleBackground_value?: ResourceColor | undefined
     enableHapticFeedback_value?: boolean | undefined
@@ -737,7 +737,7 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
     popupItemBorderRadius(value: double | undefined): this {
         return this
     }
-    itemBorderRadius(value: number | undefined): this {
+    itemBorderRadius(value: double | undefined): this {
         return this
     }
     popupBackgroundBlurStyle(value: BlurStyle | undefined): this {
@@ -940,9 +940,9 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    public itemBorderRadius(value: number | undefined): this {
+    public itemBorderRadius(value: double | undefined): this {
         if (this.checkPriority("itemBorderRadius")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setItemBorderRadiusAttribute(value_casted)
             return this
         }

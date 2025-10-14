@@ -328,7 +328,7 @@ void SetPopupItemBorderRadiusImpl(Ark_NativePointer node,
     IndexerModelStatic::SetPopupItemBorderRadius(frameNode, radius);
 }
 void SetItemBorderRadiusImpl(Ark_NativePointer node,
-                             const Opt_Number* value)
+                             const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

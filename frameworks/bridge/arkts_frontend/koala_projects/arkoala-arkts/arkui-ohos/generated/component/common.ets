@@ -1555,10 +1555,10 @@ export class ProgressMask implements MaterializedBase {
     constructor(_0: boolean, _1: boolean, _2: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ProgressMask.getFinalizer())
     }
-    constructor(value: number, total: number, color: ResourceColor) {
+    constructor(value: double, total: double, color: ResourceColor) {
         this(false, false, false, ProgressMask.construct(value, total, color))
     }
-    static construct(value: number, total: number, color: ResourceColor): KPointer {
+    static construct(value: double, total: double, color: ResourceColor): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (color instanceof Color) {
             thisSerializer.writeInt8((0).toChar())
@@ -1584,8 +1584,8 @@ export class ProgressMask implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ProgressMask_getFinalizer()
     }
-    public updateProgress(value: number): void {
-        const value_casted = value as (number)
+    public updateProgress(value: double): void {
+        const value_casted = value as (double)
         this.updateProgress_serialize(value_casted)
         return
     }
@@ -1599,7 +1599,7 @@ export class ProgressMask implements MaterializedBase {
         this.enableBreathingAnimation_serialize(value_casted)
         return
     }
-    updateProgress_serialize(value: number): void {
+    updateProgress_serialize(value: double): void {
         ArkUIGeneratedNativeModule._ProgressMask_updateProgress(this.peer!.ptr, value)
     }
     updateColor_serialize(value: ResourceColor): void {
@@ -6128,9 +6128,9 @@ export interface Rectangle {
     height?: Length;
 }
 export interface ExpectedFrameRateRange {
-    min: number;
-    max: number;
-    expected: number;
+    min: int32;
+    max: int32;
+    expected: int32;
 }
 export enum AccessibilitySamePageMode {
     SEMI_SILENT = 0,
@@ -6518,7 +6518,7 @@ export interface SystemAdaptiveOptions {
 export interface BlurStyleOptions {
     colorMode?: ThemeColorMode;
     adaptiveColor?: AdaptiveColor;
-    scale?: number;
+    scale?: double;
     blurOptions?: BlurOptions;
 }
 export interface BackgroundEffectOptions {
@@ -6573,8 +6573,8 @@ export enum ShadowStyle {
 }
 export interface MultiShadowOptions {
     radius?: number | Resource;
-    offsetX?: number | Resource;
-    offsetY?: number | Resource;
+    offsetX?: double | Resource;
+    offsetY?: double | Resource;
 }
 export enum SafeAreaType {
     SYSTEM = 0,
@@ -8471,8 +8471,8 @@ export interface OverlayOffset {
     y?: double;
 }
 export type FractionStop = [
-    number,
-    number
+    double,
+    double
 ]
 export interface CommonShapeMethod extends CommonMethod {
     stroke(value: ResourceColor | undefined): this {
@@ -8743,8 +8743,8 @@ export enum EffectEdge {
     END = 2
 }
 export interface BackgroundBrightnessOptions {
-    rate: number;
-    lightUpDegree: number;
+    rate: double;
+    lightUpDegree: double;
 }
 export interface PointLightStyle {
     lightSource?: LightSource;
@@ -11065,14 +11065,14 @@ export class BackgroundBrightnessOptions_serializer {
     public static write(buffer: SerializerBase, value: BackgroundBrightnessOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRate  = value.rate
-        valueSerializer.writeNumber(valueHolderForRate)
+        valueSerializer.writeFloat64(valueHolderForRate)
         const valueHolderForLightUpDegree  = value.lightUpDegree
-        valueSerializer.writeNumber(valueHolderForLightUpDegree)
+        valueSerializer.writeFloat64(valueHolderForLightUpDegree)
     }
     public static read(buffer: DeserializerBase): BackgroundBrightnessOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const rateTmpResult : number = (valueDeserializer.readNumber() as number)
-        const lightUpDegreeTmpResult : number = (valueDeserializer.readNumber() as number)
+        const rateTmpResult : double = valueDeserializer.readFloat64()
+        const lightUpDegreeTmpResult : double = valueDeserializer.readFloat64()
         let value : BackgroundBrightnessOptions = ({rate: rateTmpResult, lightUpDegree: lightUpDegreeTmpResult} as BackgroundBrightnessOptions)
         return value
     }
@@ -11837,17 +11837,17 @@ export class ExpectedFrameRateRange_serializer {
     public static write(buffer: SerializerBase, value: ExpectedFrameRateRange): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForMin  = value.min
-        valueSerializer.writeNumber(valueHolderForMin)
+        valueSerializer.writeInt32(valueHolderForMin)
         const valueHolderForMax  = value.max
-        valueSerializer.writeNumber(valueHolderForMax)
+        valueSerializer.writeInt32(valueHolderForMax)
         const valueHolderForExpected  = value.expected
-        valueSerializer.writeNumber(valueHolderForExpected)
+        valueSerializer.writeInt32(valueHolderForExpected)
     }
     public static read(buffer: DeserializerBase): ExpectedFrameRateRange {
         let valueDeserializer : DeserializerBase = buffer
-        const minTmpResult : number = (valueDeserializer.readNumber() as number)
-        const maxTmpResult : number = (valueDeserializer.readNumber() as number)
-        const expectedTmpResult : number = (valueDeserializer.readNumber() as number)
+        const minTmpResult : int32 = valueDeserializer.readInt32()
+        const maxTmpResult : int32 = valueDeserializer.readInt32()
+        const expectedTmpResult : int32 = valueDeserializer.readInt32()
         let value : ExpectedFrameRateRange = ({min: minTmpResult, max: maxTmpResult, expected: expectedTmpResult} as ExpectedFrameRateRange)
         return value
     }
@@ -12252,9 +12252,9 @@ export class LinearGradientBlurOptions_serializer {
         for (let valueHolderForFractionStopsCounterI = 0; valueHolderForFractionStopsCounterI < valueHolderForFractionStops.length; valueHolderForFractionStopsCounterI++) {
             const valueHolderForFractionStopsTmpElement : FractionStop = valueHolderForFractionStops[valueHolderForFractionStopsCounterI]
             const valueHolderForFractionStopsTmpElement_0  = valueHolderForFractionStopsTmpElement[0]
-            valueSerializer.writeNumber(valueHolderForFractionStopsTmpElement_0)
+            valueSerializer.writeFloat64(valueHolderForFractionStopsTmpElement_0)
             const valueHolderForFractionStopsTmpElement_1  = valueHolderForFractionStopsTmpElement[1]
-            valueSerializer.writeNumber(valueHolderForFractionStopsTmpElement_1)
+            valueSerializer.writeFloat64(valueHolderForFractionStopsTmpElement_1)
         }
         const valueHolderForDirection  = value.direction
         valueSerializer.writeInt32(valueHolderForDirection.valueOf())
@@ -12264,8 +12264,8 @@ export class LinearGradientBlurOptions_serializer {
         const fractionStopsTmpBufLength : int32 = valueDeserializer.readInt32()
         let fractionStopsTmpBuf : Array<FractionStop> = new Array<FractionStop>(fractionStopsTmpBufLength)
         for (let fractionStopsTmpBufBufCounterI = 0; fractionStopsTmpBufBufCounterI < fractionStopsTmpBufLength; fractionStopsTmpBufBufCounterI++) {
-            const fractionStopsTmpBufTempBufValue0 : number = (valueDeserializer.readNumber() as number)
-            const fractionStopsTmpBufTempBufValue1 : number = (valueDeserializer.readNumber() as number)
+            const fractionStopsTmpBufTempBufValue0 : double = valueDeserializer.readFloat64()
+            const fractionStopsTmpBufTempBufValue1 : double = valueDeserializer.readFloat64()
             fractionStopsTmpBuf[fractionStopsTmpBufBufCounterI] = ([fractionStopsTmpBufTempBufValue0, fractionStopsTmpBufTempBufValue1] as FractionStop)
         }
         const fractionStopsTmpResult : Array<FractionStop> = fractionStopsTmpBuf
@@ -13655,7 +13655,7 @@ export class BackgroundBlurStyleOptions_serializer {
         if (valueHolderForScale !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScaleTmpValue  = valueHolderForScale!
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13715,11 +13715,11 @@ export class BackgroundBlurStyleOptions_serializer {
         }
         const adaptiveColorTmpResult : AdaptiveColor | undefined = adaptiveColorTmpBuf
         const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let scaleTmpBuf : number | undefined = undefined
+        let scaleTmpBuf : double | undefined = undefined
         if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            scaleTmpBuf = (valueDeserializer.readNumber() as number)
+            scaleTmpBuf = valueDeserializer.readFloat64()
         }
-        const scaleTmpResult : number | undefined = scaleTmpBuf
+        const scaleTmpResult : double | undefined = scaleTmpBuf
         const blurOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let blurOptionsTmpBuf : BlurOptions | undefined = undefined
         if ((blurOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -14416,7 +14416,7 @@ export class ForegroundBlurStyleOptions_serializer {
         if (valueHolderForScale !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScaleTmpValue  = valueHolderForScale!
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14444,11 +14444,11 @@ export class ForegroundBlurStyleOptions_serializer {
         }
         const adaptiveColorTmpResult : AdaptiveColor | undefined = adaptiveColorTmpBuf
         const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let scaleTmpBuf : number | undefined = undefined
+        let scaleTmpBuf : double | undefined = undefined
         if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            scaleTmpBuf = (valueDeserializer.readNumber() as number)
+            scaleTmpBuf = valueDeserializer.readFloat64()
         }
-        const scaleTmpResult : number | undefined = scaleTmpBuf
+        const scaleTmpResult : double | undefined = scaleTmpBuf
         const blurOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let blurOptionsTmpBuf : BlurOptions | undefined = undefined
         if ((blurOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

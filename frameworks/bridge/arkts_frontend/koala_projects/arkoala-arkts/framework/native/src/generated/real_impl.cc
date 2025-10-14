@@ -1154,7 +1154,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetItemBorderRadiusImpl(Ark_NativePointer node,
-                                 const Opt_Number* value)
+                                 const Opt_Float64* value)
     {
     }
     void SetPopupBackgroundBlurStyleImpl(Ark_NativePointer node,
@@ -15399,8 +15399,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_ProgressMask ConstructImpl(const Ark_Number* value,
-                                   const Ark_Number* total,
+    Ark_ProgressMask ConstructImpl(Ark_Float64 value,
+                                   Ark_Float64 total,
                                    const Ark_ResourceColor* color)
     {
         return {};
@@ -15410,7 +15410,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     void UpdateProgressImpl(Ark_ProgressMask peer,
-                            const Ark_Number* value)
+                            Ark_Float64 value)
     {
     }
     void UpdateColorImpl(Ark_ProgressMask peer,
