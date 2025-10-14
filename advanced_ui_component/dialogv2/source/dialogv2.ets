@@ -779,7 +779,7 @@ export struct ConfirmDialogV2 {
         .textOverflow({ overflow: TextOverflow.Ellipsis })
     }
     .accessibilityGroup(true)
-    .accessibilityText(getCheckTipsAccessibilityText(his.getUIContext(), this.checkTips, this.checkedInner))
+    .accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.checkedInner))
     .accessibilityDescription(this.checkedInner ? $r('sys.string.advanced_dialog_accessibility_cancel_checked_desc') :
     $r('sys.string.slider_accessibility_unselectedDesc'))
     .onClick(() => {
