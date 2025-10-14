@@ -3030,8 +3030,12 @@ class NavPathStack {
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
   }
-  removeInvalidPage(index) {
+  removeInvalidPage(index, name) {
     if (index >= this.pathArray.length || index < 0) {
+      return;
+    }
+    if (this.pathArray[index].name !== name) {
+      console.warn('[AceNavigation] cannot find info to remove: ', name);
       return;
     }
     if (this.pathArray[index].replacedDestinationInfo !== undefined) {
