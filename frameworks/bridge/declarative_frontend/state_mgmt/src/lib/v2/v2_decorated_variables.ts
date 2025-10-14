@@ -266,8 +266,7 @@ class VariableUtilV2 {
             ObserveV2.getObserve().fireChange(this, consumeVarName);
           }
         },
-        enumerable: true,
-        configurable: true
+        enumerable: true
       });
       return provideView[provideVarName];
     }
