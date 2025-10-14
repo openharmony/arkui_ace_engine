@@ -27,6 +27,8 @@ ace_unittest("relative_container_test_ng") {
     "old_cases/relative_container_test_ng.cpp",
     "old_cases/relative_container_testthree_ng.cpp",
     "old_cases/relative_container_testtwo_ng.cpp",
+    "old_cases/relative_container_biasrules_test.cpp",
+    "old_cases/relative_container_chain_test.cpp",
     "relative_container_base_test_ng.cpp",
   ]
 }
