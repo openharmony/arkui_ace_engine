@@ -655,9 +655,8 @@ void SetGradientHeightImpl(Ark_NativePointer node,
     auto heightDimension = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(heightDimension);
     if (heightDimension && heightDimension->ConvertToVp() > 1.0f) {
-        heightDimension.reset();
+        TextPickerModelStatic::SetGradientHeight(frameNode, heightDimension);
     }
-    TextPickerModelStatic::SetGradientHeight(frameNode, heightDimension);
 }
 void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)

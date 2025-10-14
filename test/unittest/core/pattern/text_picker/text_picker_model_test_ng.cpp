@@ -1677,15 +1677,15 @@ HWTEST_F(TextPickerModelTestNg, GetMaxCount001, TestSize.Level1)
 HWTEST_F(TextPickerModelTestNg, TextPickerModelTestNg001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode
+     * @tc.steps: step1. Create TextPickerModelStatic and FrameNode.
      */
     TextPickerModelStatic textPickerModel;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     
     /**
-     * @tc.steps: step2. Call InitialSetupSinglePicker
-     * @tc.expected: Children should be created
+     * @tc.steps: step2. Call InitialSetupSinglePicker.
+     * @tc.expected: Children should be created.
      */
     textPickerModel.SetColumnKind(frameNode, TEXT);
     std::vector<NG::RangeContent> range = {
