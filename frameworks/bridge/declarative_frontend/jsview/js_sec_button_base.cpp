@@ -439,4 +439,10 @@ void JSSecButtonBase::SetHeightAdaptivePolicy(int32_t value)
     }
     SecurityComponentModelNG::SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }
+
+void JSSecButtonBase::SetFocusBox(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsFocusBox(info);
+    SecurityComponentModelNG::SetFocusBox();
+}
 }
