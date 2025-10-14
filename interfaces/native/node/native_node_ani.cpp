@@ -255,7 +255,7 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_GetNavDestinationAniParam(ArkUI_NodeHandle
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-int32_t OH_ArkUI_GetDrawableDescriptorFromAniValue(
+int32_t OH_ArkUI_NativeModule_GetDrawableDescriptorFromAniValue(
     ani_env* env, ani_object value, ArkUI_DrawableDescriptor** drawableDescriptor)
 {
     ani_long nativeObj = 0;
@@ -275,7 +275,7 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromAniValue(
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
-int32_t OH_ArkUI_GetDrawableDescriptorFromResourceAniValue(
+int32_t OH_ArkUI_NativeModule_GetDrawableDescriptorFromResourceAniValue(
     ani_env* env, ani_object value, ArkUI_DrawableDescriptor** drawableDescriptor)
 {
     ani_double id = 0.0;
