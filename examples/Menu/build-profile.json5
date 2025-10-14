@@ -15,21 +15,7 @@
 
 {
   "app": {
-    "signingConfigs": [
-      {
-        "name": "default",
-        "material": {
-          // 使用签名工具生成签名
-          "certpath": "",
-          "keyAlias": "",
-          "keyPassword": "",
-          "profile": "",
-          "signAlg": "",
-          "storeFile": "",
-          "storePassword": ""
-        }
-      }
-    ],
+    "signingConfigs": [],
     "products": [
       {
         "name": "default",
