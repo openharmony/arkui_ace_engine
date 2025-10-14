@@ -211,13 +211,17 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.nativeViewPartialUpdate.queryRouterPageInfo();
   }
  
-  public getUIContext(): object {
+  public getUIContext(): UIContext {
     if (typeof globalThis.__getUIContext__ === 'function') {
       return globalThis.__getUIContext__(this.nativeViewPartialUpdate.getMainInstanceId());
     }
     return this.nativeViewPartialUpdate.getUIContext();
   }
  
+  public getMainInstanceId(): number {
+    return this.nativeViewPartialUpdate.getMainInstanceId();
+  }
+
   public sendStateInfo(stateInfo: string): void {
     return this.nativeViewPartialUpdate.sendStateInfo(stateInfo);
   }

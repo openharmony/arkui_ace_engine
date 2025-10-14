@@ -28,8 +28,7 @@ constexpr int32_t STEP_6 = 6;
 constexpr int32_t STEP_7 = 7;
 constexpr int32_t STEP_8 = 8;
 constexpr int32_t STEP_9 = 9;
-constexpr double DEFAULT_CENTER_VALUE = 0.5;
-constexpr int32_t DEFAULT_ANNULUS_UNIT = static_cast<int32_t>(DimensionUnit::PERCENT);
+constexpr Dimension DEFAULT_ANNULUS_VALUE = Dimension(0.5, DimensionUnit::PERCENT);
 constexpr double DEFAULT_START_ANGLE_VALUE = 0.0;
 constexpr double DEFAULT_END_ANGLE_VALUE = 360.0;
 
@@ -43,27 +42,17 @@ void ParseAnnulusRegionCenter(EcmaVM* vm, panda::Local<panda::FunctionRef> emitt
     ArkTSUtils::ParseJsInteger(vm, isSetCenter, hasCenterValue);
     emitterProperty.isSetCenter = hasCenterValue;
     if (hasCenterValue == 1) {
-        auto centerXValueJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerXValue"));
-        auto centerXUnitJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerXUnit"));
-        double centerXValue = DEFAULT_CENTER_VALUE;
-        int32_t centerXUnit = DEFAULT_ANNULUS_UNIT;
-        ArkTSUtils::ParseJsDouble(vm, centerXValueJs, centerXValue);
-        ArkTSUtils::ParseJsInteger(vm, centerXUnitJs, centerXUnit);
-        ArkUIDimensionType centerX;
-        centerX.value = centerXValue;
-        centerX.units = centerXUnit;
-        emitterProperty.centerX = centerX;
+        auto centerXJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerX"));
+        CalcDimension centerX = DEFAULT_ANNULUS_VALUE;
+        ArkTSUtils::ParseJsLengthMetrics(vm, centerXJs, centerX);
+        emitterProperty.centerX.value = centerX.Value();
+        emitterProperty.centerX.units = static_cast<ArkUI_Int32>(centerX.Unit());
 
-        auto centerYValueJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerYValue"));
-        auto centerYUnitJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerYUnit"));
-        double centerYValue = DEFAULT_CENTER_VALUE;
-        int32_t centerYUnit = DEFAULT_ANNULUS_UNIT;
-        ArkTSUtils::ParseJsDouble(vm, centerYValueJs, centerYValue);
-        ArkTSUtils::ParseJsInteger(vm, centerYUnitJs, centerYUnit);
-        ArkUIDimensionType centerY;
-        centerY.value = centerYValue;
-        centerY.units = centerYUnit;
-        emitterProperty.centerY = centerY;
+        auto centerYJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerY"));
+        CalcDimension centerY = DEFAULT_ANNULUS_VALUE;
+        ArkTSUtils::ParseJsLengthMetrics(vm, centerYJs, centerY);
+        emitterProperty.centerY.value = centerY.Value();
+        emitterProperty.centerY.units = static_cast<ArkUI_Int32>(centerY.Unit());
     }
 }
 
@@ -76,16 +65,11 @@ void ParseAnnulusRegionRadius(EcmaVM* vm, panda::Local<panda::FunctionRef> emitt
     ArkTSUtils::ParseJsInteger(vm, isSetInnerRadius, hasInnerRadiusValue);
     emitterProperty.isSetInnerRadius = hasInnerRadiusValue;
     if (hasInnerRadiusValue == 1) {
-        auto innerRadiusValueJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "innerRadiusValue"));
-        auto innerRadiusXUnitJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "innerRadiusUnit"));
-        double innerRadiusValue = 0.0;
-        int32_t innerRadiusXUnit = 0;
-        ArkTSUtils::ParseJsDouble(vm, innerRadiusValueJs, innerRadiusValue);
-        ArkTSUtils::ParseJsInteger(vm, innerRadiusXUnitJs, innerRadiusXUnit);
-        ArkUIDimensionType innerRadius;
-        innerRadius.value = innerRadiusValue;
-        innerRadius.units = innerRadiusXUnit;
-        emitterProperty.innerRadius = innerRadius;
+        auto innerRadiusJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "innerRadius"));
+        CalcDimension innerRadius;
+        ArkTSUtils::ParseJsLengthMetrics(vm, innerRadiusJs, innerRadius);
+        emitterProperty.innerRadius.value = innerRadius.Value();
+        emitterProperty.innerRadius.units = static_cast<ArkUI_Int32>(innerRadius.Unit());
     }
 
     auto isSetOuterRadius = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetOuterRadius"));
@@ -93,16 +77,11 @@ void ParseAnnulusRegionRadius(EcmaVM* vm, panda::Local<panda::FunctionRef> emitt
     ArkTSUtils::ParseJsInteger(vm, isSetOuterRadius, hasOuterRadiusValue);
     emitterProperty.isSetOuterRadius = hasOuterRadiusValue;
     if (hasOuterRadiusValue == 1) {
-        auto outerRadiusValueJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "outerRadiusValue"));
-        auto outerRadiusXUnitJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "outerRadiusUnit"));
-        double outerRadiusValue = 0.0;
-        int32_t outerRadiusXUnit = 0;
-        ArkTSUtils::ParseJsDouble(vm, outerRadiusValueJs, outerRadiusValue);
-        ArkTSUtils::ParseJsInteger(vm, outerRadiusXUnitJs, outerRadiusXUnit);
-        ArkUIDimensionType outerRadius;
-        outerRadius.value = outerRadiusValue;
-        outerRadius.units = outerRadiusXUnit;
-        emitterProperty.outerRadius = outerRadius;
+        auto outerRadiusJs = emitterPropertyObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "outerRadius"));
+        CalcDimension outerRadius;
+        ArkTSUtils::ParseJsLengthMetrics(vm, outerRadiusJs, outerRadius);
+        emitterProperty.outerRadius.value = outerRadius.Value();
+        emitterProperty.outerRadius.units = static_cast<ArkUI_Int32>(outerRadius.Unit());
     }
 }
 
@@ -183,6 +162,130 @@ void ParseEmitterPositionAndSize(EcmaVM* vm, panda::Local<panda::FunctionRef> em
         emitterProperty.sizeHeight = sizeHeightValue;
     }
 }
+
+void ParseFieldRegion(EcmaVM* vm, panda::Local<panda::FunctionRef> rippleFieldObj, ArkFieldRegion& region)
+{
+    //parse shape
+    auto isSetShape = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetShape"));
+    int32_t hasShapeValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetShape, hasShapeValue);
+    region.isSetShape = hasShapeValue;
+    if (hasShapeValue == 1) {
+        auto shape = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "shape"));
+        int32_t shapeValue = 0;
+        ArkTSUtils::ParseJsInteger(vm, shape, shapeValue);
+        region.shape = shapeValue;
+    }
+
+    //parse position
+    auto isSetPosition = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetPosition"));
+    int32_t hasPositionValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetPosition, hasPositionValue);
+    region.isSetPosition = hasPositionValue;
+    if (hasPositionValue == 1) {
+        auto positionXJs = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "positionX"));
+        double positionX = 0;
+        ArkTSUtils::ParseJsDouble(vm, positionXJs, positionX);
+        region.positionX = positionX;
+
+        auto positionYJs = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "positionY"));
+        double positionY = 0;
+        ArkTSUtils::ParseJsDouble(vm, positionYJs, positionY);
+        region.positionY = positionY;
+    }
+
+    //parse size
+    auto isSetSize = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetSize"));
+    int32_t hasSizeValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetSize, hasSizeValue);
+    region.isSetSize = hasSizeValue;
+    if (hasSizeValue == 1) {
+        auto sizeWidthJs = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "sizeWidth"));
+        double sizeWidth = 0;
+        ArkTSUtils::ParseJsDouble(vm, sizeWidthJs, sizeWidth);
+        region.sizeWidth = sizeWidth;
+
+        auto sizeHeightJs = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "sizeHeight"));
+        double sizeHeight = 0;
+        ArkTSUtils::ParseJsDouble(vm, sizeHeightJs, sizeHeight);
+        region.sizeHeight = sizeHeight;
+    }
+}
+
+void ParseRippleCenter(EcmaVM* vm, panda::Local<panda::FunctionRef> rippleFieldObj,
+    ArkRippleFieldOptions& rippleField)
+{
+    //parse center
+    auto isSetCenter = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetCenter"));
+    int32_t hasCenterValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetCenter, hasCenterValue);
+    rippleField.isSetCenter = hasCenterValue;
+    if (hasCenterValue == 1) {
+        auto centerXJs = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerX"));
+        double centerX = 0;
+        ArkTSUtils::ParseJsDouble(vm, centerXJs, centerX);
+        rippleField.centerX = centerX;
+        auto centerYJs = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "centerY"));
+        double centerY = 0;
+        ArkTSUtils::ParseJsDouble(vm, centerYJs, centerY);
+        rippleField.centerY = centerY;
+    }
+}
+
+void ParseRipplePara(EcmaVM* vm, panda::Local<panda::FunctionRef> rippleFieldObj,
+    ArkRippleFieldOptions& rippleField)
+{
+    //parse amplitude
+    auto isSetAmplitude = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetAmplitude"));
+    int32_t hasAmplitudeValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetAmplitude, hasAmplitudeValue);
+    rippleField.isSetAmplitude = hasAmplitudeValue;
+    if (hasAmplitudeValue == 1) {
+        auto amplitude = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "amplitude"));
+        double amplitudeValue = 0;
+        ArkTSUtils::ParseJsDouble(vm, amplitude, amplitudeValue);
+        rippleField.amplitude = amplitudeValue;
+    }
+
+    //parse wavelength
+    auto isSetWaveLength = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetWaveLength"));
+    int32_t hasWaveLengthValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetWaveLength, hasWaveLengthValue);
+    rippleField.isSetWaveLength = hasWaveLengthValue;
+    if (hasWaveLengthValue == 1) {
+        auto wavelength = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "wavelength"));
+        double waveLengthValue = 0;
+        ArkTSUtils::ParseJsDouble(vm, wavelength, waveLengthValue);
+        rippleField.wavelength = waveLengthValue;
+    }
+
+    //parse waveSpeed
+    auto isSetWaveSpeed = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetWaveSpeed"));
+    int32_t hasWaveSpeedValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetWaveSpeed, hasWaveSpeedValue);
+    rippleField.isSetWaveSpeed = hasWaveSpeedValue;
+    if (hasWaveSpeedValue == 1) {
+        auto waveSpeed = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "waveSpeed"));
+        double waveSpeedValue = 0;
+        ArkTSUtils::ParseJsDouble(vm, waveSpeed, waveSpeedValue);
+        rippleField.waveSpeed = waveSpeedValue;
+    }
+
+    //parse attenuation
+    auto isSetAttenuation = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetAttenuation"));
+    int32_t hasAttenuationValue = 0;
+    ArkTSUtils::ParseJsInteger(vm, isSetAttenuation, hasAttenuationValue);
+    rippleField.isSetAttenuation = hasAttenuationValue;
+    if (hasAttenuationValue == 1) {
+        auto attenuation = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "attenuation"));
+        double attenuationValue = 0;
+        ArkTSUtils::ParseJsDouble(vm, attenuation, attenuationValue);
+        rippleField.attenuation = attenuationValue;
+    }
+
+    //parse center
+    ParseRippleCenter(vm, rippleFieldObj, rippleField);
+}
 }
 
 ArkUINativeModuleValue ParticleBridge::SetDisturbanceField(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -256,6 +359,112 @@ ArkUINativeModuleValue ParticleBridge::ResetDisturbanceField(ArkUIRuntimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getParticleModifier()->ResetDisturbanceField(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ParticleBridge::SetRippleField(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> jsValueRef = runtimeCallInfo->GetCallArgRef(1);
+    if (!jsValueRef->IsArray(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto array = panda::Local<panda::ArrayRef>(jsValueRef);
+    auto length = array->Length(vm);
+    std::vector<ArkRippleFieldOptions> dataVector;
+
+    for (uint32_t i = 0; i < length; i++) {
+        Local<JSValueRef> rippleFieldValue = panda::ArrayRef::GetValueAt(vm, array, i);
+        if (rippleFieldValue->IsObject(vm)) {
+            ArkRippleFieldOptions rippleField;
+            auto rippleFieldObj = rippleFieldValue->ToObject(vm);
+            ParseRipplePara(vm, rippleFieldObj, rippleField);
+            auto isSetRegion = rippleFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetRegion"));
+            int32_t hasRegionValue = 0;
+            ArkTSUtils::ParseJsInteger(vm, isSetRegion, hasRegionValue);
+            rippleField.isSetRegion = hasRegionValue;
+            if (hasRegionValue == 1) {
+                ParseFieldRegion(vm, rippleFieldObj, rippleField.region);
+            }
+            dataVector.emplace_back(rippleField);
+        }
+    }
+    GetArkUINodeModifiers()->getParticleModifier()->SetRippleField(
+        nativeNode, dataVector.data(), static_cast<ArkUI_Int32>(dataVector.size()));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ParticleBridge::ResetRippleField(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getParticleModifier()->ResetRippleField(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ParticleBridge::SetVelocityField(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> jsValueRef = runtimeCallInfo->GetCallArgRef(1);
+    if (!jsValueRef->IsArray(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto array = panda::Local<panda::ArrayRef>(jsValueRef);
+    auto length = array->Length(vm);
+    std::vector<ArkVelocityFieldOptions> dataVector;
+
+    for (uint32_t i = 0; i < length; i++) {
+        Local<JSValueRef> velocityFieldValue = panda::ArrayRef::GetValueAt(vm, array, i);
+        if (velocityFieldValue->IsObject(vm)) {
+            auto velocityFieldObj = velocityFieldValue->ToObject(vm);
+            //parse velocity
+            auto isSetVelocity = velocityFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetVelocity"));
+            int32_t hasVelocityValue = 0;
+            ArkTSUtils::ParseJsInteger(vm, isSetVelocity, hasVelocityValue);
+            ArkVelocityFieldOptions velocityField;
+            velocityField.isSetVelocity = hasVelocityValue;
+            if (hasVelocityValue == 1) {
+                auto velocityXJs = velocityFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "velocityX"));
+                double velocityX = 0;
+                ArkTSUtils::ParseJsDouble(vm, velocityXJs, velocityX);
+                velocityField.velocityX = velocityX;
+
+                auto velocityYJs = velocityFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "velocityY"));
+                double velocityY = 0;
+                ArkTSUtils::ParseJsDouble(vm, velocityYJs, velocityY);
+                velocityField.velocityY = velocityY;
+            }
+
+            auto isSetRegion = velocityFieldObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isSetRegion"));
+            int32_t hasRegionValue = 0;
+            ArkTSUtils::ParseJsInteger(vm, isSetRegion, hasRegionValue);
+            velocityField.isSetRegion = hasRegionValue;
+            if (hasRegionValue == 1) {
+                ParseFieldRegion(vm, velocityFieldObj, velocityField.region);
+            }
+            dataVector.emplace_back(velocityField);
+        }
+    }
+    GetArkUINodeModifiers()->getParticleModifier()->SetVelocityField(
+        nativeNode, dataVector.data(), static_cast<ArkUI_Int32>(dataVector.size()));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ParticleBridge::ResetVelocityField(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getParticleModifier()->ResetVelocityField(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

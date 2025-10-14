@@ -7953,7 +7953,8 @@ void ResetBias(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ResetBias(frameNode);
 }
-void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size)
+void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size,
+    ArkUI_Bool measureFromViewport)
 {
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
@@ -7969,7 +7970,7 @@ void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_
         event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(ratio);
         SendArkUISyncEvent(&event);
     };
-    ViewAbstract::SetOnVisibleChange(frameNode, onEvent, ratioList);
+    ViewAbstract::SetOnVisibleChange(frameNode, onEvent, ratioList, measureFromViewport);
 }
 
 void SetLayoutRect(ArkUINodeHandle node, ArkUI_Int32 (*values)[4])
@@ -9162,7 +9163,8 @@ ArkUIBackdropBlur GetNodeBackdropBlur(ArkUINodeHandle node)
 }
 
 void SetOnVisibleAreaApproximateChange(
-    ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Int32 interval)
+    ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Int32 interval,
+    ArkUI_Bool measureFromViewport)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -9178,7 +9180,7 @@ void SetOnVisibleAreaApproximateChange(
         event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(ratio);
         SendArkUISyncEvent(&event);
     };
-    ViewAbstract::SetOnVisibleAreaApproximateChange(frameNode, onEvent, ratioList, interval);
+    ViewAbstract::SetOnVisibleAreaApproximateChange(frameNode, onEvent, ratioList, interval, measureFromViewport);
 }
 
 void FreezeUINodeById(ArkUI_CharPtr id, ArkUI_Bool isFreeze)

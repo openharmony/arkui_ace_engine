@@ -80,6 +80,7 @@ private:
         const RefPtr<SecurityComponentLayoutProperty>& securityComponentLayoutProperty);
 
     void UpdateTextSize();
+    void HandleSecCompBorderRadius(LayoutWrapper* layoutWrapper);
 
     float pow(float value)
     {

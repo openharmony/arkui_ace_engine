@@ -524,10 +524,10 @@ HWTEST_F(
     algorithm_->SetHeight(500.0f);
     algorithm_->CalcMainAndMiddlePos();
 
-    EXPECT_TRUE(NearEqual(algorithm_->startMainPos_, 0.0f));
-    EXPECT_TRUE(NearEqual(algorithm_->endMainPos_, 500.0f));
-    EXPECT_TRUE(NearEqual(algorithm_->middleItemStartPos_, 185.0f));
-    EXPECT_TRUE(NearEqual(algorithm_->middleItemEndPos_, 315.0f));
+    EXPECT_EQ(algorithm_->startMainPos_, 110);
+    EXPECT_EQ(algorithm_->endMainPos_, 390);
+    EXPECT_EQ(algorithm_->middleItemStartPos_, 230);
+    EXPECT_EQ(algorithm_->middleItemEndPos_, 270);
 }
 
 /**
@@ -545,10 +545,10 @@ HWTEST_F(
     algorithm_->SetHeight(1200.0f);
     algorithm_->CalcMainAndMiddlePos();
 
-    EXPECT_TRUE(NearEqual(algorithm_->startMainPos_, 145.0f));
-    EXPECT_TRUE(NearEqual(algorithm_->endMainPos_, 1055.0f));
-    EXPECT_TRUE(NearEqual(algorithm_->middleItemStartPos_, 535.0f));
-    EXPECT_TRUE(NearEqual(algorithm_->middleItemEndPos_, 665.0f));
+    EXPECT_EQ(algorithm_->startMainPos_, 460);
+    EXPECT_EQ(algorithm_->endMainPos_, 740);
+    EXPECT_EQ(algorithm_->middleItemStartPos_, 580.0f);
+    EXPECT_EQ(algorithm_->middleItemEndPos_, 620.0f);
 }
 
 /**
@@ -1191,27 +1191,26 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithmTrans
     ASSERT_NE(frameNode, nullptr);
 
     // Set up algorithm properties needed for TranslateAndRotate
-    algorithm_->SetHeight(500.0f);
+    algorithm_->SetHeight(280);
     algorithm_->CalcMainAndMiddlePos();
-    algorithm_->topPadding_ = 20.0f;
 
     /**
      * @tc.steps: step2. Test TranslateAndRotate with different offset values
      */
     // Test case 1: Zero offset
-    OffsetF offset1(0.0f, 0.0f);
+    OffsetF offset1(0.0f, 120.0f);
     float originalY1 = offset1.GetY();
     algorithm_->TranslateAndRotate(frameNode, offset1);
-    EXPECT_TRUE(GreatNotEqual(offset1.GetY(), originalY1));
+    EXPECT_TRUE(NearEqual(offset1.GetY(), originalY1));
 
     // Test case 2: Positive offset
-    OffsetF offset2(0.0f, 100.0f);
+    OffsetF offset2(0.0f, 130.0f);
     float originalY2 = offset2.GetY();
     algorithm_->TranslateAndRotate(frameNode, offset2);
-    EXPECT_TRUE(GreatNotEqual(offset2.GetY(), originalY2));
+    EXPECT_TRUE(LessNotEqual(offset2.GetY(), originalY2));
 
     // Test case 3: Negative offset
-    OffsetF offset3(0.0f, -100.0f);
+    OffsetF offset3(0.0f, 110.0f);
     float originalY3 = offset3.GetY();
     algorithm_->TranslateAndRotate(frameNode, offset3);
     EXPECT_TRUE(GreatNotEqual(offset3.GetY(), originalY3));
@@ -1264,7 +1263,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Rese
     // Check if offset is set to -PICKER_ITEM_DEFAULT_HEIGHT
     auto newOffset = childGeometryNode->GetMarginFrameOffset();
     EXPECT_TRUE(NearEqual(newOffset.GetX(), 0.0f));
-    EXPECT_TRUE(NearEqual(newOffset.GetY(), -130.0f));
+    EXPECT_TRUE(NearEqual(newOffset.GetY(), -40.0));
     EXPECT_FALSE(NearEqual(newOffset.GetY(), originalOffset.GetY()));
 }
 

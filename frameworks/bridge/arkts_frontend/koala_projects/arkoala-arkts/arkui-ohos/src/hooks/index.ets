@@ -44,13 +44,13 @@ import { TextModifier } from "../TextModifier";
 import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
 import { CommonMethod, StateStyles, ArkCommonMethodComponent, CustomProperty } from "#generated";
-
+import { CommonMethodModifier } from "../CommonMethodModifier"
 import { AnimateParam } from "#generated";
 import { GestureModifier } from "#generated";
 import { pointer } from "@koalaui/interop";
 import { ArkUIAniModule } from "arkui.ani"
 import { InteropNativeModule } from "@koalaui/interop"
-import { NavPathStack, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent } from "../component/navigation"
+import { NavPathStack, NavigationModuleInfo, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent } from "../component/navigation"
 import { PathStackUtils } from "../base/ArkNavPathStack"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
@@ -65,9 +65,40 @@ export function hookGestureModifier(
 ) {}
 
 export function hookStateStyleImpl(
-  receiver: CommonMethod,
+  receiver: ArkCommonMethodComponent,
   value: StateStyles | undefined
-) {}
+) {
+    let currentState = receiver.getPeer().getOrCreateStateStyleMutable();
+    if (currentState === undefined) {
+      return;
+    }
+    const UI_STATE_NORMAL = 0;
+    const UI_STATE_PRESSED = 1;
+    const UI_STATE_FOCUSED = 1 << 1;
+    const UI_STATE_DISABLED = 1 << 2;
+    const UI_STATE_SELECTED = 1 << 3;
+
+    let cm = new CommonMethodModifier();
+
+    if (currentState.value === UI_STATE_NORMAL) {
+        value?.normal?.(cm)
+    }
+    if (currentState.value & UI_STATE_PRESSED) {
+        value?.clicked?.(cm)
+        value?.pressed?.(cm)
+    }
+    if (currentState.value & UI_STATE_FOCUSED) {
+        value?.focused?.(cm)
+    }
+    if (currentState.value & UI_STATE_DISABLED) {
+        value?.disabled?.(cm)
+    }
+    if (currentState.value & UI_STATE_SELECTED) {
+        value?.selected?.(cm)
+    }
+
+    cm.applyModifierPatch(receiver.getPeer())
+}
 
 export class ElementIdToCustomProperties {
     constructor() { }
@@ -96,12 +127,42 @@ export function hookCustomPropertyImpl(component: ArkCommonMethodComponent, name
         }
         return undefined;
     };
-    ArkUIAniModule._Common_SetCustomPropertyCallBack(component.getPeer().getPeerPtr(), removeCallback, getCallback);
+    const getAllCustomPropertiesCallback: () => string = () => {
+        if (ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
+            let allProperties: Record<string, CustomProperty> = new Record<string, CustomProperty>();
+            const nodeCustomProperties = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
+            if (nodeCustomProperties === undefined || nodeCustomProperties === null) {
+                return ""
+            }
+            const allKeys = Array.from(nodeCustomProperties!.keys());
+            for (let key of allKeys) {
+                try {
+                    const propertyValue = nodeCustomProperties!.get(key);
+                    if (propertyValue === undefined) {
+                        allProperties.set(key, 'Unsupported Type')
+                    } else {
+                        allProperties.set(key, propertyValue)
+                    }
+                } catch (e) {
+                    allProperties.set(key, 'Unsupported Type')
+                }   
+            }
+            try {
+                return JSON.stringify(allProperties);
+            } catch (e) {
+                return "";
+            }
+        }
+        return "";
+    };
+    ArkUIAniModule._Common_SetCustomPropertyCallBack(component.getPeer().getPeerPtr(), removeCallback, getCallback,
+        getAllCustomPropertiesCallback);
 }
 
 export * from "./modifiers";
 export * from "./content_modifiers/ContentModifierHooks";
 export * from "./theme";
+export { NavDestinationBuilder, NavigationRouterMap } from "./NavigationOpsHandWritten";
 
 export function hookImageSetImageOptions(component: ArkImageComponent, src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
     ImageOpsHandWritten.hookImageSetImageOptionsImpl(component, src, imageAIOptions);
@@ -135,8 +196,8 @@ export function hookGetParamByIndexMethod(pathStack: NavPathStack, index: number
 export function hookGetParamByNameMethod(pathStack: NavPathStack, name: string): Array<Object | null | undefined> {
   return PathStackUtils.getParamByName(pathStack, name);
 }
-export function hookSetNavigationOptions(component: ArkNavigationComponent, pathInfos?: NavPathStack): void {
-  NavigationOpsHandWritten.hookSetNavigationOptionsImpl(component, pathInfos);
+export function hookSetNavigationOptions(component: ArkNavigationComponent, pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): void {
+  NavigationOpsHandWritten.hookSetNavigationOptionsImpl(component, pathInfos, moduleInfo);
 }
 
 export function hookSetNavDestination(component: ArkNavigationComponent, value: PageMapBuilder | undefined): void {

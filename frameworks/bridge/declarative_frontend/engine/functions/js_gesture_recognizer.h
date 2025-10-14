@@ -320,10 +320,12 @@ public:
     void Update(const RefPtr<NG::LongPressRecognizer>& recognizer)
     {
         JSMultiFingerRecognizer::Update(recognizer);
+        allowableMovement_ = recognizer->GetAllowableMovement();
         duration_ = recognizer->GetDuration();
         repeat_ = recognizer->GetIsRepeat();
     }
 
+    void GetAllowableMovement(const JSCallbackInfo& args);
     void GetDuration(const JSCallbackInfo& args);
     void GetRepeat(const JSCallbackInfo& args);
     void SetRepeat(bool repeat);
@@ -343,6 +345,7 @@ private:
         }
     }
 
+    int32_t allowableMovement_ = 15;
     int32_t duration_ = 500;
     bool repeat_ = false;
 };

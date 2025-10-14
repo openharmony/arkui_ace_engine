@@ -249,7 +249,7 @@ public:
     ~PlaceholderResponseArea() = default;
     void InitResponseArea() override;
     void SetStyleString(const RefPtr<SpanString>& value);
-    void PlacehodlerMountToParent();
+    void PlaceholderMountToParent();
     void PlaceholderRemoveFromParent();
     SizeF MeasurePlaceholder(LayoutWrapper* layoutWrapper, int32_t index, const LayoutConstraintF& contentConstraint);
     SizeF Measure(LayoutWrapper* layoutWrapper, int32_t index) override {return SizeF();}

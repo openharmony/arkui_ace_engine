@@ -1837,4 +1837,30 @@ HWTEST_F(NavigationTestNg, SizeCalculationSplit001, TestSize.Level1)
     EXPECT_TRUE(NearEqual(algorithm->realNavBarWidth_, halfWidth));
     EXPECT_TRUE(NearEqual(algorithm->realContentWidth_, halfWidth));
 }
+
+/**
+ * @tc.name: CreateDividerNodeIfNeeded
+ * @tc.desc: no branch
+ *           test divider hitTestMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, CreateDividerNodeIfNeeded, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    auto navNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    pattern->SetNavigationStack(navigationStack);
+
+    navigationModel.CreateDividerNodeIfNeeded(navNode);
+    auto divider = AceType::DynamicCast<FrameNode>(navNode->GetDividerNode());
+    ASSERT_NE(divider, nullptr);
+    auto hitTestMode = divider->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->GetHitTestMode();
+    EXPECT_EQ(hitTestMode, HitTestMode::HTMTRANSPARENT);
+}
 } // namespace OHOS::Ace::NG

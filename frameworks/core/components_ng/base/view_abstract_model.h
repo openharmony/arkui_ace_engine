@@ -365,9 +365,9 @@ public:
     virtual void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier) = 0;
     virtual void SetDragPreview(const NG::DragDropInfo& info) = 0;
     virtual void SetOnVisibleChange(std::function<void(bool, double)>&& onVisibleChange,
-        const std::vector<double>& ratios, bool isOutOfBoundsAllowed = false) = 0;
+        const std::vector<double>& ratios, bool measureFromViewport = false) = 0;
     virtual void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
-        const std::vector<double>& ratioList, int32_t expectedUpdateInterval) = 0;
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval, bool measureFromViewport = false) = 0;
     virtual void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) = 0;
@@ -494,6 +494,7 @@ public:
     virtual void SetAccessibilitySelected(bool selected, bool resetValue) = 0;
     virtual void SetAccessibilityChecked(bool checked, bool resetValue) = 0;
     virtual void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) = 0;
+    virtual void SetAccessibilityGroupOptions(NG::AccessibilityGroupOptions groupOptions) = 0;
     virtual void SetAccessibilityNextFocusId(const std::string& nextFocusId) = 0;
     virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
     virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;

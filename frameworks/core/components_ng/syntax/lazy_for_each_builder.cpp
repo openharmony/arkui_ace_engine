@@ -996,16 +996,19 @@ namespace OHOS::Ace::NG {
         std::unordered_map<std::string, LazyForEachCacheChild>& cache, int64_t deadline,
         const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
-        if (!enablePreBuild_ || GetSysTimestamp() > deadline) {
+        if (GetSysTimestamp() > deadline) {
             if (DeleteExpiringItemImmediately()) {
-                return false;
+                return !enablePreBuild_;
             }
             for (const auto& [key, node] : expiringItem_) {
                 if (node.first == -1) {
                     cache.try_emplace(key, node);
                 }
             }
-            return false;
+            return !enablePreBuild_;
+        }
+        if (!enablePreBuild_) {
+            return true;
         }
         bool isTimeout = false;
         preBuildingIndex_ = -1;

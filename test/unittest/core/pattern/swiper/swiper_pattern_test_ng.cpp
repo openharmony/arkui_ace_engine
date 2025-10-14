@@ -2148,4 +2148,43 @@ HWTEST_F(SwiperPatternTestNg, PropertyPrefMonitor001, TestSize.Level1)
     pattern_->PropertyPrefMonitor(false);
     EXPECT_FALSE(pattern_->isAutoPlayAnimationRunning_);
 }
+
+/**
+ * @tc.name: FillType001
+ * @tc.desc: Test FillType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FillType001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper, isAutoPlayAnimationRunning_ is false.
+     * @tc.expected: isAutoPlayAnimationRunning_ is false.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetFillType(0);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto layoutProperty = frameNode_->GetLayoutProperty<SwiperLayoutProperty>();
+
+    EXPECT_EQ(SwiperModelNG::GetFillType(AceType::RawPtr(frameNode_)), 0);
+    pattern_->CalculateDisplayCount();
+    EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 1);
+    SwiperUtils::CheckBreakPointDisplayCount(layoutProperty, 100);
+    EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 1);
+    SwiperUtils::CheckBreakPointDisplayCount(layoutProperty, 700);
+    EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 2);
+    SwiperUtils::CheckBreakPointDisplayCount(layoutProperty, 900);
+    EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 3);
+
+    SwiperModelNG::SetFillType(AceType::RawPtr(frameNode_), 2);
+    EXPECT_EQ(SwiperModelNG::GetFillType(AceType::RawPtr(frameNode_)), 2);
+    pattern_->CalculateDisplayCount();
+    EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 2);
+    SwiperUtils::CheckBreakPointDisplayCount(layoutProperty, 100);
+    EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 2);
+    SwiperUtils::CheckBreakPointDisplayCount(layoutProperty, 700);
+    EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 3);
+    SwiperUtils::CheckBreakPointDisplayCount(layoutProperty, 900);
+    EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 5);
+}
 } // namespace OHOS::Ace::NG

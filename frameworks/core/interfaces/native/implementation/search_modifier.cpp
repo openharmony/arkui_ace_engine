@@ -65,7 +65,7 @@ NG::IconOptions Convert(const Ark_IconOptions& src)
 {
     NG::IconOptions options;
     auto iconColor = Converter::OptConvert<Color>(src.color);
-    auto iconSize = Converter::OptConvert<Dimension>(src.size);
+    auto iconSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.size);
     auto iconSrc = Converter::OptConvert<Ark_Resource_Simple>(src.src);
     if (iconSrc) {
         options.UpdateSrc(iconSrc->content, iconSrc->moduleName, iconSrc->bundleName);
@@ -85,7 +85,7 @@ SearchButtonOptions Convert(const Ark_SearchButtonOptions& src)
 {
     SearchButtonOptions buttonOptions;
     buttonOptions.color = OptConvert<Color> (src.fontColor);
-    buttonOptions.width = OptConvert<Dimension> (src.fontSize);
+    buttonOptions.width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.fontSize);
     buttonOptions.autoDisable = OptConvert<bool> (src.autoDisable);
     return buttonOptions;
 }
@@ -194,7 +194,7 @@ void SetOnEditChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SearchModelNG::SetOnEditChange(frameNode, nullptr);
         return;
     }
     auto onEditChange = [arkCallback = CallbackHelper(*optValue)](bool value) {
@@ -349,7 +349,7 @@ void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SearchModelNG::SetOnTextSelectionChange(frameNode, nullptr);
         return;
     }
     auto onTextSelectionChange = [arkCallback = CallbackHelper(*optValue)](
@@ -385,7 +385,7 @@ void SetOnCopyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SearchModelNG::SetOnCopy(frameNode, nullptr);
         return;
     }
     auto onCopy = [arkCallback = CallbackHelper(*optValue)](const std::u16string& value) {
@@ -402,7 +402,7 @@ void SetOnCutImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SearchModelNG::SetOnCut(frameNode, nullptr);
         return;
     }
     auto onCut = [arkCallback = CallbackHelper(*optValue)](const std::u16string& value) {
@@ -419,7 +419,7 @@ void SetOnPasteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SearchModelNG::SetOnPasteWithEvent(frameNode, nullptr);
         return;
     }
     auto onPaste = [arkCallback = CallbackHelper(*optValue)](const std::u16string& content,
@@ -568,6 +568,8 @@ void SetFontFeatureImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto fontFeatureSettings = Converter::OptConvertPtr<std::string>(value);
     if (!fontFeatureSettings) {
+        FONT_FEATURES_LIST fontFeatures;
+        SearchModelNG::SetFontFeature(frameNode, fontFeatures);
         return;
     }
     SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(*fontFeatureSettings));
@@ -579,7 +581,7 @@ void SetOnWillInsertImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SearchModelNG::SetOnWillInsertValueEvent(frameNode, nullptr);
         return;
     }
     auto onWillInsert = [callback = CallbackHelper(*optValue)](const InsertValueInfo& value) -> bool {
@@ -600,7 +602,7 @@ void SetOnDidInsertImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SearchModelNG::SetOnDidInsertValueEvent(frameNode, nullptr);
         return;
     }
     auto onDidInsert = [arkCallback = CallbackHelper(*optValue)](const InsertValueInfo& value) {
@@ -620,7 +622,7 @@ void SetOnWillDeleteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SearchModelNG::SetOnWillDeleteEvent(frameNode, nullptr);
         return;
     }
     auto onWillDelete = [callback = CallbackHelper(*optValue)](const DeleteValueInfo& value) -> bool {
@@ -642,7 +644,7 @@ void SetOnDidDeleteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SearchModelNG::SetOnDidDeleteEvent(frameNode, nullptr);
         return;
     }
     auto onDidDelete = [arkCallback = CallbackHelper(*optValue)](const DeleteValueInfo& value) {
@@ -663,7 +665,7 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SearchModelStatic::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
         return;
     }
     auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
@@ -727,6 +729,7 @@ void SetOnWillChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
+        SearchModelNG::SetOnWillChangeEvent(frameNode, nullptr);
         return;
     }
     auto onWillChange = [callback = CallbackHelper(*optValue)](const ChangeValueInfo& value) -> bool {

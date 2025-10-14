@@ -1942,6 +1942,41 @@ struct ArkEmitterPropertyOptions {
     ArkUI_Float32 endAngle;
 };
 
+struct ArkFieldRegion {
+    ArkUI_Int32 isSetShape;
+    ArkUI_Int32 shape;
+    ArkUI_Int32 isSetPosition;
+    ArkUI_Float32 positionX;
+    ArkUI_Float32 positionY;
+    ArkUI_Int32 isSetSize;
+    ArkUI_Float32 sizeWidth;
+    ArkUI_Float32 sizeHeight;
+};
+
+struct ArkRippleFieldOptions {
+    ArkUI_Int32 isSetAmplitude;
+    ArkUI_Float32 amplitude;
+    ArkUI_Int32 isSetWaveLength;
+    ArkUI_Float32 wavelength;
+    ArkUI_Int32 isSetWaveSpeed;
+    ArkUI_Float32 waveSpeed;
+    ArkUI_Int32 isSetAttenuation;
+    ArkUI_Float32 attenuation;
+    ArkUI_Int32 isSetCenter;
+    ArkUI_Float32 centerX;
+    ArkUI_Float32 centerY;
+    ArkUI_Int32 isSetRegion;
+    ArkFieldRegion region;
+};
+
+struct ArkVelocityFieldOptions {
+    ArkUI_Int32 isSetVelocity;
+    ArkUI_Float32 velocityX;
+    ArkUI_Float32 velocityY;
+    ArkUI_Int32 isSetRegion;
+    ArkFieldRegion region;
+};
+
 typedef struct {
     ArkUIDragEvent* dragEvent;
     ArkUI_Int32 status;
@@ -2784,8 +2819,8 @@ struct ArkUICommonModifier {
     void (*getOutlineColor)(ArkUINodeHandle node, ArkUI_Uint32 (*values)[4]);
     void (*getSize)(ArkUINodeHandle node, ArkUI_Float32 (*values)[2], ArkUI_Int32 unit);
     ArkUI_Bool (*getRenderGroup)(ArkUINodeHandle node);
-    void (*setOnVisibleAreaChange)(
-        ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size);
+    void (*setOnVisibleAreaChange)(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values,
+        ArkUI_Int32 size, ArkUI_Bool measureFromViewport);
     ArkUI_CharPtr (*getGeometryTransition)(ArkUINodeHandle node, ArkUIGeometryTransitionOptions* options);
     void (*setChainStyle)(ArkUINodeHandle node, ArkUI_Int32 direction, ArkUI_Int32 style);
     void (*getChainStyle)(ArkUINodeHandle node, ArkUI_Int32 (*values)[2]);
@@ -2863,7 +2898,8 @@ struct ArkUICommonModifier {
     ArkUIBackdropBlur (*getNodeBackdropBlur)(ArkUINodeHandle node);
     void (*setDisableDataPrefetch)(ArkUINodeHandle node, ArkUI_Bool disable);
     void (*setOnVisibleAreaApproximateChange)(
-        ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Int32 interval);
+        ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Int32 interval,
+        ArkUI_Bool measureFromViewport);
     void (*setPrivacySensitive)(ArkUINodeHandle node, ArkUI_Int32 sensitive);
     void (*resetPrivacySensitive)(ArkUINodeHandle node);
     void (*freezeUINodeById)(ArkUI_CharPtr id, ArkUI_Bool isFreeze);
@@ -3611,6 +3647,10 @@ struct ArkUIParticleModifier {
     void (*ResetDisturbanceField)(ArkUINodeHandle node);
     void (*SetEmitter)(ArkUINodeHandle node, const ArkEmitterPropertyOptions* valuesArray, ArkUI_Int32 length);
     void (*ResetEmitter)(ArkUINodeHandle node);
+    void (*SetRippleField)(ArkUINodeHandle node, const ArkRippleFieldOptions* valuesArray, ArkUI_Int32 length);
+    void (*ResetRippleField)(ArkUINodeHandle node);
+    void (*SetVelocityField)(ArkUINodeHandle node, const ArkVelocityFieldOptions* valuesArray, ArkUI_Int32 length);
+    void (*ResetVelocityField)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperModifier {
@@ -3729,6 +3769,9 @@ struct ArkUISwiperModifier {
     void (*setSwiperOnScrollStateChanged)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnScrollStateChanged)(ArkUINodeHandle node);
     void (*setSwiperFinishAnimation)(ArkUINodeHandle node);
+    void (*setSwiperFillType)(ArkUINodeHandle node, ArkUI_Int32 fillType);
+    void (*resetSwiperFillType)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperFillType)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -4426,6 +4469,8 @@ struct ArkUIGestureModifier {
         ArkUIGestureRecognizer* (*parallelInnerGesture)(ArkUIParallelInnerGestureEvent* event));
     ArkUI_Int32 (*setGestureRecognizerEnabled)(ArkUIGestureRecognizer* recognizer, bool enabled);
     ArkUI_Int32 (*setGestureRecognizerLimitFingerCount)(ArkUIGesture* gesture, bool limitFingerCount);
+    ArkUI_Int32 (*setLongPressGestureAllowableMovement)(ArkUIGesture* gesture, int32_t allowableMovement);
+    ArkUI_Int32 (*getLongPressGestureAllowableMovement)(ArkUIGesture* gesture, int32_t* allowableMovement);
     ArkUI_Bool (*getGestureRecognizerEnabled)(ArkUIGestureRecognizer* recognizer);
     ArkUI_Int32 (*getGestureRecognizerState)(ArkUIGestureRecognizer* recognizer, ArkUIGestureRecognizerState* state);
     ArkUI_Int32 (*gestureEventTargetInfoIsScrollBegin)(ArkUIGestureEventTargetInfo* info, bool* ret);
@@ -5236,6 +5281,8 @@ struct ArkUIWebModifier {
     void (*resetOnNativeEmbedLifecycleChange)(ArkUINodeHandle node);
     void (*setOnNativeEmbedGestureEvent)(ArkUINodeHandle node, void* callback);
     void (*resetOnNativeEmbedGestureEvent)(ArkUINodeHandle node);
+    void (*setOnNativeEmbedMouseEvent)(ArkUINodeHandle node, void* callback);
+    void (*resetOnNativeEmbedMouseEvent)(ArkUINodeHandle node);
     void (*setOnNativeEmbedObjectParamChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnNativeEmbedObjectParamChange)(ArkUINodeHandle node);
     void (*setRegisterNativeEmbedRule)(ArkUINodeHandle node, ArkUI_CharPtr tag, ArkUI_CharPtr type);
@@ -6646,6 +6693,12 @@ struct ArkUISelectModifier {
     void (*setMenuBgColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr menuBgColorRawPtr);
     void (*setArrowColor)(ArkUINodeHandle node, const ArkUI_Uint32 arrowColor);
     void (*setShowDefaultSelectedIcon)(ArkUINodeHandle node, ArkUI_Bool show);
+    void (*setSelectBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setSelectBackgroundColorWithColorSpace)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
+    void (*resetSelectBackgroundColor)(ArkUINodeHandle node);
+    void (*setSelectBackgroundColorWithColorSpacePtr)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, ArkUI_VoidPtr colorRawPtr);
 };
 
 /** Common for all API variants.*/

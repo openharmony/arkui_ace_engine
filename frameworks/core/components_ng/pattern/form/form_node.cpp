@@ -43,7 +43,7 @@ const std::unordered_map<TouchType, int32_t> TOUCH_TYPE_MAP = {
 };
 
 std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, const TouchEvent& point,
-    const WeakPtr<FrameNode>& node)
+    const WeakPtr<FrameNode>& node, const float viewScale)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     if (pointerEvent == nullptr) {
@@ -64,10 +64,10 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
     OHOS::MMI::PointerEvent::PointerItem item;
     PointF transformPoint(point.x, point.y);
     NGGestureRecognizer::Transform(transformPoint, node);
-    item.SetWindowX(static_cast<int32_t>(transformPoint.GetX()));
-    item.SetWindowY(static_cast<int32_t>(transformPoint.GetY()));
-    item.SetWindowXPos(transformPoint.GetX());
-    item.SetWindowYPos(transformPoint.GetY());
+    item.SetWindowX(static_cast<int32_t>(transformPoint.GetX() * viewScale));
+    item.SetWindowY(static_cast<int32_t>(transformPoint.GetY() * viewScale));
+    item.SetWindowXPos(transformPoint.GetX() * viewScale);
+    item.SetWindowYPos(transformPoint.GetY() * viewScale);
     item.SetDisplayX(static_cast<int32_t>(point.screenX));
     item.SetDisplayY(static_cast<int32_t>(point.screenY));
     item.SetPointerId(point.id);
@@ -91,7 +91,7 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
 }
 
 std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, const AxisEvent& point,
-    const WeakPtr<FrameNode>& node)
+    const WeakPtr<FrameNode>& node, const float viewScale)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     if (pointerEvent == nullptr) {
@@ -107,10 +107,10 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
     OHOS::MMI::PointerEvent::PointerItem item;
     PointF transformPoint(point.x, point.y);
     NGGestureRecognizer::Transform(transformPoint, node);
-    item.SetWindowX(static_cast<int32_t>(transformPoint.GetX()));
-    item.SetWindowY(static_cast<int32_t>(transformPoint.GetY()));
-    item.SetWindowXPos(transformPoint.GetX());
-    item.SetWindowYPos(transformPoint.GetY());
+    item.SetWindowX(static_cast<int32_t>(transformPoint.GetX() * viewScale));
+    item.SetWindowY(static_cast<int32_t>(transformPoint.GetY() * viewScale));
+    item.SetWindowXPos(transformPoint.GetX() * viewScale);
+    item.SetWindowYPos(transformPoint.GetY() * viewScale);
     item.SetDisplayX(static_cast<int32_t>(point.screenX));
     item.SetDisplayY(static_cast<int32_t>(point.screenY));
     item.SetPointerId(point.id);
@@ -200,6 +200,27 @@ private:
     bool isReg_ = false;
     WeakPtr<FormNode> weakFormNode_;
 };
+
+class FormAccessibilitySAObserverCallback : public AccessibilitySAObserverCallback {
+public:
+    explicit FormAccessibilitySAObserverCallback(const WeakPtr<FormNode> &formNode, int64_t accessibilityId)
+        : AccessibilitySAObserverCallback(accessibilityId), weakFormNode_(formNode) {}
+    ~FormAccessibilitySAObserverCallback() override = default;
+
+    bool OnState(bool state) override
+    {
+        auto formNode = weakFormNode_.Upgrade();
+        CHECK_NULL_RETURN(formNode, false);
+        auto pattern = formNode->GetPattern<FormPattern>();
+        CHECK_NULL_RETURN(pattern, false);
+        // focus only on the ScreenReadEnabled status
+        bool isScreenReadEnabled = AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled();
+        TAG_LOGD(AceLogTag::ACE_FORM, "state:%{public}d,isScreenReadEnabled:%{public}d", state, isScreenReadEnabled);
+        return pattern->OnAccessibilityStateChange(isScreenReadEnabled);
+    }
+private:
+    WeakPtr<FormNode> weakFormNode_;
+};
 }
 
 FormNode::~FormNode()
@@ -209,6 +230,7 @@ FormNode::~FormNode()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->DeregisterAccessibilityChildTreeCallback(GetAccessibilityId());
+    accessibilityManager->DeregisterAccessibilitySAObserverCallback(GetAccessibilityId());
 }
 
 HitTestResult FormNode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -295,7 +317,8 @@ void FormNode::DispatchPointerEvent(const TouchEvent& touchEvent,
     auto pattern = GetPattern<FormPattern>();
     CHECK_NULL_VOID(pattern);
     auto selfGlobalOffset = GetFormOffset();
-    auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, touchEvent, WeakClaim(this));
+    auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, touchEvent, WeakClaim(this),
+        pattern->GetFormViewScale());
     pattern->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
 
@@ -306,7 +329,8 @@ void FormNode::DispatchPointerEvent(const AxisEvent& axisEvent,
     CHECK_NULL_VOID(pattern);
 
     auto selfGlobalOffset = GetFormOffset();
-    auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, axisEvent, WeakClaim(this));
+    auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, axisEvent, WeakClaim(this),
+        pattern->GetFormViewScale());
     pattern->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
 
@@ -375,6 +399,7 @@ void FormNode::NotifyAccessibilityChildTreeRegister()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     if (accessibilityManager->IsRegister()) {
+        CHECK_NULL_VOID(accessibilityChildTreeCallback_);
         accessibilityChildTreeCallback_->OnRegister(pipeline->GetWindowId(), 0);
     }
 }
@@ -428,5 +453,30 @@ int32_t FormNode::GetImageId()
         imageId_ = ElementRegister::GetInstance()->MakeUniqueId();
     }
     return imageId_.value();
+}
+
+void FormNode::ResetAccessibilityChildTreeCallbackAndDeregister()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilityChildTreeCallback(GetAccessibilityId());
+    CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    accessibilityChildTreeCallback_->OnDeregister();
+    accessibilityChildTreeCallback_.reset();
+}
+
+void FormNode::RegisterFormAccessibilityCallback()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+
+    accessibilitySAObserverCallback_ = std::make_shared<FormAccessibilitySAObserverCallback>(
+        WeakClaim(this), GetAccessibilityId());
+    accessibilityManager->RegisterAccessibilitySAObserverCallback(GetAccessibilityId(),
+        accessibilitySAObserverCallback_);
 }
 } // namespace OHOS::Ace::NG

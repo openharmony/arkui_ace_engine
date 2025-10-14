@@ -45,6 +45,18 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   private dependentElmtIdsByProperty_ = new PropertyDependencies();
 
   // for interop
+
+  private proxy?: Object;
+
+  public getProxy(): Object | undefined {
+    return this.proxy;
+  }
+
+  public setProxy(proxy: Object): void {
+    this.proxy = proxy;
+  }
+
+
   public staticWatchFunc?: Object;
   public _setInteropValueForStaticState?: setValue<T>;
   public _notifyInteropFireChange?: () => void;
@@ -331,7 +343,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       }
     });
     stateMgmtProfiler.end();
-    if (InteropConfigureStateMgmt.instance.needsInterop() && this._notifyInteropFireChange) {
+    // for interop
+    if (InteropConfigureStateMgmt.needsInterop() && this._notifyInteropFireChange) {
       this._notifyInteropFireChange();
     }
   }

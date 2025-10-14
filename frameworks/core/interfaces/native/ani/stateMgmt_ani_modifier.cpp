@@ -35,7 +35,7 @@ std::string PersistentStorageGet(const std::string& key, const int32_t areaMode)
         "emulator or a real device instead.");
     return "";
 #endif
-    auto storage = StorageProxy::GetInstance()->GetStorage(areaMode);
+    auto storage = StorageProxy::GetInstance()->GetStorage(areaMode, true);
     if (!storage) {
         LOGW("no storage available");
         return "";
@@ -55,11 +55,11 @@ void PersistentStorageSet(const std::string& key, const std::string& value, cons
         "emulator or a real device instead.");
     return;
 #endif
-    if (!StorageProxy::GetInstance()->GetStorage(areaMode)) {
+    if (!StorageProxy::GetInstance()->GetStorage(areaMode, true)) {
         LOGW("no storage available");
         return;
     }
-    StorageProxy::GetInstance()->GetStorage(areaMode)->SetString(key, value);
+    StorageProxy::GetInstance()->GetStorage(areaMode, true)->SetString(key, value);
 }
 
 bool PersistentStorageHas(const std::string& key, const int32_t areaMode)
@@ -69,11 +69,11 @@ bool PersistentStorageHas(const std::string& key, const int32_t areaMode)
         "emulator or a real device instead.");
     return false;
 #endif
-    if (!StorageProxy::GetInstance()->GetStorage(areaMode)) {
+    if (!StorageProxy::GetInstance()->GetStorage(areaMode, true)) {
         LOGW("no storage available");
         return false;
     }
-    std::string value = StorageProxy::GetInstance()->GetStorage(areaMode)->GetString(key);
+    std::string value = StorageProxy::GetInstance()->GetStorage(areaMode, true)->GetString(key);
     if (!value.empty()) {
         return true;
     }
@@ -87,11 +87,11 @@ void PersistentStorageDelete(const std::string& key, const int32_t areaMode)
         "emulator or a real device instead.");
     return;
 #endif
-    if (!StorageProxy::GetInstance()->GetStorage(areaMode)) {
+    if (!StorageProxy::GetInstance()->GetStorage(areaMode, true)) {
         LOGW("no storage available");
         return;
     }
-    StorageProxy::GetInstance()->GetStorage(areaMode)->Delete(key);
+    StorageProxy::GetInstance()->GetStorage(areaMode, true)->Delete(key);
 }
 
 void PersistentStorageClear()
@@ -101,11 +101,11 @@ void PersistentStorageClear()
         "emulator or a real device instead.");
     return;
 #endif
-    if (!StorageProxy::GetInstance()->GetStorage()) {
+    if (!StorageProxy::GetInstance()->GetStorage(AREA_MODE_FOR_MODULE_PATH, true)) {
         LOGW("no storage available");
         return;
     }
-    StorageProxy::GetInstance()->GetStorage()->Clear();
+    StorageProxy::GetInstance()->GetStorage(AREA_MODE_FOR_MODULE_PATH, true)->Clear();
 }
 
 int32_t GetColorMode()

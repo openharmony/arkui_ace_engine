@@ -180,10 +180,6 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     menuParam.enableArrow = OptConvert<bool>(menuOptions.enableArrow);
     menuParam.arrowOffset = OptConvert<CalcDimension>(menuOptions.arrowOffset);
     menuParam.placement = OptConvert<Placement>(menuOptions.placement);
-    // if enableArrow is true and placement not set, set placement default value to top.
-    if (menuParam.enableArrow.has_value() && !menuParam.placement.has_value() && menuParam.enableArrow.value()) {
-        menuParam.placement = Placement::TOP;
-    }
     if (!menuParam.placement.has_value()) {
         menuParam.placement = Placement::BOTTOM_LEFT;
     }

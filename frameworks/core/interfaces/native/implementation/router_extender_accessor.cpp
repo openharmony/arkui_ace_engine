@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/promise_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include <cstring>
@@ -50,15 +51,95 @@ Ark_NativePointer PushImpl(Ark_NativePointer jsView,
     CHECK_NULL_RETURN(delegate, nullptr);
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        // callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
-        //     finish.Invoke(jsNode);
-        // };
-        callback = []() {
-
+        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
+            finish.Invoke(jsNode);
         };
     }
     auto pageNode = delegate->PushExtender(pushUrl, "", recoverValue, std::move(callback), jsView);
     return pageNode;
+}
+
+Ark_NativePointer CreateDynamicImpl(const Ark_String* url,
+                                    const Opt_Boolean* recover)
+{
+    CHECK_NULL_RETURN(url, nullptr);
+    CHECK_NULL_RETURN(recover, nullptr);
+    std::string pushUrl = Converter::Convert<std::string>(*url);
+    if (pushUrl.empty()) {
+        return nullptr;
+    }
+    bool recoverValue = true;
+    if (recover->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        recoverValue = Converter::Convert<bool>(recover->value);
+    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_RETURN(delegate, nullptr);
+    auto pageNode = delegate->CreateDynamicExtender(pushUrl, recoverValue);
+    return pageNode;
+}
+
+Ark_NativePointer PushDynamicImpl(Ark_NativePointer pageNode,
+                                  const Ark_String* url,
+                                  const Opt_Boolean* recover,
+                                  const Opt_RouterFinishCallback* finishCallback)
+{
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    CHECK_NULL_RETURN(url, nullptr);
+    CHECK_NULL_RETURN(recover, nullptr);
+    CHECK_NULL_RETURN(finishCallback, nullptr);
+    std::string pushUrl = Converter::Convert<std::string>(*url);
+    if (pushUrl.empty()) {
+        return nullptr;
+    }
+    bool recoverValue = true;
+    if (recover->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        recoverValue = Converter::Convert<bool>(recover->value);
+    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_RETURN(delegate, nullptr);
+    std::function<void()> callback;
+    if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        callback = [finish = CallbackHelper(finishCallback->value), pageNode]() {
+            finish.Invoke(pageNode);
+        };
+    }
+    auto node = delegate->PushDynamicExtender(pushUrl, "", recoverValue, std::move(callback), pageNode);
+    return node;
+}
+
+Ark_NativePointer ReplaceDynamicImpl(Ark_NativePointer pageNode,
+                                     const Ark_String* url,
+                                     const Opt_Boolean* recover,
+                                     const Opt_RouterFinishCallback* finishCallback)
+{
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    CHECK_NULL_RETURN(url, nullptr);
+    CHECK_NULL_RETURN(recover, nullptr);
+    CHECK_NULL_RETURN(finishCallback, nullptr);
+    std::string replaceUrl = Converter::Convert<std::string>(*url);
+    if (replaceUrl.empty()) {
+        return nullptr;
+    }
+    bool recoverValue = true;
+    if (recover->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        recoverValue = Converter::Convert<bool>(recover->value);
+    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_RETURN(delegate, nullptr);
+    std::function<void()> callback;
+    if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        callback = [finish = CallbackHelper(finishCallback->value), pageNode]() {
+            finish.Invoke(pageNode);
+        };
+    }
+    auto node = delegate->ReplaceDynamicExtender(replaceUrl, "", recoverValue, std::move(callback), pageNode);
+    return node;
 }
 
 Ark_NativePointer ReplaceImpl(Ark_NativePointer jsView,
@@ -198,6 +279,111 @@ void HideAlertBeforeBackPageImpl()
     CHECK_NULL_VOID(delegate);
     delegate->HideAlertBeforeBackPageExtender();
 }
+
+void PushNamedRoute0Impl(Ark_VMContext vmContext,
+                         Ark_AsyncWorkerPtr asyncWorker,
+                         Ark_NativePointer jsView,
+                         const Ark_PageRouterOptions* options,
+                         const Opt_RouterFinishCallback* finishCallback,
+                         const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
+    CHECK_NULL_VOID(vmContext);
+    CHECK_NULL_VOID(asyncWorker);
+    CHECK_NULL_VOID(jsView);
+    CHECK_NULL_VOID(options);
+    CHECK_NULL_VOID(finishCallback);
+    CHECK_NULL_VOID(outputArgumentForReturningPromise);
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
+    auto finishFunc = [promise](const std::string& errStr, int32_t errCode) {
+        if (errCode == ERROR_CODE_NO_ERROR) {
+            promise->Resolve();
+        } else {
+            promise->Reject({std::to_string(errCode), errStr});
+        }
+    };
+    PageRouterOptions routerOptions;
+    routerOptions.errorCallback = finishFunc;
+    routerOptions.url = Converter::Convert<std::string>(options->options.url);
+    routerOptions.isNamedRouterMode = true;
+    if (options->options.recoverable.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.recoverable = Converter::Convert<bool>(options->options.recoverable.value);
+    }
+    if (options->mode.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.routerMode = static_cast<uint32_t>(options->mode.value);
+    }
+    auto execFunc = [routerOptions, finishCallback, jsView]() {
+        std::function<void()> callback;
+        if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
+                finish.InvokeSync(jsNode);
+            };
+        }
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto delegate = container->GetFrontend();
+        CHECK_NULL_VOID(delegate);
+        delegate->PushNamedRouteExtender(routerOptions, std::move(callback), jsView);
+    };
+    promise->StartAsync(vmContext, *asyncWorker, execFunc);
+}
+void PushNamedRoute1Impl(Ark_NativePointer jsView,
+                         const Ark_PageRouterOptions* options,
+                         const Opt_RouterFinishCallback* finishCallback,
+                         const Opt_AsyncCallback_Void* callback_)
+{
+}
+void ReplaceNamedRoute0Impl(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
+                            Ark_NativePointer jsView,
+                            const Ark_PageRouterOptions* options,
+                            const Opt_RouterFinishCallback* finishCallback,
+                            const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
+    CHECK_NULL_VOID(vmContext);
+    CHECK_NULL_VOID(asyncWorker);
+    CHECK_NULL_VOID(jsView);
+    CHECK_NULL_VOID(options);
+    CHECK_NULL_VOID(finishCallback);
+    CHECK_NULL_VOID(outputArgumentForReturningPromise);
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
+    auto finishFunc = [promise](const std::string& errStr, int32_t errCode) {
+        if (errCode == ERROR_CODE_NO_ERROR) {
+            promise->Resolve();
+        } else {
+            promise->Reject({std::to_string(errCode), errStr});
+        }
+    };
+    PageRouterOptions routerOptions;
+    routerOptions.errorCallback = finishFunc;
+    routerOptions.url = Converter::Convert<std::string>(options->options.url);
+    routerOptions.isNamedRouterMode = true;
+    if (options->options.recoverable.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.recoverable = Converter::Convert<bool>(options->options.recoverable.value);
+    }
+    if (options->mode.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.routerMode = static_cast<uint32_t>(options->mode.value);
+    }
+    auto execFunc = [routerOptions, finishCallback, jsView]() {
+        std::function<void()> callback;
+        if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
+                finish.InvokeSync(jsNode);
+            };
+        }
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto delegate = container->GetFrontend();
+        CHECK_NULL_VOID(delegate);
+        delegate->ReplaceNamedRouteExtender(routerOptions, std::move(callback), jsView);
+    };
+    promise->StartAsync(vmContext, *asyncWorker, execFunc);
+}
+void ReplaceNamedRoute1Impl(Ark_NativePointer jsView,
+                            const Ark_PageRouterOptions* options,
+                            const Opt_RouterFinishCallback* finishCallback,
+                            const Opt_AsyncCallback_Void* callback_)
+{
+}
 }
 
 const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor()
@@ -212,7 +398,14 @@ const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor()
         RouterExtenderAccessor::ClearImpl,
         RouterExtenderAccessor::ShowAlertBeforeBackPageImpl,
         RouterExtenderAccessor::HideAlertBeforeBackPageImpl,
+        RouterExtenderAccessor::PushNamedRoute0Impl,
+        RouterExtenderAccessor::PushNamedRoute1Impl,
+        RouterExtenderAccessor::ReplaceNamedRoute0Impl,
+        RouterExtenderAccessor::ReplaceNamedRoute1Impl,
+        RouterExtenderAccessor::CreateDynamicImpl,
+        RouterExtenderAccessor::PushDynamicImpl,
+        RouterExtenderAccessor::ReplaceDynamicImpl,
     };
     return &RouterExtenderAccessorImpl;
 }
-}
+} // RouterExtenderAccessor

@@ -13,31 +13,32 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt, KSerializerBuffer  } from "@koalaui/interop"
-import { default as drawing } from "@ohos.graphics.drawing"
-import image from "@ohos.multimedia.image"
-import webview from "@ohos.web.webview"
-import common from "@ohos.app.ability.common"
-import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
+import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt, KSerializerBuffer  } from '@koalaui/interop';
+import { default as drawing } from '@ohos.graphics.drawing';
+import image from '@ohos.multimedia.image';
+import webview from '@ohos.web.webview';
+import common from '@ohos.app.ability.common';
+import unifiedDataChannel from '@ohos.data.unifiedDataChannel';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
-import { DrawContext } from "arkui.Graphics"
-import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from "#generated"
-import { ArkCustomComponent } from "arkui/ArkCustomComponent"
-import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from "#generated"
-import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "#generated"
-import { XComponentOptionsInternal, XComponentParametersInternal } from "#generated"
-import { HookDragInfo } from "arkui/handwritten"
-import { dragController } from "@ohos/arkui/dragController"
-import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
-import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
-import { default as uiObserver }  from "@ohos/arkui/observer"
-import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
+import { DrawContext } from 'arkui.Graphics';
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from '#generated';
+import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
+import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from '#generated';
+import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from '#generated';
+import { XComponentOptionsInternal, XComponentParametersInternal } from '#generated';
+import { HookDragInfo } from 'arkui/handwritten';
+import { dragController } from '@ohos/arkui/dragController';
+import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
+import { KeyboardAvoidMode } from '@ohos/arkui/UIContext';
+import { DrawableDescriptor } from '@ohos.arkui.drawableDescriptor';
+import { default as uiObserver }  from '@ohos/arkui/observer';
+import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
 import { NodeAdapter } from 'arkui.FrameNode'
-import { Scene } from "@ohos.graphics.scene"
-import { RectShape, CircleShape, EllipseShape, PathShape } from "@ohos.arkui.shape"
-import curves from "@ohos.curves"
-import matrix4 from "@ohos.matrix4"
-import uiEffect from "@ohos.graphics.uiEffect";
+import { Scene } from '@ohos.graphics.scene';
+import { RectShape, CircleShape, EllipseShape, PathShape } from '@ohos.arkui.shape';
+import curves from '@ohos.curves';
+import matrix4 from '@ohos.matrix4';
+import uiEffect from '@ohos.graphics.uiEffect';
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
@@ -83,6 +84,8 @@ export class ArkUIAniModule {
     native static _ToColorLong(color: KInt): KLong
     native static _ToColorInt(color: KLong): KInt
     native static _Common_GetSharedLocalStorage(): LocalStorage
+    native static _GetKeyboardAvoidMode(): KeyboardAvoidMode
+    native static _SetKeyboardAvoidMode(mode: KeyboardAvoidMode): void
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
     native static _CustomNode_RequestFrame(): void
     native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
@@ -250,11 +253,11 @@ export class ArkUIAniModule {
     native static _RichEditor_Transfer_PixelMap(pixelmap: image.PixelMap): KPointer;
 
     // for  stateMgmt
-    native static _PersistentStorage_Get(key: string, areaMode?: KInt): string
-    native static _PersistentStorage_Set(key: string, value: string, areaMode?: KInt): void
-    native static _PersistentStorage_Has(key: string, areaMode?: KInt): boolean
+    native static _PersistentStorage_Get(key: string, areaMode: KInt): string
+    native static _PersistentStorage_Set(key: string, value: string, areaMode: KInt): void
+    native static _PersistentStorage_Has(key: string, areaMode: KInt): boolean
     native static _PersistentStorage_Clear(): void
-    native static _PersistentStorage_Delete(key: string, areaMode?: KInt): void
+    native static _PersistentStorage_Delete(key: string, areaMode: KInt): void
     native static _Env_GetColorMode(): KInt
     native static _Env_GetFontScale(): KFloat
     native static _Env_GetFontWeightScale(): KFloat
@@ -280,7 +283,8 @@ export class ArkUIAniModule {
     native static _OnLayout_InnerLayout(ptr: KPointer): void
     native static _SetParallelScoped(parallel: boolean): void
     native static _Common_SetCustomPropertyCallBack(ptr: KPointer, removeCallback: () => void,
-        getCallback: (name: string) => string | undefined): void
+        getCallback: (name: string) => string | undefined,
+        getAllCustomPropertiesCallback: () => string): void
     native static _Common_getCustomProperty<T>(ptr: KPointer, key: string): string | undefined
     native static _ConditionScopeNode_Construct(id: KInt): KPointer;
 

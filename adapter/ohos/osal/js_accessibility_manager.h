@@ -446,6 +446,13 @@ public:
         const RefPtr<NG::FrameNode>& node,
         AccessibilityElementInfo& elementInfo);
 
+    void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
+        const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
+
+    void UpdateAccessibilityElementInfo(
+        const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
+        Accessibility::AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline);
+
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;
@@ -483,6 +490,10 @@ private:
             Accessibility::AccessibilityElementOperatorCallback &callback) override;
         void SetChildTreeIdAndWinId(const int64_t nodeId, const int32_t treeId, const int32_t childWindowId) override;
         void SetBelongTreeId(const int32_t treeId) override;
+        void FocusMoveSearchWithCondition(const int64_t elementId, const AccessibilityFocusMoveParam param,
+            const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
+        void DetectElementInfoFocusableThroughAncestor(const AccessibilityElementInfo &info,
+            const int64_t parentId, const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
 
         void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
         {
@@ -526,6 +537,10 @@ private:
             Accessibility::AccessibilityElementOperatorCallback &callback) override;
         void SetChildTreeIdAndWinId(const int64_t nodeId, const int32_t treeId, const int32_t childWindowId) override;
         void SetBelongTreeId(const int32_t treeId) override;
+        void FocusMoveSearchWithCondition(const int64_t elementId, const AccessibilityFocusMoveParam param,
+            const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
+        void DetectElementInfoFocusableThroughAncestor(const AccessibilityElementInfo &info,
+            const int64_t parentId, const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
 
         void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
         {
@@ -684,8 +699,7 @@ private:
     void DumpGetCheckListTest(const std::vector<std::string>& params);
 
     void DumpSpecificPropertySearchTest(const std::vector<std::string>& params, uint32_t windowId);
-    void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
-        const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
+
     void GenerateCommonPropertyForWeb(const RefPtr<PipelineBase>& context, CommonProperty& output,
             const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node);
 
@@ -717,10 +731,6 @@ private:
         const RefPtr<NG::FrameNode>& parent, const RefPtr<NG::FrameNode>& node,
         const CommonProperty& commonProperty, Accessibility::AccessibilityElementInfo& nodeInfo,
         const RefPtr<NG::PipelineContext>& ngPipeline);
-
-    void UpdateAccessibilityElementInfo(
-        const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
-        Accessibility::AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline);
 
     void UpdateCacheInfoNG(std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<NG::FrameNode>& node,
         CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
@@ -815,6 +825,11 @@ private:
     bool CheckWhiteList(const uint32_t& eventType);
 
     ActionType ConvertAceAction(AceAction aceAction);
+
+    void CheckStateTakeOver(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
+    void CheckActionTakeOver(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
+    void UpdateUserAccessibilityElementInfo(
+        const RefPtr<NG::AccessibilityProperty>& accessibilityProperty, AccessibilityElementInfo& nodeInfo);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;

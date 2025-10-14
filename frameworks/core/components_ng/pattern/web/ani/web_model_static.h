@@ -60,7 +60,9 @@ public:
     static void JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems& scriptItems);
-    static void SetNativeEmbedOptions(FrameNode *frameNode, bool supportDefaultIntrinsicSize);
+    static void SetNativeEmbedOptions(
+        FrameNode *frameNode, bool supportDefaultIntrinsicSize, bool supportCssDisplayChange);
+    static void SetBypassVsyncCondition(FrameNode *frameNode, const std::optional<WebBypassVsyncCondition>& condition);
     static void SetMixedMode(FrameNode* frameNode, const std::optional<MixedModeContent>& mixedMode);
     static void SetCacheMode(FrameNode* frameNode, const std::optional<WebCacheMode>& cacheMode);
     static void SetDarkMode(FrameNode* frameNode, const std::optional<WebDarkMode>& mode);
@@ -182,6 +184,8 @@ public:
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetNativeEmbedGestureEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetNativeEmbedMouseEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnOverrideUrlLoading(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
     static void SetRenderProcessNotRespondingId(
@@ -201,6 +205,8 @@ public:
     static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
     static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
+    static void SetActivateContentEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_ANI_WEB_MODEL_STATIC_H

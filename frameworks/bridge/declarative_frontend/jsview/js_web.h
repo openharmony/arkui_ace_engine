@@ -171,6 +171,7 @@ public:
     static JSRef<JSVal> CreatePermissionRequestHandler(const WebPermissionRequestEvent& eventInfo);
     static JSRef<JSVal> CreateGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo);
     static JSRef<JSVal> CreateNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo);
+    static JSRef<JSVal> CreateNativeEmbedMouseHandler(const NativeEmbeadMouseInfo& eventInfo);
     static JSRef<JSVal> CreateFullScreenEnterHandler(const FullScreenEnterEvent& eventInfo);
     static JSRef<JSVal> CreateCommonDialogResultHandler(const WebDialogEvent& eventInfo);
     static JSRef<JSVal> CreateFileSelectorResultHandler(const FileSelectorEvent& eventInfo);

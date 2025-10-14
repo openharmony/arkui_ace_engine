@@ -440,6 +440,7 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         CHECK_NULL_RETURN(theme, false);
         dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
         dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+        dividerNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     }
 
     return true;

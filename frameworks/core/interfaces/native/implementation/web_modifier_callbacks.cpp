@@ -107,7 +107,7 @@ void OnTitleReceive(const CallbackHelper<Callback_OnTitleReceiveEvent_Void>& ark
     CHECK_NULL_VOID(eventInfo);
     Ark_OnTitleReceiveEvent parameter;
     parameter.title = Converter::ArkValue<Ark_String>(eventInfo->GetTitle());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnGeolocationHide(const CallbackHelper<Callback_Void>& arkCallback,
@@ -117,7 +117,7 @@ void OnGeolocationHide(const CallbackHelper<Callback_Void>& arkCallback,
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    arkCallback.Invoke();
+    arkCallback.InvokeSync();
 }
 
 void OnGeolocationShow(const CallbackHelper<Callback_OnGeolocationShowEvent_Void>& arkCallback,
@@ -134,7 +134,7 @@ void OnGeolocationShow(const CallbackHelper<Callback_OnGeolocationShowEvent_Void
     auto peer = new JsGeolocationPeer();
     peer->webGeolocation = eventInfo->GetWebGeolocation();
     parameter.geolocation = peer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnRequestSelected(const CallbackHelper<Callback_Void>& arkCallback,
@@ -143,7 +143,7 @@ void OnRequestSelected(const CallbackHelper<Callback_Void>& arkCallback,
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    arkCallback.Invoke();
+    arkCallback.InvokeSync();
 }
 
 bool OnAlert(const CallbackHelper<Callback_OnAlertEvent_Boolean>& arkCallback,
@@ -284,7 +284,7 @@ void OnHttpErrorReceive(const CallbackHelper<Callback_OnHttpErrorReceiveEvent_Vo
     auto responsePeer = new WebResourceResponsePeer();
     responsePeer->handler = eventInfo->GetResponse();
     parameter.response = responsePeer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnDownloadStart(const CallbackHelper<Callback_OnDownloadStartEvent_Void>& arkCallback,
@@ -302,7 +302,7 @@ void OnDownloadStart(const CallbackHelper<Callback_OnDownloadStartEvent_Void>& a
     parameter.contentDisposition = Converter::ArkValue<Ark_String>(eventInfo->GetContentDisposition());
     parameter.userAgent = Converter::ArkValue<Ark_String>(eventInfo->GetUserAgent());
     parameter.contentLength = static_cast<Ark_Int64>(eventInfo->GetContentLength());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnRefreshAccessedHistory(const CallbackHelper<Callback_OnRefreshAccessedHistoryEvent_Void>& arkCallback,
@@ -317,7 +317,7 @@ void OnRefreshAccessedHistory(const CallbackHelper<Callback_OnRefreshAccessedHis
     Ark_OnRefreshAccessedHistoryEvent parameter;
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetVisitedUrl());
     parameter.isRefreshed = Converter::ArkValue<Ark_Boolean>(eventInfo->IsRefreshed());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnRenderExited(const CallbackHelper<Callback_OnRenderExitedEvent_Void>& arkCallback,
@@ -368,7 +368,7 @@ void OnResourceLoad(const CallbackHelper<Callback_OnResourceLoadEvent_Void>& ark
     CHECK_NULL_VOID(eventInfo);
     Ark_OnResourceLoadEvent parameter;
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetOnResourceLoadUrl());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnFullScreenExit(const CallbackHelper<Callback_Void>& arkCallback,
@@ -378,7 +378,7 @@ void OnFullScreenExit(const CallbackHelper<Callback_Void>& arkCallback,
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    arkCallback.Invoke();
+    arkCallback.InvokeSync();
 }
 
 void OnFullScreenEnter(const CallbackHelper<OnFullScreenEnterCallback>& arkCallback,
@@ -396,7 +396,7 @@ void OnFullScreenEnter(const CallbackHelper<OnFullScreenEnterCallback>& arkCallb
     auto peer = new FullScreenExitHandlerPeer();
     peer->handler = eventInfo->GetHandler();
     parameter.handler = peer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnScaleChange(const CallbackHelper<Callback_OnScaleChangeEvent_Void>& arkCallback,
@@ -411,7 +411,7 @@ void OnScaleChange(const CallbackHelper<Callback_OnScaleChangeEvent_Void>& arkCa
     Ark_OnScaleChangeEvent parameter;
     parameter.newScale = Converter::ArkValue<Ark_Float64>(eventInfo->GetOnScaleChangeNewScale());
     parameter.oldScale = Converter::ArkValue<Ark_Float64>(eventInfo->GetOnScaleChangeOldScale());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Boolean>& arkCallback,
@@ -470,7 +470,7 @@ void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_
     auto peer = new PermissionRequestPeer();
     peer->handler = eventInfo->GetWebPermissionRequest();
     parameter.request = peer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnScreenCaptureRequest(const CallbackHelper<Callback_OnScreenCaptureRequestEvent_Void>& arkCallback,
@@ -486,7 +486,7 @@ void OnScreenCaptureRequest(const CallbackHelper<Callback_OnScreenCaptureRequest
     auto peer = new ScreenCaptureHandlerPeer();
     peer->handler = eventInfo->GetWebScreenCaptureRequest();
     parameter.handler = peer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 bool OnContextMenuShow(const CallbackHelper<Callback_OnContextMenuShowEvent_Boolean>& arkCallback,
@@ -518,7 +518,7 @@ void OnContextMenuHide(const CallbackHelper<OnContextMenuHideCallback>& arkCallb
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    arkCallback.Invoke();
+    arkCallback.InvokeSync();
 }
 
 void OnSearchResultReceive(const CallbackHelper<Callback_OnSearchResultReceiveEvent_Void>& arkCallback,
@@ -534,7 +534,7 @@ void OnSearchResultReceive(const CallbackHelper<Callback_OnSearchResultReceiveEv
     parameter.activeMatchOrdinal = static_cast<Ark_Int32>(eventInfo->GetActiveMatchOrdinal());
     parameter.numberOfMatches = static_cast<Ark_Int32>(eventInfo->GetNumberOfMatches());
     parameter.isDoneCounting = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsDoneCounting());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnScroll(const CallbackHelper<Callback_OnScrollEvent_Void>& arkCallback,
@@ -549,7 +549,7 @@ void OnScroll(const CallbackHelper<Callback_OnScrollEvent_Void>& arkCallback,
     Ark_OnScrollEvent parameter;
     parameter.xOffset = Converter::ArkValue<Ark_Float64>(eventInfo->GetX());
     parameter.yOffset = Converter::ArkValue<Ark_Float64>(eventInfo->GetY());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 bool OnSslErrorEventReceive(const CallbackHelper<Callback_OnSslErrorEventReceiveEvent_Void>& arkCallback,
@@ -569,7 +569,7 @@ bool OnSslErrorEventReceive(const CallbackHelper<Callback_OnSslErrorEventReceive
     auto peer = new SslErrorHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
     return true;
 }
 
@@ -598,7 +598,7 @@ bool OnSslError(const CallbackHelper<OnSslErrorEventCallback>& arkCallback,
     peer->handler = eventInfo->GetResult();
 #endif
     parameter.handler = peer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
     return true;
 }
 
@@ -623,7 +623,7 @@ bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthentication
         auto peer = new ClientAuthenticationHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
     return false;
 }
 
@@ -710,7 +710,7 @@ void OnTouchIconUrlReceived(const CallbackHelper<Callback_OnTouchIconUrlReceived
         Ark_OnTouchIconUrlReceivedEvent parameter;
         parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
         parameter.precomposed = Converter::ArkValue<Ark_Boolean>(eventInfo->GetPreComposed());
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
     func();
@@ -794,7 +794,7 @@ void OnFaviconReceived(const CallbackHelper<Callback_OnFaviconReceivedEvent_Void
         parameter.favicon->pixelMap = PixelMap::Create(std::move(pixelMap));
         CHECK_NULL_VOID(parameter.favicon->pixelMap);
         LOGE("WebAttributeModifier::OnFaviconReceivedImpl PixelMap supporting is not implemented yet");
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
     func();
@@ -838,7 +838,7 @@ void OnDataResubmitted(const CallbackHelper<Callback_OnDataResubmittedEvent_Void
         auto peer = new DataResubmissionHandlerPeer();
         peer->handler = eventInfo->GetHandler();
         parameter.handler = peer;
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
     func();
@@ -858,7 +858,7 @@ void OnAudioStateChanged(const CallbackHelper<Callback_OnAudioStateChangedEvent_
     CHECK_NULL_VOID(eventInfo);
     Ark_OnAudioStateChangedEvent parameter;
     parameter.playing = Converter::ArkValue<Ark_Boolean>(eventInfo->IsPlaying());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnFirstContentfulPaint(const CallbackHelper<Callback_OnFirstContentfulPaintEvent_Void>& arkCallback,
@@ -875,7 +875,7 @@ void OnFirstContentfulPaint(const CallbackHelper<Callback_OnFirstContentfulPaint
         parameter.firstContentfulPaintMs = Converter::ArkValue<Ark_Int64>(
             eventInfo->GetFirstContentfulPaintMs());
         parameter.navigationStartTick = Converter::ArkValue<Ark_Int64>(eventInfo->GetNavigationStartTick());
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
     func();
@@ -897,7 +897,7 @@ void OnFirstMeaningfulPaint(const CallbackHelper<OnFirstMeaningfulPaintCallback>
         Ark_FirstMeaningfulPaint parameter;
         parameter.firstMeaningfulPaintTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetFirstMeaningfulPaintTime());
         parameter.navigationStartTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetNavigationStartTime());
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
     func();
@@ -924,7 +924,7 @@ void OnLargestContentfulPaint(const CallbackHelper<OnLargestContentfulPaintCallb
         parameter.largestImagePaintTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetLargestImagePaintTime());
         parameter.largestTextPaintTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetLargestTextPaintTime());
         parameter.navigationStartTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetNavigationStartTime());
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
     func();
@@ -960,7 +960,7 @@ void OnControllerAttached(const CallbackHelper<Callback_Void>& arkCallback,
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto func = [arkCallback]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
 #ifdef ARKUI_CAPI_UNITTEST
     func();
@@ -981,7 +981,7 @@ void OnOverScroll(const CallbackHelper<Callback_OnOverScrollEvent_Void>& arkCall
     Ark_OnOverScrollEvent parameter;
     parameter.xOffset = Converter::ArkValue<Ark_Float64>(eventInfo->GetX());
     parameter.yOffset = Converter::ArkValue<Ark_Float64>(eventInfo->GetY());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnSafeBrowsingCheckResult(const CallbackHelper<OnSafeBrowsingCheckResultCallback>& arkCallback,
@@ -996,7 +996,7 @@ void OnSafeBrowsingCheckResult(const CallbackHelper<OnSafeBrowsingCheckResultCal
         CHECK_NULL_VOID(eventInfo);
         Ark_ThreatType parameter = Converter::ArkValue<Ark_ThreatType>(
             static_cast<Converter::ThreatType>(eventInfo->GetThreatType()));
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
     func();
@@ -1021,7 +1021,7 @@ void OnNavigationEntryCommitted(const CallbackHelper<OnNavigationEntryCommittedC
         parameter.isSameDocument = Converter::ArkValue<Ark_Boolean>(eventInfo->IsSameDocument());
         parameter.navigationType = Converter::ArkValue<Ark_WebNavigationType>(eventInfo->GetNavigationType());
         parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
     func();
@@ -1043,7 +1043,7 @@ void OnIntelligentTrackingPrevention(const CallbackHelper<OnIntelligentTrackingP
         Ark_IntelligentTrackingPreventionDetails parameter;
         parameter.host = Converter::ArkValue<Ark_String>(eventInfo->GetHost());
         parameter.trackerHost = Converter::ArkValue<Ark_String>(eventInfo->GetTrackerHost());
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
     func();
@@ -1107,6 +1107,25 @@ void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_V
     auto touchEventInfo = eventInfo->GetTouchEventInfo();
     const auto event = Converter::ArkTouchEventSync(touchEventInfo);
     parameter.touchEvent = Converter::ArkValue<Opt_TouchEvent>(event.ArkValue());
+    Ark_EventResult arkEventResult;
+    auto peer = new EventResultPeer();
+    peer->handler = eventInfo->GetResult();
+    arkEventResult = peer;
+    parameter.result = Converter::ArkValue<Opt_EventResult>(arkEventResult);
+    arkCallback.InvokeSync(parameter);
+}
+
+void OnNativeEmbedMouseInfo(const CallbackHelper<MouseInfoCallback>& arkCallback,
+    int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbeadMouseInfo>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_NativeEmbedMouseInfo parameter;
+    parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
+    auto mouseEventInfo = eventInfo->GetMouseEventInfo();
+    const auto event = Converter::ArkMouseEventSync(mouseEventInfo);
+    parameter.mouseEvent = Converter::ArkValue<Opt_MouseEvent>(event.ArkValue());
     Ark_EventResult arkEventResult;
     auto peer = new EventResultPeer();
     peer->handler = eventInfo->GetResult();
@@ -1242,9 +1261,18 @@ void OnAdsBlocked(const CallbackHelper<OnAdsBlockedCallback>& arkCallback,
     std::vector<std::string> adsBlocked = eventInfo->GetAdsBlocked();
     Converter::ArkArrayHolder<Array_String> adsBlockedHolder(adsBlocked);
     parameter.adsBlocked = adsBlockedHolder.ArkValue();
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
+void OnActivateContent(const CallbackHelper<VoidCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    arkCallback.InvokeSync();
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
 

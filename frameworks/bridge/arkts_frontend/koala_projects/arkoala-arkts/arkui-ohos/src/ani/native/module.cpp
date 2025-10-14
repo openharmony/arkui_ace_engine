@@ -22,6 +22,7 @@
 #include "component3d/component3d_module_methods.h"
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
+#include "keyboard_avoid_mode/keyboard_avoid_mode_module.h"
 #include "custom_node/custom_node_module.h"
 #include "syntax/lazy_for_each_module.h"
 #include "syntax/syntax_module.h"
@@ -491,6 +492,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetListChildrenMainSize)
         },
         ani_native_function {
+            "_GetKeyboardAvoidMode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetKeyboardAvoidMode)
+        },
+        ani_native_function {
+            "_SetKeyboardAvoidMode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetKeyboardAvoidMode)
+        },
+        ani_native_function {
             "_DragEvent_Set_Data",
             "lC{@ohos.data.unifiedDataChannel.unifiedDataChannel.UnifiedData}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetData)
@@ -757,17 +768,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_PersistentStorage_Get",
-            "C{std.core.String}C{std.core.Int}:C{std.core.String}",
+            "C{std.core.String}i:C{std.core.String}",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Get)
         },
         ani_native_function {
             "_PersistentStorage_Set",
-            "C{std.core.String}C{std.core.String}C{std.core.Int}:",
+            "C{std.core.String}C{std.core.String}i:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Set)
         },
         ani_native_function {
             "_PersistentStorage_Has",
-            "C{std.core.String}C{std.core.Int}:z",
+            "C{std.core.String}i:z",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Has)
         },
         ani_native_function {
@@ -777,7 +788,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_PersistentStorage_Delete",
-            "C{std.core.String}C{std.core.Int}:",
+            "C{std.core.String}i:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Delete)
         },
         ani_native_function {

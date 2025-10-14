@@ -1415,6 +1415,82 @@ ArkUINativeModuleValue WebBridge::ResetOnNativeEmbedGestureEvent(ArkUIRuntimeCal
     return panda::JSValueRef::Undefined(vm);
 }
 
+Local<panda::ObjectRef> WebBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo& info)
+{
+    const char* keys[] = { "source", "timestamp", "target", "pressure", "sourceTool", "targetDisplayId", "deviceId",
+        "button", "action", "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x", "y" };
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
+        panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
+        CreateEventTargetObject(vm, info), panda::NumberRef::New(vm, info.GetForce()),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceTool())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTargetDisplayId())),
+        panda::NumberRef::New(vm, info.GetDeviceId()),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetButton())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetAction())),
+        panda::NumberRef::New(vm, static_cast<double>(info.GetScreenLocation().GetX())),
+        panda::NumberRef::New(vm, static_cast<double>(info.GetScreenLocation().GetY())),
+        panda::NumberRef::New(vm, static_cast<double>(info.GetLocalLocation().GetX())),
+        panda::NumberRef::New(vm, static_cast<double>(info.GetLocalLocation().GetY())),
+        panda::NumberRef::New(vm, static_cast<double>(info.GetGlobalLocation().GetX())),
+        panda::NumberRef::New(vm, static_cast<double>(info.GetGlobalLocation().GetY())),
+        panda::NumberRef::New(vm, static_cast<double>(info.GetLocalLocation().GetX())),
+        panda::NumberRef::New(vm, static_cast<double>(info.GetLocalLocation().GetY())) };
+    auto eventObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    eventObj->SetNativePointerFieldCount(vm, 1);
+    eventObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+    return eventObj;
+}
+
+ArkUINativeModuleValue WebBridge::SetOnNativeEmbedMouseEvent(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getWebModifier()->resetOnFirstContentfulPaint(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+
+    std::function<void(NativeEmbeadMouseInfo&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                               func = panda::CopyableGlobal(vm, func)](
+                                                               NativeEmbeadMouseInfo& event) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(weak);
+        auto info = event.GetMouseEventInfo();
+        auto mouseInfo = CreateMouseInfo(vm, info);
+
+        const char* keysFinal[] = { "embedId", "mouseEvent", "result" };
+        Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateNativeEmbedMouseHandler(event);
+        Local<JSValueRef> valuesFinal[] = { panda::StringRef::NewFromUtf8(vm, event.GetEmbedId().c_str()),
+            mouseInfo, handlerObj->GetLocalHandle() };
+
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysFinal), keysFinal, valuesFinal);
+        eventObject->SetNativePointerFieldCount(vm, CALL_ARG_1);
+        eventObject->SetNativePointerField(vm, CALL_ARG_0, static_cast<void*>(&event));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, CALL_ARG_1);
+    };
+    GetArkUINodeModifiers()->getWebModifier()->setOnNativeEmbedMouseEvent(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetOnNativeEmbedMouseEvent(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetOnNativeEmbedMouseEvent(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue WebBridge::SetRegisterNativeEmbedRule(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

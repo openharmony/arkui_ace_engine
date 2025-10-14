@@ -148,7 +148,7 @@ void SetOnReachStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ScrollableModelStatic::SetOnReachStart(frameNode, nullptr);
         return;
     }
     auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
@@ -163,7 +163,7 @@ void SetOnReachEndImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ScrollableModelStatic::SetOnReachEnd(frameNode, nullptr);
         return;
     }
     auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
@@ -178,7 +178,7 @@ void SetOnScrollStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ScrollableModelStatic::SetOnScrollStart(frameNode, nullptr);
         return;
     }
     auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
@@ -193,7 +193,7 @@ void SetOnScrollStopImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        ScrollableModelStatic::SetOnScrollStop(frameNode, nullptr);
         return;
     }
     auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
@@ -207,10 +207,6 @@ void SetFlingSpeedLimitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<double>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
     ScrollableModelStatic::SetMaxFlingSpeed(frameNode, *convValue);
 }
 void SetClipContentImpl(Ark_NativePointer node,
@@ -253,7 +249,7 @@ void SetBackToTopImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        ScrollableModelStatic::ResetBackToTop(frameNode);
         return;
     }
     ScrollableModelStatic::SetBackToTop(frameNode, *convValue);

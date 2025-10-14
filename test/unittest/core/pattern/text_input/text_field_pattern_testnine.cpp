@@ -1326,7 +1326,9 @@ HWTEST_F(TextFieldPatternTestNine, RegisterFontCallback, TestSize.Level0)
     bool hasChanged = false;
     auto fontChangeCallback = [&]() { hasChanged = true; };
     fontManager->RegisterCallbackNG(WeakPtr(frameNode_), "myFont", fontChangeCallback);
-    fontManager->externalLoadCallbacks_.emplace(WeakPtr(frameNode_), std::make_pair("myFont", fontChangeCallback));
+    std::map<std::string, std::function<void()>> familyMap;
+    familyMap.emplace("myFont", fontChangeCallback);
+    fontManager->externalLoadCallbacks_.emplace(WeakPtr(frameNode_), familyMap);
     fontChangeCallback();
     EXPECT_TRUE(hasChanged);
 }

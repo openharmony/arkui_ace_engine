@@ -1639,6 +1639,13 @@ void WebClientImpl::OnDetectedBlankScreen(
     delegate->OnDetectedBlankScreen(url, blankScreenReason, detectedContentfulNodesCount);
 }
 
+bool WebClientImpl::IsQuickMenuShow()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    return delegate->IsQuickMenuShow();
+}
+
 void WebClientImpl::OnRemoveBlanklessFrameWithAnimation(int delayTime)
 {
     auto delegate = webDelegate_.Upgrade();

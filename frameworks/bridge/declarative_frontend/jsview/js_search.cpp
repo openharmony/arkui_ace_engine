@@ -207,6 +207,10 @@ void JSSearch::SetFontFeature(const JSCallbackInfo& info)
 
 void JSSearch::SetSelectDetectEnable(const JSCallbackInfo& info)
 {
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        SearchModel::GetInstance()->ResetSelectDetectEnable();
+        return;
+    }
     if (info[0]->IsBoolean()) {
         auto enabled = info[0]->ToBoolean();
         SearchModel::GetInstance()->SetSelectDetectEnable(enabled);
@@ -215,6 +219,10 @@ void JSSearch::SetSelectDetectEnable(const JSCallbackInfo& info)
 
 void JSSearch::SetSelectDetectConfig(const JSCallbackInfo& info)
 {
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        SearchModel::GetInstance()->ResetSelectDetectConfig();
+        return;
+    }
     std::vector<TextDataDetectType> typesList;
     if (!info[0]->IsObject()) {
         return;

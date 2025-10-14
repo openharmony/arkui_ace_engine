@@ -1184,33 +1184,6 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
     }
 }
 
-void UpdateUserAccessibilityElementInfo(
-    const RefPtr<NG::AccessibilityProperty>& accessibilityProperty, AccessibilityElementInfo& nodeInfo)
-{
-    CHECK_NULL_VOID(accessibilityProperty);
-    if (accessibilityProperty->HasUserDisabled()) {
-        nodeInfo.SetEnabled(!accessibilityProperty->IsUserDisabled());
-    }
-    if (accessibilityProperty->HasUserCheckedType()) {
-        nodeInfo.SetChecked(accessibilityProperty->GetUserCheckedType());
-    } else {
-        nodeInfo.SetChecked(accessibilityProperty->IsChecked());
-    }
-    if (accessibilityProperty->HasUserSelected()) {
-        nodeInfo.SetSelected(accessibilityProperty->IsUserSelected());
-    } else {
-        nodeInfo.SetSelected(accessibilityProperty->IsSelected());
-    }
-
-    if (nodeInfo.IsEnabled()) {
-        if (accessibilityProperty->HasUserCheckable()) {
-            nodeInfo.SetCheckable(accessibilityProperty->IsUserCheckable());
-        } else {
-            nodeInfo.SetCheckable(accessibilityProperty->IsCheckable());
-        }
-    }
-}
-
 bool IsUserCheckedOrSelected(const RefPtr<NG::FrameNode> frameNode)
 {
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -1489,6 +1462,8 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
             nodeInfo.AddAction(action);
         }
     }
+    CheckStateTakeOver(node, nodeInfo);
+    CheckActionTakeOver(node, nodeInfo);
 }
 #ifdef WEB_SUPPORTED
 
@@ -2225,6 +2200,11 @@ bool ActClick(RefPtr<NG::FrameNode>& frameNode, const NG::SecCompEnhanceEvent& s
         // notify child action happened to parent
         NG::AccessibilityFunctionUtils::HandleNotifyChildAction(frameNode, NotifyChildActionType::ACTION_CLICK);
         return true;
+    }
+    RefPtr<NG::FrameNode> controllerNode;
+    auto controllerType = NG::AccessibilityPropertyUtils::CheckAndGetActionController(frameNode, controllerNode);
+    if ((controllerType == NG::ActionControllerType::CONTROLLER_CLICK) && (controllerNode)) {
+        return ActClick(controllerNode, secEvent);
     }
 
     auto interceptResult =
@@ -5576,6 +5556,14 @@ void JsAccessibilityManager::WebInteractionOperation::SetChildTreeIdAndWinId(con
 
 void JsAccessibilityManager::WebInteractionOperation::SetBelongTreeId(const int32_t treeId) {}
 
+void JsAccessibilityManager::WebInteractionOperation::FocusMoveSearchWithCondition(
+    const int64_t elementId, const AccessibilityFocusMoveParam param,
+    const int32_t requestId, AccessibilityElementOperatorCallback &callback) {}
+
+void JsAccessibilityManager::WebInteractionOperation::DetectElementInfoFocusableThroughAncestor(
+    const AccessibilityElementInfo &info, const int64_t parentId, const int32_t requestId,
+    AccessibilityElementOperatorCallback &callback) {}
+
 void JsAccessibilityManager::WebInteractionOperation::GetCursorPosition(
     const int64_t elementId, const int32_t requestId, AccessibilityElementOperatorCallback& callback)
 {
@@ -7694,6 +7682,14 @@ void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityClearCurrentFocus");
 }
+
+void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearchWithCondition(
+    const int64_t elementId, const AccessibilityFocusMoveParam param,
+    const int32_t requestId, AccessibilityElementOperatorCallback &callback) {}
+
+void JsAccessibilityManager::JsInteractionOperation::DetectElementInfoFocusableThroughAncestor(
+    const AccessibilityElementInfo &info, const int64_t parentId, const int32_t requestId,
+    AccessibilityElementOperatorCallback &callback) {}
 
 void JsAccessibilityManager::UpdateElementInfoTreeId(Accessibility::AccessibilityElementInfo& info)
 {

@@ -30,6 +30,7 @@ public:
     static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);
     static void SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>& value);
     static void SetDateTimeOptions(FrameNode* frameNode, const std::optional<ZeroPrefixType>& hourType);
+    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
 };
 } // namespace OHOS::Ace::NG
 

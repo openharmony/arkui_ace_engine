@@ -199,9 +199,9 @@ void SearchModelStatic::SetSearchButtonFontColor(FrameNode* frameNode, const std
     CHECK_NULL_VOID(frameNode);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(buttonFrameNode);
-    ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, buttonFrameNode);
-    buttonFrameNode->MarkModifyDone();
-    buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto searchTheme = SearchModelStatic::GetTheme(frameNode);
+    CHECK_NULL_VOID(searchTheme);
+    SearchModelNG::SetSearchButtonFontColor(frameNode, searchTheme->GetSearchButtonTextColor());
 }
 
 void SearchModelStatic::SetSearchButtonAutoDisable(FrameNode* frameNode, const std::optional<bool>& needToDisable)
@@ -341,8 +341,12 @@ void SearchModelStatic::SetCancelDefaultIcon(FrameNode* frameNode)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->InitCancelIconColorSize();
-    pattern->CreateCancelIcon();
+    auto theme = SearchModelStatic::GetTheme(frameNode);
+    CHECK_NULL_VOID(theme);
+    IconOptions iconOptions = IconOptions(theme->GetSearchIconColor(), theme->GetIconHeight(), "", "", "");
+    pattern->SetCancelImageIcon(iconOptions);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonStyle, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize, frameNode);
 }
 
 void SearchModelStatic::SetCancelButtonStyle(FrameNode* frameNode, const std::optional<CancelButtonStyle>& style)

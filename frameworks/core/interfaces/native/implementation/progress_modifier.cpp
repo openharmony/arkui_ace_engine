@@ -120,6 +120,42 @@ auto g_setProgressStyle = [](FrameNode* frameNode, const Ark_ProgressStyleOption
     // enableSmoothEffect
     ProgressModelStatic::SetSmoothEffect(frameNode, Converter::OptConvert<bool>(options.enableSmoothEffect));
 };
+
+auto g_setUndefinedStyle = [](FrameNode* frameNode) {
+    // strokeWidth
+    ProgressModelStatic::SetStrokeWidth(frameNode, std::nullopt);
+    // enableScanEffect
+    ProgressModelStatic::SetLinearSweepingEffect(frameNode, std::nullopt);
+    // strokeRadius
+    ProgressModelStatic::SetStrokeRadius(frameNode, std::nullopt);
+    // shadow
+    ProgressModelStatic::SetPaintShadow(frameNode, std::nullopt);
+    // status
+    ProgressModelStatic::SetProgressStatus(frameNode, std::nullopt);
+    // borderWidth
+    ProgressModelStatic::SetBorderWidth(frameNode, std::nullopt);
+    // borderColor
+    ProgressModelStatic::SetBorderColor(frameNode, std::nullopt);
+    // showDefaultPercentage
+    ProgressModelStatic::SetShowText(frameNode, std::nullopt);
+    // content
+#ifdef WRONG_GEN
+    ProgressModelStatic::SetText(frameNode, std::nullopt);
+#endif
+    // fontColor
+    ProgressModelStatic::SetFontColor(frameNode, std::nullopt);
+    // font
+    ProgressModelStatic::SetFontSize(frameNode, std::nullopt);
+    ProgressModelStatic::SetFontWeight(frameNode, std::nullopt);
+    ProgressModelStatic::SetItalicFontStyle(frameNode, std::nullopt);
+    ProgressModelStatic::SetFontFamily(frameNode, std::nullopt);
+    // scaleCount
+    ProgressModelStatic::SetScaleCount(frameNode, std::nullopt);
+    // scaleWidth
+    ProgressModelStatic::SetScaleWidth(frameNode, std::nullopt);
+    // enableSmoothEffect
+    ProgressModelStatic::SetSmoothEffect(frameNode, std::nullopt);
+};
 } // OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
@@ -220,18 +256,15 @@ void SetValueImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<double>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
-    ProgressModelNG::SetValue(frameNode, *convValue);
+    ProgressModelStatic::SetValue(frameNode, convValue);
 }
 void SetColorImpl(Ark_NativePointer node,
                   const Opt_Union_ResourceColor_LinearGradient* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnion(*value,
+    Converter::VisitUnion(
+        *value,
         [frameNode](const Ark_ResourceColor& resourceColor) {
             std::optional<Color> colorOpt = Converter::OptConvert<Color>(resourceColor);
             std::optional<Gradient> gradientOpt = std::nullopt;
@@ -254,30 +287,23 @@ void SetColorImpl(Ark_NativePointer node,
             ProgressModelStatic::SetGradientColor(frameNode, Converter::OptConvert<Gradient>(linearGradient));
         },
         // Implement Reset value
-        []() {}
-    );
+        [frameNode]() {
+            ProgressModelStatic::SetGradientColor(frameNode, std::nullopt);
+            ProgressModelStatic::SetColor(frameNode, std::nullopt);
+        });
 }
 void SetStyleImpl(Ark_NativePointer node,
                   const Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnion(*value,
-        [frameNode](const Ark_LinearStyleOptions& options) {
-            g_setLinearStyle(frameNode, options);
-        },
-        [frameNode](const Ark_RingStyleOptions& options) {
-            g_setRingStyle(frameNode, options);
-        },
-        [frameNode](const Ark_CapsuleStyleOptions& options) {
-            g_setCapsuleStyle(frameNode, options);
-        },
-        [frameNode](const Ark_ProgressStyleOptions& options) {
-            g_setProgressStyle(frameNode, options);
-        },
+    Converter::VisitUnion(
+        *value, [frameNode](const Ark_LinearStyleOptions& options) { g_setLinearStyle(frameNode, options); },
+        [frameNode](const Ark_RingStyleOptions& options) { g_setRingStyle(frameNode, options); },
+        [frameNode](const Ark_CapsuleStyleOptions& options) { g_setCapsuleStyle(frameNode, options); },
+        [frameNode](const Ark_ProgressStyleOptions& options) { g_setProgressStyle(frameNode, options); },
         // Implement Reset value
-        []() {}
-    );
+        [frameNode]() { g_setUndefinedStyle(frameNode); });
 }
 void SetPrivacySensitiveImpl(Ark_NativePointer node,
                              const Opt_Boolean* value)

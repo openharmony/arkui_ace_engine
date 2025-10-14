@@ -94,7 +94,7 @@ export class LengthMetrics_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const unitTmpResult : LengthUnit = LengthUnit.fromValue(valueDeserializer.readInt32())
         const valueTmpResult : number = (valueDeserializer.readNumber() as number)
-        let value : LengthMetrics = new LengthMetrics(valueTmpResult, unitTmpResult)
+        let value : LengthMetrics = ({unit: unitTmpResult, value: valueTmpResult} as LengthMetrics)
         return value
     }
 }

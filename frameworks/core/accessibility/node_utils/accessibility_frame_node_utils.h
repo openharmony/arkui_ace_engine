@@ -22,6 +22,7 @@
 #include "frameworks/core/accessibility/accessibility_manager.h"
 
 namespace OHOS::Ace::NG {
+using FindCondition = std::function<bool(const RefPtr<NG::FrameNode>&)>;
 
 struct FrameNodeHandleParam {
     std::vector<WeakPtr<NG::FrameNode>> pageNodes;
@@ -33,6 +34,7 @@ class AccessibilityFrameNodeUtils {
 public:
     static void UpdateAccessibilityVisibleToRoot(const RefPtr<UINode>& uiNode);
     static RefPtr<FrameNode> GetFramenodeByAccessibilityId(const RefPtr<FrameNode>& root, int64_t id);
+    static RefPtr<NG::FrameNode> GetFramenodeByCondition(const RefPtr<NG::FrameNode>& root, FindCondition condition);
     static bool IsValidEmbedTarget(
         const RefPtr<FrameNode>& node,
         const RefPtr<AccessibilityManager>& accessibilityManager);

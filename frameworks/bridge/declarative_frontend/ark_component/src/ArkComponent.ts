@@ -3802,20 +3802,16 @@ class ParticleEmitterModifier extends ModifierWithKey<object> {
           if (isObject(data.annulusRegion.center) &&
             isObject(data.annulusRegion.center.x) && isObject(data.annulusRegion.center.y)) {
             arkEmitterPropertyOptions.isSetCenter = 1;
-            arkEmitterPropertyOptions.centerXValue = data.annulusRegion.center.x.value;
-            arkEmitterPropertyOptions.centerXUnit = data.annulusRegion.center.x.unit;
-            arkEmitterPropertyOptions.centerYValue = data.annulusRegion.center.y.value;
-            arkEmitterPropertyOptions.centerYUnit = data.annulusRegion.center.y.unit;
+            arkEmitterPropertyOptions.centerX = data.annulusRegion.center.x;
+            arkEmitterPropertyOptions.centerY = data.annulusRegion.center.y;
           }
           if (isObject(data.annulusRegion.innerRadius)) {
             arkEmitterPropertyOptions.isSetInnerRadius = 1;
-            arkEmitterPropertyOptions.innerRadiusValue = data.annulusRegion.innerRadius.value;
-            arkEmitterPropertyOptions.innerRadiusUnit = data.annulusRegion.innerRadius.unit;
+            arkEmitterPropertyOptions.innerRadius = data.annulusRegion.innerRadius;
           }
           if (isObject(data.annulusRegion.outerRadius)) {
             arkEmitterPropertyOptions.isSetOuterRadius = 1;
-            arkEmitterPropertyOptions.outerRadiusValue = data.annulusRegion.outerRadius.value;
-            arkEmitterPropertyOptions.outerRadiusUnit = data.annulusRegion.outerRadius.unit;
+            arkEmitterPropertyOptions.outerRadius = data.annulusRegion.outerRadius.value;
           }
           if (isNumber(data.annulusRegion.startAngle)) {
             arkEmitterPropertyOptions.isSetStartAngle = 1;
@@ -3961,7 +3957,7 @@ class OnVisibleAreaChangeModifier extends ModifierWithKey<ArkOnVisibleAreaChange
     if (reset) {
       getUINativeModule().common.resetOnVisibleAreaChange(node);
     } else {
-      getUINativeModule().common.setOnVisibleAreaChange(node, this.value.ratios, this.value.event);
+      getUINativeModule().common.setOnVisibleAreaChange(node, this.value.ratios, this.value.event, this.value.measureFromViewport);
     }
   }
 }
@@ -5937,7 +5933,7 @@ class UICommonEvent {
   }
   setOnVisibleAreaApproximateChange(options: VisibleAreaEventOptions, callback: VisibleAreaChangeCallback): void {
     this._onVisibleAreaApproximateChange = callback;
-    getUINativeModule().frameNode.setOnVisibleAreaApproximateChange(this._nodePtr, callback, this._instanceId, options.ratios, options.expectedUpdateInterval ? options.expectedUpdateInterval : 1000);
+    getUINativeModule().frameNode.setOnVisibleAreaApproximateChange(this._nodePtr, callback, this._instanceId, options.ratios, options.expectedUpdateInterval ? options.expectedUpdateInterval : 1000, options.measureFromViewport);
   }
 }
 
@@ -6138,7 +6134,7 @@ class UIGestureEvent {
         let longPressGesture: LongPressGestureHandler = gesture as LongPressGestureHandler;
         getUINativeModule().common.addLongPressGesture(this._nodePtr, priority, mask, longPressGesture.gestureTag,
           longPressGesture.allowedTypes, longPressGesture.fingers, longPressGesture.repeat,
-          longPressGesture.duration, longPressGesture.limitFingerCount,
+          longPressGesture.duration, longPressGesture.limitFingerCount, longPressGesture.allowableMovement,
           longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback);
         break;
       }
@@ -6242,7 +6238,7 @@ function addGestureToGroup(nodePtr: Object | null, gesture: any, gestureGroupPtr
     case CommonGestureType.LONG_PRESS_GESTURE: {
       let longPressGesture: LongPressGestureHandler = gesture as LongPressGestureHandler;
       getUINativeModule().common.addLongPressGestureToGroup(nodePtr, longPressGesture.gestureTag, longPressGesture.allowedTypes,
-        longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration, longPressGesture.limitFingerCount,
+        longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration, longPressGesture.limitFingerCount, longPressGesture.allowableMovement,
         longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }

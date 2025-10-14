@@ -164,6 +164,7 @@ HWTEST_F(MenuModelStaticTestNg, SetItemGroupDivider001, TestSize.Level1)
     */
     MenuModelStatic::SetItemGroupDivider(node, std::optional<V2::ItemDivider>(ITEM_DIVIDER),
         std::optional<DividerMode>(DividerMode::FLOATING_ABOVE_MENU));
+    
     /**
      * @tc.steps: step3. do assert
      * @tc.expected: step3. Menu GroupDividerMode is FLOATING_ABOVE_MENU

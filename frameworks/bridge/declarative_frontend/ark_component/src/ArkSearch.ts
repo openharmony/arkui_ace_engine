@@ -15,6 +15,40 @@
 
 /// <reference path='./import.ts' />
 
+class SearchSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity = Symbol('searchSelectDetectorEnable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSelectDetectorEnable(node);
+    } else {
+      getUINativeModule().search.setSelectDetectorEnable(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchSelectDetectorConfigModifier extends ModifierWithKey<SelectDetectorConfig> {
+  constructor(value: SelectDetectorConfig) {
+    super(value);
+  }
+  static identity = Symbol('searchSelectDetectorConfig');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSelectDetectorConfig(node);
+    } else {
+      getUINativeModule().search.setSelectDetectorConfig(node, this.value.types);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
+  }
+}
+
 class SearchSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -988,6 +1022,14 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     searchButton.fontSize = option?.fontSize;
     searchButton.autoDisable = option?.autoDisable;
     modifierWithKey(this._modifiersWithKeys, SearchSearchButtonModifier.identity, SearchSearchButtonModifier, searchButton);
+    return this;
+  }
+  enableSelectedDataDetector(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorEnableModifier.identity, SearchSelectDetectorEnableModifier, value);
+    return this;
+  }
+  selectedDataDetectorConfig(config) {
+    modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorConfigModifier.identity, SearchSelectDetectorConfigModifier, config);
     return this;
   }
   selectionMenuHidden(value: boolean): SearchAttribute {

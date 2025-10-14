@@ -133,12 +133,12 @@ void TapGestureModelNG::Create(
 }
 
 void LongPressGestureModelNG::Create(
-    int32_t fingersNum, bool repeatResult, int32_t durationNum, bool isLimitFingerCount)
+    int32_t fingersNum, bool repeatResult, int32_t durationNum, bool isLimitFingerCount, int32_t allowableMovementNum)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
     auto gesture = AceType::MakeRefPtr<NG::LongPressGesture>(
-        fingersNum, repeatResult, durationNum, false, false, isLimitFingerCount);
+        fingersNum, repeatResult, durationNum, false, false, isLimitFingerCount, allowableMovementNum);
     gestureProcessor->PushGestureNG(gesture);
 }
 

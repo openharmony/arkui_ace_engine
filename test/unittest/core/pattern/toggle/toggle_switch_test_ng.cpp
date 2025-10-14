@@ -1895,6 +1895,63 @@ HWTEST_F(ToggleSwitchTestNg, ToggleFixIdealSizeTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToggleFixIdealSizeTest003
+ * @tc.desc: Test toggle switch fixIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleFixIdealSizeTest003, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get switchPattern and switchWrapper.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(switchPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(switchFrameNode, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
+    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
+    EXPECT_NE(switchLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to null.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    auto switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to FIX_AT_IDEAL_SIZE,FIX_AT_IDEAL_SIZE.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
  * @tc.name: ToggleWrapContentTest001
  * @tc.desc: Test toggle switch WrapContent.
  * @tc.type: FUNC

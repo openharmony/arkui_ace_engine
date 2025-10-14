@@ -68,7 +68,7 @@ void SetResizeableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::COLUMN_SPLIT, false);
         return;
     }
     LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::COLUMN_SPLIT, *convValue);
@@ -79,6 +79,14 @@ void SetDividerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto divider = Converter::OptConvertPtr<ColumnSplitDivider>(value);
+
+    if (!divider.has_value()) {
+        ColumnSplitDivider defaultDivider;
+
+        defaultDivider.startMargin = Dimension(0, DimensionUnit::VP);
+        defaultDivider.endMargin = Dimension(0, DimensionUnit::VP);
+        divider = defaultDivider;
+    }
     LinearSplitModelNGStatic::SetDivider(frameNode, NG::SplitType::COLUMN_SPLIT, divider);
 }
 } // ColumnSplitAttributeModifier

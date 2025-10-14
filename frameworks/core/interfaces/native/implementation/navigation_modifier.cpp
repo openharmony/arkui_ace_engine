@@ -62,7 +62,8 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 
 namespace NavigationInterfaceModifier {
 void SetNavigationOptionsImpl(Ark_NativePointer node,
-                              const Opt_NavPathStack* pathInfos)
+                              const Opt_NavPathStack* pathInfos,
+                              const Opt_NavigationModuleInfo* moduleInfo)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -252,16 +253,16 @@ void SetOnNavBarStateChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
+    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
     if (!optValue) {
-        // Implement Reset value
+        eventHub->SetOnNavBarStateChange(nullptr);
         return;
     }
     auto stateCallback = [changeCallback = CallbackHelper(*optValue)](bool isVisible) {
         auto visible = Converter::ArkValue<Ark_Boolean>(isVisible);
         changeCallback.Invoke(visible);
     };
-    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
-    CHECK_NULL_VOID(eventHub);
     eventHub->SetOnNavBarStateChange(stateCallback);
 }
 void SetOnNavigationModeChangeImpl(Ark_NativePointer node,
@@ -552,6 +553,10 @@ void SetToolbarConfigurationImpl(Ark_NativePointer node,
                         const RefPtr<UINode>& uiNode) { NavigationModelStatic::SetCustomToolBar(frameNode, uiNode); },
                     node);
         }
+    } else {
+        NavigationModelStatic::SetToolbarMorebuttonOptions(frameNode, NG::MoreButtonOptions());
+        NavigationModelStatic::SetToolbarConfiguration(frameNode, std::vector<NG::BarItem>());
+        NavigationModelStatic::SetCustomToolBar(frameNode, nullptr);
     }
 
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -584,19 +589,25 @@ void SetIgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
                                  const Opt_Array_LayoutSafeAreaType* types,
                                  const Opt_Array_LayoutSafeAreaEdge* edges)
 {
+    constexpr int32_t LAYOUT_SAFE_AREA_TYPE_LIMIT = 2;
+    constexpr int32_t LAYOUT_SAFE_AREA_EDGE_LIMIT = 6;
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(types);
     CHECK_NULL_VOID(edges);
-    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
+    NG::IgnoreLayoutSafeAreaOpts opts {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .rawEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    };
     if (types->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         auto typeRawArray = Converter::Convert<std::vector<uint32_t>>(types->value);
-        uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
+        uint32_t safeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_NONE;
         for (auto typeValue : typeRawArray) {
-            if (typeValue >= SAFE_AREA_TYPE_LIMIT || typeValue == SAFE_AREA_EDGE_SYSTEM) {
+            if (typeValue > LAYOUT_SAFE_AREA_TYPE_LIMIT) {
                 safeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
                 break;
             }
+            safeAreaType |= (1 << safeAreaType);
         }
         opts.type = safeAreaType;
     }
@@ -604,15 +615,15 @@ void SetIgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
         auto edgeRawArray = Converter::Convert<std::vector<uint32_t>>(edges->value);
         uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
         for (auto edgeValue : edgeRawArray) {
-            if (edgeValue >= SAFE_AREA_EDGE_LIMIT) {
-                safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
+            if (edgeValue >= LAYOUT_SAFE_AREA_EDGE_LIMIT) {
+                safeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
                 break;
             }
             if (edgeValue == SAFE_AREA_EDGE_TOP || edgeValue == SAFE_AREA_EDGE_BOTTOM) {
                 safeAreaEdge |= (1 << edgeValue);
             }
         }
-        opts.edges = safeAreaEdge;
+        opts.rawEdges = safeAreaEdge;
     }
     NavigationModelStatic::SetIgnoreLayoutSafeArea(frameNode, opts);
 }

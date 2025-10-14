@@ -1529,6 +1529,126 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         pageNode->GetAccessibilityId());
 }
 
+bool PageRouterManager::CreateDynamicPagePath(const std::string& url, std::string& path)
+{
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, false);
+    auto bundleName = container->GetBundleName();
+    auto moduleName = container->GetModuleName();
+    /**
+     * for example:
+     * url: "pages/Index"
+     * path: "@normalized:N&entry&com.example.demoapp&entry/src/main/ets/pages/Index&1.0.0";
+     */
+    path = "@normalized:N&" + moduleName + "&" + bundleName + "&" +
+        moduleName + "/src/main/ets/" + url + "&1.0.0";
+    return true;
+}
+
+RefPtr<FrameNode> PageRouterManager::CreateDynamicPage(int32_t pageId, const RouterPageInfo& info)
+{
+    CHECK_NULL_RETURN(loadDynamicPage_, nullptr);
+    RouterPageInfo target = info;
+    if (!CreateDynamicPagePath(target.url, target.path)) {
+        return nullptr;
+    }
+    ACE_SCOPED_TRACE("PageRouterManager::CreateDynamicPage");
+    CHECK_RUN_ON(JS);
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "Page router manager is creating dynamic page[%{public}d]: url: %{public}s path: "
+        "%{public}s, recoverable: %{public}s, namedRouter: %{public}s", pageId, target.url.c_str(),
+        target.path.c_str(), (target.recoverable ? "yes" : "no"), (target.isNamedRouterMode ? "yes" : "no"));
+    auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(
+        pageId, target.url, target.path, target.params, target.recoverable, target.isNamedRouterMode);
+    auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
+
+    std::unordered_map<std::string, std::string> reportData { { "pageUrl", target.url } };
+    ResSchedReportScope reportScope("push_page", reportData);
+    auto pageNode = PageNode::CreatePageNode(ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    pageNode->SetHostPageId(pageId);
+    // !!! must push_back first for UpdateRootComponent
+    pageRouterStack_.emplace_back(pageNode);
+
+    loadDynamicPage_(target.path, target.errorCallback);
+
+    // record full path info of every pageNode
+    auto pageInfo = pagePattern->GetPageInfo();
+    if (!pageInfo) {
+        pageRouterStack_.pop_back();
+        return nullptr;
+    }
+    auto keyInfo = target.url;
+    if (keyInfo.empty() && manifestParser_) {
+        auto router = manifestParser_->GetRouter();
+        if (router) {
+            keyInfo = router->GetEntry("");
+        }
+    }
+#if !defined(PREVIEW)
+    if (keyInfo.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
+        // deal with @bundle url
+        // @bundle format: @bundle:bundleName/moduleName/pagePath/fileName(without file extension)
+        // @bundle example: @bundle:com.example.applicationHsp/hsp/ets/mylib/pages/Index
+        // only moduleName and pagePath/fileName is needed: hspmylib/pages/Index
+        size_t bundleEndPos = keyInfo.find('/');
+        size_t moduleStartPos = bundleEndPos + 1;
+        size_t moduleEndPos = keyInfo.find('/', moduleStartPos);
+        std::string moduleName = keyInfo.substr(moduleStartPos, moduleEndPos - moduleStartPos);
+        size_t pageInfoStartPos = keyInfo.find('/', moduleEndPos + 1);
+        keyInfo = keyInfo.substr(pageInfoStartPos + 1);
+        keyInfo = moduleName + keyInfo;
+    }
+#endif
+    SetPageInfoRouteName(entryPageInfo);
+    auto pagePath = Framework::JsiDeclarativeEngine::GetFullPathInfo(keyInfo);
+    if (pagePath.empty()) {
+        auto container = Container::Current();
+        if (!container) {
+            pageRouterStack_.pop_back();
+            return nullptr;
+        }
+        auto moduleName = container->GetModuleName();
+        keyInfo = moduleName + keyInfo;
+        pagePath = Framework::JsiDeclarativeEngine::GetFullPathInfo(keyInfo);
+    }
+    pageInfo->SetFullPath(pagePath);
+
+#if defined(PREVIEW)
+    if (!isComponentPreview_()) {
+#endif
+    if (!GenerateRouterPageInner(target)) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "Update RootComponent Failed or LoadNamedRouter Failed");
+#if !defined(PREVIEW)
+        if (!target.isNamedRouterMode && target.url.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
+            const std::string errorMsg =
+                "Load Page Failed: " + target.url + ", probably caused by reasons as follows:\n"
+                "1. there is a js error in target page;\n"
+                "2. invalid moduleName or bundleName in target page.";
+            ThrowError(errorMsg, ERROR_CODE_INTERNAL_ERROR);
+        }
+#endif
+        pageRouterStack_.pop_back();
+        return nullptr;
+    }
+
+    if (target.isNamedRouterMode) {
+        if (manifestParser_) {
+            manifestParser_->SetPagePath(target.url);
+        } else {
+            TAG_LOGE(AceLogTag::ACE_ROUTER, "set routeName in manifest failed, manifestParser is null!");
+        }
+    }
+
+    if (target.errorCallback != nullptr) {
+        target.errorCallback("", ERROR_CODE_NO_ERROR);
+    }
+#if defined(PREVIEW)
+    }
+#endif
+
+    pageRouterStack_.pop_back();
+    return pageNode;
+}
+
 RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPageInfo& target)
 {
     ACE_SCOPED_TRACE("PageRouterManager::CreatePage");

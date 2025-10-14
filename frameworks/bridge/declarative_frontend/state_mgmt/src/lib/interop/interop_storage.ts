@@ -28,275 +28,281 @@
  * notify value change event.
  */
 class InteropStorage extends Map<string, ObservedPropertyAbstract<any>> {
-  originStorage_: Map<string, ObservedPropertyAbstract<any>> = new Map<string, ObservedPropertyAbstract<any>>();
+    originStorage_: Map<string, ObservedPropertyAbstract<any>> = new Map<string, ObservedPropertyAbstract<any>>();
 
-  totalKeys_ = new Set<string>();
+    private proxy?: Object;
 
-  // get value from AppStorage in ArkTS1.2
-  getStaticValue_: (value: string) => ObservedPropertyAbstract<any> = () => {
-      throw new Error('not implement');
-  };
-  removeStaticValue_: (value: string) => boolean = () => {
-      throw new Error('not implement');
-  };
-  getStaticValueSize_: () => number = () => {
-      throw new Error('not implement');
-  };
-  getStaticTotalKeys_: () => IterableIterator<string> = () => {
-      throw new Error('not implement');
-  };
+    public getProxy(): Object | undefined {
+        return this.proxy;
+    }
 
-  // call ArkTS1.2 to update interop key map.
-  addKeyFunc_: (key: string) => void = (key: string) => {
-      throw new Error('not implement');
-  };
-  removeKeyFunc_: (key: string) => void = (key: string) => {
-      throw new Error('not implement');
-  };
-  clearKeyFunc_: () => boolean = () => {
-      throw new Error('not implement');
-  };
-  checkClearKeyFunc_: () => boolean = () => {
-      throw new Error('not implement');
-  };
+    public setProxy(proxy: Object): void {
+        this.proxy = proxy;
+    }
 
-  constructor() {
-      super();
-  }
+    totalKeys_ = new Set<string>();
 
-  clear(): void {
-      this.originStorage_.clear();
-      // clear key func will also clear ArkTS1.2 storage.
-      this.clearKeyFunc_();
-      return;
-  }
+    // get value from AppStorage in ArkTS1.2
+    getStaticValue_: (value: string) => ObservedPropertyAbstract<any> = () => {
+        throw new Error('not implement');
+    };
+    removeStaticValue_: (value: string) => boolean = () => {
+        throw new Error('not implement');
+    };
+    getStaticValueSize_: () => number = () => {
+        throw new Error('not implement');
+    };
+    getStaticTotalKeys_: () => IterableIterator<string> = () => {
+        throw new Error('not implement');
+    };
 
-  delete(key: string): boolean {
-      const value = this.originStorage_.delete(key);
-      if (value) {
-          // update ArkTS1.2 cached map.
-          this.removeKeyFunc_(key);
-          return true;
-      }
-      // remove ArkTS1.2 stroage.
-      return this.removeStaticValue_(key);
-  }
+    // call ArkTS1.2 to update interop key map.
+    addKeyFunc_: (key: string) => void = (key: string) => {
+        throw new Error('not implement');
+    };
+    removeKeyFunc_: (key: string) => void = (key: string) => {
+        throw new Error('not implement');
+    };
+    clearKeyFunc_: () => boolean = () => {
+        throw new Error('not implement');
+    };
+    checkClearKeyFunc_: () => boolean = () => {
+        throw new Error('not implement');
+    };
 
-  get(key: string): ObservedPropertyAbstract<any> | undefined {
-      const value = this.originStorage_.get(key);
-      if (value !== undefined) {
-          return value;
-      }
-      // Check ArkTS1.2 storage
-      return this.getStaticValue_(key);
-  }
+    constructor() {
+        super();
+    }
 
-  has(key: string): boolean {
-      const result = this.originStorage_.has(key);
-      if (result) {
-          return result;
-      }
-      let interopValue = this.getStaticValue_(key);
-      if (interopValue) {
-          return true;
-      }
-      return false;
-  }
+    clear(): void {
+        this.originStorage_.clear();
+        // clear key func will also clear ArkTS1.2 storage.
+        this.clearKeyFunc_();
+        return;
+    }
 
-  // This will call after has or get check.
-  // When it call, ArkTS1.2 has no this key value.
-  set(key: string, value: ObservedPropertyAbstract<any>): this {
-      this.originStorage_.set(key, value);
-      // update ArkTS1.2 cached key.
-      this.addKeyFunc_(key);
-      return this;
-  }
+    delete(key: string): boolean {
+        const value = this.originStorage_.delete(key);
+        if (value) {
+            // update ArkTS1.2 cached map.
+            this.removeKeyFunc_(key);
+            return true;
+        }
+        // remove ArkTS1.2 stroage.
+        return this.removeStaticValue_(key);
+    }
 
-  get size(): number {
-      return this.originStorage_.size + this.getStaticValueSize_();
-  }
+    get(key: string): ObservedPropertyAbstract<any> | undefined {
+        const value = this.originStorage_.get(key);
+        if (value !== undefined) {
+            return value;
+        }
+        // Check ArkTS1.2 storage
+        return this.getStaticValue_(key);
+    }
 
-  keys(): IterableIterator<string> {
-      this.totalKeys_.clear();
-      const staticKeysIter = this.getStaticTotalKeys_();
-      const firstKey = staticKeysIter.next();
-      if (firstKey.done) {
-          return this.originStorage_.keys();
-      };
-      this.totalKeys_.add(firstKey.value);
-      for (const key of staticKeysIter) {
-          this.totalKeys_.add(key);
-      };
-      this.originStorage_.forEach((value: ObservedPropertyAbstract<any>, key: string) => {
-          this.totalKeys_.add(key);
-      });
-      return this.totalKeys_.keys();
-  }
+    has(key: string): boolean {
+        const result = this.originStorage_.has(key);
+        if (result) {
+            return result;
+        }
+        let interopValue = this.getStaticValue_(key);
+        if (interopValue) {
+            return true;
+        }
+        return false;
+    }
+
+    // This will call after has or get check.
+    // When it call, ArkTS1.2 has no this key value.
+    set(key: string, value: ObservedPropertyAbstract<any>): this {
+        this.originStorage_.set(key, value);
+        // update ArkTS1.2 cached key.
+        this.addKeyFunc_(key);
+        return this;
+    }
+
+    get size(): number {
+        return this.originStorage_.size + this.getStaticValueSize_();
+    }
+
+    keys(): IterableIterator<string> {
+        this.totalKeys_.clear();
+        const staticKeysIter = this.getStaticTotalKeys_();
+        const firstKey = staticKeysIter.next();
+        if (firstKey.done) {
+            return this.originStorage_.keys();
+        };
+        this.totalKeys_.add(firstKey.value);
+        for (const key of staticKeysIter) {
+            this.totalKeys_.add(key);
+        };
+        this.originStorage_.forEach((value: ObservedPropertyAbstract<any>, key: string) => {
+            this.totalKeys_.add(key);
+        });
+        return this.totalKeys_.keys();
+    }
 }
 
 function bindStaticAppStorage(
-  getStaticValue: (value: string) => ObservedPropertyAbstract<any>,
-  removeStaticValue: (value: string) => boolean,
-  getStaticValueSize: () => number,
-  getStaticTotalKeys: () => IterableIterator<string>,
+    getStaticValue: (value: string) => ObservedPropertyAbstract<any>,
+    removeStaticValue: (value: string) => boolean,
+    getStaticValueSize: () => number,
+    getStaticTotalKeys: () => IterableIterator<string>,
 
-  // call ArkTS1.2 to update interop key map.
-  addKeyFunc: (key: string) => void,
-  removeKeyFunc: (key: string) => void,
-  clearKeyFunc: () => boolean,
-  checkClearKeyFunc: () => boolean,
+    // call ArkTS1.2 to update interop key map.
+    addKeyFunc: (key: string) => void,
+    removeKeyFunc: (key: string) => void,
+    clearKeyFunc: () => boolean,
+    checkClearKeyFunc: () => boolean,
 
-  // set callback to ArkTS1.2
-  setGetValueFunc: (event: (value: string) => ObservedPropertyAbstract<any> | undefined) => void,
-  setRemoveValueFunc: (event: (value: string) => boolean) => void,
-  setClearValueFunc: (event: () => boolean) => void,
-  setCheckCanClearValueFunc: (event: () => boolean) => void
+    // set callback to ArkTS1.2
+    setGetValueFunc: (event: (value: string) => ObservedPropertyAbstract<any> | undefined) => void,
+    setRemoveValueFunc: (event: (value: string) => boolean) => void,
+    setClearValueFunc: (event: () => boolean) => void,
+    setCheckCanClearValueFunc: (event: () => boolean) => void
 ): void {
-  const appStorage = AppStorage._getOrCreateByInterop_();
+    const appStorage = AppStorage._getOrCreateByInterop_();
 
-  // use interop storage replace origin map.
-  const interopStorage = new InteropStorage();
-  interopStorage.originStorage_ = appStorage._getOriginStorageByInterop_();
-  appStorage._setOriginStorageByInterop_(interopStorage);
+    // use interop storage replace origin map.
+    const interopStorage = new InteropStorage();
+    interopStorage.originStorage_ = appStorage._getOriginStorageByInterop_();
+    appStorage._setOriginStorageByInterop_(interopStorage);
 
-  // update ArkTS1.2 key cache.
-  interopStorage.originStorage_.forEach((value: ObservedPropertyAbstractPU<any>, key: string) => {
-      addKeyFunc(key);
-  });
+    // update ArkTS1.2 key cache.
+    interopStorage.originStorage_.forEach((value: ObservedPropertyAbstractPU<any>, key: string) => {
+        addKeyFunc(key);
+    });
 
-  // bind static storage.
-  interopStorage.getStaticValue_ = getStaticValue;
-  interopStorage.removeStaticValue_ = removeStaticValue;
-  interopStorage.getStaticValueSize_ = getStaticValueSize;
-  interopStorage.getStaticTotalKeys_ = getStaticTotalKeys;
-  interopStorage.addKeyFunc_ = addKeyFunc;
-  interopStorage.removeKeyFunc_ = removeKeyFunc;
-  interopStorage.clearKeyFunc_ = clearKeyFunc;
-  interopStorage.checkClearKeyFunc_ = checkClearKeyFunc;
+    // bind static storage.
+    interopStorage.getStaticValue_ = getStaticValue;
+    interopStorage.removeStaticValue_ = removeStaticValue;
+    interopStorage.getStaticValueSize_ = getStaticValueSize;
+    interopStorage.getStaticTotalKeys_ = getStaticTotalKeys;
+    interopStorage.addKeyFunc_ = addKeyFunc;
+    interopStorage.removeKeyFunc_ = removeKeyFunc;
+    interopStorage.clearKeyFunc_ = clearKeyFunc;
+    interopStorage.checkClearKeyFunc_ = checkClearKeyFunc;
 
-  setGetValueFunc((value: string) => {
-      return interopStorage.originStorage_.get(value);
-  });
-  setRemoveValueFunc((value: string) => {
-      let state: ObservedPropertyAbstract<any> | undefined = interopStorage.originStorage_.get(value);
-      if (state) {
-          if (state.numberOfSubscrbers() > 0) {
-              return false;
-          }
-          state.aboutToBeDeleted();
-          interopStorage.originStorage_.delete(value);
-          return true;
-      }
-      return false;
-  });
-  setClearValueFunc(() => {
-      const storage = interopStorage.originStorage_;
-      for (let propName of storage.keys()) {
-          let state: ObservedPropertyAbstract<any> = storage.get(propName);
-          if (state.numberOfSubscrbers() > 0) {
-              return false;
-          }
-      }
-      for (let propName of storage.keys()) {
-          let state: ObservedPropertyAbstract<any> = storage.get(propName);
-          state.aboutToBeDeleted();
-      }
-      storage.clear();
-      return true;
-  });
-  setCheckCanClearValueFunc(() => {
-      const storage = interopStorage.originStorage_;
-      for (let propName of storage.keys()) {
-          let state: ObservedPropertyAbstract<any> = storage.get(propName);
-          if (state.numberOfSubscrbers() > 0) {
-              return false;
-          }
-      }
-      return true;
-  });
+    setGetValueFunc((value: string) => {
+        return interopStorage.originStorage_.get(value);
+    });
+    setRemoveValueFunc((value: string) => {
+        let state: ObservedPropertyAbstract<any> | undefined = interopStorage.originStorage_.get(value);
+        if (state) {
+            if (state.numberOfSubscrbers() > 0) {
+                return false;
+            }
+            state.aboutToBeDeleted();
+            interopStorage.originStorage_.delete(value);
+            return true;
+        }
+        return false;
+    });
+    setClearValueFunc(() => {
+        const storage = interopStorage.originStorage_;
+        for (let propName of storage.keys()) {
+            let state: ObservedPropertyAbstract<any> = storage.get(propName);
+            if (state.numberOfSubscrbers() > 0) {
+                return false;
+            }
+        }
+        for (let propName of storage.keys()) {
+            let state: ObservedPropertyAbstract<any> = storage.get(propName);
+            state.aboutToBeDeleted();
+        }
+        storage.clear();
+        return true;
+    });
+    setCheckCanClearValueFunc(() => {
+        const storage = interopStorage.originStorage_;
+        for (let propName of storage.keys()) {
+            let state: ObservedPropertyAbstract<any> = storage.get(propName);
+            if (state.numberOfSubscrbers() > 0) {
+                return false;
+            }
+        }
+        return true;
+    });
 }
 
 function bindStaticLocalStorage(
-  getStaticValue: (value: string) => ObservedPropertyAbstract<any>,
-  removeStaticValue: (value: string) => boolean,
-  getStaticValueSize: () => number,
-  getStaticTotalKeys: () => IterableIterator<string>,
+    localStorage: LocalStorage,
+    getStaticValue: (value: string) => ObservedPropertyAbstract<any>,
+    removeStaticValue: (value: string) => boolean,
+    getStaticValueSize: () => number,
+    getStaticTotalKeys: () => IterableIterator<string>,
 
-  // call ArkTS1.2 to update interop key map.
-  addKeyFunc: (key: string) => void,
-  removeKeyFunc: (key: string) => void,
-  clearKeyFunc: () => boolean,
-  checkClearKeyFunc: () => boolean,
+    // call ArkTS1.2 to update interop key map.
+    addKeyFunc: (key: string) => void,
+    removeKeyFunc: (key: string) => void,
+    clearKeyFunc: () => boolean,
+    checkClearKeyFunc: () => boolean,
 
-  // set callback to ArkTS1.2
-  setGetValueFunc: (event: (value: string) => ObservedPropertyAbstract<any> | undefined) => void,
-  setRemoveValueFunc: (event: (value: string) => boolean) => void,
-  setClearValueFunc: (event: () => boolean) => void,
-  setCheckCanClearValueFunc:  (event: () => boolean) => void
-) : LocalStorage {
+    // set callback to ArkTS1.2
+    setGetValueFunc: (event: (value: string) => ObservedPropertyAbstract<any> | undefined) => void,
+    setRemoveValueFunc: (event: (value: string) => boolean) => void,
+    setClearValueFunc: (event: () => boolean) => void,
+    setCheckCanClearValueFunc:  (event: () => boolean) => void
+) : void {
+    // use interop storage replace origin map.
+    const interopStorage = new InteropStorage();
+    interopStorage.originStorage_ = localStorage._getOriginStorageByInterop_();
+    localStorage._setOriginStorageByInterop_(interopStorage);
 
-  const localStorage = new LocalStorage();
+    // update ArkTS1.2 key cache.
+    interopStorage.originStorage_.forEach((value: ObservedPropertyAbstractPU<any>, key: string) => {
+        addKeyFunc(key);
+    });
 
-  // use interop storage replace origin map.
-  const interopStorage = new InteropStorage();
-  interopStorage.originStorage_ = localStorage._getOriginStorageByInterop_();
-  localStorage._setOriginStorageByInterop_(interopStorage);
+    // bind static storage.
+    interopStorage.getStaticValue_ = getStaticValue;
+    interopStorage.removeStaticValue_ = removeStaticValue;
+    interopStorage.getStaticValueSize_ = getStaticValueSize;
+    interopStorage.getStaticTotalKeys_ = getStaticTotalKeys;
+    interopStorage.addKeyFunc_ = addKeyFunc;
+    interopStorage.removeKeyFunc_ = removeKeyFunc;
+    interopStorage.clearKeyFunc_ = clearKeyFunc;
+    interopStorage.checkClearKeyFunc_ = checkClearKeyFunc;
 
-  // update ArkTS1.2 key cache.
-  interopStorage.originStorage_.forEach((value: ObservedPropertyAbstractPU<any>, key: string) => {
-      addKeyFunc(key);
-  });
-
-  // bind static storage.
-  interopStorage.getStaticValue_ = getStaticValue;
-  interopStorage.removeStaticValue_ = removeStaticValue;
-  interopStorage.getStaticValueSize_ = getStaticValueSize;
-  interopStorage.getStaticTotalKeys_ = getStaticTotalKeys;
-  interopStorage.addKeyFunc_ = addKeyFunc;
-  interopStorage.removeKeyFunc_ = removeKeyFunc;
-  interopStorage.clearKeyFunc_ = clearKeyFunc;
-  interopStorage.checkClearKeyFunc_ = checkClearKeyFunc;
-
-  setGetValueFunc((value: string) => {
-      return interopStorage.originStorage_.get(value);
-  });
-  setRemoveValueFunc((value: string) => {
-      let state: ObservedPropertyAbstract<any> | undefined = interopStorage.originStorage_.get(value);
-      if (state) {
-          if (state.numberOfSubscrbers() > 0) {
-              return false;
-          }
-          state.aboutToBeDeleted();
-          interopStorage.originStorage_.delete(value);
-          return true;
-      }
-      return false;
-  });
-  setClearValueFunc(() => {
-      const storage = interopStorage.originStorage_;
-      for (let propName of storage.keys()) {
-          let state: ObservedPropertyAbstract<any> = storage.get(propName);
-          if (state.numberOfSubscrbers() > 0) {
-              return false;
-          }
-      }
-      for (let propName of storage.keys()) {
-          let state: ObservedPropertyAbstract<any> = storage.get(propName);
-          state.aboutToBeDeleted();
-      }
-      storage.clear();
-      return true;
-  });
-  setCheckCanClearValueFunc(() => {
-      const storage = interopStorage.originStorage_;
-      for (let propName of storage.keys()) {
-          let state: ObservedPropertyAbstract<any> = storage.get(propName);
-          if (state.numberOfSubscrbers() > 0) {
-              return false;
-          }
-      }
-      return true;
-  });
-
-  return localStorage;
+    setGetValueFunc((value: string) => {
+        return interopStorage.originStorage_.get(value);
+    });
+    setRemoveValueFunc((value: string) => {
+        let state: ObservedPropertyAbstract<any> | undefined = interopStorage.originStorage_.get(value);
+        if (state) {
+            if (state.numberOfSubscrbers() > 0) {
+                return false;
+            }
+            state.aboutToBeDeleted();
+            interopStorage.originStorage_.delete(value);
+            return true;
+        }
+        return false;
+    });
+    setClearValueFunc(() => {
+        const storage = interopStorage.originStorage_;
+        for (let propName of storage.keys()) {
+            let state: ObservedPropertyAbstract<any> = storage.get(propName);
+            if (state.numberOfSubscrbers() > 0) {
+                return false;
+            }
+        }
+        for (let propName of storage.keys()) {
+            let state: ObservedPropertyAbstract<any> = storage.get(propName);
+            state.aboutToBeDeleted();
+        }
+        storage.clear();
+        return true;
+    });
+    setCheckCanClearValueFunc(() => {
+        const storage = interopStorage.originStorage_;
+        for (let propName of storage.keys()) {
+            let state: ObservedPropertyAbstract<any> = storage.get(propName);
+            if (state.numberOfSubscrbers() > 0) {
+                return false;
+            }
+        }
+        return true;
+    });
 }

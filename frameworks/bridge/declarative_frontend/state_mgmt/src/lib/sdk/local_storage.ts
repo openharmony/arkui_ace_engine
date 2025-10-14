@@ -29,15 +29,25 @@
 class LocalStorage extends NativeLocalStorage {
 
   protected storage_: Map<string, ObservedPropertyAbstract<any>>;
-  
-  public _getOriginStorageByInterop_(): Map<string, ObservedPropertyAbstract<any>> {
-    return this.storage_;
+
+  public _getOriginStorageByInterop_(): InteropStorage {
+    return this.storage_ as InteropStorage;
   }
 
   public _setOriginStorageByInterop_(value: Map<string, ObservedPropertyAbstract<any>>): void {
     this.storage_ = value;
   }
-  
+
+  private proxy?: Object;
+
+  public getProxy(): Object | undefined {
+    return this.proxy;
+  }
+
+  public setProxy(proxy: Object): void {
+    this.proxy = proxy;
+  }
+
   /*
     get access to provded LocalStorage instance thru Stake model
     @StageModelOnly
@@ -411,10 +421,20 @@ class LocalStorage extends NativeLocalStorage {
         stateMgmtProfiler.end();
         return false;
       }
-      p.aboutToBeDeleted();
-      this.storage_.delete(propName);
-      stateMgmtProfiler.end();
-      return true;
+      if (InteropConfigureStateMgmt.needsInterop()) {
+        if (!this.storage_.delete(propName)) {
+          return false;
+        }
+        p.aboutToBeDeleted();
+        stateMgmtProfiler.end();
+        return true;
+      }
+      else {
+        p.aboutToBeDeleted();
+        this.storage_.delete(propName);
+        stateMgmtProfiler.end();
+        return true;
+      }
     } else {
       stateMgmtConsole.debug(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
       stateMgmtProfiler.end();
@@ -440,6 +460,15 @@ class LocalStorage extends NativeLocalStorage {
           has ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.
           Any @Component instance with a @StorageLink/Prop or @LocalStorageLink/Prop is a subscriber.`);
         stateMgmtProfiler.end();
+        return false;
+      }
+    }
+    if (InteropConfigureStateMgmt.needsInterop()) {
+      if (
+        'checkClearKeyFunc_' in this.storage_ &&
+        typeof this.storage_.checkClearKeyFunc_ === 'function' &&
+        !this.storage_.checkClearKeyFunc_()
+      ) {
         return false;
       }
     }

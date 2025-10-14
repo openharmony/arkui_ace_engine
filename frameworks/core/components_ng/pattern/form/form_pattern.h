@@ -176,6 +176,21 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
+    float GetFormViewScale()
+    {
+        return formViewScale_;
+    }
+
+    bool OnAccessibilityStateChange(bool state);
+    inline void SetAccessibilityState(bool state)
+    {
+        accessibilityState_.store(state);
+    }
+    inline bool IsAccessibilityState()
+    {
+        return accessibilityState_.load();
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -286,6 +301,11 @@ private:
     void GetWantParam(RequestFormInfo& info);
     void UpdateFormSurface(const RequestFormInfo& info);
     void RemoveFormStyleChildNode();
+    float CalculateViewScale(float width, float height, float layoutWidth, float layoutHeight);
+    float GetNumberFromParams(const AAFwk::Want& want, const std::string& key, float defaultValue);
+    void InitializeFormAccessibility();
+    void SetForbiddenRootNodeAccessibilityAction(RefPtr<FrameNode> &forbiddeRootNode);
+    void SetFormAccessibilityAction();
 
     RefPtr<RenderContext> externalRenderContext_;
 
@@ -325,6 +345,12 @@ private:
     bool isStaticFormSnaping_ = false;
     int64_t updateFormComponentTimestamp_ = 0;
     std::shared_ptr<Rosen::RSUIContext> rsUIContext_ = nullptr;
+    std::atomic_bool accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled();
+    float formViewScale_ = 1.0f;
+    enum {
+        VALUE_TYPE_INT = 5,
+        VALUE_TYPE_DOUBLE = 8,
+    };
 };
 } // namespace NG
 } // namespace Ace

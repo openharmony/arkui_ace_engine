@@ -445,7 +445,7 @@ void TextFieldLayoutAlgorithm::UpdateStyledPlaceholderHeightAdaptivePolicy(const
 }
 
 void TextFieldLayoutAlgorithm::StylePlaceHolderMeasure(
-    LayoutWrapper* layoutWrapper, const LayoutConstraintF& textContentConstraint, SizeF& conetentSize)
+    LayoutWrapper* layoutWrapper, const LayoutConstraintF& textContentConstraint, SizeF& contentSize)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
@@ -458,8 +458,8 @@ void TextFieldLayoutAlgorithm::StylePlaceHolderMeasure(
     auto textNode = placeholderResponseArea->GetFrameNode();
     CHECK_NULL_VOID(textNode);
     auto childIndex = frameNode->GetChildIndex(textNode);
-    conetentSize = placeholderResponseArea->MeasurePlaceholder(layoutWrapper, childIndex, textContentConstraint);
-    textRect_.SetSize(conetentSize);
+    contentSize = placeholderResponseArea->MeasurePlaceholder(layoutWrapper, childIndex, textContentConstraint);
+    textRect_.SetSize(contentSize);
 
     if (LessOrEqual(textRect_.Height(), 0.0)) {
         // Used for empty placeholder.
@@ -478,13 +478,13 @@ void TextFieldLayoutAlgorithm::StylePlaceHolderMeasure(
         }
     }
 
-    auto height = GreatNotEqual(textRect_.Height(), 0.0) ? conetentSize.Height()
-                                                         : std::max(preferredHeight_, conetentSize.Height());
-    conetentSize.SetHeight(height);
+    auto height = GreatNotEqual(textRect_.Height(), 0.0) ? contentSize.Height()
+                                                         : std::max(preferredHeight_, contentSize.Height());
+    contentSize.SetHeight(height);
 }
 
 void TextFieldLayoutAlgorithm::StylePlaceHolderReMeasure(
-    LayoutWrapper* layoutWrapper, LayoutConstraintF textContentConstraint, float counterNodeHeight, SizeF& conetentSize)
+    LayoutWrapper* layoutWrapper, LayoutConstraintF textContentConstraint, float counterNodeHeight, SizeF& contentSize)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
@@ -497,7 +497,7 @@ void TextFieldLayoutAlgorithm::StylePlaceHolderReMeasure(
                              "textContentConstraint:%s][counterNodeHeight:%f][textRect_:%s]",
         frameNode->GetId(), textContentConstraint.ToString().c_str(), counterNodeHeight, textRect_.ToString().c_str());
     UpdateStyledPlaceholderHeightAdaptivePolicy(textFieldPattern);
-    StylePlaceHolderMeasure(layoutWrapper, textContentConstraint, conetentSize);
+    StylePlaceHolderMeasure(layoutWrapper, textContentConstraint, contentSize);
 }
 
 SizeF TextFieldLayoutAlgorithm::StyledPlaceHolderMeasureContent(
@@ -532,47 +532,47 @@ SizeF TextFieldLayoutAlgorithm::StyledPlaceHolderMeasureContent(
     textContentConstraint.selfIdealSize.SetHeight(std::nullopt);
     textContentConstraint.minSize.SetHeight(0.0f);
 
-    SizeF conetentSize;
-    StylePlaceHolderMeasure(layoutWrapper, textContentConstraint, conetentSize);
+    SizeF contentSize;
+    StylePlaceHolderMeasure(layoutWrapper, textContentConstraint, contentSize);
     ACE_MEASURE_SCOPED_TRACE("TextFieldLayoutAlgorithm::StyledPlaceHolderMeasureContent[self:%d][contentConstraint:%s]["
-                             "textContentConstraint:%s][conetentSize:%s][preferredHeight:%f]",
+                             "textContentConstraint:%s][contentSize:%s][preferredHeight:%f]",
         frameNode->GetId(), contentConstraint.ToString().c_str(), textContentConstraint.ToString().c_str(),
-        conetentSize.ToString().c_str(), preferredHeight_);
+        contentSize.ToString().c_str(), preferredHeight_);
 
     if (paragraph_) {
         paragraph_ = nullptr;
     }
-    StyledPlaceHolderCounterNodeMeasure(textContentConstraint, layoutWrapper, textFieldPattern, conetentSize);
+    StyledPlaceHolderCounterNodeMeasure(textContentConstraint, layoutWrapper, textFieldPattern, contentSize);
     auto textPattern = textNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, SizeF());
 
     inlineMeasureItem_.inlineSizeHeight =
         preferredHeight_ * std::min(static_cast<uint32_t>(textPattern->GetLineCount()),
         textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
-    return conetentSize;
+    return contentSize;
 }
 
 void TextFieldLayoutAlgorithm::StyledPlaceHolderCounterNodeMeasure(const LayoutConstraintF& textContentConstraint,
-    LayoutWrapper* layoutWrapper, const RefPtr<TextFieldPattern>& textFieldPattern, SizeF& conetentSize)
+    LayoutWrapper* layoutWrapper, const RefPtr<TextFieldPattern>& textFieldPattern, SizeF& contentSize)
 {
     auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     float counterNodeHeight = 0.0f;
     if (textFieldPattern->GetTextInputFlag()) {
         // TextInput's counter is outside the input area
-        counterNodeHeight = CounterNodeMeasure(conetentSize.Width(), layoutWrapper);
+        counterNodeHeight = CounterNodeMeasure(contentSize.Width(), layoutWrapper);
     } else {
         // TextArea's counter is inside the input area
-        counterNodeHeight = CounterNodeMeasure(conetentSize.Width(), layoutWrapper);
+        counterNodeHeight = CounterNodeMeasure(contentSize.Width(), layoutWrapper);
     }
     if (textFieldLayoutProperty->GetShowCounterValue(false) && textFieldLayoutProperty->HasMaxLength() &&
         textFieldPattern->IsTextArea() && !textFieldPattern->IsNormalInlineState() &&
         textRect_.Height() > textContentConstraint.maxSize.Height() - counterNodeHeight) {
-        StylePlaceHolderReMeasure(layoutWrapper, textContentConstraint, counterNodeHeight, conetentSize);
+        StylePlaceHolderReMeasure(layoutWrapper, textContentConstraint, counterNodeHeight, contentSize);
     }
 }
 
-void TextFieldLayoutAlgorithm::StyledPlaceHodlerLayout(
+void TextFieldLayoutAlgorithm::StyledPlaceholderLayout(
     LayoutWrapper* layoutWrapper, const RefPtr<TextFieldPattern>& pattern)
 {
     auto placeResponseArea = pattern->GetPlaceholderResponseArea();
@@ -582,7 +582,32 @@ void TextFieldLayoutAlgorithm::StyledPlaceHodlerLayout(
     auto placeholderResponseArea = DynamicCast<PlaceholderResponseArea>(placeResponseArea);
     CHECK_NULL_VOID(placeholderResponseArea);
     auto textNode = placeholderResponseArea->GetFrameNode();
+    CHECK_NULL_VOID(textNode);
     auto childIndex = frameNode->GetChildIndex(textNode);
+
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto size = geometryNode->GetFrameSize();
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto radius = renderContext->GetBorderRadius().value_or(BorderRadiusProperty());
+    auto rect = AceType::MakeRefPtr<ShapeRect>();
+    rect->SetWidth(Dimension(size.Width()));
+    rect->SetHeight(Dimension(size.Height()));
+    auto topLeft = Radius(radius.radiusTopLeft.value_or(Dimension()));
+    rect->SetTopLeftRadius(topLeft);
+    auto topRight = Radius(radius.radiusTopRight.value_or(Dimension()));
+    rect->SetTopRightRadius(topRight);
+    auto bottomRight = Radius(radius.radiusBottomRight.value_or(Dimension()));
+    rect->SetBottomRightRadius(bottomRight);
+    auto bottomLeft = Radius(radius.radiusBottomLeft.value_or(Dimension()));
+    rect->SetBottomLeftRadius(bottomLeft);
+    auto offset = textRect_.GetOffset();
+    rect->SetOffset(DimensionOffset(Dimension(-offset.GetX()), Dimension(-offset.GetY())));
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    textRenderContext->UpdateClipShape(rect);
+
     placeholderResponseArea->Layout(layoutWrapper, childIndex, textRect_.GetOffset());
 }
 
@@ -867,7 +892,7 @@ void TextFieldLayoutAlgorithm::ConstructStyledPlaceholderStyle(
     CHECK_NULL_VOID(responseArea);
     auto placeholderResponseArea = DynamicCast<PlaceholderResponseArea>(responseArea);
     CHECK_NULL_VOID(placeholderResponseArea);
-    placeholderResponseArea->PlacehodlerMountToParent();
+    placeholderResponseArea->PlaceholderMountToParent();
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textNode = placeholderResponseArea->GetFrameNode();

@@ -868,7 +868,7 @@ private:
         std::function<void(const Color&)> updateTextColorFunc,
         std::function<void(const Dimension&)> updateFontSizeFunc,
         std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc);
-
+    bool OnThemeScopeUpdateMultiThread();
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;

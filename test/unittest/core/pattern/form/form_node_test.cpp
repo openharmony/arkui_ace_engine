@@ -14,8 +14,8 @@
  */
 
 #include <cstddef>
-#include <optional>
 #include <memory>
+#include <optional>
 
 #include "gtest/gtest.h"
 

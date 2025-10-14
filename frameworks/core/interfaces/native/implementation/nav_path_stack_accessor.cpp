@@ -357,7 +357,19 @@ Array_Number GetIndexByNameImpl(Ark_NavPathStack peer,
 }
 Opt_NavPathStack GetParentImpl(Ark_NavPathStack peer)
 {
-    return {};
+    Opt_NavPathStack invalid = {
+        .tag = InteropTag::INTEROP_TAG_UNDEFINED,
+    };
+    CHECK_NULL_RETURN(peer, invalid);
+    auto pathStack = peer->GetNavPathStack();
+    CHECK_NULL_RETURN(pathStack, invalid);
+    auto parentStack = pathStack->GetParent();
+    CHECK_NULL_RETURN(parentStack, invalid);
+    Opt_NavPathStack retVal = {
+        .tag = InteropTag::INTEROP_TAG_OBJECT,
+        .value = new NavPathStackPeer(parentStack)
+    };
+    return retVal;
 }
 Ark_Number SizeImpl(Ark_NavPathStack peer)
 {

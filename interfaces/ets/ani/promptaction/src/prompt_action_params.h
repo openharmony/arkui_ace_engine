@@ -33,7 +33,6 @@
 #include "frameworks/base/log/log_wrapper.h"
 
 struct PromptActionAsyncContext {
-    ani_env* env = nullptr;
     ani_vm* vm = nullptr;
     ani_resolver deferred = nullptr;
     ani_fn_object callback = nullptr;

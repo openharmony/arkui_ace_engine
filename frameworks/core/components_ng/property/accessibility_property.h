@@ -39,6 +39,15 @@ struct WindowSceneInfo {
     float_t scaleX = 1.0f;
     float_t scaleY = 1.0f;
 };
+
+struct AccessibilityGroupOptions {
+    bool accessibilityTextPreferred = false;
+    AccessibilityRoleType stateControllerByType = AccessibilityRoleType::ROLE_NONE;
+    std::string stateControllerByInspector;
+    AccessibilityRoleType actionControllerByType = AccessibilityRoleType::ROLE_NONE;
+    std::string actionControllerByInspector;
+};
+
 using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
 using ActionScrollForwardImpl = ActionNoParam;
@@ -653,6 +662,11 @@ public:
     void SetAccessibilityZIndex(const int32_t& accessibilityZIndex);
     int32_t GetAccessibilityZIndex() const;
 
+    void SetAccessibilityGroupOptions(const AccessibilityGroupOptions& accessibilityGroupOptions);
+    bool HasAccessibilityGroupOptions();
+    AccessibilityGroupOptions GetAccessibilityGroupOptions();
+    void ResetAccessibilityGroupOptions();
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(
@@ -776,6 +790,8 @@ protected:
     // used to modify the hierarchical relation ship between sibling nodes the same level in barrierfree tree
     // only affects the barrierfree tree presentation, does not affect the zindex in barrierfree hover
     int32_t accessibilityZIndex_ = -1;
+    // used to maintain user accessibilityOptions
+    std::optional<AccessibilityGroupOptions> accessibilityGroupOptions_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -31,6 +31,40 @@ class TextEnableDataDetectorModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textSelectDetectorEnable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetSelectDetectorEnable(node);
+    } else {
+      getUINativeModule().text.setSelectDetectorEnable(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextSelectDetectorConfigModifier extends ModifierWithKey<SelectDetectorConfig> {
+  constructor(value: SelectDetectorConfig) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textSelectDetectorConfig');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetSelectDetectorConfig(node);
+    } else {
+      getUINativeModule().text.setSelectDetectorConfig(node, this.value.types);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
+  }
+}
+
 class FontColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
@@ -1039,6 +1073,14 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   initialize(value: Object[]): void {
     modifierWithKey(this._modifiersWithKeys, TextContentModifier.identity, TextContentModifier, value[0]);
     modifierWithKey(this._modifiersWithKeys, TextControllerModifier.identity, TextControllerModifier, value[1]);
+    return this;
+  }
+  enableSelectedDataDetector(value) {
+    modifierWithKey(this._modifiersWithKeys, TextSelectDetectorEnableModifier.identity, TextSelectDetectorEnableModifier, value);
+    return this;
+  }
+  selectedDataDetectorConfig(config) {
+    modifierWithKey(this._modifiersWithKeys, TextSelectDetectorConfigModifier.identity, TextSelectDetectorConfigModifier, config);
     return this;
   }
   enableDataDetector(value: boolean): this {

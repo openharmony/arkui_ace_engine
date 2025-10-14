@@ -68,9 +68,13 @@ public:
     int32_t GetImageId();
 
     void ClearAccessibilityChildTreeRegisterFlag();
+    void ResetAccessibilityChildTreeCallbackAndDeregister();
+private:
+    void RegisterFormAccessibilityCallback();
 private:
     std::optional<int32_t> imageId_;
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
+    std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 };
 
 } // namespace OHOS::Ace::NG

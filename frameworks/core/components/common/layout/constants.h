@@ -1268,6 +1268,12 @@ enum class ScrollSnapAnimationSpeed {
     NORMAL = 0,
     SLOW = 1,
 };
+
+enum class PresetFillType {
+    BREAKPOINT_DEFAULT = 0,
+    BREAKPOINT_SM1MD2LG3,
+    BREAKPOINT_SM2MD3LG5,
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

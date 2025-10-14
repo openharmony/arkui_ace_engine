@@ -437,8 +437,8 @@ struct CJUICommonModifier {
     void (*getOutlineColor)(ArkUINodeHandle node, ArkUI_Uint32 (*values)[4]);
     void (*getSize)(ArkUINodeHandle node, ArkUI_Float32 (*values)[2], ArkUI_Int32 unit);
     ArkUI_Bool (*getRenderGroup)(ArkUINodeHandle node);
-    void (*setOnVisibleAreaChange)(
-        ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size);
+    void (*setOnVisibleAreaChange)(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values,
+        ArkUI_Int32 size, ArkUI_Bool measureFromViewport);
     ArkUI_CharPtr (*getGeometryTransition)(ArkUINodeHandle node, ArkUIGeometryTransitionOptions* options);
     void (*setChainStyle)(ArkUINodeHandle node, ArkUI_Int32 direction, ArkUI_Int32 style);
     void (*getChainStyle)(ArkUINodeHandle node, ArkUI_Int32 (*values)[2]);
@@ -2077,6 +2077,8 @@ struct CJUIWebModifier {
     void (*resetOnNativeEmbedLifecycleChange)(ArkUINodeHandle node);
     void (*setOnNativeEmbedGestureEvent)(ArkUINodeHandle node, void* callback);
     void (*resetOnNativeEmbedGestureEvent)(ArkUINodeHandle node);
+    void (*setOnNativeEmbedMouseEvent)(ArkUINodeHandle node, void* callback);
+    void (*resetOnNativeEmbedMouseEvent)(ArkUINodeHandle node);
     void (*setOnNativeEmbedObjectParamChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnNativeEmbedObjectParamChange)(ArkUINodeHandle node);
     void (*setRegisterNativeEmbedRule)(ArkUINodeHandle node, ArkUI_CharPtr tag, ArkUI_CharPtr type);

@@ -20,22 +20,8 @@
 #include <memory>
 
 namespace OHOS::Ace::Ani {
-ani_int getAreaMode(ani_env* env, ani_object IntObject)
-{
-    ani_int areaMode = -1;
-    ani_boolean isUndefined = true;
-
-    // check areaMode whether is undefined
-    env->Reference_IsUndefined(IntObject, &isUndefined);
-    if (isUndefined) {
-        return areaMode;
-    }
-    env->Object_CallMethodByName_Int(IntObject, "unboxed", ":d", &areaMode);
-    return areaMode;
-}
-
 ani_string PersistentStorage_Get(ani_env* env, [[maybe_unused]] ani_object aniClass,
-    ani_string aniKey, ani_object IntObject)
+    ani_string aniKey, ani_int areaMode)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
@@ -43,7 +29,6 @@ ani_string PersistentStorage_Get(ani_env* env, [[maybe_unused]] ani_object aniCl
     }
 
     auto strKey = AniUtils::ANIStringToStdString(env, aniKey);
-    auto areaMode = getAreaMode(env, IntObject);
     std::string ret = modifier->getStateMgmtAniModifier()->persistentStorageGet(strKey, areaMode);
     if (!ret.empty()) {
         auto retValue = AniUtils::StdStringToANIString(env, ret);
@@ -55,7 +40,7 @@ ani_string PersistentStorage_Get(ani_env* env, [[maybe_unused]] ani_object aniCl
 }
 
 void PersistentStorage_Set(ani_env* env, [[maybe_unused]] ani_object aniClass,
-    ani_string aniKey, ani_string aniValue, ani_object IntObject)
+    ani_string aniKey, ani_string aniValue, ani_int areaMode) // ani_int
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
@@ -63,20 +48,19 @@ void PersistentStorage_Set(ani_env* env, [[maybe_unused]] ani_object aniClass,
     }
     auto strKey = AniUtils::ANIStringToStdString(env, aniKey);
     auto strVal = AniUtils::ANIStringToStdString(env, aniValue);
-    auto areaMode = getAreaMode(env, IntObject);
     modifier->getStateMgmtAniModifier()->persistentStorageSet(strKey, strVal, areaMode);
     return;
 }
 
+
 ani_boolean PersistentStorage_Has(ani_env* env, [[maybe_unused]] ani_object aniClass,
-    ani_string aniKey, ani_object IntObject)
+    ani_string aniKey, ani_int areaMode)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return false;
     }
     auto strKey = AniUtils::ANIStringToStdString(env, aniKey);
-    auto areaMode = getAreaMode(env, IntObject);
     bool ret = modifier->getStateMgmtAniModifier()->persistentStorageHas(strKey, areaMode);
     if (ret) {
         return true;
@@ -95,14 +79,13 @@ void PersistentStorage_Clear(ani_env* env, [[maybe_unused]] ani_object aniClass)
 }
 
 void PersistentStorage_Delete(ani_env* env, [[maybe_unused]] ani_object aniClass,
-    ani_string aniKey, ani_object IntObject)
+    ani_string aniKey, ani_int areaMode)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return;
     }
     auto strKey = AniUtils::ANIStringToStdString(env, aniKey);
-    auto areaMode = getAreaMode(env, IntObject);
     modifier->getStateMgmtAniModifier()->persistentStorageDelete(strKey, areaMode);
     return;
 }

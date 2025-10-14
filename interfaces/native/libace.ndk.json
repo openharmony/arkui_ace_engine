@@ -2828,12 +2828,20 @@
         "name": "OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval"
     },
     {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_SetMeasureFromViewport"
+    },
+    {
         "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_GetRatios"
     },
     {
         "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_VisibleAreaEventOptions_GetMeasureFromViewport"
     },
     {
         "first_introduced": "18",
@@ -2854,6 +2862,14 @@
     {
         "first_introduced": "18",
         "name": "OH_ArkUI_GetGestureParam_repeat"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_LongPressGesture_SetAllowableMovement"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_LongPressGesture_GetAllowableMovement"
     },
     {
         "first_introduced": "18",
@@ -4228,27 +4244,27 @@
         "name": "OH_ArkUI_NativeModule_GetNavDestinationAniParam"
     },
     {
-        "first_introduced": "21",
+        "first_introduced": "22",
         "name": "OH_ArkUI_UIInputEvent_GetCoastingAxisEvent"
     },
     {
-        "first_introduced": "21",
+        "first_introduced": "22",
         "name": "OH_ArkUI_CoastingAxisEvent_GetEventTime"
     },
     {
-        "first_introduced": "21",
+        "first_introduced": "22",
         "name": "OH_ArkUI_CoastingAxisEvent_GetPhase"
     },
     {
-        "first_introduced": "21",
+        "first_introduced": "22",
         "name": "OH_ArkUI_CoastingAxisEvent_GetDeltaX"
     },
     {
-        "first_introduced": "21",
+        "first_introduced": "22",
         "name": "OH_ArkUI_CoastingAxisEvent_GetDeltaY"
     },
     {
-        "first_introduced": "21",
+        "first_introduced": "22",
         "name": "OH_ArkUI_CoastingAxisEvent_SetPropagation"
     },
     {

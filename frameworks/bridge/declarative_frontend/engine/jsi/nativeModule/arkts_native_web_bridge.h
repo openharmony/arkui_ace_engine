@@ -105,6 +105,8 @@ public:
     static ArkUINativeModuleValue ResetOnNativeEmbedLifecycleChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnNativeEmbedGestureEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnNativeEmbedGestureEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnNativeEmbedMouseEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnNativeEmbedMouseEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetRegisterNativeEmbedRule(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetRegisterNativeEmbedRule(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetNativeEmbedOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -192,6 +194,7 @@ public:
     static Local<panda::ObjectRef> CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo& info);
     static Local<panda::ObjectRef> CreateTouchInfo(
         EcmaVM* vm, const TouchLocationInfo& touchInfo, TouchEventInfo& info);
+    static Local<panda::ObjectRef> CreateMouseInfo(EcmaVM* vm, MouseInfo& info);
     static ArkUINativeModuleValue SetOnSafeBrowsingCheckResult(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnSafeBrowsingCheckResult(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);

@@ -133,7 +133,7 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
                 width = std::min(width, parentCrossSize.value());
             }
             crossMatchChild_ = true;
-        }else if (layoutPolicy->IsWidthFix()) {
+        } else if (layoutPolicy->IsWidthFix()) {
             width = GetChildMaxWidth(layoutWrapper);
             crossMatchChild_ = true;
         } else {
@@ -157,11 +157,11 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
 
 void ContainerPickerLayoutAlgorithm::CalcMainAndMiddlePos()
 {
-    auto defaulfItemHeight = static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx());
+    auto defaultItemHeight = static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx());
     startMainPos_ = std::max((height_ - static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx())) / HALF, 0.0f);
     endMainPos_ = startMainPos_ + std::min(height_, static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx()));
-    middleItemStartPos_ = (height_ - defaulfItemHeight) / HALF;
-    middleItemEndPos_ = (height_ + defaulfItemHeight) / HALF;
+    middleItemStartPos_ = (height_ - defaultItemHeight) / HALF;
+    middleItemEndPos_ = (height_ + defaultItemHeight) / HALF;
 }
 
 float ContainerPickerLayoutAlgorithm::GetChildMaxWidth(LayoutWrapper* layoutWrapper) const

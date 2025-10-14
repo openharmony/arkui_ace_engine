@@ -29,3 +29,8 @@ export type CustomStyles =  (instance: CommonMethod) => void;
 export interface GestureModifier {
     applyGesture(event: UIGestureEvent): void
 }
+
+export function applyStyles<T extends CommonMethod>(this: T, customStyles: CustomStyles): T {
+    customStyles(this);
+    return this;
+}

@@ -275,6 +275,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SwipeByGroup, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedIsShown, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaintainVisibleContentPosition, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FillType, int32_t, PROPERTY_UPDATE_NORMAL);
 
 private:
     bool ignoreItemSpace_ = false; // displayCount and prevMargin/nextMargin have higher priorities, so itemSpace might

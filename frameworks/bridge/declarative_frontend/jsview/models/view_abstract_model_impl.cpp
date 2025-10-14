@@ -1252,7 +1252,7 @@ void ViewAbstractModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
 }
 
 void ViewAbstractModelImpl::SetOnVisibleChange(
-    std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios, bool isOutOfBoundsAllowed)
+    std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios, bool measureFromViewport)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     CHECK_NULL_VOID(inspector);
@@ -1707,6 +1707,9 @@ void ViewAbstractModelImpl::SetAccessibilityChecked(bool checked, bool resetValu
 {}
 
 void ViewAbstractModelImpl::SetAccessibilityTextPreferred(bool accessibilityTextPreferred)
+{}
+
+void ViewAbstractModelImpl::SetAccessibilityGroupOptions(NG::AccessibilityGroupOptions groupOptions)
 {}
 
 void ViewAbstractModelImpl::SetAccessibilityNextFocusId(const std::string& nextFocusId)

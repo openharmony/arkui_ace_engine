@@ -916,7 +916,7 @@ bool UINode::CheckThreadSafeNodeTree(bool needCheck)
         TAG_LOGW(AceLogTag::ACE_NATIVE_NODE,
             "CheckIsThreadSafeNodeTree failed. thread safe node tree contains unsafe node: %{public}d", GetId());
         needCheckChild = false;
-    } else if (isThreadSafeNode_ || !IsReusableNode()) {
+    } else if (isThreadSafeNode_) {
         needCheckChild = true;
     }
     return needCheckChild;

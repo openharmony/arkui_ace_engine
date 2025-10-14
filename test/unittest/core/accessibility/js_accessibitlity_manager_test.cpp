@@ -28,6 +28,7 @@
 #include "base/log/dump_log.h"
 #include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_node.h"
+#include "frameworks/core/accessibility/utils/accessibility_manager_utils.h"
 #include "adapter/ohos/entrance/ace_container.h"
 
 using namespace OHOS::Accessibility;
@@ -3030,6 +3031,381 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager047, TestSize.Level1)
     EXPECT_EQ(info1.GetAccessibilityVisible(), false);
     jsAccessibilityManager->UpdateAccessibilityVisible(frameNode2, info2);
     EXPECT_EQ(info2.GetAccessibilityVisible(), true);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager048
+ * @tc.desc: test CheckStateTakeOver when node is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test CheckStateTakeOver when node is nullptr
+     */
+    RefPtr<NG::FrameNode> node = nullptr;
+    AccessibilityElementInfo nodeInfo1;
+    AccessibilityElementInfo nodeInfo2 = nodeInfo1;
+    jsAccessibilityManager->CheckStateTakeOver(node, nodeInfo1);
+    EXPECT_EQ(nodeInfo1.GetCustomComponentType(), nodeInfo2.GetCustomComponentType());
+    EXPECT_EQ(nodeInfo1.GetDescriptionInfo(), nodeInfo2.GetDescriptionInfo());
+}
+
+/**
+ * @tc.name: JsAccessibilityManager049
+ * @tc.desc: test CheckStateTakeOver when accessibilityGroup is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto frameNode = AceType::MakeRefPtr<NG::FrameNode>("frameNode", 1, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
+
+    /**
+     * @tc.steps: step2. set accessibilityGroup false
+     */
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityGroup(false);
+
+    /**
+     * @tc.steps: step3. test CheckStateTakeOver
+     */
+    AccessibilityElementInfo nodeInfo1;
+    AccessibilityElementInfo nodeInfo2 = nodeInfo1;
+    jsAccessibilityManager->CheckStateTakeOver(frameNode, nodeInfo1);
+    EXPECT_EQ(nodeInfo1.GetCustomComponentType(), nodeInfo2.GetCustomComponentType());
+    EXPECT_EQ(nodeInfo1.GetDescriptionInfo(), nodeInfo2.GetDescriptionInfo());
+}
+
+/**
+ * @tc.name: JsAccessibilityManager050
+ * @tc.desc: test CheckActionTakeOver when node is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager050, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test CheckActionTakeOver when node is nullptr
+     */
+    RefPtr<NG::FrameNode> node = nullptr;
+    AccessibilityElementInfo nodeInfo1;
+    AccessibilityElementInfo nodeInfo2 = nodeInfo1;
+    jsAccessibilityManager->CheckStateTakeOver(node, nodeInfo1);
+    EXPECT_EQ(nodeInfo1.IsClickable(), nodeInfo2.IsClickable());
+    auto actionlist = nodeInfo1.GetActionList();
+    EXPECT_TRUE(actionlist.empty());
+}
+
+/**
+ * @tc.name: JsAccessibilityManager051
+ * @tc.desc: test CheckActionTakeOver when accessibilityGroup is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager051, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto frameNode = AceType::MakeRefPtr<NG::FrameNode>("frameNode", 1, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
+
+    /**
+     * @tc.steps: step2. set accessibilityGroup false
+     */
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityGroup(false);
+
+    /**
+     * @tc.steps: step3. test CheckActionTakeOver
+     */
+    AccessibilityElementInfo nodeInfo1;
+    AccessibilityElementInfo nodeInfo2 = nodeInfo1;
+    jsAccessibilityManager->CheckStateTakeOver(frameNode, nodeInfo1);
+    EXPECT_EQ(nodeInfo1.IsClickable(), nodeInfo2.IsClickable());
+    auto actionlist = nodeInfo1.GetActionList();
+    EXPECT_TRUE(actionlist.empty());
+}
+
+/**
+ * @tc.name: JsAccessibilityManager052
+ * @tc.desc: test UpdateUserAccessibilityElementInfo when accessibilityProperty is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager052, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test UpdateUserAccessibilityElementInfo when accessibilityProperty is nullptr
+     */
+    RefPtr<NG::AccessibilityProperty> accessibilityProperty = nullptr;
+    AccessibilityElementInfo nodeInfo1;
+    AccessibilityElementInfo nodeInfo2 = nodeInfo1;
+    jsAccessibilityManager->UpdateUserAccessibilityElementInfo(accessibilityProperty, nodeInfo1);
+    EXPECT_EQ(nodeInfo1.IsEnabled(), nodeInfo2.IsEnabled());
+    EXPECT_EQ(nodeInfo1.IsChecked(), nodeInfo2.IsChecked());
+    EXPECT_EQ(nodeInfo1.IsCheckable(), nodeInfo2.IsCheckable());
+}
+
+/**
+ * @tc.name: JsAccessibilityManager053
+ * @tc.desc: test SetAccessibilityGroupOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager053, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AccessibilityProperty
+     */
+    auto frameNode = AceType::MakeRefPtr<NG::FrameNode>("frameNode", 1, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. construct accessibilityGroupOptions
+     */
+    AccessibilityGroupOptions accessibilityGroupOptions;
+    accessibilityGroupOptions.accessibilityTextPreferred = true;
+    accessibilityGroupOptions.stateControllerByType = AccessibilityRoleType::ROLE_IMAGE_BITMAP;
+    accessibilityGroupOptions.stateControllerByInspector = "Test StateControllerByInspector";
+    accessibilityGroupOptions.actionControllerByType = AccessibilityRoleType::BUTTON;
+    accessibilityGroupOptions.actionControllerByInspector = "Test ActionControllerByInspector";
+
+    /**
+     * @tc.steps: step3. test SetAccessibilityGroupOptions
+     */
+    accessibilityProperty->SetAccessibilityGroupOptions(accessibilityGroupOptions);
+    EXPECT_TRUE(accessibilityProperty->accessibilityGroupOptions_.has_value());
+    AccessibilityGroupOptions valueAccessibilityGroupOptions =
+        accessibilityProperty->accessibilityGroupOptions_.value();
+    EXPECT_EQ(valueAccessibilityGroupOptions.accessibilityTextPreferred,
+        accessibilityGroupOptions.accessibilityTextPreferred);
+    EXPECT_EQ(valueAccessibilityGroupOptions.stateControllerByType,
+        accessibilityGroupOptions.stateControllerByType);
+    EXPECT_EQ(valueAccessibilityGroupOptions.stateControllerByInspector,
+        accessibilityGroupOptions.stateControllerByInspector);
+    EXPECT_EQ(valueAccessibilityGroupOptions.actionControllerByType,
+        accessibilityGroupOptions.actionControllerByType);
+    EXPECT_EQ(valueAccessibilityGroupOptions.actionControllerByInspector,
+        accessibilityGroupOptions.actionControllerByInspector);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager054
+ * @tc.desc: test HasAccessibilityGroupOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager054, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AccessibilityProperty
+     */
+    auto frameNode = AceType::MakeRefPtr<NG::FrameNode>("frameNode", 1, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. test HasAccessibilityGroupOptions
+     */
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityGroupOptions());
+}
+
+/**
+ * @tc.name: JsAccessibilityManager055
+ * @tc.desc: test GetAccessibilityGroupOptions when has value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager055, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AccessibilityProperty
+     */
+    auto frameNode = AceType::MakeRefPtr<NG::FrameNode>("frameNode", 1, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. construct accessibilityGroupOptions
+     */
+    AccessibilityGroupOptions accessibilityGroupOptions;
+    accessibilityGroupOptions.accessibilityTextPreferred = true;
+    accessibilityGroupOptions.stateControllerByType = AccessibilityRoleType::COLUMN;
+    accessibilityGroupOptions.stateControllerByInspector = "Test StateControllerByInspector";
+    accessibilityGroupOptions.actionControllerByType = AccessibilityRoleType::TEXT_AREA;
+    accessibilityGroupOptions.actionControllerByInspector = "Test ActionControllerByInspector";
+    accessibilityProperty->accessibilityGroupOptions_ = accessibilityGroupOptions;
+
+    /**
+     * @tc.steps: step3. test GetAccessibilityGroupOptions
+     */
+    auto getAccessibilityGroupOptions = accessibilityProperty->GetAccessibilityGroupOptions();;
+    EXPECT_TRUE(accessibilityProperty->accessibilityGroupOptions_.has_value());
+    AccessibilityGroupOptions valueAccessibilityGroupOptions =
+        accessibilityProperty->accessibilityGroupOptions_.value();
+    EXPECT_EQ(getAccessibilityGroupOptions.accessibilityTextPreferred,
+        valueAccessibilityGroupOptions.accessibilityTextPreferred);
+    EXPECT_EQ(getAccessibilityGroupOptions.stateControllerByType,
+        valueAccessibilityGroupOptions.stateControllerByType);
+    EXPECT_EQ(getAccessibilityGroupOptions.stateControllerByInspector,
+        valueAccessibilityGroupOptions.stateControllerByInspector);
+    EXPECT_EQ(getAccessibilityGroupOptions.actionControllerByType,
+        valueAccessibilityGroupOptions.actionControllerByType);
+    EXPECT_EQ(getAccessibilityGroupOptions.actionControllerByInspector,
+        valueAccessibilityGroupOptions.actionControllerByInspector);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager056
+ * @tc.desc: test GetAccessibilityGroupOptions when no value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager056, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AccessibilityProperty
+     */
+    auto frameNode = AceType::MakeRefPtr<NG::FrameNode>("frameNode", 1, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->accessibilityGroupOptions_.has_value());
+
+    /**
+     * @tc.steps: step2. test GetAccessibilityGroupOptions
+     */
+    AccessibilityGroupOptions newAccessibilityGroupOptions;
+    auto getAccessibilityGroupOptions = accessibilityProperty->GetAccessibilityGroupOptions();
+    EXPECT_EQ(getAccessibilityGroupOptions.accessibilityTextPreferred,
+        newAccessibilityGroupOptions.accessibilityTextPreferred);
+    EXPECT_EQ(getAccessibilityGroupOptions.stateControllerByType,
+        newAccessibilityGroupOptions.stateControllerByType);
+    EXPECT_EQ(getAccessibilityGroupOptions.stateControllerByInspector,
+        newAccessibilityGroupOptions.stateControllerByInspector);
+    EXPECT_EQ(getAccessibilityGroupOptions.actionControllerByType,
+        newAccessibilityGroupOptions.actionControllerByType);
+    EXPECT_EQ(getAccessibilityGroupOptions.actionControllerByInspector,
+        newAccessibilityGroupOptions.actionControllerByInspector);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager057
+ * @tc.desc: test ResetAccessibilityGroupOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager057, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AccessibilityProperty
+     */
+    auto frameNode = AceType::MakeRefPtr<NG::FrameNode>("frameNode", 1, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. construct accessibilityGroupOptions
+     */
+    AccessibilityGroupOptions accessibilityGroupOptions;
+    accessibilityGroupOptions.accessibilityTextPreferred = true;
+    accessibilityGroupOptions.stateControllerByType = AccessibilityRoleType::BACK_BUTTON;
+    accessibilityGroupOptions.stateControllerByInspector = "Test StateControllerByInspector";
+    accessibilityGroupOptions.actionControllerByType = AccessibilityRoleType::TEXT_INPUT;
+    accessibilityGroupOptions.actionControllerByInspector = "Test ActionControllerByInspector";
+    accessibilityProperty->accessibilityGroupOptions_ = accessibilityGroupOptions;
+
+    /**
+     * @tc.steps: step2. test ResetAccessibilityGroupOptions
+     */
+    EXPECT_TRUE(accessibilityProperty->accessibilityGroupOptions_.has_value());
+    accessibilityProperty->ResetAccessibilityGroupOptions();
+    EXPECT_FALSE(accessibilityProperty->accessibilityGroupOptions_.has_value());
+}
+
+/**
+ * @tc.name: JsAccessibilityManager058
+ * @tc.desc: test HasAccessibilityGroupOptions when has value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager058, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AccessibilityProperty
+     */
+    auto frameNode = AceType::MakeRefPtr<NG::FrameNode>("frameNode", 1, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. construct accessibilityGroupOptions
+     */
+    AccessibilityGroupOptions accessibilityGroupOptions;
+    accessibilityGroupOptions.accessibilityTextPreferred = true;
+    accessibilityGroupOptions.stateControllerByType = AccessibilityRoleType::BACK_BUTTON;
+    accessibilityGroupOptions.stateControllerByInspector = "Test StateControllerByInspector";
+    accessibilityGroupOptions.actionControllerByType = AccessibilityRoleType::TEXT_INPUT;
+    accessibilityGroupOptions.actionControllerByInspector = "Test ActionControllerByInspector";
+    accessibilityProperty->accessibilityGroupOptions_ = accessibilityGroupOptions;
+
+    /**
+     * @tc.steps: step3. test HasAccessibilityGroupOptions
+     */
+    EXPECT_TRUE(accessibilityProperty->accessibilityGroupOptions_.has_value());
+    auto ret = accessibilityProperty->HasAccessibilityGroupOptions();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager059
+ * @tc.desc: test HasAccessibilityGroupOptions when no value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager059, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AccessibilityProperty
+     */
+    auto frameNode = AceType::MakeRefPtr<NG::FrameNode>("frameNode", 1, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. test HasAccessibilityGroupOptions
+     */
+    EXPECT_FALSE(accessibilityProperty->accessibilityGroupOptions_.has_value());
+    auto ret = accessibilityProperty->HasAccessibilityGroupOptions();
+    EXPECT_FALSE(ret);
 }
 
 #ifdef WEB_SUPPORTED

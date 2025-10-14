@@ -43,7 +43,7 @@ public:
         return std::move(itemPosition_);
     }
 
-    const std::vector<int32_t>& GetOffScreemItems()
+    const std::vector<int32_t>& GetOffScreenItems()
     {
         return std::move(offScreenItemsIndex_);
     }

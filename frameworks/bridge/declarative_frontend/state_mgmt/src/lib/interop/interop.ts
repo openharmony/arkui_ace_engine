@@ -59,10 +59,11 @@ class SubscribeInterop implements ISinglePropertyChangeSubscriber<Object>{
 type setValue<T> = (value: T) => void;
 type WatchFuncType = (propertyName: string) => void;
 
-function createStateVariable<T>(value: T, setValueCallback: setValue<T>, notifyCallback: () => void): ObservedPropertyPU<T> {
+function createStateVariable<T>(staticState: Object, value: T, setValueCallback: setValue<T>, notifyCallback: () => void): ObservedPropertyPU<T> {
     const proxy = new ObservedPropertyPU(value, undefined, 'proxy');
     proxy._setInteropValueForStaticState = setValueCallback;
     proxy._notifyInteropFireChange = notifyCallback;
+    proxy.setProxy(staticState);
     return proxy;
 }
 
@@ -72,30 +73,6 @@ function updateSetValueCallback(observedProperty, setValueCallback): void {
 
 function updateNotifyCallback(observedProperty, notifyCallback): void {
     observedProperty._notifyInteropFireChange = notifyCallback;
-}
-
-function resetViewPUFindProvideInterop(): void {
-    ViewPU._resetFindProvide_ViewPU_Interop();
-}
-
-function setFindProvideInterop(callback: (providedPropName: string) => any, view?: ViewPU): void {
-    if (view == null) {
-        ViewPU._findProvide_ViewPU_Interop = callback;
-    } else {
-        view.findProvideInterop = callback;
-    }
-}
-
-function setFindLocalStorageInterop(callback: () => any, view?: ViewPU): void {
-    if (view == null) {
-        ViewPU._findLocalStorage_ViewPU_Interop = callback;
-    } else {
-        view.findLocalStorageInterop = callback;
-    }
-}
-
-function resetViewPUFindLocalStorageInterop(): void {
-    ViewPU._resetFindLocalStorage_ViewPU_Interop();
 }
 
 function viewPUCreate(component: ViewPU): void {
@@ -160,4 +137,18 @@ function __Interop_transferCompatibleDynamicBuilder_Internal(builder: (...args: 
         throw new Error("Non Method For Transfer Compatible Dynamic Builder");
     }
     return InteropExtractorModule.transferCompatibleDynamicBuilder(builder);
+}
+
+function __Interop_createCompatibleStaticState_Internal(value: Object) {
+    if(InteropExtractorModule.createCompatibleStaticState === undefined) {
+        throw new Error("Non Method For createCompatibleStaticState");
+    }
+    return InteropExtractorModule.createCompatibleStaticState(value);
+}
+
+function __Interop_TransferCompatibleUpdatableBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleUpdatableBuilder === undefined) {
+        throw new Error("Non Method For Transfer CompatibleUpdatableBuilder");
+    }
+    return InteropExtractorModule.transferCompatibleUpdatableBuilder(builder);
 }

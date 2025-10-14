@@ -699,7 +699,8 @@ void PickerColumnPattern::SetOptionShiftDistance()
     uint32_t itemCounts = 0;
     CHECK_EQUAL_VOID(GetOptionItemCount(itemCounts), false);
     bool isLanscape = IsLanscape(itemCounts);
-    for (uint32_t i = 0; i < itemCounts; i++) {
+    uint32_t counts = itemCounts > optionProperties_.size() ? optionProperties_.size() : itemCounts;
+    for (uint32_t i = 0; i < counts; i++) {
         PickerOptionProperty& prop = optionProperties_[i];
         if (isLanscape) {
             prop.prevDistance = GetShiftDistanceForLandscape(i, PickerScrollDirection::UP);
@@ -1117,7 +1118,6 @@ void PickerColumnPattern::AddAnimationTextProperties(
                 optionProperties_[currentIndex].fontheight = optionProperties_[currentIndex].height;
             }
         }
-        SetOptionShiftDistance();
         properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
     }
     if (textLayoutProperty->HasTextColor()) {

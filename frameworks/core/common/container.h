@@ -779,8 +779,6 @@ public:
 
     static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
 
-    virtual void UpdateColorMode(uint32_t colorMode) {};
-
     virtual void TriggerModuleSerializer() {};
 
     virtual sptr<IRemoteObject> GetToken();

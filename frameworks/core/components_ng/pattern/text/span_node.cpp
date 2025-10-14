@@ -1102,35 +1102,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
 RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     auto sameSpan = MakeRefPtr<SpanItem>();
-    GetFontStyleSpanItem(sameSpan);
-    COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
-    COPY_TEXT_STYLE(textLineStyle, LineSpacing, UpdateLineSpacing);
-    COPY_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, UpdateOptimizeTrailingSpace);
-    COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
-    COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
-    COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);
-    COPY_TEXT_STYLE(textLineStyle, TextAlign, UpdateTextAlign);
-    COPY_TEXT_STYLE(textLineStyle, TextVerticalAlign, UpdateTextVerticalAlign);
-    COPY_TEXT_STYLE(textLineStyle, MaxLength, UpdateMaxLength);
-    COPY_TEXT_STYLE(textLineStyle, MaxLines, UpdateMaxLines);
-    COPY_TEXT_STYLE(textLineStyle, HeightAdaptivePolicy, UpdateHeightAdaptivePolicy);
-    COPY_TEXT_STYLE(textLineStyle, TextIndent, UpdateTextIndent);
-    COPY_TEXT_STYLE(textLineStyle, LeadingMargin, UpdateLeadingMargin);
-    COPY_TEXT_STYLE(textLineStyle, DrawableLeadingMargin, UpdateDrawableLeadingMargin);
-    COPY_TEXT_STYLE(textLineStyle, WordBreak, UpdateWordBreak);
-    COPY_TEXT_STYLE(textLineStyle, LineBreakStrategy, UpdateLineBreakStrategy);
-    COPY_TEXT_STYLE(textLineStyle, EllipsisMode, UpdateEllipsisMode);
-    COPY_TEXT_STYLE(textLineStyle, HalfLeading, UpdateHalfLeading);
-    COPY_TEXT_STYLE(textLineStyle, ParagraphSpacing, UpdateParagraphSpacing);
-    if (textStyle_.has_value()) {
-        sameSpan->textStyle_ = textStyle_;
-    }
-    if (backgroundStyle.has_value()) {
-        sameSpan->backgroundStyle = backgroundStyle;
-    }
-    sameSpan->urlAddress = urlAddress;
-    CopySpanItemEvents(sameSpan);
-    sameSpan->resMap_ = resMap_;
+    CopyBaseSpanItem(sameSpan);
     return sameSpan;
 }
 
@@ -1158,12 +1130,50 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(fontStyle, MaxFontScale, UpdateMaxFontScale);
 }
 
+void SpanItem::GetTextLineStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
+{
+    COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
+    COPY_TEXT_STYLE(textLineStyle, LineSpacing, UpdateLineSpacing);
+    COPY_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, UpdateOptimizeTrailingSpace);
+    COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
+    COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
+    COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);
+    COPY_TEXT_STYLE(textLineStyle, TextAlign, UpdateTextAlign);
+    COPY_TEXT_STYLE(textLineStyle, TextVerticalAlign, UpdateTextVerticalAlign);
+    COPY_TEXT_STYLE(textLineStyle, MaxLength, UpdateMaxLength);
+    COPY_TEXT_STYLE(textLineStyle, MaxLines, UpdateMaxLines);
+    COPY_TEXT_STYLE(textLineStyle, HeightAdaptivePolicy, UpdateHeightAdaptivePolicy);
+    COPY_TEXT_STYLE(textLineStyle, TextIndent, UpdateTextIndent);
+    COPY_TEXT_STYLE(textLineStyle, LeadingMargin, UpdateLeadingMargin);
+    COPY_TEXT_STYLE(textLineStyle, DrawableLeadingMargin, UpdateDrawableLeadingMargin);
+    COPY_TEXT_STYLE(textLineStyle, WordBreak, UpdateWordBreak);
+    COPY_TEXT_STYLE(textLineStyle, LineBreakStrategy, UpdateLineBreakStrategy);
+    COPY_TEXT_STYLE(textLineStyle, EllipsisMode, UpdateEllipsisMode);
+    COPY_TEXT_STYLE(textLineStyle, HalfLeading, UpdateHalfLeading);
+    COPY_TEXT_STYLE(textLineStyle, ParagraphSpacing, UpdateParagraphSpacing);
+}
+
 void SpanItem::CopySpanItemEvents(RefPtr<SpanItem>& spanItem) const
 {
     spanItem->urlOnRelease = urlOnRelease;
     spanItem->onClick = onClick;
     spanItem->onLongPress = onLongPress;
     spanItem->onTouch = onTouch;
+}
+
+void SpanItem::CopyBaseSpanItem(RefPtr<SpanItem> sameSpan) const
+{
+    GetFontStyleSpanItem(sameSpan);
+    GetTextLineStyleSpanItem(sameSpan);
+    if (textStyle_.has_value()) {
+        sameSpan->textStyle_ = textStyle_;
+    }
+    if (backgroundStyle.has_value()) {
+        sameSpan->backgroundStyle = backgroundStyle;
+    }
+    sameSpan->urlAddress = urlAddress;
+    CopySpanItemEvents(sameSpan);
+    sameSpan->resMap_ = resMap_;
 }
 
 #define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
@@ -1528,6 +1538,7 @@ void ImageSpanItem::ResetImageSpanOptions()
 RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     auto sameSpan = MakeRefPtr<ImageSpanItem>();
+    CopyBaseSpanItem(sameSpan);
     if (isEncodeTlvS) {
         if (options.HasValue()) {
             sameSpan->SetImageSpanOptions(options);
@@ -1545,12 +1556,6 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
         }
     } else {
         sameSpan->SetImageSpanOptions(options);
-    }
-    sameSpan->urlOnRelease = urlOnRelease;
-    sameSpan->onClick = onClick;
-    sameSpan->onLongPress = onLongPress;
-    if (backgroundStyle.has_value()) {
-        sameSpan->backgroundStyle = backgroundStyle;
     }
     return sameSpan;
 }
@@ -1771,14 +1776,9 @@ void PlaceholderSpanItem::DumpInfo() const
 RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     auto sameSpan = MakeRefPtr<CustomSpanItem>();
+    CopyBaseSpanItem(sameSpan);
     sameSpan->onMeasure = onMeasure;
     sameSpan->onDraw = onDraw;
-    sameSpan->urlOnRelease = urlOnRelease;
-    sameSpan->onClick = onClick;
-    sameSpan->onLongPress = onLongPress;
-    if (backgroundStyle.has_value()) {
-        sameSpan->backgroundStyle = backgroundStyle;
-    }
     return sameSpan;
 }
 

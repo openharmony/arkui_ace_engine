@@ -599,9 +599,9 @@ WebPattern::WebPattern()
 }
 
 WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, RenderMode renderMode,
-    bool incognitoMode, const std::string& sharedRenderProcessToken)
+    bool incognitoMode, const std::string& sharedRenderProcessToken, bool emulateTouchFromMouseEvent)
     : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode), incognitoMode_(incognitoMode),
-      sharedRenderProcessToken_(sharedRenderProcessToken)
+      sharedRenderProcessToken_(sharedRenderProcessToken), emulateTouchFromMouseEvent_(emulateTouchFromMouseEvent)
 {
     InitMagnifier();
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
@@ -610,9 +610,10 @@ WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& w
 }
 
 WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, RenderMode renderMode,
-    bool incognitoMode, const std::string& sharedRenderProcessToken)
+    bool incognitoMode, const std::string& sharedRenderProcessToken, bool emulateTouchFromMouseEvent)
     : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), renderMode_(renderMode),
-      incognitoMode_(incognitoMode), sharedRenderProcessToken_(sharedRenderProcessToken)
+      incognitoMode_(incognitoMode), sharedRenderProcessToken_(sharedRenderProcessToken),
+      emulateTouchFromMouseEvent_(emulateTouchFromMouseEvent)
 {
     InitMagnifier();
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
@@ -1839,6 +1840,9 @@ void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnTooltip("");
+        if (pattern->emulateTouchFromMouseEvent_) {
+            pattern->lastMouseTouchDown_ = false;
+        }
         if (info.GetChangedTouches().empty()) {
             return;
         }
@@ -1979,6 +1983,98 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
     mouseEventCallback(info);
 }
 
+bool WebPattern::ConvertMouseToTouchEvent(float touchHandleOffsetY, const MouseInfo& mouse, TouchEventInfo& touch)
+{
+    if (mouse.GetButton() != MouseButton::LEFT_BUTTON) {
+        return false;
+    }
+
+    if (mouse.GetAction() != MouseAction::PRESS && mouse.GetAction() != MouseAction::RELEASE &&
+        mouse.GetAction() != MouseAction::MOVE) {
+        return false;
+    }
+    TouchLocationInfo infoLocation("onTouch", 0);
+    if (mouse.GetAction() == MouseAction::PRESS) {
+        infoLocation.SetTouchType(TouchType::DOWN);
+    } else if (mouse.GetAction() == MouseAction::RELEASE) {
+        infoLocation.SetTouchType(TouchType::UP);
+    } else {
+        infoLocation.SetTouchType(TouchType::MOVE);
+    }
+    auto infoGlobalLocation = mouse.GetGlobalLocation();
+    auto infoLocalLocation = mouse.GetLocalLocation();
+    auto infoScreenLocation = mouse.GetScreenLocation();
+
+    infoGlobalLocation.SetY(mouse.GetGlobalLocation().GetY() + touchHandleOffsetY);
+    infoLocalLocation.SetY(mouse.GetLocalLocation().GetY() + touchHandleOffsetY);
+    infoScreenLocation.SetY(mouse.GetScreenLocation().GetY() + touchHandleOffsetY);
+
+    infoLocation.SetGlobalLocation(infoGlobalLocation);
+    infoLocation.SetLocalLocation(infoLocalLocation);
+    infoLocation.SetScreenLocation(infoScreenLocation);
+
+    touch.AddChangedTouchLocationInfo(std::move(infoLocation));
+    touch.SetSourceDevice(SourceType::TOUCH);
+    touch.SetTouchEventsEnd(true);
+    return true;
+}
+
+bool WebPattern::HandleMouseToTouchEvent(float touchHandleOffsetY, bool fromOverlay, const MouseInfo& mouseInfo)
+{
+    if (!emulateTouchFromMouseEvent_) {
+        return false;
+    }
+    lastMouseTouchDown_ = false;
+    TouchEventInfo touch("touchEvent");
+    if (ConvertMouseToTouchEvent(touchHandleOffsetY, mouseInfo, touch)) {
+        OnTooltip("");
+        if (touch.GetChangedTouches().empty()) {
+            return true;
+        }
+
+        touchEventInfo_ = touch;
+        isMouseEvent_ = false;
+        const auto& changedPoint = touch.GetChangedTouches().front();
+        if (changedPoint.GetTouchType() == TouchType::DOWN || changedPoint.GetTouchType() == TouchType::UP) {
+            if (touchEventQueue_.size() < TOUCH_EVENT_MAX_SIZE) {
+                touchEventQueue_.push(touch);
+            }
+        }
+        if (changedPoint.GetTouchType() == TouchType::MOVE) {
+            HandleTouchMove(touch, fromOverlay);
+            TAG_LOGD(AceLogTag::ACE_WEB,
+                "WebPattern::HandleMouseToTouchEvent TouchType::MOVE fromOverlay:%{public}d", fromOverlay);
+            return true;
+        }
+
+        if (changedPoint.GetTouchType() == TouchType::UP) {
+            HandleTouchUp(touch, fromOverlay);
+            TAG_LOGD(AceLogTag::ACE_WEB,
+                "WebPattern::HandleMouseToTouchEvent TouchType::UP fromOverlay:%{public}d", fromOverlay);
+            return true;
+        }
+        if (changedPoint.GetTouchType() == TouchType::DOWN) {
+            HandleTouchDown(touch, fromOverlay);
+            lastMouseTouchDown_ = true;
+            TAG_LOGD(AceLogTag::ACE_WEB,
+                "WebPattern::HandleMouseToTouchEvent TouchType::DOWN fromOverlay:%{public}d", fromOverlay);
+            return true;
+        }
+    }
+    return false;
+}
+
+void WebPattern::FilterMouseForTooltip(const MouseInfo& info)
+{
+    if ((info.GetAction() == MouseAction::PRESS) ||
+        (info.GetButton() == MouseButton::LEFT_BUTTON) ||
+        (info.GetButton() == MouseButton::RIGHT_BUTTON) ||
+        (info.GetButton() == MouseButton::BACK_BUTTON) ||
+        (info.GetButton() == MouseButton::FORWARD_BUTTON)) {
+        OnTooltip("");
+    }
+}
+
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
     if (snapshotImageNodeId_.has_value()) {
@@ -1989,13 +2085,13 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
     }
     CHECK_NULL_VOID(delegate_);
     auto localLocation = info.GetLocalLocation();
-    if ((info.GetAction() == MouseAction::PRESS) ||
-        (info.GetButton() == MouseButton::LEFT_BUTTON) ||
-        (info.GetButton() == MouseButton::RIGHT_BUTTON) ||
-        (info.GetButton() == MouseButton::BACK_BUTTON) ||
-        (info.GetButton() == MouseButton::FORWARD_BUTTON)) {
-        OnTooltip("");
+
+    if (HandleMouseToTouchEvent(0.0, false, info)) {
+        return;
     }
+
+    FilterMouseForTooltip(info);
+
     if (info.GetAction() == MouseAction::PRESS && !GetNativeEmbedModeEnabledValue(false)) {
         delegate_->OnContextMenuHide("");
         WebRequestFocus();
@@ -4629,7 +4725,16 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
         ResetDragAction();
     }
     if (isDragging_) {
-        ResetDragStateValue();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (!pipeline) {
+            ResetDragStateValue();
+        } else {
+            auto manager = pipeline->GetDragDropManager();
+            if (!manager || !manager->IsMSDPDragging()) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "HandleTouchUp, system not in dragging, reset drag state.");
+                ResetDragStateValue();
+            }
+        }
     }
     HideMagnifier();
     std::list<TouchInfo> touchInfos;

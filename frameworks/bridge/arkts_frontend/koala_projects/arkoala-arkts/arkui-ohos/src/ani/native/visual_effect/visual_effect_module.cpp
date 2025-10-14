@@ -36,6 +36,13 @@ ani_object CallFromPtrMethod(ani_env* env, const char* methodName, ani_long ptr)
     ANI_CALL(env, Class_CallStaticMethod_Ref(myClass, method, &resultRef, ptr), return nullptr);
     return static_cast<ani_object>(resultRef);
 }
+
+ani_long GetNativePtrFromMethod(ani_env* env, ani_object obj, const char* methodName)
+{
+    ani_long result = 0L;
+    ANI_CALL(env, Object_CallMethodByName_Long(obj, methodName, nullptr, &result), return 0L);
+    return result;
+}
 }
 ani_long ExtractorsToRectShapePtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object obj)
 {
@@ -83,10 +90,20 @@ ani_long ExtractorsToMatrix4TransitPtr(ani_env* env, ani_object aniClass, ani_ob
 }
 ani_long ExtractorsToUiEffectFilterPtr(ani_env* env, ani_object aniClass, ani_object obj)
 {
-    return GetPropertyName(env, obj, "filterNativeObj");
+    ani_long result = GetPropertyName(env, obj, "filterNativeObj");
+    if (result != 0L) {
+        return result;
+    }
+
+    return GetNativePtrFromMethod(env, obj, "getNativePtr");
 }
 ani_long ExtractorsToUiEffectVisualEffectPtr(ani_env* env, ani_object aniClass, ani_object obj)
 {
-    return GetPropertyName(env, obj, "visualEffectNativeObj");
+    ani_long result = GetPropertyName(env, obj, "visualEffectNativeObj");
+    if (result != 0L) {
+        return result;
+    }
+
+    return GetNativePtrFromMethod(env, obj, "getNativePtr");
 }
 } // namespace OHOS::Ace::Ani

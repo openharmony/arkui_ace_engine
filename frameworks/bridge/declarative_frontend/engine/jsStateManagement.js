@@ -64,7 +64,8 @@ class AppStorageV2 {
   }
 }
 
-AppStorageV2.appStorageV2Impl_ = AppStorageV2Impl.instance();
+AppStorageV2.appStorageV2Impl_ =
+InteropConfigureStateMgmt.needsInterop() ? InteropStorageV2.instance() : AppStorageV2Impl.instance();
 
 /**
  * PersistenceV2

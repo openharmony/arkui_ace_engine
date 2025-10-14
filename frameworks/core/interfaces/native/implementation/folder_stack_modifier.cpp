@@ -96,7 +96,7 @@ void SetEnableAnimationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        FolderStackModelNG::SetEnableAnimation(frameNode, true);
         return;
     }
     FolderStackModelNG::SetEnableAnimation(frameNode, *convValue);
@@ -108,7 +108,7 @@ void SetAutoHalfFoldImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        FolderStackModelNG::SetAutoHalfFold(frameNode, true);
         return;
     }
     FolderStackModelNG::SetAutoHalfFold(frameNode, *convValue);

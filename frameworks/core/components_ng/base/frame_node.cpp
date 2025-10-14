@@ -2082,7 +2082,7 @@ void FrameNode::DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& vis
         }
     }
     if (hasUserCallback) {
-        if (visibleAreaUserCallback.isOutOfBoundsAllowed) {
+        if (visibleAreaUserCallback.measureFromViewport) {
             ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.innerFrameRect,
                 visibleAreaUserRatios, visibleAreaUserCallback, true);
         } else {
@@ -2105,7 +2105,7 @@ void FrameNode::ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const Re
             NearEqual(currentVisibleRatio, lastVisibleRatio_) ? "non-execution" : "execution");
     }
     if (isUser) {
-        if (visibleAreaCallback.isOutOfBoundsAllowed) {
+        if (visibleAreaCallback.measureFromViewport) {
             auto rect = renderContext_->GetPaintRectWithoutTransform();
             currentVisibleRatio = rect.IsEmpty() ? VISIBLE_RATIO_MIN : currentVisibleRatio;
         }
@@ -2191,8 +2191,8 @@ void FrameNode::ThrottledVisibleTask()
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto visibleResult = GetCacheVisibleRect(pipeline->GetVsyncTime());
-    RectF frameRect = visibleResult.frameRect;
-    RectF visibleRect = visibleResult.visibleRect;
+    RectF frameRect = userCallback.measureFromViewport ? visibleResult.innerFrameRect : visibleResult.frameRect;
+    RectF visibleRect = userCallback.measureFromViewport ? visibleResult.innerVisibleRect : visibleResult.visibleRect;
     double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
                                       : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
                                           VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
@@ -6272,6 +6272,21 @@ RectF FrameNode::ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<Fr
     offset += parentRenderContext->GetPaintRectWithTransform().GetOffset();
     newRect.SetOffset(offset);
     return newRect;
+}
+
+void FrameNode::SetCustomPropertyCallback(std::function<void()>&& func,
+    std::function<std::string(const std::string&)>&& getFunc,
+    std::function<std::string()>&& getAllCustomPropertiesFunc)
+{
+    if (!removeCustomProperties_) {
+        removeCustomProperties_ = std::move(func);
+    }
+    if (!getCustomProperty_) {
+        getCustomProperty_ = std::move(getFunc);
+    }
+    if (!getCustomPropertyMapFunc_) {
+        getCustomPropertyMapFunc_ = std::move(getAllCustomPropertiesFunc);
+    }
 }
 
 void FrameNode::GetVisibleRect(RectF& visibleRect, RectF& frameRect) const

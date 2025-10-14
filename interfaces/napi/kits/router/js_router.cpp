@@ -342,8 +342,36 @@ static napi_value CommonRouterWithCallbackProcess(
     return result;
 }
 
+static bool TryPushFromDynamicIfNeeded(napi_env env, napi_callback_info info, napi_value& result)
+{
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, false);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, false);
+    auto type = frontend->GetType();
+    if (type != FrontendType::ARK_TS) {
+        return false;
+    }
+    auto callback = [weakFrontend = WeakPtr(frontend)](
+        std::shared_ptr<RouterAsyncContext> context, const ErrorCallback& errorCallback) {
+        CHECK_NULL_VOID(context);
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_VOID(frontend);
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "call pushUrl from dynamic with mode: %{public}d, url: %{public}s",
+            context->mode, context->uriString.c_str());
+        frontend->PushFromDynamicExtender(
+            context->uriString, context->paramsString, context->recoverable, errorCallback, context->mode);
+    };
+    result = CommonRouterWithCallbackProcess(env, info, callback, "url");
+    return true;
+}
+
 static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info)
 {
+    napi_value result;
+    if (TryPushFromDynamicIfNeeded(env, info, result)) {
+        return result;
+    }
     auto callback = [](std::shared_ptr<RouterAsyncContext> context, const ErrorCallback& errorCallback) {
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         auto defaultDelegate = EngineHelper::GetDefaultDelegate();
@@ -364,8 +392,36 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
     return CommonRouterWithCallbackProcess(env, info, callback, "url");
 }
 
+static bool TryReplaceFromDynamicIfNeeded(napi_env env, napi_callback_info info, napi_value& result)
+{
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, false);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, false);
+    auto type = frontend->GetType();
+    if (type != FrontendType::ARK_TS) {
+        return false;
+    }
+    auto callback = [weakFrontend = WeakPtr(frontend)](
+        std::shared_ptr<RouterAsyncContext> context, const ErrorCallback& errorCallback) {
+        CHECK_NULL_VOID(context);
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_VOID(frontend);
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "call replaceUrl from dynamic, url: %{public}s with mode: %{public}u",
+            context->uriString.c_str(), context->mode);
+        frontend->ReplaceFromDynamicExtender(
+            context->uriString, context->paramsString, context->recoverable, errorCallback, context->mode);
+    };
+    result = CommonRouterWithCallbackProcess(env, info, callback, "url");
+    return true;
+}
+
 static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info info)
 {
+    napi_value result;
+    if (TryReplaceFromDynamicIfNeeded(env, info, result)) {
+        return result;
+    }
     auto callback = [](std::shared_ptr<RouterAsyncContext> context, const ErrorCallback& errorCallback) {
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         auto defaultDelegate = EngineHelper::GetDefaultDelegate();
@@ -449,6 +505,43 @@ static napi_value JsBackToIndex(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
+static bool TryBackFromDynamicIfNeeded(napi_env env, napi_valuetype argType, napi_value arg)
+{
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, false);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, false);
+    auto type = frontend->GetType();
+    if (type != FrontendType::ARK_TS) {
+        return false;
+    }
+    std::string uriString = "";
+    std::string paramsString = "";
+    napi_value uriNApi = nullptr;
+    napi_value params = nullptr;
+    napi_valuetype valueType = napi_undefined;
+    if (argType == napi_object) {
+        napi_get_named_property(env, arg, "url", &uriNApi);
+        napi_typeof(env, uriNApi, &valueType);
+        if (valueType == napi_undefined) {
+            napi_get_named_property(env, arg, "path", &uriNApi);
+            napi_typeof(env, uriNApi, &valueType);
+        }
+        if (valueType == napi_string) {
+            ParseUri(env, uriNApi, uriString);
+        }
+
+        napi_get_named_property(env, arg, "params", &params);
+        napi_typeof(env, params, &valueType);
+        if (valueType == napi_object) {
+            ParseParams(env, params, paramsString);
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "back from dynamic, url: %{public}s", uriString.c_str());
+    frontend->BackFromDynamicExtender(uriString, paramsString);
+    return true;
+}
+
 static napi_value JSRouterBack(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_WITH_ROUTER_PARAMTER;
@@ -461,6 +554,9 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
     napi_typeof(env, argv[0], &valueType);
     if (argc == ARGC_WITH_ROUTER_PARAMTER || valueType == napi_number) {
         return JsBackToIndex(env, info);
+    }
+    if (TryBackFromDynamicIfNeeded(env, valueType, argv[0])) {
+        return nullptr;
     }
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
@@ -493,8 +589,27 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
+static bool TryClearFromDynamicIfNeeded(napi_env env, napi_callback_info info)
+{
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, false);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, false);
+    auto type = frontend->GetType();
+    if (type != FrontendType::ARK_TS) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "clear router stack from dynamic");
+    frontend->ClearFromDynamicExtender();
+    return true;
+}
+
 static napi_value JSRouterClear(napi_env env, napi_callback_info info)
 {
+    if (TryClearFromDynamicIfNeeded(env, info)) {
+        return nullptr;
+    }
+    LOGI("AceRouter JSRouterClear 1-2");
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
@@ -505,8 +620,30 @@ static napi_value JSRouterClear(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
+static bool TryGetLengthFromDynamicIfNeeded(napi_env env, napi_callback_info info, napi_value& result)
+{
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, false);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, false);
+    auto type = frontend->GetType();
+    if (type != FrontendType::ARK_TS) {
+        return false;
+    }
+    int32_t len = frontend->GetLengthFromDynamicExtender();
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "get length from dynamic: %{public}d", len);
+    napi_value routeNApiNum = nullptr;
+    napi_create_int32(env, len, &routeNApiNum);
+    napi_coerce_to_string(env, routeNApiNum, &result);
+    return true;
+}
+
 static napi_value JSRouterGetLength(napi_env env, napi_callback_info info)
 {
+    napi_value result = nullptr;
+    if (TryGetLengthFromDynamicIfNeeded(env, info, result)) {
+        return result;
+    }
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
@@ -515,7 +652,6 @@ static napi_value JSRouterGetLength(napi_env env, napi_callback_info info)
     int32_t routeNumber = delegate->GetStackSize();
     napi_value routeNApiNum = nullptr;
     napi_create_int32(env, routeNumber, &routeNApiNum);
-    napi_value result = nullptr;
     napi_coerce_to_string(env, routeNApiNum, &result);
     return result;
 }
@@ -874,7 +1010,6 @@ static napi_value RouterExport(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("RouterMode", routerMode),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(routerDesc) / sizeof(routerDesc[0]), routerDesc));
-
     return exports;
 }
 

@@ -13,57 +13,60 @@
  * limitations under the License.
  */
 
-import { FrameNode, FrameNodeUtils } from "arkui/FrameNode"
-import { ArkUIGeneratedNativeModule } from "#components"
-import { int32, int64 } from "@koalaui/common"
+import { FrameNode, FrameNodeUtils } from 'arkui/FrameNode';
+import { ArkUIGeneratedNativeModule } from '#components';
+import { int32, int64 } from '@koalaui/common';
 import { nullptr, KPointer, KSerializerBuffer, toPeerPtr, RuntimeType,
-    runtimeType, Finalizable, SerializerBase, DeserializerBase } from "@koalaui/interop"
-import { _animateTo } from "arkui/base/ArkAnimation"
+    runtimeType, Finalizable, SerializerBase, DeserializerBase } from '@koalaui/interop';
+import { _animateTo } from 'arkui/base/ArkAnimation';
 import { AnimateParam, KeyframeAnimateParam, KeyframeState } from 'arkui/framework'
-import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from "@ohos/animator"
+import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from '@ohos/animator';
 import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
-    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId }
-    from "@ohos/arkui/UIContext"
+    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
+    KeyboardAvoidMode } from '@ohos/arkui/UIContext';
 import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry, memoEntry1,
-    IncrementalNode } from '@koalaui/runtime'
-import { Context, PointerStyle, PixelMap } from "#external"
-import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
-import { KeyEvent, PopupCommonOptions, MenuOptions } from "arkui/component/common"
-import { GlobalScope_ohos_font } from "#generated"
-import router from '@ohos/router'
+    IncrementalNode } from '@koalaui/runtime';
+import { Context, PointerStyle, PixelMap } from '#external';
+import { Nullable,  WidthBreakpoint, HeightBreakpoint } from 'arkui/component/enums';
+import { KeyEvent, PopupCommonOptions, MenuOptions } from 'arkui/component/common';
+import { GlobalScope_ohos_font } from '#generated';
+import router from '@ohos/router';
 import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
-    AlertDialogParamWithOptions }from "arkui/component/alertDialog"
-import { ActionSheetOptions } from "arkui/component/actionSheet"
-import inspector from "@ohos/arkui/inspector"
-import { ComponentContent } from 'arkui/ComponentContent'
-import overlayManager from '@ohos/overlayManager'
-import promptAction, { LevelOrder } from '@ohos/promptAction'
-import { ArkUIAniModule } from "arkui.ani"
-import { default as font } from "@ohos/font"
-import { MeasureOptions } from "@ohos/measure"
-import { GlobalScope_ohos_measure_utils } from "#generated"
-import { SizeOptions, ResourceColor } from "arkui/component/units"
-import { Frame } from "arkui/Graphics"
-import { TextMenuOptions } from "arkui/component/textCommon"
-import { focusController } from "@ohos/arkui/focusController"
-import { KeyProcessingMode } from "arkui/component/focus"
-import { componentUtils } from "@ohos/arkui/componentUtils"
-import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
-import { dragController } from "@ohos/arkui/dragController"
-import { UIContextAtomicServiceBar } from "#generated"
-import { GlobalScope } from "#generated"
-import { default as mediaquery } from '@ohos/mediaquery'
-import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework'
-import { AsyncCallback } from 'arkui/base';
-import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from "arkui/ArkUIEntry"
-import { PeerNode, findPeerNode } from 'arkui/PeerNode'
-import { KBuffer } from "@koalaui/interop"
-import { deserializeAndCallCallback } from "arkui/framework/peers/CallbackDeserializeCall"
-import { InteropNativeModule } from "@koalaui/interop"
+    AlertDialogParamWithOptions } from 'arkui/component/alertDialog';
+import { ActionSheetOptions } from 'arkui/component/actionSheet';
+import inspector from '@ohos/arkui/inspector';
+import { ComponentContent } from 'arkui/ComponentContent';
+import overlayManager from '@ohos/overlayManager';
+import promptAction, { LevelOrder } from '@ohos/promptAction';
+import { ArkUIAniModule } from 'arkui.ani';
+import { default as font } from '@ohos/font';
+import { MeasureOptions } from '@ohos/measure';
+import { GlobalScope_ohos_measure_utils } from '#generated';
+import { SizeOptions, ResourceColor } from 'arkui/component/units';
+import { Frame } from 'arkui/Graphics';
+import { TextMenuOptions } from 'arkui/component/textCommon';
+import { focusController } from '@ohos/arkui/focusController';
+import { KeyProcessingMode } from 'arkui/component/focus';
+import { componentUtils } from '@ohos/arkui/componentUtils';
+import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
+import { dragController } from '@ohos/arkui/dragController';
+import { UIContextAtomicServiceBar } from '#generated';
+import { GlobalScope } from '#generated';
+import { default as mediaquery } from '@ohos/mediaquery';
+import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework';
+import { AsyncCallback } from '#generated';
+import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
+import { PeerNode, findPeerNode } from 'arkui/PeerNode';
+import { KBuffer } from '@koalaui/interop';
+import { deserializeAndCallCallback } from 'arkui/framework/peers/CallbackDeserializeCall';
+import { InteropNativeModule } from '@koalaui/interop';
 import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
 import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender } from '../framework';
+import { EntryPoint, NavInterface } from '../component/customComponent';
+import { AsyncCallback as routerAsyncCallback } from '@ohos.base';
+
 export class ContextRecord {
     uiContext?: UIContext
 }
@@ -227,7 +230,7 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
     }
 
     //@ts-ignore
-    public get(id: string, callback: AsyncCallback<PixelMap>, options?: componentSnapshot.SnapshotOptions): void {
+    public get(id: string, callback: routerAsyncCallback<PixelMap>, options?: componentSnapshot.SnapshotOptions): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         componentSnapshot.get(id, callback, options);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -245,17 +248,17 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
     public createFromBuilder(builder: CustomBuilder, callback: AsyncCallback<PixelMap>,
                              delay?: number, checkImageStatus?: boolean,
                              options?: componentSnapshot.SnapshotOptions): void {
-        // ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // const peerNode = createUiDetachedRoot((): PeerNode => {
-        //     return ArkComponentRootPeer.create(undefined);
-        // }, builder, this.instanceId_);
-        // let rootNode = peerNode.peer.ptr;
-        // const destroyCallback = (): void => {
-        //     destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
-        // }
-        // ArkUIAniModule._ComponentSnapshot_createFromBuilderWithCallback(
-        //     rootNode, destroyCallback, callback, delay, checkImageStatus, options);
-        // ArkUIAniModule._Common_Restore_InstanceId();
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const peerNode = createUiDetachedRoot((): PeerNode => {
+            return ArkComponentRootPeer.create(undefined);
+        }, builder, this.instanceId_);
+        let rootNode = peerNode.peer.ptr;
+        const destroyCallback = (): void => {
+            destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
+        }
+        ArkUIAniModule._ComponentSnapshot_createFromBuilderWithCallback(
+            rootNode, destroyCallback, callback, delay, checkImageStatus, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     // @ts-ignore
@@ -295,20 +298,20 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         return pixmap;
     }
 
-    // public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number,
-    //     checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
-    //     ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-    //     let node = content.getFrameNode();
-    //     if (node === undefined || node === null) {
-    //         throw Error("The type of parameters is incorrect.");
-    //     }
-    //     let frameNode = node as FrameNode
-    //     const destroyCallback = (): void => {}
-    //     let pixmap = ArkUIAniModule._ComponentSnapshot_createFromComponentWithPromise(
-    //         toPeerPtr(frameNode), destroyCallback, delay, checkImageStatus, options);
-    //     ArkUIAniModule._Common_Restore_InstanceId();
-    //     return pixmap;
-    // }
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number,
+        checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let node = content.getFrameNode();
+        if (node === undefined || node === null) {
+            throw Error("The type of parameters is incorrect.");
+        }
+        let frameNode = node as FrameNode
+        const destroyCallback = (): void => {}
+        let pixmap = ArkUIAniModule._ComponentSnapshot_createFromComponentWithPromise(
+            toPeerPtr(frameNode), destroyCallback, delay, checkImageStatus, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return pixmap;
+    }
 }
 
 export class DragControllerImpl extends DragController {
@@ -321,39 +324,39 @@ export class DragControllerImpl extends DragController {
     //@ts-ignore
     public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo,
         callback: AsyncCallback<dragController.DragEventParam>): void {
-        // ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // if (typeof custom === "function") {
-        //     const peerNode = createUiDetachedRoot((): PeerNode => {
-        //         return ArkComponentRootPeer.create(undefined);
-        //     }, custom as CustomBuilder);
-        //     let rootNode = peerNode.peer.ptr;
-        //     const destroyCallback = (): void => {
-        //         destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
-        //     }
-        //     let dragItemInfoNull: DragItemInfo = {};
-        //     ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
-        //         destroyCallback, dragInfo, callback);
-        // } else {
-        //     let destroyCallback = (): void => { };
-        //     let customDragInfo = custom as DragItemInfo;
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        if (typeof custom === "function") {
+            const peerNode = createUiDetachedRoot((): PeerNode => {
+                return ArkComponentRootPeer.create(undefined);
+            }, custom as CustomBuilder);
+            let rootNode = peerNode.peer.ptr;
+            const destroyCallback = (): void => {
+                destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
+            }
+            let dragItemInfoNull: DragItemInfo = {};
+            ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
+                destroyCallback, dragInfo, callback);
+        } else {
+            let destroyCallback = (): void => { };
+            let customDragInfo = custom as DragItemInfo;
 
-        //     if (customDragInfo.pixelMap !== undefined) {
-        //         ArkUIAniModule._DragController_executeDragWithCallback(custom as DragItemInfo, nullptr,
-        //             destroyCallback, dragInfo, callback);
-        //     } else {
-        //         const peerNode = createUiDetachedRoot((): PeerNode => {
-        //             return ArkComponentRootPeer.create(undefined);
-        //         }, customDragInfo.builder as CustomBuilder);
-        //         let rootNode = peerNode.peer.ptr;
-        //         destroyCallback = (): void => {
-        //             destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
-        //         }
-        //         let dragItemInfoNull: DragItemInfo = {};
-        //         ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
-        //             destroyCallback, dragInfo, callback);
-        //     }
-        // }
-        // ArkUIAniModule._Common_Restore_InstanceId();
+            if (customDragInfo.pixelMap !== undefined) {
+                ArkUIAniModule._DragController_executeDragWithCallback(custom as DragItemInfo, nullptr,
+                    destroyCallback, dragInfo, callback);
+            } else {
+                const peerNode = createUiDetachedRoot((): PeerNode => {
+                    return ArkComponentRootPeer.create(undefined);
+                }, customDragInfo.builder as CustomBuilder);
+                let rootNode = peerNode.peer.ptr;
+                destroyCallback = (): void => {
+                    destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
+                }
+                let dragItemInfoNull: DragItemInfo = {};
+                ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
+                    destroyCallback, dragInfo, callback);
+            }
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     // @ts-ignore
@@ -486,6 +489,44 @@ export class RouterImpl extends Router {
         return result;
     }
 
+    public pushNamedRoute(options: router.NamedRouterOptions): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.pushNamedRoute(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public pushNamedRoute(options: router.NamedRouterOptions, mode: router.RouterMode): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.pushNamedRoute(options, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public pushNamedRoute(options: router.NamedRouterOptions, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        // this.router_!.pushNamedRoute(options, callback);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public pushNamedRoute(options: router.NamedRouterOptions, mode: router.RouterMode, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        // this.router_!.pushNamedRoute(options, callback, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
     public replaceUrl(options: router.RouterOptions): Promise<void> {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
@@ -496,6 +537,44 @@ export class RouterImpl extends Router {
         });
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
+    }
+
+    public replaceNamedRoute(options: router.NamedRouterOptions): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.replaceNamedRoute(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public replaceNamedRoute(options: router.NamedRouterOptions, mode: router.RouterMode): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.replaceNamedRoute(options, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public replaceNamedRoute(options: router.NamedRouterOptions, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        // this.router_!.replaceNamedRoute(options, callback);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public replaceNamedRoute(options: router.NamedRouterOptions, mode: router.RouterMode, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        // this.router_!.replaceNamedRoute(options, callback, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public back(options?:router.RouterOptions): void {
@@ -568,7 +647,7 @@ export class RouterImpl extends Router {
 
     public getStateRoot(): ComputableState<IncrementalNode> | undefined {
         if (this.router_ === undefined) {
-            return undefined;
+            return undefined
             // throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
@@ -586,6 +665,15 @@ export class RouterImpl extends Router {
         let result = this.router_!.getPreState();
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
+    }
+
+    public registerNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.registerNamedRouter(routerName, instance, param);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
@@ -1073,7 +1161,11 @@ export class DetachedRootEntryManager {
 
     public getDetachedRoots() : Map<KPointer, DetachedRootEntry> {
          return this.detachedRoots_;
-     }
+    }
+
+    public setDetachedRootNode(nativeNode: KPointer, rootNode: ComputableState<IncrementalNode>): void {
+        this.detachedRoots_.set(nativeNode, new DetachedRootEntryImpl<IncrementalNode>(rootNode));
+    }
 
     public createUiDetachedRoot(
         peerFactory: () => PeerNode,
@@ -1173,6 +1265,7 @@ export class UIContextImpl extends UIContext {
     contextMenuController_: ContextMenuControllerImpl;
     overlayManager_: OverlayManagerImpl | null = null;
     promptAction_: PromptActionImpl | null = null;
+    keyboardAvoidMode_: KeyboardAvoidMode = KeyboardAvoidMode.OFFSET;
     cursorController_: CursorControllerImpl;
     font_: FontImpl;
     measureUtils_: MeasureUtilsImpl;
@@ -1316,6 +1409,20 @@ export class UIContextImpl extends UIContext {
     }
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
+    }
+
+    setKeyboardAvoidMode(mode: KeyboardAvoidMode): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ArkUIAniModule._SetKeyboardAvoidMode(mode);
+        this.keyboardAvoidMode_ = mode;
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    getKeyboardAvoidMode(): KeyboardAvoidMode {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let mode:KeyboardAvoidMode = ArkUIAniModule._GetKeyboardAvoidMode();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return mode;
     }
 
     public getAtomicServiceBar(): Nullable<AtomicServiceBar> {

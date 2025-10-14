@@ -22,6 +22,7 @@ group("advanced_ui_component_static") {
       "fullscreenlaunchcomponent:fullScreenLaunch",
       "splitlayout:splitLayout",
       "swiperefresher:swipeRefresher",
+      "segmentbutton:segmentButton",
     ]
   }
 }

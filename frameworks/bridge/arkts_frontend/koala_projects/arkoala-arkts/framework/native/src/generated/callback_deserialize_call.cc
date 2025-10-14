@@ -76,6 +76,50 @@ void deserializeAndCallSyncAsyncCallback_image_PixelMap_Void(Ark_VMContext vmCon
     Ark_image_PixelMap result = static_cast<Ark_image_PixelMap>(image_PixelMap_serializer::read(thisDeserializer));
     callSyncMethod(vmContext, resourceId, result);
 }
+void deserializeAndCallAsyncCallback_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_BusinessError err, const Opt_void data)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_AsyncCallback_Void))));
+    thisDeserializer.readPointer();
+    const auto errTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_BusinessError errTmpBuf = {};
+    errTmpBuf.tag = errTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((errTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        errTmpBuf.value = static_cast<Ark_BusinessError>(BusinessError_serializer::read(thisDeserializer));
+    }
+    Opt_BusinessError err = errTmpBuf;
+    const auto dataTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_void dataTmpBuf = {};
+    dataTmpBuf.tag = dataTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((dataTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        dataTmpBuf.value = Ark_Void();
+    }
+    Opt_void data = dataTmpBuf;
+    _call(_resourceId, err, data);
+}
+void deserializeAndCallSyncAsyncCallback_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_BusinessError err, const Opt_void data)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_AsyncCallback_Void))));
+    const auto errTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_BusinessError errTmpBuf = {};
+    errTmpBuf.tag = errTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((errTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        errTmpBuf.value = static_cast<Ark_BusinessError>(BusinessError_serializer::read(thisDeserializer));
+    }
+    Opt_BusinessError err = errTmpBuf;
+    const auto dataTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_void dataTmpBuf = {};
+    dataTmpBuf.tag = dataTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((dataTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        dataTmpBuf.value = Ark_Void();
+    }
+    Opt_void data = dataTmpBuf;
+    callSyncMethod(vmContext, resourceId, err, data);
+}
 void deserializeAndCallButtonModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -2094,6 +2138,42 @@ void deserializeAndCallSyncCallback_OnPageVisibleEvent_Void(Ark_VMContext vmCont
     thisDeserializer.readPointer();
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnPageVisibleEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_OnPageVisibleEvent_Void))));
     Ark_OnPageVisibleEvent value0 = OnPageVisibleEvent_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, value0);
+}
+void deserializeAndCallCallback_OnPdfLoadEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnPdfLoadEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_OnPdfLoadEvent_Void))));
+    thisDeserializer.readPointer();
+    Ark_OnPdfLoadEvent value0 = OnPdfLoadEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnPdfLoadEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnPdfLoadEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_OnPdfLoadEvent_Void))));
+    Ark_OnPdfLoadEvent value0 = OnPdfLoadEvent_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, value0);
+}
+void deserializeAndCallCallback_OnPdfScrollEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnPdfScrollEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_OnPdfScrollEvent_Void))));
+    thisDeserializer.readPointer();
+    Ark_OnPdfScrollEvent value0 = OnPdfScrollEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnPdfScrollEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnPdfScrollEvent value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_OnPdfScrollEvent_Void))));
+    Ark_OnPdfScrollEvent value0 = OnPdfScrollEvent_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, value0);
 }
 void deserializeAndCallCallback_OnPermissionRequestEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -4510,6 +4590,24 @@ void deserializeAndCallSyncModifierKeyStateGetter(Ark_VMContext vmContext, KSeri
     Callback_Boolean_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
     callSyncMethod(vmContext, resourceId, keys, continuationResult);
 }
+void deserializeAndCallMouseInfoCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativeEmbedMouseInfo event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_MouseInfoCallback))));
+    thisDeserializer.readPointer();
+    Ark_NativeEmbedMouseInfo event = NativeEmbedMouseInfo_serializer::read(thisDeserializer);
+    _call(_resourceId, event);
+}
+void deserializeAndCallSyncMouseInfoCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativeEmbedMouseInfo event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_MouseInfoCallback))));
+    Ark_NativeEmbedMouseInfo event = NativeEmbedMouseInfo_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, event);
+}
 void deserializeAndCallNavDestinationTransitionDelegate(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -4531,6 +4629,26 @@ void deserializeAndCallSyncNavDestinationTransitionDelegate(Ark_VMContext vmCont
     Ark_Boolean isEnter = thisDeserializer.readBoolean();
     Callback_Opt_Array_NavDestinationTransition_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Array_NavDestinationTransition value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_Array_NavDestinationTransition_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Array_NavDestinationTransition value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_Array_NavDestinationTransition_Void))))};
     callSyncMethod(vmContext, resourceId, operation, isEnter, continuationResult);
+}
+void deserializeAndCallNavExtender_CreateNavDestination(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_NavExtender_CreateNavDestination))));
+    thisDeserializer.readPointer();
+    Ark_Int32 index = thisDeserializer.readInt32();
+    Callback_Pointer_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    _call(_resourceId, index, continuationResult);
+}
+void deserializeAndCallSyncNavExtender_CreateNavDestination(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_NavExtender_CreateNavDestination))));
+    Ark_Int32 index = thisDeserializer.readInt32();
+    Callback_Pointer_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    callSyncMethod(vmContext, resourceId, index, continuationResult);
 }
 void deserializeAndCallNavExtender_OnUpdateStack(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -4727,6 +4845,24 @@ void deserializeAndCallSyncOnCreateMenuCallback(Ark_VMContext vmContext, KSerial
     Array_TextMenuItem menuItems = menuItemsTmpBuf;
     Callback_Array_TextMenuItem_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Array_TextMenuItem value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Array_TextMenuItem_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_TextMenuItem value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Array_TextMenuItem_Void))))};
     callSyncMethod(vmContext, resourceId, menuItems, continuationResult);
+}
+void deserializeAndCallOnDetectBlankScreenCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_BlankScreenDetectionEventInfo event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnDetectBlankScreenCallback))));
+    thisDeserializer.readPointer();
+    Ark_BlankScreenDetectionEventInfo event = BlankScreenDetectionEventInfo_serializer::read(thisDeserializer);
+    _call(_resourceId, event);
+}
+void deserializeAndCallSyncOnDetectBlankScreenCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_BlankScreenDetectionEventInfo event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnDetectBlankScreenCallback))));
+    Ark_BlankScreenDetectionEventInfo event = BlankScreenDetectionEventInfo_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, event);
 }
 void deserializeAndCallOnDidChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -4992,6 +5128,24 @@ void deserializeAndCallSyncOnMoveHandler(Ark_VMContext vmContext, KSerializerBuf
     Ark_Number to = static_cast<Ark_Number>(thisDeserializer.readNumber());
     callSyncMethod(vmContext, resourceId, from, to);
 }
+void deserializeAndCallOnNativeEmbedObjectParamChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativeEmbedParamDataInfo event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnNativeEmbedObjectParamChangeCallback))));
+    thisDeserializer.readPointer();
+    Ark_NativeEmbedParamDataInfo event = NativeEmbedParamDataInfo_serializer::read(thisDeserializer);
+    _call(_resourceId, event);
+}
+void deserializeAndCallSyncOnNativeEmbedObjectParamChangeCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativeEmbedParamDataInfo event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnNativeEmbedObjectParamChangeCallback))));
+    Ark_NativeEmbedParamDataInfo event = NativeEmbedParamDataInfo_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, event);
+}
 void deserializeAndCallOnNativeEmbedVisibilityChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -5027,6 +5181,26 @@ void deserializeAndCallSyncOnNavigationEntryCommittedCallback(Ark_VMContext vmCo
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_LoadCommittedDetails loadCommittedDetails)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnNavigationEntryCommittedCallback))));
     Ark_LoadCommittedDetails loadCommittedDetails = LoadCommittedDetails_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, loadCommittedDetails);
+}
+void deserializeAndCallOnOverrideErrorPageCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnErrorReceiveEvent errorPageEvent, const Callback_String_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnOverrideErrorPageCallback))));
+    thisDeserializer.readPointer();
+    Ark_OnErrorReceiveEvent errorPageEvent = OnErrorReceiveEvent_serializer::read(thisDeserializer);
+    Callback_String_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String breakpoints)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String breakpoints)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_String_Void))))};
+    _call(_resourceId, errorPageEvent, continuationResult);
+}
+void deserializeAndCallSyncOnOverrideErrorPageCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnErrorReceiveEvent errorPageEvent, const Callback_String_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnOverrideErrorPageCallback))));
+    Ark_OnErrorReceiveEvent errorPageEvent = OnErrorReceiveEvent_serializer::read(thisDeserializer);
+    Callback_String_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String breakpoints)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String breakpoints)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_String_Void))))};
+    callSyncMethod(vmContext, resourceId, errorPageEvent, continuationResult);
 }
 void deserializeAndCallOnOverrideUrlLoadingCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -6742,6 +6916,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_AccessibilityCallback: return deserializeAndCallAccessibilityCallback(thisArray, thisLength);
         case Kind_AccessibilityFocusCallback: return deserializeAndCallAccessibilityFocusCallback(thisArray, thisLength);
         case Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallAsyncCallback_image_PixelMap_Void(thisArray, thisLength);
+        case Kind_AsyncCallback_Void: return deserializeAndCallAsyncCallback_Void(thisArray, thisLength);
         case Kind_ButtonModifierBuilder: return deserializeAndCallButtonModifierBuilder(thisArray, thisLength);
         case Kind_ButtonTriggerClickCallback: return deserializeAndCallButtonTriggerClickCallback(thisArray, thisLength);
         case Kind_Callback_Area_Area_Void: return deserializeAndCallCallback_Area_Area_Void(thisArray, thisLength);
@@ -6843,6 +7018,8 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_OnPageBeginEvent_Void: return deserializeAndCallCallback_OnPageBeginEvent_Void(thisArray, thisLength);
         case Kind_Callback_OnPageEndEvent_Void: return deserializeAndCallCallback_OnPageEndEvent_Void(thisArray, thisLength);
         case Kind_Callback_OnPageVisibleEvent_Void: return deserializeAndCallCallback_OnPageVisibleEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnPdfLoadEvent_Void: return deserializeAndCallCallback_OnPdfLoadEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnPdfScrollEvent_Void: return deserializeAndCallCallback_OnPdfScrollEvent_Void(thisArray, thisLength);
         case Kind_Callback_OnPermissionRequestEvent_Void: return deserializeAndCallCallback_OnPermissionRequestEvent_Void(thisArray, thisLength);
         case Kind_Callback_onPlaceChildren_Void: return deserializeAndCallCallback_onPlaceChildren_Void(thisArray, thisLength);
         case Kind_Callback_OnProgressChangeEvent_Void: return deserializeAndCallCallback_OnProgressChangeEvent_Void(thisArray, thisLength);
@@ -6947,7 +7124,9 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_MenuItemModifierBuilder: return deserializeAndCallMenuItemModifierBuilder(thisArray, thisLength);
         case Kind_MenuOnAppearCallback: return deserializeAndCallMenuOnAppearCallback(thisArray, thisLength);
         case Kind_ModifierKeyStateGetter: return deserializeAndCallModifierKeyStateGetter(thisArray, thisLength);
+        case Kind_MouseInfoCallback: return deserializeAndCallMouseInfoCallback(thisArray, thisLength);
         case Kind_NavDestinationTransitionDelegate: return deserializeAndCallNavDestinationTransitionDelegate(thisArray, thisLength);
+        case Kind_NavExtender_CreateNavDestination: return deserializeAndCallNavExtender_CreateNavDestination(thisArray, thisLength);
         case Kind_NavExtender_OnUpdateStack: return deserializeAndCallNavExtender_OnUpdateStack(thisArray, thisLength);
         case Kind_OnAdsBlockedCallback: return deserializeAndCallOnAdsBlockedCallback(thisArray, thisLength);
         case Kind_OnAlphabetIndexerPopupSelectCallback: return deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisArray, thisLength);
@@ -6958,6 +7137,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_OnContentScrollCallback: return deserializeAndCallOnContentScrollCallback(thisArray, thisLength);
         case Kind_OnContextMenuHideCallback: return deserializeAndCallOnContextMenuHideCallback(thisArray, thisLength);
         case Kind_OnCreateMenuCallback: return deserializeAndCallOnCreateMenuCallback(thisArray, thisLength);
+        case Kind_OnDetectBlankScreenCallback: return deserializeAndCallOnDetectBlankScreenCallback(thisArray, thisLength);
         case Kind_OnDidChangeCallback: return deserializeAndCallOnDidChangeCallback(thisArray, thisLength);
         case Kind_OnDragEventCallback: return deserializeAndCallOnDragEventCallback(thisArray, thisLength);
         case Kind_OnFirstMeaningfulPaintCallback: return deserializeAndCallOnFirstMeaningfulPaintCallback(thisArray, thisLength);
@@ -6971,8 +7151,10 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_OnLinearIndicatorChangeCallback: return deserializeAndCallOnLinearIndicatorChangeCallback(thisArray, thisLength);
         case Kind_OnMenuItemClickCallback: return deserializeAndCallOnMenuItemClickCallback(thisArray, thisLength);
         case Kind_OnMoveHandler: return deserializeAndCallOnMoveHandler(thisArray, thisLength);
+        case Kind_OnNativeEmbedObjectParamChangeCallback: return deserializeAndCallOnNativeEmbedObjectParamChangeCallback(thisArray, thisLength);
         case Kind_OnNativeEmbedVisibilityChangeCallback: return deserializeAndCallOnNativeEmbedVisibilityChangeCallback(thisArray, thisLength);
         case Kind_OnNavigationEntryCommittedCallback: return deserializeAndCallOnNavigationEntryCommittedCallback(thisArray, thisLength);
+        case Kind_OnOverrideErrorPageCallback: return deserializeAndCallOnOverrideErrorPageCallback(thisArray, thisLength);
         case Kind_OnOverrideUrlLoadingCallback: return deserializeAndCallOnOverrideUrlLoadingCallback(thisArray, thisLength);
         case Kind_OnPasteCallback: return deserializeAndCallOnPasteCallback(thisArray, thisLength);
         case Kind_OnRadioChangeCallback: return deserializeAndCallOnRadioChangeCallback(thisArray, thisLength);
@@ -7051,6 +7233,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_AccessibilityCallback: return deserializeAndCallSyncAccessibilityCallback(vmContext, thisArray, thisLength);
         case Kind_AccessibilityFocusCallback: return deserializeAndCallSyncAccessibilityFocusCallback(vmContext, thisArray, thisLength);
         case Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallSyncAsyncCallback_image_PixelMap_Void(vmContext, thisArray, thisLength);
+        case Kind_AsyncCallback_Void: return deserializeAndCallSyncAsyncCallback_Void(vmContext, thisArray, thisLength);
         case Kind_ButtonModifierBuilder: return deserializeAndCallSyncButtonModifierBuilder(vmContext, thisArray, thisLength);
         case Kind_ButtonTriggerClickCallback: return deserializeAndCallSyncButtonTriggerClickCallback(vmContext, thisArray, thisLength);
         case Kind_Callback_Area_Area_Void: return deserializeAndCallSyncCallback_Area_Area_Void(vmContext, thisArray, thisLength);
@@ -7152,6 +7335,8 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_OnPageBeginEvent_Void: return deserializeAndCallSyncCallback_OnPageBeginEvent_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_OnPageEndEvent_Void: return deserializeAndCallSyncCallback_OnPageEndEvent_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_OnPageVisibleEvent_Void: return deserializeAndCallSyncCallback_OnPageVisibleEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnPdfLoadEvent_Void: return deserializeAndCallSyncCallback_OnPdfLoadEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnPdfScrollEvent_Void: return deserializeAndCallSyncCallback_OnPdfScrollEvent_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_OnPermissionRequestEvent_Void: return deserializeAndCallSyncCallback_OnPermissionRequestEvent_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_onPlaceChildren_Void: return deserializeAndCallSyncCallback_onPlaceChildren_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_OnProgressChangeEvent_Void: return deserializeAndCallSyncCallback_OnProgressChangeEvent_Void(vmContext, thisArray, thisLength);
@@ -7256,7 +7441,9 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_MenuItemModifierBuilder: return deserializeAndCallSyncMenuItemModifierBuilder(vmContext, thisArray, thisLength);
         case Kind_MenuOnAppearCallback: return deserializeAndCallSyncMenuOnAppearCallback(vmContext, thisArray, thisLength);
         case Kind_ModifierKeyStateGetter: return deserializeAndCallSyncModifierKeyStateGetter(vmContext, thisArray, thisLength);
+        case Kind_MouseInfoCallback: return deserializeAndCallSyncMouseInfoCallback(vmContext, thisArray, thisLength);
         case Kind_NavDestinationTransitionDelegate: return deserializeAndCallSyncNavDestinationTransitionDelegate(vmContext, thisArray, thisLength);
+        case Kind_NavExtender_CreateNavDestination: return deserializeAndCallSyncNavExtender_CreateNavDestination(vmContext, thisArray, thisLength);
         case Kind_NavExtender_OnUpdateStack: return deserializeAndCallSyncNavExtender_OnUpdateStack(vmContext, thisArray, thisLength);
         case Kind_OnAdsBlockedCallback: return deserializeAndCallSyncOnAdsBlockedCallback(vmContext, thisArray, thisLength);
         case Kind_OnAlphabetIndexerPopupSelectCallback: return deserializeAndCallSyncOnAlphabetIndexerPopupSelectCallback(vmContext, thisArray, thisLength);
@@ -7267,6 +7454,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_OnContentScrollCallback: return deserializeAndCallSyncOnContentScrollCallback(vmContext, thisArray, thisLength);
         case Kind_OnContextMenuHideCallback: return deserializeAndCallSyncOnContextMenuHideCallback(vmContext, thisArray, thisLength);
         case Kind_OnCreateMenuCallback: return deserializeAndCallSyncOnCreateMenuCallback(vmContext, thisArray, thisLength);
+        case Kind_OnDetectBlankScreenCallback: return deserializeAndCallSyncOnDetectBlankScreenCallback(vmContext, thisArray, thisLength);
         case Kind_OnDidChangeCallback: return deserializeAndCallSyncOnDidChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnDragEventCallback: return deserializeAndCallSyncOnDragEventCallback(vmContext, thisArray, thisLength);
         case Kind_OnFirstMeaningfulPaintCallback: return deserializeAndCallSyncOnFirstMeaningfulPaintCallback(vmContext, thisArray, thisLength);
@@ -7280,8 +7468,10 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_OnLinearIndicatorChangeCallback: return deserializeAndCallSyncOnLinearIndicatorChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnMenuItemClickCallback: return deserializeAndCallSyncOnMenuItemClickCallback(vmContext, thisArray, thisLength);
         case Kind_OnMoveHandler: return deserializeAndCallSyncOnMoveHandler(vmContext, thisArray, thisLength);
+        case Kind_OnNativeEmbedObjectParamChangeCallback: return deserializeAndCallSyncOnNativeEmbedObjectParamChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnNativeEmbedVisibilityChangeCallback: return deserializeAndCallSyncOnNativeEmbedVisibilityChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnNavigationEntryCommittedCallback: return deserializeAndCallSyncOnNavigationEntryCommittedCallback(vmContext, thisArray, thisLength);
+        case Kind_OnOverrideErrorPageCallback: return deserializeAndCallSyncOnOverrideErrorPageCallback(vmContext, thisArray, thisLength);
         case Kind_OnOverrideUrlLoadingCallback: return deserializeAndCallSyncOnOverrideUrlLoadingCallback(vmContext, thisArray, thisLength);
         case Kind_OnPasteCallback: return deserializeAndCallSyncOnPasteCallback(vmContext, thisArray, thisLength);
         case Kind_OnRadioChangeCallback: return deserializeAndCallSyncOnRadioChangeCallback(vmContext, thisArray, thisLength);

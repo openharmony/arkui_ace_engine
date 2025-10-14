@@ -36,7 +36,7 @@ public:
 HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     * @tc.steps: step1. create frameNode and test pattern UpdateCaretRect
      */
     CreateTextField();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,

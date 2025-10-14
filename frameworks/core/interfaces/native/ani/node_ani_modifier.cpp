@@ -22,6 +22,7 @@
 #include "condition_scope_ani_modifier.h"
 #include "content_slot_ani_modifier.h"
 #include "custom_node_ani_modifier.h"
+#include "keyboard_avoid_mode_ani_modifier.h"
 #include "drag_ani_modifier.h"
 #include "drag_controller_ani_modifier.h"
 #include "image_ani_modifier.h"
@@ -54,6 +55,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getDragAniModifier = OHOS::Ace::NG::GetDragAniModifier,
         .getCommonAniModifier = OHOS::Ace::NG::GetCommonAniModifier,
         .getCustomNodeAniModifier = OHOS::Ace::NG::GetCustomNodeAniModifier,
+        .getKeyboardAvoidModeAniModifier = OHOS::Ace::NG::GetKeyboardAvoidModeAniModifier,
         .getLazyForEachNodeAniModifier = OHOS::Ace::NG::GetLazyForEachNodeAniModifier,
         .getContentSlotAniModifier = OHOS::Ace::NG::GetContentSlotAniModifier,
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,

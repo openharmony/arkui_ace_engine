@@ -1777,6 +1777,105 @@ HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityTextHint001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetAccessibilityGroupOptions001
+ * @tc.desc: Test the SetAccessibilityGroupOptions when no value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityGroupOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct framenode
+     */
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step2. construct accessibilityGroupOptions
+     */
+    AccessibilityGroupOptions accessibilityGroupOptions;
+    accessibilityGroupOptions.accessibilityTextPreferred = true;
+    accessibilityGroupOptions.stateControllerByType = AccessibilityRoleType::CALENDAR;
+    accessibilityGroupOptions.stateControllerByInspector = "Test StateControllerByInspector";
+    accessibilityGroupOptions.actionControllerByType = AccessibilityRoleType::BUTTON;
+    accessibilityGroupOptions.actionControllerByInspector = "Test ActionControllerByInspector";
+
+    /**
+     * @tc.steps: step3. Test the SetAccessibilityGroupOptions
+     */
+    auto accessibilityProperty = frameNode.GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->accessibilityGroupOptions_.has_value());
+    viewAbstractModelNG.SetAccessibilityGroupOptions(&frameNode, accessibilityGroupOptions);
+    EXPECT_TRUE(accessibilityProperty->accessibilityGroupOptions_.has_value());
+    AccessibilityGroupOptions valueAccessibilityGroupOptions =
+        accessibilityProperty->accessibilityGroupOptions_.value();
+    EXPECT_EQ(valueAccessibilityGroupOptions.accessibilityTextPreferred,
+        accessibilityGroupOptions.accessibilityTextPreferred);
+    EXPECT_EQ(valueAccessibilityGroupOptions.stateControllerByType,
+        accessibilityGroupOptions.stateControllerByType);
+    EXPECT_EQ(valueAccessibilityGroupOptions.stateControllerByInspector,
+        accessibilityGroupOptions.stateControllerByInspector);
+    EXPECT_EQ(valueAccessibilityGroupOptions.actionControllerByType,
+        accessibilityGroupOptions.actionControllerByType);
+    EXPECT_EQ(valueAccessibilityGroupOptions.actionControllerByInspector,
+        accessibilityGroupOptions.actionControllerByInspector);
+}
+
+/**
+ * @tc.name: SetAccessibilityGroupOptions002
+ * @tc.desc: Test the SetAccessibilityGroupOptions when has value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityGroupOptions002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct framenode
+     */
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step2. construct accessibilityGroupOptions
+     */
+    AccessibilityGroupOptions accessibilityGroupOptions1;
+    accessibilityGroupOptions1.accessibilityTextPreferred = true;
+    accessibilityGroupOptions1.stateControllerByType = AccessibilityRoleType::CALENDAR;
+    accessibilityGroupOptions1.stateControllerByInspector = "Test StateControllerByInspector 1";
+    accessibilityGroupOptions1.actionControllerByType = AccessibilityRoleType::BUTTON;
+    accessibilityGroupOptions1.actionControllerByInspector = "Test ActionControllerByInspector 1";
+    AccessibilityGroupOptions accessibilityGroupOptions2;
+    accessibilityGroupOptions1.accessibilityTextPreferred = false;
+    accessibilityGroupOptions1.stateControllerByType = AccessibilityRoleType::ACTION_SHEET;
+    accessibilityGroupOptions1.stateControllerByInspector = "Test StateControllerByInspector 2";
+    accessibilityGroupOptions1.actionControllerByType = AccessibilityRoleType::ALERT_DIALOG;
+    accessibilityGroupOptions1.actionControllerByInspector = "Test ActionControllerByInspector 2";
+
+    /**
+     * @tc.steps: step3. Test the SetAccessibilityGroupOptions
+     */
+    auto accessibilityProperty = frameNode.GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->accessibilityGroupOptions_ = accessibilityGroupOptions1;
+    EXPECT_TRUE(accessibilityProperty->accessibilityGroupOptions_.has_value());
+    viewAbstractModelNG.SetAccessibilityGroupOptions(&frameNode, accessibilityGroupOptions2);
+    EXPECT_TRUE(accessibilityProperty->accessibilityGroupOptions_.has_value());
+    AccessibilityGroupOptions valueAccessibilityGroupOptions =
+        accessibilityProperty->accessibilityGroupOptions_.value();
+    EXPECT_EQ(valueAccessibilityGroupOptions.accessibilityTextPreferred,
+        accessibilityGroupOptions2.accessibilityTextPreferred);
+    EXPECT_EQ(valueAccessibilityGroupOptions.stateControllerByType,
+        accessibilityGroupOptions2.stateControllerByType);
+    EXPECT_EQ(valueAccessibilityGroupOptions.stateControllerByInspector,
+        accessibilityGroupOptions2.stateControllerByInspector);
+    EXPECT_EQ(valueAccessibilityGroupOptions.actionControllerByType,
+        accessibilityGroupOptions2.actionControllerByType);
+    EXPECT_EQ(valueAccessibilityGroupOptions.actionControllerByInspector,
+        accessibilityGroupOptions2.actionControllerByInspector);
+}
+
+/**
  * @tc.name: SetToolbarBuilder
  * @tc.desc: Test the SetToolbarBuilder
  * @tc.type: FUNC

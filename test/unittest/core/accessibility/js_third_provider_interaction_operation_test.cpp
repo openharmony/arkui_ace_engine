@@ -22,6 +22,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "accessibility_def.h"
 #include "accessibility_system_ability_client.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "adapter/ohos/osal/js_third_provider_interaction_operation.h"
@@ -100,10 +101,26 @@ public:
         mockRequestId = requestId;
     }
 
+    void SetFocusMoveSearchWithConditionResult(const std::list<AccessibilityElementInfo> &info,
+        const Accessibility::FocusMoveResult &result, const int32_t requestId) override
+    {
+        mockInfos_ = info;
+        mockResult_ = result;
+        mockRequestId = requestId;
+    }
+
+    void SetDetectElementInfoFocusableThroughAncestorResult(bool isFocusable, const int32_t requestId) override
+    {
+        mockFocusable_ = isFocusable;
+        mockRequestId = requestId;
+    }
+
     std::list<Accessibility::AccessibilityElementInfo> mockInfos_;
     Accessibility::AccessibilityElementInfo mockInfo_;
+    Accessibility::FocusMoveResult mockResult_;
     int32_t mockRequestId = 0;
     bool mockSucceeded_ = false;
+    bool mockFocusable_ = false;
     int32_t mockCursorPosition_ = 0;
 };
 } // namespace OHOS::Ace

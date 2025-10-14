@@ -698,8 +698,9 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     float lengthOfItemsInViewport = info_.GetTotalHeightOfItemsInView(mainGap_);
     // scroll forward
     if (LessNotEqual(info_.prevOffset_, info_.currentOffset_)) {
-        if ((GreatOrEqual(info_.currentOffset_, info_.contentStartOffset_) && !canOverScrollStart_) ||
-            (NonPositive(info_.currentOffset_) && !canOverScrollEnd_)) {
+        if (scrollSource_ != SCROLL_FROM_ANIMATION_SPRING &&
+            ((GreatOrEqual(info_.currentOffset_, info_.contentStartOffset_) && !canOverScrollStart_) ||
+                (NonPositive(info_.currentOffset_) && !canOverScrollEnd_))) {
             info_.reachEnd_ = false;
             info_.offsetEnd_ = false;
             return;
@@ -791,7 +792,8 @@ void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize,
     if (mainIter != info_.gridMatrix_.end() && mainIter->second.size() < crossCount_) {
         bool doneFillCurrentLine = false;
         auto currentIndex = info_.endIndex_ + 1;
-        cellAveLength_ = -1.0f;
+        auto lineHeight = info_.lineHeightMap_.find(currentMainLineIndex_);
+        cellAveLength_ = lineHeight == info_.lineHeightMap_.end() ? -1.0f : lineHeight->second;
         lastCross_ = 0;
         auto childrenCount = info_.GetChildrenCount();
         for (uint32_t i = mainIter->second.size(); i < crossCount_; i++) {

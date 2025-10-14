@@ -157,6 +157,7 @@ template("ace_core_interfaces_native_node") {
         "ani/condition_scope_ani_modifier.cpp",
         "ani/content_slot_ani_modifier.cpp",
         "ani/custom_node_ani_modifier.cpp",
+        "ani/keyboard_avoid_mode_ani_modifier.cpp",
         "ani/drag_ani_modifier.cpp",
         "ani/image_ani_modifier.cpp",
         "ani/image_span_ani_modifier.cpp",
@@ -168,13 +169,13 @@ template("ace_core_interfaces_native_node") {
         "ani/search_ani_modifier.cpp",
         "ani/shape_ani_modifier.cpp",
         "ani/stateMgmt_ani_modifier.cpp",
+        "ani/xbar_ani_modifier.cpp",
         "ani/styled_string_ani_modifier.cpp",
         "ani/trace_ani_modifier.cpp",
         "ani/uinode_ani_modifier.cpp",
         "ani/video_ani_modifier.cpp",
         "ani/waterflow_ani_modifier.cpp",
         "ani/web_ani_modifier.cpp",
-        "ani/xbar_ani_modifier.cpp",
         "ani/xcomponent_ani_modifier.cpp",
       ]
       if (build_ohos_sdk) {

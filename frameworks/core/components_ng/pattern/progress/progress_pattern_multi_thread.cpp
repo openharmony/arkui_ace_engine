@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
-/**
- * The util module provided by ArkTs
- */
-declare interface ArkTsUtil {
-    getHash(object: object): number;
-}
+#include "core/components_ng/pattern/progress/progress_pattern.h"
 
-// Require and local module.
-declare function requireInternal(moduleName: string): ArkTsUtil;
+namespace OHOS::Ace::NG {
+void ProgressPattern::SetBuilderFuncMultiThread()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnModifyDone();
+    });
+}
+} // namespace OHOS::Ace::NG

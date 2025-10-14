@@ -72,7 +72,6 @@ std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> TextBases::Init()
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->rootNode_ =
         FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, ROOT_NODE_ID, Referenced::MakeRefPtr<RootPattern>());
-
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     pattern->clipboard_ = clipboard;
     return { frameNode, pattern };

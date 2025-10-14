@@ -349,8 +349,8 @@ ArkUINativeModuleValue SliderBridge::SetBlockColor(ArkUIRuntimeCallInfo* runtime
                 .unit = static_cast<int8_t>(gradient.GetColors()[i].GetDimension().Unit()) });
         }
 
-        gradientObj.color = &(*colorValues.begin());
-        gradientObj.offset = &(*offsetValues.begin());
+        gradientObj.color = colorValues.data();
+        gradientObj.offset = offsetValues.data();
         GetArkUINodeModifiers()->getSliderModifier()->setLinearBlockColor(nativeNode, &gradientObj, colorLength);
     } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         auto colorRawPtr = AceType::RawPtr(colorResObj);

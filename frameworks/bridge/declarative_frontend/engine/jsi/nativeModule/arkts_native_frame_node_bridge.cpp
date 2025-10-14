@@ -44,6 +44,7 @@ namespace {
 
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
+constexpr int32_t INDEX_OF_MEASURE_FROM_VIEWPORT = 5;
 constexpr int32_t INDEX_OF_INTERVAL = 4;
 constexpr int32_t INDEX_OF_OPTION_OF_VISIBLE = 3;
 constexpr int DEFAULT_EXPECTED_UPDATE_INTERVAL = 1000;
@@ -2085,8 +2086,13 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnVisibleAreaApproximateChange(ArkUIR
     if (intervalMs < 0) {
         intervalMs = DEFAULT_EXPECTED_UPDATE_INTERVAL;
     }
+    Local<JSValueRef> measureFromViewportArg = runtimeCallInfo->GetCallArgRef(INDEX_OF_MEASURE_FROM_VIEWPORT);
+    bool measureFromViewport = false;
+    if (measureFromViewportArg->IsBoolean()) {
+        measureFromViewport = measureFromViewportArg->ToBoolean(vm)->Value();
+    }
     NG::ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(
-        frameNode, std::move(onVisibleAreaApproximateChange), ratioVec, intervalMs);
+        frameNode, std::move(onVisibleAreaApproximateChange), ratioVec, intervalMs, measureFromViewport);
     return panda::JSValueRef::Undefined(vm);
 }
 

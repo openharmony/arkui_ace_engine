@@ -130,6 +130,8 @@ void OnNativeEmbedVisibilityChange(const CallbackHelper<OnNativeEmbedVisibilityC
     int32_t instanceId, const BaseEventInfo* info);
 void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_Void>& arkCallback,
     int32_t instanceId, const BaseEventInfo* info);
+void OnNativeEmbedMouseInfo(const CallbackHelper<MouseInfoCallback>& arkCallback,
+    int32_t instanceId, const BaseEventInfo* info);
 bool OnOverrideUrlLoading(const CallbackHelper<OnOverrideUrlLoadingCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnRenderProcessNotResponding(const CallbackHelper<OnRenderProcessNotRespondingCallback>& arkCallback,
@@ -142,7 +144,8 @@ WebKeyboardOption OnWebKeyboard(const CallbackHelper<WebKeyboardCallback>& arkCa
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnAdsBlocked(const CallbackHelper<OnAdsBlockedCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-
+void OnActivateContent(const CallbackHelper<VoidCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
 

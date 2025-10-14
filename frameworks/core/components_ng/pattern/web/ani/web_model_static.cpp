@@ -345,12 +345,24 @@ void WebModelStatic::JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems
     (void)scriptItems;
 }
 
-void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode, bool supportDefaultIntrinsicSize)
+void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode,
+                                           bool supportDefaultIntrinsicSize,
+                                           bool supportCssDisplayChange)
 {
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateIntrinsicSizeEnabled(supportDefaultIntrinsicSize);
+    webPatternStatic->UpdateCssDisplayChangeEnabled(supportCssDisplayChange);
+}
+
+void WebModelStatic::SetBypassVsyncCondition(FrameNode *frameNode,
+                                             const std::optional<WebBypassVsyncCondition>& condition)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateBypassVsyncCondition(condition.value_or(WebBypassVsyncCondition::NONE));
 }
 
 void WebModelStatic::SetMixedMode(FrameNode* frameNode, const std::optional<MixedModeContent>& mixedContentMode)
@@ -1207,6 +1219,16 @@ void WebModelStatic::SetNativeEmbedGestureEventId(
     webEventHub->SetOnNativeEmbedGestureEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetNativeEmbedMouseEventId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnNativeEmbedMouseEvent(std::move(uiCallback));
+}
+
 void WebModelStatic::SetOnOverrideUrlLoading(
     FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback)
 {
@@ -1329,5 +1351,15 @@ void WebModelStatic::SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllow
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
+}
+
+void WebModelStatic::SetActivateContentEventId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnActivateContentEvent(std::move(uiCallback));
 }
 } // namespace OHOS::Ace::NG

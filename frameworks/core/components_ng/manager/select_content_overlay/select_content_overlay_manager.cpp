@@ -474,7 +474,11 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
             ConvertRectRelativeToParent(selectArea);
             menuPattern->UpdateSelectArea(selectArea);
         }
-        if ((dirty & DIRTY_ALL_MENU_ITEM) == DIRTY_ALL_MENU_ITEM) {
+        if ((dirty & DIRTY_SELECT_AI_DETECT) == DIRTY_SELECT_AI_DETECT) {
+            SelectMenuInfo menuInfo;
+            selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, dirty);
+            menuPattern->UpdateSelectMenuInfo(menuInfo);
+        } else if ((dirty & DIRTY_ALL_MENU_ITEM) == DIRTY_ALL_MENU_ITEM) {
             SelectMenuInfo menuInfo;
             selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
             TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update all menu item: %{public}s - %{public}s",
@@ -609,8 +613,8 @@ void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
         info.secondHandle.paintRect.ToString().c_str(), info.secondHandle.isShow);
     shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(info);
     auto menuNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_, SelectOverlayMode::MENU_ONLY);
-    menuNode_ = menuNode;
     auto handleNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_, SelectOverlayMode::HANDLE_ONLY);
+    menuNode_ = menuNode;
     handleNode_ = handleNode;
     auto taskExecutor = Container::CurrentTaskExecutorSafely();
     CHECK_NULL_VOID(taskExecutor);

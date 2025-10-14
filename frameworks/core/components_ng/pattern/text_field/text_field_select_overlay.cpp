@@ -138,6 +138,26 @@ void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, Tou
     SetLastSourceType(sourceType);
 }
 
+void TextFieldSelectOverlay::IsAIMenuOptionChanged(SelectMenuInfo& menuInfo)
+{
+    auto textFieldPattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto oldIsShowAIMenuOption = textFieldPattern->IsShowAIMenuOption();
+    TextDataDetectType oldAiMenuOptionType = TextDataDetectType::INVALID;
+    if (textFieldPattern->IsShowAIMenuOption() && !textFieldPattern->GetAIItemOption().empty()) {
+        oldAiMenuOptionType = textFieldPattern->GetAIItemOption().begin()->second.type;
+    }
+    textFieldPattern->UpdateAIMenuOptions();
+    menuInfo.isShowAIMenuOptionChanged = oldIsShowAIMenuOption != textFieldPattern->IsShowAIMenuOption();
+    if (textFieldPattern->IsShowAIMenuOption()) {
+        auto firstSpanItem = textFieldPattern->GetAIItemOption().begin()->second;
+        menuInfo.aiMenuOptionType = firstSpanItem.type;
+    } else {
+        menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
+    }
+    menuInfo.isShowAIMenuOptionChanged |= oldAiMenuOptionType != menuInfo.aiMenuOptionType;
+}
+
 void TextFieldSelectOverlay::HandleOnShowMenu()
 {
     auto selectArea = GetSelectArea();
@@ -281,9 +301,9 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     auto isSupportCameraInput = false;
 #endif
     menuInfo.showCameraInput = !pattern->IsSelected() && isSupportCameraInput && !pattern->HasCustomKeyboard();
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    CHECK_NULL_VOID(manager);
     if (IsUsingMouse()) {
-        auto manager = SelectContentOverlayManager::GetOverlayManager();
-        CHECK_NULL_VOID(manager);
         menuInfo.menuIsShow = !isHideSelectionMenu || manager->IsOpen();
     } else {
         menuInfo.menuIsShow = (hasText || IsShowPaste() || menuInfo.showCameraInput) &&
@@ -300,10 +320,12 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && pattern->IsSelected();
     if (pattern->IsShowAIMenuOption() && !pattern->GetAIItemOption().empty()) {
-        auto firstSpanItem = pattern->GetAIItemOption().begin()->second;
-        menuInfo.aiMenuOptionType = firstSpanItem.type;
+        menuInfo.aiMenuOptionType = pattern->GetAIItemOption().begin()->second.type;
     } else {
         menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
+    }
+    if ((dirtyFlag & DIRTY_SELECT_AI_DETECT) == DIRTY_SELECT_AI_DETECT) {
+        menuInfo.menuIsShow = manager->IsMenuShow();
     }
 }
 
@@ -816,6 +838,6 @@ void TextFieldSelectOverlay::UpdateAISelectMenu()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM);
+    manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AI_DETECT);
 }
 } // namespace OHOS::Ace::NG

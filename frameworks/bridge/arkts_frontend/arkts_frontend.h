@@ -76,21 +76,7 @@ public:
     {
         mediaQueryCallbacks_ = mediaQueryCallback;
     }
-    bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override
-    {
-        taskExecutor_ = taskExecutor;
-
-        auto mediaQueryCallback = [weakEngine = AceType::WeakClaim(this)](
-                                         const std::string& callbackId, const std::string& args) {
-            auto arktsFrontend = weakEngine.Upgrade();
-            if (!arktsFrontend) {
-                return;
-            }
-            arktsFrontend->CallbackMediaQuery(callbackId, args);
-        };
-        SetMediaQueryCallback(std::move(mediaQueryCallback));
-        return true;
-    }
+    bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
 
     void Destroy() override;
 
@@ -115,14 +101,32 @@ public:
 
     void* PushExtender(const std::string& url, const std::string& params, bool recoverable,
         std::function<void()>&& finishCallback, void* jsNode) override;
+    void PushNamedRouteExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
     void* ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
         std::function<void()>&& enterFinishCallback, void* jsNode) override;
+    void ReplaceNamedRouteExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
     void* RunPageExtender(const std::string& url, const std::string& params, bool recoverable,
         std::function<void()>&& finishCallback, void* jsNode) override;
     void BackExtender(const std::string& url, const std::string& params) override;
     void ClearExtender() override;
     void ShowAlertBeforeBackPageExtender(const std::string& url) override;
     void HideAlertBeforeBackPageExtender() override;
+
+    void* CreateDynamicExtender(const std::string& url, bool recoverable) override;
+    void* PushDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback, void* pageNode) override;
+    void* ReplaceDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback, void* pageNode) override;
+
+    void PushFromDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
+        const std::function<void(const std::string&, int32_t)>& callback, uint32_t routerMode) override;
+    void ReplaceFromDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
+        const std::function<void(const std::string&, int32_t)>& callback, uint32_t routerMode) override;
+    void BackFromDynamicExtender(const std::string& url, const std::string& params) override;
+    void ClearFromDynamicExtender() override;
+    int32_t GetLengthFromDynamicExtender() override;
 
     RefPtr<AcePage> GetPage(int32_t /*pageId*/) const override
     {
@@ -396,7 +400,14 @@ public:
     static void* preloadArkTSRuntime;
     void OpenStateMgmtInterop() override;
     void NotifyArkoalaConfigurationChange(bool isNeedUpdate) override;
+    void InitXBarProxy() override;
 protected:
+    bool LoadNavDestinationPage(const std::string bundleName, const std::string& moduleName,
+        const std::string& pageSourceFile, bool isSingleton);
+    bool GetNavigationRegisterClassName(const std::string& pageSourceFile, std::string& className);
+    bool GetNearestNonBootRuntimeLinker();
+
+    ani_ref linkerRef_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;
     ani_vm* vm_ = nullptr;

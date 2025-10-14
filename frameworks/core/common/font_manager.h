@@ -189,7 +189,7 @@ private:
     std::set<WeakPtr<RenderNode>> variationNodes_;
     std::set<WeakPtr<NG::UINode>> variationNodesNG_;
     std::set<WeakPtr<FontChangeObserver>> observers_;
-    std::map<WeakPtr<NG::UINode>, ExternalLoadFontPair> externalLoadCallbacks_;
+    std::map<WeakPtr<NG::UINode>, std::map<std::string, std::function<void()>>> externalLoadCallbacks_;
     std::map<WeakPtr<NG::UINode>, FormLoadFontCallbackInfo> formLoadCallbacks_;
     bool hasRegisterLoadFontCallback_ = false;
 

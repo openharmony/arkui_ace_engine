@@ -15,6 +15,9 @@
 
 import { __context, StateManager } from '@koalaui/runtime';
 import { int32 } from '@koalaui/common';
+import { WrappedBuilder } from "./builder"
+import { NavigationRouterMap, NavDestinationBuilder } from "#handwritten"
+import { InteropNativeModule } from '@koalaui/interop'
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { ArkStructBase } from '../ArkStructBase';
 import { ArkUIAniModule } from 'arkui.ani';
@@ -28,6 +31,9 @@ import { PeerNode } from '../PeerNode';
 import { UIContext } from '@ohos/arkui/UIContext';
 import promptAction from '@ohos/promptAction';
 import { RecordData } from "@ohos.base"
+import { UIContextImpl } from "arkui/base/UIContextImpl"
+import { UIContextUtil } from "arkui/base/UIContextUtil"
+import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 
 export class ReuseObject {
     readonly _raw: RecordData;
@@ -205,6 +211,8 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.setActiveCount(active);
         if (this.isViewActive()) {
             StateUpdateLoop.consumeFreezeTasks(this.getUniqueId());
+            ObserveSingleton.instance.unFreezeDelayedComputedProps();
+            ObserveSingleton.instance.unFreezeDelayedMonitorPaths();
         }
         const peer = this.getPeerNode() as PeerNode | undefined;
         if (peer) {
@@ -441,13 +449,20 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
 }
 
 export class EntryPoint {
+    public static NavigationBuilderRegister(name: string, builder: WrappedBuilder<NavDestinationBuilder>) {
+        InteropNativeModule._NativeLog(`AceNavigation: NavigationBuilderRegister for name: ${name}`)
+        NavigationRouterMap.RegisterNavDestinationBuilder(name, builder)
+    }
+
     constructor() {}
     /** @memo */
     entry(): void {
     }
 
     public static RegisterNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface) {
-        
+        let uiContext : UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImpl = uiContext.getRouter().getRouter();
+        globalRouterImpl.registerNamedRouter(routerName, instance, param);
     }
 }
 

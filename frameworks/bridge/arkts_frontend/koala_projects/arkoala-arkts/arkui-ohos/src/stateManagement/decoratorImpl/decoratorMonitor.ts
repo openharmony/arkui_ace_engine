@@ -37,6 +37,10 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         this.readInitialMonitorValues();
     }
 
+    public isFreeze(): boolean {
+        return !!(this.owningComponent_ && !this.owningComponent_!.isViewActive());
+    }
+
     public value<T>(path?: string): IMonitorValue<T> | undefined {
         if (path) {
             for (let monitorValue of this.values_) {

@@ -297,40 +297,28 @@ export class ArkColorsImpl implements Colors {
 
     static convertColorEnumToValue(color: Color): string {
         switch (color) {
-            case Color.WHITE:
             case Color.White:
                 return '#ffffffff';
-            case Color.BLACK:
             case Color.Black:
                 return '#ff000000';
-            case Color.BLUE:
             case Color.Blue:
                 return '#ff0000ff';
-            case Color.BROWN:
             case Color.Brown:
                 return '#ffa52a2a';
-            case Color.GRAY:
             case Color.Gray:
                 return '#ff808080';
-            case Color.GREEN:
             case Color.Green:
                 return '#ff008000';
-            case Color.GREY:
             case Color.Grey:
                 return '#ff808080';
-            case Color.ORANGE:
             case Color.Orange:
                 return '#ffffa500';
-            case Color.PINK:
             case Color.Pink:
                 return '#ffffc0cb';
-            case Color.RED:
             case Color.Red:
                 return '#ffff0000';
-            case Color.YELLOW:
             case Color.Yellow:
                 return '#ffffff00';
-            case Color.TRANSPARENT:
             case Color.Transparent:
                 return '#00000000';
         }

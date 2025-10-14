@@ -74,6 +74,8 @@ public:
     static ArkUINativeModuleValue ResetSelectDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetAvoidance(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetAvoidance(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetMenuOutline(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetMenuOutline(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnSelect(ArkUIRuntimeCallInfo* runtimeCallInfo);

@@ -20,6 +20,7 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/utils/multi_thread.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/frame_node.h"
@@ -114,11 +115,16 @@ public:
     {
         if (!makeFunc) {
             makeFunc_ = std::nullopt;
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            FREE_NODE_CHECK(host, SetBuilderFunc);
             OnModifyDone();
             return;
         }
         makeFunc_ = std::move(makeFunc);
     }
+
+    void SetBuilderFuncMultiThread();
 
     bool UseContentModifier() const
     {

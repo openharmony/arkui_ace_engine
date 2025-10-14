@@ -34,6 +34,8 @@
 
 namespace OHOS::Ace::NG {
 
+using LoadDynamicPageCallback = std::function<bool(const std::string& ohmUrl,
+    const std::function<void(const std::string&, int32_t)>&)>;
 using LoadPageCallback = std::function<bool(const std::string&,
     const std::function<void(const std::string&, int32_t)>&)>;
 using LoadPageByBufferCallback = std::function<bool(const std::shared_ptr<std::vector<uint8_t>>& content,
@@ -104,6 +106,11 @@ public:
     void SetManifestParser(const RefPtr<Framework::ManifestParser>& manifestParser)
     {
         manifestParser_ = manifestParser;
+    }
+
+    void SetLoadDynamicPageCallback(LoadDynamicPageCallback&& callback)
+    {
+        loadDynamicPage_ = std::move(callback);
     }
 
     void SetLoadJsCallback(LoadPageCallback&& callback)
@@ -181,10 +188,19 @@ public:
 
     // For ArkTS1.2
     RefPtr<FrameNode> PushExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
+    void PushNamedRouteExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
     RefPtr<FrameNode> ReplaceExtender(
+        const RouterPageInfo& target, std::function<void()>&& enterFinishCallback, void* jsNode);
+    void ReplaceNamedRouteExtender(
         const RouterPageInfo& target, std::function<void()>&& enterFinishCallback, void* jsNode);
     RefPtr<FrameNode> RunPageExtender(
         const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
+
+    // ArkTS1.2 push ArkTS1.1
+    RefPtr<FrameNode> PushDynamicExtender(
+        const RouterPageInfo& target, std::function<void()>&& finishCallback, const RefPtr<FrameNode>& pageNode);
+    RefPtr<FrameNode> ReplaceDynamicExtender(
+        const RouterPageInfo& target, std::function<void()>&& finishCallback, const RefPtr<FrameNode>& pageNode);
 
     void PushNamedRoute(const RouterPageInfo& target);
     bool Pop();
@@ -247,6 +263,11 @@ public:
         const std::function<void()>&& loadPageCallback);
     std::string GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam);
 
+    // page id manage
+    int32_t GenerateNextPageId();
+    RefPtr<FrameNode> CreatePage(int32_t pageId, const RouterPageInfo& target);
+    RefPtr<FrameNode> CreateDynamicPage(int32_t pageId, const RouterPageInfo& target);
+
 protected:
     class RouterOptScope {
     public:
@@ -262,9 +283,6 @@ protected:
     private:
         PageRouterManager* manager_ = nullptr;
     };
-
-    // page id manage
-    int32_t GenerateNextPageId();
 
     virtual int32_t GetLastPageIndex()
     {
@@ -333,6 +351,10 @@ protected:
     virtual bool LoadPageExtender(int32_t pageId, const RouterPageInfo& target, void* jsNode,
         bool needHideLast = true, bool needTransition = true);
     RefPtr<FrameNode> CreatePageExtender(int32_t pageId, const RouterPageInfo& target);
+    // ArkTS1.2 push ArkTS1.1
+    bool LoadDynamicPageExtender(
+        const RefPtr<FrameNode>& pageNode, bool needHideLast = true, bool needTransition = true);
+    bool CreateDynamicPagePath(const std::string& url, std::string& path);
 
     UIContentErrorCode LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, int64_t cardId,
         bool isRestore = false, bool needHideLast = true, const std::string& entryPoint = "");
@@ -346,7 +368,6 @@ protected:
     void ReplaceNamedRouteInner(const RouterPageInfo& target);
     void RunPageByNamedRouterInner(const std::string& name, const std::string& params);
 
-    RefPtr<FrameNode> CreatePage(int32_t pageId, const RouterPageInfo& target);
     void RestoreOhmUrl(const RouterPageInfo& target, std::function<void()>&& finishCallback,
         RestorePageDestination dest, bool needTransition);
     void PushPageToTop(RefPtr<FrameNode>& pageNode, std::function<void()>&& finishCallback, bool needTransition);
@@ -370,6 +391,7 @@ protected:
     };
     InsertPageProcessingType insertPageProcessingType_ = InsertPageProcessingType::NONE;
     bool inRouterOpt_ = false;
+    LoadDynamicPageCallback loadDynamicPage_;
     LoadPageCallback loadJs_;
     LoadPageByBufferCallback loadJsByBuffer_;
     LoadCardCallback loadCard_;

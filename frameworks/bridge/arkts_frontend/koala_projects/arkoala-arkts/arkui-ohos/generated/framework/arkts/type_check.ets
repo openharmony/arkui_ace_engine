@@ -24,12 +24,12 @@ import { AnimationMode, BarMode, BarPosition, LayoutStyle, TabContentTransitionP
 import { ArrowPosition, AvoidanceMode, MenuAlignType, MenuItemConfiguration, SelectOption, MenuOutlineOptions } from "./../../component/select"
 import { AttributeModifier, extractors, GestureModifier, WrappedBuilder, ContentModifier, UIGestureEvent, LocalStorage, AttributeUpdater, CustomStyles } from "#handwritten"
 import { AttributeUpdaterFlag } from "./../../AttributeUpdaterFlag"
-import { AudioSessionType, BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ConsoleMessage, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, DataResubmissionHandler, EventResult, FileSelectorMode, FileSelectorParam, FileSelectorResult, FullScreenExitHandler, HitTestType, HttpAuthHandler, JsGeolocation, JsResult, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureConfig, SslError, SslErrorHandler, ThreatType, ViewportFit, WebCaptureMode, WebContextMenuParam, WebContextMenuResult, WebDarkMode, WebElementType, WebKeyboardAvoidMode, WebKeyboardController, WebLayoutMode, WebNavigationType, WebResourceError, Header, WebResourceRequest, WebResourceResponse, WebResponseType, AdsBlockedDetails, EmbedOptions, FirstMeaningfulPaint, FullScreenEnterEvent, IntelligentTrackingPreventionDetails, JavaScriptProxy, LargestContentfulPaint, LoadCommittedDetails, NativeEmbedVisibilityInfo, NestedScrollOptionsExt, OnAlertEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnContextMenuShowEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, OnLoadFinishedEvent, OnLoadInterceptEvent, OnLoadStartedEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPermissionRequestEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScreenCaptureRequestEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, RenderProcessNotRespondingData, ScriptItem, SslErrorEvent, WebKeyboardCallbackInfo, WebKeyboardOptions, WebMediaOptions, WebOptions, SelectionMenuOptionsExt, NativeEmbedInfo, NativeEmbedDataInfo, NativeEmbedTouchInfo } from "./../../component/web"
+import { AudioSessionType, BlankScreenDetectionMethod, BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ConsoleMessage, MessageLevel, ContextMenuDataMediaType, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, DataResubmissionHandler, DetectedBlankScreenReason, EventResult, FileSelectorMode, FileSelectorParam, FileSelectorResult, FullScreenExitHandler, GestureFocusMode, HttpAuthHandler, JsGeolocation, JsResult, MixedMode, NativeEmbedParamStatus, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PdfLoadResult, PermissionRequest, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureConfig, SslError, SslErrorHandler, ThreatType, ViewportFit, WebBypassVsyncCondition, WebCaptureMode, WebContextMenuParam, WebContextMenuResult, WebDarkMode, WebElementType, WebKeyboardAvoidMode, WebKeyboardController, WebLayoutMode, WebNavigationType, WebResourceError, Header, WebResourceRequest, WebResourceResponse, WebResponseType, WebRotateEffect, AdsBlockedDetails, BlankScreenDetails, BlankScreenDetectionConfig, EmbedOptions, FirstMeaningfulPaint, FullScreenEnterEvent, IntelligentTrackingPreventionDetails, JavaScriptProxy, LargestContentfulPaint, LoadCommittedDetails, NativeEmbedParamItem, NativeEmbedParamDataInfo, NativeEmbedVisibilityInfo, NestedScrollOptionsExt, OnAlertEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnContextMenuShowEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, OnLoadFinishedEvent, OnLoadInterceptEvent, OnLoadStartedEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPdfLoadEvent, OnPdfScrollEvent, OnPermissionRequestEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScreenCaptureRequestEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, RenderProcessNotRespondingData, ScriptItem, SslErrorEvent, WebKeyboardCallbackInfo, WebKeyboardOptions, WebMediaOptions, WebOptions, BlankScreenDetectionEventInfo, SelectionMenuOptionsExt, NativeEmbedInfo, NativeEmbedDataInfo, NativeEmbedMouseInfo, NativeEmbedTouchInfo } from "./../../component/web"
 import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWithAffinity, MenuType, TextEditControllerEx, PreviewText, StyledStringController, StyledStringChangedListener, TextBaseController, TextRange, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuShowMode, TextMenuItem, DeleteValue, EditMenuOptions, OnCreateMenuCallback, OnMenuItemClickCallback, FontSettingOptions, InsertValue, StyledStringChangeValue, OnDidChangeCallback, DecorationStyleResult, TextChangeOptions, CaretStyle, EditableTextChangeValue, TextDataDetectorConfig } from "./../../component/textCommon"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../../component/badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle } from "./../../component/relativeContainer"
-import { BarStyle, LaunchMode, NavBarPosition, NavigationMode, NavigationOperation, NavigationTitleMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo, NavigationInterception, ToolbarItemStatus, NavContentInfo, NavigationAnimatedTransition, NavigationTransitionProxy, InterceptionShowCallback, NavBar, InterceptionModeCallback, NavigationCommonTitle, NavigationMenuItem, UpdateTransitionCallback, ToolbarItem, MoreButtonOptions, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, NavigationToolbarOptions } from "./../../component/navigation"
-import { BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, CustomDialogControllerExtender, CustomDialogControllerOptionsExtender, CustomDialogControllerExternalOptionsExtender, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, RotateResult, ScaleResult, TranslateResult, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, ErrorEvent, Event, LengthMetricsCustom, MessageEvents, PostMessageOptions, SnapshotOptions, WorkerOptions, ComponentInfo, Matrix4Result, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, WorkerEventListener } from "./../../component/idlize"
+import { BarStyle, LaunchMode, NavBarPosition, NavigationMode, NavigationOperation, NavigationTitleMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo, NavigationInterception, ToolbarItemStatus, NavContentInfo, NavigationAnimatedTransition, NavigationTransitionProxy, InterceptionShowCallback, NavBar, InterceptionModeCallback, NavigationModuleInfo, NavigationCommonTitle, NavigationMenuItem, UpdateTransitionCallback, ToolbarItem, MoreButtonOptions, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, NavigationToolbarOptions } from "./../../component/navigation"
+import { BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, CustomDialogControllerExtender, CustomDialogControllerOptionsExtender, CustomDialogControllerExternalOptionsExtender, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, RotateResult, ScaleResult, TranslateResult, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, ErrorEvent, Event, LengthMetricsCustom, MessageEvents, PostMessageOptions, SnapshotOptions, WorkerOptions, ComponentInfo, Matrix4Result, PageRouterOptions, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, WorkerEventListener } from "./../../component/idlize"
 import { Length, SizeOptions, ColorFilter, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, DirectionalEdgesT, VP, DividerStyleOptions, LengthConstrain, Offset, PX, LPX, MarkStyle } from "./../../component/units"
 import { Resource } from "global.resource"
 import { BreakpointsReference, GridRowDirection, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../../component/gridRow"
@@ -97,7 +97,7 @@ import { LoadingProgressConfiguration, LoadingProgressStyle } from "./../../comp
 import { MarqueeStartPolicy, MarqueeState, TextController, TextAttribute, TextOptions, TextOverflowOptions, TextResponseType, TextSpanType, TextMarqueeOptions } from "./../../component/text"
 import { ModelType, SceneOptions } from "./../../component/component3d"
 import { MultiAppMode, ModuleMetadata, ApplicationInfo } from "bundleManager.ApplicationInfo"
-import { NavDestinationActiveReason, NavDestinationMode, NavigationSystemTransitionType, NavDestinationTransition, NavDestinationContext, NestedScrollInfo, RouteMapConfig, NavDestinationCommonTitle, NavDestinationCustomTitle } from "./../../component/navDestination"
+import { NavDestinationActiveReason, NavDestinationMode, NavigationSystemTransitionType, NavDestinationTransition, NavDestinationModuleInfo, NavDestinationContext, NestedScrollInfo, RouteMapConfig, NavDestinationCommonTitle, NavDestinationCustomTitle } from "./../../component/navDestination"
 import { NodeController } from "arkui.NodeController"
 import { FrameNode, ExpandMode, LayoutConstraint, CrossLanguageOptions } from "arkui.FrameNode"
 import { OnFoldStatusChangeInfo, FolderStackOptions, HoverEventParam } from "./../../component/folderStack"
@@ -400,6 +400,18 @@ export class TypeChecker {
     static isBindable(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof Bindable
     }
+    static isBlankScreenDetails(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof BlankScreenDetails
+    }
+    static isBlankScreenDetectionConfig(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof BlankScreenDetectionConfig
+    }
+    static isBlankScreenDetectionEventInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof BlankScreenDetectionEventInfo
+    }
+    static isBlankScreenDetectionMethod(value: Object | string | number | undefined): boolean {
+        return value instanceof BlankScreenDetectionMethod
+    }
     static isBlendApplyType(value: Object | string | number | undefined): boolean {
         return value instanceof BlendApplyType
     }
@@ -679,6 +691,9 @@ export class TypeChecker {
     static isContextMenuAnimationOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof ContextMenuAnimationOptions
     }
+    static isContextMenuDataMediaType(value: Object | string | number | undefined): boolean {
+        return value instanceof ContextMenuDataMediaType
+    }
     static isContextMenuEditStateFlags(value: Object | string | number | undefined): boolean {
         return value instanceof ContextMenuEditStateFlags
     }
@@ -804,6 +819,9 @@ export class TypeChecker {
     }
     static isDependency(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof Dependency
+    }
+    static isDetectedBlankScreenReason(value: Object | string | number | undefined): boolean {
+        return value instanceof DetectedBlankScreenReason
     }
     static isDialogAlignment(value: Object | string | number | undefined): boolean {
         return value instanceof DialogAlignment
@@ -979,7 +997,7 @@ export class TypeChecker {
     static isEmbeddedType(value: Object | string | number | undefined): boolean {
         return value instanceof EmbeddedType
     }
-    static isEmbedOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isEmbedOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof EmbedOptions
     }
     static isEnterKeyType(value: Object | string | number | undefined): boolean {
@@ -1168,6 +1186,9 @@ export class TypeChecker {
     static isGestureGroup(value: Object | string | number | undefined): boolean {
         return value instanceof GestureGroup
     }
+    static isGestureFocusMode(value: Object | string | number | undefined): boolean {
+        return value instanceof GestureFocusMode
+    }
     static isGestureInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof GestureInfo
     }
@@ -1263,9 +1284,6 @@ export class TypeChecker {
     }
     static isHitTestMode(value: Object | string | number | undefined): boolean {
         return value instanceof HitTestMode
-    }
-    static isHitTestType(value: Object | string | number | undefined): boolean {
-        return value instanceof HitTestType
     }
     static isHorizontalAlign(value: Object | string | number | undefined): boolean {
         return value instanceof HorizontalAlign
@@ -1735,6 +1753,18 @@ export class TypeChecker {
     static isNativeEmbedInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean): boolean {
         return value instanceof NativeEmbedInfo
     }
+    static isNativeEmbedMouseInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof NativeEmbedMouseInfo
+    }
+    static isNativeEmbedParamDataInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof NativeEmbedParamDataInfo
+    }
+    static isNativeEmbedParamItem(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof NativeEmbedParamItem
+    }
+    static isNativeEmbedParamStatus(value: Object | string | number | undefined): boolean {
+        return value instanceof NativeEmbedParamStatus
+    }
     static isNativeEmbedStatus(value: Object | string | number | undefined): boolean {
         return value instanceof NativeEmbedStatus
     }
@@ -1771,6 +1801,9 @@ export class TypeChecker {
     static isNavDestinationMode(value: Object | string | number | undefined): boolean {
         return value instanceof NavDestinationMode
     }
+    static isNavDestinationModuleInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof NavDestinationModuleInfo
+    }
     static isNavDestinationTransition(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
         return value instanceof NavDestinationTransition
     }
@@ -1794,6 +1827,9 @@ export class TypeChecker {
     }
     static isNavigationMode(value: Object | string | number | undefined): boolean {
         return value instanceof NavigationMode
+    }
+    static isNavigationModuleInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof NavigationModuleInfo
     }
     static isNavigationOperation(value: Object | string | number | undefined): boolean {
         return value instanceof NavigationOperation
@@ -1930,6 +1966,12 @@ export class TypeChecker {
     static isOnPageVisibleEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof OnPageVisibleEvent
     }
+    static isOnPdfLoadEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof OnPdfLoadEvent
+    }
+    static isOnPdfScrollEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnPdfScrollEvent
+    }
     static isOnPermissionRequestEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof OnPermissionRequestEvent
     }
@@ -1939,7 +1981,7 @@ export class TypeChecker {
     static isOnPromptEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof OnPromptEvent
     }
-    static isOnRefreshAccessedHistoryEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+    static isOnRefreshAccessedHistoryEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof OnRefreshAccessedHistoryEvent
     }
     static isOnRenderExitedEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
@@ -2005,6 +2047,9 @@ export class TypeChecker {
     static isPageFlipMode(value: Object | string | number | undefined): boolean {
         return value instanceof PageFlipMode
     }
+    static isPageRouterOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof PageRouterOptions
+    }
     static isPanDirection(value: Object | string | number | undefined): boolean {
         return value instanceof PanDirection
     }
@@ -2064,6 +2109,9 @@ export class TypeChecker {
     }
     static isPatternLockController(value: Object | string | number | undefined): boolean {
         return value instanceof PatternLockController
+    }
+    static isPdfLoadResult(value: Object | string | number | undefined): boolean {
+        return value instanceof PdfLoadResult
     }
     static isPerfMonitorActionType(value: Object | string | number | undefined): boolean {
         return value instanceof PerfMonitorActionType
@@ -2572,7 +2620,7 @@ export class TypeChecker {
     static isSelectionMenuOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
         return value instanceof SelectionMenuOptions
     }
-    static isSelectionMenuOptionsExt(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+    static isSelectionMenuOptionsExt(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof SelectionMenuOptionsExt
     }
     static isSelectionOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
@@ -2695,7 +2743,7 @@ export class TypeChecker {
     static isSslError(value: Object | string | number | undefined): boolean {
         return value instanceof SslError
     }
-    static isSslErrorEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
+    static isSslErrorEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
         return value instanceof SslErrorEvent
     }
     static isSslErrorHandler(value: Object | string | number | undefined): boolean {
@@ -3205,6 +3253,9 @@ export class TypeChecker {
     static isWaterFlowSections(value: Object | string | number | undefined): boolean {
         return value instanceof WaterFlowSections
     }
+    static isWebBypassVsyncCondition(value: Object | string | number | undefined): boolean {
+        return value instanceof WebBypassVsyncCondition
+    }
     static isWebCaptureMode(value: Object | string | number | undefined): boolean {
         return value instanceof WebCaptureMode
     }
@@ -3255,6 +3306,9 @@ export class TypeChecker {
     }
     static isWebResponseType(value: Object | string | number | undefined): boolean {
         return value instanceof WebResponseType
+    }
+    static isWebRotateEffect(value: Object | string | number | undefined): boolean {
+        return value instanceof WebRotateEffect
     }
     static iswebview_WebviewController(value: Object | string | number | undefined): boolean {
         return value instanceof webview.WebviewController
@@ -3448,6 +3502,12 @@ export class TypeChecker {
     static BarStyle_FromNumeric(ordinal: int32): BarStyle {
         return BarStyle.fromValue(ordinal)
     }
+    static BlankScreenDetectionMethod_ToNumeric(value: BlankScreenDetectionMethod): int32 {
+        return value.valueOf()
+    }
+    static BlankScreenDetectionMethod_FromNumeric(ordinal: int32): BlankScreenDetectionMethod {
+        return BlankScreenDetectionMethod.fromValue(ordinal)
+    }
     static BlendApplyType_ToNumeric(value: BlendApplyType): int32 {
         return value.valueOf()
     }
@@ -3640,6 +3700,12 @@ export class TypeChecker {
     static contextConstant_AreaMode_FromNumeric(ordinal: int32): contextConstant.AreaMode {
         return contextConstant.AreaMode.fromValue(ordinal)
     }
+    static ContextMenuDataMediaType_ToNumeric(value: ContextMenuDataMediaType): int32 {
+        return value.valueOf()
+    }
+    static ContextMenuDataMediaType_FromNumeric(ordinal: int32): ContextMenuDataMediaType {
+        return ContextMenuDataMediaType.fromValue(ordinal)
+    }
     static ContextMenuEditStateFlags_ToNumeric(value: ContextMenuEditStateFlags): int32 {
         return value.valueOf()
     }
@@ -3705,6 +3771,12 @@ export class TypeChecker {
     }
     static DatePickerMode_FromNumeric(ordinal: int32): DatePickerMode {
         return DatePickerMode.fromValue(ordinal)
+    }
+    static DetectedBlankScreenReason_ToNumeric(value: DetectedBlankScreenReason): int32 {
+        return value.valueOf()
+    }
+    static DetectedBlankScreenReason_FromNumeric(ordinal: int32): DetectedBlankScreenReason {
+        return DetectedBlankScreenReason.fromValue(ordinal)
     }
     static DialogAlignment_ToNumeric(value: DialogAlignment): int32 {
         return value.valueOf()
@@ -3952,6 +4024,12 @@ export class TypeChecker {
     static GestureControl_GestureType_FromNumeric(ordinal: int32): GestureControl.GestureType {
         return GestureControl.GestureType.fromValue(ordinal)
     }
+    static GestureFocusMode_ToNumeric(value: GestureFocusMode): int32 {
+        return value.valueOf()
+    }
+    static GestureFocusMode_FromNumeric(ordinal: int32): GestureFocusMode {
+        return GestureFocusMode.fromValue(ordinal)
+    }
     static GestureJudgeResult_ToNumeric(value: GestureJudgeResult): int32 {
         return value.valueOf()
     }
@@ -4029,12 +4107,6 @@ export class TypeChecker {
     }
     static HitTestMode_FromNumeric(ordinal: int32): HitTestMode {
         return HitTestMode.fromValue(ordinal)
-    }
-    static HitTestType_ToNumeric(value: HitTestType): int32 {
-        return value.valueOf()
-    }
-    static HitTestType_FromNumeric(ordinal: int32): HitTestType {
-        return HitTestType.fromValue(ordinal)
     }
     static HorizontalAlign_ToNumeric(value: HorizontalAlign): int32 {
         return value.valueOf()
@@ -4378,6 +4450,12 @@ export class TypeChecker {
     static MouseButton_FromNumeric(ordinal: int32): MouseButton {
         return MouseButton.fromValue(ordinal)
     }
+    static NativeEmbedParamStatus_ToNumeric(value: NativeEmbedParamStatus): int32 {
+        return value.valueOf()
+    }
+    static NativeEmbedParamStatus_FromNumeric(ordinal: int32): NativeEmbedParamStatus {
+        return NativeEmbedParamStatus.fromValue(ordinal)
+    }
     static NativeEmbedStatus_ToNumeric(value: NativeEmbedStatus): int32 {
         return value.valueOf()
     }
@@ -4509,6 +4587,12 @@ export class TypeChecker {
     }
     static PatternLockChallengeResult_FromNumeric(ordinal: int32): PatternLockChallengeResult {
         return PatternLockChallengeResult.fromValue(ordinal)
+    }
+    static PdfLoadResult_ToNumeric(value: PdfLoadResult): int32 {
+        return value.valueOf()
+    }
+    static PdfLoadResult_FromNumeric(ordinal: int32): PdfLoadResult {
+        return PdfLoadResult.fromValue(ordinal)
     }
     static PerfMonitorActionType_ToNumeric(value: PerfMonitorActionType): int32 {
         return value.valueOf()
@@ -5146,6 +5230,12 @@ export class TypeChecker {
     static WaterFlowLayoutMode_FromNumeric(ordinal: int32): WaterFlowLayoutMode {
         return WaterFlowLayoutMode.fromValue(ordinal)
     }
+    static WebBypassVsyncCondition_ToNumeric(value: WebBypassVsyncCondition): int32 {
+        return value.valueOf()
+    }
+    static WebBypassVsyncCondition_FromNumeric(ordinal: int32): WebBypassVsyncCondition {
+        return WebBypassVsyncCondition.fromValue(ordinal)
+    }
     static WebCaptureMode_ToNumeric(value: WebCaptureMode): int32 {
         return value.valueOf()
     }
@@ -5187,6 +5277,12 @@ export class TypeChecker {
     }
     static WebResponseType_FromNumeric(ordinal: int32): WebResponseType {
         return WebResponseType.fromValue(ordinal)
+    }
+    static WebRotateEffect_ToNumeric(value: WebRotateEffect): int32 {
+        return value.valueOf()
+    }
+    static WebRotateEffect_FromNumeric(ordinal: int32): WebRotateEffect {
+        return WebRotateEffect.fromValue(ordinal)
     }
     static Week_ToNumeric(value: Week): int32 {
         return value.valueOf()
@@ -5359,6 +5455,9 @@ export class TypeChecker {
     static isArray_Object(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+    static isArray_BlankScreenDetectionMethod(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_AbilityInfo(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
@@ -5381,6 +5480,9 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_Tuple_ResourceColor_Number(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_NativeEmbedParamItem(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_Buffer(value: Object | string | number | undefined): boolean {

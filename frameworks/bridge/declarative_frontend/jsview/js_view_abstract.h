@@ -50,6 +50,7 @@ constexpr int32_t DEFAULT_TAP_COUNTS = 1;
 constexpr float DEFAULT_PROGRESS_TOTAL = 100.0f;
 
 enum class ResourceType : uint32_t {
+    UNKNOWN = 0,
     COLOR = 10001,
     FLOAT,
     STRING,
@@ -600,7 +601,6 @@ public:
     static void JsAccessibilitySelected(const JSCallbackInfo& info);
     static void JsAccessibilityChecked(const JSCallbackInfo& info);
     static void JsAccessibilityRole(const JSCallbackInfo& info);
-    static std::string GetRoleByType(AccessibilityRoleType roleType);
     static void JsOnAccessibilityFocus(const JSCallbackInfo& info);
     static void JsOnAccessibilityActionIntercept(const JSCallbackInfo& info);
     static void JsOnAccessibilityHoverTransparent(const JSCallbackInfo& info);

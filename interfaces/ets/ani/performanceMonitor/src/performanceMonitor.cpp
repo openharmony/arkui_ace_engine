@@ -30,7 +30,7 @@
 
 static void Begin([[maybe_unused]] ani_env *env, ani_string scene, ani_enum_item startInputType, ani_string note)
 {
-    ani_size  strSize;
+    ani_size strSize;
     env->String_GetUTF8Size(scene, &strSize);
     std::vector<char> buffer(strSize + 1);
     char* utf8Buffer = buffer.data();
@@ -39,14 +39,21 @@ static void Begin([[maybe_unused]] ani_env *env, ani_string scene, ani_enum_item
     utf8Buffer[bytes_written] = '\0';
     std::string sceneId = std::string(utf8Buffer);
 
-    ani_size  strSize2;
-    env->String_GetUTF8Size(note, &strSize2);
-    std::vector<char> buffer2(strSize2 + 1);
-    char* utf8Buffer2 = buffer2.data();
-    ani_size bytes_written2 = 0;
-    env->String_GetUTF8(note, utf8Buffer2, strSize2 + 1, &bytes_written2);
-    utf8Buffer2[bytes_written2] = '\0';
-    std::string noteStr = std::string(utf8Buffer2);
+    ani_boolean isUndefined;
+    if (ANI_OK != env->Reference_IsUndefined(note, &isUndefined)) {
+        return;
+    }
+    std::string noteStr = "undefined";
+    if (!isUndefined) {
+        ani_size strSize2;
+        env->String_GetUTF8Size(note, &strSize2);
+        std::vector<char> buffer2(strSize2 + 1);
+        char* utf8Buffer2 = buffer2.data();
+        ani_size bytes_written2 = 0;
+        env->String_GetUTF8(note, utf8Buffer2, strSize2 + 1, &bytes_written2);
+        utf8Buffer2[bytes_written2] = '\0';
+        noteStr = std::string(utf8Buffer2);
+    }
 
     ani_namespace ns;
     if (ANI_OK != env->FindNamespace("@ohos.arkui.performanceMonitor.performanceMonitor", &ns)) {

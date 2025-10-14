@@ -24,6 +24,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "frameworks/core/components/common/layout/constants.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,6 +84,7 @@ typedef struct webview_WebviewControllerPeer {
     std::function<void()> releaseRefFunc = nullptr;
     std::function<void(int32_t)> setWebIdFunc = nullptr;
     std::function<void(const std::string&)> setHapPathFunc = nullptr;
+    std::function<void(int32_t)> setWebDetachFunc = nullptr;
 } WebviewControllerPeer;
 
 typedef struct NodeAdapterInfo {
@@ -483,7 +485,8 @@ struct ArkUIAniCommonModifier {
     void (*setParallelScoped)(ani_boolean parallel);
     void (*setCustomPropertyCallBack)(
         ArkUINodeHandle node, std::function<void()>&& func,
-        std::function<std::string(const std::string&)>&& getFunc);
+        std::function<std::string(const std::string&)>&& getFunc,
+        std::function<std::string()>&& getAllCustomPropertiesFunc);
     std::optional<std::string> (*getCustomProperty)(ani_env* env, ArkUINodeHandle node, const std::string& key);
     void (*setOverlayComponent)(ani_long node, ani_long builderPtr, AniOverlayOptions options);
     ani_double (*vp2px)(ani_double value, ani_int instanceId);
@@ -546,6 +549,10 @@ struct ArkUIAniCustomNodeModifier {
     void (*queryRouterPageInfo)(ani_long node, ArkUIRouterPageInfo& info);
     bool (*queryNavDestinationInfo1)(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& info);
     bool (*queryRouterPageInfo1)(ArkUI_Int32 uniqueId, ArkUIRouterPageInfo& info);
+};
+struct ArkUIAniKeyboardAvoidModeModifier {
+    ArkUI_Int32 (*getKeyboardAvoidMode)();
+    void (*setKeyboardAvoidMode)(int32_t index);
 };
 struct ArkUIAniDrawModifier {
     void (*setDrawModifier)(ani_long ptr, uint32_t flag,
@@ -731,6 +738,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniDragModifier* (*getDragAniModifier) ();
     const ArkUIAniCommonModifier* (*getCommonAniModifier)();
     const ArkUIAniCustomNodeModifier* (*getCustomNodeAniModifier)();
+    const ArkUIAniKeyboardAvoidModeModifier* (*getKeyboardAvoidModeAniModifier)();
     const ArkUIAniLazyForEachNodeModifier* (*getLazyForEachNodeAniModifier)();
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();

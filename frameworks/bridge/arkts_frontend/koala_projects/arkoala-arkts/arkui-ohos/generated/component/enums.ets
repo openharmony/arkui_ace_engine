@@ -26,30 +26,18 @@ export enum CheckBoxShape {
     ROUNDED_SQUARE = 1
 }
 export enum Color {
-    WHITE = "'#FFFFFFFF'",
-    White = "'#FFFFFFFF'",
-    BLACK = "'#FF000000'",
-    Black = "'#FF000000'",
-    BLUE = "'#FF0000FF'",
-    Blue = "'#FF0000FF'",
-    BROWN = "'#FFA52A2A'",
-    Brown = "'#FFA52A2A'",
-    GRAY = "'#FF808080'",
-    Gray = "'#FF808080'",
-    GREEN = "'#FF008000'",
-    Green = "'#FF008000'",
-    GREY = "'#FF808080'",
-    Grey = "'#FF808080'",
-    ORANGE = "'#FFFFA500'",
-    Orange = "'#FFFFA500'",
-    PINK = "'#FFFFC0CB'",
-    Pink = "'#FFFFC0CB'",
-    RED = "'#FFFF0000'",
-    Red = "'#FFFF0000'",
-    YELLOW = "'#FFFFFF00'",
-    Yellow = "'#FFFFFF00'",
-    TRANSPARENT = "'#00000000'",
-    Transparent = "'#00000000'"
+    White = '#FFFFFFFF',
+    Black = '#FF000000',
+    Blue = '#FF0000FF',
+    Brown = '#FFA52A2A',
+    Gray = '#FF808080',
+    Green = '#FF008000',
+    Grey = '#FF808080',
+    Orange = '#FFFFA500',
+    Pink = '#FFFFC0CB',
+    Red = '#FFFF0000',
+    Yellow = '#FFFFFF00',
+    Transparent = '#00000000'
 }
 export enum ColoringStrategy {
     INVERT = "'invert'",

@@ -1,0 +1,113 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "adapter/ohos/osal/js_accessibility_manager.h"
+#include "frameworks/core/accessibility/utils/accessibility_property_utils.h"
+
+using namespace OHOS::Accessibility;
+using namespace OHOS::AccessibilityConfig;
+
+namespace OHOS::Ace::Framework {
+
+namespace {
+void UpdateCheckedSelectedElementInfo(const RefPtr<NG::AccessibilityProperty>& accessibilityProperty,
+    AccessibilityElementInfo& nodeInfo, bool isEnable)
+{
+    if (accessibilityProperty->HasUserCheckedType()) {
+        nodeInfo.SetChecked(accessibilityProperty->GetUserCheckedType());
+    } else {
+        nodeInfo.SetChecked(accessibilityProperty->IsChecked());
+    }
+    if (accessibilityProperty->HasUserSelected()) {
+        nodeInfo.SetSelected(accessibilityProperty->IsUserSelected());
+    } else {
+        nodeInfo.SetSelected(accessibilityProperty->IsSelected());
+    }
+
+    if (isEnable) {
+        if (accessibilityProperty->HasUserCheckable()) {
+            nodeInfo.SetCheckable(accessibilityProperty->IsUserCheckable());
+        } else {
+            nodeInfo.SetCheckable(accessibilityProperty->IsCheckable());
+        }
+    }
+}
+} // namespace
+
+void JsAccessibilityManager::CheckStateTakeOver(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
+{
+    CHECK_NULL_VOID(node);
+    RefPtr<NG::FrameNode> controllerNode;
+    auto controllerType = NG::AccessibilityPropertyUtils::CheckAndGetStateController(node, controllerNode);
+    CHECK_EQUAL_VOID(controllerType, NG::StateControllerType::CONTROLLER_NONE);
+    CHECK_NULL_VOID(controllerNode);
+    auto accessibilityProperty = controllerNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if ((controllerType == NG::StateControllerType::CONTROLLER_CHECK)
+        || (controllerType == NG::StateControllerType::CONTROLLER_CHECK_WITH_EXTRA)) {
+        UpdateCheckedSelectedElementInfo(accessibilityProperty, nodeInfo, nodeInfo.IsEnabled());
+        auto controllerNodeTag = controllerNode->GetTag();
+        if (accessibilityProperty->HasAccessibilityRole()) {
+            controllerNodeTag = accessibilityProperty->GetAccessibilityRole();
+        }
+        if (accessibilityProperty->HasAccessibilityCustomRole()) {
+            controllerNodeTag = accessibilityProperty->GetAccessibilityCustomRole();
+        }
+        nodeInfo.SetCustomComponentType(controllerNodeTag);
+        nodeInfo.SetDescriptionInfo(accessibilityProperty->GetAccessibilityDescription());
+    }
+    if (controllerType == NG::StateControllerType::CONTROLLER_CHECK_WITH_EXTRA) {
+        ExtraElementInfo extraElementInfo = nodeInfo.GetExtraElement();
+        accessibilityProperty->GetAllExtraElementInfo(extraElementInfo);
+        nodeInfo.SetExtraElement(extraElementInfo);
+    }
+}
+
+void JsAccessibilityManager::CheckActionTakeOver(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
+{
+    CHECK_NULL_VOID(node);
+    RefPtr<NG::FrameNode> controllerNode;
+    auto controllerType = NG::AccessibilityPropertyUtils::CheckAndGetActionController(node, controllerNode);
+    CHECK_NE_VOID(controllerType, NG::ActionControllerType::CONTROLLER_CLICK);
+    CHECK_NULL_VOID(controllerNode);
+    auto accessibilityProperty = controllerNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto eventHub = controllerNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    CHECK_NE_VOID(gestureEventHub->IsAccessibilityClickable(), true);
+    nodeInfo.SetClickable(gestureEventHub->IsAccessibilityClickable());
+
+    AccessibleAction action(ACCESSIBILITY_ACTION_CLICK, "ace");
+    auto actionlist = nodeInfo.GetActionList();
+    auto find = std::find_if(actionlist.begin(), actionlist.end(),
+        [](AccessibleAction& actionIt) { return actionIt.GetActionType() == ACCESSIBILITY_ACTION_CLICK; });
+    if (find == actionlist.end()) {
+        nodeInfo.AddAction(action);
+    }
+}
+
+void JsAccessibilityManager::UpdateUserAccessibilityElementInfo(
+    const RefPtr<NG::AccessibilityProperty>& accessibilityProperty, AccessibilityElementInfo& nodeInfo)
+{
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (accessibilityProperty->HasUserDisabled()) {
+        nodeInfo.SetEnabled(!accessibilityProperty->IsUserDisabled());
+    }
+    UpdateCheckedSelectedElementInfo(accessibilityProperty, nodeInfo, nodeInfo.IsEnabled());
+}
+
+} // namespace OHOS::Ace::Framework

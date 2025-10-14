@@ -726,3 +726,22 @@ HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest026, TestSize.Level1)
     ret = IsValidArkUINodeMultiThread(child2);
     EXPECT_EQ(ret, false);
 }
+
+/**
+ * @tc.name: NodeModelSafelyTest027
+ * @tc.desc: Test GetUserDataSafely function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest027, TestSize.Level1)
+{
+    ArkUI_NodeHandle node = CreateNodeSafely(ArkUI_NodeType::ARKUI_NODE_COLUMN);
+    ASSERT_NE(node, nullptr);
+
+    int userData = 1;
+    bool ret = SetUserDataSafely(node, &userData);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ASSERT_NE(GetUserDataSafely(node), nullptr);
+    EXPECT_EQ(*reinterpret_cast<int*>(GetUserDataSafely(node)), 1);
+
+    DisposeNodeSafely(node);
+}

@@ -110,7 +110,7 @@ public:
 
     double GetTotalOffset() const override
     {
-        return -currentOffset_;
+        return -currentOffset_ - contentStartOffset_;
     }
 
     void ResetPosition();

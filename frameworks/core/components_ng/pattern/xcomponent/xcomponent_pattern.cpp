@@ -191,9 +191,6 @@ void XComponentPattern::InitSurface()
             pipelineContext->AddOnAreaChangeNode(host->GetId());
             extSurfaceClient_ = MakeRefPtr<XComponentExtSurfaceCallbackClient>(WeakClaim(this));
             renderSurface_->SetExtSurfaceCallback(extSurfaceClient_);
-#ifdef RENDER_EXTRACT_SUPPORTED
-            RegisterRenderContextCallBack();
-#endif
         }
         handlingSurfaceRenderContext_ = renderContextForSurface_;
     } else if (type_ == XComponentType::TEXTURE) {
@@ -424,7 +421,7 @@ void XComponentPattern::OnModifyDone()
 
 void XComponentPattern::OnAreaChangedInner()
 {
-#ifndef RENDER_EXTRACT_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -734,9 +731,13 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(renderSurface_);
+#ifndef RENDER_EXTRACT_SUPPORTED
+// crossplatform xcomponent need recreate nativeWindow even if a nativeWindow already exists
+// so crossplatform xcomponent cannot do the following condition check
     if (renderSurface_->GetNativeWindow()) {
         return;
     }
+#endif
     if (renderSurface_->IsSurfaceValid() && (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE)) {
         float viewScale = context->GetViewScale();
         renderSurface_->CreateNativeWindow();

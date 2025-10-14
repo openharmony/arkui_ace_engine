@@ -40,13 +40,16 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_RETURN(switchTheme, std::nullopt);
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     if (contentConstraint.selfIdealSize.Width().has_value()) {
         frameWidth = contentConstraint.selfIdealSize.Width().value();
     } else {
         auto width = (switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).ConvertToPx();
         frameWidth = static_cast<float>(width) - padding.left.value_or(0.0f) - padding.right.value_or(0.0f);
-        if (frameWidth > contentConstraint.maxSize.Width()) {
-            frameWidth = contentConstraint.maxSize.Width();
+        if (!(layoutPolicy.has_value() && layoutPolicy->IsFix())) {
+            if (frameWidth > contentConstraint.maxSize.Width()) {
+                frameWidth = contentConstraint.maxSize.Width();
+            }
         }
     }
     if (contentConstraint.selfIdealSize.Height().has_value()) {
@@ -54,22 +57,14 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     } else {
         auto height = (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
         frameHeight = static_cast<float>(height) - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f);
-        if (frameHeight > contentConstraint.maxSize.Height()) {
-            frameHeight = contentConstraint.maxSize.Height();
+        if (!(layoutPolicy.has_value() && layoutPolicy->IsFix())) {
+            if (frameHeight > contentConstraint.maxSize.Height()) {
+                frameHeight = contentConstraint.maxSize.Height();
+            }
         }
     }
 
-    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-    if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
-        LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, frameWidth, frameHeight);
-    }
-    if (layoutPolicy.has_value() && layoutPolicy->IsWrap()) {
-        LayoutPolicyIsWrapContent(contentConstraint, layoutPolicy, frameWidth, frameHeight);
-    }
-    if (layoutPolicy.has_value() && layoutPolicy->IsFix()) {
-        LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicy, frameWidth, frameHeight);
-    }
-
+    MeasureContentLayoutPolicy(contentConstraint, layoutPolicy, frameWidth, frameHeight);
     CalcHeightAndWidth(frameNode, height_, width_, frameHeight, frameWidth);
     return SizeF(width_, height_);
 }
@@ -133,6 +128,20 @@ void SwitchLayoutAlgorithm::CalcHeightAndWidth(
             height = frameHeight;
             width = frameWidth;
         }
+    }
+}
+
+void SwitchLayoutAlgorithm::MeasureContentLayoutPolicy(const LayoutConstraintF& contentConstraint,
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy, float& frameWidth, float& frameHeight)
+{
+    if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+        LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, frameWidth, frameHeight);
+    }
+    if (layoutPolicy.has_value() && layoutPolicy->IsWrap()) {
+        LayoutPolicyIsWrapContent(contentConstraint, layoutPolicy, frameWidth, frameHeight);
+    }
+    if (layoutPolicy.has_value() && layoutPolicy->IsFix()) {
+        LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicy, frameWidth, frameHeight);
     }
 }
 

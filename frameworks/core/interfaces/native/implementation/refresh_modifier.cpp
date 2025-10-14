@@ -124,6 +124,7 @@ void SetOnStateChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
+        RefreshModelStatic::SetOnStateChange(frameNode, nullptr);
         return;
     }
     auto onStateChange = [arkCallback = CallbackHelper(*optValue)](const int32_t statusValue) {
@@ -140,6 +141,7 @@ void SetOnRefreshingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
+        RefreshModelStatic::SetOnRefreshing(frameNode, nullptr);
         return;
     }
     auto onRefreshing = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };

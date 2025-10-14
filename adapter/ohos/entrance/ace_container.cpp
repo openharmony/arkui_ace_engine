@@ -2922,6 +2922,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         if ((type_ == FrontendType::STATIC_HYBRID_DYNAMIC || type_ == FrontendType::DYNAMIC_HYBRID_STATIC) &&
             subFrontend_) {
             subFrontend_->AttachPipelineContext(pipelineContext_);
+            if (type_ == FrontendType::DYNAMIC_HYBRID_STATIC) {
+                // init uiContext and Application, use __INTEROP__ to indicate only the initialization path executed
+                subFrontend_->RunPage("__INTEROP__", "");
+            }
         }
     } else if (frontend_->GetType() == FrontendType::DECLARATIVE_JS) {
         if (declarativeFrontend) {
@@ -3464,11 +3468,7 @@ void AceContainer::ProcessColorModeUpdate(
     ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
     configurationChange.colorModeUpdate = true;
-    if (SystemProperties::ConfigChangePerform()) {
-        // reread all cache color of ark theme when configuration updates
-        ContainerScope scope(instanceId_);
-        NG::TokenThemeStorage::GetInstance()->CacheResetColor();
-    } else {
+    if (!SystemProperties::ConfigChangePerform() || !configurationChange.OnlyColorModeChange()) {
         // clear cache of ark theme instances when configuration updates
         NG::TokenThemeStorage::GetInstance()->CacheClear();
     }
@@ -3483,7 +3483,8 @@ void AceContainer::ProcessColorModeUpdate(
     }
 }
 
-void AceContainer::UpdateColorMode(uint32_t colorMode)
+void AceContainer::UpdateColorMode(uint32_t colorMode,
+    const ParsedConfig& parsedConfig, const std::string& configuration)
 {
     ACE_SCOPED_TRACE("AceContainer::UpdateColorMode %u", colorMode);
     CHECK_NULL_VOID(pipelineContext_);
@@ -3500,6 +3501,7 @@ void AceContainer::UpdateColorMode(uint32_t colorMode)
     }
     pipelineContext_->SetIsSystemColorChange(true);
     pipelineContext_->NotifyColorModeChange(colorMode);
+    NotifyConfigToSubContainers(parsedConfig, configuration);
 }
 
 void AceContainer::CheckForceVsync(const ParsedConfig& parsedConfig)
@@ -3536,6 +3538,13 @@ void AceContainer::UpdateSubContainerDensity(ResourceConfiguration& resConfig)
     }
 }
 
+void AceContainer::ReloadThemeCache()
+{
+    // reread all cache color of ark theme when configuration updates
+    ContainerScope scope(instanceId_);
+    NG::TokenThemeStorage::GetInstance()->CacheResetColor();
+}
+
 void AceContainer::UpdateConfiguration(
     const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel)
 {
@@ -3568,8 +3577,9 @@ void AceContainer::UpdateConfiguration(
     }
     themeManager->LoadResourceThemes();
     if (SystemProperties::ConfigChangePerform() && configurationChange.OnlyColorModeChange()) {
+        ReloadThemeCache();
         OnFrontUpdated(configurationChange, configuration);
-        UpdateColorMode(static_cast<uint32_t>(resConfig.GetColorMode()));
+        UpdateColorMode(static_cast<uint32_t>(resConfig.GetColorMode()), parsedConfig, configuration);
         return;
     }
     OnFrontUpdated(configurationChange, configuration);

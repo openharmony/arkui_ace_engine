@@ -60,6 +60,8 @@ public:
     void SetTextFont(const Font& font) override;
     void SetSelectDetectEnable(bool value) override;
     void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
+    void ResetSelectDetectEnable() override;
+    void ResetSelectDetectConfig() override;
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& color) override;

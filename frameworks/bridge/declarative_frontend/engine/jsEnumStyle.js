@@ -3300,7 +3300,7 @@ class WaterFlowSections {
     this.sectionArray = [];
     // native waterflow section, implement in cpp
     this.nativeSection = undefined;
-    this.changeArray = [];
+    this.changeFlag = true;
   }
 
   setNativeSection(section) {
@@ -3364,9 +3364,8 @@ class WaterFlowSections {
 
     if (this.nativeSection) {
       this.nativeSection.onSectionChanged({ start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : [] });
-    } else {
-      this.changeArray.push({ start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : [] });
     }
+    this.changeFlag = !this.changeFlag;
     return true;
   }
 
@@ -3378,9 +3377,8 @@ class WaterFlowSections {
     this.sectionArray.push(section);
     if (this.nativeSection) {
       this.nativeSection.onSectionChanged({ start: oldLength, deleteCount: 0, sections: [section] });
-    } else {
-      this.changeArray.push({ start: oldLength, deleteCount: 0, sections: [section] });
     }
+    this.changeFlag = !this.changeFlag;
     return true;
   }
 
@@ -3394,9 +3392,8 @@ class WaterFlowSections {
     let intStart = this.toArrayIndex(sectionIndex, oldLength);
     if (this.nativeSection) {
       this.nativeSection.onSectionChanged({ start: intStart, deleteCount: 1, sections: [section] });
-    } else {
-      this.changeArray.push({ start: intStart, deleteCount: 1, sections: [section] });
     }
+    this.changeFlag = !this.changeFlag;
     return true;
   }
 
@@ -3409,7 +3406,7 @@ class WaterFlowSections {
   }
 
   clearChanges() {
-    UIUtilsImpl.instance().getTarget(this).changeArray.splice(0);
+
   }
 }
 
@@ -3435,6 +3432,7 @@ class ChildrenMainSize {
     this.defaultMainSize = childDefaultSize;
     this.sizeArray = [];
     this.nativeMainSize = undefined;
+    this.changeFlag = true;
   }
 
   setNativeMainSize(value) {
@@ -3451,7 +3449,7 @@ class ChildrenMainSize {
     }
     this.defaultMainSize = value;
     if (this.nativeMainSize) {
-      this.nativeMainSize.updateDefaultMainSize(value);
+      this.nativeMainSize.onDefaultSizeUpdate(value);
     }
   }
 
@@ -3496,6 +3494,7 @@ class ChildrenMainSize {
         this.nativeMainSize.onStateChanged({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
       }
     }
+    this.changeFlag = !this.changeFlag;
   }
 
   update(index, childSize) {
@@ -3513,6 +3512,7 @@ class ChildrenMainSize {
     if (this.nativeMainSize) {
       this.nativeMainSize.onStateChanged({ start: startValue, deleteCount: 1, childrenSize: [childSize] });
     }
+    this.changeFlag = !this.changeFlag;
   }
 
   isInvalid(input) {
@@ -4601,3 +4601,15 @@ let WebRotateEffect;
   WebRotateEffect[WebRotateEffect.TOPLEFT_EFFECT = 0] = 'TOPLEFT_EFFECT';
   WebRotateEffect[WebRotateEffect.RESIZE_COVER_EFFECT = 1] = 'RESIZE_COVER_EFFECT';
 })(WebRotateEffect || (WebRotateEffect = {}));
+
+let PresetFillType;
+(function (PresetFillType) {
+  PresetFillType[PresetFillType.BREAKPOINT_DEFAULT = 0] = 'BREAKPOINT_DEFAULT';
+  PresetFillType[PresetFillType.BREAKPOINT_SM1MD2LG3 = 1] = 'BREAKPOINT_SM1MD2LG3';
+  PresetFillType[PresetFillType.BREAKPOINT_SM2MD3LG5 = 2] = 'BREAKPOINT_SM2MD3LG5';
+})(PresetFillType || (PresetFillType = {}));
+
+let SystemProperties;
+(function (SystemProperties) {
+  SystemProperties.BREAK_POINT = 'system.arkui.breakpoint';
+})(SystemProperties || (SystemProperties = {}));

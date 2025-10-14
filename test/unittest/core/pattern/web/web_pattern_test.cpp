@@ -640,4 +640,56 @@ HWTEST_F(WebPatternTest, IsShowHandle, TestSize.Level1)
     result = webPattern->IsShowHandle();
     EXPECT_TRUE(result);
 }
+
+/**
+ * @tc.name: HandleMouseToTouchEvent
+ * @tc.desc: Test HandleMouseToTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, HandleMouseToTouchEvent, TestSize.Level1)
+{
+    bool result;
+    g_webPattern->emulateTouchFromMouseEvent_ = false;
+    MouseInfo info;
+    result = g_webPattern->HandleMouseToTouchEvent(0.0, false, info);
+    EXPECT_FALSE(result);
+    g_webPattern->emulateTouchFromMouseEvent_ = true;
+    info.SetButton(MouseButton::NONE_BUTTON);
+
+    result = g_webPattern->HandleMouseToTouchEvent(0.0, false, info);
+    EXPECT_FALSE(result);
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::NONE);
+    result = g_webPattern->HandleMouseToTouchEvent(0.0, false, info);
+    EXPECT_FALSE(result);
+
+    for (TouchLocationInfo& location : g_webPattern->touchEventInfo_.changedTouches_) {
+        location.SetTouchType(TouchType::DOWN);
+    }
+    info.SetAction(MouseAction::PRESS);
+    result = g_webPattern->HandleMouseToTouchEvent(0.0, false, info);
+    EXPECT_TRUE(result);
+
+    for (TouchLocationInfo& location : g_webPattern->touchEventInfo_.changedTouches_) {
+        location.SetTouchType(TouchType::MOVE);
+    }
+    info.SetAction(MouseAction::PRESS);
+    result = g_webPattern->HandleMouseToTouchEvent(0.0, false, info);
+    EXPECT_TRUE(result);
+
+    for (TouchLocationInfo& location : g_webPattern->touchEventInfo_.changedTouches_) {
+        location.SetTouchType(TouchType::UP);
+    }
+    info.SetAction(MouseAction::PRESS);
+    result = g_webPattern->HandleMouseToTouchEvent(0.0, false, info);
+    EXPECT_TRUE(result);
+
+    for (TouchLocationInfo& location : g_webPattern->touchEventInfo_.changedTouches_) {
+        location.SetTouchType(TouchType::DOWN);
+    }
+    info.SetAction(MouseAction::PRESS);
+    result = g_webPattern->HandleMouseToTouchEvent(0.0, false, info);
+    EXPECT_TRUE(result);
+}
+
 } // namespace OHOS::Ace::NG

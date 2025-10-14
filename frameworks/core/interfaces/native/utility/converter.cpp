@@ -574,7 +574,7 @@ std::optional<uint32_t> ResourceConverter::ToSymbol()
             return static_cast<uint32_t>(strtol(result.value().c_str(), nullptr, 16));
         }
     }
-    if (id_ != -1) {
+    if (id_ != -1 && type_ == ResourceType::SYMBOL) {
         return resWrapper_->GetSymbolById(id_);
     } else if (auto name = GetResourceName(); name) {
         return resWrapper_->GetSymbolByName(name->c_str());
@@ -2111,9 +2111,7 @@ std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src, DimensionUnit 
         [&dimension, defaultUnit](const Ark_Resource& value) {
             dimension = OptConvertFromArkResource(value, defaultUnit);
         },
-        [&dimension]() {
-            dimension = Dimension();
-        });
+        []() {});
 
     return dimension;
 }
@@ -2121,10 +2119,11 @@ template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Union_F64_Strin
     const Ark_Union_F64_String_Resource&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(const Ark_Dimension&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(const Ark_Length&, DimensionUnit);
+template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(const Opt_Length&, DimensionUnit);
 
 std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
 {
-    std::optional<Dimension> dimension;
+    std::optional<Dimension> dimension = std::nullopt;
     Converter::VisitUnion(src,
         [&dimension](const Ark_Number& value) {
             dimension = Converter::Convert<Dimension>(value);
@@ -2135,11 +2134,7 @@ std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, Dimensio
         [&dimension, defaultUnit](const Ark_Resource& value) {
             dimension = OptConvertFromArkLengthResource(value, defaultUnit);
         },
-        [&dimension]() {
-            dimension = Dimension();
-        });
-
-    dimension->SetUnit(defaultUnit);
+        [&dimension]() {});
     return dimension;
 }
 

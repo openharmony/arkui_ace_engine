@@ -44,7 +44,7 @@ void SetResizeableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, false);
         return;
     }
     LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, *convValue);

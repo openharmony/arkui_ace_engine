@@ -1874,6 +1874,23 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[...].f32: threshold array. \n
      *
+     * @since 12
+     */
+    /**
+     * @brief Defines the visible area ratio (visible area/total area of the component) threshold for invoking the
+     * visible area change event of the component, this enum extends the configuration capability.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[...].f32: threshold array. The value range is 0 to 1.
+     * .?object: pass in one {@link ArkUI_VisibleAreaEventOptions} object for configuring the ratio or other options.
+     * Please note, when use this param, the ratios set through .value[...].f32 will be ignored, and the update
+     * interval from it is always ignored too.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[...].f32: threshold array. \n
+     * .object: the {@link ArkUI_VisibleAreaEventOptions} object.
+     *
+     * @since 21
      */
     NODE_VISIBLE_AREA_CHANGE_RATIO = 93,
 
@@ -6631,6 +6648,24 @@ typedef enum {
     NODE_SWIPER_MAINTAIN_VISIBLE_CONTENT_POSITION = 1001023,
 
     /**
+     * @brief Define a responsive item layout suitable for Swiper components.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: number of elements at different breakpoints.\n
+     * The parameter type is {@link ArkUI_ItemFillPolicy}.\n
+     * .value[1]?.f32: whether to turn pages by group.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: number of elements at different breakpoints.\n
+     * The parameter type is {@link ArkUI_ItemFillPolicy}.\n
+     * .value[1]?.i32: whether to turn pages by group.\n
+     *
+     * @since 22
+     */
+    NODE_SWIPER_ITEMFILLPOLICY,
+
+    /**
      * @brief: Set the delineation component of the ListItem, supporting property settings, property resets, and
      * property acquisition interfaces.
      *
@@ -7804,7 +7839,7 @@ typedef enum {
      * And the {@link ArkUI_CoastingAxisEvent} object can be obtained from the {@link ArkUI_UIInputEvent}
      * object through {@link OH_ArkUI_UIInputEvent_GetCoastingAxisEvent}. \n
      *
-     * @since 21
+     * @since 22
      */
     NODE_ON_COASTING_AXIS_EVENT = 31,
 

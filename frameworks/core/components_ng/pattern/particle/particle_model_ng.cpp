@@ -131,6 +131,41 @@ void ParticleModelNG::DisturbanceField(const std::vector<ParticleDisturbance>& d
     pattern->UpdateDisturbance(disturbanceArray);
 }
 
+void ParticleModelNG::RippleFields(const std::vector<ParticleRippleField>& rippleFields, NG::FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateRippleFields(rippleFields);
+}
+
+void ParticleModelNG::RippleFields(const std::vector<ParticleRippleField>& rippleFields)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateRippleFields(rippleFields);
+}
+
+void ParticleModelNG::VelocityFields(const std::vector<ParticleVelocityField>& velocityFields,
+    NG::FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateVelocityFields(velocityFields);
+}
+
+void ParticleModelNG::VelocityFields(const std::vector<ParticleVelocityField>& velocityFields)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateVelocityFields(velocityFields);
+}
+
 void ParticleModelNG::updateEmitter(std::vector<EmitterProperty>& property, FrameNode* frameNode)
 {
     auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());

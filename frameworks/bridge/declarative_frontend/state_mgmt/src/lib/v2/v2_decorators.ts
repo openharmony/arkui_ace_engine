@@ -176,7 +176,11 @@ const Provider = (aliasName?: string) => {
   return (proto: Object, varName: string): void => {
     const providedUnderName: string = aliasName || varName;
     ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, providedUnderName, '@Provider');
-    trackInternal(proto, varName);
+    if (!InteropConfigureStateMgmt.needsInterop) {
+      trackInternal(proto, varName);
+    } else {
+      trackInternalInterop(proto, varName);
+    }
   };
 }; // @Provider
 
@@ -304,4 +308,31 @@ const Computed = (target: Object, propertyKey: string, descriptor: PropertyDescr
   target[watchProp] ? target[watchProp][propertyKey] = computeFunction
     : target[watchProp] = { [propertyKey]: computeFunction };
 
+};
+
+const Env = (envKey: string) => {
+  return (proto: object, varName: string): void => {
+    Reflect.defineProperty(proto, varName, {
+      get() {
+        if (!(envKey in envFactoryMap)) {
+          const message = `Unsupported key '${envKey}' in @Env.`;
+          stateMgmtConsole.applicationError(message);
+          throw new BusinessError(UNSUPPORTED_KEY_IN_ENV, message);
+        }
+
+        if (!(this instanceof ViewPU || this instanceof ViewV2)) {
+          const message = `@Env can only be declared inside @Component or @ComponentV2.`;
+          stateMgmtConsole.applicationError(message);
+          throw new Error(message);
+        }
+        return EnvV2.registerEnv(envKey as keyof EnvTypeMap, this.getUIContext(), this.getMainInstanceId());
+      },
+      set(_) {
+          const message = `@Env(${envKey}) is read-only and cannot assign value for it.`;
+          stateMgmtConsole.applicationError(message);
+          throw new Error(message);
+      },
+      enumerable: true
+    });
+  };
 };

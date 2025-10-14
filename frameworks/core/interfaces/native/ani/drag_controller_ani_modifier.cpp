@@ -442,28 +442,28 @@ void HideDragPreviewWindow(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
 }
 
 int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::string& udKey,
-    std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary)
+    DragSummaryInfo& dragSummaryInfo)
 {
-    // int32_t dataSize = 1;
-    // CHECK_NULL_RETURN(asyncCtx, dataSize);
-    // if (asyncCtx->unifiedData) {
-    //     int32_t ret =
-    //         UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
-    //     if (ret != 0) {
-    //         LOGE("AceDrag, udmf set data failed, return value is %{public}d", ret);
-    //     } else {
-    //         ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
-    //         if (ret != 0) {
-    //             LOGE("AceDrag, get summary failed, return value is %{public}d", ret);
-    //         }
-    //     }
-    //     dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
-    // }
-    // auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
-    // if (badgeNumber.has_value()) {
-    //     dataSize = badgeNumber.value();
-    // }
-    // return dataSize;
+    int32_t dataSize = 1;
+    CHECK_NULL_RETURN(asyncCtx, dataSize);
+    if (asyncCtx->unifiedData) {
+        int32_t ret =
+            UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
+        if (ret != 0) {
+            LOGE("AceDrag, udmf set data failed, return value is %{public}d", ret);
+        } else {
+            ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
+            if (ret != 0) {
+                LOGE("AceDrag, get summary failed, return value is %{public}d", ret);
+            }
+        }
+        dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
+    }
+    auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
+    if (badgeNumber.has_value()) {
+        dataSize = badgeNumber.value();
+    }
+    return dataSize;
     return -1;
 }
 
@@ -481,9 +481,8 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         return false;
     }
     std::string udKey;
-    std::map<std::string, int64_t> summary;
-    std::map<std::string, int64_t> detailedSummary;
-    int32_t dataSize = SetUnifiedData(asyncCtx, udKey, summary, detailedSummary);
+    DragSummaryInfo dragSummaryInfo;
+    int32_t dataSize = SetUnifiedData(asyncCtx, udKey, dragSummaryInfo);
     int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
     auto windowId = container->GetWindowId();
     auto arkExtraInfoJson = JsonUtil::Create(true);
@@ -493,7 +492,8 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, recordSize, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
-        windowId, true, false, detailedSummary };
+        windowId, true, false, dragSummaryInfo.summary, false, dragSummaryInfo.detailedSummary,
+        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize };
     return true;
 }
 
@@ -680,9 +680,8 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::Dev
     CHECK_NULL_RETURN(asyncCtx, false);
     CHECK_NULL_RETURN(asyncCtx->pixelMap, false);
     std::string udKey;
-    std::map<std::string, int64_t> summary;
-    std::map<std::string, int64_t> detailedSummary;
-    int32_t dataSize = SetUnifiedData(asyncCtx, udKey, summary, detailedSummary);
+    DragSummaryInfo dragSummaryInfo;
+    int32_t dataSize = SetUnifiedData(asyncCtx, udKey, dragSummaryInfo);
     
     auto container = Ace::AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, false);
@@ -698,7 +697,8 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::Dev
     dragData = { { shadowInfo }, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, dataSize, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
-        windowId, true, false, detailedSummary };
+        windowId, true, false, dragSummaryInfo.summary, false, dragSummaryInfo.detailedSummary,
+        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize };
     return true;
 }
 

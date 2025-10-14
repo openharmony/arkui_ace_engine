@@ -1353,15 +1353,16 @@ public:
     }
 
     void SetOnVisibleChange(std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios,
-        bool isOutOfBoundsAllowed) override
+        bool measureFromViewport) override
     {
-        ViewAbstract::SetOnVisibleChange(std::move(onVisibleChange), ratios, isOutOfBoundsAllowed);
+        ViewAbstract::SetOnVisibleChange(std::move(onVisibleChange), ratios, measureFromViewport);
     }
 
     void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
-        const std::vector<double>& ratioList, int32_t expectedUpdateInterval) override
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval, bool measureFromViewport) override
     {
-        ViewAbstract::SetOnVisibleAreaApproximateChange(std::move(onVisibleChange), ratioList, expectedUpdateInterval);
+        ViewAbstract::SetOnVisibleAreaApproximateChange(
+            std::move(onVisibleChange), ratioList, expectedUpdateInterval, measureFromViewport);
     }
 
     void SetOnAreaChanged(
@@ -1665,6 +1666,7 @@ public:
         NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) override;
     void SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc) override;
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
+    void SetAccessibilityGroupOptions(AccessibilityGroupOptions groupOptions) override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
     void ResetOnAccessibilityFocus() override;
     void SetAccessibilityDefaultFocus(bool isFocus) override;
@@ -1909,6 +1911,7 @@ public:
     static void SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue);
     static void SetAccessibilityChecked(FrameNode* frameNode, bool checked, bool resetValue);
     static void SetAccessibilityTextPreferred(FrameNode* frameNode, bool accessibilityTextPreferred);
+    static void SetAccessibilityGroupOptions(FrameNode* frameNode, AccessibilityGroupOptions groupOptions);
     static void SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue);
     static void SetOnAccessibilityFocus(
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);

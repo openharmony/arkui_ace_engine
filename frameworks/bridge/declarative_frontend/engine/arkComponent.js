@@ -3592,7 +3592,7 @@ class OnVisibleAreaChangeModifier extends ModifierWithKey {
       getUINativeModule().common.resetOnVisibleAreaChange(node);
     } 
     else {
-      getUINativeModule().common.setOnVisibleAreaChange(node, this.value.ratios, this.value.event);
+      getUINativeModule().common.setOnVisibleAreaChange(node, this.value.ratios, this.value.event, this.value.measureFromViewport);
     }
   }
 }
@@ -5423,6 +5423,7 @@ class LongPressGestureHandler extends GestureHandler {
       this.fingers = options.fingers;
       this.repeat = options.repeat;
       this.duration = options.duration;
+      this.allowableMovement = options.allowableMovement;
       this.limitFingerCount = options.isFingerCountLimited;
     }
   }
@@ -5691,7 +5692,8 @@ class UICommonEvent {
   }
   setOnVisibleAreaApproximateChange(options, callback) {
     this._onVisibleAreaApproximateChange = callback;
-    getUINativeModule().frameNode.setOnVisibleAreaApproximateChange(this._nodePtr, callback, this._instanceId, options.ratios, options.expectedUpdateInterval ? options.expectedUpdateInterval : 1000);
+    getUINativeModule().frameNode.setOnVisibleAreaApproximateChange(this._nodePtr, callback, this._instanceId, options.ratios,
+      options.expectedUpdateInterval ? options.expectedUpdateInterval : 1000, options.measureFromViewport);
   }
 }
 
@@ -5865,7 +5867,7 @@ class UIGestureEvent {
         let longPressGesture = gesture;
         getUINativeModule().common.addLongPressGesture(this._nodePtr, priority, mask, longPressGesture.gestureTag,
           longPressGesture.allowedTypes, longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
-          longPressGesture.limitFingerCount, longPressGesture.onActionCallback,
+          longPressGesture.limitFingerCount, longPressGesture.allowableMovement, longPressGesture.onActionCallback,
           longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback);
         break;
       }
@@ -5970,7 +5972,8 @@ function addGestureToGroup(nodePtr, gesture, gestureGroupPtr) {
       let longPressGesture = gesture;
       getUINativeModule().common.addLongPressGestureToGroup(nodePtr, longPressGesture.gestureTag, longPressGesture.allowedTypes,
         longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration, longPressGesture.limitFingerCount,
-        longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback, gestureGroupPtr);
+        longPressGesture.allowableMovement, longPressGesture.onActionCallback, longPressGesture.onActionEndCallback,
+        longPressGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PAN_GESTURE: {
@@ -11962,9 +11965,6 @@ class ArkSearchComponent extends ArkComponent {
     return this;
   }
   selectedDataDetectorConfig(config) {
-    if (config === undefined || config === null) {
-      return this;
-    }
     modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorConfigModifier.identity, SearchSelectDetectorConfigModifier, config);
     return this;
   }
@@ -14701,9 +14701,6 @@ class ArkTextComponent extends ArkComponent {
     return this;
   }
   selectedDataDetectorConfig(config) {
-    if (config === undefined || config === null) {
-      return this;
-    }
     modifierWithKey(this._modifiersWithKeys, TextSelectDetectorConfigModifier.identity, TextSelectDetectorConfigModifier, config);
     return this;
   }
@@ -16383,9 +16380,6 @@ class ArkTextAreaComponent extends ArkComponent {
     return this;
   }
   selectedDataDetectorConfig(config) {
-    if (config === undefined || config === null) {
-      return this;
-    }
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorConfigModifier.identity, TextAreaSelectDetectorConfigModifier, config);
     return this;
   }
@@ -18434,9 +18428,6 @@ class ArkTextInputComponent extends ArkComponent {
     return this;
   }
   selectedDataDetectorConfig(config) {
-    if (config === undefined || config === null) {
-      return this;
-    }
     modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorConfigModifier.identity, TextInputSelectDetectorConfigModifier, config);
     return this;
   }
@@ -19681,12 +19672,13 @@ class BlankScreenDetectionConfig {
   }
 }
 class ArkOnVisibleAreaChange {
-  constructor(ratios, event) {
+  constructor(ratios, event, measureFromViewport) {
     this.ratios = ratios;
     this.event = event;
+    this.measureFromViewport = measureFromViewport;
   }
   isEqual(another) {
-    return this.ratios === another.ratios && this.event === another.event;
+    return this.ratios === another.ratios && this.event === another.event && this.measureFromViewport === another.measureFromViewport;
   }
 }
 class ArkSliderStepOptions {
@@ -20760,20 +20752,58 @@ class ArkEmitterPropertyOptions {
     this.sizeHeight = undefined;
     this.isSetAnnulusRegion = 0;
     this.isSetCenter = 0;
-    this.centerXValue = undefined;
-    this.centerXUnit = undefined;
-    this.centerYValue = undefined;
-    this.centerYUnit = undefined;
+    this.centerX = undefined;
+    this.centerY = undefined;
     this.isSetInnerRadius = 0;
-    this.innerRadiusValue = undefined;
-    this.innerRadiusUnit = undefined;
+    this.innerRadius = undefined;
     this.isSetOuterRadius = 0;
-    this.outerRadiusValue = undefined;
-    this.outerRadiusUnit = undefined;
+    this.outerRadius = undefined;
     this.isSetStartAngle = 0;
     this.startAngle = undefined;
     this.isSetEndAngle = 0;
     this.endAngle = undefined;
+  }
+}
+
+class ArkRippleFieldOptions {
+  constructor() {
+    this.isSetAmplitude = 0;
+    this.amplitude = undefined;
+    this.isSetWaveLength = 0;
+    this.wavelength = undefined;
+    this.isSetWaveSpeed = 0;
+    this.waveSpeed = undefined;
+    this.isSetAttenuation = 0;
+    this.attenuation = undefined;
+    this.isSetCenter = 0;
+    this.centerX = undefined;
+    this.centerY = undefined;
+    this.isSetRegion = 0;
+    this.isSetShape = 0;
+    this.shape = undefined;
+    this.isSetPosition = 0;
+    this.positionX = undefined;
+    this.positionY = undefined;
+    this.isSetSize = 0;
+    this.sizeWidth = undefined;
+    this.sizeHeight = undefined;
+  }
+}
+
+class ArkVelocityFieldOptions {
+  constructor() {
+    this.isSetVelocity = 0;
+    this.velocityX = undefined;
+    this.velocityY = undefined;
+    this.isSetShape = 0;
+    this.isSetRegion = 0;
+    this.shape = undefined;
+    this.isSetPosition = 0;
+    this.positionX = undefined;
+    this.positionY = undefined;
+    this.isSetSize = 0;
+    this.sizeWidth = undefined;
+    this.sizeHeight = undefined;
   }
 }
 
@@ -22867,6 +22897,10 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, AvoidanceModifier.identity, AvoidanceModifier, mode);
     return this;
   }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, SelectBackgroundColorModifier.identity, SelectBackgroundColorModifier, value);
+    return this;
+  }
 }
 
 class SelectOptionsModifier extends ModifierWithKey {
@@ -23439,7 +23473,23 @@ class AvoidanceModifier extends ModifierWithKey {
   }
 }
 AvoidanceModifier.identity = Symbol('selectAvoidance');
-
+class SelectBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().select.setBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SelectBackgroundColorModifier.identity = Symbol('selectBackgroundColor');
 class SelectOnSelectModifier extends ModifierWithKey{
   constructor(value) {
     super(value);
@@ -31966,6 +32016,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedGestureEventModifier.identity, WebOnNativeEmbedGestureEventModifier, event);
     return this;
   }
+  onNativeEmbedMouseEvent(event) {
+    modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedMouseEventModifier.identity, WebOnNativeEmbedMouseEventModifier, event);
+    return this;
+  }
   onNativeEmbedObjectParamChange(event) {
     modifierWithKey(this._modifiersWithKeys, WebOnNativeEmbedObjectParamChangeModifier.identity, WebOnNativeEmbedObjectParamChangeModifier, event);
     return this;
@@ -32704,6 +32758,20 @@ class WebOnNativeEmbedGestureEventModifier extends ModifierWithKey {
   }
 }
 WebOnNativeEmbedGestureEventModifier.identity = Symbol('webOnNativeEmbedGestureEventModifier');
+
+class WebOnNativeEmbedMouseEventModifier extends ModifierWithKey {
+  constructor (value) {
+    super(value);
+  }
+  applyPeer (node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnNativeEmbedMouseEvent(node);
+    } else {
+      getUINativeModule().web.setOnNativeEmbedMouseEvent(node, this.value);
+    }
+  }
+}
+WebOnNativeEmbedMouseEventModifier.identity = Symbol('webOnNativeEmbedMouseEventModifier');
 
 class WebOnNativeEmbedObjectParamChangeModifier extends ModifierWithKey {
   constructor (value) {
@@ -36267,8 +36335,16 @@ class SwiperDisplayCountModifier extends ModifierWithKey {
         getUINativeModule().swiper.setSwiperSwipeByGroup(node, swipeByGroup);
 
         if (typeof this.value.value === 'object') {
-          let minSize = this.value.value.minSize.toString();
-          getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value.value);
+          if ('minsize' in this.value.value) {
+            let minSize = this.value.value.minSize.toString();
+            getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, 'minSize');
+          } else {
+            let fillType = this.value.value.fillType;
+            if (typeof fillType !== 'number') {
+              fillType = 0;
+            }
+            getUINativeModule().swiper.setSwiperDisplayCount(node, fillType, 'fillType');
+          }
         } else {
           getUINativeModule().swiper.setSwiperDisplayCount(node, this.value.value, typeof this.value.value, swipeByGroup);
         }
@@ -39760,20 +39836,16 @@ class ParticleEmitterModifier extends ModifierWithKey {
           if (isObject(data.annulusRegion.center) &&
             isObject(data.annulusRegion.center.x) && isObject(data.annulusRegion.center.y)) {
             arkEmitterPropertyOptions.isSetCenter = 1;
-            arkEmitterPropertyOptions.centerXValue = data.annulusRegion.center.x.value;
-            arkEmitterPropertyOptions.centerXUnit = data.annulusRegion.center.x.unit;
-            arkEmitterPropertyOptions.centerYValue = data.annulusRegion.center.y.value;
-            arkEmitterPropertyOptions.centerYUnit = data.annulusRegion.center.y.unit;
+            arkEmitterPropertyOptions.centerX = data.annulusRegion.center.x;
+            arkEmitterPropertyOptions.centerY = data.annulusRegion.center.y;
           }
           if (isObject(data.annulusRegion.innerRadius)) {
             arkEmitterPropertyOptions.isSetInnerRadius = 1;
-            arkEmitterPropertyOptions.innerRadiusValue = data.annulusRegion.innerRadius.value;
-            arkEmitterPropertyOptions.innerRadiusUnit = data.annulusRegion.innerRadius.unit;
+            arkEmitterPropertyOptions.innerRadius = data.annulusRegion.innerRadius;
           }
           if (isObject(data.annulusRegion.outerRadius)) {
             arkEmitterPropertyOptions.isSetOuterRadius = 1;
-            arkEmitterPropertyOptions.outerRadiusValue = data.annulusRegion.outerRadius.value;
-            arkEmitterPropertyOptions.outerRadiusUnit = data.annulusRegion.outerRadius.unit;
+            arkEmitterPropertyOptions.outerRadius = data.annulusRegion.outerRadius;
           }
           if (isNumber(data.annulusRegion.startAngle)) {
             arkEmitterPropertyOptions.isSetStartAngle = 1;
@@ -39797,6 +39869,134 @@ class ParticleEmitterModifier extends ModifierWithKey {
 
 ParticleEmitterModifier.identity = Symbol('emitter');
 
+class ParticleRippleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().particle.resetRippleField(node);
+    }
+    else {
+      let dataArray = [];
+      if (!Array.isArray(this.value)) {
+        return;
+      }
+      for (let i = 0; i < this.value.length; i++) {
+        let arkRippleFieldOptions = new ArkRippleFieldOptions();
+        let data = this.value[i];
+        if (!data) {
+          continue;
+        }
+        if (isNumber(data.amplitude)) {
+          arkRippleFieldOptions.isSetAmplitude = 1;
+          arkRippleFieldOptions.amplitude = data.amplitude;
+        }
+        if (isNumber(data.wavelength)) {
+          arkRippleFieldOptions.isSetWaveLength = 1;
+          arkRippleFieldOptions.wavelength = data.wavelength;
+        }
+        if (isNumber(data.waveSpeed)) {
+          arkRippleFieldOptions.isSetWaveSpeed = 1;
+          arkRippleFieldOptions.waveSpeed = data.waveSpeed;
+        }
+        if (isNumber(data.attenuation)) {
+          arkRippleFieldOptions.isSetAttenuation = 1;
+          arkRippleFieldOptions.attenuation = data.attenuation;
+        }
+        if (isObject(data.center)) {
+          arkRippleFieldOptions.isSetCenter = 1;
+          arkRippleFieldOptions.centerX = data.center.x;
+          arkRippleFieldOptions.centerY = data.center.y;
+        }
+        if (isObject(data.region)) {
+          arkRippleFieldOptions.isSetRegion = 1;
+          if (isNumber(data.region.shape)) {
+            arkRippleFieldOptions.isSetShape = 1;
+            arkRippleFieldOptions.shape = data.region.shape;
+          }
+
+          if (isObject(data.region.position)) {
+            arkRippleFieldOptions.isSetPosition = 1;
+            arkRippleFieldOptions.positionX = data.region.position.x;
+            arkRippleFieldOptions.positionY = data.region.position.y;
+          }
+
+          if (isObject(data.region.size)) {
+            arkRippleFieldOptions.isSetSize = 1;
+            arkRippleFieldOptions.sizeWidth = data.region.size.width;
+            arkRippleFieldOptions.sizeHeight = data.region.size.height;
+          }
+        }
+        dataArray.push(arkRippleFieldOptions);
+      }
+      getUINativeModule().particle.setRippleField(node, dataArray);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+ParticleRippleModifier.identity = Symbol('rippleFields');
+
+class ParticleVelocityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().particle.resetVelocityField(node);
+    }
+    else {
+      let dataArray = [];
+      if (!Array.isArray(this.value)) {
+        return;
+      }
+      for (let i = 0; i < this.value.length; i++) {
+        let arkVelocityFieldOptions = new ArkVelocityFieldOptions();
+        let data = this.value[i];
+        if (!data) {
+          continue;
+        }
+        if (isObject(data.velocity)) {
+          arkVelocityFieldOptions.isSetVelocity = 1;
+          arkVelocityFieldOptions.velocityX = data.velocity.x;
+          arkVelocityFieldOptions.velocityY = data.velocity.y;
+        }
+        if (isObject(data.region)) {
+          arkVelocityFieldOptions.isSetRegion = 1;
+          if (isNumber(data.region.shape)) {
+            arkVelocityFieldOptions.isSetShape = 1;
+            arkVelocityFieldOptions.shape = data.region.shape;
+          }
+
+          if (isObject(data.region.position)) {
+            arkVelocityFieldOptions.isSetPosition = 1;
+            arkVelocityFieldOptions.positionX = data.region.position.x;
+            arkVelocityFieldOptions.positionY = data.region.position.y;
+          }
+
+          if (isObject(data.region.size)) {
+            arkVelocityFieldOptions.isSetSize = 1;
+            arkVelocityFieldOptions.sizeWidth = data.region.size.width;
+            arkVelocityFieldOptions.sizeHeight = data.region.size.height;
+          }
+        }
+      }
+      dataArray.push(arkVelocityFieldOptions);
+    }
+    getUINativeModule().particle.setVelocityField(node, dataArray);
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+ParticleVelocityModifier.identity = Symbol('velocityFields');
+
 /// <reference path='./import.ts' />
 class ArkParticleComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -39809,8 +40009,18 @@ class ArkParticleComponent extends ArkComponent {
 
   emitter(value) {
     modifierWithKey(this._modifiersWithKeys, ParticleEmitterModifier.identity, ParticleEmitterModifier, value);
-   return this;
- }
+    return this;
+  }
+
+  rippleFields(value) {
+    modifierWithKey(this._modifiersWithKeys, ParticleRippleModifier.identity, ParticleRippleModifier, value);
+    return this;
+  }
+
+  velocityFields(value) {
+    modifierWithKey(this._modifiersWithKeys, ParticleVelocityModifier.identity, ParticleVelocityModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.Particle !== undefined) {

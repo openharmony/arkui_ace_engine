@@ -2407,6 +2407,28 @@ HWTEST_F(LazyForEachSyntaxTestNg, PreBuildByIndex02, TestSize.Level1)
     EXPECT_EQ(result, true);
 }
 /**
+ * @tc.name: PreBuildByIndex03
+ * @tc.desc: Test the PreBuildByIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, PreBuildByIndex03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: make GetSysTimestamp() > deadline make canRunLongPredictTask to false.
+     * @tc.expected: Create lazyForEachBuilder success and make isTimeout to false.
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    int32_t index = 0;
+    std::unordered_map<std::string, LazyForEachCacheChild> cache;
+    int64_t deadline = GetSysTimestamp() + 10000;
+    auto itemConstraint = LayoutConstraintF();
+    bool canRunLongPredictTask = false;
+    lazyForEachBuilder->enablePreBuild_ = false;
+    bool result = lazyForEachBuilder->PreBuildByIndex(index, cache, deadline, itemConstraint, canRunLongPredictTask);
+    EXPECT_EQ(result, true);
+}
+/**
  * @tc.name: LazyForEachBuilder33
  * @tc.desc: Test the ProcessOffscreenNode function.
  * @tc.type: FUNC

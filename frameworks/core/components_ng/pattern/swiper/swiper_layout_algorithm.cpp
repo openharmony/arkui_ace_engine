@@ -185,6 +185,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto mainSize = contentIdealSize.MainSize(axis_);
     if (mainSize.has_value()) {
         SwiperUtils::CheckAutoFillDisplayCount(swiperLayoutProperty, mainSize.value(), realTotalCount_);
+        SwiperUtils::CheckBreakPointDisplayCount(swiperLayoutProperty, mainSize.value());
     }
     const auto& padding = swiperLayoutProperty->CreatePaddingAndBorder();
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);

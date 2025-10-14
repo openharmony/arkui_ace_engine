@@ -64,14 +64,17 @@ class ArkBorderStyle {
 class ArkOnVisibleAreaChange {
   ratios: Array<number>;
   event: (isVisible: boolean, currentRatio: number) => void;
+  measureFromViewport?: boolean;
 
-  constructor(ratios: Array<number> | undefined, event: (isVisible: boolean, currentRatio: number) => void | undefined) {
+  constructor(ratios: Array<number> | undefined, event: (isVisible: boolean, currentRatio: number) => void | undefined,
+    measureFromViewport?: boolean | undefined) {
     this.ratios = ratios;
     this.event = event;
+    this.measureFromViewport = measureFromViewport;
   }
 
   isEqual(another: ArkOnVisibleAreaChange): boolean {
-    return this.ratios === another.ratios && this.event === another.event;
+    return this.ratios === another.ratios && this.event === another.event && this.measureFromViewport === another.measureFromViewport;
   }
 }
 
@@ -1695,6 +1698,16 @@ class TextDataDetectorConfig {
   }
 }
 
+class SelectDetectorConfig {
+  types: TextDataDetectorType;
+  constructor() {
+    this.types = undefined;
+  }
+  isEqual(another: TextDataDetectorConfig): boolean {
+    return (this.types === another.types);
+  }
+}
+
 class ArkDragPreviewOptions {
   mode: DragPreviewMode | Array<DragPreviewMode> | undefined;
   sizeChangeEffect: DraggingSizeChangeEffect | undefined;
@@ -2009,16 +2022,12 @@ class ArkEmitterPropertyOptions {
   sizeHeight: number | undefined;
   isSetAnnulusRegion: number;
   isSetCenter: number;
-  centerXValue: number | undefined;
-  centerXUnit: number | undefined;
-  centerYValue: number | undefined;
-  centerYUnit: number | undefined;
+  centerX: LengthMetrics | undefined;
+  centerY: LengthMetrics | undefined;
   isSetInnerRadius: number;
-  innerRadiusValue: number | undefined;
-  innerRadiusUnit: number | undefined;
+  innerRadius: LengthMetrics | undefined;
   isSetOuterRadius: number;
-  outerRadiusValue: number | undefined;
-  outerRadiusUnit: number | undefined;
+  outerRadius: LengthMetrics | undefined;
   isSetStartAngle: number;
   startAngle: number | undefined;
   isSetEndAngle: number;

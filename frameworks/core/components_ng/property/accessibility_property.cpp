@@ -1350,4 +1350,23 @@ int32_t AccessibilityProperty::GetFocusDrawLevel()
     return static_cast<int32_t>(focusDrawLevel_);
 }
 
+void AccessibilityProperty::SetAccessibilityGroupOptions(const AccessibilityGroupOptions& accessibilityGroupOptions)
+{
+    accessibilityGroupOptions_ = accessibilityGroupOptions;
+}
+
+bool AccessibilityProperty::HasAccessibilityGroupOptions()
+{
+    return accessibilityGroupOptions_.has_value();
+}
+
+AccessibilityGroupOptions AccessibilityProperty::GetAccessibilityGroupOptions()
+{
+    return accessibilityGroupOptions_.value_or(AccessibilityGroupOptions {});
+}
+
+void AccessibilityProperty::ResetAccessibilityGroupOptions()
+{
+    accessibilityGroupOptions_.reset();
+}
 } // namespace OHOS::Ace::NG

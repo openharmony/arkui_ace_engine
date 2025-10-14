@@ -866,7 +866,9 @@ public:
         auto rect = uiWindow_->GetHostWindowRect(hostWindowId);
         return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
-    void UpdateColorMode(uint32_t colorMode) override;
+    void UpdateColorMode(uint32_t colorMode,
+        const ParsedConfig& parsedConfig, const std::string& configuration);
+    void ReloadThemeCache();
     void FireUIExtensionEventCallback(uint32_t eventId);
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
 
