@@ -409,7 +409,14 @@ void FontManager::RegisterTextEngineLoadCallback(
         FormLoadFontCallbackInfo formCallbackInfo = { std::make_pair(familyName, callback), runtimeId };
         formLoadCallbacks_.emplace(node, formCallbackInfo);
     }
-    externalLoadCallbacks_.emplace(node, std::make_pair(familyName, callback));
+    auto iter = externalLoadCallbacks_.find(node);
+    if (iter != externalLoadCallbacks_.end()) {
+        iter->second.emplace(familyName, callback);
+    } else {
+        std::map<std::string, std::function<void()>> familyMap;
+        familyMap.emplace(familyName, callback);
+        externalLoadCallbacks_.emplace(node, familyMap);
+    }
 }
 
 void FontManager::AddFontNodeNG(const WeakPtr<NG::UINode>& node)
@@ -515,8 +522,10 @@ void FontManager::NotifyFontChange(const std::string& fontName, uint64_t runtime
     }
     // global font change event.
     for (const auto& element : externalLoadCallbacks_) {
-        if (element.second.first == fontName && element.second.second) {
-            element.second.second();
+        for (const auto& family : element.second) {
+            if (family.first == fontName && family.second) {
+                family.second();
+            }
         }
     }
 }

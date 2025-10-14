@@ -597,7 +597,7 @@ void TextFieldPattern::SetPlaceholderStyledString(const RefPtr<SpanString>& valu
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-bool TextFieldPattern::IsStyledPlaceholder()
+bool TextFieldPattern::IsStyledPlaceholder() const
 {
     CHECK_NULL_RETURN(placeholderResponseArea_, false);
     auto textNode = placeholderResponseArea_->GetFrameNode();
@@ -7547,7 +7547,19 @@ std::u16string TextFieldPattern::GetPlaceHolder() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, u"");
+    if (IsStyledPlaceholder()) {
+        return GetStyledPlaceHolderValue();
+    }
     return layoutProperty->GetPlaceholderValue(u"");
+}
+
+std::u16string TextFieldPattern::GetStyledPlaceHolderValue() const
+{
+    CHECK_NULL_RETURN(IsStyledPlaceholder(), u"");
+    auto textNode = placeholderResponseArea_->GetFrameNode();
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, u"");
+    return textPattern->GetTextForDisplay();
 }
 
 std::string TextFieldPattern::GetInputFilter() const

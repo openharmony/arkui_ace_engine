@@ -993,6 +993,7 @@ public:
     std::string GetFontFamily() const;
     TextAlign GetTextAlign() const;
     std::u16string GetPlaceHolder() const;
+    std::u16string GetStyledPlaceHolderValue() const;
     uint32_t GetMaxLength() const;
     uint32_t GetMaxLines() const;
     uint32_t GetMinLines() const;
@@ -1874,7 +1875,7 @@ private:
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
     bool HasStateStyle(UIState state) const;
-    bool IsStyledPlaceholder();
+    bool IsStyledPlaceholder() const;
 
     void OnTextInputScroll(float offset);
     void OnTextAreaScroll(float offset);
