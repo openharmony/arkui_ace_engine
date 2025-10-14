@@ -39,13 +39,13 @@ function createDynamicBuilder(
 ): (...args: any[]) => void {
   let func = function (...args: any[]): void {
       this.observeComponentCreation2((elmtId: number, isInitialRender: boolean) => {
-          this.__interopInStaticRendering_internal_ = true;
+          ObserveV2.getObserve().__interopInStaticRendering_internal_ = true;
           if (isInitialRender) {
               let pointer = staticBuilder(...args);
               ViewStackProcessor.push(pointer);
               ViewStackProcessor.pop();
           }
-          this.__interopInStaticRendering_internal_ = false;
+          ObserveV2.getObserve().__interopInStaticRendering_internal_ = false;
       }, {});
   };
   return func;
@@ -62,7 +62,7 @@ function createDynamicUpdatableBuilder(
   let func = function (args: any): void {
       let stateMeta: [number, ()=>void]
       this.observeComponentCreation2((elmtId: number, isInitialRender: boolean) => {
-        this.__interopInStaticRendering_internal_ = true;
+        ObserveV2.getObserve().__interopInStaticRendering_internal_ = true;
           if (isInitialRender) {
               stateMeta = staticBuilder(args);
               ViewStackProcessor.push(stateMeta[0]);
@@ -70,8 +70,20 @@ function createDynamicUpdatableBuilder(
           } else {
               stateMeta[1]()
           }
-          this.__interopInStaticRendering_internal_ = false;
+          ObserveV2.getObserve().__interopInStaticRendering_internal_ = false;
       }, {});
   };
   return func;
+}
+
+function enableCompatibleObservedV2ForStatic(value: Object, 
+  createFunc: Function, recordFunc: Function, updateFunc: Function) {
+  value['__staticCompatibleFunc__'] = [createFunc, recordFunc, updateFunc]
+}
+
+function createCompatibleStateMetaForStaticObservedV2(): [()=>void, ()=>void] {
+  let stateMeta = UIUtilsImpl.instance().makeObserved({value: 1});
+  let addRef = () => { stateMeta.value }
+  let fireChange = () => { stateMeta.value++ }
+  return [addRef, fireChange]
 }
