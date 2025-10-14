@@ -793,6 +793,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_curves_Curve& src);
     template<> void AssignCast(std::optional<RenderMode>& dst, const Ark_RenderMode& src);
+    template<> void AssignCast(std::optional<WebAudioSessionType>& dst, const Ark_AudioSessionType& src);
     template<> void AssignCast(std::optional<RenderingStrategy>& dst, const Ark_SymbolRenderingStrategy& src);
     template<> void AssignCast(std::optional<ResponseType>& dst, const Ark_ResponseType& src);
     template<> void AssignCast(std::optional<ResponseType>& dst, const Ark_WebResponseType& src);

@@ -72,6 +72,7 @@ public:
     static void SetKeyboardAvoidMode(FrameNode* frameNode, const std::optional<WebKeyboardAvoidMode>& mode);
     static void SetAudioResumeInterval(FrameNode* frameNode, const std::optional<int32_t>& resumeInterval);
     static void SetAudioExclusive(FrameNode* frameNode, const std::optional<bool>& audioExclusive);
+    static void SetAudioSessionType(FrameNode* frameNode, const std::optional<WebAudioSessionType>& audioSessionType);
     static void SetBlurOnKeyboardHideMode(FrameNode* frameNode, const std::optional<BlurOnKeyboardHideMode>& mode);
     static void SetTextZoomRatio(FrameNode* frameNode, int32_t textZoomRatioNum);
     static void InitialScale(FrameNode* frameNode, float scale);

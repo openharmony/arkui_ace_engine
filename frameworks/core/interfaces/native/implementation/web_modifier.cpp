@@ -399,6 +399,8 @@ void SetMediaOptionsImpl(Ark_NativePointer node,
     }
     WebModelStatic::SetAudioResumeInterval(frameNode, Converter::OptConvert<int32_t>(optValue->resumeInterval));
     WebModelStatic::SetAudioExclusive(frameNode, Converter::OptConvert<bool>(optValue->audioExclusive));
+    WebModelStatic::SetAudioSessionType(frameNode,
+                                        Converter::OptConvert<WebAudioSessionType>(optValue->audioSessionType));
 #endif // WEB_SUPPORTED
 }
 void SetOverviewModeAccessImpl(Ark_NativePointer node,

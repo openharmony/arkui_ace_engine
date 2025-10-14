@@ -1188,8 +1188,13 @@ HWTEST_F(WebModelStaticTest, SetMediaOptions001, TestSize.Level1)
     WebModelStatic::SetAudioExclusive(AccessibilityManager::RawPtr(frameNode), audioExclusive);
     audioExclusive = true;
     WebModelStatic::SetAudioExclusive(AccessibilityManager::RawPtr(frameNode), audioExclusive);
+    std::optional<WebAudioSessionType> audioSessionType;
+    WebModelStatic::SetAudioSessionType(AccessibilityManager::RawPtr(frameNode), audioSessionType);
+    audioSessionType = WebAudioSessionType::AMBIENT;
+    WebModelStatic::SetAudioSessionType(AccessibilityManager::RawPtr(frameNode), audioSessionType);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckAudioResumeInterval(0), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckAudioExclusive(true), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckAudioSessionType(3), true);
 #endif
 }
 
