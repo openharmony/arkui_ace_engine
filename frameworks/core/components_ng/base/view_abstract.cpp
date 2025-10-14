@@ -3783,7 +3783,7 @@ void ViewAbstract::BindPopup(
                 overlayManager1->ErasePopup(targetId);
                 popupInfo = {};
                 overlayManager1->HideTips(targetId, popupInfo, 0);
-            } else {
+            } else if (subwindow) {
                 showInSubWindow = true;
             }
         }
