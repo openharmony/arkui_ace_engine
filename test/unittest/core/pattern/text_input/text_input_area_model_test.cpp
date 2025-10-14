@@ -1079,7 +1079,7 @@ HWTEST_F(TextInputAreaTest, accessibilityProperty002, TestSize.Level1)
 
 /**
  * @tc.name: testStroke001
- * @tc.desc: test textInput and textArea of the stroke
+ * @tc.desc: test textInput and textArea of  the stroke
  * @tc.type: FUNC
  */
 HWTEST_F(TextInputAreaTest, testStroke001, TestSize.Level1)
