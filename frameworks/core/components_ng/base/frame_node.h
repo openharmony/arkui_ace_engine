@@ -1127,15 +1127,8 @@ public:
         }
     }
     void SetCustomPropertyCallback(
-        std::function<void()> func, std::function<std::string(const std::string&)> getFunc)
-    {
-        if (!removeCustomProperties_) {
-            removeCustomProperties_ = func;
-        }
-        if (!getCustomProperty_) {
-            getCustomProperty_ = getFunc;
-        }
-    }
+        std::function<void()>&& func, std::function<std::string(const std::string&)>&& getFunc,
+        std::function<std::string()>&& getAllCustomPropertiesFunc);
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
     void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect,
                                 bool withClip = false) const;
