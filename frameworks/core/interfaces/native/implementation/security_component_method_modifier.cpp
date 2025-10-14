@@ -49,27 +49,6 @@ OffsetT<Dimension> Convert(const Ark_Position& src)
     }
     return offset;
 }
-template<>
-PaddingPropertyT<Dimension> Convert(const Ark_Padding& src)
-{
-    PaddingPropertyT<Dimension> padding;
-    // padding.left = Converter::OptConvert<Dimension>(src.left);
-    // padding.top = Converter::OptConvert<Dimension>(src.top);
-    // padding.right = Converter::OptConvert<Dimension>(src.right);
-    // padding.bottom = Converter::OptConvert<Dimension>(src.bottom);
-    return padding;
-}
-template<>
-PaddingPropertyT<Dimension> Convert(const Ark_Dimension& src)
-{
-    PaddingPropertyT<Dimension> padding;
-    // auto value = Converter::Convert<Dimension>(src);
-    // padding.left = value;
-    // padding.top = value;
-    // padding.right = value;
-    // padding.bottom = value;
-    return padding;
-}
 } //namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -87,6 +66,10 @@ void SetEnabledImpl(Ark_NativePointer node,
 void SetChainModeImpl(Ark_NativePointer node,
     const Opt_Axis *direction,
     const Opt_ChainStyle *style);
+void SetWidthImpl(Ark_NativePointer node,
+    const Opt_Union_Length_LayoutPolicy* value);
+void SetHeightImpl(Ark_NativePointer node,
+    const Opt_Union_Length_LayoutPolicy* value);
 } // namespace CommonMethodModifier
 namespace SecurityComponentMethodModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -249,10 +232,32 @@ void SetBorderRadiusImpl(Ark_NativePointer node,
 void SetPaddingImpl(Ark_NativePointer node,
                     const Opt_Union_Padding_Dimension* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto convValue = Converter::OptConvert<BorderRadiusProperty>(*value);
-    // SecurityComponentModelNG::SetBackgroundBorderRadius(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == INTEROP_TAG_UNDEFINED) {
+        SecurityComponentModelNG::SetBackgroundPadding(frameNode, std::nullopt, std::nullopt, std::nullopt,
+            std::nullopt);
+        return;
+    }
+    PaddingPropertyT<Dimension> padding;
+    if (value->value.selector == 0) {
+        auto paddingTmp = value->value.value0;
+        padding.left = Converter::OptConvert<Dimension>(paddingTmp.left);
+        padding.top = Converter::OptConvert<Dimension>(paddingTmp.top);
+        padding.right = Converter::OptConvert<Dimension>(paddingTmp.right);
+        padding.bottom = Converter::OptConvert<Dimension>(paddingTmp.bottom);
+    } else if (value->value.selector == 1) {
+        Opt_Dimension dimensionTmp = {};
+        dimensionTmp.tag = INTEROP_TAG_OBJECT;
+        dimensionTmp.value = value->value.value1;
+        padding.left = Converter::OptConvert<Dimension>(dimensionTmp);
+        padding.top = Converter::OptConvert<Dimension>(dimensionTmp);
+        padding.right = Converter::OptConvert<Dimension>(dimensionTmp);
+        padding.bottom = Converter::OptConvert<Dimension>(dimensionTmp);
+    }
+    SecurityComponentModelNG::SetBackgroundPadding(frameNode, padding.left, padding.right, padding.top,
+        padding.bottom);
 }
 void SetTextIconSpaceImpl(Ark_NativePointer node,
                           const Opt_Dimension* value)
@@ -276,12 +281,32 @@ void SetKeyImpl(Ark_NativePointer node,
 void SetWidthImpl(Ark_NativePointer node,
                const Opt_Length* value)
 {
-    // CommonMethodModifier::Width0Impl(node, value);
+    if (value->tag == INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    CHECK_NULL_VOID(value);
+    Opt_Union_Length_LayoutPolicy tmpValue = {};
+    tmpValue.tag = value->tag;
+    Ark_Union_Length_LayoutPolicy tmpArkValue = {};
+    tmpArkValue.selector = 0;
+    tmpArkValue.value0 = value->value;
+    tmpValue.value = tmpArkValue;
+    CommonMethodModifier::SetWidthImpl(node, &tmpValue);
 }
 void SetHeightImpl(Ark_NativePointer node,
                 const Opt_Length* value)
 {
-    // CommonMethodModifier::Height0Impl(node, value);
+    if (value->tag == INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    CHECK_NULL_VOID(value);
+    Opt_Union_Length_LayoutPolicy tmpValue = {};
+    tmpValue.tag = value->tag;
+    Ark_Union_Length_LayoutPolicy tmpArkValue = {};
+    tmpArkValue.selector = 0;
+    tmpArkValue.value0 = value->value;
+    tmpValue.value = tmpArkValue;
+    CommonMethodModifier::SetHeightImpl(node, &tmpValue);
 }
 void SetSizeImpl(Ark_NativePointer node,
               const Opt_SizeOptions* value)
