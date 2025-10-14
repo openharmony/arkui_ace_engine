@@ -70,6 +70,7 @@ const Dimension BORDER_WIDTH_PX_A { 10.0, DimensionUnit::PX };
 const Dimension BORDER_WIDTH_PX_B { 20.0, DimensionUnit::PX };
 const Dimension BORDER_WIDTH_PX_C { 30.0, DimensionUnit::PX };
 const Dimension BORDER_WIDTH_PX_D { 40.0, DimensionUnit::PX };
+const Dimension DIALOG_BUTTON_BORDER_RADIUS { 20.0, DimensionUnit::VP };
 constexpr float FONT_MAX_SIZE_SCALE = 2.0f;
 constexpr float FONT_SIZE_SCALE_TEST1 = 1.75f;
 constexpr float FONT_SIZE_SCALE_TEST2 = 3.20f;
@@ -248,6 +249,9 @@ void DialogPatternTestNg::CheckTextMarquee(RefPtr<FrameNode> buttonNode)
     EXPECT_EQ(textProps->GetTextOverflow(), TextOverflow::MARQUEE);
     EXPECT_EQ(textProps->GetTextMarqueeStartPolicy(), MarqueeStartPolicy::ON_FOCUS);
     EXPECT_TRUE(textProps->GetTextMarqueeFadeout());
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(DIALOG_BUTTON_BORDER_RADIUS);
+    EXPECT_EQ(buttonProp->GetBorderRadius(), borderRadius);
 }
 
 /**
@@ -1874,6 +1878,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest030, TestSize.Level1)
     dialogTheme->paddingSingleTitle_ = DIALOG_TITLE_PADDING;
     dialogTheme->button_type_ = 1;
     dialogTheme->buttonTextSize_ = 0.0_vp;
+    dialogTheme->buttonBorderRadius_= DIALOG_BUTTON_BORDER_RADIUS;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return textTheme;
@@ -1920,8 +1925,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest030, TestSize.Level1)
         if (child->GetTag() != V2::BUTTON_ETS_TAG) {
             continue;
         }
-        auto buttonNode = AceType::DynamicCast<FrameNode>(child);
-        CheckTextMarquee(buttonNode);
+        CheckTextMarquee(AceType::DynamicCast<FrameNode>(child));
     }
 }
 
