@@ -90,6 +90,16 @@ void TextFieldModelStatic::SetShowCounterBorder(FrameNode* frameNode, const std:
     TextFieldModelNG::SetShowCounterBorder(frameNode, optValue.value_or(true));
 }
 
+void TextFieldModelStatic::SetShowCounter(FrameNode* frameNode, const std::optional<bool>& optValue)
+{
+    if (optValue) {
+        TextFieldModelNG::SetShowCounter(frameNode, optValue.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, ShowCounter,
+            PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
 void TextFieldModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
     NG::ViewAbstractModelStatic::SetBackgroundColor(frameNode, color);
@@ -477,6 +487,16 @@ void TextFieldModelStatic::SetPasswordRules(FrameNode* frameNode, const std::opt
         TextFieldModelNG::SetPasswordRules(frameNode, passwordRules.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, frameNode);
+    }
+}
+
+void TextFieldModelStatic::SetFontFeature(FrameNode* frameNode, const std::optional<FONT_FEATURES_LIST>& optValue)
+{
+    if (optValue) {
+        TextFieldModelNG::SetFontFeature(frameNode, optValue.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, FontFeature,
+            PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 

@@ -1150,6 +1150,57 @@ HWTEST_F(TextFieldModelStaticTest, SetMargin, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetShowCounter
+ * @tc.desc: Test TextFieldModelStatic SetShowCounter with different conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetShowCounter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test SetShowCounter with different conditions
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+    TextFieldModelStatic::SetShowCounter(node, false);
+    EXPECT_TRUE(textFieldLayoutProperty->HasShowCounter());
+
+    TextFieldModelStatic::SetShowCounter(node, true);
+    EXPECT_TRUE(textFieldLayoutProperty->HasShowCounter());
+
+    TextFieldModelStatic::SetShowCounter(node, std::nullopt);
+    EXPECT_FALSE(textFieldLayoutProperty->HasShowCounter());
+}
+
+/**
+ * @tc.name: SetFontFeature
+ * @tc.desc: Test TextFieldModelStatic SetFontFeature with different conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetFontFeature, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test SetFontFeature with different conditions
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    FONT_FEATURES_LIST featureList = {{"\"subs\" on", 1}};
+    TextFieldModelStatic::SetFontFeature(node, featureList);
+    EXPECT_TRUE(textFieldLayoutProperty->HasFontFeature());
+    
+    TextFieldModelStatic::SetFontFeature(node, std::nullopt);
+    EXPECT_FALSE(textFieldLayoutProperty->HasFontFeature());
+}
+
+/**
  * @tc.name: SetBackBorder
  * @tc.desc: Test TextFieldModelStatic SetBackBorder with different conditions
  * @tc.type: FUNC

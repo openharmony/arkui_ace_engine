@@ -608,12 +608,7 @@ void SetFontFeatureImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
-    if (!convValue) {
-        FONT_FEATURES_LIST fontFeatures;
-        TextFieldModelNG::SetFontFeature(frameNode, fontFeatures);
-        return;
-    }
-    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(*convValue));
+    TextFieldModelStatic::SetFontFeature(frameNode, ParseFontFeatureSettings(*convValue));
 }
 void SetOnWillInsertImpl(Ark_NativePointer node,
                          const Opt_Callback_InsertValue_Boolean* value)
@@ -826,13 +821,10 @@ void SetShowCounterImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto showCounter = Converter::OptConvertPtr<bool>(value);
-    const bool defaultShowCounter = false;
-    const int32_t defaultCounterType = -1;
-    const bool defaultCounterBorder = true;
     if (!showCounter) {
-        TextFieldModelNG::SetShowCounter(frameNode, defaultShowCounter);
-        TextFieldModelStatic::SetCounterType(frameNode, defaultCounterType);
-        TextFieldModelStatic::SetShowCounterBorder(frameNode, defaultCounterBorder);
+        TextFieldModelStatic::SetShowCounter(frameNode, std::nullopt);
+        TextFieldModelStatic::SetCounterType(frameNode, std::nullopt);
+        TextFieldModelStatic::SetShowCounterBorder(frameNode, std::nullopt);
         return;
     }
     auto optionsOpt = Converter::OptConvertPtr<Ark_InputCounterOptions>(options);
@@ -851,7 +843,7 @@ void SetShowCounterImpl(Ark_NativePointer node,
     }
     TextFieldModelStatic::SetShowCounterBorder(frameNode, highlightBorderOpt);
     TextFieldModelStatic::SetCounterType(frameNode, thresholdPercentageOpt);
-    TextFieldModelNG::SetShowCounter(frameNode, *showCounter);
+    TextFieldModelStatic::SetShowCounter(frameNode, showCounter);
 }
 void SetCustomKeyboardImpl(Ark_NativePointer node,
                            const Opt_CustomNodeBuilder* value,
