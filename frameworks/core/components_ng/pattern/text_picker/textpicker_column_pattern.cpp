@@ -602,7 +602,7 @@ void TextPickerColumnPattern::ResetOptionPropertyHeight()
             pickerItemHeight =
                 pattern->GetResizeFlag() ? pattern->GetResizePickerItemHeight() : pattern->GetDefaultPickerItemHeight();
             int32_t itemCounts = static_cast<int32_t>(GetShowOptionCount());
-            for (int32_t i = 0; i < itemCounts; i++) {
+            for (int32_t i = 0; i < std::min(itemCounts, static_cast<int32_t>(optionProperties_.size())); i++) {
                 TextPickerOptionProperty& prop = optionProperties_[i];
                 prop.height = pickerItemHeight;
             }
@@ -1809,6 +1809,9 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
 void TextPickerColumnPattern::SetOptionShiftDistanceByIndex(int32_t index, const bool isLandscape)
 {
     CHECK_EQUAL_VOID(optionProperties_.empty(), true);
+    if (index >= static_cast<int32_t>(optionProperties_.size())) {
+        return;
+    }
     TextPickerOptionProperty& prop = optionProperties_[index];
     if (isLandscape) {
         prop.prevDistance = GetShiftDistanceForLandscape(index, ScrollDirection::UP);
