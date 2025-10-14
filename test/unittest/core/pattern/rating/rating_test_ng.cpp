@@ -2478,7 +2478,7 @@ HWTEST_F(RatingTestNg, MeasureTest003, TestSize.Level1)
     contentConstraint.selfIdealSize.SetSize(TEST_SIZE_200);
     ret = ratingLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicyProperty, DEFAULT_STAR_NUM,
         TEST_SIZE_200.Width(), TEST_SIZE_200.Height());
-    EXPECT_NE(ret, TEST_SIZE_200);
+    EXPECT_EQ(ret, TEST_SIZE_200);
 }
 
 /**
