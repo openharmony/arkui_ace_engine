@@ -73,7 +73,7 @@ void SelectModelStatic::SetArrowPosition(FrameNode* frameNode, const std::option
 }
 
 void SelectModelStatic::SetArrowModifierApply(FrameNode* frameNode,
-        const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply)
+    const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
