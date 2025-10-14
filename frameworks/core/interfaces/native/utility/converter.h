@@ -538,6 +538,7 @@ namespace Converter {
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> Color Convert(const Ark_Number& src);
     template<> Color Convert(const Ark_Int32& src);
+    template<> Color Convert(const Ark_Int64& src);
     template<> Color Convert(const Ark_Float64& src);
     template<> Color Convert(const Ark_String& src);
     template<> Dimension Convert(const Ark_Float64& src);

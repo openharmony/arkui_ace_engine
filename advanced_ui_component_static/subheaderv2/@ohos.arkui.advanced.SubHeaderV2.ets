@@ -89,11 +89,11 @@ export class SubHeaderV2Title {
   }
 }
 
-export type SubHeaderV2SelectOnSelect = (selectedIndex: number, selectedContent?: string) => void;
+export type SubHeaderV2SelectOnSelect = (selectedIndex: int, selectedContent?: string) => void;
 
 export interface SubHeaderV2SelectOptions {
   options: SelectOption[];
-  selectedIndex?: number;
+  selectedIndex?: int;
   selectedContent?: ResourceStr;
   onSelect?: SubHeaderV2SelectOnSelect;
   defaultFocus?: boolean;
@@ -108,7 +108,7 @@ export class SubHeaderV2Select {
   @Trace
   public options: SelectOption[];
   @Trace
-  public selectedIndex?: number;
+  public selectedIndex?: int;
   @Trace
   public selectedContent?: ResourceStr;
   @Trace
@@ -289,7 +289,7 @@ export struct SubHeaderV2 {
   @Local
   buttonBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
   @Local
-  selectedIndex: number | Resource | undefined = -1;
+  selectedIndex: int | Resource | undefined = -1;
   @Local
   selectedContent: ResourceStr | undefined = '';
   @Local
@@ -435,13 +435,13 @@ export struct SubHeaderV2 {
       .selected(this.selectedIndex)
       .value(this.selectedContent)
       .defaultFocus(this.select?.defaultFocus)
-      .onSelect((index: number, value?: string) => {
+      .onSelect((index: int, value?: string) => {
         this.selectedIndex = index;
         if (value) {
           this.selectedContent = value;
         }
         if (selectParam.params.onSelect) {
-          (selectParam?.params.onSelect as (index: number, value?: string) => void)(index, value);
+          (selectParam?.params.onSelect as (index: int, value?: string) => void)(index, value);
         }
       })
       .font({

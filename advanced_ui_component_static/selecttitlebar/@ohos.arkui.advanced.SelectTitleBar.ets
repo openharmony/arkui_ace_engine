@@ -90,7 +90,7 @@ export struct SelectTitleBar {
   badgeValue: int = 0;
   hidesBackButton: boolean = false;
   messageDesc: string = '';
-  onSelected: ((index: number) => void) = (index: number) => {
+  onSelected: ((index: int) => void) = (index: int) => {
   };
   private static readonly badgeSize: number = 16;
   private static readonly totalHeight: number = 56;

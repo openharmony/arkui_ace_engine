@@ -35,7 +35,7 @@ import ApplicationContext from 'application.ApplicationContext';
 const START_TIME: int = 250;
 const END_TIME: int = 200;
 const BORDER_RADIUS: number = 12;
-const ZINDEX_NUM: number = 9;
+const ZINDEX_NUM: int = 9;
 const SYMBOL_SIZE: number = 24;
 const MAX_SYMBOL_FONT_SCALE: number = 2;
 const MIN_SYMBOL_FONT_SCALE: number = 1;

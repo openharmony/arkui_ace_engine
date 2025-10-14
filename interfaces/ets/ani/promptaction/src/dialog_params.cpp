@@ -464,9 +464,8 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     if (!dialogProps.isShowInSubWindow) {
         GetLevelMode(env, object, dialogProps.dialogLevelMode);
     }
-    double levelUniqueId = -1;
-    GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
-    dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
+    dialogProps.dialogLevelUniqueId = -1;
+    GetInt32Param(env, object, "levelUniqueId", dialogProps.dialogLevelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
     GetOnLanguageChange(dialogProps);
     return true;
@@ -512,11 +511,11 @@ ani_ref CreateShowDialogSuccessResponse(ani_env* env, int32_t index)
         return nullptr;
     }
 
-    ani_double aniIndex = static_cast<ani_double>(index);
-    status = env->Object_SetPropertyByName_Double(responseObj, "index", aniIndex);
+    ani_int aniIndex = static_cast<ani_int>(index);
+    status = env->Object_SetPropertyByName_Int(responseObj, "index", aniIndex);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
-            "[ANI] Object_SetPropertyByName_Double fail. status: %{public}d", status);
+            "[ANI] Object_SetPropertyByName_Int fail. status: %{public}d", status);
         return nullptr;
     }
     return reinterpret_cast<ani_ref>(responseObj);
@@ -723,9 +722,8 @@ bool GetActionMenuOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     if (!dialogProps.isShowInSubWindow) {
         GetLevelMode(env, object, dialogProps.dialogLevelMode);
     }
-    double levelUniqueId = -1;
-    GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
-    dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
+    dialogProps.dialogLevelUniqueId = -1;
+    GetInt32Param(env, object, "levelUniqueId", dialogProps.dialogLevelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
     return true;
 }
@@ -754,11 +752,11 @@ ani_ref CreateActionMenuSuccessResponse(ani_env* env, int32_t index)
         return nullptr;
     }
 
-    ani_double aniIndex = static_cast<ani_double>(index);
-    status = env->Object_SetPropertyByName_Double(responseObj, "index", aniIndex);
+    ani_int aniIndex = static_cast<ani_int>(index);
+    status = env->Object_SetPropertyByName_Int(responseObj, "index", aniIndex);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
-            "[ANI] Object_SetPropertyByName_Double fail. status: %{public}d", status);
+            "[ANI] Object_SetPropertyByName_Int fail. status: %{public}d", status);
         return nullptr;
     }
     return reinterpret_cast<ani_ref>(responseObj);
@@ -1021,9 +1019,8 @@ bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     if (!dialogProps.isShowInSubWindow) {
         GetLevelMode(env, object, dialogProps.dialogLevelMode);
     }
-    double levelUniqueId = -1;
-    GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
-    dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
+    dialogProps.dialogLevelUniqueId = -1;
+    GetInt32Param(env, object, "levelUniqueId", dialogProps.dialogLevelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
     GetBoolParam(env, object, "focusable", dialogProps.focusable);
     return true;
@@ -1188,7 +1185,7 @@ bool GetCustomBuilderWithId(ani_env* env, ani_object object,
         }
 
         ani_fn_object func = static_cast<ani_fn_object>(globalBuilderRef);
-        ani_object dialogIdObj = CreateANIDoubleObject(env, static_cast<double>(dialogId));
+        ani_object dialogIdObj = CreateANIIntObject(env, dialogId);
         ani_ref dialogIdRef = static_cast<ani_ref>(dialogIdObj);
         ani_ref fnReturnVal {};
         status = env->FunctionalObject_Call(func, 1, &dialogIdRef, &fnReturnVal);
@@ -1503,8 +1500,7 @@ std::function<void(int32_t)> GetOpenCustomDialogPromise(std::shared_ptr<PromptAc
             }
 
             if (dialogId > 0) {
-                double returnDialogId = static_cast<double>(dialogId);
-                ani_object dialogIdObj = CreateANIDoubleObject(env, returnDialogId);
+                ani_object dialogIdObj = CreateANIIntObject(env, dialogId);
                 ani_ref dialogRef = static_cast<ani_ref>(dialogIdObj);
                 status = env->PromiseResolver_Resolve(asyncContext->deferred, dialogRef);
                 if (status != ANI_OK) {

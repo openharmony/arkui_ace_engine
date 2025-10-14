@@ -169,8 +169,8 @@ export function deserializeAndCallButtonModifierBuilder(thisDeserializer: Deseri
 export function deserializeAndCallButtonTriggerClickCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ButtonTriggerClickCallback)
-    let xPos : number = (thisDeserializer.readNumber() as number)
-    let yPos : number = (thisDeserializer.readNumber() as number)
+    let xPos : double = thisDeserializer.readFloat64()
+    let yPos : double = thisDeserializer.readFloat64()
     _call(xPos, yPos)
 }
 export function deserializeAndCallCallback_AccessibilityActionInterceptResult_Void(thisDeserializer: DeserializerBase): void {
@@ -494,6 +494,13 @@ export function deserializeAndCallCallback_F64_Void(thisDeserializer: Deserializ
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((offset: double) => void))
     let offset : double = thisDeserializer.readFloat64()
     _call(offset)
+}
+export function deserializeAndCallCallback_F64_SliderChangeMode_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: double,mode: SliderChangeMode) => void))
+    let value : double = thisDeserializer.readFloat64()
+    let mode : SliderChangeMode = SliderChangeMode.fromValue(thisDeserializer.readInt32())
+    _call(value, mode)
 }
 export function deserializeAndCallCallback_FocusAxisEvent_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -844,13 +851,6 @@ export function deserializeAndCallCallback_Number_Number_Void(thisDeserializer: 
     let prevIndex : number = (thisDeserializer.readNumber() as number)
     let index : number = (thisDeserializer.readNumber() as number)
     _call(prevIndex, index)
-}
-export function deserializeAndCallCallback_Number_SliderChangeMode_Void(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: number,mode: SliderChangeMode) => void))
-    let value : number = (thisDeserializer.readNumber() as number)
-    let mode : SliderChangeMode = SliderChangeMode.fromValue(thisDeserializer.readInt32())
-    _call(value, mode)
 }
 export function deserializeAndCallCallback_Number_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -1937,10 +1937,10 @@ export function deserializeAndCallContentWillScrollCallback(thisDeserializer: De
     const _callResult  = _call(result)
     continuationResult(_callResult)
 }
-export function deserializeAndCallCustomBuilderT_Number(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCustomBuilderT_I32(thisDeserializer: DeserializerBase): void {
     // const _resourceId : int32 = thisDeserializer.readInt32()
-    // const _call  = (ResourceHolder.instance().get(_resourceId) as CustomBuilderT<number>)
-    // let t : number = (thisDeserializer.readNumber() as number)
+    // const _call  = (ResourceHolder.instance().get(_resourceId) as CustomBuilderT<int32>)
+    // let t : int32 = thisDeserializer.readInt32()
     // _call(t)
 }
 export function deserializeAndCallCustomNodeBuilder(thisDeserializer: DeserializerBase): void {
@@ -2523,7 +2523,7 @@ export function deserializeAndCallOnRadioChangeCallback(thisDeserializer: Deseri
 export function deserializeAndCallOnRatingChangeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnRatingChangeCallback)
-    let rating : number = (thisDeserializer.readNumber() as number)
+    let rating : double = thisDeserializer.readFloat64()
     _call(rating)
 }
 export function deserializeAndCallOnRenderProcessNotRespondingCallback(thisDeserializer: DeserializerBase): void {
@@ -3037,7 +3037,7 @@ export function deserializeAndCallSliderModifierBuilder(thisDeserializer: Deseri
 export function deserializeAndCallSliderTriggerChangeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as SliderTriggerChangeCallback)
-    let value : number = (thisDeserializer.readNumber() as number)
+    let value : double = thisDeserializer.readFloat64()
     let mode : SliderChangeMode = SliderChangeMode.fromValue(thisDeserializer.readInt32())
     _call(value, mode)
 }
@@ -3431,6 +3431,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_Extender_OnFinish: return deserializeAndCallCallback_Extender_OnFinish(thisDeserializer);
         case CallbackKind.Kind_Callback_Extender_OnProgress: return deserializeAndCallCallback_Extender_OnProgress(thisDeserializer);
         case CallbackKind.Kind_Callback_F64_F64_Void: return deserializeAndCallCallback_F64_F64_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_F64_SliderChangeMode_Void: return deserializeAndCallCallback_F64_SliderChangeMode_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_F64_Void: return deserializeAndCallCallback_F64_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_FocusAxisEvent_Void: return deserializeAndCallCallback_FocusAxisEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_FormCallbackInfo_Void: return deserializeAndCallCallback_FormCallbackInfo_Void(thisDeserializer);
@@ -3468,7 +3469,6 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_NavigationTitleMode_Void: return deserializeAndCallCallback_NavigationTitleMode_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_NavigationTransitionProxy_Void: return deserializeAndCallCallback_NavigationTransitionProxy_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Number_Number_Void: return deserializeAndCallCallback_Number_Number_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_Number_SliderChangeMode_Void: return deserializeAndCallCallback_Number_SliderChangeMode_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Number_Void: return deserializeAndCallCallback_Number_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Object_Void: return deserializeAndCallCallback_Object_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnAlertEvent_Boolean: return deserializeAndCallCallback_OnAlertEvent_Boolean(thisDeserializer);
@@ -3579,7 +3579,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_CheckBoxModifierBuilder: return deserializeAndCallCheckBoxModifierBuilder(thisDeserializer);
         case CallbackKind.Kind_ContentDidScrollCallback: return deserializeAndCallContentDidScrollCallback(thisDeserializer);
         case CallbackKind.Kind_ContentWillScrollCallback: return deserializeAndCallContentWillScrollCallback(thisDeserializer);
-        case CallbackKind.Kind_CustomBuilderT_Number: return deserializeAndCallCustomBuilderT_Number(thisDeserializer);
+        case CallbackKind.Kind_CustomBuilderT_I32: return deserializeAndCallCustomBuilderT_I32(thisDeserializer);
         case CallbackKind.Kind_CustomNodeBuilder: return deserializeAndCallCustomNodeBuilder(thisDeserializer);
         case CallbackKind.Kind_DataPanelModifierBuilder: return deserializeAndCallDataPanelModifierBuilder(thisDeserializer);
         case CallbackKind.Kind_EditableTextOnChangeCallback: return deserializeAndCallEditableTextOnChangeCallback(thisDeserializer);
