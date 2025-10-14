@@ -34,12 +34,12 @@ ani_status CreateInt(ani_env* env, ani_int value, ani_object& rs)
 {
     ani_class cls;
     ani_status status;
-    if ((status = env->FindClass("Lstd/core/Int;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("std.core.Int", &cls)) != ANI_OK) {
         HILOGE("[ACE_APPBAR]Find Int class failed");
         return status;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "i:", &ctor)) != ANI_OK) {
         HILOGE("[ACE_APPBAR]Find Int ctor failed");
         return status;
     }
