@@ -388,7 +388,6 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest011, TestSize.Level1)
      * @tc.steps: step1. construct a FocusManager.
      */
     auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
-
     setFocusManagerViewStack(focusManager);
 
     std::unordered_map<int32_t, std::pair<WeakPtr<FocusView>, std::list<WeakPtr<FocusView>>>> focusViewMap;
