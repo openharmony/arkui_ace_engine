@@ -90,8 +90,8 @@ void MovingPhotoPattern::OnAttachToFrameNode()
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
     renderContextForMediaPlayer_->InitContext(false, param);
-    renderContext->UpdateBackgroundColor(Color::BLACK);
-    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->SetClipToBounds(true);
 
     CHECK_NULL_VOID(controller_);
