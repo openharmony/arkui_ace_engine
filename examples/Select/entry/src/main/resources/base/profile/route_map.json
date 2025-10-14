@@ -116,6 +116,11 @@
       "buildFunction": "SelectLevel7Builder"
     },
     {
+      "name": "SelectMenuOutline",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectMenuOutline.ets",
+      "buildFunction": "SelectMenuOutlineBuilder"
+    },
+    {
       "name": "ButtonIndex",
       "pageSourceFile": "src/main/ets/pages/components/button/Index.ets",
       "buildFunction": "ButtonIndexBuilder"

@@ -117,6 +117,7 @@
     "pages/BindContextMenu/bindContextMenus/bindMenu/menu",
     "pages/BindContextMenu/bindContextMenus/bindMenu/menuBuilder",
     "pages/BindContextMenu/bindContextMenus/bindMenu/secondInterface",
+    "pages/BindContextMenu/bindContextMenus/bindMenu/outline",
     "pages/BindContextMenu/bindContextMenus/ContentAnimation/Content",
     "pages/BindContextMenu/bindContextMenus/LabelInfoAnimation/labelInfoTest",
     "pages/BindContextMenu/bindContextMenus/UIConsistency/MenuDynamicIcons/DynamicIcons/dynamicIcon",
