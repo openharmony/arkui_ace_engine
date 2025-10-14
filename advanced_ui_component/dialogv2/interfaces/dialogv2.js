@@ -319,7 +319,7 @@ export class TipsDialogV2 extends ViewV2 {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Row.create();
       Row.accessibilityGroup(true);
-      Row.accessibilityText(getCheckTipsAccessibilityText(this.checkTips, this.checkedInner));
+      Row.accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.checkedInner));
       Row.accessibilityDescription(this.checkedInner ? { 'id': -1, 'type': 10003, params: ['sys.string.advanced_dialog_accessibility_cancel_checked_desc'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10003, params: ['sys.string.slider_accessibility_unselectedDesc'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
       Row.onClick(() => {
         this.checkedInner = !this.checkedInner;
@@ -852,7 +852,7 @@ export class SelectDialogV2 extends ViewV2 {
               Column.focusBox({
                 margin: { value: -2, unit: LengthUnit.VP }
               });
-              Column.accessibilityText(getAccessibilityText(item.title, this.selectedIndexInner === index));
+              Column.accessibilityText(getAccessibilityText(this.getUIContext(), item.title, this.selectedIndexInner === index));
               Column.onClick(() => {
                 this.selectedIndexInner = index;
                 item.action && item.action();
@@ -1216,7 +1216,7 @@ export class ConfirmDialogV2 extends ViewV2 {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Row.create();
       Row.accessibilityGroup(true);
-      Row.accessibilityText(getCheckTipsAccessibilityText(this.checkTips, this.checkedInner));
+      Row.accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.checkedInner));
       Row.accessibilityDescription(this.checkedInner ? { 'id': -1, 'type': 10003, params: ['sys.string.advanced_dialog_accessibility_cancel_checked_desc'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10003, params: ['sys.string.slider_accessibility_unselectedDesc'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
       Row.onClick(() => {
         this.checkedInner = !this.checkedInner;
@@ -2758,15 +2758,15 @@ function getEnumNumberByResourceId(resourceId, defaultValue) {
  * @param selected select state
  * @returns string
  */
-function getAccessibilityText(resource, selected) {
+function getAccessibilityText(context, resource, selected) {
   try {
-    let selectText = getContext().resourceManager.getStringSync(125833934);
+    let selectText = context?.getHostContext()?.resourceManager.getStringSync(125833934) ?? '';
     let resourceString = '';
     if (typeof resource === 'string') {
       resourceString = resource;
     }
     else {
-      resourceString = getContext().resourceManager.getStringSync(resource);
+      resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource.id) ?? '' : '';
     }
     return selected ? `${selectText},${resourceString}` : resourceString;
   }
@@ -2809,20 +2809,20 @@ function resolveKeyEvent(event, controller) {
  * @param selected select state
  * @returns string
  */
-function getCheckTipsAccessibilityText(resource, selected) {
+function getCheckTipsAccessibilityText(context, resource, selected) {
   try {
     // 'sys.string.slider_accessibility_selected'
-    let selectText = getContext().resourceManager.getStringSync(125833934);
+    let selectText = context?.getHostContext()?.resourceManager.getStringSync(125833934) ?? '';
     // 'sys.string.slider_accessibility_unselected'
-    let unselectText = getContext().resourceManager.getStringSync(125833935);
+    let unselectText = context?.getHostContext()?.resourceManager.getStringSync(125833935) ?? '';
     // 'sys.string.advanced_dialog_accessibility_checkbox'
-    let checkBoxText = getContext().resourceManager.getStringSync(125834354);
+    let checkBoxText = context?.getHostContext()?.resourceManager.getStringSync(125834354) ?? '';
     let resourceString = '';
     if (typeof resource === 'string') {
       resourceString = resource;
     }
     else {
-      resourceString = getContext().resourceManager.getStringSync(resource);
+      resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource.id) ?? '' : '';
     }
     return selected ? `${selectText},${resourceString},${checkBoxText}` :
       `${unselectText},${resourceString},${checkBoxText}`;
