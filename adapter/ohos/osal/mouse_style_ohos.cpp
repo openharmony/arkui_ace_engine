@@ -85,6 +85,14 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
         { MouseFormat::CURSOR_CIRCLE, MMI::CURSOR_CIRCLE },
         { MouseFormat::LOADING, MMI::LOADING },
         { MouseFormat::RUNNING, MMI::RUNNING },
+        { MouseFormat::MIDDLE_BTN_EAST_WEST, MMI::MIDDLE_BTN_EAST_WEST },
+        { MouseFormat::RUNNING_LEFT, MMI::RUNNING_LEFT },
+        { MouseFormat::RUNNING_RIGHT, MMI::RUNNING_RIGHT },
+        { MouseFormat::AECH_DEVELOPER_DEFINED_ICON, MMI::AECH_DEVELOPER_DEFINED_ICON },
+        { MouseFormat::SCREENRECORDER_CURSOR, MMI::SCREENRECORDER_CURSOR },
+        { MouseFormat::LASER_CURSOR, MMI::LASER_CURSOR },
+        { MouseFormat::LASER_CURSOR_DOT, MMI::LASER_CURSOR_DOT },
+        { MouseFormat::LASER_CURSOR_DOT_RED, MMI::LASER_CURSOR_DOT_RED },
     };
     int32_t MMIPointStyle = MMI::DEFAULT;
     int64_t idx = BinarySearchFindIndex(mouseFormatMap, ArraySize(mouseFormatMap), pointerStyle);
