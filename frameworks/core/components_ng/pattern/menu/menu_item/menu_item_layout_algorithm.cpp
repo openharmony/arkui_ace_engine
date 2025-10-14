@@ -520,8 +520,16 @@ void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, cons
     minItemHeight_ = static_cast<float>(selectTheme->GetOptionMinHeight().ConvertToPx());
     childConstraint.minSize.SetHeight(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ?
         selectTheme->GetMenuChildMinHeight().ConvertToPx() : minItemHeight_);
-    
+
     iconSize_ = selectTheme->GetIconSideLength().ConvertToPx();
+    if (selectTheme->IsTV() && !isOption_) {
+        // The end side needs to be aligned on TV.
+        auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
+        auto rightRowSize = rightRow ? rightRow->GetGeometryNode()->GetFrameSize() : SizeT(0.0f, 0.0f);
+        middleSpace_ = GreatNotEqual(rightRowSize.Width(), 0.0f)
+                           ? static_cast<float>(selectTheme->GetIconContentPadding().ConvertToPx())
+                           : 0;
+    }
     MeasureItemViews(childConstraint, layoutConstraint, layoutWrapper);
     MeasureClickableArea(layoutWrapper);
     CheckNeedExpandContent(layoutWrapper, childConstraint);
