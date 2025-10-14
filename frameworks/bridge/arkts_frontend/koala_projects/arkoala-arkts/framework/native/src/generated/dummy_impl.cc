@@ -27054,27 +27054,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getPreventDefault(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetPreventDefaultImpl(Ark_ClickEvent peer,
-                               const Callback_Void* preventDefault)
+    void PreventDefaultImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setPreventDefault(");
-        WriteToString(&out, preventDefault);
+        string out("preventDefault(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -31158,27 +31144,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_Void GetStopPropagationImpl(Ark_HoverEvent peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getStopPropagation(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_HoverEvent peer,
-                                const Callback_Void* stopPropagation)
+    void StopPropagationImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setStopPropagation(");
-        WriteToString(&out, stopPropagation);
+        string out("stopPropagation(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -41568,51 +41540,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_Void GetStopPropagationImpl(Ark_TouchEvent peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getStopPropagation(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_TouchEvent peer,
-                                const Callback_Void* stopPropagation)
+    void StopPropagationImpl(Ark_TouchEvent peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setStopPropagation(");
-        WriteToString(&out, stopPropagation);
+        string out("stopPropagation(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_Void GetPreventDefaultImpl(Ark_TouchEvent peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getPreventDefault(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetPreventDefaultImpl(Ark_TouchEvent peer,
-                               const Callback_Void* preventDefault)
+    void PreventDefaultImpl(Ark_TouchEvent peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setPreventDefault(");
-        WriteToString(&out, preventDefault);
+        string out("preventDefault(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -44163,8 +44107,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ClickEventAccessor::SetYImpl,
             ClickEventAccessor::GetHandImpl,
             ClickEventAccessor::SetHandImpl,
-            ClickEventAccessor::GetPreventDefaultImpl,
-            ClickEventAccessor::SetPreventDefaultImpl,
+            ClickEventAccessor::PreventDefaultImpl,
         };
         return &ClickEventAccessorImpl;
     }
@@ -44877,8 +44820,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             HoverEventAccessor::SetDisplayXImpl,
             HoverEventAccessor::GetDisplayYImpl,
             HoverEventAccessor::SetDisplayYImpl,
-            HoverEventAccessor::GetStopPropagationImpl,
-            HoverEventAccessor::SetStopPropagationImpl,
+            HoverEventAccessor::StopPropagationImpl,
         };
         return &HoverEventAccessorImpl;
     }
@@ -46676,10 +46618,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TouchEventAccessor::SetTouchesImpl,
             TouchEventAccessor::GetChangedTouchesImpl,
             TouchEventAccessor::SetChangedTouchesImpl,
-            TouchEventAccessor::GetStopPropagationImpl,
-            TouchEventAccessor::SetStopPropagationImpl,
-            TouchEventAccessor::GetPreventDefaultImpl,
-            TouchEventAccessor::SetPreventDefaultImpl,
+            TouchEventAccessor::StopPropagationImpl,
+            TouchEventAccessor::PreventDefaultImpl,
         };
         return &TouchEventAccessorImpl;
     }

@@ -24489,9 +24489,7 @@ typedef struct GENERATED_ArkUIClickEventAccessor {
     Opt_InteractionHand (*getHand)(Ark_ClickEvent peer);
     void (*setHand)(Ark_ClickEvent peer,
                     const Opt_InteractionHand* hand);
-    Callback_Void (*getPreventDefault)(Ark_ClickEvent peer);
-    void (*setPreventDefault)(Ark_ClickEvent peer,
-                              const Callback_Void* preventDefault);
+    void (*preventDefault)(Ark_ClickEvent peer);
 } GENERATED_ArkUIClickEventAccessor;
 
 typedef struct GENERATED_ArkUIClientAuthenticationHandlerAccessor {
@@ -25096,9 +25094,7 @@ typedef struct GENERATED_ArkUIHoverEventAccessor {
     Opt_Float64 (*getDisplayY)(Ark_HoverEvent peer);
     void (*setDisplayY)(Ark_HoverEvent peer,
                         const Opt_Float64* displayY);
-    Callback_Void (*getStopPropagation)(Ark_HoverEvent peer);
-    void (*setStopPropagation)(Ark_HoverEvent peer,
-                               const Callback_Void* stopPropagation);
+    void (*stopPropagation)(Ark_HoverEvent peer);
 } GENERATED_ArkUIHoverEventAccessor;
 
 typedef struct GENERATED_ArkUIHttpAuthHandlerAccessor {
@@ -26745,12 +26741,8 @@ typedef struct GENERATED_ArkUITouchEventAccessor {
     Array_TouchObject (*getChangedTouches)(Ark_TouchEvent peer);
     void (*setChangedTouches)(Ark_TouchEvent peer,
                               const Array_TouchObject* changedTouches);
-    Callback_Void (*getStopPropagation)(Ark_TouchEvent peer);
-    void (*setStopPropagation)(Ark_TouchEvent peer,
-                               const Callback_Void* stopPropagation);
-    Callback_Void (*getPreventDefault)(Ark_TouchEvent peer);
-    void (*setPreventDefault)(Ark_TouchEvent peer,
-                              const Callback_Void* preventDefault);
+    void (*stopPropagation)(Ark_TouchEvent peer);
+    void (*preventDefault)(Ark_TouchEvent peer);
 } GENERATED_ArkUITouchEventAccessor;
 
 typedef struct GENERATED_ArkUITransitionEffectAccessor {

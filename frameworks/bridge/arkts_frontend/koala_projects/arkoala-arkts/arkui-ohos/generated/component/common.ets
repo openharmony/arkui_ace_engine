@@ -22110,7 +22110,7 @@ export interface ClickEvent {
     x: double
     y: double
     hand?: InteractionHand | undefined
-    preventDefault: (() => void)
+    preventDefault(): void
 }
 export class ClickEventInternal extends BaseEventInternal implements MaterializedBase,ClickEvent {
     get displayX(): double {
@@ -22156,11 +22156,9 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         const hand_NonNull  = (hand as InteractionHand)
         this.setHand(hand_NonNull)
     }
-    get preventDefault(): (() => void) {
-        return this.getPreventDefault()
-    }
-    set preventDefault(preventDefault: (() => void)) {
-        this.setPreventDefault(preventDefault)
+    public preventDefault(): void {
+        this.preventDefault_serialize()
+        return
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -22234,14 +22232,6 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         this.setHand_serialize(hand_casted)
         return
     }
-    private getPreventDefault(): (() => void) {
-        return this.getPreventDefault_serialize()
-    }
-    private setPreventDefault(preventDefault: (() => void)): void {
-        const preventDefault_casted = preventDefault as ((() => void))
-        this.setPreventDefault_serialize(preventDefault_casted)
-        return
-    }
     private getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getDisplayX(this.peer!.ptr)
         return retval
@@ -22307,15 +22297,8 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._ClickEvent_setHand(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getPreventDefault_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getPreventDefault(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setPreventDefault_serialize(preventDefault: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(preventDefault)
-        ArkUIGeneratedNativeModule._ClickEvent_setPreventDefault(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    preventDefault_serialize(): void {
+        ArkUIGeneratedNativeModule._ClickEvent_preventDefault(this.peer!.ptr)
     }
 }
 export interface FocusAxisEvent {
@@ -22411,7 +22394,7 @@ export interface HoverEvent {
     windowY?: double | undefined
     displayX?: double | undefined
     displayY?: double | undefined
-    stopPropagation: (() => void)
+    stopPropagation(): void
 }
 export class HoverEventInternal extends BaseEventInternal implements MaterializedBase,HoverEvent {
     get x(): double | undefined {
@@ -22456,11 +22439,9 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         const displayY_NonNull  = (displayY as double)
         this.setDisplayY(displayY_NonNull)
     }
-    get stopPropagation(): (() => void) {
-        return this.getStopPropagation()
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
+        return
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -22524,14 +22505,6 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
     private setDisplayY(displayY: double | undefined): void {
         const displayY_casted = displayY as (double | undefined)
         this.setDisplayY_serialize(displayY_casted)
-        return
-    }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
         return
     }
     private getX_serialize(): double | undefined {
@@ -22672,15 +22645,8 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._HoverEvent_setDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._HoverEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._HoverEvent_stopPropagation(this.peer!.ptr)
     }
 }
 export interface MouseEvent {
@@ -23034,8 +23000,8 @@ export interface TouchEvent {
     type: TouchType
     touches: Array<TouchObject>
     changedTouches: Array<TouchObject>
-    stopPropagation: (() => void)
-    preventDefault: (() => void)
+    stopPropagation(): void
+    preventDefault(): void
     getHistoricalPoints(): Array<HistoricalPoint>
 }
 export class TouchEventInternal extends BaseEventInternal implements MaterializedBase,TouchEvent {
@@ -23057,17 +23023,13 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     set changedTouches(changedTouches: Array<TouchObject>) {
         this.setChangedTouches(changedTouches)
     }
-    get stopPropagation(): (() => void) {
-        return this.getStopPropagation()
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
+        return
     }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
-    }
-    get preventDefault(): (() => void) {
-        return this.getPreventDefault()
-    }
-    set preventDefault(preventDefault: (() => void)) {
-        this.setPreventDefault(preventDefault)
+    public preventDefault(): void {
+        this.preventDefault_serialize()
+        return
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -23110,22 +23072,6 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     private setChangedTouches(changedTouches: Array<TouchObject>): void {
         const changedTouches_casted = changedTouches as (Array<TouchObject>)
         this.setChangedTouches_serialize(changedTouches_casted)
-        return
-    }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
-        return
-    }
-    private getPreventDefault(): (() => void) {
-        return this.getPreventDefault_serialize()
-    }
-    private setPreventDefault(preventDefault: (() => void)): void {
-        const preventDefault_casted = preventDefault as ((() => void))
-        this.setPreventDefault_serialize(preventDefault_casted)
         return
     }
     getHistoricalPoints_serialize(): Array<HistoricalPoint> {
@@ -23188,25 +23134,11 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._TouchEvent_setChangedTouches(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+    stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._TouchEvent_stopPropagation(this.peer!.ptr)
     }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._TouchEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getPreventDefault_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getPreventDefault(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setPreventDefault_serialize(preventDefault: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(preventDefault)
-        ArkUIGeneratedNativeModule._TouchEvent_setPreventDefault(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    preventDefault_serialize(): void {
+        ArkUIGeneratedNativeModule._TouchEvent_preventDefault(this.peer!.ptr)
     }
 }
 export namespace cursorControl {

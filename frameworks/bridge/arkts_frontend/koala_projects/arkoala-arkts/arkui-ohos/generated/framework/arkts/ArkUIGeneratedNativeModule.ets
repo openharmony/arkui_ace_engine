@@ -3596,9 +3596,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ClickEvent_setHand(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _ClickEvent_getPreventDefault(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _ClickEvent_setPreventDefault(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _ClickEvent_preventDefault(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _ClientAuthenticationHandler_construct(): KPointer
     @ani.unsafe.Direct
@@ -4236,9 +4234,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _HoverEvent_setDisplayY(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _HoverEvent_getStopPropagation(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _HoverEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _HoverEvent_stopPropagation(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _HttpAuthHandler_construct(): KPointer
     @ani.unsafe.Direct
@@ -5661,13 +5657,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TouchEvent_setChangedTouches(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _TouchEvent_getStopPropagation(ptr: KPointer): KPointer
+    native static _TouchEvent_stopPropagation(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _TouchEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _TouchEvent_getPreventDefault(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _TouchEvent_setPreventDefault(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _TouchEvent_preventDefault(ptr: KPointer): void
     @ani.unsafe.Quick
     native static _TransitionEffect_construct0(type: KStringPtr): KPointer
     @ani.unsafe.Quick

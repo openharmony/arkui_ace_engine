@@ -49,7 +49,7 @@ public:
 
 private:
     ani_env* env_;
-    ani_ref ref_;
+    ani_ref ref_ = nullptr;
 };
 } // namespace OHOS::Ace::Ani
 
