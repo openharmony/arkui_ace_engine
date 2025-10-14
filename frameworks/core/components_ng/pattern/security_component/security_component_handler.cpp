@@ -1010,6 +1010,8 @@ void SecurityComponentHandler::WriteButtonInfo(
     if (SystemProperties::GetDeviceType() == DeviceType::WEARABLE) {
         buttonInfo.isWearableDevice_ = true;
     }
+
+    buttonInfo.isArkuiComponent_ = layoutProperty->GetIsArkuiComponent().value_or(false);
 }
 
 bool SecurityComponentHandler::InitButtonInfoValue(RefPtr<FrameNode>& node,
