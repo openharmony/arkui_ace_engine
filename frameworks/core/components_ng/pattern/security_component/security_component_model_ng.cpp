@@ -156,9 +156,6 @@ bool SecurityComponentModelNG::InitSecurityComponent(FrameNode* frameNode,
     property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     property->UpdateIsArkuiComponent(isArkuiComponent);
     property->UpdateTextStyle(style.text);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
-    CHECK_NULL_RETURN(pipeline, false);
-    pipeline->AddWindowStateChangedCallback(frameNode->GetId());
     return true;
 }
 

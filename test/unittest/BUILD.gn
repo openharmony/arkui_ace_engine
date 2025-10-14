@@ -1293,6 +1293,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/security_component/security_component_layout_element.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/security_component/security_component_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/security_component/security_component_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/security_component/security_component_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select/select_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select/select_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select/select_model_ng.cpp",
