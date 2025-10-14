@@ -44,6 +44,26 @@ void UpdateCheckedSelectedElementInfo(const RefPtr<NG::AccessibilityProperty>& a
         }
     }
 }
+
+void RemoveControllerTextFromGroup(const RefPtr<NG::FrameNode>& controllerNode,
+    const RefPtr<NG::AccessibilityProperty>& accessibilityProperty,
+    AccessibilityElementInfo& nodeInfo)
+{
+    CHECK_NULL_VOID(controllerNode);
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (!NG::AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(controllerNode)) {
+        return;
+    }
+    auto content = nodeInfo.GetContent();
+    CHECK_EQUAL_VOID(content.empty(), true);
+    auto text = accessibilityProperty->GetText();
+    CHECK_EQUAL_VOID(text.empty(), true);
+    size_t pos = content.find(text);
+    if (pos != std::string::npos) {
+        content.erase(pos, text.length());
+        nodeInfo.SetContent(content);
+    }
+}
 } // namespace
 
 void JsAccessibilityManager::CheckStateTakeOver(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
@@ -67,6 +87,7 @@ void JsAccessibilityManager::CheckStateTakeOver(const RefPtr<NG::FrameNode>& nod
         }
         nodeInfo.SetCustomComponentType(controllerNodeTag);
         nodeInfo.SetDescriptionInfo(accessibilityProperty->GetAccessibilityDescription());
+        RemoveControllerTextFromGroup(controllerNode, accessibilityProperty, nodeInfo);
     }
     if (controllerType == NG::StateControllerType::CONTROLLER_CHECK_WITH_EXTRA) {
         ExtraElementInfo extraElementInfo = nodeInfo.GetExtraElement();

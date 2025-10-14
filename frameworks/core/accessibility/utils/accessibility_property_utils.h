@@ -44,6 +44,7 @@ public:
         const RefPtr<FrameNode>& node, RefPtr<FrameNode>& controllerNode);
     static ActionControllerType CheckAndGetActionController(
         const RefPtr<FrameNode>& node, RefPtr<FrameNode>& controllerNode);
+    static bool NeedRemoveControllerTextFromGroup(const RefPtr<FrameNode>& controllerNode);
 };
 } // namespace OHOS::Ace::NG
 
