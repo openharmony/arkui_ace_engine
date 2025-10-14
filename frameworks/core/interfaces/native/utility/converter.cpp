@@ -1583,6 +1583,7 @@ template<>
 OverlayOptions Convert(const Ark_OverlayOptions& src)
 {
     OverlayOptions dst;
+    dst.align = Alignment::TOP_LEFT;
     auto align = Converter::OptConvert<Alignment>(src.align);
     if (align) {
         dst.align = align.value();
