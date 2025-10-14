@@ -203,6 +203,7 @@ public:
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
     static void SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled);
     static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
+    static void SetGestureFocusMode(FrameNode* frameNode, const GestureFocusMode& mode);
     static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
     static void SetActivateContentEventId(

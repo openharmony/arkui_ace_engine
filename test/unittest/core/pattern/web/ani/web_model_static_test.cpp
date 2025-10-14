@@ -2642,6 +2642,7 @@ HWTEST_F(WebModelStaticTest, SetGestureFocusMode001, TestSize.Level1)
         GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckGestureFocusMode(
         GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS), true);
+
     WebModelStatic::SetGestureFocusMode(AccessibilityManager::RawPtr(frameNode),
         GestureFocusMode::DEFAULT);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckGestureFocusMode(GestureFocusMode::DEFAULT), true);
