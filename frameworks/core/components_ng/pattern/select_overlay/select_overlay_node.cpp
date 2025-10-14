@@ -1147,6 +1147,7 @@ RefPtr<FrameNode> CreateMenuTextNode(const std::string& value, const RefPtr<Fram
     textProperty->UpdateFontSize(theme->GetMenuFontSize());
     textProperty->UpdateFontWeight(FontWeight::REGULAR);
     textProperty->UpdateTextColor(Color::TRANSPARENT);
+    textProperty->UpdateWordBreak(WordBreak::BREAK_ALL);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     if (isAIMenuEnabled == true && textOverlayTheme) {
         TextStyle textStyle;
