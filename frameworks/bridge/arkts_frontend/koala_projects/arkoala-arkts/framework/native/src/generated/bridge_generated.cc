@@ -34186,46 +34186,46 @@ void impl_SwiperContentTransitionProxy_finishTransition(Ark_NativePointer thisPt
         GetAccessors()->getSwiperContentTransitionProxyAccessor()->finishTransition(self);
 }
 KOALA_INTEROP_DIRECT_V1(SwiperContentTransitionProxy_finishTransition, Ark_NativePointer)
-Ark_Number impl_SwiperContentTransitionProxy_getSelectedIndex(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_SwiperContentTransitionProxy_getSelectedIndex(Ark_NativePointer thisPtr) {
         Ark_SwiperContentTransitionProxy self = reinterpret_cast<Ark_SwiperContentTransitionProxy>(thisPtr);
         return GetAccessors()->getSwiperContentTransitionProxyAccessor()->getSelectedIndex(self);
 }
-KOALA_INTEROP_DIRECT_1(SwiperContentTransitionProxy_getSelectedIndex, KInteropNumber, Ark_NativePointer)
-void impl_SwiperContentTransitionProxy_setSelectedIndex(Ark_NativePointer thisPtr, KInteropNumber selectedIndex) {
+KOALA_INTEROP_DIRECT_1(SwiperContentTransitionProxy_getSelectedIndex, Ark_Int32, Ark_NativePointer)
+void impl_SwiperContentTransitionProxy_setSelectedIndex(Ark_NativePointer thisPtr, Ark_Int32 selectedIndex) {
         Ark_SwiperContentTransitionProxy self = reinterpret_cast<Ark_SwiperContentTransitionProxy>(thisPtr);
-        GetAccessors()->getSwiperContentTransitionProxyAccessor()->setSelectedIndex(self, (const Ark_Number*) (&selectedIndex));
+        GetAccessors()->getSwiperContentTransitionProxyAccessor()->setSelectedIndex(self, selectedIndex);
 }
-KOALA_INTEROP_DIRECT_V2(SwiperContentTransitionProxy_setSelectedIndex, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_SwiperContentTransitionProxy_getIndex(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(SwiperContentTransitionProxy_setSelectedIndex, Ark_NativePointer, Ark_Int32)
+Ark_Int32 impl_SwiperContentTransitionProxy_getIndex(Ark_NativePointer thisPtr) {
         Ark_SwiperContentTransitionProxy self = reinterpret_cast<Ark_SwiperContentTransitionProxy>(thisPtr);
         return GetAccessors()->getSwiperContentTransitionProxyAccessor()->getIndex(self);
 }
-KOALA_INTEROP_DIRECT_1(SwiperContentTransitionProxy_getIndex, KInteropNumber, Ark_NativePointer)
-void impl_SwiperContentTransitionProxy_setIndex(Ark_NativePointer thisPtr, KInteropNumber index) {
+KOALA_INTEROP_DIRECT_1(SwiperContentTransitionProxy_getIndex, Ark_Int32, Ark_NativePointer)
+void impl_SwiperContentTransitionProxy_setIndex(Ark_NativePointer thisPtr, Ark_Int32 index) {
         Ark_SwiperContentTransitionProxy self = reinterpret_cast<Ark_SwiperContentTransitionProxy>(thisPtr);
-        GetAccessors()->getSwiperContentTransitionProxyAccessor()->setIndex(self, (const Ark_Number*) (&index));
+        GetAccessors()->getSwiperContentTransitionProxyAccessor()->setIndex(self, index);
 }
-KOALA_INTEROP_DIRECT_V2(SwiperContentTransitionProxy_setIndex, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_SwiperContentTransitionProxy_getPosition(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(SwiperContentTransitionProxy_setIndex, Ark_NativePointer, Ark_Int32)
+Ark_Int32 impl_SwiperContentTransitionProxy_getPosition(Ark_NativePointer thisPtr) {
         Ark_SwiperContentTransitionProxy self = reinterpret_cast<Ark_SwiperContentTransitionProxy>(thisPtr);
         return GetAccessors()->getSwiperContentTransitionProxyAccessor()->getPosition(self);
 }
-KOALA_INTEROP_DIRECT_1(SwiperContentTransitionProxy_getPosition, KInteropNumber, Ark_NativePointer)
-void impl_SwiperContentTransitionProxy_setPosition(Ark_NativePointer thisPtr, KInteropNumber position) {
+KOALA_INTEROP_1(SwiperContentTransitionProxy_getPosition, Ark_Int32, Ark_NativePointer)
+void impl_SwiperContentTransitionProxy_setPosition(Ark_NativePointer thisPtr, KDouble position) {
         Ark_SwiperContentTransitionProxy self = reinterpret_cast<Ark_SwiperContentTransitionProxy>(thisPtr);
-        GetAccessors()->getSwiperContentTransitionProxyAccessor()->setPosition(self, (const Ark_Number*) (&position));
+        GetAccessors()->getSwiperContentTransitionProxyAccessor()->setPosition(self, position);
 }
-KOALA_INTEROP_DIRECT_V2(SwiperContentTransitionProxy_setPosition, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_SwiperContentTransitionProxy_getMainAxisLength(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_V2(SwiperContentTransitionProxy_setPosition, Ark_NativePointer, KDouble)
+Ark_Int32 impl_SwiperContentTransitionProxy_getMainAxisLength(Ark_NativePointer thisPtr) {
         Ark_SwiperContentTransitionProxy self = reinterpret_cast<Ark_SwiperContentTransitionProxy>(thisPtr);
         return GetAccessors()->getSwiperContentTransitionProxyAccessor()->getMainAxisLength(self);
 }
-KOALA_INTEROP_DIRECT_1(SwiperContentTransitionProxy_getMainAxisLength, KInteropNumber, Ark_NativePointer)
-void impl_SwiperContentTransitionProxy_setMainAxisLength(Ark_NativePointer thisPtr, KInteropNumber mainAxisLength) {
+KOALA_INTEROP_1(SwiperContentTransitionProxy_getMainAxisLength, Ark_Int32, Ark_NativePointer)
+void impl_SwiperContentTransitionProxy_setMainAxisLength(Ark_NativePointer thisPtr, KDouble mainAxisLength) {
         Ark_SwiperContentTransitionProxy self = reinterpret_cast<Ark_SwiperContentTransitionProxy>(thisPtr);
-        GetAccessors()->getSwiperContentTransitionProxyAccessor()->setMainAxisLength(self, (const Ark_Number*) (&mainAxisLength));
+        GetAccessors()->getSwiperContentTransitionProxyAccessor()->setMainAxisLength(self, mainAxisLength);
 }
-KOALA_INTEROP_DIRECT_V2(SwiperContentTransitionProxy_setMainAxisLength, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_V2(SwiperContentTransitionProxy_setMainAxisLength, Ark_NativePointer, KDouble)
 Ark_NativePointer impl_SwiperController_construct() {
         return GetAccessors()->getSwiperControllerAccessor()->construct();
 }

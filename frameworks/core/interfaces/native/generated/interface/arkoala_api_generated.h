@@ -26442,18 +26442,18 @@ typedef struct GENERATED_ArkUISwiperContentTransitionProxyAccessor {
     Ark_SwiperContentTransitionProxy (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*finishTransition)(Ark_SwiperContentTransitionProxy peer);
-    Ark_Number (*getSelectedIndex)(Ark_SwiperContentTransitionProxy peer);
+    Ark_Int32 (*getSelectedIndex)(Ark_SwiperContentTransitionProxy peer);
     void (*setSelectedIndex)(Ark_SwiperContentTransitionProxy peer,
-                             const Ark_Number* selectedIndex);
-    Ark_Number (*getIndex)(Ark_SwiperContentTransitionProxy peer);
+                             Ark_Int32 selectedIndex);
+    Ark_Int32 (*getIndex)(Ark_SwiperContentTransitionProxy peer);
     void (*setIndex)(Ark_SwiperContentTransitionProxy peer,
-                     const Ark_Number* index);
-    Ark_Number (*getPosition)(Ark_SwiperContentTransitionProxy peer);
+                     Ark_Int32 index);
+    Ark_Float64 (*getPosition)(Ark_SwiperContentTransitionProxy peer);
     void (*setPosition)(Ark_SwiperContentTransitionProxy peer,
-                        const Ark_Number* position);
-    Ark_Number (*getMainAxisLength)(Ark_SwiperContentTransitionProxy peer);
+                        Ark_Float64 position);
+    Ark_Float64 (*getMainAxisLength)(Ark_SwiperContentTransitionProxy peer);
     void (*setMainAxisLength)(Ark_SwiperContentTransitionProxy peer,
-                              const Ark_Number* mainAxisLength);
+                              Ark_Float64 mainAxisLength);
 } GENERATED_ArkUISwiperContentTransitionProxyAccessor;
 
 typedef struct GENERATED_ArkUISwiperControllerAccessor {
