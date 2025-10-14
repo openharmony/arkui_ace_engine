@@ -131,6 +131,14 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillDisappearModifier.identity, NavDestinationOnWillDisappearModifier, callback);
     return this;
   }
+  onActive(callback: (reason: NavDestinationActiveReason) => void): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnActiveModifier.identity, NavDestinationOnActiveModifier, callback);
+    return this;
+  }
+  onInactive(callback: (reason: NavDestinationInactiveReason) => void): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationonInactiveModifier.identity, NavDestinationonInactiveModifier, callback);
+    return this;
+  }
   onBackPressed(callback: () => boolean): this {
     modifierWithKey(this._modifiersWithKeys, NavDestinationOnBackPressedModifier.identity, NavDestinationOnBackPressedModifier, callback);
     return this;
@@ -201,6 +209,14 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
   }
   systemBarStyle(style: Optional<SystemBarStyle>): this {
     modifierWithKey(this._modifiersWithKeys, NavDestinationSystemBarStyleModifier.identity, NavDestinationSystemBarStyleModifier, style);
+    return this;
+  }
+  onResult(callback: Optional<Callback<ESObject>>): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnResultModifier.identity, NavDestinationOnResultModifier, callback);
+    return this;
+  }
+  onNewParam(callback: Optional<Callback<ESObject>>): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnNewParamModifier.identity, NavDestinationOnNewParamModifier, callback);
     return this;
   }
 }
@@ -548,6 +564,34 @@ class NavDestinationOnWillDisappearModifier extends ModifierWithKey<Callback<voi
   }
 }
 
+class NavDestinationOnActiveModifier extends ModifierWithKey<Callback<void>> {
+  constructor(value: (reason: NavDestinationActiveReason) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onActive');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnActive(node);
+    } else {
+      getUINativeModule().navDestination.setOnActive(node, this.value);
+    }
+  }
+}
+
+class NavDestinationOnInactiveModifier extends ModifierWithKey<Callback<void>> {
+  constructor(value: (reason: NavDestinationActiveReason) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onInactive');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnInactive(node);
+    } else {
+      getUINativeModule().navDestination.setOnInactive(node, this.value);
+    }
+  }
+}
+
 class NavDestinationOnBackPressedModifier extends ModifierWithKey<()=> boolean> {
   constructor(value: ()=> boolean) {
     super(value);
@@ -572,6 +616,34 @@ class NavDestinationOnReadyModifier extends ModifierWithKey<Callback<NavDestinat
       getUINativeModule().navDestination.resetOnReady(node);
     } else {
       getUINativeModule().navDestination.setOnReady(node, this.value);
+    }
+  }
+}
+
+class NavDestinationOnResultModifier extends ModifierWithKey<Callback<ESObject>> {
+  constructor(value: (callback: ESObject) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onResult');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnResult(node);
+    } else {
+      getUINativeModule().navDestination.setOnResult(node, this.value);
+    }
+  }
+}
+
+class NavDestinationonNewParamModifier extends ModifierWithKey<Callback<ESObject>> {
+  constructor(value: (callback: ESObject) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onNewParam');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetonNewParam(node);
+    } else {
+      getUINativeModule().navDestination.setonNewParam(node, this.value);
     }
   }
 }

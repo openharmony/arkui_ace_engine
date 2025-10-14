@@ -4727,6 +4727,14 @@ struct ArkUINavDestinationModifier {
     void (*setNavDestinationBeforeCreateLayoutWrapperCallBack)(ArkUINodeHandle node,
         void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node));
     void (*setTitleAnimationElapsedTime)(ArkUINodeHandle node, ArkUI_Int32 elapsedTime);
+    void (*setNavDestinationOnActive)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnActive)(ArkUINodeHandle node);
+    void (*setNavDestinationOnInactive)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnInactive)(ArkUINodeHandle node);
+    void (*setNavDestinationOnResult)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnResult)(ArkUINodeHandle node);
+    void (*setNavDestinationOnNewParam)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnNewParam)(ArkUINodeHandle node);
 };
 
 struct ArkUITextAreaModifier {

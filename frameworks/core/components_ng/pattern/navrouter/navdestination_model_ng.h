@@ -130,9 +130,13 @@ public:
     static void SetOnWillShow(FrameNode* frameNode, std::function<void()>&& willShow);
     static void SetOnWillHide(FrameNode* frameNode, std::function<void()>&& willHide);
     static void SetOnWillDisAppear(FrameNode* frameNode, std::function<void()>&& willDisAppear);
+    static void SetOnActive(FrameNode* frameNode, std::function<void(int32_t)>&& active);
+    static void SetOnInactive(FrameNode* frameNode, std::function<void(int32_t)>&& inactive);
     static void SetOnBackPressed(FrameNode* frameNode, std::function<bool()>&& onBackPressed);
     static void SetOnReady(FrameNode* frameNode, std::function<void(RefPtr<NavDestinationContext>)>&& onReady);
     static void SetCustomBackButtonNode(FrameNode* frameNode, FrameNode* backButtonNode);
+    static void SetOnNewParam(FrameNode* frameNode, NG::NavDestinationOnNewParamCallback&& onNewParamCallback);
+    static void SetOnPop(FrameNode* frameNode, std::function<void(const RefPtr<NavPathInfo>&)>&& popCallback);
     void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) override;
     void SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback) override;
     void SetPreferredOrientation(const std::optional<Orientation>& ori) override;

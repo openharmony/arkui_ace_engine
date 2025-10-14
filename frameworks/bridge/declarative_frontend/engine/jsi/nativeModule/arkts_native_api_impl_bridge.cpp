@@ -3126,6 +3126,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnWillDisappear));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillDisappear"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnWillDisappear));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnActive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnActive));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnActive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnActive));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnInactive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnInactive));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnInactive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnInactive));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnBackPressed"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnBackPressed));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnBackPressed"),
@@ -3138,6 +3146,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetToolBarConfiguration));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetToolBarConfiguration"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetToolBarConfiguration));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnResult"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnResult));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnResult"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnResult));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnNewParam"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnNewParam));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNewParam"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnNewParam));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestination"), navDestination);
 
     auto particle = panda::ObjectRef::New(vm);
