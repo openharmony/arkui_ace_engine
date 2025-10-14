@@ -11845,12 +11845,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                      const Opt_InteractionHand* hand)
     {
     }
-    Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
-    {
-        return {};
-    }
-    void SetPreventDefaultImpl(Ark_ClickEvent peer,
-                               const Callback_Void* preventDefault)
+    void PreventDefaultImpl(Ark_ClickEvent peer)
     {
     }
     } // ClickEventAccessor
@@ -13451,12 +13446,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_Number* displayY)
     {
     }
-    Callback_Void GetStopPropagationImpl(Ark_HoverEvent peer)
-    {
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_HoverEvent peer,
-                                const Callback_Void* stopPropagation)
+    void StopPropagationImpl(Ark_HoverEvent peer)
     {
     }
     } // HoverEventAccessor
@@ -17437,20 +17427,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Array_TouchObject* changedTouches)
     {
     }
-    Callback_Void GetStopPropagationImpl(Ark_TouchEvent peer)
-    {
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_TouchEvent peer,
-                                const Callback_Void* stopPropagation)
+    void StopPropagationImpl(Ark_TouchEvent peer)
     {
     }
-    Callback_Void GetPreventDefaultImpl(Ark_TouchEvent peer)
-    {
-        return {};
-    }
-    void SetPreventDefaultImpl(Ark_TouchEvent peer,
-                               const Callback_Void* preventDefault)
+    void PreventDefaultImpl(Ark_TouchEvent peer)
     {
     }
     } // TouchEventAccessor
@@ -18682,8 +18662,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ClickEventAccessor::SetYImpl,
             ClickEventAccessor::GetHandImpl,
             ClickEventAccessor::SetHandImpl,
-            ClickEventAccessor::GetPreventDefaultImpl,
-            ClickEventAccessor::SetPreventDefaultImpl,
+            ClickEventAccessor::PreventDefaultImpl,
         };
         return &ClickEventAccessorImpl;
     }
@@ -19415,8 +19394,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             HoverEventAccessor::SetDisplayXImpl,
             HoverEventAccessor::GetDisplayYImpl,
             HoverEventAccessor::SetDisplayYImpl,
-            HoverEventAccessor::GetStopPropagationImpl,
-            HoverEventAccessor::SetStopPropagationImpl,
+            HoverEventAccessor::StopPropagationImpl,
         };
         return &HoverEventAccessorImpl;
     }
@@ -21211,10 +21189,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TouchEventAccessor::SetTouchesImpl,
             TouchEventAccessor::GetChangedTouchesImpl,
             TouchEventAccessor::SetChangedTouchesImpl,
-            TouchEventAccessor::GetStopPropagationImpl,
-            TouchEventAccessor::SetStopPropagationImpl,
-            TouchEventAccessor::GetPreventDefaultImpl,
-            TouchEventAccessor::SetPreventDefaultImpl,
+            TouchEventAccessor::StopPropagationImpl,
+            TouchEventAccessor::PreventDefaultImpl,
         };
         return &TouchEventAccessorImpl;
     }
