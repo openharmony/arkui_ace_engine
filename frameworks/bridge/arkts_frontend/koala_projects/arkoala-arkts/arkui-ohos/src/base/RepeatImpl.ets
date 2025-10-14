@@ -41,6 +41,9 @@ export function RepeatImplForOptions<T>(
         throw new Error('Repeat item builder function unspecified. Usage error!');
     }
     if (repeat.disableVirtualScroll_) {
+        if (repeat.useTemplate_) {
+            throw new Error('Repeat: template function is not supported in non-virtualScroll mode.');
+        }
         nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(REPEAT_EACH_FUNC_TYPE)!, repeat.keyGenFunc_,
             repeat.onMove_, repeat.itemDragEvent_);
     } else {
@@ -173,6 +176,8 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     reusable_: boolean = true;
     disableVirtualScroll_: boolean = false;
 
+    useTemplate_: boolean = false; // whether use template function
+
     setRepeatOptions(arr: RepeatArray<T>): this {
         return this;
     }
@@ -207,6 +212,7 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
         }
         this.itemGenFuncs_.set(type, itemBuilder);
         this.templateCacheSize_.set(type, templateOptions?.cachedCount ?? Number.POSITIVE_INFINITY.toInt());
+        this.useTemplate_ = true;
         return this;
     }
 
