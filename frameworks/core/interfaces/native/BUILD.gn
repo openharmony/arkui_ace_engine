@@ -89,6 +89,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_list_item_modifier.cpp",
       "node/node_list_modifier.cpp",
       "node/node_loading_progress_modifier.cpp",
+      "node/node_loading_progress_modifier_multi_thread.cpp",
       "node/node_modifiers.cpp",
       "node/node_refresh_modifier.cpp",
       "node/node_relative_container_modifier.cpp",
