@@ -47,7 +47,10 @@ ohos_shared_library("inspector_ani") {
 #构建abc
 generate_static_abc("inspector") {
   base_url = "./ets"
-  files = [ "./ets/@ohos.arkui.inspector.ets" ]
+  files = [
+    "./ets/@ohos.arkui.inspector.ets",
+    "./ets/arkui.component.units.ets",
+  ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/inspector.abc"
 }
