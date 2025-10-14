@@ -16,5 +16,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("event_recorder_test") {
   type = "new"
   module_output = "basic"
-  sources = [ "event_recorder_test.cpp" ]
+  sources = [
+    "event_config_test.cpp",
+    "event_recorder_test.cpp",
+  ]
 }
