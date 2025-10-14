@@ -2094,4 +2094,26 @@ HWTEST_F(ImageTestOneNg, SetImageModelStaticSrc001, TestSize.Level1)
         ImageLayoutProperty, ImageSourceInfo, defaultInfo, frameNode, ImageSourceInfo());
     ASSERT_EQ(defaultInfo.GetSrc(), "");
 }
+
+/**
+ * @tc.name: SetImageModelStaticImageFit001
+ * @tc.desc: parse src
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticImageFit001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ImageFit defaultFit = ImageFit::NONE;
+    const std::optional<ImageFit> value = ImageFit::FILL;
+    ImageModelStatic::SetImageFit(frameNode, value);
+
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, ImageFit, defaultFit, frameNode, ImageFit::COVER);
+    ASSERT_EQ(defaultFit, ImageFit::FILL);
+    ImageModelStatic::SetImageFit(frameNode, std::nullopt);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, ImageFit, defaultFit, frameNode, ImageFit::COVER);
+    ASSERT_EQ(defaultFit, ImageFit::COVER);
+}
 } // namespace OHOS::Ace::NG
