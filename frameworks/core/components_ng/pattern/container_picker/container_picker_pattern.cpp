@@ -83,7 +83,7 @@ bool ContainerPickerPattern::AccumulatingTerminateHelper(
 
 bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure && config.skipLayout && !playAnimation_) {
+    if (config.skipMeasure && config.skipLayout && !isNeedStartInertialAnimation_) {
         return false;
     }
 
@@ -99,8 +99,8 @@ bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
     SetDefaultTextStyle();
     HandleTargetIndex(dirty, pickerAlgorithm);
 
-    if (playAnimation_) {
-        PlayAnimation();
+    if (isNeedStartInertialAnimation_) {
+        StartInertialAnimation();
     }
     return false;
 }
@@ -385,11 +385,11 @@ RefPtr<TouchEventImpl> ContainerPickerPattern::CreateItemTouchEventListener()
         }
 
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            if (pattern->isTossStatus_) {
+            if (pattern->isInertialRolling) {
                 pattern->touchBreak_ = true;
                 pattern->animationBreak_ = true;
                 pattern->clickBreak_ = true;
-                pattern->StopTossAnimation();
+                pattern->StopInertialRollingAnimation();
             } else {
                 pattern->animationBreak_ = false;
                 pattern->clickBreak_ = false;
@@ -622,13 +622,13 @@ bool ContainerPickerPattern::Play(double dragVelocity)
         return false;
     }
 
-    playAnimation_ = true;
+    isNeedStartInertialAnimation_ = true;
     dragVelocity_ = dragVelocity;
     PickerMarkDirty();
     return true;
 }
 
-void ContainerPickerPattern::PlayAnimation()
+void ContainerPickerPattern::StartInertialAnimation()
 {
     AnimationOption option;
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
@@ -652,10 +652,10 @@ void ContainerPickerPattern::PlayAnimation()
             pattern->lastAnimationScroll_ = 0.0f;
             pattern->animationOffset_ = 0.0f;
         }
-        pattern->isTossStatus_ = false;
+        pattern->isInertialRolling = false;
     };
     snapOffsetProperty_->AnimateWithVelocity(option, -endOffset, dragVelocity_, finishCallback);
-    playAnimation_ = false;
+    isNeedStartInertialAnimation_ = false;
 }
 
 void ContainerPickerPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus)
@@ -667,7 +667,6 @@ void ContainerPickerPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sce
 
 ScrollResult ContainerPickerPattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
 {
-    currentDelta_ -= offset;
     PickerMarkDirty();
     return { 0.0f, false };
 }
@@ -793,7 +792,7 @@ void ContainerPickerPattern::CreateSnapProperty()
         pattern->currentDelta_ = position - pattern->lastAnimationScroll_;
         pattern->lastAnimationScroll_ = position;
         pattern->animationOffset_ += pattern->currentDelta_;
-        pattern->isTossStatus_ = true;
+        pattern->isInertialRolling = true;
         pattern->PickerMarkDirty();
     };
     snapOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
@@ -864,9 +863,9 @@ void ContainerPickerPattern::PickerMarkDirty()
     }
 }
 
-void ContainerPickerPattern::StopTossAnimation()
+void ContainerPickerPattern::StopInertialRollingAnimation()
 {
-    isTossStatus_ = false;
+    isInertialRolling = false;
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(0);

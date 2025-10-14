@@ -187,8 +187,8 @@ private:
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
     void CreateChildrenClickEvent(RefPtr<UINode>& host);
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
-    void PlayAnimation();
-    void StopTossAnimation();
+    void StartInertialAnimation();
+    void StopInertialRollingAnimation();
     void PlayResetAnimation();
     double GetCurrentTime() const;
     float CalculateResetOffset(float totalOffset);
@@ -230,7 +230,7 @@ private:
 
     double dragStartTime_ = 0.0;
     double dragEndTime_ = 0.0;
-    bool isTossStatus_ = false;
+    bool isInertialRolling = false;
     bool clickBreak_ = false;
     bool touchBreak_ = false;
     bool animationBreak_ = false;
@@ -240,7 +240,7 @@ private:
     float lastAnimationScroll_ = 0.0f;
     float dragOffsetForAnimation_ = 0.0f;
     float currentDelta_ = 0.0f;
-    bool playAnimation_ = false;
+    bool isNeedStartInertialAnimation_ = false;
     double dragVelocity_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
