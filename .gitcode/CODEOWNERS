@@ -1211,6 +1211,8 @@ frameworks/bridge/declarative_frontend/jsview/js_list_item.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_list_item_group.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_list_item_group.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_list_item.h @arkuiscroll
+frameworks/bridge/declarative_frontend/jsview/js_list_children_main_size.cpp @arkuiscroll
+frameworks/bridge/declarative_frontend/jsview/js_list_children_main_size.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_loading_progress.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_local_storage.cpp @arkui_statemgmt
