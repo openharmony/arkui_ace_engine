@@ -1711,7 +1711,7 @@ export class UIContextImpl extends UIContext {
         return inspector.getFilteredInspectorTree(filters);
     }
  
-    public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
+    public getFilteredInspectorTreeById(id: string, depth: int, filters?: Array<string>): string {
         return inspector.getFilteredInspectorTreeById(id, depth, filters);
     }
 

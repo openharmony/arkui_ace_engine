@@ -678,7 +678,7 @@ export class UIContext {
         throw Error("getFilteredInspectorTree not implemented in UIContext!")
     }
  
-    public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
+    public getFilteredInspectorTreeById(id: string, depth: int, filters?: Array<string>): string {
         throw Error("getFilteredInspectorTreeById not implemented in UIContext!")
     }
     public setImageCacheCount(value: int): void {

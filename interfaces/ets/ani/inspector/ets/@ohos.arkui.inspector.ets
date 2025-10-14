@@ -13,6 +13,7 @@
  * limitations under the License.
  */
  import { Callback, RecordData } from '@ohos.base';
+ import { VoidCallback } from './arkui.component.units';
  import hilog from '@ohos.hilog';
  
  const DOMAIN_ID = 0x0000;
@@ -31,25 +32,25 @@
     export native function sendEventByKey(id: string, action: int, params: string): boolean;
     native function getInspectorTreeNative(): string;
     export native function getFilteredInspectorTree(filters?: Array<string>): string;
-    export native function getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string;
+    export native function getFilteredInspectorTreeById(id: string, depth: int, filters?: Array<string>): string;
     
     export default interface ComponentObserver
     {
-        on(type: string, callback: Callback<void>): void;
+        on(type: string, callback: VoidCallback): void;
  
-        off(type: string, callback?: Callback<void>): void;
+        off(type: string, callback?: VoidCallback): void;
         
-        onLayout(callback: Callback<void>): void;
+        onLayout(callback: VoidCallback): void;
         
-        offLayout(callback?: Callback<void>): void;
+        offLayout(callback?: VoidCallback): void;
         
-        onDraw(callback: Callback<void>): void;
+        onDraw(callback: VoidCallback): void;
         
-        offDraw(callback?: Callback<void>): void;
+        offDraw(callback?: VoidCallback): void;
 
-        onDrawChildren(callback: Callback<void>): void;
+        onDrawChildren(callback: VoidCallback): void;
         
-        offDrawChildren(callback?: Callback<void>): void;
+        offDrawChildren(callback?: VoidCallback): void;
     }
     
     class ComponentObserverImpl implements ComponentObserver
@@ -62,33 +63,33 @@
             }
         }
         
-        public onLayout(callback: Callback<void>): void {
+        public onLayout(callback: VoidCallback): void {
             this.on('layout', callback);
         }
         
-        public offLayout(callback?: Callback<void>): void {
+        public offLayout(callback?: VoidCallback): void {
             this.off('layout', callback);
         }
         
-        public onDraw(callback: Callback<void>): void {
+        public onDraw(callback: VoidCallback): void {
             this.on('draw', callback);
         }
         
-        public offDraw(callback?: Callback<void>): void {
+        public offDraw(callback?: VoidCallback): void {
             this.off('draw', callback);
         }
 
-        public onDrawChildren(callback: Callback<void>): void {
+        public onDrawChildren(callback: VoidCallback): void {
             this.on('drawChildren', callback);
         }
         
-        public offDrawChildren(callback?: Callback<void>): void {
+        public offDrawChildren(callback?: VoidCallback): void {
             this.off('drawChildren', callback);
         }
         
-        public native on(type: string, callback: Callback<void>) : void;
+        public native on(type: string, callback: VoidCallback) : void;
 
-        public native off(type: string, callback?: Callback<void>) : void;
+        public native off(type: string, callback?: VoidCallback) : void;
     }
  }
  
