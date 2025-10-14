@@ -116,10 +116,13 @@ void UpdateSections(
         return;
     }
     auto id = Container::CurrentId();
-    auto callback = [id, weak = AceType::WeakClaim(AceType::RawPtr(waterFlowSections))](
+    auto callback = [id, weak = AceType::WeakClaim(AceType::RawPtr(waterFlowSections)),
+                        weakNode = AceType::WeakClaim(frameNode)](
                         size_t start, size_t deleteCount, std::vector<NG::WaterFlowSections::Section>& newSections) {
         ContainerScope scope(id);
-        auto context = NG::PipelineContext::GetCurrentContext();
+        auto node = weakNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto context = node->GetContext();
         CHECK_NULL_VOID(context);
         context->AddBuildFinishCallBack([start, deleteCount, change = newSections, weak]() {
             auto nodeSection = weak.Upgrade();
@@ -130,15 +133,9 @@ void UpdateSections(
     };
     section->SetOnSectionChangedCallback(frameNode, callback);
 
-    auto lengthFunc = sectionsObject->GetProperty("length");
-    CHECK_NULL_VOID(lengthFunc->IsFunction());
-    auto sectionLength = (JSRef<JSFunc>::Cast(lengthFunc))->Call(sectionsObject);
-    if (sectionLength->IsNumber() &&
-        waterFlowSections->GetSectionInfo().size() != sectionLength->ToNumber<uint32_t>()) {
-        auto allSections = sectionsObject->GetProperty("sectionArray");
-        CHECK_NULL_VOID(allSections->IsArray());
-        ParseSections(args, JSRef<JSArray>::Cast(allSections), waterFlowSections);
-    }
+    auto allSections = sectionsObject->GetProperty("sectionArray");
+    CHECK_NULL_VOID(allSections->IsArray());
+    ParseSections(args, JSRef<JSArray>::Cast(allSections), waterFlowSections);
 }
 
 void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sections)
