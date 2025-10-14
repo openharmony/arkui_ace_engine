@@ -79,7 +79,7 @@ RefPtr<FrameNode> ContainerModalStaticView::BuildTitleContainer(RefPtr<FrameNode
     } else {
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(containerTitleRow, nullptr);
-        std::shared_ptr<XbarComponent> xbarComponent = nullptr;
+        RefPtr<XbarComponent> xbarComponent = nullptr;
         if (isFloatingTitle) {
             TAG_LOGI(AceLogTag::ACE_APPBAR, "BuildTitleContainer isFloatingTitle");
             xbarComponent = XbarProxyWrapper::GetInstance()->CreateXBarComponent(0, pipeline->GetInstanceId());
