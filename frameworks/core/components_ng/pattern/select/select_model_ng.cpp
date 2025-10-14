@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/select/select_model_ng.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select/select_layout_property.h"
@@ -776,6 +777,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
 {
     CHECK_NULL_VOID(frameNode);
     auto select = AceType::Claim(frameNode);
+    FREE_NODE_CHECK(select, InitSelect, select, params);
     SetSelectDefaultSize(select);
     auto pattern = select->GetPattern<SelectPattern>();
 

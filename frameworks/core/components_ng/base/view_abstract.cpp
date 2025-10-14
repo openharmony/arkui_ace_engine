@@ -3754,8 +3754,9 @@ void ViewAbstract::SetTransform3DMatrix(const Matrix4& matrix)
 void ViewAbstract::BindPopup(
     const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode)
 {
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind popup enter");
     CHECK_NULL_VOID(targetNode);
+    FREE_NODE_CHECK(targetNode, BindPopup, param, targetNode, customNode);
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind popup enter");
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
     auto context = targetNode->GetContext();
@@ -3906,6 +3907,7 @@ void ViewAbstract::BindTips(
 {
     CHECK_NULL_VOID(param);
     CHECK_NULL_VOID(targetNode);
+    FREE_NODE_CHECK(targetNode, BindTips, param, targetNode, spanString);
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
     auto context = targetNode->GetContext();

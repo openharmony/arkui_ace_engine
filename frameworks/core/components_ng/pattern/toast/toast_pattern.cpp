@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/multi_thread.h"
 #include "core/animation/animation_util.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -436,6 +437,14 @@ void ToastPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
+    OnAttachToFrameNodeImpl();
+}
+
+void ToastPattern::OnAttachToFrameNodeImpl()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto containerId = Container::CurrentId();
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
     auto pipeline = parentContainerId < 0 || parentContainerId >= MIN_PA_SERVICE_ID
@@ -471,6 +480,14 @@ void ToastPattern::OnAttachToFrameNode()
 
 void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromFrameNode, node);
+    OnDetachFromFrameNodeImpl(node);
+}
+
+void ToastPattern::OnDetachFromFrameNodeImpl(FrameNode* node)
+{
     auto containerId = Container::CurrentId();
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
     auto current_context = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -487,6 +504,20 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->UnRegisterRawKeyboardChangedCallback(rowKeyboardCallbackId_);
     CHECK_NULL_VOID(node);
     pipeline->RemoveWindowSizeChangeCallback(node->GetId());
+}
+
+void ToastPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
+void ToastPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
 double ToastPattern::GetTextMaxHeight()

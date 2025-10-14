@@ -1111,6 +1111,10 @@ private:
 };
 
 // multi thread function start
+void BindPopupMultiThread(
+    const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
+void BindTipsMultiThread(
+    const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<SpanString>& spanString);
 void SetInspectorIdMultiThread(FrameNode* frameNode, const std::string& inspectorId);
 void SetBackgroundBlurStyleMultiThread(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle,
     const SysOptions& sysOptions);

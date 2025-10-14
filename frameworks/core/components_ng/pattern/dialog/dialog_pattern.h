@@ -377,7 +377,11 @@ private:
     void OnModifyDone() override;
 
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToFrameNodeImpl();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
+    void OnDetachFromFrameNodeImpl(FrameNode* frameNode);
     void RegisterHoverModeChangeCallback();
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -452,7 +456,11 @@ private:
     void CheckScrollHeightIsNegative(const RefPtr<UINode>& contentColumn, const DialogProperties& props);
     RefPtr<OverlayManager> GetOverlayManager(const RefPtr<FrameNode>& host);
     void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
+    void OnAttachToMainTreeImpl();
     void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
+    void OnDetachFromMainTreeImpl();
     void AddFollowParentWindowLayoutNode();
     void RemoveFollowParentWindowLayoutNode();
     bool InvertShadowColor();

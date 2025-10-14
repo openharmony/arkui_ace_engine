@@ -211,6 +211,12 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread();
+    void OnDetachFromFrameNodeImpl(FrameNode* frameNode);
+    void OnAttachToMainTreeMultiThread();
+    void OnAttachToMainTreeImpl(const RefPtr<FrameNode>& host);
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void InitClickEvent();

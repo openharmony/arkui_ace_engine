@@ -176,6 +176,9 @@ public:
 private:
     void AddResObjWithCallBack(
         std::string key, const RefPtr<ResourceObject>& resObj, const int32_t index, const SelectOptionType& optionType);
+
+    // multi-thread
+    static void InitSelectMultiThread(const RefPtr<FrameNode>& host, const std::vector<SelectParam>& params);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H

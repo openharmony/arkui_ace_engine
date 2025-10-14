@@ -44,6 +44,8 @@ public:
 private:
     static void DoMountRow(const RefPtr<NG::FrameNode>& menuItem);
     static void UpdateRadius(const RefPtr<NG::FrameNode>& menuItem);
+    static void AddRowChildBase(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps);
+    static void AddRowChildMultiThread(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MODEL_STATIC_H

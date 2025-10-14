@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
@@ -190,15 +191,29 @@ void MenuWrapperPattern::ClearLastMenuItem()
 
 void MenuWrapperPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     RegisterOnTouch();
 }
 
 void MenuWrapperPattern::OnAttachToMainTree()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
     RegisterDetachCallback();
 }
 
 void MenuWrapperPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    OnDetachFromMainTreeImpl();
+}
+
+void MenuWrapperPattern::OnDetachFromMainTreeImpl()
 {
     UnRegisterDetachCallback();
     CHECK_NULL_VOID(filterColumnNode_);
@@ -1098,6 +1113,14 @@ void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapp
 void MenuWrapperPattern::SetMenuTransitionEffect(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
 {
     TAG_LOGD(AceLogTag::ACE_MENU, "set menu transition effect");
+    CHECK_NULL_VOID(menuWrapperNode);
+    FREE_NODE_CHECK(menuWrapperNode, SetMenuTransitionEffect, menuWrapperNode, menuParam);
+    SetMenuTransitionEffectImpl(menuWrapperNode, menuParam);
+}
+
+void MenuWrapperPattern::SetMenuTransitionEffectImpl(
+    const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
+{
     CHECK_NULL_VOID(menuWrapperNode);
     auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(pattern);
