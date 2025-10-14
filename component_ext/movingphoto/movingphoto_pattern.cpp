@@ -575,7 +575,7 @@ void MovingPhotoPattern::RegisterImageEvent(const RefPtr<FrameNode>& imageNode)
         pattern->HandleImageCompleteEvent(info);
     };
     imageHub->SetOnComplete(imageCompleteEventCallback);
-        auto imageErrorEventCallback = [weak = WeakClaim(this)](const LoadImageFailEvent& info) {
+    auto imageErrorEventCallback = [weak = WeakClaim(this)](const LoadImageFailEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleImageErrorEvent(info);
@@ -595,7 +595,7 @@ void MovingPhotoPattern::RegisterTransitionImageEvent(const RefPtr<FrameNode>& i
         pattern->HandleTransitionImageCompleteEvent(info);
     };
     imageHub->SetOnComplete(imageCompleteEventCallback);
-        auto imageErrorEventCallback = [weak = WeakClaim(this)](const LoadImageFailEvent& info) {
+    auto imageErrorEventCallback = [weak = WeakClaim(this)](const LoadImageFailEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleTransitionImageErrorEvent(info);
