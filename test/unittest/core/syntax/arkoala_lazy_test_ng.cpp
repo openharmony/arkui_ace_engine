@@ -276,11 +276,11 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest007)
     EXPECT_EQ(lazyNode->node4Index_.Size(), 0);
     auto repeatNode = CreateRepeatNode(GetNextId());
     lazyNode->node4Index_.Put(0, repeatNode);
-    EXPECT_FALSE(lazyNode->isActive_);
-    lazyNode->SetJSViewActive(true, true);
     EXPECT_TRUE(lazyNode->isActive_);
     auto child = AceType::DynamicCast<ArkoalaLazyNode>(lazyNode->node4Index_.Get(0)->Upgrade());
     EXPECT_TRUE(child->isActive_);
+    lazyNode->SetJSViewActive(false, true);
+    EXPECT_FALSE(lazyNode->isActive_);
 }
 
 /**
