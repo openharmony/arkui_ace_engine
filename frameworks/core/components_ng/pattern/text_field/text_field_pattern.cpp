@@ -5985,9 +5985,11 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
         compose_ = value->compose;
         unmarkText_ = value->unmarkText;
 #endif
+#ifdef ANDROID_PLATFORM
         if (value->appendText.empty()) {
             return;
         }
+#endif
         InsertValue(UtfUtils::Str8DebugToStr16(value->appendText), true);
         return;
     }
