@@ -45,7 +45,8 @@ namespace Converter {
     RequestPluginInfo Convert(const Ark_PluginComponentTemplate& temp)
     {
         RequestPluginInfo info;
-        info.source = OptConvert<std::string>(temp.source).value_or("");
+        info.pluginName =
+            OptConvert<std::string>(temp.source).value_or(""); // for historical reasons, source is pluginName
         info.bundleName = OptConvert<std::string>(temp.bundleName).value_or("");
         return info;
     }
