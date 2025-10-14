@@ -31,6 +31,7 @@ import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { getObservedObject, isDynamicObject } from '../../component/interop';
 
 export class StoragePropRefDecoratedVariable<T>
     extends DecoratedV1VariableBase<T>
@@ -52,8 +53,12 @@ export class StoragePropRefDecoratedVariable<T>
         this.propName = propName;
         this.backingStorageValue_ = storagePropRef;
         this.backingStorageValue_.onChange(this.onStorageObjChanged);
-        const initValue = this.backingStorageValue_.get();
-        this.backing_ = FactoryInternal.mkDecoratorValue<T>(varName, initValue);
+        let initValue = this.backingStorageValue_.get();
+        if (isDynamicObject(initValue)) {
+            this.backing_ = FactoryInternal.mkInteropDecoratorValue(varName, initValue);
+        } else {
+            this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
+        }
         this.registerWatchForObservedObjectChanges(initValue);
         this.storageWatchFunc_ = new WatchFunc((prop: string) => {
             this.onStorageObjPropChanged(prop);
@@ -83,10 +88,15 @@ export class StoragePropRefDecoratedVariable<T>
         if (oldValue === newValue) {
             return;
         }
-        const value = uiUtils.makeObserved(newValue);
-        this.backing_.setNoCheck(value);
+        if (isDynamicObject(newValue)) {
+            const value = getObservedObject(newValue);
+            this.backing_.setNoCheck(value);
+        } else {
+            const value = uiUtils.makeObserved(newValue);
+            this.backing_.setNoCheck(value);
+        }
         this.unregisterWatchFromObservedObjectChanges(oldValue);
-        this.registerWatchForObservedObjectChanges(value);
+        this.registerWatchForObservedObjectChanges(this.backing_.get(false));
         this.execWatchFuncs();
     }
 
