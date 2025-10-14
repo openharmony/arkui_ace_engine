@@ -258,8 +258,8 @@ bool AccessibilityFrameNodeUtils::IsValidEmbedTarget(
 {
     CHECK_NULL_RETURN(node, false);
     CHECK_NULL_RETURN(accessibilityManager, false);
-#ifdef SUPPORT_ACCESSIBILITY_FOCUS_MOVE
-    return accessibilityManager->CheckAndGetEmbedFrameNode(frameNode) != INVALID_ACCESSIBILITY_NODE_ID;
+#if !defined(ACE_UNITTEST)
+    return accessibilityManager->CheckAndGetEmbedFrameNode(node) != INVALID_ACCESSIBILITY_NODE_ID;
 #else
     return false;
 #endif

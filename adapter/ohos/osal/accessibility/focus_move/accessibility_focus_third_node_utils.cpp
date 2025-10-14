@@ -28,82 +28,82 @@ ThirdRulesCheckNode::ThirdRulesCheckNode(std::shared_ptr<ArkUI_AccessibilityElem
 {
 }
 
-bool ThirdRulesCheckNode::GetPropText(Accessibility::PropValueStub& value)
+bool ThirdRulesCheckNode::GetPropText(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
-    value.valueType = Accessibility::ValueTypeStub::STRING;
+    value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = nodeInfo_->GetContents();
     return true;
 }
 
-bool ThirdRulesCheckNode::GetPropHintText(Accessibility::PropValueStub& value)
+bool ThirdRulesCheckNode::GetPropHintText(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
-    value.valueType = Accessibility::ValueTypeStub::STRING;
+    value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = nodeInfo_->GetHintText();
     return true;
 }
 
-bool ThirdRulesCheckNode::GetPropDesc(Accessibility::PropValueStub& value)
+bool ThirdRulesCheckNode::GetPropDesc(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
-    value.valueType = Accessibility::ValueTypeStub::STRING;
+    value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = nodeInfo_->GetAccessibilityDescription();
     return true;
 }
 
-bool ThirdRulesCheckNode::GetPropAccessibilityText(Accessibility::PropValueStub& value)
+bool ThirdRulesCheckNode::GetPropAccessibilityText(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
-    value.valueType = Accessibility::ValueTypeStub::STRING;
+    value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = nodeInfo_->GetAccessibilityText();
     return true;
 }
 
-bool ThirdRulesCheckNode::GetPropType(Accessibility::PropValueStub& value)
+bool ThirdRulesCheckNode::GetPropType(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
-    value.valueType = Accessibility::ValueTypeStub::STRING;
+    value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = nodeInfo_->GetComponentType();
     return true;
 }
 
-bool ThirdRulesCheckNode::GetPropAccessibilityLevel(Accessibility::PropValueStub& value)
+bool ThirdRulesCheckNode::GetPropAccessibilityLevel(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
-    value.valueType = Accessibility::ValueTypeStub::STRING;
+    value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = nodeInfo_->GetAccessibilityLevel();
     return true;
 }
 
-bool ThirdRulesCheckNode::GetPropAccessibilityGroup(Accessibility::PropValueStub& value)
+bool ThirdRulesCheckNode::GetPropAccessibilityGroup(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
-    value.valueType = Accessibility::ValueTypeStub::BOOL;
+    value.valueType = Accessibility::ValueType::BOOL;
     value.valueBool = nodeInfo_->GetAccessibilityGroup();
     return true;
 }
 
-bool ThirdRulesCheckNode::GetPropIsEnable(Accessibility::PropValueStub& value)
+bool ThirdRulesCheckNode::GetPropIsEnable(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
-    value.valueType = Accessibility::ValueTypeStub::BOOL;
+    value.valueType = Accessibility::ValueType::BOOL;
     value.valueBool = nodeInfo_->IsEnabled();
     return true;
 }
 
-bool ThirdRulesCheckNode::GetPropChildrenCount(Accessibility::PropValueStub& value)
+bool ThirdRulesCheckNode::GetPropChildrenCount(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
-    value.valueType = Accessibility::ValueTypeStub::NUMBER;
+    value.valueType = Accessibility::ValueType::NUMBER;
     auto children = nodeInfo_->GetChildNodeIds();
     value.valueNum = children.size();
     return true;
 }
 
-bool ThirdRulesCheckNode::GetPropActionNames(Accessibility::PropValueStub& value)
+bool ThirdRulesCheckNode::GetPropActionNames(Accessibility::PropValue& value)
 {
-    value.valueType = Accessibility::ValueTypeStub::ARRAY;
+    value.valueType = Accessibility::ValueType::ARRAY;
     CHECK_NULL_RETURN(nodeInfo_, false);
     auto supportAceActions = nodeInfo_->GetOperationActions();
     for (auto& action: supportAceActions) {
@@ -144,9 +144,9 @@ std::vector<std::shared_ptr<FocusRulesCheckNode>> ThirdRulesCheckNode::GetAceChi
     return GetChildrenTemplate<FocusRulesCheckNode>();
 }
 
-std::vector<std::shared_ptr<Accessibility::ReadableRulesNodeStub>> ThirdRulesCheckNode::GetChildren()
+std::vector<std::shared_ptr<Accessibility::ReadableRulesNode>> ThirdRulesCheckNode::GetChildren()
 {
-    return GetChildrenTemplate<Accessibility::ReadableRulesNodeStub>();
+    return GetChildrenTemplate<Accessibility::ReadableRulesNode>();
 }
 
 std::shared_ptr<FocusRulesCheckNode> ThirdRulesCheckNode::GetAceParent()
@@ -165,7 +165,7 @@ std::shared_ptr<FocusRulesCheckNode> ThirdRulesCheckNode::GetAceParent()
     return nullptr;
 }
 
-std::shared_ptr<Accessibility::ReadableRulesNodeStub> ThirdRulesCheckNode::GetParent()
+std::shared_ptr<Accessibility::ReadableRulesNode> ThirdRulesCheckNode::GetParent()
 {
     return GetAceParent();
 }
