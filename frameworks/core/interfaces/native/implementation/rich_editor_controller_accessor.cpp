@@ -626,8 +626,10 @@ Ark_Number AddTextSpanImpl(Ark_RichEditorController peer,
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
     CHECK_NULL_RETURN(content, Converter::ArkValue<Ark_Number>(0));
+    auto result = Converter::OptConvert<std::u16string>(*content);
+    CHECK_NULL_RETURN(result.has_value() && !result.value().empty(), Converter::ArkValue<Ark_Number>(-1));
     auto locOptions = Converter::OptConvertPtr<TextSpanOptions>(options).value_or(TextSpanOptions{});
-    locOptions.value = Converter::OptConvert<std::u16string>(*content).value_or(locOptions.value);
+    locOptions.value = result.value();
     return Converter::ArkValue<Ark_Number>(peerImpl->AddTextSpanImpl(locOptions));
 }
 Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
@@ -661,6 +663,8 @@ Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
         }
         locOptions.isUriPureNumber = info->GetIsUriPureNumber();
     }
+    auto hasImageSrc = locOptions.image.has_value() && !locOptions.image.value().empty();
+    CHECK_NULL_RETURN(hasImageSrc || locOptions.imagePixelMap.has_value(), Converter::ArkValue<Ark_Number>(-1));
     return Converter::ArkValue<Ark_Number>(peerImpl->AddImageSpanImpl(locOptions));
 }
 Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
@@ -693,9 +697,8 @@ Ark_Number AddSymbolSpanImpl(Ark_RichEditorController peer,
         locOptions = optionsOpt.value();
     }
     auto convValue = Converter::OptConvert<Converter::SymbolData>(*value);
-    if (convValue && convValue->symbol) {
-        locOptions.symbolId = convValue->symbol.value();
-    }
+    CHECK_NULL_RETURN(convValue && convValue->symbol, Converter::ArkValue<Ark_Number>(-1));
+    locOptions.symbolId = convValue->symbol.value();
     return Converter::ArkValue<Ark_Number>(peerImpl->AddSymbolSpanImpl(locOptions));
 }
 void UpdateSpanStyleImpl(Ark_RichEditorController peer,
