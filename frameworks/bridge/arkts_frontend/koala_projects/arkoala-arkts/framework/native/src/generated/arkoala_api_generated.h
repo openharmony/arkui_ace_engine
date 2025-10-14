@@ -3666,9 +3666,9 @@ typedef struct Opt_BlurStyleActivePolicy {
     Ark_BlurStyleActivePolicy value;
 } Opt_BlurStyleActivePolicy;
 typedef enum Ark_BorderStyle {
-    ARK_BORDER_STYLE_DOTTED = 0,
+    ARK_BORDER_STYLE_DOTTED = 2,
     ARK_BORDER_STYLE_DASHED = 1,
-    ARK_BORDER_STYLE_SOLID = 2,
+    ARK_BORDER_STYLE_SOLID = 0,
 } Ark_BorderStyle;
 typedef struct Opt_BorderStyle {
     Ark_Tag tag;
