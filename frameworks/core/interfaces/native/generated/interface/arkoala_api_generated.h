@@ -26286,7 +26286,7 @@ typedef struct GENERATED_ArkUIScrollerAccessor {
                   Ark_Float64 velocity);
     void (*scrollPage)(Ark_Scroller peer,
                        const Ark_ScrollPageOptions* value);
-    Ark_OffsetResult (*currentOffset)(Ark_Scroller peer);
+    Opt_OffsetResult (*currentOffset)(Ark_Scroller peer);
     void (*scrollToIndex)(Ark_Scroller peer,
                           Ark_Int32 value,
                           const Opt_Boolean* smooth,
