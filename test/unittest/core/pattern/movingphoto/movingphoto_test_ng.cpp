@@ -17,7 +17,7 @@
 
 #define private public
 #define protected public
- 
+
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_media_player.h"
@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/image/image_source_info.h"
+
 
 #include "component_ext/movingphoto/movingphoto_styles.h"
 #include "component_ext/movingphoto/movingphoto_pattern.h"
