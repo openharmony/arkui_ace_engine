@@ -69,12 +69,12 @@ export enum ImageFit {
     MATRIX = 16
 }
 export enum BorderStyle {
-    DOTTED = 0,
-    Dotted = 0,
+    DOTTED = 2,
+    Dotted = 2,
     DASHED = 1,
     Dashed = 1,
-    SOLID = 2,
-    Solid = 2
+    SOLID = 0,
+    Solid = 0
 }
 export enum LineJoinStyle {
     MITER = 0,
