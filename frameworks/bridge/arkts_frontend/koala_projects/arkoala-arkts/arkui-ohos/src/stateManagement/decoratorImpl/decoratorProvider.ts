@@ -44,6 +44,7 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implem
         if (this.backing_.set(makeObserved)) {
             if (this.viewV2) {
                 ESValue.wrap(this.viewV2).setProperty(this.provideAlias_, ESValue.wrap(makeObserved));
+                ESValue.getGlobal().getProperty('runPendingJobs').invoke();
             }
         }
     }
