@@ -1297,8 +1297,13 @@ void FormManagerDelegate::ProcessDueControlForm(bool isDisablePolicy, bool isCon
 bool FormManagerDelegate::CheckFormDueControl(const std::string &bundleName, const std::string &moduleName,
     const std::string &abilityName, const std::string &formName, const int32_t dimension, const bool isDisablePolicy)
 {
-    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormDueControl(
-        bundleName, moduleName, abilityName, formName, dimension, isDisablePolicy);
+    OHOS::AppExecFwk::FormMajorInfo formMajorInfo;
+    formMajorInfo.bundleName = bundleName;
+    formMajorInfo.moduleName = moduleName;
+    formMajorInfo.abilityName = abilityName;
+    formMajorInfo.formName = formName;
+    formMajorInfo.dimension = dimension;
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormDueControl(formMajorInfo, isDisablePolicy);
 }
 #endif
 } // namespace OHOS::Ace
