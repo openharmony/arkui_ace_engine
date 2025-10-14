@@ -209,6 +209,13 @@ void ArkoalaLazyNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool 
     isActive_ = active;
 }
 
+void ArkoalaLazyNode::BuildAllChildren()
+{
+    for (int32_t i = 0; i < FrameCount(); i++) {
+        GetFrameChildByIndex(i, true, false, false);
+    }
+}
+
 void ArkoalaLazyNode::PostIdleTask()
 {
     if (postUpdateTaskHasBeenScheduled_) {

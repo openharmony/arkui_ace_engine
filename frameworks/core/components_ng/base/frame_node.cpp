@@ -56,6 +56,7 @@
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #endif
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 
@@ -170,10 +171,13 @@ public:
             return;
         }
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(UiNode);
+        auto arkoalaLazyNode = AceType::DynamicCast<ArkoalaLazyNode>(UiNode);
         auto repeatVirtualScrollNode = AceType::DynamicCast<RepeatVirtualScrollNode>(UiNode);
         auto repeatVirtualScroll2Node = AceType::DynamicCast<RepeatVirtualScroll2Node>(UiNode);
         if (lazyForEachNode) {
             lazyForEachNode->BuildAllChildren();
+        } else if (arkoalaLazyNode) {
+            arkoalaLazyNode->BuildAllChildren();
         } else if (repeatVirtualScrollNode || repeatVirtualScroll2Node) {
             TAG_LOGE(AceLogTag::ACE_REPEAT, "repeatVirtualScroll not support in non scoll container!");
         } else {
