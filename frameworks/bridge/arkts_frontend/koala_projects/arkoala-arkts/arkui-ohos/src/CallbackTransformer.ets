@@ -53,17 +53,21 @@ export class CallbackTransformer {
         const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
         const currentExtendableComponent = ExtendableComponent.current;
         return (parentNodeId: KPointer): KPointer => {
-            const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
-            const lastExtendableComponent = ExtendableComponent.current;
-            ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
-            ExtendableComponent.current = currentExtendableComponent;
-            try {
-                const peer = createUiDetachedRoot(componentRootPeerFactory, value)
-                return peer.peer.ptr;
-            } finally {
-                ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
-                ExtendableComponent.current = lastExtendableComponent;
-            }
+            /** @memo */
+            const cb = () => {
+                const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
+                const lastExtendableComponent = ExtendableComponent.current;
+                ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
+                ExtendableComponent.current = currentExtendableComponent;
+                try {
+                    value();
+                } finally {
+                    ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
+                    ExtendableComponent.current = lastExtendableComponent;
+                }
+            };
+            const peer = createUiDetachedRoot(componentRootPeerFactory, cb);
+            return peer.peer.ptr;
         }
     }
     static transformToCustomBuilder(value: CustomNodeBuilder): CustomBuilder {
