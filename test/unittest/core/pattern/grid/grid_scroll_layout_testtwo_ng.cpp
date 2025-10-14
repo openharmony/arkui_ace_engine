@@ -122,6 +122,41 @@ HWTEST_F(GridScrollLayoutTestNg, Remeasure001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CrossCountInRemeasure
+ * @tc.desc: Test crossCount after measure multiple times on the same Algo object
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, CrossCountInRemeasure, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(0, false);
+    CreateFixedItems(20);
+    auto& elementsStack = ViewStackProcessor::GetInstance()->elementsStack_;
+    while (elementsStack.size() > 1) {
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto currentNode = AceType::DynamicCast<FrameNode>(element);
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    // rootNode > stageNode > currentNode
+    MountToStageNode(currentNode);
+
+    currentNode->Measure(currentNode->GetLayoutConstraint());
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto algo = AceType::DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_TRUE(algo);
+    // crossCount is 2 after first Measure, but not synced to pattern.
+    EXPECT_EQ(algo->info_.crossCount_, 2);
+    EXPECT_EQ(pattern_->info_.crossCount_, 0);
+
+    // crossCount is 2 after second Measure
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(algo->info_.crossCount_, 2);
+}
+
+/**
  * @tc.name: GetTotalHeight002
  * @tc.desc: Test GetTotalHeight when all items in viewport are irregular item
  * @tc.type: FUNC
