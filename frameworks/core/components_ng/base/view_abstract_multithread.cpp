@@ -19,6 +19,7 @@
 #include "core/components_ng/base/view_abstract.h"
 
 #include "core/common/container_scope.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -194,6 +195,66 @@ void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFu
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
         ViewAbstract::SetOnClick(frameNode.GetRawPtr(), std::move(clickEventFunc), distanceThreshold);
+    });
+}
+
+void SetBackgroundEffectMultiThread(FrameNode* frameNode, const EffectOption& effectOption,
+    const SysOptions& sysOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode), effectOption,
+        sysOptions]() mutable {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        if (SystemProperties::ConfigChangePerform()) {
+            auto pattern = frameNode->GetPattern();
+            CHECK_NULL_VOID(pattern);
+            RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+            auto&& updateFunc = [effectOption, sysOptions, weak](const RefPtr<ResourceObject>& resObj) {
+                auto frameNode = weak.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                EffectOption& effectOptionValue = const_cast<EffectOption&>(effectOption);
+                effectOptionValue.ReloadResources();
+                ViewAbstract::UpdateBackgroundEffect(AceType::RawPtr(frameNode), effectOptionValue, sysOptions);
+            };
+            pattern->AddResObj("backgroundEffect", resObj, std::move(updateFunc));
+        }
+        ViewAbstract::UpdateBackgroundEffect(AceType::RawPtr(frameNode), effectOption, sysOptions);
+    });
+}
+
+void SetClickEffectLevelMultiThread(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode), level,
+        scaleValue]() mutable {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ClickEffectInfo clickEffectInfo;
+        clickEffectInfo.level = level;
+        clickEffectInfo.scaleNumber = scaleValue;
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
+    });
+}
+
+void SetUseEffectMultiThread(FrameNode* frameNode, bool useEffect, EffectType effectType)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode), useEffect, effectType]() mutable {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto* pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        if (useEffect && effectType == EffectType::WINDOW_EFFECT) {
+            pipeline->AddWindowActivateChangedCallback(frameNode->GetId());
+        } else {
+            pipeline->RemoveWindowActivateChangedCallback(frameNode->GetId());
+        }
+        const auto& target = frameNode->GetRenderContext();
+        if (target) {
+            target->UpdateUseEffect(useEffect);
+            target->UpdateUseEffectType(effectType);
+        }
     });
 }
 } // namespace OHOS::Ace::NG
