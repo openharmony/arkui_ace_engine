@@ -30,12 +30,12 @@ void OnLoadFontFinished(const Rosen::FontCollection* collection, const Rosen::Fo
     uint64_t runtimeId = 0;
 #endif
     if (runtimeId == 0) {
-        auto txtFontCollection = AceType::DynamicCast<TxtFontCollection>(FontCollection::Current());
+        auto txtFontCollection = AceType::DynamicCast<TxtFontCollection>(FontCollection::Global());
         if (!txtFontCollection || txtFontCollection->GetRawFontCollection().get() != collection) {
             return;
         }
     }
-    auto loadFinishCallback = FontCollection::Current()->GetLoadFontFinishCallback();
+    auto loadFinishCallback = FontCollection::Global()->GetLoadFontFinishCallback();
     for (const auto& callback : loadFinishCallback) {
         if (callback) {
             callback(info.familyName, runtimeId);
@@ -51,12 +51,12 @@ void OnUnLoadFontFinished(const Rosen::FontCollection* collection, const Rosen::
     uint64_t runtimeId = 0;
 #endif
     if (runtimeId == 0) {
-        auto txtFontCollection = AceType::DynamicCast<TxtFontCollection>(FontCollection::Current());
+        auto txtFontCollection = AceType::DynamicCast<TxtFontCollection>(FontCollection::Global());
         if (!txtFontCollection || txtFontCollection->GetRawFontCollection().get() != collection) {
             return;
         }
     }
-    auto unLoadFinishCallback = FontCollection::Current()->GetUnloadFontFinishCallback();
+    auto unLoadFinishCallback = FontCollection::Global()->GetUnloadFontFinishCallback();
     for (const auto& callback : unLoadFinishCallback) {
         if (callback) {
             callback(info.familyName, runtimeId);
@@ -77,6 +77,11 @@ RefPtr<FontCollection> FontCollection::Current()
     if (localFontCollection) {
         return localFontCollection;
     }
+    return TxtFontCollection::GetInstance();
+}
+
+RefPtr<FontCollection> FontCollection::Global()
+{
     return TxtFontCollection::GetInstance();
 }
 

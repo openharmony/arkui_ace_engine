@@ -20,4 +20,8 @@ RefPtr<FontCollection> FontCollection::Current()
 {
     return nullptr;
 }
+RefPtr<FontCollection> FontCollection::Global()
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

@@ -473,14 +473,14 @@ void FontManager::RegisterLoadFontCallbacks()
 {
     auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
-    NG::FontCollection::Current()->RegisterLoadFontFinishCallback(
+    NG::FontCollection::Global()->RegisterLoadFontFinishCallback(
         [weakContext = WeakPtr(context), weak = WeakClaim(this)](
             const std::string& fontName, uint64_t runtimeId) {
             auto fontManager = weak.Upgrade();
             CHECK_NULL_VOID(fontManager);
             fontManager->OnLoadFontChanged(weakContext, fontName, runtimeId);
         });
-    NG::FontCollection::Current()->RegisterUnloadFontFinishCallback(
+    NG::FontCollection::Global()->RegisterUnloadFontFinishCallback(
         [weakContext = WeakPtr(context), weak = WeakClaim(this)](
             const std::string& fontName, uint64_t runtimeId) {
             auto fontManager = weak.Upgrade();

@@ -3138,7 +3138,7 @@ HWTEST_F(TextTestFiveNg, onDraw001, TestSize.Level1)
     ASSERT_NE(textContentModifier, nullptr);
 
     ParagraphStyle paragraphStyle;
-    auto paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    auto paragraph = Paragraph::Create(paragraphStyle, FontCollection::Global());
     ASSERT_NE(paragraph, nullptr);
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
 
