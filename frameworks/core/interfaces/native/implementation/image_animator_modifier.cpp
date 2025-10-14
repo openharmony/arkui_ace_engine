@@ -120,7 +120,7 @@ void SetStateImpl(Ark_NativePointer node,
     ImageAnimatorModelStatic::SetState(frameNode, stateOpt);
 }
 void SetDurationImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -161,7 +161,7 @@ void SetFillModeImpl(Ark_NativePointer node,
     ImageAnimatorModelStatic::SetFillMode(frameNode, fillModeOpt);
 }
 void SetIterationsImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+                       const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

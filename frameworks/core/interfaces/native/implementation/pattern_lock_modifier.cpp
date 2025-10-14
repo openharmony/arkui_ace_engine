@@ -134,7 +134,7 @@ void SetPathColorImpl(Ark_NativePointer node,
     PatternLockModelStatic::SetPathColor(frameNode, convValue);
 }
 void SetPathStrokeWidthImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String* value)
+                            const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -142,7 +142,7 @@ void SetPathStrokeWidthImpl(Ark_NativePointer node,
     PatternLockModelStatic::SetStrokeWidth(frameNode, convValue);
 }
 void SetOnPatternCompleteImpl(Ark_NativePointer node,
-                              const Opt_Callback_Array_Number_Void* value)
+                              const Opt_Callback_Array_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -155,7 +155,7 @@ void SetOnPatternCompleteImpl(Ark_NativePointer node,
     auto call = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* info) {
         const auto* eventInfo = TypeInfoHelper::DynamicCast<V2::PatternCompleteEvent>(info);
         CHECK_NULL_VOID(eventInfo);
-        Converter::ArkArrayHolder<Array_Number> arrayHolder(eventInfo->GetInput());
+        Converter::ArkArrayHolder<Array_Int32> arrayHolder(eventInfo->GetInput());
         arkCallback.Invoke(arrayHolder.ArkValue());
     };
     PatternLockModelNG::SetPatternComplete(frameNode, std::move(call));

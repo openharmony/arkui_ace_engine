@@ -79,7 +79,7 @@ export struct ProgressButton {
   }
 
   private getProgressContext(propertyName: string) {
-    if (this.progress < 0) {
+    if (this.progress < 0.0) {
       this.isLoading = false;
       this.textProgress = MIN_PERCENTAGE;
     } else if (this.progress >= MAX_PROGRESS) {
@@ -103,7 +103,7 @@ export struct ProgressButton {
 
   private getLoadingProgress(propertyName: string) {
     if (this.isLoading) {
-      if (this.progress < 0) {
+      if (this.progress < 0.0) {
         this.textProgress = MIN_PERCENTAGE;
       } else if (this.progress >= MAX_PROGRESS) {
         this.textProgress = MAX_PERCENTAGE;

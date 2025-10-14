@@ -124,8 +124,8 @@ void ContentModifierDataPanelImpl(Ark_NativePointer node,
         Ark_DataPanelConfiguration arkConfig;
         arkConfig.contentModifier = contentModifier;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.values = Converter::ArkValue<Array_Number>(config.values_, Converter::FC);
-        arkConfig.maxValue = Converter::ArkValue<Ark_Number>(config.maxValue_);
+        arkConfig.values = Converter::ArkValue<Array_Float64>(config.values_, Converter::FC);
+        arkConfig.maxValue = Converter::ArkValue<Ark_Float64>(config.maxValue_);
         auto panelNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([panelNode](const RefPtr<UINode>& uiNode) mutable {
             panelNode->AddChild(uiNode);
@@ -154,9 +154,9 @@ void ContentModifierGaugeImpl(Ark_NativePointer node,
         Ark_GaugeConfiguration arkConfig;
         arkConfig.contentModifier = contentModifier;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.max = Converter::ArkValue<Ark_Number>(config.max_);
-        arkConfig.min = Converter::ArkValue<Ark_Number>(config.min_);
-        arkConfig.value = Converter::ArkValue<Ark_Number>(config.value_);
+        arkConfig.max = Converter::ArkValue<Ark_Float64 >(config.max_);
+        arkConfig.min = Converter::ArkValue<Ark_Float64 >(config.min_);
+        arkConfig.value = Converter::ArkValue<Ark_Float64 >(config.value_);
         auto gaugeNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([gaugeNode](const RefPtr<UINode>& uiNode) mutable {
             gaugeNode->AddChild(uiNode);
@@ -216,8 +216,8 @@ void ContentModifierProgressImpl(Ark_NativePointer node,
         Ark_ProgressConfiguration arkConfig;
         arkConfig.contentModifier = contentModifier;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.value = Converter::ArkValue<Ark_Number>(config.value_);
-        arkConfig.total = Converter::ArkValue<Ark_Number>(config.total_);
+        arkConfig.value = Converter::ArkValue<Ark_Float64>(config.value_);
+        arkConfig.total = Converter::ArkValue<Ark_Float64>(config.total_);
         auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);
@@ -388,9 +388,9 @@ void ContentModifierTextClockImpl(Ark_NativePointer node,
         Ark_TextClockConfiguration arkConfig;
         arkConfig.contentModifier = contentModifier;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.timeZoneOffset = Converter::ArkValue<Ark_Number>(config.timeZoneOffset_);
+        arkConfig.timeZoneOffset = Converter::ArkValue<Ark_Float64>(config.timeZoneOffset_);
         arkConfig.started = Converter::ArkValue<Ark_Boolean>(config.started_);
-        arkConfig.timeValue = Converter::ArkValue<Ark_Number>(config.timeValue_);
+        arkConfig.timeValue = Converter::ArkValue<Ark_Int64>(config.timeValue_);
         auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);
@@ -419,10 +419,10 @@ void ContentModifierTextTimerImpl(Ark_NativePointer node,
         Ark_TextTimerConfiguration arkConfig;
         arkConfig.contentModifier = contentModifier;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.count = Converter::ArkValue<Ark_Number>(config.count_);
+        arkConfig.count = Converter::ArkValue<Ark_Int64>(config.count_);
         arkConfig.isCountDown = Converter::ArkValue<Ark_Boolean>(config.isCountDown_);
         arkConfig.started = Converter::ArkValue<Ark_Boolean>(config.started_);
-        arkConfig.elapsedTime = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(config.elapsedTime_));
+        arkConfig.elapsedTime = Converter::ArkValue<Ark_Int64>(static_cast<int32_t>(config.elapsedTime_));
         auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);

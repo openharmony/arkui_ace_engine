@@ -38,7 +38,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
     applyDisabledAttribute(instance: TextPickerAttribute): void { }
     applySelectedAttribute(instance: TextPickerAttribute): void { }
     _defaultPickerItemHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _defaultPickerItemHeight_0_0value?: number | string | undefined
+    _defaultPickerItemHeight_0_0value?: double | string | undefined
     _canLoop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _canLoop_0_0value?: boolean | undefined
     _disappearTextStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -58,7 +58,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
     _onEnterSelectedArea_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onEnterSelectedArea_0_0value?: TextPickerEnterSelectedAreaCallback | undefined
     _selectedIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selectedIndex_0_0value?: number | Array<number> | undefined
+    _selectedIndex_0_0value?: int32 | Array<int32> | undefined
     _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _divider_0_0value?: DividerOptions | null | undefined
     _gradientHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -74,7 +74,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             switch (this._defaultPickerItemHeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDefaultPickerItemHeightAttribute((this._defaultPickerItemHeight_0_0value as number | string | undefined));
+                    peer.setDefaultPickerItemHeightAttribute((this._defaultPickerItemHeight_0_0value as double | string | undefined));
                     this._defaultPickerItemHeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -84,7 +84,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                 }
                 default: {
                     this._defaultPickerItemHeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDefaultPickerItemHeightAttribute((undefined as number | string | undefined));
+                    peer.setDefaultPickerItemHeightAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -254,7 +254,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             switch (this._selectedIndex_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSelectedIndexAttribute((this._selectedIndex_0_0value as number | Array<number> | undefined));
+                    peer.setSelectedIndexAttribute((this._selectedIndex_0_0value as int32 | Array<int32> | undefined));
                     this._selectedIndex_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -264,7 +264,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                 }
                 default: {
                     this._selectedIndex_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSelectedIndexAttribute((undefined as number | Array<number> | undefined));
+                    peer.setSelectedIndexAttribute((undefined as int32 | Array<int32> | undefined));
                 }
             }
         }
@@ -352,7 +352,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                     break;
                 }
                 default: {
-                    this.defaultPickerItemHeight((undefined as number | string | undefined));
+                    this.defaultPickerItemHeight((undefined as double | string | undefined));
                 }
             }
         }
@@ -482,7 +482,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                     break;
                 }
                 default: {
-                    this.selectedIndex((undefined as number | Array<number> | undefined));
+                    this.selectedIndex((undefined as int32 | Array<int32> | undefined));
                 }
             }
         }
@@ -539,7 +539,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
             }
         }
     }
-    defaultPickerItemHeight(value: number | string | undefined): this {
+    defaultPickerItemHeight(value: double | string | undefined): this {
         if (((this._defaultPickerItemHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._defaultPickerItemHeight_0_0value) !== (value)))
         {
             this._defaultPickerItemHeight_0_flag = AttributeUpdaterFlag.UPDATE
@@ -649,7 +649,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         }
         return this
     }
-    selectedIndex(value: number | Array<number> | undefined): this {
+    selectedIndex(value: int32 | Array<int32> | undefined): this {
         if (((this._selectedIndex_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._selectedIndex_0_0value) !== (value)))
         {
             this._selectedIndex_0_flag = AttributeUpdaterFlag.UPDATE

@@ -79,7 +79,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
     _pointLight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _pointLight_0_0value?: PointLightStyle | undefined
     _edgeAntialiasing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _edgeAntialiasing_0_0value?: number | undefined
+    _edgeAntialiasing_0_0value?: double | undefined
     _onComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onComplete_0_0value?: ImageOnCompleteCallback | undefined
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -411,7 +411,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             switch (this._edgeAntialiasing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEdgeAntialiasingAttribute((this._edgeAntialiasing_0_0value as number | undefined));
+                    peer.setEdgeAntialiasingAttribute((this._edgeAntialiasing_0_0value as double | undefined));
                     this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -421,7 +421,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
                 }
                 default: {
                     this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setEdgeAntialiasingAttribute((undefined as number | undefined));
+                    peer.setEdgeAntialiasingAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -820,7 +820,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
                     break;
                 }
                 default: {
-                    this.edgeAntialiasing((undefined as number | undefined));
+                    this.edgeAntialiasing((undefined as double | undefined));
                 }
             }
         }
@@ -1129,7 +1129,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         }
         return this
     }
-    edgeAntialiasing(value: number | undefined): this {
+    edgeAntialiasing(value: double | undefined): this {
         if (((this._edgeAntialiasing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._edgeAntialiasing_0_0value) !== (value)))
         {
             this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.UPDATE
