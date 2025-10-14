@@ -382,12 +382,6 @@ typedef struct FullScreenExitHandlerPeer* Ark_FullScreenExitHandler;
 typedef struct Opt_FullScreenExitHandler Opt_FullScreenExitHandler;
 typedef struct Ark_FullscreenInfo Ark_FullscreenInfo;
 typedef struct Opt_FullscreenInfo Opt_FullscreenInfo;
-typedef struct GesturePeer GesturePeer;
-typedef struct GesturePeer* Ark_Gesture;
-typedef struct Opt_Gesture Opt_Gesture;
-typedef struct GestureGroupPeer GestureGroupPeer;
-typedef struct GestureGroupPeer* Ark_GestureGroup;
-typedef struct Opt_GestureGroup Opt_GestureGroup;
 typedef struct GestureModifierPeer GestureModifierPeer;
 typedef struct GestureModifierPeer* Ark_GestureModifier;
 typedef struct Opt_GestureModifier Opt_GestureModifier;
@@ -397,7 +391,6 @@ typedef struct Opt_GestureRecognizer Opt_GestureRecognizer;
 typedef struct GestureStylePeer GestureStylePeer;
 typedef struct GestureStylePeer* Ark_GestureStyle;
 typedef struct Opt_GestureStyle Opt_GestureStyle;
-typedef struct Ark_GestureType Ark_GestureType;
 typedef struct Opt_GestureType Opt_GestureType;
 typedef struct HttpAuthHandlerPeer HttpAuthHandlerPeer;
 typedef struct HttpAuthHandlerPeer* Ark_HttpAuthHandler;
@@ -572,9 +565,6 @@ typedef struct Ark_RootSceneSession Ark_RootSceneSession;
 typedef struct Opt_RootSceneSession Opt_RootSceneSession;
 typedef struct Ark_RotateResult Ark_RotateResult;
 typedef struct Opt_RotateResult Opt_RotateResult;
-typedef struct RotationGesturePeer RotationGesturePeer;
-typedef struct RotationGesturePeer* Ark_RotationGesture;
-typedef struct Opt_RotationGesture Opt_RotationGesture;
 typedef struct RotationRecognizerPeer RotationRecognizerPeer;
 typedef struct RotationRecognizerPeer* Ark_RotationRecognizer;
 typedef struct Opt_RotationRecognizer Opt_RotationRecognizer;
@@ -625,9 +615,6 @@ typedef struct Opt_StyledStringController Opt_StyledStringController;
 typedef struct SubmitEventPeer SubmitEventPeer;
 typedef struct SubmitEventPeer* Ark_SubmitEvent;
 typedef struct Opt_SubmitEvent Opt_SubmitEvent;
-typedef struct SwipeGesturePeer SwipeGesturePeer;
-typedef struct SwipeGesturePeer* Ark_SwipeGesture;
-typedef struct Opt_SwipeGesture Opt_SwipeGesture;
 typedef struct Ark_SwiperAnimationEvent Ark_SwiperAnimationEvent;
 typedef struct Opt_SwiperAnimationEvent Opt_SwiperAnimationEvent;
 typedef struct SwiperContentTransitionProxyPeer SwiperContentTransitionProxyPeer;
@@ -893,8 +880,6 @@ typedef struct Array_FractionStop Array_FractionStop;
 typedef struct Opt_Array_FractionStop Opt_Array_FractionStop;
 typedef struct Array_GestureRecognizer Array_GestureRecognizer;
 typedef struct Opt_Array_GestureRecognizer Opt_Array_GestureRecognizer;
-typedef struct Array_GestureType Array_GestureType;
-typedef struct Opt_Array_GestureType Opt_Array_GestureType;
 typedef struct Array_GuideLineStyle Array_GuideLineStyle;
 typedef struct Opt_Array_GuideLineStyle Opt_Array_GuideLineStyle;
 typedef struct Array_Header Array_Header;
@@ -1113,10 +1098,6 @@ typedef struct Callback_FullscreenInfo_Void Callback_FullscreenInfo_Void;
 typedef struct Opt_Callback_FullscreenInfo_Void Opt_Callback_FullscreenInfo_Void;
 typedef struct Callback_GestureEvent_Void Callback_GestureEvent_Void;
 typedef struct Opt_Callback_GestureEvent_Void Opt_Callback_GestureEvent_Void;
-typedef struct Callback_GestureGroup Callback_GestureGroup;
-typedef struct Opt_Callback_GestureGroup Opt_Callback_GestureGroup;
-typedef struct Callback_GestureGroup_Void Callback_GestureGroup_Void;
-typedef struct Opt_Callback_GestureGroup_Void Opt_Callback_GestureGroup_Void;
 typedef struct Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult;
 typedef struct Opt_Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult Opt_Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult;
 typedef struct Callback_GestureJudgeResult_Void Callback_GestureJudgeResult_Void;
@@ -1315,10 +1296,6 @@ typedef struct Callback_RichEditorSelection_Void Callback_RichEditorSelection_Vo
 typedef struct Opt_Callback_RichEditorSelection_Void Opt_Callback_RichEditorSelection_Void;
 typedef struct Callback_RichEditorTextSpanResult_Void Callback_RichEditorTextSpanResult_Void;
 typedef struct Opt_Callback_RichEditorTextSpanResult_Void Opt_Callback_RichEditorTextSpanResult_Void;
-typedef struct Callback_RotationGesture Callback_RotationGesture;
-typedef struct Opt_Callback_RotationGesture Opt_Callback_RotationGesture;
-typedef struct Callback_RotationGesture_Void Callback_RotationGesture_Void;
-typedef struct Opt_Callback_RotationGesture_Void Opt_Callback_RotationGesture_Void;
 typedef struct Callback_SheetDismiss_Void Callback_SheetDismiss_Void;
 typedef struct Opt_Callback_SheetDismiss_Void Opt_Callback_SheetDismiss_Void;
 typedef struct Callback_SheetType_Void Callback_SheetType_Void;
@@ -1343,10 +1320,6 @@ typedef struct Callback_StyledStringMarshallingValue_Void Callback_StyledStringM
 typedef struct Opt_Callback_StyledStringMarshallingValue_Void Opt_Callback_StyledStringMarshallingValue_Void;
 typedef struct Callback_SwipeActionState_Void Callback_SwipeActionState_Void;
 typedef struct Opt_Callback_SwipeActionState_Void Opt_Callback_SwipeActionState_Void;
-typedef struct Callback_SwipeGesture Callback_SwipeGesture;
-typedef struct Opt_Callback_SwipeGesture Opt_Callback_SwipeGesture;
-typedef struct Callback_SwipeGesture_Void Callback_SwipeGesture_Void;
-typedef struct Opt_Callback_SwipeGesture_Void Opt_Callback_SwipeGesture_Void;
 typedef struct Callback_SwiperContentTransitionProxy_Void Callback_SwiperContentTransitionProxy_Void;
 typedef struct Opt_Callback_SwiperContentTransitionProxy_Void Opt_Callback_SwiperContentTransitionProxy_Void;
 typedef struct Callback_T_Void Callback_T_Void;
@@ -2161,8 +2134,6 @@ typedef struct Ark_RichEditorSpanPosition Ark_RichEditorSpanPosition;
 typedef struct Opt_RichEditorSpanPosition Opt_RichEditorSpanPosition;
 typedef struct Ark_RotateOptions Ark_RotateOptions;
 typedef struct Opt_RotateOptions Opt_RotateOptions;
-typedef struct Ark_RotationGestureHandlerOptions Ark_RotationGestureHandlerOptions;
-typedef struct Opt_RotationGestureHandlerOptions Opt_RotationGestureHandlerOptions;
 typedef struct Ark_RoundedRectOptions Ark_RoundedRectOptions;
 typedef struct Opt_RoundedRectOptions Opt_RoundedRectOptions;
 typedef struct Ark_RouteMapConfig Ark_RouteMapConfig;
@@ -2224,8 +2195,6 @@ typedef struct Ark_SurfaceRect Ark_SurfaceRect;
 typedef struct Opt_SurfaceRect Opt_SurfaceRect;
 typedef struct Ark_SurfaceRotationOptions Ark_SurfaceRotationOptions;
 typedef struct Opt_SurfaceRotationOptions Opt_SurfaceRotationOptions;
-typedef struct Ark_SwipeGestureHandlerOptions Ark_SwipeGestureHandlerOptions;
-typedef struct Opt_SwipeGestureHandlerOptions Opt_SwipeGestureHandlerOptions;
 typedef struct Ark_SwiperAutoFill Ark_SwiperAutoFill;
 typedef struct Opt_SwiperAutoFill Opt_SwiperAutoFill;
 typedef struct Ark_SwiperContentAnimatedTransition Ark_SwiperContentAnimatedTransition;
@@ -7051,14 +7020,6 @@ typedef struct Opt_FullscreenInfo {
     Ark_Tag tag;
     Ark_FullscreenInfo value;
 } Opt_FullscreenInfo;
-typedef struct Opt_Gesture {
-    Ark_Tag tag;
-    Ark_Gesture value;
-} Opt_Gesture;
-typedef struct Opt_GestureGroup {
-    Ark_Tag tag;
-    Ark_GestureGroup value;
-} Opt_GestureGroup;
 typedef struct Opt_GestureModifier {
     Ark_Tag tag;
     Ark_GestureModifier value;
@@ -7071,18 +7032,6 @@ typedef struct Opt_GestureStyle {
     Ark_Tag tag;
     Ark_GestureStyle value;
 } Opt_GestureStyle;
-typedef struct Ark_GestureType {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_Gesture value0;
-        Ark_GestureGroup value1;
-    };
-} Ark_GestureType;
-typedef struct Opt_GestureType {
-    Ark_Tag tag;
-    Ark_GestureType value;
-} Opt_GestureType;
 typedef struct Opt_HttpAuthHandler {
     Ark_Tag tag;
     Ark_HttpAuthHandler value;
@@ -7511,10 +7460,6 @@ typedef struct Opt_RotateResult {
     Ark_Tag tag;
     Ark_RotateResult value;
 } Opt_RotateResult;
-typedef struct Opt_RotationGesture {
-    Ark_Tag tag;
-    Ark_RotationGesture value;
-} Opt_RotationGesture;
 typedef struct Opt_RotationRecognizer {
     Ark_Tag tag;
     Ark_RotationRecognizer value;
@@ -7621,10 +7566,6 @@ typedef struct Opt_SubmitEvent {
     Ark_Tag tag;
     Ark_SubmitEvent value;
 } Opt_SubmitEvent;
-typedef struct Opt_SwipeGesture {
-    Ark_Tag tag;
-    Ark_SwipeGesture value;
-} Opt_SwipeGesture;
 typedef struct Ark_SwiperAnimationEvent {
     /* kind: Interface */
     Ark_Number currentOffset;
@@ -8573,15 +8514,6 @@ typedef struct Opt_Array_GestureRecognizer {
     Ark_Tag tag;
     Array_GestureRecognizer value;
 } Opt_Array_GestureRecognizer;
-typedef struct Array_GestureType {
-    /* kind: ContainerType */
-    Ark_GestureType* array;
-    Ark_Int32 length;
-} Array_GestureType;
-typedef struct Opt_Array_GestureType {
-    Ark_Tag tag;
-    Array_GestureType value;
-} Opt_Array_GestureType;
 typedef struct Array_GuideLineStyle {
     /* kind: ContainerType */
     Ark_GuideLineStyle* array;
@@ -9605,26 +9537,6 @@ typedef struct Opt_Callback_GestureEvent_Void {
     Ark_Tag tag;
     Callback_GestureEvent_Void value;
 } Opt_Callback_GestureEvent_Void;
-typedef struct Callback_GestureGroup {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Callback_GestureGroup_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Callback_GestureGroup_Void continuation);
-} Callback_GestureGroup;
-typedef struct Opt_Callback_GestureGroup {
-    Ark_Tag tag;
-    Callback_GestureGroup value;
-} Opt_Callback_GestureGroup;
-typedef struct Callback_GestureGroup_Void {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_GestureGroup value);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureGroup value);
-} Callback_GestureGroup_Void;
-typedef struct Opt_Callback_GestureGroup_Void {
-    Ark_Tag tag;
-    Callback_GestureGroup_Void value;
-} Opt_Callback_GestureGroup_Void;
 typedef struct Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -10615,26 +10527,6 @@ typedef struct Opt_Callback_RichEditorTextSpanResult_Void {
     Ark_Tag tag;
     Callback_RichEditorTextSpanResult_Void value;
 } Opt_Callback_RichEditorTextSpanResult_Void;
-typedef struct Callback_RotationGesture {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Callback_RotationGesture_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Callback_RotationGesture_Void continuation);
-} Callback_RotationGesture;
-typedef struct Opt_Callback_RotationGesture {
-    Ark_Tag tag;
-    Callback_RotationGesture value;
-} Opt_Callback_RotationGesture;
-typedef struct Callback_RotationGesture_Void {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_RotationGesture value);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_RotationGesture value);
-} Callback_RotationGesture_Void;
-typedef struct Opt_Callback_RotationGesture_Void {
-    Ark_Tag tag;
-    Callback_RotationGesture_Void value;
-} Opt_Callback_RotationGesture_Void;
 typedef struct Callback_SheetDismiss_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -10755,26 +10647,6 @@ typedef struct Opt_Callback_SwipeActionState_Void {
     Ark_Tag tag;
     Callback_SwipeActionState_Void value;
 } Opt_Callback_SwipeActionState_Void;
-typedef struct Callback_SwipeGesture {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Callback_SwipeGesture_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Callback_SwipeGesture_Void continuation);
-} Callback_SwipeGesture;
-typedef struct Opt_Callback_SwipeGesture {
-    Ark_Tag tag;
-    Callback_SwipeGesture value;
-} Opt_Callback_SwipeGesture;
-typedef struct Callback_SwipeGesture_Void {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_SwipeGesture value);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_SwipeGesture value);
-} Callback_SwipeGesture_Void;
-typedef struct Opt_Callback_SwipeGesture_Void {
-    Ark_Tag tag;
-    Callback_SwipeGesture_Void value;
-} Opt_Callback_SwipeGesture_Void;
 typedef struct Callback_SwiperContentTransitionProxy_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14459,16 +14331,6 @@ typedef struct Opt_RotateOptions {
     Ark_Tag tag;
     Ark_RotateOptions value;
 } Opt_RotateOptions;
-typedef struct Ark_RotationGestureHandlerOptions {
-    /* kind: Interface */
-    Opt_Boolean isFingerCountLimited;
-    Opt_Number fingers;
-    Opt_Number angle;
-} Ark_RotationGestureHandlerOptions;
-typedef struct Opt_RotationGestureHandlerOptions {
-    Ark_Tag tag;
-    Ark_RotationGestureHandlerOptions value;
-} Opt_RotationGestureHandlerOptions;
 typedef struct Ark_RoundedRectOptions {
     /* kind: Interface */
     Opt_Union_F64_String width;
@@ -14712,17 +14574,6 @@ typedef struct Opt_SurfaceRotationOptions {
     Ark_Tag tag;
     Ark_SurfaceRotationOptions value;
 } Opt_SurfaceRotationOptions;
-typedef struct Ark_SwipeGestureHandlerOptions {
-    /* kind: Interface */
-    Opt_Boolean isFingerCountLimited;
-    Opt_Number fingers;
-    Opt_SwipeDirection direction;
-    Opt_Number speed;
-} Ark_SwipeGestureHandlerOptions;
-typedef struct Opt_SwipeGestureHandlerOptions {
-    Ark_Tag tag;
-    Ark_SwipeGestureHandlerOptions value;
-} Opt_SwipeGestureHandlerOptions;
 typedef struct Ark_SwiperAutoFill {
     /* kind: Interface */
     Ark_VP minSize;
@@ -20903,15 +20754,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setTransition1)(Ark_NativePointer node,
                            const Opt_TransitionEffect* effect,
                            const Opt_TransitionFinishCallback* onFinish);
-    void (*setGesture)(Ark_NativePointer node,
-                       const Opt_GestureType* gesture,
-                       const Opt_GestureMask* mask);
-    void (*setPriorityGesture)(Ark_NativePointer node,
-                               const Opt_GestureType* gesture,
-                               const Opt_GestureMask* mask);
-    void (*setParallelGesture)(Ark_NativePointer node,
-                               const Opt_GestureType* gesture,
-                               const Opt_GestureMask* mask);
     void (*setBlur)(Ark_NativePointer node,
                     const Opt_Number* blurRadius,
                     const Opt_BlurOptions* options,
@@ -22775,8 +22617,8 @@ typedef struct GENERATED_ArkUISwiperModifier {
     void (*setOnContentWillScroll)(Ark_NativePointer node,
                                    const Opt_ContentWillScrollCallback* value);
     void (*setAutoPlay1)(Ark_NativePointer node,
-                         const Opt_Boolean* autoPlay,
-                         const Opt_AutoPlayOptions* options);
+                        const Opt_Boolean* autoPlay,
+                        const Opt_AutoPlayOptions* options);
     void (*setDisplayArrow)(Ark_NativePointer node,
                             const Opt_Union_ArrowStyle_Boolean* value,
                             const Opt_Boolean* isHoverShow);
@@ -24852,16 +24694,6 @@ typedef struct GENERATED_ArkUIFullScreenExitHandlerAccessor {
     void (*exitFullScreen)(Ark_FullScreenExitHandler peer);
 } GENERATED_ArkUIFullScreenExitHandlerAccessor;
 
-typedef struct GENERATED_ArkUIGestureAccessor {
-    void (*destroyPeer)(Ark_Gesture peer);
-    Ark_Gesture (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-    void (*tag)(Ark_Gesture peer,
-                const Ark_String* tag);
-    void (*allowedTypes)(Ark_Gesture peer,
-                         const Array_SourceTool* types);
-} GENERATED_ArkUIGestureAccessor;
-
 typedef struct GENERATED_ArkUIGestureEventAccessor {
     void (*destroyPeer)(Ark_GestureEvent peer);
     Ark_GestureEvent (*construct)();
@@ -24904,16 +24736,58 @@ typedef struct GENERATED_ArkUIGestureEventAccessor {
                         const Ark_Number* velocity);
 } GENERATED_ArkUIGestureEventAccessor;
 
-typedef struct GENERATED_ArkUIGestureGroupAccessor {
-    void (*destroyPeer)(Ark_GestureGroup peer);
-    Ark_GestureGroup (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-    Ark_GestureGroup (*$_instantiate)(const Callback_GestureGroup* factory,
-                                      Ark_GestureMode mode,
-                                      const Array_GestureType* gesture);
-    Ark_GestureGroup (*onCancel)(Ark_GestureGroup peer,
-                                 const Callback_Void* event);
-} GENERATED_ArkUIGestureGroupAccessor;
+typedef struct GENERATED_ArkUIGestureOpsAccessor {
+    Ark_NativePointer (*createTapGesture)(const Ark_Number* fingers,
+                                          const Ark_Number* count,
+                                          const Ark_Number* distanceThreshold,
+                                          Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createLongPressGesture)(const Ark_Number* fingers,
+                                                Ark_Boolean repeat,
+                                                const Ark_Number* duration,
+                                                Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createPanGesture)(const Ark_Number* fingers,
+                                          Ark_PanDirection direction,
+                                          const Ark_Number* distance,
+                                          Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createPanGestureWithPanGestureOptions)(Ark_NativePointer panGestureOptions);
+    Ark_NativePointer (*createPinchGesture)(const Ark_Number* fingers,
+                                            const Ark_Number* distance,
+                                            Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createRotationGesture)(const Ark_Number* fingers,
+                                               const Ark_Number* angle,
+                                               Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createSwipeGesture)(const Ark_Number* fingers,
+                                            Ark_SwipeDirection direction,
+                                            const Ark_Number* speed,
+                                            Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createGestureGroup)(Ark_GestureMode mode);
+    void (*setOnAction)(Ark_NativePointer gesture,
+                        const Callback_GestureEvent_Void* onAction);
+    void (*setOnActionStart)(Ark_NativePointer gesture,
+                             const Callback_GestureEvent_Void* onActionStart);
+    void (*setOnActionUpdate)(Ark_NativePointer gesture,
+                              const Callback_GestureEvent_Void* onActionUpdate);
+    void (*setOnActionEnd)(Ark_NativePointer gesture,
+                           const Callback_GestureEvent_Void* onActionEnd);
+    void (*setOnActionCancel)(Ark_NativePointer gesture,
+                              const Callback_GestureEvent_Void* onActionCancel);
+    void (*setOnCancel)(Ark_NativePointer gesture,
+                        const Callback_Void* onCancel);
+    void (*setGestureTag)(Ark_NativePointer gesture,
+                          const Ark_String* tag);
+    void (*setAllowedTypes)(Ark_NativePointer gesture,
+                            const Array_SourceTool* types);
+    void (*addGestureToNode)(Ark_NativePointer node,
+                             const Ark_Number* priority,
+                             Ark_GestureMask mask,
+                             Ark_NativePointer gesture,
+                             Ark_Boolean isModifier);
+    void (*addGestureToGroup)(Ark_NativePointer group,
+                              Ark_NativePointer gesture);
+    void (*removeGestureByTag)(Ark_NativePointer node,
+                               const Ark_String* tag);
+    void (*clearGestures)(Ark_NativePointer node);
+} GENERATED_ArkUIGestureOpsAccessor;
 
 typedef struct GENERATED_ArkUIGestureRecognizerAccessor {
     void (*destroyPeer)(Ark_GestureRecognizer peer);
@@ -25959,22 +25833,6 @@ typedef struct GENERATED_ArkUIRichEditorStyledStringControllerAccessor {
                              const Ark_StyledStringChangedListener* listener);
 } GENERATED_ArkUIRichEditorStyledStringControllerAccessor;
 
-typedef struct GENERATED_ArkUIRotationGestureAccessor {
-    void (*destroyPeer)(Ark_RotationGesture peer);
-    Ark_RotationGesture (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-    Ark_RotationGesture (*$_instantiate)(const Callback_RotationGesture* factory,
-                                         const Opt_RotationGestureHandlerOptions* value);
-    void (*onActionStart)(Ark_RotationGesture peer,
-                          const Callback_GestureEvent_Void* event);
-    void (*onActionUpdate)(Ark_RotationGesture peer,
-                           const Callback_GestureEvent_Void* event);
-    void (*onActionEnd)(Ark_RotationGesture peer,
-                        const Callback_GestureEvent_Void* event);
-    void (*onActionCancel)(Ark_RotationGesture peer,
-                           const Callback_GestureEvent_Void* event);
-} GENERATED_ArkUIRotationGestureAccessor;
-
 typedef struct GENERATED_ArkUIRotationGestureEventAccessor {
     void (*destroyPeer)(Ark_RotationGestureEvent peer);
     Ark_RotationGestureEvent (*construct)();
@@ -26233,16 +26091,6 @@ typedef struct GENERATED_ArkUISubmitEventAccessor {
     void (*setText)(Ark_SubmitEvent peer,
                     const Ark_String* text);
 } GENERATED_ArkUISubmitEventAccessor;
-
-typedef struct GENERATED_ArkUISwipeGestureAccessor {
-    void (*destroyPeer)(Ark_SwipeGesture peer);
-    Ark_SwipeGesture (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-    Ark_SwipeGesture (*$_instantiate)(const Callback_SwipeGesture* factory,
-                                      const Opt_SwipeGestureHandlerOptions* value);
-    void (*onAction)(Ark_SwipeGesture peer,
-                     const Callback_GestureEvent_Void* event);
-} GENERATED_ArkUISwipeGestureAccessor;
 
 typedef struct GENERATED_ArkUISwipeGestureEventAccessor {
     void (*destroyPeer)(Ark_SwipeGestureEvent peer);
@@ -27038,9 +26886,8 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIFrameNodeExtenderAccessor* (*getFrameNodeExtenderAccessor)();
     const GENERATED_ArkUIFrictionMotionAccessor* (*getFrictionMotionAccessor)();
     const GENERATED_ArkUIFullScreenExitHandlerAccessor* (*getFullScreenExitHandlerAccessor)();
-    const GENERATED_ArkUIGestureAccessor* (*getGestureAccessor)();
     const GENERATED_ArkUIGestureEventAccessor* (*getGestureEventAccessor)();
-    const GENERATED_ArkUIGestureGroupAccessor* (*getGestureGroupAccessor)();
+    const GENERATED_ArkUIGestureOpsAccessor* (*getGestureOpsAccessor)();
     const GENERATED_ArkUIGestureRecognizerAccessor* (*getGestureRecognizerAccessor)();
     const GENERATED_ArkUIGestureStyleAccessor* (*getGestureStyleAccessor)();
     const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* (*getGlobalScope_ohos_arkui_componentSnapshotAccessor)();
@@ -27105,7 +26952,6 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIRichEditorBaseControllerAccessor* (*getRichEditorBaseControllerAccessor)();
     const GENERATED_ArkUIRichEditorControllerAccessor* (*getRichEditorControllerAccessor)();
     const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* (*getRichEditorStyledStringControllerAccessor)();
-    const GENERATED_ArkUIRotationGestureAccessor* (*getRotationGestureAccessor)();
     const GENERATED_ArkUIRotationGestureEventAccessor* (*getRotationGestureEventAccessor)();
     const GENERATED_ArkUIRotationRecognizerAccessor* (*getRotationRecognizerAccessor)();
     const GENERATED_ArkUIRouterExtenderAccessor* (*getRouterExtenderAccessor)();
@@ -27125,7 +26971,6 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIStyledStringAccessor* (*getStyledStringAccessor)();
     const GENERATED_ArkUIStyledStringControllerAccessor* (*getStyledStringControllerAccessor)();
     const GENERATED_ArkUISubmitEventAccessor* (*getSubmitEventAccessor)();
-    const GENERATED_ArkUISwipeGestureAccessor* (*getSwipeGestureAccessor)();
     const GENERATED_ArkUISwipeGestureEventAccessor* (*getSwipeGestureEventAccessor)();
     const GENERATED_ArkUISwiperContentTransitionProxyAccessor* (*getSwiperContentTransitionProxyAccessor)();
     const GENERATED_ArkUISwiperControllerAccessor* (*getSwiperControllerAccessor)();

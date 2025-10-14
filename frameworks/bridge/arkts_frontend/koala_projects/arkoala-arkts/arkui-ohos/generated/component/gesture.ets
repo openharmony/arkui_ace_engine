@@ -24,6 +24,9 @@ import { SourceTool, BaseEvent, BaseEventInternal } from "./common"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { InteractionHand } from "./enums"
+// instructive change start
+import { GlobalStateManager, MutableState } from '@koalaui/runtime'
+// instructive change end
 export class EventTargetInfoInternal {
     public static fromPtr(ptr: KPointer): EventTargetInfo {
         return new EventTargetInfo(ptr)
@@ -53,118 +56,6 @@ export class EventTargetInfo implements MaterializedBase {
     getId_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._EventTargetInfo_getId(this.peer!.ptr)
         return retval
-    }
-}
-export class GestureInternal {
-    public static fromPtr(ptr: KPointer): Gesture {
-        return new Gesture(ptr)
-    }
-}
-export class Gesture implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, Gesture.getFinalizer())
-    }
-    constructor() {
-        this(Gesture.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._Gesture_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._Gesture_getFinalizer()
-    }
-    public tag(tag: string): this {
-        const tag_casted = tag as (string)
-        this.tag_serialize(tag_casted)
-        return this
-    }
-    public allowedTypes(types: Array<SourceTool>): this {
-        const types_casted = types as (Array<SourceTool>)
-        this.allowedTypes_serialize(types_casted)
-        return this
-    }
-    tag_serialize(tag: string): this {
-        ArkUIGeneratedNativeModule._Gesture_tag(this.peer!.ptr, tag)
-        return this
-    }
-    allowedTypes_serialize(types: Array<SourceTool>): this {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.writeInt32((types.length).toInt())
-        for (let typesCounterI = 0; typesCounterI < types.length; typesCounterI++) {
-            const typesTmpElement : SourceTool = types[typesCounterI]
-            thisSerializer.writeInt32(typesTmpElement.valueOf())
-        }
-        ArkUIGeneratedNativeModule._Gesture_allowedTypes(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return this
-    }
-}
-export class GestureGroupInternal {
-    public static fromPtr(ptr: KPointer): GestureGroup {
-        return new GestureGroup(ptr)
-    }
-}
-export class GestureGroup implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, GestureGroup.getFinalizer())
-    }
-    constructor() {
-        this(GestureGroup.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._GestureGroup_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._GestureGroup_getFinalizer()
-    }
-    static $_instantiate_serialize(factory: (() => GestureGroup), mode: GestureMode, gesture: Array<GestureType>): GestureGroup {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(factory)
-        thisSerializer.writeInt32((gesture.length).toInt())
-        for (let gestureCounterI = 0; gestureCounterI < gesture.length; gestureCounterI++) {
-            const gestureTmpElement : GestureType = gesture[gestureCounterI]
-            if (gestureTmpElement instanceof Gesture) {
-                thisSerializer.writeInt8((0).toChar())
-                const gestureTmpElementForIdx0  = gestureTmpElement as Gesture
-                Gesture_serializer.write(thisSerializer, gestureTmpElementForIdx0)
-            } else if (gestureTmpElement instanceof GestureGroup) {
-                thisSerializer.writeInt8((1).toChar())
-                const gestureTmpElementForIdx1  = gestureTmpElement as GestureGroup
-                GestureGroup_serializer.write(thisSerializer, gestureTmpElementForIdx1)
-            }
-        }
-        const retval  = ArkUIGeneratedNativeModule._GestureGroup_$_instantiate(thisSerializer.asBuffer(), thisSerializer.length(), mode.valueOf())
-        thisSerializer.release()
-        const obj : GestureGroup = GestureGroupInternal.fromPtr(retval)
-        return obj
-    }
-    public static $_instantiate(factory: (() => GestureGroup), mode: GestureMode, gesture: Array<GestureType>): GestureGroup {
-        const factory_casted = factory as ((() => GestureGroup))
-        const mode_casted = mode as (GestureMode)
-        const gesture_casted = gesture as (Array<GestureType>)
-        return GestureGroup.$_instantiate_serialize(factory_casted, mode_casted, gesture_casted)
-    }
-    public onCancel(event: (() => void)): GestureGroup {
-        const event_casted = event as ((() => void))
-        return this.onCancel_serialize(event_casted)
-    }
-    onCancel_serialize(event: (() => void)): GestureGroup {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._GestureGroup_onCancel(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        const obj : GestureGroup = GestureGroupInternal.fromPtr(retval)
-        return obj
     }
 }
 export class GestureRecognizerInternal {
@@ -270,6 +161,9 @@ export class PanGestureOptionsInternal {
 }
 export class PanGestureOptions implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
+    // instructive change start
+    public optionState: MutableState<int32> | undefined
+    // instructive change end
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -278,6 +172,10 @@ export class PanGestureOptions implements MaterializedBase {
     }
     constructor(value?: PanGestureHandlerOptions) {
         this(false, PanGestureOptions.construct(value))
+        // instructive change start
+        const manager = GlobalStateManager.instance
+        this.optionState = manager.mutableState<int32>(0 as int32, true)
+        // instructive change end
     }
     static construct(value?: PanGestureHandlerOptions): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -295,19 +193,36 @@ export class PanGestureOptions implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._PanGestureOptions_getFinalizer()
     }
+    // instructive change start
+    public getOptionState(): number {
+        return this.optionState!.value
+    }
+    public setOptionState(): void {
+        this.optionState!.value = this.optionState!.value % 100 + 1
+    }
+    // instructive change end
     public setDirection(value: PanDirection): void {
         const value_casted = value as (PanDirection)
         this.setDirection_serialize(value_casted)
+        // instructive change start
+        this.setOptionState()
+        // instructive change end
         return
     }
     public setDistance(value: number): void {
         const value_casted = value as (number)
         this.setDistance_serialize(value_casted)
+        // instructive change end
+        this.setOptionState()
+        // instructive change end
         return
     }
     public setFingers(value: number): void {
         const value_casted = value as (number)
         this.setFingers_serialize(value_casted)
+        // instructive change start
+        this.setOptionState()
+        // instructive change end
         return
     }
     public getDirection(): PanDirection {
@@ -403,7 +318,9 @@ export interface FingerInfo {
     displayY: number;
     hand?: InteractionHand;
 }
+// instructive change start
 export type GestureType = Gesture | GestureGroup;
+// instructive change end
 export interface BaseHandlerOptions {
     isFingerCountLimited?: boolean;
 }
@@ -412,50 +329,39 @@ export interface TapGestureParameters extends BaseHandlerOptions {
     fingers?: number;
     distanceThreshold?: number;
 }
-export interface GestureHandler {
-}
 export interface TapGestureHandlerOptions extends BaseHandlerOptions {
     count?: number;
     fingers?: number;
-}
-export interface TapGestureHandler extends GestureHandler {
 }
 export interface LongPressGestureHandlerOptions extends BaseHandlerOptions {
     fingers?: number;
     repeat?: boolean;
     duration?: number;
 }
-export interface LongPressGestureHandler extends GestureHandler {
-}
 export interface PanGestureHandlerOptions extends BaseHandlerOptions {
     fingers?: number;
     direction?: PanDirection;
     distance?: number;
-}
-export interface PanGestureHandler extends GestureHandler {
 }
 export interface SwipeGestureHandlerOptions extends BaseHandlerOptions {
     fingers?: number;
     direction?: SwipeDirection;
     speed?: number;
 }
-export interface SwipeGestureHandler extends GestureHandler {
-}
 export interface PinchGestureHandlerOptions extends BaseHandlerOptions {
     fingers?: number;
     distance?: number;
-}
-export interface PinchGestureHandler extends GestureHandler {
 }
 export interface RotationGestureHandlerOptions extends BaseHandlerOptions {
     fingers?: number;
     angle?: number;
 }
-export interface RotationGestureHandler extends GestureHandler {
-}
+// instructive change start
 export interface GestureGroupGestureHandlerOptions {
-    _stub: int32;
+    mode: GestureMode;
+    gestures: GestureHandler[];
 }
+// instructive change end
 export enum GesturePriority {
     NORMAL = 0,
     PRIORITY = 1
@@ -477,28 +383,6 @@ export class EventTargetInfo_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return EventTargetInfoInternal.fromPtr(ptr)
-    }
-}
-export class Gesture_serializer {
-    public static write(buffer: SerializerBase, value: Gesture): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): Gesture {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return GestureInternal.fromPtr(ptr)
-    }
-}
-export class GestureGroup_serializer {
-    public static write(buffer: SerializerBase, value: GestureGroup): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): GestureGroup {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return GestureGroupInternal.fromPtr(ptr)
     }
 }
 export class GestureRecognizer_serializer {
@@ -556,17 +440,6 @@ export class PinchRecognizer_serializer {
         return PinchRecognizerInternal.fromPtr(ptr)
     }
 }
-export class RotationGesture_serializer {
-    public static write(buffer: SerializerBase, value: RotationGesture): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): RotationGesture {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return RotationGestureInternal.fromPtr(ptr)
-    }
-}
 export class RotationRecognizer_serializer {
     public static write(buffer: SerializerBase, value: RotationRecognizer): void {
         let valueSerializer : SerializerBase = buffer
@@ -587,17 +460,6 @@ export class ScrollableTargetInfo_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return ScrollableTargetInfoInternal.fromPtr(ptr)
-    }
-}
-export class SwipeGesture_serializer {
-    public static write(buffer: SerializerBase, value: SwipeGesture): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): SwipeGesture {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return SwipeGestureInternal.fromPtr(ptr)
     }
 }
 export class SwipeRecognizer_serializer {
@@ -760,124 +622,6 @@ export class PanGestureHandlerOptions_serializer {
         }
         const distanceTmpResult : number | undefined = distanceTmpBuf
         let value : PanGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimitedTmpResult, fingers: fingersTmpResult, direction: directionTmpResult, distance: distanceTmpResult} as PanGestureHandlerOptions)
-        return value
-    }
-}
-export class RotationGestureHandlerOptions_serializer {
-    public static write(buffer: SerializerBase, value: RotationGestureHandlerOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForIsFingerCountLimited  = value.isFingerCountLimited
-        if (valueHolderForIsFingerCountLimited !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForIsFingerCountLimitedTmpValue  = valueHolderForIsFingerCountLimited!
-            valueSerializer.writeBoolean(valueHolderForIsFingerCountLimitedTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForFingers  = value.fingers
-        if (valueHolderForFingers !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForFingersTmpValue  = valueHolderForFingers!
-            valueSerializer.writeNumber(valueHolderForFingersTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForAngle  = value.angle
-        if (valueHolderForAngle !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForAngleTmpValue  = valueHolderForAngle!
-            valueSerializer.writeNumber(valueHolderForAngleTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): RotationGestureHandlerOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const isFingerCountLimitedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let isFingerCountLimitedTmpBuf : boolean | undefined = undefined
-        if ((isFingerCountLimitedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            isFingerCountLimitedTmpBuf = valueDeserializer.readBoolean()
-        }
-        const isFingerCountLimitedTmpResult : boolean | undefined = isFingerCountLimitedTmpBuf
-        const fingersTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fingersTmpBuf : number | undefined = undefined
-        if ((fingersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fingersTmpBuf = (valueDeserializer.readNumber() as number)
-        }
-        const fingersTmpResult : number | undefined = fingersTmpBuf
-        const angleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let angleTmpBuf : number | undefined = undefined
-        if ((angleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            angleTmpBuf = (valueDeserializer.readNumber() as number)
-        }
-        const angleTmpResult : number | undefined = angleTmpBuf
-        let value : RotationGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimitedTmpResult, fingers: fingersTmpResult, angle: angleTmpResult} as RotationGestureHandlerOptions)
-        return value
-    }
-}
-export class SwipeGestureHandlerOptions_serializer {
-    public static write(buffer: SerializerBase, value: SwipeGestureHandlerOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForIsFingerCountLimited  = value.isFingerCountLimited
-        if (valueHolderForIsFingerCountLimited !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForIsFingerCountLimitedTmpValue  = valueHolderForIsFingerCountLimited!
-            valueSerializer.writeBoolean(valueHolderForIsFingerCountLimitedTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForFingers  = value.fingers
-        if (valueHolderForFingers !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForFingersTmpValue  = valueHolderForFingers!
-            valueSerializer.writeNumber(valueHolderForFingersTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForDirection  = value.direction
-        if (valueHolderForDirection !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForDirectionTmpValue  = (valueHolderForDirection as SwipeDirection)
-            valueSerializer.writeInt32(valueHolderForDirectionTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForSpeed  = value.speed
-        if (valueHolderForSpeed !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForSpeedTmpValue  = valueHolderForSpeed!
-            valueSerializer.writeNumber(valueHolderForSpeedTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): SwipeGestureHandlerOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const isFingerCountLimitedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let isFingerCountLimitedTmpBuf : boolean | undefined = undefined
-        if ((isFingerCountLimitedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            isFingerCountLimitedTmpBuf = valueDeserializer.readBoolean()
-        }
-        const isFingerCountLimitedTmpResult : boolean | undefined = isFingerCountLimitedTmpBuf
-        const fingersTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fingersTmpBuf : number | undefined = undefined
-        if ((fingersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fingersTmpBuf = (valueDeserializer.readNumber() as number)
-        }
-        const fingersTmpResult : number | undefined = fingersTmpBuf
-        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let directionTmpBuf : SwipeDirection | undefined = undefined
-        if ((directionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            directionTmpBuf = SwipeDirection.fromValue(valueDeserializer.readInt32())
-        }
-        const directionTmpResult : SwipeDirection | undefined = directionTmpBuf
-        const speedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let speedTmpBuf : number | undefined = undefined
-        if ((speedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            speedTmpBuf = (valueDeserializer.readNumber() as number)
-        }
-        const speedTmpResult : number | undefined = speedTmpBuf
-        let value : SwipeGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimitedTmpResult, fingers: fingersTmpResult, direction: directionTmpResult, speed: speedTmpResult} as SwipeGestureHandlerOptions)
         return value
     }
 }
@@ -1412,94 +1156,6 @@ export class PinchRecognizer extends GestureRecognizer implements MaterializedBa
         return retval
     }
 }
-export class RotationGestureInternal {
-    public static fromPtr(ptr: KPointer): RotationGesture {
-        return new RotationGesture(ptr)
-    }
-}
-export class RotationGesture extends Gesture implements MaterializedBase {
-    constructor(peerPtr: KPointer) {
-        super(peerPtr)
-    }
-    constructor() {
-        this(RotationGesture.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._RotationGesture_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._RotationGesture_getFinalizer()
-    }
-    static $_instantiate_serialize(factory: (() => RotationGesture), value?: RotationGestureHandlerOptions): RotationGesture {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(factory)
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            RotationGestureHandlerOptions_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const retval  = ArkUIGeneratedNativeModule._RotationGesture_$_instantiate(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        const obj : RotationGesture = RotationGestureInternal.fromPtr(retval)
-        return obj
-    }
-    public static $_instantiate(factory: (() => RotationGesture), value?: RotationGestureHandlerOptions): RotationGesture {
-        const factory_casted = factory as ((() => RotationGesture))
-        const value_casted = value as (RotationGestureHandlerOptions | undefined)
-        return RotationGesture.$_instantiate_serialize(factory_casted, value_casted)
-    }
-    public onActionStart(event: ((value0: GestureEvent) => void)): this {
-        const event_casted = event as (((value0: GestureEvent) => void))
-        this.onActionStart_serialize(event_casted)
-        return this
-    }
-    public onActionUpdate(event: ((value0: GestureEvent) => void)): this {
-        const event_casted = event as (((value0: GestureEvent) => void))
-        this.onActionUpdate_serialize(event_casted)
-        return this
-    }
-    public onActionEnd(event: ((value0: GestureEvent) => void)): this {
-        const event_casted = event as (((value0: GestureEvent) => void))
-        this.onActionEnd_serialize(event_casted)
-        return this
-    }
-    public onActionCancel(event: ((value0: GestureEvent) => void)): this {
-        const event_casted = event as (((value0: GestureEvent) => void))
-        this.onActionCancel_serialize(event_casted)
-        return this
-    }
-    onActionStart_serialize(event: ((value0: GestureEvent) => void)): this {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(event)
-        ArkUIGeneratedNativeModule._RotationGesture_onActionStart(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return this
-    }
-    onActionUpdate_serialize(event: ((value0: GestureEvent) => void)): this {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(event)
-        ArkUIGeneratedNativeModule._RotationGesture_onActionUpdate(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return this
-    }
-    onActionEnd_serialize(event: ((value0: GestureEvent) => void)): this {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(event)
-        ArkUIGeneratedNativeModule._RotationGesture_onActionEnd(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return this
-    }
-    onActionCancel_serialize(event: ((value0: GestureEvent) => void)): this {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(event)
-        ArkUIGeneratedNativeModule._RotationGesture_onActionCancel(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return this
-    }
-}
 export class RotationRecognizerInternal {
     public static fromPtr(ptr: KPointer): RotationRecognizer {
         return new RotationRecognizer(ptr)
@@ -1559,58 +1215,6 @@ export class ScrollableTargetInfo extends EventTargetInfo implements Materialize
     isEnd_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._ScrollableTargetInfo_isEnd(this.peer!.ptr)
         return retval
-    }
-}
-export class SwipeGestureInternal {
-    public static fromPtr(ptr: KPointer): SwipeGesture {
-        return new SwipeGesture(ptr)
-    }
-}
-export class SwipeGesture extends Gesture implements MaterializedBase {
-    constructor(peerPtr: KPointer) {
-        super(peerPtr)
-    }
-    constructor() {
-        this(SwipeGesture.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._SwipeGesture_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._SwipeGesture_getFinalizer()
-    }
-    static $_instantiate_serialize(factory: (() => SwipeGesture), value?: SwipeGestureHandlerOptions): SwipeGesture {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(factory)
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            SwipeGestureHandlerOptions_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const retval  = ArkUIGeneratedNativeModule._SwipeGesture_$_instantiate(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        const obj : SwipeGesture = SwipeGestureInternal.fromPtr(retval)
-        return obj
-    }
-    public static $_instantiate(factory: (() => SwipeGesture), value?: SwipeGestureHandlerOptions): SwipeGesture {
-        const factory_casted = factory as ((() => SwipeGesture))
-        const value_casted = value as (SwipeGestureHandlerOptions | undefined)
-        return SwipeGesture.$_instantiate_serialize(factory_casted, value_casted)
-    }
-    public onAction(event: ((value0: GestureEvent) => void)): this {
-        const event_casted = event as (((value0: GestureEvent) => void))
-        this.onAction_serialize(event_casted)
-        return this
-    }
-    onAction_serialize(event: ((value0: GestureEvent) => void)): this {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(event)
-        ArkUIGeneratedNativeModule._SwipeGesture_onAction(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return this
     }
 }
 export class SwipeRecognizerInternal {
