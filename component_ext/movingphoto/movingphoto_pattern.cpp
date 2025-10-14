@@ -634,7 +634,7 @@ void MovingPhotoPattern::HandleTransitionImageCompleteEvent(const LoadImageSucce
     }
 }
 
-void MovingPhotoPattern::HandleTransitionImageErrorEvent(const LoadImageErrorEvent& info)
+void MovingPhotoPattern::HandleTransitionImageErrorEvent(const LoadImageFailEvent& info)
 {
     auto errorStatus = info.GetErrorInfo();
     TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "HandleTransitionImageErrorEvent  errorCode:%{public}d.",
