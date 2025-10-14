@@ -1270,66 +1270,35 @@ void FormManagerDelegate::ProcessLockForm(bool lock)
     HandleLockFormCallback(lock);
 }
 
-void FormManagerDelegate::AddDueDisableFormCallback(DueDisableFormCallback&& callback)
+void FormManagerDelegate::AddDueControlFormCallback(DueControlFormCallback&& callback)
 {
     if (!callback || state_ == State::RELEASED) {
         return;
     }
-    dueDisableFormCallback_ = std::move(callback);
+    dueControlFormCallback_ = std::move(callback);
 }
- 
-void FormManagerDelegate::HandleDueDisableForm(bool isDisable)
+
+void FormManagerDelegate::HandleDueControlForm(bool isDisablePolicy, bool isControl)
 {
-    if (!dueDisableFormCallback_) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "dueDisableFormCallback_ is null");
+    if (!dueControlFormCallback_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "dueControlFormCallback_ is null");
         return;
     }
-    dueDisableFormCallback_(isDisable);
+    dueControlFormCallback_(isDisablePolicy, isControl);
 }
- 
-void FormManagerDelegate::ProcessDueDisableForm(bool isDisable)
+
+void FormManagerDelegate::ProcessDueControlForm(bool isDisablePolicy, bool isControl)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessDueDisableForm, isDisable:%{public}d, formId:%{public}" PRId64,
-        isDisable, runningCardId_);
-    HandleDueDisableForm(isDisable);
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessDueControlForm, isDisablePolicy:%{public}d, isControl:%{public}d,"
+        "formId:%{public}" PRId64, isDisablePolicy, isControl, runningCardId_);
+    HandleDueControlForm(isDisablePolicy, isControl);
 }
- 
-bool FormManagerDelegate::CheckFormDueDisable(const std::string &bundleName, const std::string &moduleName,
-    const std::string &abilityName, const std::string &formName, const int32_t dimension)
+
+bool FormManagerDelegate::CheckFormDueControl(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &formName, const int32_t dimension, const bool isDisablePolicy)
 {
-    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormDueDisable(
-        bundleName, moduleName, abilityName, formName, dimension);
-}
- 
-void FormManagerDelegate::AddDueRemoveFormCallback(DueRemoveFormCallback&& callback)
-{
-    if (!callback || state_ == State::RELEASED) {
-        return;
-    }
-    dueRemoveFormCallback_ = std::move(callback);
-}
- 
-void FormManagerDelegate::HandleDueRemoveForm(bool isRemove)
-{
-    if (!dueRemoveFormCallback_) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "dueRemoveFormCallback_ is null");
-        return;
-    }
-    dueRemoveFormCallback_(isRemove);
-}
- 
-void FormManagerDelegate::ProcessDueRemoveForm(bool isRemove)
-{
-    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessDueRemoveForm, isRemove:%{public}d, formId:%{public}" PRId64,
-        isRemove, runningCardId_);
-    HandleDueRemoveForm(isRemove);
-}
- 
-bool FormManagerDelegate::CheckFormDueRemove(const std::string &bundleName, const std::string &moduleName,
-    const std::string &abilityName, const std::string &formName, const int32_t dimension)
-{
-    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormDueRemove(
-        bundleName, moduleName, abilityName, formName, dimension);
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormDueControl(
+        bundleName, moduleName, abilityName, formName, dimension, isDisablePolicy);
 }
 #endif
 } // namespace OHOS::Ace

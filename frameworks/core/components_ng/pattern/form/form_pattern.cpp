@@ -920,9 +920,9 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
     }
     cardInfo_.obscuredMode |= isFormBundleForbidden || isFormProtected || isShowDeveloperTips;
     bool isDueDisable =
-        IsFormDueDisable(info.bundleName, info.moduleName, info.abilityName, info.cardName, info.dimension);
+        IsFormDueControl(info.bundleName, info.moduleName, info.abilityName, info.cardName, info.dimension, true);
     bool isDueRemove =
-        IsFormDueRemove(info.bundleName, info.moduleName, info.abilityName, info.cardName, info.dimension);
+        IsFormDueControl(info.bundleName, info.moduleName, info.abilityName, info.cardName, info.dimension, false);
 #if OHOS_STANDARD_SYSTEM
     formManagerBridge_->AddForm(pipeline, cardInfo_, formInfo);
 #else
@@ -3116,58 +3116,37 @@ void FormPattern::InitDueControlFormCallback(int32_t instanceID)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
-    formManagerBridge_->AddDueDisableFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool isDisable) {
+    formManagerBridge_->AddDueControlFormCallback(
+        [weak = WeakClaim(this), instanceID, pipeline](const bool isDisablePolicy, const bool isControl) {
         ContainerScope scope(instanceID);
         CHECK_NULL_VOID(pipeline);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak, instanceID, isDisable] {
+        uiTaskExecutor.PostTask([weak, instanceID, isDisablePolicy, isControl] {
             ContainerScope scope(instanceID);
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
-            formPattern->HandleFormDueDisable(isDisable);
-            }, "ArkUIFormHandleDueDisableEvent");
-    });
-
-    formManagerBridge_->AddDueRemoveFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool isRemove) {
-        ContainerScope scope(instanceID);
-        CHECK_NULL_VOID(pipeline);
-        auto uiTaskExecutor =
-            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak, instanceID, isRemove] {
-            ContainerScope scope(instanceID);
-            auto formPattern = weak.Upgrade();
-            CHECK_NULL_VOID(formPattern);
-            formPattern->HandleFormDueRemove(isRemove);
-            }, "ArkUIFormHandleDueRemoveEvent");
+            formPattern->HandleFormDueControl(isDisablePolicy, isControl);
+            }, "ArkUIFormHandleDueControlEvent");
     });
 }
 
-void FormPattern::HandleFormDueDisable(bool isDisable)
+void FormPattern::HandleFormDueControl(bool isDisablePolicy, bool isControl)
 {
     auto newFormSpecialStyle = formSpecialStyle_;
-    newFormSpecialStyle.SetIsDisableByDue(isDisable);
+    if (isDisablePolicy) {
+        newFormSpecialStyle.SetIsDisableByDue(isControl);
+    } else {
+        newFormSpecialStyle.SetIsRemoveByDue(isControl);
+    }
     HandleFormStyleOperation(newFormSpecialStyle);
 }
 
-bool FormPattern::IsFormDueDisable(const std::string &bundleName, const std::string &moduleName,
-    const std::string &abilityName, const std::string &formName, const int32_t dimension)
+bool FormPattern::IsFormDueControl(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &formName, const int32_t dimension, const bool isDisablePolicy)
 {
     CHECK_NULL_RETURN(formManagerBridge_, false);
-    return formManagerBridge_->CheckFormDueDisable(bundleName, moduleName, abilityName, formName, dimension);
-}
-
-void FormPattern::HandleFormDueRemove(bool isRemove)
-{
-    auto newFormSpecialStyle = formSpecialStyle_;
-    newFormSpecialStyle.SetIsRemoveByDue(isRemove);
-    HandleFormStyleOperation(newFormSpecialStyle);
-}
-
-bool FormPattern::IsFormDueRemove(const std::string &bundleName, const std::string &moduleName,
-    const std::string &abilityName, const std::string &formName, const int32_t dimension)
-{
-    CHECK_NULL_RETURN(formManagerBridge_, false);
-    return formManagerBridge_->CheckFormDueRemove(bundleName, moduleName, abilityName, formName, dimension);
+    return formManagerBridge_->CheckFormDueControl(
+        bundleName, moduleName, abilityName, formName, dimension, isDisablePolicy);
 }
 } // namespace OHOS::Ace::NG

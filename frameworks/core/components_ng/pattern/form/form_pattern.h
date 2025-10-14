@@ -317,12 +317,9 @@ private:
     void InitializeFormAccessibility();
     void SetForbiddenRootNodeAccessibilityAction(RefPtr<FrameNode> &forbiddeRootNode);
     void SetFormAccessibilityAction();
-    void HandleFormDueDisable(bool isDisable);
-    bool IsFormDueDisable(const std::string &bundleName, const std::string &moduleName,
-        const std::string &abilityName, const std::string &formName, const int32_t dimension);
-    void HandleFormDueRemove(bool isDisable);
-    bool IsFormDueRemove(const std::string &bundleName, const std::string &moduleName,
-        const std::string &abilityName, const std::string &formName, const int32_t dimension);
+    void HandleFormDueControl(bool isDisablePolicy, bool isControl);
+    bool IsFormDueControl(const std::string &bundleName, const std::string &moduleName, const std::string &abilityName,
+        const std::string &formName, const int32_t dimension, const bool isDisablePolicy);
 
     RefPtr<RenderContext> externalRenderContext_;
 
