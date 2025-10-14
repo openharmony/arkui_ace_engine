@@ -1536,7 +1536,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createXComponentNodeDefault(context: UIContext, type: string): XComponentFrameNode {
+    function createXComponentNodeDefault(context: UIContext): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1549,7 +1549,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createXComponentNodeWithOptions(context: UIContext, type: string, options: XComponentOptions): XComponentFrameNode {
+    function createXComponentNodeWithOptions(context: UIContext, options: XComponentOptions): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1562,7 +1562,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createXComponentNodeWithNativeParameters(context: UIContext, type: string, parameters: NativeXComponentParameters): XComponentFrameNode {
+    function createXComponentNodeWithNativeParameters(context: UIContext, parameters: NativeXComponentParameters): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);

@@ -187,24 +187,26 @@ HWTEST_F(VideoControllerAccessorTest, DISABLED_setCurrentTimeTest, TestSize.Leve
     auto arkPos3 = Converter::ArkValue<Ark_Float64>(pos3);
     auto arkPos4 = Converter::ArkValue<Ark_Float64>(pos4);
     Ark_SeekMode arkSeekMode1 = ARK_SEEK_MODE_ACCURATE;
+    auto optSeekMode1 = Converter::OptConvert<Ark_SeekMode>(arkSeekMode1);
     Ark_SeekMode arkSeekMode2 = ARK_SEEK_MODE_CLOSEST_KEYFRAME;
+    auto optSeekMode2 = Converter::OptConvert<Ark_SeekMode>(arkSeekMode2);
     Ark_SeekMode arkSeekMode3 = ARK_SEEK_MODE_NEXT_KEYFRAME;
+    auto optSeekMode3 = Converter::OptConvert<Ark_SeekMode>(arkSeekMode3);
     Ark_SeekMode arkSeekMode4 = ARK_SEEK_MODE_PREVIOUS_KEYFRAME;
+    auto optSeekMode4 = Converter::OptConvert<Ark_SeekMode>(arkSeekMode4);
 
-    ASSERT_NE(accessor_->setCurrentTimeDefault, nullptr);
-    ASSERT_NE(accessor_->setCurrentTimeWithMode, nullptr);
+    ASSERT_NE(accessor_->setCurrentTime, nullptr);
 
     EXPECT_CALL(*mockVideoController_, SeekTo(pos1, seekMode1)).Times(1);
-    accessor_->setCurrentTimeWithMode(peer_, arkPos1, arkSeekMode1);
+    accessor_->setCurrentTime(peer_, arkPos1, optSeekMode1);
 
     EXPECT_CALL(*mockVideoController_, SeekTo(pos2, seekMode2)).Times(1);
-    accessor_->setCurrentTimeWithMode(peer_, arkPos2, arkSeekMode2);
+    accessor_->setCurrentTime(peer_, arkPos2, optSeekMode2);
 
     EXPECT_CALL(*mockVideoController_, SeekTo(pos3, seekMode3)).Times(1);
-    accessor_->setCurrentTimeWithMode(peer_, arkPos3, arkSeekMode3);
+    accessor_->setCurrentTime(peer_, arkPos3, optSeekMode3);
 
     EXPECT_CALL(*mockVideoController_, SeekTo(pos4, seekMode4)).Times(2);
-    accessor_->setCurrentTimeWithMode(peer_, arkPos4, arkSeekMode4);
-    accessor_->setCurrentTimeDefault(peer_, arkPos4);
+    accessor_->setCurrentTime(peer_, arkPos4, optSeekMode4);
 }
 } // namespace OHOS::Ace::NG

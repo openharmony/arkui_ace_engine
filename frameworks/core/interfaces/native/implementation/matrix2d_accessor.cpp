@@ -27,13 +27,14 @@ void DestroyPeerImpl(Ark_Matrix2D peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_Matrix2D Construct0Impl()
+Ark_Matrix2D ConstructImpl(const Opt_LengthMetricsUnit* unit)
 {
-    return PeerUtils::CreatePeer<Matrix2DPeer>();
-}
-Ark_Matrix2D Construct1Impl(Ark_LengthMetricsUnit unit)
-{
-    return PeerUtils::CreatePeer<Matrix2DPeer>();
+    auto peer = PeerUtils::CreatePeer<Matrix2DPeer>();
+    auto optUnit = Converter::OptConvertPtr<Ace::CanvasUnit>(unit);
+    if (optUnit) {
+        peer->SetUnit(optUnit.value());
+    }
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -167,8 +168,7 @@ const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor()
 {
     static const GENERATED_ArkUIMatrix2DAccessor Matrix2DAccessorImpl {
         Matrix2DAccessor::DestroyPeerImpl,
-        Matrix2DAccessor::Construct0Impl,
-        Matrix2DAccessor::Construct1Impl,
+        Matrix2DAccessor::ConstructImpl,
         Matrix2DAccessor::GetFinalizerImpl,
         Matrix2DAccessor::IdentityImpl,
         Matrix2DAccessor::InvertImpl,

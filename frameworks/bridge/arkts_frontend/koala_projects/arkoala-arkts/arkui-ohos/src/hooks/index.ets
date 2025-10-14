@@ -364,17 +364,3 @@ export function hookGetContext(peerPtr: OffscreenCanvas, contextType: string, op
 {
   return peerPtr.getContext2d(options)
 }
-export function hookOn(peerPtr: CanvasRenderingContext2D, type: string, callback_: Callback<void>): void {
-    if (type == "onAttach") {
-        peerPtr.onOnAttach(callback_)
-    } else if (type == "onDetach") {
-        peerPtr.onOnDetach(callback_)
-    }
-}
-export function hookOff(peerPtr: CanvasRenderingContext2D, type: string, callback_?: Callback<void>): void {
-    if (type == "offAttach") {
-        peerPtr.offOnAttach(callback_)
-    } else if (type == "offDetach") {
-        peerPtr.offOnDetach(callback_)
-    }
-}

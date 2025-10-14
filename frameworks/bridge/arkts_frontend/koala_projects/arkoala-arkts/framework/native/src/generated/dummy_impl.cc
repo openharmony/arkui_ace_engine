@@ -25004,8 +25004,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     void AddColorStopImpl(Ark_CanvasGradient peer,
-                          const Ark_Number* offset,
-                          const Ark_String* color)
+                          Ark_Float64 offset,
+                          const Ark_Union_String_ColorMetrics* color)
     {
         if (!needGroupedLog(1))
         {

@@ -11109,8 +11109,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     void AddColorStopImpl(Ark_CanvasGradient peer,
-                          const Ark_Number* offset,
-                          const Ark_String* color)
+                          Ark_Float64 offset,
+                          const Ark_Union_String_ColorMetrics* color)
     {
     }
     } // CanvasGradientAccessor
