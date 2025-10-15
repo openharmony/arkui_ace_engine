@@ -84,7 +84,7 @@ void OH_ArkUI_SelectedDataDetectorConfig_SetTypes(
 {
     CHECK_NULL_VOID(config);
     config->types.clear();
-    for (int32_t i = 0; i < length; ++i) {
+    for (uint32_t i = 0; i < length; ++i) {
         config->types.push_back(types[i]);
     }
 }

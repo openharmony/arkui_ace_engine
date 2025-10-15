@@ -12661,7 +12661,7 @@ int32_t SetSelectDetectorConfig(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     auto size = config->types.size();
     std::vector<ArkUI_Uint32> values;
     auto typesList = config->types;
-    for (int i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         values.push_back(typesList[i]);
     }
     if (node->type == ARKUI_NODE_TEXT) {

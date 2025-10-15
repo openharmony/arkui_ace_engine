@@ -482,16 +482,6 @@ void GetLayoutConstraint(Ark_NodeHandle node, Ark_Int32* value)
 
 void SetChildTotalCount(Ark_NodeHandle node, int totalCount)
 {
-    // auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // if (frameNode->GetTag() == OHOS::Ace::V2::LIST_ETS_TAG) {
-    //     ListModelNG::SetListItemTotalCount(frameNode, totalCount);
-    //     return;
-    // }
-    // if (frameNode->GetTag() == OHOS::Ace::V2::GRID_ETS_TAG) {
-    //     GridModelNG::SetGridItemTotalCount(frameNode, totalCount);
-    //     return;
-    // }
 }
 
 int IndexerChecker(Ark_VMContext vmContext, Ark_NodeHandle nodePtr)
@@ -548,24 +538,6 @@ inline T* fromBits(GENERATED_Ark_EventCallbackArg* args)
 
 void SetLazyItemIndexer(Ark_VMContext vmContext, Ark_NodeHandle nodePtr, int indexerId)
 {
-    // auto* frameNode = reinterpret_cast<FrameNode*>(nodePtr);
-    // CHECK_NULL_VOID(frameNode);
-    // auto getNodeByIndex = [vmContext, indexerId](int32_t index) -> OHOS::Ace::RefPtr<FrameNode> {
-    //     GENERATED_Ark_EventCallbackArg args[] = { { index }, { 0 }, { 0 } };
-    //     int found = GetCallbackMethod()->CallInt(vmContext, indexerId, 3, &args[0]);
-    //     if (found == 0) {
-    //         return nullptr;
-    //     }
-    //     return OHOS::Ace::AceType::Claim(fromBits<FrameNode>(&args[1]));
-    // };
-    // if (frameNode->GetTag() == OHOS::Ace::V2::LIST_ETS_TAG) {
-    //     ListModelNG::SetListItemGetFunc(frameNode, std::move(getNodeByIndex));
-    //     return;
-    // }
-    // if (frameNode->GetTag() == OHOS::Ace::V2::GRID_ETS_TAG) {
-    //     GridModelNG::SetGridItemGetFunc(frameNode, std::move(getNodeByIndex));
-    //     return;
-    // }
 }
 
 void EmitOnClick(Ark_NativePointer node, Ark_ClickEvent event)
