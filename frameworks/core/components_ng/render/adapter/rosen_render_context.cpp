@@ -5794,6 +5794,12 @@ void RosenRenderContext::SetRenderFit(RenderFit renderFit)
     }
 }
 
+void RosenRenderContext::OnCornerApplyTypeUpdate(CornerApplyType cornerApplyType)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetCornerApplyType(static_cast<Rosen::RSCornerApplyType>(cornerApplyType));
+}
+
 void RosenRenderContext::ClearDrawCommands()
 {
     StartRecording();

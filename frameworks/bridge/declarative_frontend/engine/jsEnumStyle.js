@@ -206,6 +206,12 @@ let BorderStyle;
   BorderStyle[BorderStyle.Dotted = 2] = 'Dotted';
 })(BorderStyle || (BorderStyle = {}));
 
+let CornerApplyType;
+(function (CornerApplyType) {
+  CornerApplyType[CornerApplyType.FAST = 0] = 'FAST';
+  CornerApplyType[CornerApplyType.OFFSCREEN = 1] = 'OFFSCREEN';
+})(CornerApplyType || (CornerApplyType = {}));
+
 let LineCapStyle;
 (function (LineCapStyle) {
   LineCapStyle[LineCapStyle.Butt = 0] = 'Butt';
