@@ -91,60 +91,43 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // ButtonModifier
 namespace ButtonInterfaceModifier {
-void SetButtonOptions0Impl(Ark_NativePointer node)
-{
-    // safe it empty for save default values
-}
-void SetButtonOptions1Impl(Ark_NativePointer node,
-                           const Ark_ButtonOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto buttonOptions = Converter::Convert<ButtonOptions>(*options);
-    ButtonModelStatic::SetType(frameNode, EnumToInt(buttonOptions.type));
-    ButtonModelStatic::SetStateEffect(frameNode, buttonOptions.stateEffect);
-    ButtonModelStatic::SetRole(frameNode, buttonOptions.role);
-    ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
-    ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
-}
-void SetButtonOptions2Impl(Ark_NativePointer node,
+void SetButtonOptions0Impl(Ark_NativePointer node,
                            const Ark_ResourceStr* label,
                            const Opt_ButtonOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(label);
-    if (auto buttonOptions = Converter::OptConvertPtr<Ark_ButtonOptions>(options); buttonOptions) {
-        SetButtonOptions1Impl(node, &buttonOptions.value());
+    auto arkButtonOptions = Converter::OptConvertPtr<Ark_ButtonOptions>(options);
+    if (arkButtonOptions.has_value()) {
+        auto buttonOptions = Converter::Convert<ButtonOptions>(*arkButtonOptions);
+        ButtonModelStatic::SetType(frameNode, EnumToInt(buttonOptions.type));
+        ButtonModelStatic::SetStateEffect(frameNode, buttonOptions.stateEffect);
+        ButtonModelStatic::SetRole(frameNode, buttonOptions.role);
+        ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
+        ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
     }
     auto labelString = Converter::OptConvert<std::string>(*label);
     if (labelString) {
         ButtonModelStatic::SetLabel(frameNode, labelString->c_str());
     }
+    ButtonModelStatic::SetCreateWithLabel(frameNode, true);
 }
-void SetButtonOptionsImpl(Ark_NativePointer node,
-                          const Ark_Union_ButtonOptions_ResourceStr* label,
-                          const Opt_ButtonOptions* options)
+void SetButtonOptions1Impl(Ark_NativePointer node,
+                           const Opt_ButtonOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(label);
-    if (auto buttonOptions = Converter::OptConvertPtr<Ark_ButtonOptions>(options); buttonOptions) {
-        SetButtonOptions1Impl(node, &buttonOptions.value());
+    auto arkButtonOptions = Converter::OptConvertPtr<Ark_ButtonOptions>(options);
+    if (arkButtonOptions.has_value()) {
+        auto buttonOptions = Converter::Convert<ButtonOptions>(*arkButtonOptions);
+        ButtonModelStatic::SetType(frameNode, EnumToInt(buttonOptions.type));
+        ButtonModelStatic::SetStateEffect(frameNode, buttonOptions.stateEffect);
+        ButtonModelStatic::SetRole(frameNode, buttonOptions.role);
+        ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
+        ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
     }
-    Converter::VisitUnion(*label,
-        [node](const Ark_ButtonOptions& value) {
-            SetButtonOptions1Impl(node, &value);
-        },
-        [frameNode](const Ark_ResourceStr& value) {
-            auto labelString = Converter::OptConvert<std::string>(value);
-            if (labelString) {
-                ButtonModelStatic::SetLabel(frameNode, labelString->c_str());
-            }
-        },
-        []() {}
-    );
+    ButtonModelStatic::SetCreateWithLabel(frameNode, false);
 }
 } // ButtonInterfaceModifier
 namespace ButtonAttributeModifier {
@@ -263,7 +246,8 @@ const GENERATED_ArkUIButtonModifier* GetButtonModifier()
 {
     static const GENERATED_ArkUIButtonModifier ArkUIButtonModifierImpl {
         ButtonModifier::ConstructImpl,
-        ButtonInterfaceModifier::SetButtonOptionsImpl,
+        ButtonInterfaceModifier::SetButtonOptions0Impl,
+        ButtonInterfaceModifier::SetButtonOptions1Impl,
         ButtonAttributeModifier::SetTypeImpl,
         ButtonAttributeModifier::SetStateEffectImpl,
         ButtonAttributeModifier::SetButtonStyleImpl,

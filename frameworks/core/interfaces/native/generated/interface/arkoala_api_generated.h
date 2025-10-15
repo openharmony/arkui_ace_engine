@@ -2304,8 +2304,6 @@ typedef struct Ark_Union_Boolean_ResourceStr_SymbolGlyphModifier Ark_Union_Boole
 typedef struct Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier;
 typedef struct Ark_Union_BorderStyle_EdgeStyles Ark_Union_BorderStyle_EdgeStyles;
 typedef struct Opt_Union_BorderStyle_EdgeStyles Opt_Union_BorderStyle_EdgeStyles;
-typedef struct Ark_Union_ButtonOptions_ResourceStr Ark_Union_ButtonOptions_ResourceStr;
-typedef struct Opt_Union_ButtonOptions_ResourceStr Opt_Union_ButtonOptions_ResourceStr;
 typedef struct Ark_Union_Color_I32_String_Resource Ark_Union_Color_I32_String_Resource;
 typedef struct Opt_Union_Color_I32_String_Resource Opt_Union_Color_I32_String_Resource;
 typedef struct Ark_Union_Color_String_Resource Ark_Union_Color_String_Resource;
@@ -15164,18 +15162,6 @@ typedef struct Opt_Union_BorderStyle_EdgeStyles {
     Ark_Tag tag;
     Ark_Union_BorderStyle_EdgeStyles value;
 } Opt_Union_BorderStyle_EdgeStyles;
-typedef struct Ark_Union_ButtonOptions_ResourceStr {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_ButtonOptions value0;
-        Ark_ResourceStr value1;
-    };
-} Ark_Union_ButtonOptions_ResourceStr;
-typedef struct Opt_Union_ButtonOptions_ResourceStr {
-    Ark_Tag tag;
-    Ark_Union_ButtonOptions_ResourceStr value;
-} Opt_Union_ButtonOptions_ResourceStr;
 typedef struct Ark_Union_Color_I32_String_Resource {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -20534,9 +20520,11 @@ typedef struct GENERATED_ArkUIBlankModifier {
 typedef struct GENERATED_ArkUIButtonModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
-    void (*setButtonOptions)(Ark_NativePointer node,
-                             const Ark_Union_ButtonOptions_ResourceStr* label,
-                             const Opt_ButtonOptions* options);
+    void (*setButtonOptions0)(Ark_NativePointer node,
+                              const Ark_ResourceStr* label,
+                              const Opt_ButtonOptions* options);
+    void (*setButtonOptions1)(Ark_NativePointer node,
+                              const Opt_ButtonOptions* options);
     void (*setType)(Ark_NativePointer node,
                     const Opt_ButtonType* value);
     void (*setStateEffect)(Ark_NativePointer node,

@@ -887,34 +887,22 @@ Ark_NativePointer impl_Button_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getButtonModifier()->construct(id, flags);
 }
 KOALA_INTEROP_DIRECT_2(Button_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
-void impl_ButtonInterface_setButtonOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_ButtonInterface_setButtonOptions0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 labelValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_ButtonOptions_ResourceStr labelValueTempTmpBuf = {};
+        Ark_ResourceStr labelValueTempTmpBuf = {};
         labelValueTempTmpBuf.selector = labelValueTempTmpBufUnionSelector;
         if (labelValueTempTmpBufUnionSelector == 0) {
             labelValueTempTmpBuf.selector = 0;
-            labelValueTempTmpBuf.value0 = ButtonOptions_serializer::read(thisDeserializer);
+            labelValueTempTmpBuf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
         } else if (labelValueTempTmpBufUnionSelector == 1) {
             labelValueTempTmpBuf.selector = 1;
-            const Ark_Int8 labelValueTempTmpBufBufUUnionSelector = thisDeserializer.readInt8();
-            Ark_ResourceStr labelValueTempTmpBufBufU = {};
-            labelValueTempTmpBufBufU.selector = labelValueTempTmpBufBufUUnionSelector;
-            if (labelValueTempTmpBufBufUUnionSelector == 0) {
-                labelValueTempTmpBufBufU.selector = 0;
-                labelValueTempTmpBufBufU.value0 = static_cast<Ark_String>(thisDeserializer.readString());
-            } else if (labelValueTempTmpBufBufUUnionSelector == 1) {
-                labelValueTempTmpBufBufU.selector = 1;
-                labelValueTempTmpBufBufU.value1 = Resource_serializer::read(thisDeserializer);
-            } else {
-                INTEROP_FATAL("One of the branches for labelValueTempTmpBufBufU has to be chosen through deserialisation.");
-            }
-            labelValueTempTmpBuf.value1 = static_cast<Ark_ResourceStr>(labelValueTempTmpBufBufU);
+            labelValueTempTmpBuf.value1 = Resource_serializer::read(thisDeserializer);
         } else {
             INTEROP_FATAL("One of the branches for labelValueTempTmpBuf has to be chosen through deserialisation.");
         }
-        Ark_Union_ButtonOptions_ResourceStr labelValueTemp = static_cast<Ark_Union_ButtonOptions_ResourceStr>(labelValueTempTmpBuf);;
+        Ark_ResourceStr labelValueTemp = static_cast<Ark_ResourceStr>(labelValueTempTmpBuf);;
         const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_ButtonOptions optionsValueTempTmpBuf = {};
         optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -922,9 +910,22 @@ void impl_ButtonInterface_setButtonOptions(Ark_NativePointer thisPtr, KSerialize
             optionsValueTempTmpBuf.value = ButtonOptions_serializer::read(thisDeserializer);
         }
         Opt_ButtonOptions optionsValueTemp = optionsValueTempTmpBuf;;
-        GetNodeModifiers()->getButtonModifier()->setButtonOptions(self, static_cast<Ark_Union_ButtonOptions_ResourceStr*>(&labelValueTemp), static_cast<Opt_ButtonOptions*>(&optionsValueTemp));
+        GetNodeModifiers()->getButtonModifier()->setButtonOptions0(self, static_cast<Ark_ResourceStr*>(&labelValueTemp), static_cast<Opt_ButtonOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(ButtonInterface_setButtonOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(ButtonInterface_setButtonOptions0, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ButtonInterface_setButtonOptions1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ButtonOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = ButtonOptions_serializer::read(thisDeserializer);
+        }
+        Opt_ButtonOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        GetNodeModifiers()->getButtonModifier()->setButtonOptions1(self, static_cast<Opt_ButtonOptions*>(&optionsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ButtonInterface_setButtonOptions1, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ButtonAttribute_setType(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
