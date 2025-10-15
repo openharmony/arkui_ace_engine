@@ -25936,6 +25936,22 @@ void impl_AnimationExtender_CloseImplicitAnimation() {
         GetAccessors()->getAnimationExtenderAccessor()->CloseImplicitAnimation();
 }
 KOALA_INTEROP_DIRECT_V0(AnimationExtender_CloseImplicitAnimation)
+void impl_AnimationExtender_OpenImplicitAnimationForAnimation(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto paramValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_AnimateParam paramValueTempTmpBuf = {};
+        paramValueTempTmpBuf.tag = paramValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((paramValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            paramValueTempTmpBuf.value = AnimateParam_serializer::read(thisDeserializer);
+        }
+        Opt_AnimateParam paramValueTemp = paramValueTempTmpBuf;;
+        GetAccessors()->getAnimationExtenderAccessor()->OpenImplicitAnimationForAnimation(node, static_cast<Opt_AnimateParam*>(&paramValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(AnimationExtender_OpenImplicitAnimationForAnimation, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_AnimationExtender_CloseImplicitAnimationForAnimation(Ark_NativePointer node) {
+        GetAccessors()->getAnimationExtenderAccessor()->CloseImplicitAnimationForAnimation(node);
+}
+KOALA_INTEROP_DIRECT_V1(AnimationExtender_CloseImplicitAnimationForAnimation, Ark_NativePointer)
 void impl_AnimationExtender_StartDoubleAnimation(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_DoubleAnimationParam paramValueTemp = DoubleAnimationParam_serializer::read(thisDeserializer);;

@@ -23845,6 +23845,9 @@ typedef struct GENERATED_ArkUIAnimationExtenderAccessor {
                         Ark_Float32 height);
     void (*OpenImplicitAnimation)(const Ark_AnimateParam* param);
     void (*CloseImplicitAnimation)();
+    void (*OpenImplicitAnimationForAnimation)(Ark_NativePointer node,
+                                              const Opt_AnimateParam* param);
+    void (*CloseImplicitAnimationForAnimation)(Ark_NativePointer node);
     void (*StartDoubleAnimation)(Ark_NativePointer node,
                                  const Ark_DoubleAnimationParam* param);
     void (*AnimationTranslate)(Ark_NativePointer node,

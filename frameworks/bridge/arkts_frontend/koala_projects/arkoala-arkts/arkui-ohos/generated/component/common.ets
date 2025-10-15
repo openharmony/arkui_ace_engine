@@ -2116,15 +2116,17 @@ export class TransitionEffect implements MaterializedBase {
     animation_serialize(value: AnimateParam): TransitionEffect {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         AnimateParam_serializer.write(thisSerializer, value)
-        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_animation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        // instructive change start
+        ArkUIGeneratedNativeModule._TransitionEffect_animation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
-        return obj
+        return this
+        // instructive change end
     }
     combine_serialize(transitionEffect: TransitionEffect): TransitionEffect {
-        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_combine(this.peer!.ptr, toPeerPtr(transitionEffect))
-        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
-        return obj
+        // instructive change start
+        ArkUIGeneratedNativeModule._TransitionEffect_combine(this.peer!.ptr, toPeerPtr(transitionEffect))
+        return this
+        // instructive change end
     }
 }
 export interface UICommonEvent {
@@ -9360,17 +9362,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     // instructive change start
     public animationStart(value: AnimateParam | undefined): this {
         if (this.checkPriority("animationStart")) {
-            const value_casted = value as (AnimateParam | undefined)
-            _animationStart(value_casted, this.isFirstBuild);
+            _animationStart(this.getPeer()?.getPeerPtr(), value, this.isFirstBuild);
             return this
         }
         return this
     }
     public animationStop(value: AnimateParam | undefined): this {
         if (this.checkPriority("animationStop")) {
-            _animationStop(value, this.isFirstBuild, () => {
-                this.isFirstBuild = false
-            });
+            _animationStop(this.getPeer()?.getPeerPtr(), value, this.isFirstBuild);
             return this
         }
         return this

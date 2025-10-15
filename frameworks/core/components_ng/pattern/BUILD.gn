@@ -727,6 +727,7 @@ build_component_ng("pattern_ng") {
     "video/video_node.cpp",
     "video/video_pattern.cpp",
     "view_context/view_context_model_ng.cpp",
+    "view_context/view_context_model_static.cpp",
     "waterflow/layout/sliding_window/water_flow_layout_info_sw.cpp",
     "waterflow/layout/sliding_window/water_flow_layout_sw.cpp",
     "waterflow/layout/top_down/water_flow_layout_algorithm.cpp",
