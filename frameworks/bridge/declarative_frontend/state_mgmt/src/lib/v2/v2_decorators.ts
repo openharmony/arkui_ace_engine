@@ -176,7 +176,7 @@ const Provider = (aliasName?: string) => {
   return (proto: Object, varName: string): void => {
     const providedUnderName: string = aliasName || varName;
     ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, providedUnderName, '@Provider');
-    if (!InteropConfigureStateMgmt.needsInterop) {
+    if (!InteropConfigureStateMgmt.needsInterop()) {
       trackInternal(proto, varName);
     } else {
       trackInternalInterop(proto, varName);
