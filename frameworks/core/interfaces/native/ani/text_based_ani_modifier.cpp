@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
+#include "core/interfaces/native/implementation/text_modifier_peer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -37,11 +38,30 @@ void* FromSymbolModifierPeer(void* ptr)
     return ret;
 }
 
+void* ToTextModifierPeer(std::function<void(OHOS::Ace::WeakPtr<NG::FrameNode>)>& textApply,
+    void* textModifierAni)
+{
+    auto textPeer = PeerUtils::CreatePeer<TextModifierPeer>();
+    textPeer->textApply = textApply;
+    textPeer->textModifierAni = textModifierAni;
+    return reinterpret_cast<void*>(textPeer);
+}
+void* FromTextModifierPeer(void* ptr)
+{
+    auto* textModifierPeer = reinterpret_cast<TextModifierPeer*>(ptr);
+    CHECK_NULL_RETURN(textModifierPeer, nullptr);
+    auto ret = textModifierPeer->textModifierAni;
+    PeerUtils::DestroyPeer(textModifierPeer);
+    return ret;
+}
+
 const ArkUIAniTextBasedModifier* GetTextBasedAniModifier()
 {
     static const ArkUIAniTextBasedModifier impl = {
         .fromSymbolModifierPeer = OHOS::Ace::NG::FromSymbolModifierPeer,
-        .toSymbolModifierPeer = OHOS::Ace::NG::ToSymbolModifierPeer
+        .toSymbolModifierPeer = OHOS::Ace::NG::ToSymbolModifierPeer,
+        .fromTextModifierPeer = OHOS::Ace::NG::FromTextModifierPeer,
+        .toTextModifierPeer = OHOS::Ace::NG::ToTextModifierPeer
     };
     return &impl;
 }
