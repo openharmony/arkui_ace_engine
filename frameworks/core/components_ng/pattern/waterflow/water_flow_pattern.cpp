@@ -88,7 +88,7 @@ bool WaterFlowPattern::IsAtTop() const
 {
     return layoutInfo_->itemStart_;
 };
-bool WaterFlowPattern::IsAtBottom(bool considerRepeat) const
+bool WaterFlowPattern::IsAtBottom(bool considerRepeat, bool fromController) const
 {
     return considerRepeat ? (layoutInfo_->offsetEnd_ && layoutInfo_->repeatDifference_ == 0) : layoutInfo_->offsetEnd_;
 };
