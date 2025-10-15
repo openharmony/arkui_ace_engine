@@ -41,11 +41,13 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     ) {
         super('Provide', owningView, varName, watchFunc);
         if (isDynamicObject(initValue)) {
-            initValue = getObservedObject(initValue, this);
+            initValue = getObservedObject(initValue);
+            this.backing_ = FactoryInternal.mkInteropDecoratorValue(varName, initValue);
+        } else {
+            this.backing_ = FactoryInternal.mkDecoratorValue<T>(varName, initValue);
         }
         this.provideAlias_ = provideAliasName;
         this.allowOverride_ = allowOverride ? allowOverride : false;
-        this.backing_ = FactoryInternal.mkDecoratorValue<T>(varName, initValue);
         this.registerWatchForObservedObjectChanges(initValue);
         owningView.addProvidedVar(provideAliasName, this, allowOverride);
         if (varName !== provideAliasName) {
@@ -63,16 +65,18 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
             return;
         }
         let value: T = uiUtils.makeObserved(newValue);
-        // for interop
-        if (isDynamicObject(value)) {
-            value = getObservedObject(value, this);
+        if (isDynamicObject(newValue)) {
+            let value = getObservedObject(newValue);
+            this.backing_.setNoCheck(value);
+        } else {
+            // for interop
+            this.backing_.setNoCheck(value);
         }
-        this.backing_.setNoCheck(value);
         if (this.setProxyValue) {
             this.setProxyValue!(value);
         }
         this.unregisterWatchFromObservedObjectChanges(oldValue);
-        this.registerWatchForObservedObjectChanges(value);
+        this.registerWatchForObservedObjectChanges(this.backing_.get(false));
         this.execWatchFuncs();
     }
 

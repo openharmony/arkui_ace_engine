@@ -520,6 +520,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/typedNode/ArkToggleNode.ets",
   "arkui-preprocessed/arkui/typedNode/ArkWaterFlowNode.ets",
   "arkui-preprocessed/arkui/typedNode/ArkXComponentNode.ets",
+  "arkui-preprocessed/arkui/stateManagement/interop/interopBackingValue.ets",
 ]
 
 arkui_path_keys = [

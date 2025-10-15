@@ -36,6 +36,8 @@ export interface IFactoryInternal {
     // create a Proxy for observed interface / intrinsic object T
     // see also InterfaceProxyHandler
     mkObservedInterfaceProxy<T extends Object>(x: T): T;
+    
+    mkInteropDecoratorValue<T>(info: string, initValue: T): IBackingValue<T>;
 }
 
 export const FactoryInternal: IFactoryInternal = new FactoryInternalImpl();

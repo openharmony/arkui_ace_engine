@@ -25,7 +25,7 @@ function isStaticProxy<T extends Object>(obj: T): boolean {
 
 class SubscribeInterop implements ISinglePropertyChangeSubscriber<Object>{
     private id_: number;
-    constructor(callback: () => void) {
+    constructor(callback: (property: string) => void) {
         this.notifyInterop = callback;
         this.id_ = SubscriberManager.MakeStateVariableId();
         SubscriberManager.Add(this);
@@ -43,16 +43,16 @@ class SubscribeInterop implements ISinglePropertyChangeSubscriber<Object>{
         return;
     }
 
-    public notifyInterop: () => void;
+    public notifyInterop: (property: string) => void;
 
     // @Observed no @Track   set to ObservedObject
     onTrackedObjectPropertyCompatModeHasChangedPU<T>(sourceObject: ObservedObject<T>, changedPropertyName: string): void {
-        this.notifyInterop();
+        this.notifyInterop(changedPropertyName);
     }
     
     // @Observed has @Track
     onTrackedObjectPropertyHasChangedPU<T>(sourceObject: ObservedObject<T>, changedPropertyName: string): void {
-        this.notifyInterop();
+        this.notifyInterop(changedPropertyName);
     }
 }
 
@@ -91,13 +91,25 @@ function getRawObjectForInterop(value: Object): Object {
     return value;
 }
 
-function staticStateBindObservedObject(value: Object, staticCallback: () => void): Object {
-    if (!ObservedObject.IsObservedObject(value)) {
-        value = ObservedObject.createNew(value, null);
+function staticStateBindObservedObject(
+    value: Object,
+    onPropertyChange: () => void,
+    onTrackPropertyRead:(readPropName: string, isTracked: boolean) => void,
+    onTrackPropertyChange: (readPropName: string) => void
+): void {
+    if (TrackedObject.isCompatibilityMode(value)) {
+        const subscribeInterop = new SubscribeInterop((property: string) => {
+            onPropertyChange()
+        });
+        ObservedObject.addOwningProperty(value, subscribeInterop);
+        return;
     }
-    const subscirbeInterop = new SubscribeInterop(staticCallback);
-    ObservedObject.addOwningProperty(value, subscirbeInterop);
-    return value;
+    const subscribeInterop = new SubscribeInterop(onTrackPropertyChange);
+    const observedObject = new ObservedPropertyObjectPU<Object>(value, undefined, undefined);
+    ObservedObject.addOwningProperty(value, subscribeInterop);
+    ObservedObject.registerPropertyReadCb(value, (readObject: Object, readPropName: string, isTracked: boolean) => {
+        onTrackPropertyRead(readPropName, isTracked)
+    }, observedObject)
 }
 
 function __Interop_CreateStaticComponent_Internal(
@@ -151,4 +163,11 @@ function __Interop_TransferCompatibleUpdatableBuilder_Internal(builder: (...args
         throw new Error("Non Method For Transfer CompatibleUpdatableBuilder");
     }
     return InteropExtractorModule.transferCompatibleUpdatableBuilder(builder);
+}
+
+function createObservedObject(value: Object): Object {
+    if (!ObservedObject.IsObservedObject(value)) {
+        value = ObservedObject.createNew(value, null);
+    }
+    return value;
 }
