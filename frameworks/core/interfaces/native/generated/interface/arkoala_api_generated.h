@@ -4754,9 +4754,9 @@ typedef struct Opt_ImageRotateOrientation {
     Ark_ImageRotateOrientation value;
 } Opt_ImageRotateOrientation;
 typedef enum Ark_ImageSize {
-    ARK_IMAGE_SIZE_AUTO = 0,
+    ARK_IMAGE_SIZE_AUTO = 2,
     ARK_IMAGE_SIZE_COVER = 1,
-    ARK_IMAGE_SIZE_CONTAIN = 2,
+    ARK_IMAGE_SIZE_CONTAIN = 0,
     ARK_IMAGE_SIZE_FILL = 3,
 } Ark_ImageSize;
 typedef struct Opt_ImageSize {
@@ -4887,8 +4887,8 @@ typedef struct Opt_KeyProcessingMode {
 } Opt_KeyProcessingMode;
 typedef enum Ark_KeySource {
     ARK_KEY_SOURCE_UNKNOWN = 0,
-    ARK_KEY_SOURCE_KEYBOARD = 1,
-    ARK_KEY_SOURCE_JOYSTICK = 2,
+    ARK_KEY_SOURCE_KEYBOARD = 4,
+    ARK_KEY_SOURCE_JOYSTICK = 5,
 } Ark_KeySource;
 typedef struct Opt_KeySource {
     Ark_Tag tag;
@@ -5159,10 +5159,10 @@ typedef struct Opt_ModifierKey {
     Ark_ModifierKey value;
 } Opt_ModifierKey;
 typedef enum Ark_MouseAction {
-    ARK_MOUSE_ACTION_PRESS = 0,
-    ARK_MOUSE_ACTION_RELEASE = 1,
-    ARK_MOUSE_ACTION_MOVE = 2,
-    ARK_MOUSE_ACTION_HOVER = 3,
+    ARK_MOUSE_ACTION_PRESS = 1,
+    ARK_MOUSE_ACTION_RELEASE = 2,
+    ARK_MOUSE_ACTION_MOVE = 3,
+    ARK_MOUSE_ACTION_HOVER = 4,
     ARK_MOUSE_ACTION_CANCEL = 13,
 } Ark_MouseAction;
 typedef struct Opt_MouseAction {
@@ -5170,12 +5170,12 @@ typedef struct Opt_MouseAction {
     Ark_MouseAction value;
 } Opt_MouseAction;
 typedef enum Ark_MouseButton {
-    ARK_MOUSE_BUTTON_LEFT = 0,
-    ARK_MOUSE_BUTTON_RIGHT = 1,
-    ARK_MOUSE_BUTTON_MIDDLE = 2,
-    ARK_MOUSE_BUTTON_BACK = 3,
-    ARK_MOUSE_BUTTON_FORWARD = 4,
-    ARK_MOUSE_BUTTON_NONE = 5,
+    ARK_MOUSE_BUTTON_LEFT = 1,
+    ARK_MOUSE_BUTTON_RIGHT = 2,
+    ARK_MOUSE_BUTTON_MIDDLE = 4,
+    ARK_MOUSE_BUTTON_BACK = 8,
+    ARK_MOUSE_BUTTON_FORWARD = 16,
+    ARK_MOUSE_BUTTON_NONE = 0,
 } Ark_MouseButton;
 typedef struct Opt_MouseButton {
     Ark_Tag tag;
@@ -6036,9 +6036,9 @@ typedef enum Ark_SourceTool {
     ARK_SOURCE_TOOL_UNKNOWN = 0,
     ARK_SOURCE_TOOL_FINGER = 1,
     ARK_SOURCE_TOOL_PEN = 2,
-    ARK_SOURCE_TOOL_MOUSE = 3,
-    ARK_SOURCE_TOOL_TOUCHPAD = 4,
-    ARK_SOURCE_TOOL_JOYSTICK = 5,
+    ARK_SOURCE_TOOL_MOUSE = 7,
+    ARK_SOURCE_TOOL_TOUCHPAD = 9,
+    ARK_SOURCE_TOOL_JOYSTICK = 10,
 } Ark_SourceTool;
 typedef struct Opt_SourceTool {
     Ark_Tag tag;
