@@ -798,6 +798,8 @@ typedef struct UserDataSpanPeer* Ark_UserDataSpan;
 typedef struct Opt_UserDataSpan Opt_UserDataSpan;
 typedef struct Ark_Vec4 Ark_Vec4;
 typedef struct Opt_Vec4 Opt_Vec4;
+typedef struct Ark_Vector2 Ark_Vector2;
+typedef struct Opt_Vector2 Opt_Vector2;
 typedef struct Ark_VerticalAlignParam Ark_VerticalAlignParam;
 typedef struct Opt_VerticalAlignParam Opt_VerticalAlignParam;
 typedef struct VideoControllerPeer VideoControllerPeer;
@@ -8269,6 +8271,15 @@ typedef struct Opt_Vec4 {
     Ark_Tag tag;
     Ark_Vec4 value;
 } Opt_Vec4;
+typedef struct Ark_Vector2 {
+    /* kind: Interface */
+    Ark_Float64 x;
+    Ark_Float64 y;
+} Ark_Vector2;
+typedef struct Opt_Vector2 {
+    Ark_Tag tag;
+    Ark_Vector2 value;
+} Opt_Vector2;
 typedef struct Ark_VerticalAlignParam {
     /* kind: Interface */
     Ark_String anchor;
@@ -24779,6 +24790,9 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_FrameNode (*unWrapRawPtr)(Ark_FrameNode peer,
                                   Ark_NativePointer pointer);
     Ark_UICommonEvent (*getCommonEvent)(Ark_FrameNode peer);
+    Array_Float64 (*convertPoint)(Ark_FrameNode peer,
+                                 Ark_FrameNode node,
+                                 const Ark_Vector2* vector2);
 } GENERATED_ArkUIFrameNodeExtenderAccessor;
 
 typedef struct GENERATED_ArkUIFrictionMotionAccessor {
