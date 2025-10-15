@@ -4174,6 +4174,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GestureOps_clearGestures(node: KPointer): void
     @ani.unsafe.Direct
+    native static _GestureOps_getGestureEventType(event: KPointer): number
+    @ani.unsafe.Direct
+    native static _GestureOps_isScrollableComponent(event: KPointer): boolean
+    @ani.unsafe.Direct
     native static _GestureRecognizer_construct(): KPointer
     @ani.unsafe.Direct
     native static _GestureRecognizer_getFinalizer(): KPointer

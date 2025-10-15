@@ -137,6 +137,7 @@ HWTEST_F(TapGestureTestNg, GestureTest001, TestSize.Level1)
     PanGestureModelNG panGestureModelNG;
     int32_t fingersNum = DEFAULT_PAN_FINGER;
     double distanceNum = DEFAULT_PAN_DISTANCE.ConvertToPx();
+
     PanDirection panDirection;
     panGestureModelNG.Create(fingersNum, panDirection, distanceNum);
     auto panGestureNG = AceType::DynamicCast<NG::PanGesture>(gestureProcessor->TopGestureNG());
