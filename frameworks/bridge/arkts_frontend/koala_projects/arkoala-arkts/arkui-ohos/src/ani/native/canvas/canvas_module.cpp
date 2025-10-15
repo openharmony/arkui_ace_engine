@@ -15,10 +15,12 @@
 
 #include "canvas_module.h"
 
+#include <ani_signature_builder.h>
+
+#include "canvas_ani/ani_canvas.h"
 #include "load.h"
 #include "pixel_map_taihe_ani.h"
 #include "utils/ani_utils.h"
-#include "canvas_ani/ani_canvas.h"
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
@@ -159,12 +161,16 @@ ani_object CanvasModule::GetImageData(ani_env* env, [[maybe_unused]] ani_object 
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
+    arkts::ani_signature::SignatureBuilder signatureBuilder {};
+    signatureBuilder.AddClass("escompat.Array").AddInt();
+    std::string signatureStr = signatureBuilder.BuildSignatureDescriptor();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "C{std.core.Object}:", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", signatureStr.c_str(), &ctor)) {
         return nullptr;
     }
     ani_object aniValue;
-    if (ANI_OK != env->Object_New(cls, ctor, &aniValue, arrayBuffer)) {
+    ani_int offset = 0;
+    if (ANI_OK != env->Object_New(cls, ctor, &aniValue, arrayBuffer, offset)) {
         return nullptr;
     }
     return aniValue;
