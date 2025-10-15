@@ -540,7 +540,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkClassMock.ts @arkui_
 frameworks/bridge/declarative_frontend/ark_component/src/ArkColumnSplit.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkColumn.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkCommonShape.ts @arkuieco3
-frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent3D.ts
+frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent3D.ts @arkui_component3d
 frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts @arkui_architecture
 frameworks/bridge/declarative_frontend/ark_component/src/ArkContainerSpan.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkCounter.ts @arkui001
@@ -642,7 +642,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/circle_modifier.ts @arku
 frameworks/bridge/declarative_frontend/ark_modifier/src/column_modifier.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_modifier/src/column_split_modifier.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_modifier/src/common_modifier.ts @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/ark_modifier/src/component3d_modifier.ts
+frameworks/bridge/declarative_frontend/ark_modifier/src/component3d_modifier.ts @arkui_component3d
 frameworks/bridge/declarative_frontend/ark_modifier/src/container_span_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/counter_modifier.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_modifier/src/data_panel_modifier.ts @arkui001
@@ -869,8 +869,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_comm
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_shape_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_shape_bridge.h @arkuilayout1
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_component3d_bridge.cpp
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_component3d_bridge.h
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_component3d_bridge.cpp @arkui_component3d
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_component3d_bridge.h @arkui_component3d
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_span_bridge.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_span_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.cpp @arkui001
@@ -1211,6 +1211,8 @@ frameworks/bridge/declarative_frontend/jsview/js_list_item.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_list_item_group.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_list_item_group.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_list_item.h @arkuiscroll
+frameworks/bridge/declarative_frontend/jsview/js_list_children_main_size.cpp @arkuiscroll
+frameworks/bridge/declarative_frontend/jsview/js_list_children_main_size.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_loading_progress.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_local_storage.cpp @arkui_statemgmt
@@ -2496,7 +2498,7 @@ frameworks/core/components_ng/pattern/list/ @arkuiscroll
 frameworks/core/components_ng/pattern/loading_progress/ @arkui001
 frameworks/core/components_ng/pattern/marquee/ @huawei_g_five
 frameworks/core/components_ng/pattern/menu/ @arkuipopupwindow_all
-frameworks/core/components_ng/pattern/model/
+frameworks/core/components_ng/pattern/model/ @arkui_component3d
 frameworks/core/components_ng/pattern/navigation/ @arkui_navigation
 frameworks/core/components_ng/pattern/navigator/ @arkui_navigation
 frameworks/core/components_ng/pattern/navrouter/ @arkui_navigation
@@ -2884,8 +2886,8 @@ frameworks/core/interfaces/native/node/node_checkbox_modifier.cpp @arkuipopupwin
 frameworks/core/interfaces/native/node/node_checkbox_modifier.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/node/node_common_modifier.cpp @arkui_framework_xnode
 frameworks/core/interfaces/native/node/node_common_modifier.h @arkui_framework_xnode
-frameworks/core/interfaces/native/node/node_component3d_modifier.cpp
-frameworks/core/interfaces/native/node/node_component3d_modifier.h
+frameworks/core/interfaces/native/node/node_component3d_modifier.cpp @arkui_component3d
+frameworks/core/interfaces/native/node/node_component3d_modifier.h @arkui_component3d
 frameworks/core/interfaces/native/node/node_container_modifier.cpp @arkui_framework_xnode
 frameworks/core/interfaces/native/node/node_container_modifier.h @arkui_framework_xnode
 frameworks/core/interfaces/native/node/node_container_span_modifier.cpp @huawei_g_five
@@ -3230,6 +3232,13 @@ frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.h @arkui_framewo
 frameworks/core/interfaces/native/ani/keyboard_avoid_mode_ani_modifier.h @arkuilayout1
 frameworks/core/interfaces/native/ani/keyboard_avoid_mode_ani_modifier.cpp @arkuilayout1
 
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ApplyModifierToNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkSymbolGlyphNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkTextInputNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkTextAreaNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkTextNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkSearchNode.ets @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkMarqueeNode.ets @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_input_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/search_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_area_modifier.cpp @huawei_g_five
@@ -3261,6 +3270,7 @@ frameworks/core/interfaces/native/implementation/text_input_controller_peer.h @h
 frameworks/core/interfaces/native/implementation/global_scope_ohos_font_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/global_scope_ohos_measure_utils_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/global_scope_uicontext_text_menu_accessor.cpp @huawei_g_five
+frameworks/core/interfaces/native/implementation/global_scope_uicontext_font_scale_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/edit_menu_options_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_menu_item_id_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_menu_item_id_peer.h @huawei_g_five
@@ -3299,6 +3309,10 @@ frameworks/core/interfaces/native/implementation/baseline_offset_style_accessor.
 frameworks/core/interfaces/native/implementation/baseline_offset_style_peer.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/paragraph_style_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/paragraph_style_peer.h @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/text_based_modifier @huawei_g_five
+frameworks/core/interfaces/native/ani/text_based_ani_modifier.cpp @huawei_g_five
+frameworks/core/interfaces/native/ani/text_based_ani_modifier.h @huawei_g_five
+frameworks/core/interfaces/native/implementation/symbol_glyph_modifier_peer.h @huawei_g_five
 
 [Web ArkTS1.2]
 frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkweb-committer-group
@@ -3356,6 +3370,12 @@ frameworks/core/interfaces/native/implementation/webview_controller_accessor.cpp
 frameworks/core/interfaces/native/implementation/web/webview_controller_peer_impl.h @arkweb-committer-group
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/web @arkweb-committer-group
 
+[Component3D ArkTS1.2]
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/component3d @arkui_component3d
+frameworks/core/interfaces/native/ani/component3d_ani_modifier.cpp @arkui_component3d
+frameworks/core/interfaces/native/ani/component3d_ani_modifier.h @arkui_component3d
+frameworks/core/interfaces/native/implementation/component3d_modifier.cpp @arkui_component3d
+
 [ArkTS static]
 frameworks/core/interfaces/native/implementation/children_main_size_accessor.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/children_main_size_peer.h @arkuiscroll
@@ -3407,6 +3427,7 @@ test/mock/core/manager/mock_display_manager.h @arkuilayout1
 test/mock/core/svg/ @arkui001
 test/mock/core/pipeline/ @arkui_framework_xnode
 test/mock/core/common/mock_container.h @arkui_framework_xnode
+test/mock/core/render/mock_font_collection.cpp @huawei_g_five
 test/mock/interfaces/ @arkui_architecture
 
 test/mock/core/animation/mock_animation_manager.h @arkuiscroll
@@ -3491,6 +3512,7 @@ test/unittest/core/pattern/list/ @arkuiscroll
 test/unittest/core/pattern/loading_progress/ @arkui001
 test/unittest/core/pattern/marquee/ @huawei_g_five
 test/unittest/core/pattern/menu/ @arkuipopupwindow_all
+test/unittest/core/pattern/model/ @arkui_component3d
 test/unittest/core/pattern/navigation/ @arkui_navigation
 test/unittest/core/pattern/navigator/ @arkui_navigation
 test/unittest/core/pattern/navrouter/ @arkui_navigation
@@ -3599,6 +3621,7 @@ test/unittest/interfaces/form_render/ @form_framework
 [Generated source]
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/ @arkui-idlize
 frameworks/core/interfaces/native/generated/ @arkui-idlize
+frameworks/core/interfaces/native/utility/generated/ @arkui-idlize
 
 [Koala mirror]
 frameworks/bridge/arkts_frontend/koala_mirror/ @huaweimaxuchu

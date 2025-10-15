@@ -4129,6 +4129,7 @@ HWTEST_F(WebModelTestNg, SetOnFileSelectorShow002, TestSize.Level1)
     EXPECT_TRUE(callbackCalled);
 #endif
 }
+
 /**
  * @tc.name: SetOnContextMenuShow002
  * @tc.desc: Test web_model_ng.cpp

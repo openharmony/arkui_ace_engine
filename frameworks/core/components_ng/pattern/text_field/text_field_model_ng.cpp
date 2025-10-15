@@ -1411,6 +1411,7 @@ void TextFieldModelNG::SetSelectDetectEnable(bool value)
 
 void TextFieldModelNG::SetSelectDetectEnable(FrameNode* frameNode, bool value)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectDetectEnable(value);
@@ -1418,13 +1419,24 @@ void TextFieldModelNG::SetSelectDetectEnable(FrameNode* frameNode, bool value)
 
 bool TextFieldModelNG::GetSelectDetectEnable(FrameNode* frameNode)
 {
+    CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, false);
     return pattern->GetSelectDetectEnable();
 }
 
+void TextFieldModelNG::ResetSelectDetectEnable()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectEnable();
+}
+
 void TextFieldModelNG::ResetSelectDetectEnable(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetSelectDetectEnable();
@@ -1441,6 +1453,7 @@ void TextFieldModelNG::SetSelectDetectConfig(std::vector<TextDataDetectType>& ty
 
 void TextFieldModelNG::SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectDetectConfig(types);
@@ -1448,13 +1461,24 @@ void TextFieldModelNG::SetSelectDetectConfig(FrameNode* frameNode, std::vector<T
 
 std::vector<TextDataDetectType> TextFieldModelNG::GetSelectDetectConfig(FrameNode* frameNode)
 {
+    CHECK_NULL_RETURN(frameNode, std::vector<TextDataDetectType>());
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, std::vector<TextDataDetectType>());
     return pattern->GetSelectDetectConfig();
 }
 
+void TextFieldModelNG::ResetSelectDetectConfig()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectConfig();
+}
+
 void TextFieldModelNG::ResetSelectDetectConfig(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetSelectDetectConfig();

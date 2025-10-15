@@ -230,8 +230,10 @@ export class ArkUIAniModule {
     native static _StyledString_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
     native static _StyledString_GetPixelMap(peerPtr: KPointer): image.PixelMap
 
-    // for search
-    native static _Search_SetSearchIcon_Symbol(ptr: KPointer, value: SymbolGlyphModifier): void
+    // for SymbolGlyph Modifier
+    native static _Extractors_ToSymbolGlyphModifierPtr(callBack: (node: KPointer) => void,
+        value: SymbolGlyphModifier): KPointer;
+    native static _Extractors_FromSymbolGlyphModifierPtr(ptr: KPointer): SymbolGlyphModifier;
 
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
@@ -253,11 +255,11 @@ export class ArkUIAniModule {
     native static _RichEditor_Transfer_PixelMap(pixelmap: image.PixelMap): KPointer;
 
     // for  stateMgmt
-    native static _PersistentStorage_Get(key: string, areaMode?: KInt): string
-    native static _PersistentStorage_Set(key: string, value: string, areaMode?: KInt): void
-    native static _PersistentStorage_Has(key: string, areaMode?: KInt): boolean
+    native static _PersistentStorage_Get(key: string, areaMode: KInt): string
+    native static _PersistentStorage_Set(key: string, value: string, areaMode: KInt): void
+    native static _PersistentStorage_Has(key: string, areaMode: KInt): boolean
     native static _PersistentStorage_Clear(): void
-    native static _PersistentStorage_Delete(key: string, areaMode?: KInt): void
+    native static _PersistentStorage_Delete(key: string, areaMode: KInt): void
     native static _Env_GetColorMode(): KInt
     native static _Env_GetFontScale(): KFloat
     native static _Env_GetFontWeightScale(): KFloat
@@ -283,7 +285,8 @@ export class ArkUIAniModule {
     native static _OnLayout_InnerLayout(ptr: KPointer): void
     native static _SetParallelScoped(parallel: boolean): void
     native static _Common_SetCustomPropertyCallBack(ptr: KPointer, removeCallback: () => void,
-        getCallback: (name: string) => string | undefined): void
+        getCallback: (name: string) => string | undefined,
+        getAllCustomPropertiesCallback: () => string): void
     native static _Common_getCustomProperty<T>(ptr: KPointer, key: string): string | undefined
     native static _ConditionScopeNode_Construct(id: KInt): KPointer;
 

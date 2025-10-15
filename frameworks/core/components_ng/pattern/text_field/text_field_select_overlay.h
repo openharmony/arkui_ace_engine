@@ -98,6 +98,7 @@ public:
     std::optional<Color> GetHandleColor() override;
     void BeforeOnPrepareMenu() override;
     void ProcessOverlayAfterLayout(const OverlayRequest& request);
+    void IsAIMenuOptionChanged(SelectMenuInfo& menuInfo) override;
 
 protected:
     bool AllowTranslate() override;

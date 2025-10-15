@@ -691,9 +691,9 @@ void SetAutoPlay1Impl(Ark_NativePointer node,
     auto autoPlayConv = Converter::OptConvertPtr<bool>(autoPlay);
     if (!autoPlayConv) {
         SwiperModelStatic::SetAutoPlay(frameNode, false);
-        return;
+    } else {
+        SwiperModelStatic::SetAutoPlay(frameNode, *autoPlayConv);
     }
-    SwiperModelStatic::SetAutoPlay(frameNode, *autoPlayConv);
     auto optionsConv = Converter::OptConvertPtr<SwiperAutoPlayOptions>(options);
     if (!optionsConv) {
         SwiperAutoPlayOptions swiperAutoPlayOptions;
@@ -709,12 +709,13 @@ void SetDisplayArrowImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optArrow = Converter::OptConvertPtr<ArrowStyleVariantType>(value);
-    CHECK_NULL_VOID(optArrow);
-
     if (auto show = Converter::OptConvertPtr<bool>(isHoverShow); show) {
         SwiperModelStatic::SetHoverShow(frameNode, *show);
     }
-
+    if (!optArrow) {
+        SwiperModelStatic::SetDisplayArrow(frameNode, false);
+        return;
+    }
     bool *arrowBoolPtr = std::get_if<bool>(&(*optArrow));
     if (arrowBoolPtr && !*arrowBoolPtr) {
         SwiperModelStatic::SetDisplayArrow(frameNode, false);
@@ -755,10 +756,14 @@ void SetDisplayCountImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
 
     auto optDispCount = Converter::OptConvertPtr<DisplayCountVariantType>(value);
-    CHECK_NULL_VOID(optDispCount);
 
     if (auto bygroupOpt = Converter::OptConvertPtr<bool>(swipeByGroup); bygroupOpt) {
         SwiperModelStatic::SetSwipeByGroup(frameNode, *bygroupOpt);
+    }
+
+    if (!optDispCount) {
+        SwiperModelStatic::SetDisplayCount(frameNode, DEFAULT_DISPLAY_COUNT);
+        return;
     }
 
     if (auto countPtr = std::get_if<int32_t>(&(*optDispCount)); countPtr) {

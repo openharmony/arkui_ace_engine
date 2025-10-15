@@ -22,57 +22,57 @@
 #include "core/components_ng/pattern/model/model_view_ng.h"
 
 namespace {
-// OHOS::Render3D::SurfaceType CheckModelType(int32_t modelType)
-// {
-//     OHOS::Render3D::SurfaceType surfaceType = OHOS::Render3D::SurfaceType::SURFACE_TEXTURE;
-//     switch (modelType) {
-//         case 0:
-//             surfaceType = OHOS::Render3D::SurfaceType::SURFACE_TEXTURE;
-//             break;
-//         case 1:
-//             surfaceType = OHOS::Render3D::SurfaceType::SURFACE_WINDOW;
-//             break;
-//         default:
-//             LOGE("Unexpected enum value in ModelType: %{public}d", modelType);
-//     }
-//     return surfaceType;
-// }
+OHOS::Render3D::SurfaceType CheckModelType(int32_t modelType)
+{
+    OHOS::Render3D::SurfaceType surfaceType = OHOS::Render3D::SurfaceType::SURFACE_TEXTURE;
+    switch (modelType) {
+        case 0:
+            surfaceType = OHOS::Render3D::SurfaceType::SURFACE_TEXTURE;
+            break;
+        case 1:
+            surfaceType = OHOS::Render3D::SurfaceType::SURFACE_WINDOW;
+            break;
+        default:
+            LOGE("Unexpected enum value in ModelType: %{public}d", modelType);
+    }
+    return surfaceType;
+}
 } // namespace
 #endif
 
 namespace OHOS::Ace::NG {
 void SetScene(ArkUINodeHandle node, void* scene, int32_t modelType)
 {
-// #if defined(MODEL_COMPONENT_SUPPORTED)
-//     LOGD("ace_lume frameNode setScene");
-//     auto frameNode = reinterpret_cast<FrameNode*>(node);
-//     CHECK_NULL_VOID(frameNode);
-//     CHECK_NULL_VOID(scene);
+#if defined(MODEL_COMPONENT_SUPPORTED)
+    LOGD("ace_lume frameNode setScene");
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(scene);
 
-//     Render3D::SurfaceType surfaceType = CheckModelType(modelType);
-//     std::string bundleName;
-//     std::string moduleName;
-//     auto sceneAdapter = *(reinterpret_cast<std::shared_ptr<Render3D::ISceneAdapter>*>(scene));
+    Render3D::SurfaceType surfaceType = CheckModelType(modelType);
+    std::string bundleName;
+    std::string moduleName;
+    auto sceneAdapter = *(reinterpret_cast<std::shared_ptr<Render3D::ISceneAdapter>*>(scene));
 
-//     ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType, sceneAdapter });
-// #endif
+    ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType, sceneAdapter });
+#endif
 }
 
 void SetWidget(ArkUINodeHandle node, const std::string& srcPath, int32_t modelType)
 {
-// #if defined(MODEL_COMPONENT_SUPPORTED)
-//     LOGD("ace_lume frameNode setWidget");
-//     auto frameNode = reinterpret_cast<FrameNode*>(node);
-//     CHECK_NULL_VOID(frameNode);
+#if defined(MODEL_COMPONENT_SUPPORTED)
+    LOGD("ace_lume frameNode setWidget");
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
 
-//     Render3D::SurfaceType surfaceType = CheckModelType(modelType);
-//     std::string bundleName;
-//     std::string moduleName;
+    Render3D::SurfaceType surfaceType = CheckModelType(modelType);
+    std::string bundleName;
+    std::string moduleName;
 
-//     ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType, nullptr });
-//     std::string ohosPath = "OhosRawFile://" + srcPath;
-//     ModelViewNG::SetModelSource(frameNode, ohosPath);
-// #endif
+    ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType, nullptr });
+    std::string ohosPath = "OhosRawFile://" + srcPath;
+    ModelViewNG::SetModelSource(frameNode, ohosPath);
+#endif
 }
 
 const ArkUIAniComponent3DModifier* GetComponent3DModifier()

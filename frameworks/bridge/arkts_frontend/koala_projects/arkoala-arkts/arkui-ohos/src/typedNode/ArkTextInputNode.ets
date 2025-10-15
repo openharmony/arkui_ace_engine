@@ -239,20 +239,17 @@ export class ArkTextInputNode extends ArkBaseNode  implements TextInputAttribute
         this.markDirty();
         return this;
     }
-    cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
-        if ((value === undefined) || (value instanceof CancelButtonOptions)) {
-            const value_casted = value as (CancelButtonOptions | undefined)
-            this.getPeer()?.setCancelButtonAttribute(value_casted)
-            this.markDirty();
-            return this
-        }
-        if ((value === undefined) || (value instanceof CancelButtonSymbolOptions)) {
-            const value_casted = value as (CancelButtonSymbolOptions | undefined)
-            this.getPeer()?.setCancelButtonAttribute(value_casted)
-            this.markDirty();
-            return this
-        }
-        return this;
+    cancelButton(value: CancelButtonOptions | undefined): this {
+        const value_casted = value as (CancelButtonOptions | undefined)
+        this.getPeer()?.setCancelButton0Attribute(value_casted)
+        this.markDirty();
+        return this
+    }
+    cancelButton(value: CancelButtonSymbolOptions | undefined): this {
+        const value_casted = value as (CancelButtonSymbolOptions | undefined)
+        this.getPeer()?.setCancelButton1Attribute(value_casted)
+        this.markDirty();
+        return this
     }
     selectAll(value: boolean | undefined): this {
         this.getPeer().setSelectAllAttribute(value);

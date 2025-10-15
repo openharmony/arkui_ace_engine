@@ -2071,6 +2071,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTypeTest003, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
     clickRecognizer->AttachFrameNode(frameNode);
     clickRecognizer->SetRecognizerType(GestureTypeName::TAP_GESTURE);
+
     GestureEvent info = GestureEvent();
     clickRecognizer->HandleReports(info, GestureCallbackType::START);
     EXPECT_EQ(clickRecognizer->GetRecognizerType(), GestureTypeName::TAP_GESTURE);

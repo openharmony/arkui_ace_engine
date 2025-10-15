@@ -244,15 +244,16 @@ const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor();
 const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor();
 const GENERATED_ArkUIFrictionMotionAccessor* GetFrictionMotionAccessor();
 const GENERATED_ArkUIFullScreenExitHandlerAccessor* GetFullScreenExitHandlerAccessor();
-const GENERATED_ArkUIGestureAccessor* GetGestureAccessor();
 const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor();
-const GENERATED_ArkUIGestureGroupAccessor* GetGestureGroupAccessor();
+const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor();
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
 const GENERATED_ArkUIGestureStyleAccessor* GetGestureStyleAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* GetGlobalScope_ohos_arkui_componentSnapshotAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* GetGlobalScope_ohos_arkui_performanceMonitorAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor* GetGlobalScope_ohos_measure_utilsAccessor();
+const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicontextFontScaleAccessor();
+const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* GetGlobalScopeUicontextTextMenuAccessor();
 const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor();
 const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor();
 const GENERATED_ArkUIHttpAuthHandlerAccessor* GetHttpAuthHandlerAccessor();
@@ -311,7 +312,6 @@ const GENERATED_ArkUIRestrictedWorkerAccessor* GetRestrictedWorkerAccessor();
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor();
 const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccessor();
 const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyledStringControllerAccessor();
-const GENERATED_ArkUIRotationGestureAccessor* GetRotationGestureAccessor();
 const GENERATED_ArkUIRotationGestureEventAccessor* GetRotationGestureEventAccessor();
 const GENERATED_ArkUIRotationRecognizerAccessor* GetRotationRecognizerAccessor();
 const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor();
@@ -331,7 +331,6 @@ const GENERATED_ArkUIStateStylesOpsAccessor* GetStateStylesOpsAccessor();
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
 const GENERATED_ArkUIStyledStringControllerAccessor* GetStyledStringControllerAccessor();
 const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();
-const GENERATED_ArkUISwipeGestureAccessor* GetSwipeGestureAccessor();
 const GENERATED_ArkUISwipeGestureEventAccessor* GetSwipeGestureEventAccessor();
 const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTransitionProxyAccessor();
 const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor();
@@ -548,15 +547,16 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetFrameNodeExtenderAccessor,
         GetFrictionMotionAccessor,
         GetFullScreenExitHandlerAccessor,
-        GetGestureAccessor,
         GetGestureEventAccessor,
-        GetGestureGroupAccessor,
+        GetGestureOpsAccessor,
         GetGestureRecognizerAccessor,
         GetGestureStyleAccessor,
         GetGlobalScope_ohos_arkui_componentSnapshotAccessor,
         GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
         GetGlobalScope_ohos_fontAccessor,
         GetGlobalScope_ohos_measure_utilsAccessor,
+        GetGlobalScopeUicontextFontScaleAccessor,
+        GetGlobalScopeUicontextTextMenuAccessor,
         GetHierarchicalSymbolEffectAccessor,
         GetHoverEventAccessor,
         GetHttpAuthHandlerAccessor,
@@ -615,7 +615,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetRichEditorBaseControllerAccessor,
         GetRichEditorControllerAccessor,
         GetRichEditorStyledStringControllerAccessor,
-        GetRotationGestureAccessor,
         GetRotationGestureEventAccessor,
         GetRotationRecognizerAccessor,
         GetRouterExtenderAccessor,
@@ -635,7 +634,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetStyledStringAccessor,
         GetStyledStringControllerAccessor,
         GetSubmitEventAccessor,
-        GetSwipeGestureAccessor,
         GetSwipeGestureEventAccessor,
         GetSwiperContentTransitionProxyAccessor,
         GetSwiperControllerAccessor,

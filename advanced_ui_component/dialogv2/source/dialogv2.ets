@@ -234,7 +234,7 @@ export struct TipsDialogV2 {
       }
     }
     .accessibilityGroup(true)
-    .accessibilityText(getCheckTipsAccessibilityText(this.checkTips, this.checkedInner))
+    .accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.checkedInner))
     .accessibilityDescription(this.checkedInner ? $r('sys.string.advanced_dialog_accessibility_cancel_checked_desc') :
     $r('sys.string.slider_accessibility_unselectedDesc'))
     .onClick(() => {
@@ -561,7 +561,7 @@ export struct SelectDialogV2 {
               .focusBox({
                 margin: { value: -2, unit: LengthUnit.VP }
               })
-              .accessibilityText(getAccessibilityText(item.title, this.selectedIndexInner === index))
+              .accessibilityText(getAccessibilityText(this.getUIContext(), item.title, this.selectedIndexInner === index))
               .onClick(() => {
                 this.selectedIndexInner = index;
                 item.action && item.action();
@@ -779,7 +779,7 @@ export struct ConfirmDialogV2 {
         .textOverflow({ overflow: TextOverflow.Ellipsis })
     }
     .accessibilityGroup(true)
-    .accessibilityText(getCheckTipsAccessibilityText(this.checkTips, this.checkedInner))
+    .accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.checkedInner))
     .accessibilityDescription(this.checkedInner ? $r('sys.string.advanced_dialog_accessibility_cancel_checked_desc') :
     $r('sys.string.slider_accessibility_unselectedDesc'))
     .onClick(() => {
@@ -1660,14 +1660,14 @@ function getEnumNumberByResourceId(resourceId: number, defaultValue: number): nu
  * @param selected select state
  * @returns string
  */
-function getAccessibilityText(resource: ResourceStr, selected: boolean): string {
+function getAccessibilityText(context: UIContext, resource: ResourceStr, selected: boolean): string {
   try {
-    let selectText: string = getContext().resourceManager.getStringSync(125833934);
+    let selectText: string = context?.getHostContext()?.resourceManager.getStringSync(125833934) ?? '';
     let resourceString: string = '';
     if (typeof resource === 'string') {
       resourceString = resource;
     } else {
-      resourceString = getContext().resourceManager.getStringSync(resource);
+      resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource.id) ?? '' : '';
     }
     return selected ? `${selectText},${resourceString}` : resourceString;
   } catch (error) {
@@ -1710,19 +1710,19 @@ function resolveKeyEvent(event: KeyEvent, controller: Scroller) {
  * @param selected select state
  * @returns string
  */
-function getCheckTipsAccessibilityText(resource: ResourceStr | null | undefined, selected?: boolean): string {
+function getCheckTipsAccessibilityText(context: UIContext, resource: ResourceStr | null | undefined, selected?: boolean): string {
   try {
     // 'sys.string.slider_accessibility_selected'
-    let selectText: string = getContext().resourceManager.getStringSync(125833934);
+    let selectText: string = context?.getHostContext()?.resourceManager.getStringSync(125833934) ?? '';
     // 'sys.string.slider_accessibility_unselected'
-    let unselectText: string = getContext().resourceManager.getStringSync(125833935);
+    let unselectText: string = context?.getHostContext()?.resourceManager.getStringSync(125833935) ?? '';
     // 'sys.string.advanced_dialog_accessibility_checkbox'
-    let checkBoxText: string = getContext().resourceManager.getStringSync(125834354);
+    let checkBoxText: string = context?.getHostContext()?.resourceManager.getStringSync(125834354) ?? '';
     let resourceString: string = '';
     if (typeof resource === 'string') {
       resourceString = resource
     } else {
-      resourceString = getContext().resourceManager.getStringSync(resource);
+      resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource.id) ?? '' : '';
     }
     return selected ? `${selectText},${resourceString},${checkBoxText}` :
       `${unselectText},${resourceString},${checkBoxText}`;

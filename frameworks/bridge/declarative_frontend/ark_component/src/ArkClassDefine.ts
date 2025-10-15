@@ -1698,6 +1698,16 @@ class TextDataDetectorConfig {
   }
 }
 
+class SelectDetectorConfig {
+  types: TextDataDetectorType;
+  constructor() {
+    this.types = undefined;
+  }
+  isEqual(another: TextDataDetectorConfig): boolean {
+    return (this.types === another.types);
+  }
+}
+
 class ArkDragPreviewOptions {
   mode: DragPreviewMode | Array<DragPreviewMode> | undefined;
   sizeChangeEffect: DraggingSizeChangeEffect | undefined;

@@ -346,6 +346,11 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     menuInfo.showCut = false;
     menuInfo.showPaste = false;
     menuInfo.hasOnPrepareMenuCallback = onPrepareMenuCallback_ ? true : false;
+    if ((dirtyFlag & DIRTY_SELECT_AI_DETECT) == DIRTY_SELECT_AI_DETECT) {
+        auto manager = SelectContentOverlayManager::GetOverlayManager();
+        CHECK_NULL_VOID(manager);
+        menuInfo.menuIsShow = manager->IsMenuShow();
+    }
 }
 
 void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
@@ -444,6 +449,10 @@ void TextSelectOverlay::IsAIMenuOptionChanged(SelectMenuInfo& menuInfo)
 
     auto oldIsShowAIMenuOption = textPattern->IsShowAIMenuOption();
     auto oldIsShowAskCelia = textPattern->IsAskCeliaEnabled();
+    TextDataDetectType oldAiMenuOptionType = TextDataDetectType::INVALID;
+    if (textPattern->IsShowAIMenuOption() && !textPattern->GetAIItemOption().empty()) {
+        oldAiMenuOptionType = textPattern->GetAIItemOption().begin()->second.type;
+    }
     textPattern->UpdateAIMenuOptions();
     menuInfo.isShowAIMenuOptionChanged =
         oldIsShowAIMenuOption != textPattern->IsShowAIMenuOption() ||
@@ -456,6 +465,7 @@ void TextSelectOverlay::IsAIMenuOptionChanged(SelectMenuInfo& menuInfo)
     } else {
         menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
     }
+    menuInfo.isShowAIMenuOptionChanged |= oldAiMenuOptionType != menuInfo.aiMenuOptionType;
     menuInfo.isAskCeliaEnabled = textPattern->IsAskCeliaEnabled();
 }
 
@@ -741,6 +751,6 @@ void TextSelectOverlay::UpdateAISelectMenu()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM);
+    manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AI_DETECT);
 }
 } // namespace OHOS::Ace::NG

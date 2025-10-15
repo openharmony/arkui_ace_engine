@@ -56,10 +56,14 @@ public:
     static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& maxFontScale);
     static float GetMinFontScale(FrameNode* frameNode);
     static float GetMaxFontScale(FrameNode* frameNode);
+    static void ResetButtonTextFontSize(FrameNode* frameNode);
+    static void ResetButtonFontColor(FrameNode* frameNode);
+    static void ResetButtonFontSize(FrameNode* frameNode);
+    static void ResetFontFamily(FrameNode* frameNode);
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const std::string& label);
-    static void SetButtonSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize,
+    static void SetButtonSize(FrameNode* frameNode, const ControlSize& controlSize,
         RefPtr<ButtonTheme> buttonTheme);
 };
 } // namespace OHOS::Ace::NG

@@ -738,8 +738,34 @@ void ConvertGetCallbackFun(ani_vm* vm, std::function<std::string(const std::stri
     };
 }
 
+void ConvertGetAllCustomPropertiesCallbackFun(ani_vm* vm, std::function<std::string()>& callback,
+    const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
+{
+    callback = [vm, callbackAni]() -> std::string {
+        std::string value;
+        CHECK_NULL_RETURN(vm, value);
+        CHECK_NULL_RETURN(callbackAni, value);
+        ani_env* env = nullptr;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_RETURN(env, value);
+        std::vector<ani_ref> args = {};
+        ani_ref ret = nullptr;
+        callbackAni->Call(env, args.size(), args.data(), &ret);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
+        ani_string resultRef = static_cast<ani_string>(ret);
+        if (resultRef == nullptr) {
+            return value;
+        }
+        value = AniUtils::ANIStringToStdString(env, resultRef);
+        return value;
+    };
+}
+
 void SetCustomPropertyCallBack(
-    ani_env* env, ani_object aniClass, ani_long node, ani_fn_object removeCallback, ani_fn_object getCallback)
+    ani_env* env, ani_object aniClass, ani_long node, ani_fn_object removeCallback, ani_fn_object getCallback,
+    ani_fn_object getAllCustomPropertiesCallback)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier || !modifier->getCommonAniModifier() || !env) {
@@ -750,17 +776,23 @@ void SetCustomPropertyCallBack(
 
     ani_ref removeCallbackAniRef = static_cast<ani_ref>(removeCallback);
     ani_ref getCallbackAniRef = static_cast<ani_ref>(getCallback);
+    ani_ref getAllCustomPropertiesCallbackAniRef = static_cast<ani_ref>(getAllCustomPropertiesCallback);
     auto removeCallbackAni = std::make_shared<CommonModuleCallbackAni>(env, removeCallbackAniRef);
     auto getCallbackAni = std::make_shared<CommonModuleCallbackAni>(env, getCallbackAniRef);
+    auto getAllCustomPropertiesCallbackAni = std::make_shared<CommonModuleCallbackAni>(env,
+        getAllCustomPropertiesCallbackAniRef);
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
     std::function<void()> removeCallbackFun = nullptr;
     std::function<std::string(const std::string&)> getCallbackFun = nullptr;
+    std::function<std::string()> getAllCustomPropertiesCallbackFun = nullptr;
     ConvertRemoveCallbackFun(vm, removeCallbackFun, removeCallbackAni);
     ConvertGetCallbackFun(vm, getCallbackFun, getCallbackAni);
+    ConvertGetAllCustomPropertiesCallbackFun(vm, getAllCustomPropertiesCallbackFun, getAllCustomPropertiesCallbackAni);
 
     modifier->getCommonAniModifier()->setCustomPropertyCallBack(
-        frameNode, std::move(removeCallbackFun), std::move(getCallbackFun));
+        frameNode, std::move(removeCallbackFun), std::move(getCallbackFun),
+        std::move(getAllCustomPropertiesCallbackFun));
 }
 
 ani_string GetCustomProperty(

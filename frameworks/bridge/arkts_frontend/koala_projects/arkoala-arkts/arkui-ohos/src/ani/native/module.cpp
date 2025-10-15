@@ -41,7 +41,7 @@
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
 #include "rich_editor/rich_editor_module.h"
-#include "search/search_module.h"
+#include "text_based_modifier/text_based_modifier_module.h"
 #include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
 #include "xbar/xbar_module_methods.h"
@@ -722,9 +722,14 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::StyledStringModule::GetPixelMap)
         },
         ani_native_function {
-            "_Search_SetSearchIcon_Symbol",
+            "_Extractors_FromSymbolGlyphModifierPtr",
             nullptr,
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetSearchIconSymbol)
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromSymbolGlyphModifierPtr)
+        },
+        ani_native_function {
+            "_Extractors_ToSymbolGlyphModifierPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToSymbolGlyphModifierPtr)
         },
         ani_native_function {
             "_ImageSpan_Set_PixelMap",
@@ -768,17 +773,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_PersistentStorage_Get",
-            "C{std.core.String}C{std.core.Int}:C{std.core.String}",
+            "C{std.core.String}i:C{std.core.String}",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Get)
         },
         ani_native_function {
             "_PersistentStorage_Set",
-            "C{std.core.String}C{std.core.String}C{std.core.Int}:",
+            "C{std.core.String}C{std.core.String}i:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Set)
         },
         ani_native_function {
             "_PersistentStorage_Has",
-            "C{std.core.String}C{std.core.Int}:z",
+            "C{std.core.String}i:z",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Has)
         },
         ani_native_function {
@@ -788,7 +793,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_PersistentStorage_Delete",
-            "C{std.core.String}C{std.core.Int}:",
+            "C{std.core.String}i:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Delete)
         },
         ani_native_function {

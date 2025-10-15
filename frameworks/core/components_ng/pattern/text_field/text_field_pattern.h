@@ -993,6 +993,7 @@ public:
     std::string GetFontFamily() const;
     TextAlign GetTextAlign() const;
     std::u16string GetPlaceHolder() const;
+    std::u16string GetStyledPlaceHolderValue() const;
     uint32_t GetMaxLength() const;
     uint32_t GetMaxLines() const;
     uint32_t GetMinLines() const;
@@ -1779,6 +1780,9 @@ public:
     void ResetSelectDetectConfig();
     void SelectAIDetect();
     void HandleAIMenuOption(const std::string& labelInfo = "");
+    void UpdateAIMenuOptions();
+    bool MaybeNeedShowSelectAIDetect();
+    bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1831,7 +1835,7 @@ protected:
     std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
     bool selectDetectEnabledIsUserSet_ = false;
     bool selectDetectEnabled_ = true;
-    bool selectDetectTypesIsUserSet_ = false;
+    bool selectDetectConfigIsUserSet_ = false;
     std::vector<TextDataDetectType> selectDataDetectorTypes_;
 
 private:
@@ -1871,7 +1875,7 @@ private:
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
     bool HasStateStyle(UIState state) const;
-    bool IsStyledPlaceholder();
+    bool IsStyledPlaceholder() const;
 
     void OnTextInputScroll(float offset);
     void OnTextAreaScroll(float offset);

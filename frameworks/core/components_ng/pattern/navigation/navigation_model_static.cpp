@@ -904,7 +904,6 @@ void NavigationModelStatic::SetCustomTitle(FrameNode* frameNode, const RefPtr<UI
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    navBarNode->UpdatePrevTitleIsCustom(true);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     if (!navBarNode->GetPrevTitleIsCustomValue(false)) {
@@ -913,6 +912,7 @@ void NavigationModelStatic::SetCustomTitle(FrameNode* frameNode, const RefPtr<UI
         titleBarNode->SetTitle(nullptr);
         titleBarNode->SetSubtitle(nullptr);
     }
+    navBarNode->UpdatePrevTitleIsCustom(true);
     auto currentTitle = titleBarNode->GetTitle();
     if (currentTitle && customNode->GetId() == currentTitle->GetId()) {
         // do nothing

@@ -485,7 +485,8 @@ struct ArkUIAniCommonModifier {
     void (*setParallelScoped)(ani_boolean parallel);
     void (*setCustomPropertyCallBack)(
         ArkUINodeHandle node, std::function<void()>&& func,
-        std::function<std::string(const std::string&)>&& getFunc);
+        std::function<std::string(const std::string&)>&& getFunc,
+        std::function<std::string()>&& getAllCustomPropertiesFunc);
     std::optional<std::string> (*getCustomProperty)(ani_env* env, ArkUINodeHandle node, const std::string& key);
     void (*setOverlayComponent)(ani_long node, ani_long builderPtr, AniOverlayOptions options);
     ani_double (*vp2px)(ani_double value, ani_int instanceId);
@@ -626,9 +627,10 @@ struct ArkUIAniImageSpanModifier {
     void (*setAltPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
 };
-struct ArkUIAniSearchModifier {
-    void (*setSearchIconSymbol)(ArkUINodeHandle node,
-        std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)>& symbolApply);
+struct ArkUIAniTextBasedModifier {
+    void* (*fromSymbolModifierPeer)(void* ptr);
+    void* (*toSymbolModifierPeer)(std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)>& symbolApply,
+        void* symbolModifierAni);
 };
 struct ArkUIAniStyledStringModifier {
     void (*setPixelMap)(ArkUIStyledString peer, void* nativePixelMap);
@@ -748,7 +750,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniInteropModifier* (*getInteropAniModifier)();
     const ArkUIAniDragControllerModifier* (*getDragControllerAniModifier)();
     const ArkUIAniStyledStringModifier* (*getStyledStringAniModifier)();
-    const ArkUIAniSearchModifier* (*getSearchAniModifier)();
+    const ArkUIAniTextBasedModifier* (*getTextBasedAniModifier)();
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
     const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();

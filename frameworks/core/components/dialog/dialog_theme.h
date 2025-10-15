@@ -44,7 +44,9 @@ constexpr int DEFAULT_DIALOG_COLUMN_MEASURE_TYPE = 1;
 constexpr int DIALOG_TITLE_MAX_LINES_VALUE = 2;
 constexpr float DEFAULT_ALIGN_DIALOG = 3.0;
 constexpr float SHADOW_NONE = 6.0;
-
+constexpr Dimension DIALOG_BUTTON_BORDER_RADIUS = 20.0_vp;
+// default FontWeight::MEDIUM
+constexpr float DIALOG_TITLE_TEXT_FONT_WEIGHT = 13.0;
 } // namespace
 /**
  * DialogTheme defines color and styles of DialogComponent. DialogTheme should be built
@@ -586,6 +588,11 @@ public:
         return normalButtonFontSize_;
     }
 
+    const Dimension& GetButtonBorderRadius() const
+    {
+        return buttonBorderRadius_;
+    }
+
     const std::string& GetCancelText() const
     {
         return cancelText_;
@@ -701,6 +708,7 @@ private:
     uint32_t shadowDialog_ = 6;
     int32_t alignDialog_ = 3;
     Dimension normalButtonFontSize_;
+    Dimension buttonBorderRadius_;
     Color colorBgWithBlur_;
     Color backgroundBorderColor_;
     int dialogBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);

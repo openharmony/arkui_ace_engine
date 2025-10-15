@@ -35,20 +35,39 @@ Ark_NativePointer GetFinalizerImpl()
 void SetGestureEventResult0Impl(Ark_EventResult peer,
                                 Ark_Boolean result)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->SetGestureEventResult(
-        Converter::Convert<bool>(result)
-    );
+    CHECK_NULL_VOID(peer && peer->handler.has_value());
+    auto& variant = peer->handler.value();
+    if (auto gestureResult = std::get_if<RefPtr<GestureEventResult>>(&variant)) {
+        if (*gestureResult) {
+            (*gestureResult)->SetGestureEventResult(Converter::Convert<bool>(result));
+        }
+    }
 }
 void SetGestureEventResult1Impl(EventResultPeer* peer,
                                 Ark_Boolean result,
                                 Ark_Boolean stopPropagation)
 {
+    CHECK_NULL_VOID(peer && peer->handler.has_value());
+    auto& variant = peer->handler.value();
+    if (auto gestureResult = std::get_if<RefPtr<GestureEventResult>>(&variant)) {
+        if (*gestureResult) {
+            (*gestureResult)->SetGestureEventResult(Converter::Convert<bool>(result),
+                                                    Converter::Convert<bool>(stopPropagation));
+        }
+    }
 }
-void SetMouseEventResultImpl(Ark_EventResult peer,
+void SetMouseEventResultImpl(EventResultPeer* peer,
                              Ark_Boolean result,
                              const Opt_Boolean* stopPropagation)
 {
+    CHECK_NULL_VOID(peer && peer->handler.has_value());
+    auto& variant = peer->handler.value();
+    if (auto mouseResult = std::get_if<RefPtr<MouseEventResult>>(&variant)) {
+        if (*mouseResult) {
+            auto stopProp = Converter::OptConvertPtr<bool>(stopPropagation).value_or(false);
+            (*mouseResult)->SetMouseEventResult(Converter::Convert<bool>(result), stopProp);
+        }
+    }
 }
 } // EventResultAccessor
 const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor()

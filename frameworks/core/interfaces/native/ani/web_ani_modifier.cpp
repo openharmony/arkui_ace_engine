@@ -137,7 +137,15 @@ napi_value TransferEventResultToDynamic(napi_env env, void* peer)
 #ifdef WEB_SUPPORTED
     auto* objectPeer = reinterpret_cast<EventResultPeer *>(peer);
     CHECK_NULL_RETURN(objectPeer, nullptr);
-    return OHOS::Ace::Framework::CreateJSNativeEmbedGestureRequestObject(env, objectPeer->handler);
+    if (objectPeer->handler.has_value()) {
+        auto& variant = objectPeer->handler.value();
+        if (auto gestureResult = std::get_if<RefPtr<GestureEventResult>>(&variant)) {
+            if (*gestureResult) {
+                return OHOS::Ace::Framework::CreateJSNativeEmbedGestureRequestObject(env, *gestureResult);
+            }
+        }
+    }
+    return nullptr;
 #else
     return nullptr;
 #endif // WEB_SUPPORTED

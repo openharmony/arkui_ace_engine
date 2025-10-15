@@ -63,7 +63,8 @@ void OnMeasureInnerMeasure(ani_env* env, ani_object obj, ani_long ptr);
 void OnLayoutInnerLayout(ani_env* env, ani_object obj, ani_long ptr);
 void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel);
 void SetCustomPropertyCallBack(
-    ani_env* env, ani_object aniClass, ani_long node, ani_fn_object removeCallback, ani_fn_object getCallback);
+    ani_env* env, ani_object aniClass, ani_long node, ani_fn_object removeCallback, ani_fn_object getCallback,
+    ani_fn_object getAllCustomPropertiesCallback);
 ani_string GetCustomProperty(ani_env* env, ani_object aniClass, ani_long node, ani_string aniKey);
 void SetOverlayComponentContent(ani_env* env, ani_object obj, ani_long ptr, ani_long buildNodePtr, ani_object options);
 ani_double Vp2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);

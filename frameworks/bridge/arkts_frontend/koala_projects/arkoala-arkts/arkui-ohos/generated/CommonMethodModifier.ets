@@ -390,15 +390,6 @@ export class CommonMethodModifier implements CommonMethod {
     _transition_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _transition_1_0value?: TransitionEffect | undefined
     _transition_1_1value?: TransitionFinishCallback | undefined
-    _gesture_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _gesture_0_0value?: GestureType | undefined
-    _gesture_0_1value?: GestureMask | undefined
-    _priorityGesture_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _priorityGesture_0_0value?: GestureType | undefined
-    _priorityGesture_0_1value?: GestureMask | undefined
-    _parallelGesture_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _parallelGesture_0_0value?: GestureType | undefined
-    _parallelGesture_0_1value?: GestureMask | undefined
     _blur_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _blur_0_0value?: number | undefined
     _blur_0_1value?: BlurOptions | undefined
@@ -3498,60 +3489,6 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (this._gesture_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._gesture_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setGestureAttribute((this._gesture_0_0value as GestureType | undefined), (this._gesture_0_1value as GestureMask | undefined | undefined));
-                    this._gesture_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._gesture_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._gesture_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setGestureAttribute((undefined as GestureType | undefined), (undefined as GestureMask | undefined | undefined));
-                }
-            }
-        }
-        if (this._priorityGesture_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._priorityGesture_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setPriorityGestureAttribute((this._priorityGesture_0_0value as GestureType | undefined), (this._priorityGesture_0_1value as GestureMask | undefined | undefined));
-                    this._priorityGesture_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._priorityGesture_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._priorityGesture_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setPriorityGestureAttribute((undefined as GestureType | undefined), (undefined as GestureMask | undefined | undefined));
-                }
-            }
-        }
-        if (this._parallelGesture_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._parallelGesture_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setParallelGestureAttribute((this._parallelGesture_0_0value as GestureType | undefined), (this._parallelGesture_0_1value as GestureMask | undefined | undefined));
-                    this._parallelGesture_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._parallelGesture_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._parallelGesture_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setParallelGestureAttribute((undefined as GestureType | undefined), (undefined as GestureMask | undefined | undefined));
-                }
-            }
-        }
         if (this._blur_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._blur_0_flag) {
@@ -6211,45 +6148,6 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (modifier._gesture_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._gesture_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.gesture(modifier._gesture_0_0value, modifier._gesture_0_1value);
-                    break;
-                }
-                default: {
-                    this.gesture((undefined as GestureType | undefined), (undefined as GestureMask | undefined | undefined));
-                }
-            }
-        }
-        if (modifier._priorityGesture_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._priorityGesture_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.priorityGesture(modifier._priorityGesture_0_0value, modifier._priorityGesture_0_1value);
-                    break;
-                }
-                default: {
-                    this.priorityGesture((undefined as GestureType | undefined), (undefined as GestureMask | undefined | undefined));
-                }
-            }
-        }
-        if (modifier._parallelGesture_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._parallelGesture_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.parallelGesture(modifier._parallelGesture_0_0value, modifier._parallelGesture_0_1value);
-                    break;
-                }
-                default: {
-                    this.parallelGesture((undefined as GestureType | undefined), (undefined as GestureMask | undefined | undefined));
-                }
-            }
-        }
         if (modifier._blur_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._blur_0_flag) {
@@ -8450,42 +8348,6 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._transition_1_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
-        if (((this._gesture_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
-        {
-            this._gesture_0_flag = AttributeUpdaterFlag.UPDATE
-            this._gesture_0_0value = gesture
-            this._gesture_0_1value = mask
-        } else
-        {
-            this._gesture_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
-        if (((this._priorityGesture_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
-        {
-            this._priorityGesture_0_flag = AttributeUpdaterFlag.UPDATE
-            this._priorityGesture_0_0value = gesture
-            this._priorityGesture_0_1value = mask
-        } else
-        {
-            this._priorityGesture_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
-        if (((this._parallelGesture_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
-        {
-            this._parallelGesture_0_flag = AttributeUpdaterFlag.UPDATE
-            this._parallelGesture_0_0value = gesture
-            this._parallelGesture_0_1value = mask
-        } else
-        {
-            this._parallelGesture_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

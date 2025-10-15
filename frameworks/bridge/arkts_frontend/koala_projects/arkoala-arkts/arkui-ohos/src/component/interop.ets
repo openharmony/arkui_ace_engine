@@ -46,6 +46,9 @@ import {
     createInteropView
 } from './interopExtendableComponent';
 
+import { StateManagerImpl } from '@koalaui/runtime';
+import { MutableStateMeta } from '../stateManagement/base/mutableStateMeta';
+
 export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags);
@@ -81,8 +84,11 @@ export function compatibleComponent(
         if (staticComponent === undefined) {
             throw new Error('compatibleComponent error: non current ExtendableComponent');
         }
+        let current = (GlobalStateManager.instance as StateManagerImpl).current;
+        (GlobalStateManager.instance as StateManagerImpl).current = undefined;
         const viewInterop = createInteropView(staticComponent);
         const result = init(viewInterop);
+        (GlobalStateManager.instance as StateManagerImpl).current = current;
         const dynamicComponent = result.component;
         const nodePtr = ArkUIAniModule._PopViewStackProcessor();
         ArkUIAniModule._DeleteViewStackProcessor(ptr);
@@ -345,6 +351,8 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
 
         let component: ESValue;
         let createCompatibleNode: ESValue;
+        let current = (GlobalStateManager.instance as StateManagerImpl).current;
+        (GlobalStateManager.instance as StateManagerImpl).current = undefined;
         switch (args.length) {
             case 0:
                 createCompatibleNode = global.getProperty('createCompatibleNodeWithFuncVoid');
@@ -403,6 +411,7 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
         }
         const viewPUCreate = global.getProperty('viewPUCreate');
         viewPUCreate.invoke(component);
+        (GlobalStateManager.instance as StateManagerImpl).current = current;
         return {
             component: component,
             name: 'compatibleWrappedBuilder',
@@ -608,5 +617,60 @@ function createCompatibleStaticState<T>(dynamicValue: Object): IStateDecoratedVa
     }
     else {
         return getProxy as IStateDecoratedVariable<T>
+    }
+}
+
+export function enableCompatibleObservedV2ForStatic<T>(
+    value: T
+): T {
+    let method = ESValue.getGlobal().getProperty('enableCompatibleObservedV2ForStatic');
+    let createStaticState = () => {
+        return StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+    }
+    let recordStaticState = (value: MutableState<int32>) => {
+        value.value
+    }
+    let updateStaticState = (value: MutableState<int32>) => {   
+        value.value++
+    }
+    method.invoke(ESValue.wrap(value), ESValue.wrap(createStaticState),
+        ESValue.wrap(recordStaticState), ESValue.wrap(updateStaticState))
+    return value;
+}
+
+export function enableCompatibleObservedV2ForDynamic<T>(
+    value: T
+): T {
+    if (value instanceof IObservedObject) {
+        addCompatibleWatchFuncForDynamic(value as IObservedObject)
+    }
+    return value;
+}
+
+function createDynamicCompatibleStateMeta(): [()=> void,()=> void] {
+    let createFunc = ESValue.getGlobal().getProperty('createCompatibleStateMetaForStaticObservedV2');
+    if (createFunc  ==  ESValue.Undefined) {
+        throw Error('fail to find compatible func for create dynamic state meta');
+    }
+    let result = createFunc.invoke();
+    let addRef = () => {
+        result.getPropertySafe(0).invoke();
+    }
+    let fireChange = () => {
+        result.getPropertySafe(1).invoke();
+    }
+    return [addRef, fireChange];
+}
+
+function addCompatibleWatchFuncForDynamic(value: IObservedObject): void {
+    let values = Object.values(value);
+    for(let i =0; i < values.length; i++){
+        let attr = values[i];
+        if (attr instanceof MutableStateMeta) {
+            let result = createDynamicCompatibleStateMeta();
+            (attr as MutableStateMeta).registerDynamicHookFunc(result[0], result[1]);
+        } else if (attr instanceof IObservedObject) {
+            addCompatibleWatchFuncForDynamic(attr as IObservedObject);
+        }
     }
 }

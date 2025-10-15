@@ -39,6 +39,16 @@ public:
     std::optional<std::shared_ptr<Render3D::ShaderInputBuffer>> GetShaderInputBuffer() override;
 
     static void AddShaderInputBuffer(FrameNode* frameNode, const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer);
+    static void AddCustomRender(FrameNode* frameNode,
+                                const std::shared_ptr<Render3D::CustomRenderDescriptor>& customRender);
+    static void AddShaderImageTexture(FrameNode* frameNode, const std::string& path);
+    static void SetModelSource(FrameNode* frameNode, const std::string& value);
+    static void SetBackground(FrameNode* frameNode, const std::string& value);
+    static void SetShader(FrameNode* frameNode, const std::string& path);
+    static void SetRenderWidth(FrameNode* frameNode, const std::optional<Dimension>& width);
+    static void SetRenderHeight(FrameNode* frameNode, const std::optional<Dimension>& width);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetModelViewContext(FrameNode* frameNode, const ModelViewContext& context);
 private:
     // Camera and lights animations are done from the frontend with Animatable types.
     WeakPtr<FrameNode> frameNode_;

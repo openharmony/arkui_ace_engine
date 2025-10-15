@@ -6274,6 +6274,21 @@ RectF FrameNode::ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<Fr
     return newRect;
 }
 
+void FrameNode::SetCustomPropertyCallback(std::function<void()>&& func,
+    std::function<std::string(const std::string&)>&& getFunc,
+    std::function<std::string()>&& getAllCustomPropertiesFunc)
+{
+    if (!removeCustomProperties_) {
+        removeCustomProperties_ = std::move(func);
+    }
+    if (!getCustomProperty_) {
+        getCustomProperty_ = std::move(getFunc);
+    }
+    if (!getCustomPropertyMapFunc_) {
+        getCustomPropertyMapFunc_ = std::move(getAllCustomPropertiesFunc);
+    }
+}
+
 void FrameNode::GetVisibleRect(RectF& visibleRect, RectF& frameRect) const
 {
     visibleRect = GetPaintRectWithTransform();

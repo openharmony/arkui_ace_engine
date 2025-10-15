@@ -642,4 +642,15 @@ void SearchModelStatic::SetSearchSymbolIcon(FrameNode *frameNode,
     pattern->SetSearchSymbolIcon();
 }
 
+void SearchModelStatic::SetCancelSymbolIcon(FrameNode *frameNode,
+    std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetCancelIconSymbol(iconSymbol);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCancelSymbolIcon();
+}
+
 } // namespace OHOS::Ace::NG

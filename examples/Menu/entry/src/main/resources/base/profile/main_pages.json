@@ -204,6 +204,9 @@
     "pages/MenuUX/previewIMAGESet",
     "pages/MenuUX/previewBurSet",
     "pages/MenuUX/btnMenu",
+    "pages/MenuUX/hoverScaleInterruption",
+    "pages/MenuUX/menuEnableHoverScale",
+    "pages/MenuUX/popupEnableHoverScale",
 
     "pages/MenuPlacement/Index",
     "pages/MenuPlacement/RightClick/Index",

@@ -1903,6 +1903,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmGetTextDi
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
     
+    buttonAlgorithm->HandleSecCompBorderRadius(layoutWrapper);
     textLayoutProperty->UpdateContent(u"test");
     EXPECT_EQ(buttonAlgorithm->GetTextDirection(layoutWrapper), TextDirection::LTR);
 

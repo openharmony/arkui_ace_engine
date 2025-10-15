@@ -143,8 +143,11 @@ bool TextFieldAccessibilityProperty::IsHint() const
     CHECK_NULL_RETURN(frameNode, false);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, false);
-    return !(!textFieldLayoutProperty->GetValueValue(u"").empty() ||
-        textFieldLayoutProperty->GetPlaceholderValue(u"").empty());
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    return textFieldLayoutProperty->GetValueValue(u"").empty() &&
+        (!textFieldLayoutProperty->GetPlaceholderValue(u"").empty() ||
+            !textFieldPattern->GetStyledPlaceHolderValue().empty());
 }
 
 std::string TextFieldAccessibilityProperty::GetHintText() const

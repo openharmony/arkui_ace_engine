@@ -67,6 +67,8 @@ public:
     void SetTextDecorationColor(const Color& value) override;
     void SetSelectDetectEnable(bool value) override;
     void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
+    void ResetSelectDetectEnable() override;
+    void ResetSelectDetectConfig() override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetBaselineOffset(const Dimension& value) override;
     void SetWordBreak(WordBreak value) override;

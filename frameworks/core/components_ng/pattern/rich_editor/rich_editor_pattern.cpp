@@ -189,7 +189,7 @@ void RichEditorPattern::RecreateUndoManager()
 
 void RichEditorPattern::CreateStyledString()
 {
-    CHECK_NULL_VOID(isSpanStringMode_);
+    CHECK_NULL_VOID(isSpanStringMode_ && !styledString_);
     styledString_ = MakeRefPtr<MutableSpanString>(u"");
     styledString_->SetSpanWatcher(WeakClaim(this));
 }

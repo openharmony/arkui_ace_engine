@@ -49,6 +49,7 @@ public:
     static void SetMaxFontSize(const JSCallbackInfo& info);
     static void SetMinFontSize(const JSCallbackInfo& info);
     static void SetHeightAdaptivePolicy(int32_t value);
+    static void SetFocusBox(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEC_BUTTON_BASE_H

@@ -166,7 +166,6 @@ private:
     void CalcEndOffset(float& endOffset, double velocity);
     bool Play(double dragVelocity);
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
-    void UpdateCurrentOffset(float offset);
     bool SpringCurveTailMoveProcess(bool useRebound, double& dragDelta);
     void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
     double GetDragDeltaLessThanJumpInterval(
@@ -187,6 +186,12 @@ private:
     float ShortestDistanceBetweenCurrentAndTarget();
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
     void CreateChildrenClickEvent(RefPtr<UINode>& host);
+    RefPtr<TouchEventImpl> CreateItemTouchEventListener();
+    void StartInertialAnimation();
+    void StopInertialRollingAnimation();
+    void PlayResetAnimation();
+    double GetCurrentTime() const;
+    float CalculateResetOffset(float totalOffset);
 
     int32_t containerPickerId_ = -1;
     int32_t displayCount_ = 7;
@@ -204,10 +209,8 @@ private:
     std::optional<int32_t> runningTargetIndex_ = 0;
 
     bool crossMatchChild_ = false;
-    float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
     float currentIndexOffset_ = 0.0f;
-    float totalOffset_ = 0.0f; // indicates the offset of the actual layout
     float height_ = 0.0f;
     float contentMainSize_ = 0.0f;
     float mainDeltaSum_ = 0.0f;
@@ -218,18 +221,27 @@ private:
     bool isTargetAnimationRunning_ = false;
     bool requestLongPredict_ = true;
     bool isLoop_ = true;
-    double timeStart_ = 0.0;
-    double timeEnd = 0.0;
-    double scrollDelta_ = 0.0;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
-    float offsetCurSet_ = 0.0f;
-    float lastAnimationScroll_ = 0.0f;
 
     RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
     RefPtr<NodeAnimatablePropertyFloat> aroundClickProperty_;
     RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
-    std::shared_ptr<AnimationUtils::Animation> animation_;
+
+    double dragStartTime_ = 0.0;
+    double dragEndTime_ = 0.0;
+    bool isInertialRolling = false;
+    bool clickBreak_ = false;
+    bool touchBreak_ = false;
+    bool animationBreak_ = false;
+
+    float dragOffset_ = 0.0f;
+    float animationOffset_ = 0.0f;
+    float lastAnimationScroll_ = 0.0f;
+    float dragOffsetForAnimation_ = 0.0f;
+    float currentDelta_ = 0.0f;
+    bool isNeedStartInertialAnimation_ = false;
+    double dragVelocity_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

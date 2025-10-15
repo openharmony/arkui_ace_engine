@@ -1126,6 +1126,11 @@ void ResetVisibleChangeMultiThread(FrameNode* frameNode);
 void SetNeedFocusMultiThread(FrameNode* frameNode, bool value);
 void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold);
 void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, Dimension distanceThreshold);
+void SetBackgroundEffectMultiThread(FrameNode* frameNode, const EffectOption& effectOption,
+    const SysOptions& sysOptions = SysOptions());
+void SetClickEffectLevelMultiThread(const ClickEffectLevel& level, float scaleValue);
+void SetClickEffectLevelMultiThread(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue);
+void SetUseEffectMultiThread(FrameNode* frameNode, bool useEffect, EffectType effectType);
 // multi thread function end
 } // namespace OHOS::Ace::NG
 

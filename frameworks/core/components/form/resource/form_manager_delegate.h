@@ -94,8 +94,7 @@ public:
         float expectedWidth = 0.0f;
         float expectedHeight = 0.0f;
         float expectedBorderWidth = 0.0f;
-        float expectedLayoutWidth = 0.0f;
-        float expectedLayoutHeight = 0.0f;
+        float expectedFormViewScale = 1.0f;
     };
 
     FormManagerDelegate() = delete;
@@ -199,7 +198,7 @@ private:
     void HandleLockFormCallback(bool lock);
     void SetGestureInnerFlag();
     void CheckWhetherSurfaceChangeFailed();
-    void UpdateFormSizeWantCache(float width, float height, float layoutWidth, float layoutHeight, float borderWidth);
+    void UpdateFormSizeWantCache(float width, float height, float formViewScale, float borderWidth);
     void HandleDueControlForm(bool isDisablePolicy, bool isControl);
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;

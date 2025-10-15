@@ -128,6 +128,44 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     };
 }
 
+void AssignArkValue(Ark_font_UIFontFallbackInfo& dst, const FallbackInfo& src, ConvContext* ctx)
+{
+    dst.family = Converter::ArkValue<Ark_String>(src.familyName, ctx);
+    dst.language = Converter::ArkValue<Ark_String>(src.font, ctx);
+}
+
+void AssignArkValue(Ark_font_UIFontFallbackGroupInfo& dst, const FallbackGroup& src, ConvContext* ctx)
+{
+    dst.fontSetName = Converter::ArkValue<Ark_String>(src.groupName, ctx);
+    dst.fallback = Converter::ArkValue<Array_font_UIFontFallbackInfo>(src.fallbackInfoSet, ctx);
+}
+
+void AssignArkValue(Ark_font_UIFontAdjustInfo& dst, const AdjustInfo& src)
+{
+    dst.weight = Converter::ArkValue<Ark_Float64>(src.origValue);
+    dst.to = Converter::ArkValue<Ark_Int32>(src.newValue);
+}
+
+void AssignArkValue(Ark_font_UIFontAliasInfo& dst, const AliasInfo& src, ConvContext* ctx)
+{
+    dst.name = Converter::ArkValue<Ark_String>(src.familyName, ctx);
+    dst.weight = Converter::ArkValue<Ark_Float64>(src.weight);
+}
+
+void AssignArkValue(Ark_font_UIFontGenericInfo& dst, const FontGenericInfo& src, ConvContext* ctx)
+{
+    dst.family = Converter::ArkValue<Ark_String>(src.familyName, ctx);
+    dst.alias = Converter::ArkValue<Array_font_UIFontAliasInfo>(src.aliasSet, ctx);
+    dst.adjust = Converter::ArkValue<Array_font_UIFontAdjustInfo>(src.adjustSet, ctx);
+}
+
+void AssignArkValue(Ark_font_UIFontConfig& dst, const FontConfigJsonInfo& src, ConvContext* ctx)
+{
+    dst.fontDir = Converter::ArkValue<Array_String>(src.fontDirSet, ctx);
+    dst.generic = Converter::ArkValue<Array_font_UIFontGenericInfo>(src.genericSet, ctx);
+    dst.fallbackGroups = Converter::ArkValue<Array_font_UIFontFallbackGroupInfo>(src.fallbackGroupSet, ctx);
+}
+
 void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx)
 {
     if (src.menuOptionsParam.content.has_value()) {
@@ -626,9 +664,7 @@ void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo
     AssignArkValue(dst.touchObject, src);
     dst.size = ArkValue<Ark_Number>(src.GetSize());
     dst.force = ArkValue<Ark_Number>(src.GetForce());
-#ifdef WRONG_GEN
-    dst.timestamp = src.GetTimeStamp().time_since_epoch().count();
-#endif
+    dst.timestamp = ArkValue<Ark_Number>(static_cast<int32_t>(src.GetTimeStamp().time_since_epoch().count()));
 }
 
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)

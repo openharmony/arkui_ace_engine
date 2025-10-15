@@ -736,6 +736,44 @@ void SetNavDestinationOnWillDisappear(ArkUINodeHandle node, void* callback)
     }
 }
 
+void ResetNavDestinationOnActive(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnActive(frameNode, nullptr);
+}
+
+void SetNavDestinationOnActive(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onActive = reinterpret_cast<std::function<void(int32_t)>*>(callback);
+        NavDestinationModelNG::SetOnActive(frameNode, std::move(*onActive));
+    } else {
+        NavDestinationModelNG::SetOnActive(frameNode, nullptr);
+    }
+}
+
+void ResetNavDestinationOnInactive(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnInactive(frameNode, nullptr);
+}
+
+void SetNavDestinationOnInactive(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onInactive = reinterpret_cast<std::function<void(int32_t)>*>(callback);
+        NavDestinationModelNG::SetOnInactive(frameNode, std::move(*onInactive));
+    } else {
+        NavDestinationModelNG::SetOnInactive(frameNode, nullptr);
+    }
+}
+
 void ResetNavDestinationOnWillDisappear(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -814,6 +852,44 @@ void SetTitleAnimationElapsedTime(ArkUINodeHandle node, ArkUI_Int32 elapsedTime)
     CHECK_NULL_VOID(frameNode);
     NavDestinationModelNG::SetTitleAnimationElapsedTime(frameNode, static_cast<int32_t>(elapsedTime));
 }
+
+void SetNavDestinationOnResult(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onResult = reinterpret_cast<std::function<void(const RefPtr<NavPathInfo>&)>*>(callback);
+        NavDestinationModelNG::SetOnPop(frameNode, std::move(*onResult));
+    } else {
+        NavDestinationModelNG::SetOnPop(frameNode, nullptr);
+    }
+}
+
+void ResetNavDestinationOnResult(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnPop(frameNode, nullptr);
+}
+
+void SetNavDestinationOnNewParam(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onNewParam = reinterpret_cast<std::function<void(napi_value)>*>(callback);
+        NavDestinationModelNG::SetOnNewParam(frameNode, std::move(*onNewParam));
+    } else {
+        NavDestinationModelNG::SetOnNewParam(frameNode, nullptr);
+    }
+}
+
+void ResetNavDestinationOnNewParam(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnNewParam(frameNode, nullptr);
+}
 namespace NodeModifier {
 const ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
@@ -881,6 +957,14 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .resetNavDestinationIsCustomTitleBarSize = ResetNavDestinationIsCustomTitleBarSize,
         .setNavDestinationBeforeCreateLayoutWrapperCallBack = SetNavDestinationBeforeCreateLayoutWrapperCallBack,
         .setTitleAnimationElapsedTime = SetTitleAnimationElapsedTime,
+        .setNavDestinationOnActive = SetNavDestinationOnActive,
+        .resetNavDestinationOnActive = ResetNavDestinationOnActive,
+        .setNavDestinationOnInactive = SetNavDestinationOnInactive,
+        .resetNavDestinationOnInactive = ResetNavDestinationOnInactive,
+        .setNavDestinationOnResult = SetNavDestinationOnResult,
+        .resetNavDestinationOnResult = ResetNavDestinationOnResult,
+        .setNavDestinationOnNewParam = SetNavDestinationOnNewParam,
+        .resetNavDestinationOnNewParam = ResetNavDestinationOnNewParam,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

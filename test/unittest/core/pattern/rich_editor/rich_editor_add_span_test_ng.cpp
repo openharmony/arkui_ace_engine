@@ -673,7 +673,8 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpanByPasteData001, TestSize.Level1)
 
     TextSpanOptions options;
     options.value = INIT_VALUE_1;
-    richEditorController->AddTextSpan(options);
+    auto result = richEditorController->AddTextSpan(options);
+    EXPECT_NE(result, 0);
 
     /**
      * @tc.steps: step2. test AddSpanByPasteData001

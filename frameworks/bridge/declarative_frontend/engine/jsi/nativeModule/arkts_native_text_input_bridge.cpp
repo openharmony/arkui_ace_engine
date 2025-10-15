@@ -2841,7 +2841,7 @@ ArkUINativeModuleValue TextInputBridge::SetEllipsisMode(ArkUIRuntimeCallInfo* ru
         return panda::JSValueRef::Undefined(vm);
     }
     uint32_t ellipsisMode = ellipsisModeArg->Uint32Value(vm);
-    GetArkUINodeModifiers()->getTextModifier()->setEllipsisMode(nativeNode, ellipsisMode);
+    GetArkUINodeModifiers()->getTextInputModifier()->setEllipsisMode(nativeNode, ellipsisMode);
     return panda::JSValueRef::Undefined(vm);
 }
 

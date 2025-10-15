@@ -36,7 +36,7 @@ public:
 HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     * @tc.steps: step1. create frameNode and test pattern UpdateCaretRect
      */
     CreateTextField();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
@@ -168,7 +168,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern007
- * @tc.desc: Test TextPattern HandleOnRedoAction.
+ * @tc.desc: Test TextPattern HandleOnRedoAction
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern007, TestSize.Level1)
@@ -2745,6 +2745,7 @@ HWTEST_F(TextFieldPatternTest, HandleOnCopy001, TestSize.Level0)
     pattern->contentController_->content_ = u"Test";
     ASSERT_NE(pattern->selectController_, nullptr);
     pattern->selectController_->UpdateHandleIndex(0, 4);
+
 
     auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);

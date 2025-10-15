@@ -561,12 +561,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setTransition1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _CommonMethod_setGesture(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _CommonMethod_setPriorityGesture(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _CommonMethod_setParallelGesture(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _CommonMethod_setBlur(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setLinearGradientBlur(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -2149,11 +2143,15 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setRenderingStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SymbolGlyphAttribute_setSymbolEffect0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setMinFontScale(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setMaxFontScale(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _SymbolGlyphAttribute_setSymbolEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _SymbolGlyphAttribute_setSymbolEffect1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SymbolGlyphAttribute_setSymbolEffect2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SymbolSpan_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -2561,7 +2559,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextInputAttribute_setLineBreakStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _TextInputAttribute_setCancelButton(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _TextInputAttribute_setCancelButton0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextInputAttribute_setCancelButton1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextInputAttribute_setSelectAll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4080,14 +4080,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FullScreenExitHandler_exitFullScreen(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _Gesture_construct(): KPointer
-    @ani.unsafe.Direct
-    native static _Gesture_getFinalizer(): KPointer
-    @ani.unsafe.Quick
-    native static _Gesture_tag(ptr: KPointer, tag: KStringPtr): void
-    @ani.unsafe.Direct
-    native static _Gesture_allowedTypes(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _GestureEvent_construct(): KPointer
     @ani.unsafe.Direct
     native static _GestureEvent_getFinalizer(): KPointer
@@ -4140,13 +4132,45 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GestureEvent_setVelocity(ptr: KPointer, velocity: number): void
     @ani.unsafe.Direct
-    native static _GestureGroup_construct(): KPointer
+    native static _GestureOps_createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
-    native static _GestureGroup_getFinalizer(): KPointer
+    native static _GestureOps_createLongPressGesture(fingers: number, repeat: KInt, duration: number, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
-    native static _GestureGroup_$_instantiate(thisArray: KSerializerBuffer, thisLength: int32, mode: KInt): KPointer
+    native static _GestureOps_createPanGesture(fingers: number, direction: KInt, distance: number, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
-    native static _GestureGroup_onCancel(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    native static _GestureOps_createPanGestureWithPanGestureOptions(panGestureOptions: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _GestureOps_createPinchGesture(fingers: number, distance: number, isFingerCountLimited: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _GestureOps_createRotationGesture(fingers: number, angle: number, isFingerCountLimited: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _GestureOps_createSwipeGesture(fingers: number, direction: KInt, speed: number, isFingerCountLimited: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _GestureOps_createGestureGroup(mode: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _GestureOps_setOnAction(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GestureOps_setOnActionStart(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GestureOps_setOnActionUpdate(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GestureOps_setOnActionEnd(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GestureOps_setOnActionCancel(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GestureOps_setOnCancel(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _GestureOps_setGestureTag(gesture: KPointer, tag: KStringPtr): void
+    @ani.unsafe.Direct
+    native static _GestureOps_setAllowedTypes(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GestureOps_addGestureToNode(node: KPointer, priority: number, mask: KInt, gesture: KPointer, isModifier: KInt): void
+    @ani.unsafe.Direct
+    native static _GestureOps_addGestureToGroup(group: KPointer, gesture: KPointer): void
+    @ani.unsafe.Quick
+    native static _GestureOps_removeGestureByTag(node: KPointer, tag: KStringPtr): void
+    @ani.unsafe.Direct
+    native static _GestureOps_clearGestures(node: KPointer): void
     @ani.unsafe.Direct
     native static _GestureRecognizer_construct(): KPointer
     @ani.unsafe.Direct
@@ -4188,11 +4212,19 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _GlobalScope_ohos_font_getSystemFontList(): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _GlobalScope_ohos_font_getFontByName(fontName: KStringPtr): KPointer
+    native static _GlobalScope_ohos_font_getFontByName(fontName: KStringPtr): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _GlobalScope_ohos_font_getUIFontConfig(): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _GlobalScope_ohos_measure_utils_measureText(thisArray: KSerializerBuffer, thisLength: int32): double
     @ani.unsafe.Quick
     native static _GlobalScope_ohos_measure_utils_measureTextSize(thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _GlobalScopeUicontextFontScale_isFollowingSystemFontScale(): boolean
+    @ani.unsafe.Quick
+    native static _GlobalScopeUicontextFontScale_getMaxFontScale(): double
+    @ani.unsafe.Direct
+    native static _GlobalScopeUicontextTextMenu_setMenuOptions(thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _HierarchicalSymbolEffect_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -5070,20 +5102,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RichEditorStyledStringController_onContentChanged(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _RotationGesture_construct(): KPointer
-    @ani.unsafe.Direct
-    native static _RotationGesture_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _RotationGesture_$_instantiate(thisArray: KSerializerBuffer, thisLength: int32): KPointer
-    @ani.unsafe.Direct
-    native static _RotationGesture_onActionStart(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _RotationGesture_onActionUpdate(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _RotationGesture_onActionEnd(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _RotationGesture_onActionCancel(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _RotationGestureEvent_construct(): KPointer
     @ani.unsafe.Direct
     native static _RotationGestureEvent_getFinalizer(): KPointer
@@ -5268,14 +5286,6 @@ export class ArkUIGeneratedNativeModule {
     native static _SubmitEvent_getText(ptr: KPointer): string
     @ani.unsafe.Quick
     native static _SubmitEvent_setText(ptr: KPointer, text: KStringPtr): void
-    @ani.unsafe.Direct
-    native static _SwipeGesture_construct(): KPointer
-    @ani.unsafe.Direct
-    native static _SwipeGesture_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _SwipeGesture_$_instantiate(thisArray: KSerializerBuffer, thisLength: int32): KPointer
-    @ani.unsafe.Direct
-    native static _SwipeGesture_onAction(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SwipeGestureEvent_construct(): KPointer
     @ani.unsafe.Direct

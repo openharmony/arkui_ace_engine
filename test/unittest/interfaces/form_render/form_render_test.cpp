@@ -46,8 +46,7 @@ const std::string FORM_COMPONENT_ID_3 = "333333";
 const std::string CHECK_KEY = "CHECK_KEY";
 constexpr double FORM_WIDTH = 100.0f;
 constexpr double FORM_HEIGHT = 100.0f;
-constexpr double FORM_LAYOUT_WIDTH = 100.f;
-constexpr double FORM_LAYOUT_HEIGHT = 100.f;
+constexpr double FORM_VIEW_SCALE = 1.0f;
 constexpr double FORM_WIDTH_2 = 200.0f;
 constexpr double FORM_HEIGHT_2 = 200.0f;
 } // namespace
@@ -130,7 +129,7 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level0)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH)).Times(Exactly(2));
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT)).Times(Exactly(2));
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormViewScale(FORM_WIDTH, FORM_HEIGHT,
-        FORM_LAYOUT_WIDTH, FORM_LAYOUT_HEIGHT)).Times(Exactly(2));
+        FORM_VIEW_SCALE)).Times(Exactly(2));
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormSharedImage(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormData(_)).WillOnce(Return());
 

@@ -618,6 +618,7 @@ build_component_ng("pattern_ng") {
     "tabs/tab_bar_modifier.cpp",
     "tabs/tab_bar_paint_method.cpp",
     "tabs/tab_bar_pattern.cpp",
+    "tabs/tab_bar_pattern_multi_thread.cpp",
     "tabs/tab_content_model_ng.cpp",
     "tabs/tab_content_model_static.cpp",
     "tabs/tab_content_node.cpp",
@@ -776,7 +777,7 @@ build_component_ng("pattern_ng") {
     "container_modal/interfaces:customtitle",
   ]
 
-  if (!build_ohos_sdk) {
+  if (!build_ohos_sdk && !is_arkui_x) {
     # arkts 1.2
     deps += [ "container_modal/static/source:WindowTitlebarComponent" ]
   }

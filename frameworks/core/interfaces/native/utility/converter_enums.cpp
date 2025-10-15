@@ -235,6 +235,17 @@ void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringS
 }
 
 template<>
+void AssignCast(std::optional<GestureFocusMode>& dst, const Ark_GestureFocusMode& src)
+{
+    switch (src) {
+        case ARK_GESTURE_FOCUS_MODE_DEFAULT: dst = GestureFocusMode::DEFAULT; break;
+        case ARK_GESTURE_FOCUS_MODE_GESTURE_TAP_AND_LONG_PRESS:
+            dst = GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS; break;
+        default: LOGE("Unexpected enum value in Ark_GestureFocusMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<GestureMask>& dst, const Ark_GestureMask& src)
 {
     switch (src) {
@@ -297,6 +308,15 @@ void AssignCast(std::optional<ImageRenderMode>& dst, const Ark_ImageRenderMode& 
         case ARK_IMAGE_RENDER_MODE_ORIGINAL: dst = ImageRenderMode::ORIGINAL; break;
         case ARK_IMAGE_RENDER_MODE_TEMPLATE: dst = ImageRenderMode::TEMPLATE; break;
         default: LOGE("Unexpected enum value in Ark_ImageRenderMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<WebAudioSessionType>& dst, const Ark_AudioSessionType& src)
+{
+    switch (src) {
+        case ARK_AUDIO_SESSION_TYPE_AMBIENT: dst = WebAudioSessionType::AMBIENT; break;
+        default: LOGE("Unexpected enum value in Ark_AudioSessionType: %{public}d", src);
     }
 }
 
@@ -1168,6 +1188,17 @@ void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_Sli
 }
 
 template<>
+void AssignCast(std::optional<WebBypassVsyncCondition>& dst, const Ark_WebBypassVsyncCondition& src)
+{
+    switch (src) {
+        case ARK_WEB_BYPASS_VSYNC_CONDITION_NONE: dst = WebBypassVsyncCondition::NONE; break;
+        case ARK_WEB_BYPASS_VSYNC_CONDITION_SCROLLBY_FROM_ZERO_OFFSET:
+                                                dst = WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET; break;
+        default: LOGE("Unexpected enum value in Ark_WebBypassVsyncCondition: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<WebDarkMode>& dst, const Ark_WebDarkMode& src)
 {
     switch (src) {
@@ -1183,6 +1214,8 @@ void AssignCast(std::optional<WebElementType>& dst, const Ark_WebElementType& sr
 {
     switch (src) {
         case ARK_WEB_ELEMENT_TYPE_IMAGE: dst = WebElementType::IMAGE; break;
+        case ARK_WEB_ELEMENT_TYPE_LINK: dst = WebElementType::LINK; break;
+        case ARK_WEB_ELEMENT_TYPE_TEXT: dst = WebElementType::TEXT; break;
         default: LOGE("Unexpected enum value in Ark_WebElementType: %{public}d", src);
     }
 }
@@ -1228,6 +1261,7 @@ void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src)
         case ARK_WORD_BREAK_NORMAL: dst = WordBreak::NORMAL; break;
         case ARK_WORD_BREAK_BREAK_ALL: dst = WordBreak::BREAK_ALL; break;
         case ARK_WORD_BREAK_BREAK_WORD: dst = WordBreak::BREAK_WORD; break;
+        case ARK_WORD_BREAK_HYPHENATION: dst = WordBreak::HYPHENATION; break;
         default: LOGE("Unexpected enum value in Ark_WordBreak: %{public}d", src);
     }
 }
@@ -1739,6 +1773,7 @@ void AssignCast(std::optional<ResponseType>& dst, const Ark_WebResponseType& src
 {
     switch (src) {
         case ARK_WEB_RESPONSE_TYPE_LONG_PRESS: dst = ResponseType::LONG_PRESS; break;
+        case ARK_WEB_RESPONSE_TYPE_RIGHT_CLICK: dst = ResponseType::RIGHT_CLICK; break;
         default: LOGE("Unexpected enum value in Ark_WebResponseType: %{public}d", src);
     }
 }

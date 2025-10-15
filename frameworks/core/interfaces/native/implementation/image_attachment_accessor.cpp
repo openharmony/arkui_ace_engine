@@ -130,7 +130,7 @@ void DestroyPeerImpl(Ark_ImageAttachment peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_ImageAttachment ConstructImpl(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value)
+Ark_ImageAttachment ConstructImpl(const Opt_AttachmentType* value)
 {
     auto peer = PeerUtils::CreatePeer<ImageAttachmentPeer>();
     CHECK_NULL_RETURN(value, peer);

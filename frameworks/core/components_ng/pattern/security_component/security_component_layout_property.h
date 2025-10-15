@@ -78,6 +78,7 @@ public:
         value->propIsMaxLineLimitExceeded_ = CloneIsMaxLineLimitExceeded();
         value->propIsIconExceeded_ = CloneIsIconExceeded();
         value->propHasCustomPermissionForSecComp_ = CloneHasCustomPermissionForSecComp();
+        value->propFocusBoxFlag_ = CloneFocusBoxFlag();
         return value;
     }
 
@@ -124,6 +125,7 @@ public:
         ResetIsMaxLineLimitExceeded();
         ResetIsIconExceeded();
         ResetHasCustomPermissionForSecComp();
+        ResetFocusBoxFlag();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundLeftPadding, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -168,6 +170,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsMaxLineLimitExceeded, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsIconExceeded, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasCustomPermissionForSecComp, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FocusBoxFlag, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DISALLOW_COPY_AND_MOVE(SecurityComponentLayoutProperty);
 };
 } // namespace OHOS::Ace::NG

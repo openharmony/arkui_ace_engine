@@ -4727,6 +4727,14 @@ struct ArkUINavDestinationModifier {
     void (*setNavDestinationBeforeCreateLayoutWrapperCallBack)(ArkUINodeHandle node,
         void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node));
     void (*setTitleAnimationElapsedTime)(ArkUINodeHandle node, ArkUI_Int32 elapsedTime);
+    void (*setNavDestinationOnActive)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnActive)(ArkUINodeHandle node);
+    void (*setNavDestinationOnInactive)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnInactive)(ArkUINodeHandle node);
+    void (*setNavDestinationOnResult)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnResult)(ArkUINodeHandle node);
+    void (*setNavDestinationOnNewParam)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnNewParam)(ArkUINodeHandle node);
 };
 
 struct ArkUITextAreaModifier {
@@ -6693,6 +6701,12 @@ struct ArkUISelectModifier {
     void (*setMenuBgColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr menuBgColorRawPtr);
     void (*setArrowColor)(ArkUINodeHandle node, const ArkUI_Uint32 arrowColor);
     void (*setShowDefaultSelectedIcon)(ArkUINodeHandle node, ArkUI_Bool show);
+    void (*setSelectBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setSelectBackgroundColorWithColorSpace)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
+    void (*resetSelectBackgroundColor)(ArkUINodeHandle node);
+    void (*setSelectBackgroundColorWithColorSpacePtr)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, ArkUI_VoidPtr colorRawPtr);
 };
 
 /** Common for all API variants.*/
