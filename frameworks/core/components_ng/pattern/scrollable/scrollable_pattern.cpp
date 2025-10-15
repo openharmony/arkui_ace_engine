@@ -46,6 +46,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -3249,6 +3250,7 @@ void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
         OnScrollStop(hub->GetOnScrollStop(), hub->GetJSFrameNodeOnScrollStop());
     }
     RecordScrollEvent(Recorder::EventType::SCROLL_START);
+    UiSessionManager::GetInstance()->ReportScrollEvent("onScrollStart");
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     if (withPerfMonitor) {
@@ -3502,6 +3504,7 @@ void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
     CHECK_NULL_VOID(pipeline);
     pipeline->SetTHPNotifyState(ThpNotifyState::DEFAULT);
     pipeline->PostTaskResponseRegion(DEFAULT_DELAY_THP);
+    UiSessionManager::GetInstance()->ReportScrollEvent("onScrollStop");
 }
 
 void ScrollablePattern::RecordScrollEvent(Recorder::EventType eventType)

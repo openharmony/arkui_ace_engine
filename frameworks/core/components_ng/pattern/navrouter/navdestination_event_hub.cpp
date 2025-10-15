@@ -16,6 +16,8 @@
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 namespace OHOS::Ace::NG {
 void NavDestinationEventHub::FireOnDisappear()
 {
@@ -70,6 +72,7 @@ void NavDestinationEventHub::FireOnShownEvent(
     state_= NavDestinationState::ON_SHOWN;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_SHOWN);
+    UiSessionManager::GetInstance()->OnRouterChange(navDestination->GetNavDestinationPathInfo(), "onPageShow");
     if (onShownEvent_) {
         auto onShownEvent = onShownEvent_;
         onShownEvent(static_cast<int32_t>(reason));
@@ -106,6 +109,7 @@ void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name, NavDestV
     state_ = NavDestinationState::ON_HIDDEN;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_HIDDEN);
+    UiSessionManager::GetInstance()->OnRouterChange(navDestination->GetNavDestinationPathInfo(), "onPageHide");
     if (onHiddenEvent_) {
         onHiddenEvent_(static_cast<int32_t>(reason));
     }

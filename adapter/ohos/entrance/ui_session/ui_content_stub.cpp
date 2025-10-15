@@ -70,6 +70,14 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             RegisterComponentChangeEventCallbackInner(data, reply, option);
             break;
         }
+        case REGISTER_SCROLL_EVENT: {
+            RegisterScrollEventCallbackInner(data, reply, option);
+            break;
+        }
+        case REGISTER_LIFE_CYCLE_EVENT: {
+            RegisterLifeCycleEventCallbackInner(data, reply, option);
+            break;
+        }
         case SENDCOMMAND_ASYNC_EVENT: {
             SendCommandInnerAsync(data, reply, option);
             break;
@@ -96,6 +104,14 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
         }
         case UNREGISTER_WEB_UNFOCUS_EVENT: {
             UnregisterWebUnfocusEventCallbackInner(data, reply, option);
+            break;
+        }
+        case UNREGISTER_SCROLL_EVENT: {
+            UnregisterScrollEventCallbackInner(data, reply, option);
+            break;
+        }
+        case UNREGISTER_LIFE_CYCLE_EVENT: {
+            UnregisterLifeCycleEventCallbackInner(data, reply, option);
             break;
         }
         case RESET_ALL_TEXT: {
@@ -212,6 +228,20 @@ int32_t UiContentStub::RegisterWebUnfocusEventCallbackInner(
     return NO_ERROR;
 }
 
+int32_t UiContentStub::RegisterScrollEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(RegisterScrollEventCallback(nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::RegisterLifeCycleEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(RegisterLifeCycleEventCallback(nullptr));
+    return NO_ERROR;
+}
+
 int32_t UiContentStub::SendCommandInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
@@ -267,6 +297,19 @@ int32_t UiContentStub::UnregisterWebUnfocusEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     reply.WriteInt32(UnregisterWebUnfocusEventCallback());
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::UnregisterScrollEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(UnregisterScrollEventCallback());
+    return NO_ERROR;
+}
+int32_t UiContentStub::UnregisterLifeCycleEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(UnregisterLifeCycleEventCallback());
     return NO_ERROR;
 }
 

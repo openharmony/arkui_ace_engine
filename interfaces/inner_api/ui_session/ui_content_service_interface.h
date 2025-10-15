@@ -41,11 +41,15 @@ public:
         REGISTER_ROUTER_CHANGE_EVENT,
         REGISTER_COMPONENT_EVENT,
         REGISTER_WEB_UNFOCUS_EVENT,
+        REGISTER_SCROLL_EVENT,
+        REGISTER_LIFE_CYCLE_EVENT,
         UNREGISTER_CLICK_EVENT,
         UNREGISTER_SEARCH_EVENT,
         UNREGISTER_ROUTER_CHANGE_EVENT,
         UNREGISTER_COMPONENT_EVENT,
         UNREGISTER_WEB_UNFOCUS_EVENT,
+        UNREGISTER_SCROLL_EVENT,
+        UNREGISTER_LIFE_CYCLE_EVENT,
         RESET_ALL_TEXT,
         RESET_TEXT_BY_ID,
         GET_WEB_VIEW_LANGUAGE,
@@ -109,6 +113,18 @@ public:
         const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) = 0;
 
     /**
+     * @description: define register a callback on scroll event occur to execute interface
+     * @return: result number
+     */
+    virtual int32_t RegisterScrollEventCallback(const EventCallback& eventCallback) = 0;
+
+    /**
+     * @description: define register a callback on life cycle event occur to execute interface
+     * @return: result number
+     */
+    virtual int32_t RegisterLifeCycleEventCallback(const EventCallback& eventCallback) = 0;
+
+    /**
      * @description: define register a callback on SendCommand event occur to execute interface
      * @return: result number
      *          0: Node execution is successful.
@@ -161,6 +177,18 @@ public:
      * @return: result number
      */
     virtual int32_t UnregisterWebUnfocusEventCallback() = 0;
+
+    /**
+     * @description: define unregister the scroll event occur callback last register interface
+     * @return: result number
+     */
+    virtual int32_t UnregisterScrollEventCallback() = 0;
+
+    /**
+     * @description: define unregister the life cycle event occur callback last register interface
+     * @return: result number
+     */
+    virtual int32_t UnregisterLifeCycleEventCallback() = 0;
 
     /**
      * @description:get web need translate text
@@ -252,6 +280,8 @@ public:
         REPORT_SEARCH_EVENT,
         REPORT_INSPECTOR_VALUE,
         REPORT_WEB_UNFOCUS_EVENT,
+        REPORT_SCROLL_EVENT,
+        REPORT_LIFE_CYCLE_EVENT,
         SEND_BASE_INFO,
         SEND_CURRENT_LANGUAGE,
         SEND_TEXT,
@@ -289,6 +319,16 @@ public:
      * @description: define reports web unfocus value to the proxy interface
      */
     virtual void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) = 0;
+
+    /**
+     * @description: define reports the scroll event to the proxy interface
+     */
+    virtual void ReportScrollEvent(const std::string& data) = 0;
+
+    /**
+     * @description: define reports the life cycle event to the proxy interface
+     */
+    virtual void ReportLifeCycleEvent(const std::string& data) = 0;
 
     /**
      * @description: define send base info value to the proxy interface

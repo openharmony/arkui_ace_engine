@@ -58,6 +58,16 @@ public:
     void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) override;
 
     /**
+     * @description: notify stub side to report scroll value
+     */
+    void ReportScrollEvent(const std::string& data) override;
+
+    /**
+     * @description: notify stub side to report life cycle value
+     */
+    void ReportLifeCycleEvent(const std::string& data) override;
+
+    /**
      * @description: notify stub side to report web unfocus value
      */
     void SendBaseInfo(const std::string& data) override;

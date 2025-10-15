@@ -31,15 +31,21 @@ public:
         int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value) override;
     void ReportWebInputEvent(
         int64_t accessibilityId, const std::string& data, const std::string& type = "") override;
+    void ReportScrollEvent(const std::string& data) override;
+    void ReportLifeCycleEvent(const std::string& data) override;
     void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId) override;
     void SetClickEventRegistered(bool status) override;
     void SetSearchEventRegistered(bool status) override;
     void SetRouterChangeEventRegistered(bool status) override;
     void SetComponentChangeEventRegistered(bool status) override;
+    void SetScrollEventRegistered(bool status) override;
+    void SetLifeCycleEventRegistered(bool status) override;
     bool GetClickEventRegistered() override;
     bool GetSearchEventRegistered() override;
     bool GetRouterChangeEventRegistered() override;
     bool GetComponentChangeEventRegistered() override;
+    bool GetScrollEventRegistered() override;
+    bool GetLifeCycleEventRegistered() override;
     void GetInspectorTree(ParamConfig config = ParamConfig()) override;
     void SaveInspectorTreeFunction(InspectorFunction&& function) override;
     void AddValueForTree(int32_t id, const std::string& value) override;
