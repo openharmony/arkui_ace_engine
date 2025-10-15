@@ -18,6 +18,7 @@
 arkui_files = [
   "arkui-preprocessed/@ohos.animator.ets",
   "arkui-preprocessed/@ohos.arkui.Parallelize.ets",
+  "arkui-preprocessed/@ohos.arkui.Prefetcher.ets",
   "arkui-preprocessed/@ohos.arkui.UIContext.ets",
   "arkui-preprocessed/@ohos.arkui.componentSnapshot.ets",
   "arkui-preprocessed/@ohos.arkui.componentUtils.ets",
@@ -278,7 +279,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/component/pluginComponent.ets",
   "arkui-preprocessed/arkui/component/polygon.ets",
   "arkui-preprocessed/arkui/component/polyline.ets",
-  "arkui-preprocessed/arkui/component/prefetcher.ets",
   "arkui-preprocessed/arkui/component/progress.ets",
   "arkui-preprocessed/arkui/component/qrcode.ets",
   "arkui-preprocessed/arkui/component/radio.ets",
