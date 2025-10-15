@@ -5588,4 +5588,7 @@ static isArray_Tuple_ResourceColor_Number(value: Object | string | number | unde
     static isArray_ScriptItem(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+    static isArray_NativePointer(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
 }
