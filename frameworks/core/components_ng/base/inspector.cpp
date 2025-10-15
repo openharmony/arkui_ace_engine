@@ -337,6 +337,8 @@ bool IsInternalNode(const RefPtr<NG::UINode>& uiNode)
 std::unique_ptr<OHOS::Ace::JsonValue> GetNavCustomNodeInfo(const RefPtr<UINode>& navCustomNode,
     const RefPtr<NG::UINode>& parent, const InspectorFilter& filter)
 {
+    auto node = AceType::DynamicCast<CustomNode>(navCustomNode);
+    CHECK_NULL_RETURN(node, nullptr);
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, navCustomNode->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, navCustomNode->GetId());
@@ -423,6 +425,7 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
             auto navCustomNode = navDestinationNode->GetPattern<NavDestinationPattern>()->GetCustomNode();
             CHECK_NULL_BREAK(navCustomNode);
             auto navCustomNodeJsonNode = GetNavCustomNodeInfo(navCustomNode, parent, filter);
+            CHECK_NULL_BREAK(navCustomNodeJsonNode);
             auto navCustomNodeChildrenArray = JsonUtil::CreateArray(true);
             GetInspectorChildren(uiNode, navCustomNodeChildrenArray, inspectorParameters, filter, depth - 1);
             if (navCustomNodeChildrenArray->GetArraySize() > 0) {
