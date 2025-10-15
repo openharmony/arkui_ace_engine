@@ -29389,6 +29389,33 @@ void impl_FocusController_requestFocus(const KStringPtr& key) {
         GetAccessors()->getFocusControllerAccessor()->requestFocus((const Ark_String*) (&key));
 }
 KOALA_INTEROP_V1(FocusController_requestFocus, KStringPtr)
+void impl_ForEachOps_SyncOnMoveOps(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const Ark_Int32 additionalChildValueTempTmpBufLength = thisDeserializer.readInt32();
+        Array_NativePointer additionalChildValueTempTmpBuf = {};
+        thisDeserializer.resizeArray<std::decay<decltype(additionalChildValueTempTmpBuf)>::type,
+        std::decay<decltype(*additionalChildValueTempTmpBuf.array)>::type>(&additionalChildValueTempTmpBuf, additionalChildValueTempTmpBufLength);
+        for (int additionalChildValueTempTmpBufBufCounterI = 0; additionalChildValueTempTmpBufBufCounterI < additionalChildValueTempTmpBufLength; additionalChildValueTempTmpBufBufCounterI++) {
+            additionalChildValueTempTmpBuf.array[additionalChildValueTempTmpBufBufCounterI] = thisDeserializer.readPointer();
+        }
+        Array_NativePointer additionalChildValueTemp = additionalChildValueTempTmpBuf;;
+        const auto onMoveOpsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_OnMoveHandler onMoveOpsValueTempTmpBuf = {};
+        onMoveOpsValueTempTmpBuf.tag = onMoveOpsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((onMoveOpsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            onMoveOpsValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number from, const Ark_Number to)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnMoveHandler)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number from, const Ark_Number to)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnMoveHandler))))};
+        }
+        Opt_OnMoveHandler onMoveOpsValueTemp = onMoveOpsValueTempTmpBuf;;
+        const auto onMoveDragEventOpsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ItemDragEventHandler onMoveDragEventOpsValueTempTmpBuf = {};
+        onMoveDragEventOpsValueTempTmpBuf.tag = onMoveDragEventOpsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((onMoveDragEventOpsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            onMoveDragEventOpsValueTempTmpBuf.value = ItemDragEventHandler_serializer::read(thisDeserializer);
+        }
+        Opt_ItemDragEventHandler onMoveDragEventOpsValueTemp = onMoveDragEventOpsValueTempTmpBuf;;
+        GetAccessors()->getForEachOpsAccessor()->SyncOnMoveOps(node, static_cast<Array_NativePointer*>(&additionalChildValueTemp), static_cast<Opt_OnMoveHandler*>(&onMoveOpsValueTemp), static_cast<Opt_ItemDragEventHandler*>(&onMoveDragEventOpsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ForEachOps_SyncOnMoveOps, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_FrameNodeExtender_constructorFrameNode() {
         return GetAccessors()->getFrameNodeExtenderAccessor()->constructorFrameNode();
 }

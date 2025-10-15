@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,12 +18,12 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/components_ng/syntax/arkoala_lazy_node.h"
+#include "core/components_ng/syntax/arkoala_for_each_node.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace LazyForEachOpsAccessor {
+namespace ForEachOpsAccessor {
 void SyncItemDragEvent(
-    ArkoalaLazyNode* lazyNode, const Opt_ItemDragEventHandler* onMoveDragEventOps)
+    ArkoalaForEachNode* forEachNode, const Opt_ItemDragEventHandler* onMoveDragEventOps)
 {
     std::function<void(int32_t)> onLongPressCallback;
     std::function<void(int32_t)> onDragStartCallback;
@@ -31,7 +31,7 @@ void SyncItemDragEvent(
     std::function<void(int32_t)> onDropCallback;
     auto onMoveDragEventOpt = Converter::GetOptPtr(onMoveDragEventOps);
     if (!onMoveDragEventOpt) {
-        lazyNode->SetItemDragEvent(nullptr, nullptr, nullptr, nullptr);
+        forEachNode->SetItemDragEvent(nullptr, nullptr, nullptr, nullptr);
         return;
     }
     auto onLongPressOpt = Converter::OptConvert<Callback_Number_Void>(onMoveDragEventOpt->onLongPress);
@@ -63,70 +63,47 @@ void SyncItemDragEvent(
             arkCallback.Invoke(arkIndex);
         };
     }
-    lazyNode->SetItemDragEvent(std::move(onLongPressCallback), std::move(onDragStartCallback),
+    forEachNode->SetItemDragEvent(std::move(onLongPressCallback), std::move(onDragStartCallback),
         std::move(onMoveThroughCallback), std::move(onDropCallback));
 }
-void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, int32_t changeCnt)
-{
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto lazyNode = AceType::DynamicCast<ArkoalaLazyNode>(uiNode);
-    CHECK_NULL_VOID(lazyNode);
-    lazyNode->OnDataChange(startIdx, changeCnt, UINode::NotificationType::START_CHANGE_POSITION);
-}
-void SyncImpl(Ark_NativePointer node,
-              Ark_Int32 totalCount,
-              const Callback_CreateItem* creator,
-              const Callback_RangeUpdate* updater)
-{
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode && creator && updater);
-    auto lazyNode = AceType::DynamicCast<ArkoalaLazyNode>(uiNode);
-    CHECK_NULL_VOID(lazyNode);
-
-    lazyNode->SetTotalCount(totalCount);
-    lazyNode->SetCallbacks(
-        [callback = CallbackHelper(*creator)](
-            int32_t index) { return AceType::DynamicCast<UINode>(callback.BuildSync(index)); },
-        [cb = CallbackHelper(*updater)](int32_t start, int32_t end) { cb.InvokeSync(start, end); });
-}
 void SyncOnMoveOpsImpl(Ark_NativePointer node,
-                       const Callback_OnMoveFromTo* onMoveFromToOps,
+                       const Array_NativePointer* additionalChild,
                        const Opt_OnMoveHandler* onMoveOps,
                        const Opt_ItemDragEventHandler* onMoveDragEventOps)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode && onMoveFromToOps);
-    ArkoalaLazyNode* lazyNode = AceType::DynamicCast<ArkoalaLazyNode>(uiNode);
-    CHECK_NULL_VOID(lazyNode);
+    CHECK_NULL_VOID(uiNode);
+    ArkoalaForEachNode* forEachNode = AceType::DynamicCast<ArkoalaForEachNode>(uiNode);
+    CHECK_NULL_VOID(forEachNode);
+    CHECK_NULL_VOID(additionalChild);
     auto onMoveOpt = Converter::OptConvert<OnMoveHandler>(*onMoveOps);
     if (!onMoveOpt) {
         // enable user to disable onMove callback.
-        lazyNode->SetOnMove(nullptr);
-        lazyNode->SetOnMoveFromTo(nullptr);
-        lazyNode->SetItemDragEvent(nullptr, nullptr, nullptr, nullptr);
+        forEachNode->SetOnMove(nullptr);
+        forEachNode->SetItemDragEvent(nullptr, nullptr, nullptr, nullptr);
         return;
     }
-    lazyNode->SetOnMove([callback = CallbackHelper(*onMoveOpt)](int32_t from, int32_t to) {
+    forEachNode->SetOnMove([callback = CallbackHelper(*onMoveOpt)](int32_t from, int32_t to) {
         auto arkFrom = Converter::ArkValue<Ark_Number>(from);
         auto arkTo = Converter::ArkValue<Ark_Number>(to);
         callback.InvokeSync(arkFrom, arkTo);
     });
-    lazyNode->SetOnMoveFromTo([callback = CallbackHelper(*onMoveFromToOps)](int32_t from, int32_t to) {
-        callback.InvokeSync(from, to);
-    });
+    for (int32_t i = 0; i < additionalChild->length; ++i) {
+        auto* childNode = reinterpret_cast<UINode*>(additionalChild->array[i]);
+        if (childNode) {
+            forEachNode->InitDragManager(AceType::DynamicCast<FrameNode>(childNode->GetFrameChildByIndex(0, true)));
+        }
+    }
     // set drag event callback
-    SyncItemDragEvent(lazyNode, onMoveDragEventOps);
+    SyncItemDragEvent(forEachNode, onMoveDragEventOps);
 }
-} // LazyForEachOpsAccessor
-const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
+} // ForEachOpsAccessor
+const GENERATED_ArkUIForEachOpsAccessor* GetForEachOpsAccessor()
 {
-    static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
-        LazyForEachOpsAccessor::NotifyChangeImpl,
-        LazyForEachOpsAccessor::SyncImpl,
-        LazyForEachOpsAccessor::SyncOnMoveOpsImpl,
+    static const GENERATED_ArkUIForEachOpsAccessor ForEachOpsAccessorImpl {
+        ForEachOpsAccessor::SyncOnMoveOpsImpl,
     };
-    return &LazyForEachOpsAccessorImpl;
+    return &ForEachOpsAccessorImpl;
 }
 
 }

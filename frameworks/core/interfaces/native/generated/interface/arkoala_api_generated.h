@@ -983,6 +983,8 @@ typedef struct Array_ModuleMetadata Array_ModuleMetadata;
 typedef struct Opt_Array_ModuleMetadata Opt_Array_ModuleMetadata;
 typedef struct Array_MouseButton Array_MouseButton;
 typedef struct Opt_Array_MouseButton Opt_Array_MouseButton;
+typedef struct Array_NativePointer Array_NativePointer;
+typedef struct Opt_Array_NativePointer Opt_Array_NativePointer;
 typedef struct Array_NavDestinationTransition Array_NavDestinationTransition;
 typedef struct Opt_Array_NavDestinationTransition Opt_Array_NavDestinationTransition;
 typedef struct Array_NavigationMenuItem Array_NavigationMenuItem;
@@ -9183,6 +9185,15 @@ typedef struct Opt_Array_NativeEmbedParamItem {
     Ark_Tag tag;
     Array_NativeEmbedParamItem value;
 } Opt_Array_NativeEmbedParamItem;
+typedef struct Array_NativePointer {
+    /* kind: ContainerType */
+    Ark_NativePointer* array;
+    Ark_Int32 length;
+} Array_NativePointer;
+typedef struct Opt_Array_NativePointer {
+    Ark_Tag tag;
+    Array_NativePointer value;
+} Opt_Array_NativePointer;
 typedef struct Array_NavDestinationTransition {
     /* kind: ContainerType */
     Ark_NavDestinationTransition* array;
@@ -25968,6 +25979,13 @@ typedef struct GENERATED_ArkUIFocusControllerAccessor {
     void (*requestFocus)(const Ark_String* key);
 } GENERATED_ArkUIFocusControllerAccessor;
 
+typedef struct GENERATED_ArkUIForEachOpsAccessor {
+    void (*SyncOnMoveOps)(Ark_NativePointer node,
+                          const Array_NativePointer* additionalChild,
+                          const Opt_OnMoveHandler* onMoveOps,
+                          const Opt_ItemDragEventHandler* onMoveDragEventOps);
+} GENERATED_ArkUIForEachOpsAccessor;
+
 typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_NativePointer (*constructorFrameNode)();
     Ark_NativePointer (*getDestroy)();
@@ -28480,6 +28498,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIFileSelectorResultAccessor* (*getFileSelectorResultAccessor)();
     const GENERATED_ArkUIFocusAxisEventAccessor* (*getFocusAxisEventAccessor)();
     const GENERATED_ArkUIFocusControllerAccessor* (*getFocusControllerAccessor)();
+    const GENERATED_ArkUIForEachOpsAccessor* (*getForEachOpsAccessor)();
     const GENERATED_ArkUIFrameNodeExtenderAccessor* (*getFrameNodeExtenderAccessor)();
     const GENERATED_ArkUIFrictionMotionAccessor* (*getFrictionMotionAccessor)();
     const GENERATED_ArkUIFullScreenExitHandlerAccessor* (*getFullScreenExitHandlerAccessor)();

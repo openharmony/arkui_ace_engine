@@ -21,7 +21,7 @@ import { KPointer } from '@koalaui/interop'
 import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback } from '@koalaui/runtime'
 import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat'
 import { IDataSource, DataChangeListener } from '../component/lazyForEach'
-import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from '#generated'
+import { OnMoveHandler, ItemDragEventHandler, ForEachOps } from '#generated'
 import { LazyForEachImplForOptions, NodeHolder } from './LazyForEachImpl'
 import { InternalListener } from './DataChangeListener'
 import { PeerNode } from '../PeerNode'
@@ -319,8 +319,17 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
         throw new Error('key generator is not a function. Application error!');
     }
     let nodeHolder = remember(() => new NodeHolder())
+    const defaultKey = (e: T, idx: int32): string => {
+        try {
+            return `${idx}__${JSON.stringify(e)}`
+        } catch (e) {
+            throw new Error(
+                'Repeat: use of default key generator not possible on provided data structure.' +
+                'Need to specify key(). Application Error!')
+        }
+    };
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
-        keyGenerator ? hashCodeFromString(keyGenerator!(ele, i)) : i;
+        keyGenerator ? hashCodeFromString(keyGenerator!(ele, i)) : hashCodeFromString(defaultKey(ele, i));
     /** @memo */
     const action = (ele: T, i: int32) => {
         const ri = new RepeatItemImpl<T>(ele, i);
@@ -336,7 +345,7 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
     /**
      * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
      */
-    LazyForEachOps.SyncOnMoveOps(nodeHolder.node!.getPeerPtr(), onMoveFromTo, onMove, itemDragEvent);
+    ForEachOps.SyncOnMoveOps(nodeHolder.node!.getPeerPtr(), new Array<KPointer>(), onMove, itemDragEvent);
 
     ArkUIAniModule._ForEach_FinishRender(nodeHolder.node!.getPeerPtr());
 }

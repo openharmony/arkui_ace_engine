@@ -1331,6 +1331,40 @@ export class FocusController {
         return
     }
 }
+export class ForEachOps {
+    static SyncOnMoveOps_serialize(node: KPointer, additionalChild: Array<KPointer>, onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((additionalChild.length).toInt())
+        for (let additionalChildCounterI = 0; additionalChildCounterI < additionalChild.length; additionalChildCounterI++) {
+            const additionalChildTmpElement : KPointer = additionalChild[additionalChildCounterI]
+            thisSerializer.writePointer(additionalChildTmpElement)
+        }
+        if (onMoveOps !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onMoveOpsTmpValue  = onMoveOps!
+            thisSerializer.holdAndWriteCallback(onMoveOpsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (onMoveDragEventOps !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onMoveDragEventOpsTmpValue  = onMoveDragEventOps!
+            ItemDragEventHandler_serializer.write(thisSerializer, onMoveDragEventOpsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ForEachOps_SyncOnMoveOps(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static SyncOnMoveOps(node: KPointer, additionalChild: Array<KPointer>, onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
+        const node_casted = node as (KPointer)
+        const additionalChild_casted = additionalChild as (Array<KPointer>)
+        const onMoveOps_casted = onMoveOps as (OnMoveHandler | undefined)
+        const onMoveDragEventOps_casted = onMoveDragEventOps as (ItemDragEventHandler | undefined)
+        ForEachOps.SyncOnMoveOps_serialize(node_casted, additionalChild_casted, onMoveOps_casted, onMoveDragEventOps_casted)
+        return
+    }
+}
 export class FrameNodeExtender {
     static constructorFrameNode_serialize(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_constructorFrameNode()
