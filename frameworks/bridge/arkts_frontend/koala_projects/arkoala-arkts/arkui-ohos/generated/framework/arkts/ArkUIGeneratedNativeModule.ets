@@ -4063,6 +4063,8 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNodeExtender_unWrapRawPtr(peer: KPointer, pointer: KPointer): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getCommonEvent(peer: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_convertPoint(peer: KPointer, node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _FrictionMotion_construct(friction: number, position: number, velocity: number): KPointer
     @ani.unsafe.Direct

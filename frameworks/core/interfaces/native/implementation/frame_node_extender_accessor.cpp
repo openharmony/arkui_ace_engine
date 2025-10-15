@@ -790,6 +790,43 @@ Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
     ret->node = peer->node;
     return ret;
 }
+
+void ParseArrayFailNumber(std::vector<float>& indexes)
+{
+    indexes.clear();
+    indexes.emplace_back(0);
+}
+
+void ParseArrayResultNumber(std::vector<float>& indexes, NG::OffsetF offset)
+{
+    indexes.clear();
+    indexes.emplace_back(1);
+    indexes.emplace_back(offset.GetX());
+    indexes.emplace_back(offset.GetY());
+}
+
+Array_Float64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark_Vector2* vector2)
+{
+    std::vector<float> indexes;
+    ParseArrayFailNumber(indexes);
+    Array_Float64 errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(currentNode, errValue);
+    auto targetNode = FrameNodePeer::GetFrameNodeByPeer(node);
+    CHECK_NULL_RETURN(targetNode, errValue);
+    auto sameParentNode =
+        FindSameParentComponent(currentNode, targetNode);
+    if (!sameParentNode) {
+        return errValue;
+    }
+    auto xFloat = Converter::Convert<float>(vector2->x);
+    auto yFloat = Converter::Convert<float>(vector2->y);
+    auto offset =
+        currentNode->ConvertPoint(NG::OffsetF(xFloat, yFloat), targetNode);
+    ParseArrayResultNumber(indexes, offset);
+    Array_Float64 resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    return resultValue;
+}
 } // FrameNodeExtenderAccessor
 const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
 {
@@ -849,6 +886,7 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::CreateByRawPtrImpl,
         FrameNodeExtenderAccessor::UnWrapRawPtrImpl,
         FrameNodeExtenderAccessor::GetCommonEventImpl,
+        FrameNodeExtenderAccessor::ConvertPointImpl,
     };
     return &FrameNodeExtenderAccessorImpl;
 }

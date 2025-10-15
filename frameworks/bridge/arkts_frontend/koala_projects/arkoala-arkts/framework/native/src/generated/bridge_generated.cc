@@ -29145,6 +29145,19 @@ Ark_NativePointer impl_FrameNodeExtender_getCommonEvent(Ark_NativePointer peer) 
         return GetAccessors()->getFrameNodeExtenderAccessor()->getCommonEvent(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getCommonEvent, Ark_NativePointer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNodeExtender_convertPoint(Ark_NativePointer peer, Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_Vector2 vector2ValueTemp = Vector2_serializer::read(thisDeserializer);;
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->convertPoint(static_cast<Ark_FrameNode>(peer), static_cast<Ark_FrameNode>(node), static_cast<Ark_Vector2*>(&vector2ValueTemp));
+        SerializerBase _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
+            const Ark_Float64 retValueTmpElement = retValue.array[retValueCounterI];
+            _retSerializer.writeFloat64(retValueTmpElement);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_4(FrameNodeExtender_convertPoint, KInteropReturnBuffer, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_FrictionMotion_construct(KInteropNumber friction, KInteropNumber position, KInteropNumber velocity) {
         return GetAccessors()->getFrictionMotionAccessor()->construct((const Ark_Number*) (&friction), (const Ark_Number*) (&position), (const Ark_Number*) (&velocity));
 }
