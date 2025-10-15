@@ -2030,15 +2030,13 @@ export class TransitionEffect implements MaterializedBase {
     animation_serialize(value: AnimateParam): TransitionEffect {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         AnimateParam_serializer.write(thisSerializer, value)
-        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_animation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TransitionEffect_animation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
-        return obj
+        return this
     }
     combine_serialize(transitionEffect: TransitionEffect): TransitionEffect {
-        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_combine(this.peer!.ptr, toPeerPtr(transitionEffect))
-        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
-        return obj
+        ArkUIGeneratedNativeModule._TransitionEffect_combine(this.peer!.ptr, toPeerPtr(transitionEffect))
+        return this
     }
 }
 export interface UICommonEvent {
