@@ -1921,10 +1921,10 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
   do {                                                                                                  \
     ani_env* env = reinterpret_cast<ani_env*>(vmContext);                                               \
     ani_class errorClass {};                                                                            \
-    CHECK_ANI_FATAL(env->FindClass("escompat.Error", &errorClass));                                     \
+    CHECK_ANI_FATAL(env->FindClass("std.core.Error", &errorClass));                                     \
     ani_method errorCtor {};                                                                            \
     CHECK_ANI_FATAL(env->Class_FindMethod(errorClass, "<ctor>",                                         \
-      "C{std.core.String}C{escompat.ErrorOptions}:", &errorCtor));                                      \
+      "C{std.core.String}C{std.core.ErrorOptions}:", &errorCtor));                                      \
     ani_string messageObject{};                                                                         \
     CHECK_ANI_FATAL(env->String_NewUTF8(message, strlen(message), &messageObject));                     \
     ani_ref undefined{};                                                                                \
