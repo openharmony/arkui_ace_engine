@@ -6205,7 +6205,7 @@ export interface ReuseOptions {
 export { Context } from "application.Context"
 export interface Configuration {
     readonly colorMode: string;
-    readonly fontScale: number;
+    readonly fontScale: double;
 }
 export interface Rectangle {
     x?: Length;
@@ -8663,12 +8663,12 @@ export interface RectResult {
     height: double;
 }
 export interface CaretOffset {
-    index: number;
-    x: number;
-    y: number;
+    index: int32;
+    x: int32;
+    y: int32;
 }
 export interface TextContentControllerOptions {
-    offset?: number;
+    offset?: int32;
 }
 export enum ContentClipMode {
     CONTENT_ONLY = 0,
@@ -11348,17 +11348,17 @@ export class CaretOffset_serializer {
     public static write(buffer: SerializerBase, value: CaretOffset): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForIndex  = value.index
-        valueSerializer.writeNumber(valueHolderForIndex)
+        valueSerializer.writeInt32(valueHolderForIndex)
         const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
+        valueSerializer.writeInt32(valueHolderForX)
         const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
+        valueSerializer.writeInt32(valueHolderForY)
     }
     public static read(buffer: DeserializerBase): CaretOffset {
         let valueDeserializer : DeserializerBase = buffer
-        const indexTmpResult : number = (valueDeserializer.readNumber() as number)
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const indexTmpResult : int32 = valueDeserializer.readInt32()
+        const xTmpResult : int32 = valueDeserializer.readInt32()
+        const yTmpResult : int32 = valueDeserializer.readInt32()
         let value : CaretOffset = ({index: indexTmpResult, x: xTmpResult, y: yTmpResult} as CaretOffset)
         return value
     }
@@ -13041,7 +13041,7 @@ export class TextContentControllerOptions_serializer {
         if (valueHolderForOffset !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetTmpValue  = valueHolderForOffset!
-            valueSerializer.writeNumber(valueHolderForOffsetTmpValue)
+            valueSerializer.writeInt32(valueHolderForOffsetTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13049,11 +13049,11 @@ export class TextContentControllerOptions_serializer {
     public static read(buffer: DeserializerBase): TextContentControllerOptions {
         let valueDeserializer : DeserializerBase = buffer
         const offsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetTmpBuf : number | undefined = undefined
+        let offsetTmpBuf : int32 | undefined = undefined
         if ((offsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            offsetTmpBuf = (valueDeserializer.readNumber() as number)
+            offsetTmpBuf = valueDeserializer.readInt32()
         }
-        const offsetTmpResult : number | undefined = offsetTmpBuf
+        const offsetTmpResult : int32 | undefined = offsetTmpBuf
         let value : TextContentControllerOptions = ({offset: offsetTmpResult} as TextContentControllerOptions)
         return value
     }

@@ -65,7 +65,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _enterKeyType_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enterKeyType_0_0value?: EnterKeyType | undefined
     _onSubmit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSubmit_0_0value?: ((value0: string) => void) | SearchSubmitCallback | undefined
+    _onSubmit_0_0value?: SearchSubmitCallback | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: EditableTextOnChangeCallback | undefined
     _onTextSelectionChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -344,7 +344,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._onSubmit_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnSubmitAttribute((this._onSubmit_0_0value as ((value0: string) => void) | SearchSubmitCallback | undefined));
+                    peer.setOnSubmitAttribute((this._onSubmit_0_0value as SearchSubmitCallback | undefined));
                     this._onSubmit_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -354,7 +354,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     this._onSubmit_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnSubmitAttribute((undefined as ((value0: string) => void) | SearchSubmitCallback | undefined));
+                    peer.setOnSubmitAttribute((undefined as SearchSubmitCallback | undefined));
                 }
             }
         }
@@ -1143,7 +1143,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                     break;
                 }
                 default: {
-                    this.onSubmit((undefined as ((value0: string) => void) | SearchSubmitCallback | undefined));
+                    this.onSubmit((undefined as SearchSubmitCallback | undefined));
                 }
             }
         }
@@ -1724,7 +1724,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
         return this
     }
-    onSubmit(value: ((value0: string) => void) | SearchSubmitCallback | undefined): this {
+    onSubmit(value: SearchSubmitCallback | undefined): this {
         if (((this._onSubmit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onSubmit_0_flag = AttributeUpdaterFlag.UPDATE

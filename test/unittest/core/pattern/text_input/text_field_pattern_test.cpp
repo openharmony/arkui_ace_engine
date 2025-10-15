@@ -168,7 +168,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern007
- * @tc.desc: Test TextPattern HandleOnRedoAction.
+ * @tc.desc: Test TextPattern HandleOnRedoAction
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern007, TestSize.Level1)

@@ -71,7 +71,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _selectedBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selectedBackgroundColor_0_0value?: ResourceColor | undefined
     _onSubmit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSubmit_0_0value?: ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined
+    _onSubmit_0_0value?: TextAreaSubmitCallback | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: EditableTextOnChangeCallback | undefined
     _onTextSelectionChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -424,7 +424,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._onSubmit_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnSubmitAttribute((this._onSubmit_0_0value as ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined));
+                    peer.setOnSubmitAttribute((this._onSubmit_0_0value as TextAreaSubmitCallback | undefined));
                     this._onSubmit_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -434,7 +434,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._onSubmit_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnSubmitAttribute((undefined as ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined));
+                    peer.setOnSubmitAttribute((undefined as TextAreaSubmitCallback | undefined));
                 }
             }
         }
@@ -1442,7 +1442,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.onSubmit((undefined as ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined));
+                    this.onSubmit((undefined as TextAreaSubmitCallback | undefined));
                 }
             }
         }
@@ -2186,7 +2186,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    onSubmit(value: ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined): this {
+    onSubmit(value: TextAreaSubmitCallback | undefined): this {
         if (((this._onSubmit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onSubmit_0_flag = AttributeUpdaterFlag.UPDATE

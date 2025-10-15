@@ -1261,6 +1261,7 @@ void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src)
         case ARK_WORD_BREAK_NORMAL: dst = WordBreak::NORMAL; break;
         case ARK_WORD_BREAK_BREAK_ALL: dst = WordBreak::BREAK_ALL; break;
         case ARK_WORD_BREAK_BREAK_WORD: dst = WordBreak::BREAK_WORD; break;
+        case ARK_WORD_BREAK_HYPHENATION: dst = WordBreak::HYPHENATION; break;
         default: LOGE("Unexpected enum value in Ark_WordBreak: %{public}d", src);
     }
 }

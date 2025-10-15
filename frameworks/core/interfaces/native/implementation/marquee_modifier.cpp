@@ -89,7 +89,13 @@ void SetMarqueeOptionsImpl(Ark_NativePointer node,
         MarqueeModelNG::SetScrollAmount(frameNode, stepOpt);
     }
     if (marqueeOptions.loop) {
-        MarqueeModelNG::SetLoop(frameNode, marqueeOptions.loop);
+        std::optional<int32_t> loopOpt;
+        int32_t loop = marqueeOptions.loop.value();
+        if (loop == std::numeric_limits<int32_t>::max() || loop < 1) {
+            loop = -1;
+        }
+        loopOpt = loop;
+        MarqueeModelNG::SetLoop(frameNode, loopOpt);
     }
     if (marqueeOptions.src) {
         MarqueeModelNG::SetValue(frameNode, marqueeOptions.src);

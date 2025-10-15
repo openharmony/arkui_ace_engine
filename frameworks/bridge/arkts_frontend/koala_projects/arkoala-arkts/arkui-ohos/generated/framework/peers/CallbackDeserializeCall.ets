@@ -51,7 +51,7 @@ import { MenuItemConfiguration_serializer, MenuItemConfiguration, OnSelectCallba
 import { CheckboxGroupResult_serializer, OnCheckboxGroupChangeCallback, CheckboxGroupResult } from "./../../component/checkboxgroup"
 import { OnFoldStatusChangeInfo_serializer, HoverEventParam_serializer, OnFoldStatusChangeCallback, OnFoldStatusChangeInfo, OnHoverStatusChangeCallback, HoverEventParam } from "./../../component/folderStack"
 import { VisibleListContentInfo_serializer, ScrollState, OnScrollVisibleContentChangeCallback, VisibleListContentInfo } from "./../../component/list"
-import { SubmitEvent_serializer, EnterKeyType, OnContentScrollCallback, OnPasteCallback, OnSubmitCallback, SubmitEvent, OnTextSelectionChangeCallback } from "./../../component/textInput"
+import { SubmitEvent_serializer, OnContentScrollCallback, OnPasteCallback, OnSubmitCallback, EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback } from "./../../component/textInput"
 import { PluginErrorData_serializer, RecordData, PluginErrorCallback, PluginErrorData } from "./../../component/pluginComponent"
 import { ProgressConfiguration_serializer, ProgressConfiguration } from "./../../component/progress"
 import { RadioConfiguration_serializer, OnRadioChangeCallback, RadioConfiguration } from "./../../component/radio"
@@ -437,12 +437,6 @@ export function deserializeAndCallCallback_EditableTextChangeValue_Boolean(thisD
     }
     const _callResult  = _call(value0)
     continuationResult(_callResult)
-}
-export function deserializeAndCallCallback_EnterKeyType_Void(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((enterKey: EnterKeyType) => void))
-    let enterKey : EnterKeyType = EnterKeyType.fromValue(thisDeserializer.readInt32())
-    _call(enterKey)
 }
 export function deserializeAndCallCallback_ErrorInformation_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -3450,7 +3444,6 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_DrawContext_CustomSpanDrawInfo_Void: return deserializeAndCallCallback_DrawContext_CustomSpanDrawInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_DrawContext_Void: return deserializeAndCallCallback_DrawContext_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_EditableTextChangeValue_Boolean: return deserializeAndCallCallback_EditableTextChangeValue_Boolean(thisDeserializer);
-        case CallbackKind.Kind_Callback_EnterKeyType_Void: return deserializeAndCallCallback_EnterKeyType_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_ErrorInformation_Void: return deserializeAndCallCallback_ErrorInformation_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Extender_OnFinish: return deserializeAndCallCallback_Extender_OnFinish(thisDeserializer);
         case CallbackKind.Kind_Callback_Extender_OnProgress: return deserializeAndCallCallback_Extender_OnProgress(thisDeserializer);
