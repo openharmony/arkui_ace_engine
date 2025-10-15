@@ -600,9 +600,9 @@ ArkUINativeModuleValue ListBridge::SetListScrollBarColor(ArkUIRuntimeCallInfo* r
         } else {
             GetArkUINodeModifiers()->getListModifier()->setListScrollBarColor(
                 nativeNode, color.ColorToString().c_str());
-            GetArkUINodeModifiers()->getListModifier()->createWithResourceObjScrollBarColor(
-                nativeNode, AceType::RawPtr(resObj));
         }
+        GetArkUINodeModifiers()->getListModifier()->createWithResourceObjScrollBarColor(
+            nativeNode, AceType::RawPtr(resObj));
         return panda::JSValueRef::Undefined(vm);
     }
     if (!ArkTSUtils::ParseJsColorAlpha(vm, argColor, color) || color.ColorToString().empty()) {

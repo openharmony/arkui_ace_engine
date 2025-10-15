@@ -439,9 +439,9 @@ ArkUINativeModuleValue WaterFlowBridge::SetScrollBarColor(ArkUIRuntimeCallInfo* 
         } else {
             GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarColor(
                 nativeNode, color.ColorToString().c_str());
-            GetArkUINodeModifiers()->getWaterFlowModifier()->createWaterFlowScrollBarColorWithResourceObj(
-                nativeNode, AceType::RawPtr(resObj));
         }
+        GetArkUINodeModifiers()->getWaterFlowModifier()->createWaterFlowScrollBarColorWithResourceObj(
+            nativeNode, AceType::RawPtr(resObj));
         return panda::JSValueRef::Undefined(vm);
     }
     if (!ArkTSUtils::ParseJsColorAlpha(vm, argColor, color) || color.ColorToString().empty()) {
