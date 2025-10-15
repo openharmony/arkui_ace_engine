@@ -1349,6 +1349,8 @@ HWTEST_F(TabBarTestNg, TabBarPatternApplyTurnPageRateToIndicator001, TestSize.Le
     tabBarPattern_->ApplyTurnPageRateToIndicator(-2.0f);
     EXPECT_EQ(tabBarPattern_->turnPageRate_, 0.0f);
     tabBarPattern_->swiperStartIndex_ = 0;
+    tabBarPattern_->SetDrawableIndicatorFlag(true, 0, false);
+    tabBarPattern_->SetDrawableIndicatorFlag(false, 1, false);
     tabBarPattern_->ApplyTurnPageRateToIndicator(0.9f);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
