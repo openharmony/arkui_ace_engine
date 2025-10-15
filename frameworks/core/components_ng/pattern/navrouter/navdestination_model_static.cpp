@@ -659,6 +659,17 @@ void NavDestinationModelStatic::SetHideItemText(FrameNode* frameNode, bool isHid
     NavigationToolbarUtil::SetHideItemText(navDestinationGroupNode, isHideItemText);
 }
 
+void NavDestinationModelStatic::SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<SystemBarStyle> style = SystemBarStyle::CreateStyleFromColor(contentColor.GetValue());
+    pattern->SetSystemBarStyle(style);
+}
+
 void NavDestinationModelStatic::SetPreferredOrientation(FrameNode* frameNode, const std::optional<Orientation>& ori)
 {
     CHECK_NULL_VOID(frameNode);
