@@ -1594,8 +1594,8 @@ export class ArkUIGeneratedNativeModule {
     native static _RichEditorAttribute_setPlaceholder(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichText_construct(id: KInt, flags: KInt): KPointer
-    @ani.unsafe.Quick
-    native static _RichTextInterface_setRichTextOptions(ptr: KPointer, content: KStringPtr): void
+    @ani.unsafe.Direct
+    native static _RichTextInterface_setRichTextOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichTextAttribute_setOnStart(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct

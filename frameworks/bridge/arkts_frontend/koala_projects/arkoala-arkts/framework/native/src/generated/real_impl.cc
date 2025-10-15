@@ -4731,7 +4731,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // RichTextModifier
     namespace RichTextInterfaceModifier {
     void SetRichTextOptionsImpl(Ark_NativePointer node,
-                                const Ark_String* content)
+                                const Ark_Union_String_Resource* content)
     {
     }
     } // RichTextInterfaceModifier
