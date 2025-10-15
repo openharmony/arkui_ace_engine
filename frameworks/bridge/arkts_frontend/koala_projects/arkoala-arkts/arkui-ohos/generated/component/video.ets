@@ -26,7 +26,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ImageFit } from "./enums"
 import { VoidCallback } from "./units"
-import { AttributeModifier, extractors, hookVideoAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, extractors, hookVideoAttributeModifier, AttributeUpdater, hookSetVideoOptions, hookVideoAnalyzerConfig } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -551,6 +551,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
     }
     public setVideoOptions(value: VideoOptions): this {
         if (this.checkPriority("setVideoOptions")) {
+            hookSetVideoOptions(this, value)
             const value_casted = value as (VideoOptions)
             this.getPeer()?.setVideoOptionsAttribute(value_casted)
             return this
@@ -687,9 +688,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
     }
     public analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
         if (this.checkPriority("analyzerConfig")) {
-            const value_casted = value as (ImageAnalyzerConfig | undefined)
-            this.getPeer()?.setAnalyzerConfigAttribute(value_casted)
-            return this
+            hookVideoAnalyzerConfig(this, value)
         }
         return this
     }

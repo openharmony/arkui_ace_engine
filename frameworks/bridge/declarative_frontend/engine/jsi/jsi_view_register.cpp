@@ -39,8 +39,15 @@
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/components_ng/pattern/video/video_pattern.h"
+#ifdef XCOMPONENT_SUPPORTED
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#endif //XCOMPONENT_SUPPORTED
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector.h"
+#include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
+#include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
@@ -1253,6 +1260,7 @@ panda::Local<panda::JSValueRef> WrapEventTargetInfoPointer(panda::JsiRuntimeCall
     return eventTargetObj.Get().GetLocalHandle();
 }
 
+template<typename T>
 panda::Local<panda::JSValueRef> WrapImageAIOptions(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     ContainerScope scope(Container::CurrentIdSafely());
@@ -1260,14 +1268,14 @@ panda::Local<panda::JSValueRef> WrapImageAIOptions(panda::JsiRuntimeCallInfo* ru
     if (vm == nullptr) {
         return panda::JSValueRef::Undefined(vm);
     }
-    panda::Local<panda::JSValueRef> imageValueRef = runtimeCallInfo->GetCallArgRef(0);
-    if (!(imageValueRef->IsNumber())) {
+    panda::Local<panda::JSValueRef> peerValueRef = runtimeCallInfo->GetCallArgRef(0);
+    if (!(peerValueRef->IsNumber())) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto imagePointer = static_cast<int64_t>(imageValueRef->ToNumber(vm)->Value());
-    auto* imageFrameNode = reinterpret_cast<NG::FrameNode*>(imagePointer);
-    auto imagePattern = imageFrameNode->GetPattern<NG::ImagePattern>();
-    if (!imagePattern) {
+    auto peerPointer = static_cast<int64_t>(peerValueRef->ToNumber(vm)->Value());
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(peerPointer);
+    auto pattern = frameNode->GetPattern<T>();
+    if (!pattern) {
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::JSValueRef> imageAIOptionsValueRef = runtimeCallInfo->GetCallArgRef(1);
@@ -1282,7 +1290,141 @@ panda::Local<panda::JSValueRef> WrapImageAIOptions(panda::JsiRuntimeCallInfo* ru
     Framework::ScopeRAII scopeRAII(env);
     JSValueWrapper optionsWrapper = imageAIOptionsValueRef;
     napi_value optionsValue = nativeEngine->ValueToNapiValue(optionsWrapper);
-    imagePattern->SetImageAIOptions(optionsValue);
+    pattern->SetImageAIOptions(optionsValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> WrapXComponentImageAIOptions(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    auto* vm = runtimeCallInfo->GetVM();
+#ifdef XCOMPONENT_SUPPORTED
+    if (vm == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::JSValueRef> xComponentValueRef = runtimeCallInfo->GetCallArgRef(0);
+    if (!(xComponentValueRef->IsNumber())) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto xComponentPointer = static_cast<int64_t>(xComponentValueRef->ToNumber(vm)->Value());
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(xComponentPointer);
+    auto xComponenPattern = frameNode->GetPattern<NG::XComponentPattern>();
+    if (!xComponenPattern) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::JSValueRef> imageAIOptionsValueRef = runtimeCallInfo->GetCallArgRef(1);
+    if (imageAIOptionsValueRef.IsNull() || imageAIOptionsValueRef->IsUndefined()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, panda::JSValueRef::Undefined(vm));
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, panda::JSValueRef::Undefined(vm));
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    Framework::ScopeRAII scopeRAII(env);
+    JSValueWrapper optionsWrapper = imageAIOptionsValueRef;
+    napi_value optionsValue = nativeEngine->ValueToNapiValue(optionsWrapper);
+    xComponenPattern->SetImageAIOptions(optionsValue);
+#endif //XCOMPONENT_SUPPORTED
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> HookVideoSetAnalyzerConfig(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    auto* vm = runtimeCallInfo->GetVM();
+    if (vm == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::JSValueRef> videoValueRef = runtimeCallInfo->GetCallArgRef(0);
+    if (!(videoValueRef->IsNumber())) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto videoPointer = static_cast<int64_t>(videoValueRef->ToNumber(vm)->Value());
+    auto* videoFrameNode = reinterpret_cast<NG::FrameNode*>(videoPointer);
+    auto videoPattern = videoFrameNode->GetPattern<NG::VideoPattern>();
+    if (!videoPattern) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::JSValueRef> analyzerConfigValueRef = runtimeCallInfo->GetCallArgRef(1);
+    if (analyzerConfigValueRef.IsNull() || analyzerConfigValueRef->IsUndefined()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, panda::JSValueRef::Undefined(vm));
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, panda::JSValueRef::Undefined(vm));
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    Framework::ScopeRAII scopeRAII(env);
+    JSValueWrapper configWrapper = analyzerConfigValueRef;
+    napi_value configValue = nativeEngine->ValueToNapiValue(configWrapper);
+    videoPattern->SetImageAnalyzerConfig(configValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> HookCanvasSetAnalyzerConfig(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    auto* vm = runtimeCallInfo->GetVM();
+    if (vm == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::JSValueRef> peerValueRef = runtimeCallInfo->GetCallArgRef(0);
+    if (!(peerValueRef->IsNumber())) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto peerPointer = static_cast<int64_t>(peerValueRef->ToNumber(vm)->Value());
+    auto* peer = reinterpret_cast<NG::GeneratedModifier::CanvasRendererPeerImpl*>(peerPointer);
+    CHECK_NULL_RETURN(peer, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::JSValueRef> analyzerConfigValueRef = runtimeCallInfo->GetCallArgRef(1);
+    if (analyzerConfigValueRef.IsNull() || analyzerConfigValueRef->IsUndefined()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    peer->wrapAnalyzerConfigImpl = [configRef = panda::CopyableGlobal(vm, analyzerConfigValueRef)]() -> void* {
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_RETURN(engine, nullptr);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_RETURN(nativeEngine, nullptr);
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        Framework::ScopeRAII scopeRAII(env);
+        JSValueWrapper configWrapper = configRef.ToLocal();
+        napi_value configValue = nativeEngine->ValueToNapiValue(configWrapper);
+        return reinterpret_cast<void*>(configValue);
+    };
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> HookXComponentSetAnalyzerConfig(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    auto* vm = runtimeCallInfo->GetVM();
+#ifdef XCOMPONENT_SUPPORTED
+    if (vm == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::JSValueRef> peerValueRef = runtimeCallInfo->GetCallArgRef(0);
+    if (!(peerValueRef->IsNumber())) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto peerPointer = static_cast<int64_t>(peerValueRef->ToNumber(vm)->Value());
+    auto* peer = reinterpret_cast<NG::GeneratedModifier::XComponentControllerPeerImpl*>(peerPointer);
+    CHECK_NULL_RETURN(peer, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::JSValueRef> analyzerConfigValueRef = runtimeCallInfo->GetCallArgRef(1);
+    if (analyzerConfigValueRef.IsNull() || analyzerConfigValueRef->IsUndefined()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    peer->wrapAnalyzerConfigImpl = [configRef = panda::CopyableGlobal(vm, analyzerConfigValueRef)]() -> void* {
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_RETURN(engine, nullptr);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_RETURN(nativeEngine, nullptr);
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        Framework::ScopeRAII scopeRAII(env);
+        JSValueWrapper configWrapper = configRef.ToLocal();
+        napi_value configValue = nativeEngine->ValueToNapiValue(configWrapper);
+        return reinterpret_cast<void*>(configValue);
+    };
+#endif
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1902,7 +2044,19 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomE
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapEventTargetInfoPointer"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapEventTargetInfoPointer));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapImageAIOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapImageAIOptions));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapImageAIOptions<NG::ImagePattern>));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapCanvasImageAIOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapImageAIOptions<NG::CanvasPattern>));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "hookCanvasSetAnalyzerConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HookCanvasSetAnalyzerConfig));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapVideoImageAIOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapImageAIOptions<NG::VideoPattern>));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "hookVideoSetAnalyzerConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HookVideoSetAnalyzerConfig));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapXComponentImageAIOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapXComponentImageAIOptions));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "hookXComponentSetAnalyzerConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HookXComponentSetAnalyzerConfig));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapScrollableTargetInfoPointer"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapScrollableTargetInfoPointer));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapDragEventPointer"),

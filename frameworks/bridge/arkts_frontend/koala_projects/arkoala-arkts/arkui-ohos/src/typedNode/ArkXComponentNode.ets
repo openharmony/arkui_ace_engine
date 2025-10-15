@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import { InteropNativeModule } from '@koalaui/interop';
+import { InteropNativeModule, toPeerPtr } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
-import { XComponentAttribute, ArkXComponentPeer, XComponentParameters, XComponentOptions, NativeXComponentParameters, SurfaceRect } from '../component/xcomponent';
+import { XComponentAttribute, ArkXComponentPeer, XComponentParameters, XComponentOptions, NativeXComponentParameters, SurfaceRect, XComponentOptionsInternal } from '../component/xcomponent';
 import { VoidCallback } from '../component/units';
 import { ArkUIAniModule } from "arkui.ani";
 
@@ -27,17 +27,27 @@ export class ArkXComponentNode extends ArkBaseNode implements XComponentAttribut
         return this.peer as ArkXComponentPeer
     }
     initializeXComponentParameter(value: XComponentParameters): this {
+        const peer = this.getPeer();
+        peer?.setXComponentOptionsAttribute(value);
         return this;
     }
     initializeXComponentOptions(value: XComponentOptions): this {
-        return this;
-    }
-    initializeNativeXComponentParameters(value: NativeXComponentParameters): this {
         const peer = this.getPeer();
         if (peer === undefined) {
             return this;
         }
-        ArkUIAniModule._XComponent_SetNativeXComponentParameters(peer.getPeerPtr(), value.type);
+        const options: XComponentOptionsInternal = {
+            onSurfaceCreated: value.controller.onSurfaceCreated as ((surfaceId: string) => void),
+            onSurfaceChanged: value.controller.onSurfaceChanged as ((surfaceId: string, surfaceRect: SurfaceRect) => void),
+            onSurfaceDestroyed: value.controller.onSurfaceDestroyed as ((surfaceId: string) => void)
+        } as XComponentOptionsInternal;
+        ArkUIAniModule._XComponent_SetXComponentControllerCallback(toPeerPtr(value.controller), options);
+        peer.setXComponentOptionsAttribute(value);
+        return this;
+    }
+    initializeNativeXComponentParameters(value: NativeXComponentParameters): this {
+        const peer = this.getPeer();
+        peer?.setXComponentOptionsAttribute(value);
         return this;
     }
     overload initialize { initializeXComponentParameter, initializeXComponentOptions, initializeNativeXComponentParameters }
