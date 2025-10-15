@@ -1350,6 +1350,14 @@ void WebModelStatic::SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAcces
     webPatternStatic->UpdateZoomAccessEnabled(isZoomAccessEnabled);
 }
 
+void WebModelStatic::SetZoomControlAccess(FrameNode* frameNode, bool zoomControlAccess)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateZoomControlAccess(zoomControlAccess);
+}
+
 void WebModelStatic::SetGestureFocusMode(FrameNode* frameNode, const GestureFocusMode& mode)
 {
     CHECK_NULL_VOID(frameNode);
