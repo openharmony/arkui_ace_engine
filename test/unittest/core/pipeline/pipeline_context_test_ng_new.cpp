@@ -4085,5 +4085,16 @@ HWTEST_F(PipelineContextTestNg, AddNeedReloadNodes001, TestSize.Level1)
     context_->AddNeedReloadNodes(AceType::RawPtr(dirtyNode));
     EXPECT_EQ(context_->needReloadNodes_.size(), 1);
 }
+
+/**
+ * @tc.name: LinearColorGetValue001
+ * @tc.desc: Test LinearColor.GetValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, LinearColorGetValue001, TestSize.Level1)
+{
+    LinearColor linearColor(-1, -1, -1, -1);
+    EXPECT_EQ(linearColor.GetValue(), 0x00000000);
+}
 } // namespace NG
 } // namespace OHOS::Ace
