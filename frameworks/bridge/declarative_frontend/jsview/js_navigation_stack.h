@@ -88,7 +88,7 @@ public:
     void PushName(const std::string& name, const JSRef<JSVal>& param);
     void RemoveName(const std::string& name) override;
     void RemoveIndex(int32_t index) override;
-    void RemoveInvalidPage(int32_t index);
+    void RemoveInvalidPage(int32_t index, const std::string& name);
     void Clear() override;
     int32_t GetReplaceValue() const override;
     void UpdateReplaceValue(int32_t isReplace) const override;
