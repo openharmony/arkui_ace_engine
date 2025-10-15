@@ -94,6 +94,7 @@ const GENERATED_ArkUICircleModifier* GetCircleModifier();
 const GENERATED_ArkUIColumnModifier* GetColumnModifier();
 const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitModifier();
 const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier();
+const GENERATED_ArkUICommonModifier* GetCommonModifier();
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier();
 const GENERATED_ArkUIComponent3DModifier* GetComponent3DModifier();
 const GENERATED_ArkUIComponentRootModifier* GetComponentRootModifier();
@@ -391,6 +392,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetColumnModifier,
         GetColumnSplitModifier,
         GetCommonMethodModifier,
+        GetCommonModifier,
         GetCommonShapeMethodModifier,
         GetComponent3DModifier,
         GetComponentRootModifier,

@@ -20940,6 +20940,12 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                               const Opt_Boolean* exposeInnerGesture);
 } GENERATED_ArkUICommonMethodModifier;
 
+typedef struct GENERATED_ArkUICommonModifier {
+    Ark_NativePointer (*construct)(Ark_Int32 id,
+                                   Ark_Int32 flags);
+    void (*setCommonOptions)(Ark_NativePointer node);
+} GENERATED_ArkUICommonModifier;
+
 typedef struct GENERATED_ArkUICommonShapeMethodModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
@@ -26843,6 +26849,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUIColumnModifier* (*getColumnModifier)();
     const GENERATED_ArkUIColumnSplitModifier* (*getColumnSplitModifier)();
     const GENERATED_ArkUICommonMethodModifier* (*getCommonMethodModifier)();
+    const GENERATED_ArkUICommonModifier* (*getCommonModifier)();
     const GENERATED_ArkUICommonShapeMethodModifier* (*getCommonShapeMethodModifier)();
     const GENERATED_ArkUIComponent3DModifier* (*getComponent3DModifier)();
     const GENERATED_ArkUIComponentRootModifier* (*getComponentRootModifier)();
