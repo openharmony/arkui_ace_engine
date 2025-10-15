@@ -389,7 +389,7 @@ void SetDurationImpl(Ark_NativePointer node,
         SwiperModelStatic::SetDuration(frameNode, DEFAULT_DURATION);
         return;
     }
-    SwiperModelStatic::SetDuration(frameNode, *convValue);
+    SwiperModelStatic::SetDuration(frameNode, *convValue < 0 ? DEFAULT_DURATION : *convValue);
 }
 void SetVerticalImpl(Ark_NativePointer node,
                      const Opt_Boolean* value)
@@ -415,7 +415,8 @@ void SetItemSpaceImpl(Ark_NativePointer node,
         SwiperModelStatic::SetItemSpace(frameNode, value);
         return;
     }
-    SwiperModelStatic::SetItemSpace(frameNode, *aceOptVal);
+    SwiperModelStatic::SetItemSpace(frameNode,
+        *aceOptVal < OHOS::Ace::Dimension(0) ? OHOS::Ace::Dimension(0) : *aceOptVal);
 }
 void SetDisplayModeImpl(Ark_NativePointer node,
                         const Opt_SwiperDisplayMode* value)
