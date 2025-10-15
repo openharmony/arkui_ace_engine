@@ -33,6 +33,7 @@ import { KeyboardAvoidMode } from '@ohos/arkui/UIContext';
 import { DrawableDescriptor } from '@ohos.arkui.drawableDescriptor';
 import { default as uiObserver }  from '@ohos/arkui/observer';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
+import { TextModifier } from 'arkui.TextModifier'
 import { NodeAdapter } from 'arkui.FrameNode'
 import { Scene } from '@ohos.graphics.scene';
 import { RectShape, CircleShape, EllipseShape, PathShape } from '@ohos.arkui.shape';
@@ -234,6 +235,11 @@ export class ArkUIAniModule {
     native static _Extractors_ToSymbolGlyphModifierPtr(callBack: (node: KPointer) => void,
         value: SymbolGlyphModifier): KPointer;
     native static _Extractors_FromSymbolGlyphModifierPtr(ptr: KPointer): SymbolGlyphModifier;
+
+    // for Text Modifier
+    native static _Extractors_ToTextModifierPtr(callBack: (node: KPointer) => void,
+        value: TextModifier): KPointer;
+    native static _Extractors_FromTextModifierPtr(ptr: KPointer): TextModifier;
 
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
