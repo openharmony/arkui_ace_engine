@@ -14,7 +14,7 @@
  */
 
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from 'arkui/component/common';
-import { ComponentBase } from 'arkui.ComponentBase';
+import { ComponentBase } from 'arkui/ComponentBase';
 import { Alignment } from 'arkui.component.enums';
 import { StackModifier } from 'arkui.StackModifier';
 import { PointLightStyle, AttributeModifier } from 'arkui.component.common';
