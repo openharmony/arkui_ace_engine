@@ -31,6 +31,7 @@ public:
     static void SetEnableCascade(FrameNode* frameNode, const std::optional<bool>& isEnableCascade);
     static void SetLoop(FrameNode* frameNode, const std::optional<bool>& loop);
     static void SetUseMilitaryTime(FrameNode* frameNode, const std::optional<bool>& isUseMilitaryTime);
+    static void ResetDateTimeOptions(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TIME_PICKER_MODEL_STATIC_H

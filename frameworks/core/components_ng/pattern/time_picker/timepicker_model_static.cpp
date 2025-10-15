@@ -126,4 +126,16 @@ void TimePickerModelStatic::SetUseMilitaryTime(FrameNode* frameNode, const std::
     timePickerRowPattern->ClearOptionsHour();
     timePickerRowPattern->SetHour24(isUseMilitaryTime.value_or(false));
 }
+
+void TimePickerModelStatic::ResetDateTimeOptions(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    auto prefixHour = ZeroPrefixType::AUTO;
+    timePickerRowPattern->SetPrefixHour(prefixHour);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixHour, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixMinute, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixSecond, frameNode);
+}
 } // namespace OHOS::Ace::NG
