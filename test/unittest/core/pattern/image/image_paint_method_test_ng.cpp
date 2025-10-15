@@ -407,9 +407,11 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_NeedsContentTransition00
     pattern->image_->SetPaintConfig(ImagePaintConfig());
     ImagePaintMethodConfig imagePaintMethodConfig_;
     imagePaintMethodConfig_.selected = true;
-    RefPtr<ImagePaintMethod> imagePaintMethod_ =
-        AceType::MakeRefPtr<ImagePaintMethod>(pattern->image_, imagePaintMethodConfig_);
+    RefPtr<ImagePaintMethod> imagePaintMethod_ = AceType::MakeRefPtr<ImagePaintMethod>(nullptr);
     EXPECT_NE(imagePaintMethod_, nullptr);
+    EXPECT_FALSE(imagePaintMethod_->needContentTransition_);
+    imagePaintMethod_->UpdatePaintMethod(pattern->image_, imagePaintMethodConfig_);
+    EXPECT_FALSE(imagePaintMethod_->needContentTransition_);
     RefPtr<ImageRenderProperty> imagePaintProperty_ = frameNode->GetPaintProperty<ImageRenderProperty>();
     EXPECT_NE(imagePaintProperty_, nullptr);
     imagePaintProperty_->UpdateImageRepeat(ImageRepeat::REPEAT_X);
@@ -430,7 +432,7 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_NeedsContentTransition00
     auto&& config = pattern->image_->GetPaintConfig();
     config.isSvg_ = true;
     bool needsTransition = imagePaintMethod_->NeedsContentTransition();
-    EXPECT_EQ(needsTransition, true);
+    EXPECT_FALSE(needsTransition);
 
     /**
      * @tc.steps: step4. call function.
@@ -452,7 +454,7 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_NeedsContentTransition00
      */
     config.frameCount_ = 1;
     bool needsTransition3 = imagePaintMethod_->NeedsContentTransition();
-    EXPECT_EQ(needsTransition3, true);
+    EXPECT_FALSE(needsTransition3);
 }
 
 /**

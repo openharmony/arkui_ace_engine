@@ -29,6 +29,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/drawing_forward.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 using BorderRadiusArray = std::array<PointF, 4>;
@@ -126,6 +127,11 @@ public:
         return imageDfxConfig_;
     }
 
+    inline ImageSourceInfo& GetImageSourceInfo()
+    {
+        return imageSrcInfo_;
+    }
+
     virtual bool IsStatic()
     {
         return true;
@@ -141,6 +147,11 @@ public:
     inline void SetImageDfxConfig(const ImageDfxConfig& imageDfxConfig)
     {
         imageDfxConfig_ = imageDfxConfig;
+    }
+
+    inline void SetImageSourceInfo(const ImageSourceInfo& imageSrcInfo)
+    {
+        imageSrcInfo_ = imageSrcInfo;
     }
 
     void SetDrawCompleteCallback(std::function<void(const RenderedImageInfo&)>&& drawCompleteCallback)
@@ -166,6 +177,7 @@ protected:
 private:
     std::unique_ptr<ImagePaintConfig> paintConfig_;
     ImageDfxConfig imageDfxConfig_;
+    ImageSourceInfo imageSrcInfo_;
     // Callback function executed after the graphics rendering is complete.
     std::function<void(const RenderedImageInfo&)> drawCompleteCallback_ = nullptr;
 

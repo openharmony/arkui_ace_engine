@@ -676,6 +676,9 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
     bool hasValidSlice = renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice());
     bool isHdrDecoderNeed = renderProp && (renderProp->HasDynamicMode() || renderProp->HasHdrBrightness());
+    contentTransitionType_ = renderProp
+                                 ? renderProp->GetContentTransition().value_or(ContentTransitionType::IDENTITY)
+                                 : ContentTransitionType::IDENTITY;
 
     if (loadingCtx_) {
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
@@ -734,11 +737,14 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
         CHECK_NULL_RETURN(host, nullptr);
         sensitive = host->IsPrivacySensitive();
     }
-    ImagePaintMethodConfig imagePaintMethodConfig { .sensitive = sensitive,
+    ImagePaintMethodConfig imagePaintMethodConfig {
+        .sensitive = sensitive,
         .selected = isSelected_,
         .imageOverlayModifier = overlayMod_,
         .imageContentModifier = contentMod_,
-        .interpolation = interpolationDefault_ };
+        .interpolation = interpolationDefault_,
+        .contentTransitionType = contentTransitionType_,
+    };
     // Callback function executed after the graphics rendering is complete.
     auto drawCompleteCallback = [weakPattern = WeakClaim(this)](const RenderedImageInfo& renderedImageInfo) {
         auto pattern = weakPattern.Upgrade();
