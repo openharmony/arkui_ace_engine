@@ -204,7 +204,13 @@ void SetSystemBarStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("ARKOALA NavDestination.SystemBarStyleImpl -> Method is not implemented, Opt_CustomObject is not supported!");
+    auto optValue = Converter::GetOptPtr(value);
+    auto contentColor = optValue ? Converter::OptConvert<Color>(optValue->statusBarContentColor): std::nullopt;
+    if (!contentColor) {
+        // Implement Reset value
+        return;
+    }
+    NavDestinationModelStatic::SetSystemBarStyle(frameNode, *contentColor);
 }
 void SetRecoverableImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
