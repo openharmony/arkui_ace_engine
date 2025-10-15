@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { ArrayState, Equivalent, MutableState, StateManager, ValueTracker, createStateManager, StateManagerImpl } from "./State"
-import { int32 } from "@koalaui/common"
+import { ArrayState, Equivalent, MutableState, StateManager, ValueTracker, createStateManager, StateManagerImpl } from './State'
+import { int32 } from '@koalaui/common'
 
 /**
  * This class provides an access to the global state manager of the application.
@@ -42,7 +42,7 @@ export class GlobalStateManager {
      * Drops the current instance to recreate a global state manager.
      * @internal
      */
-    static reset() {
+    static reset(): void {
         GlobalStateManager.GetLocalManager()?.reset()
     }
 
@@ -102,7 +102,7 @@ export function callScheduledCallbacks(manager: StateManager = GlobalStateManage
  * (before the next recomposition and after the current one).
  * @param callback - a function to perform between recompositions
  */
-export function scheduleCallback(callback?: () => void, manager: StateManager = GlobalStateManager.instance) {
+export function scheduleCallback(callback?: () => void, manager: StateManager = GlobalStateManager.instance): void {
     if (callback) {
         manager.scheduleCallback(callback)
     }

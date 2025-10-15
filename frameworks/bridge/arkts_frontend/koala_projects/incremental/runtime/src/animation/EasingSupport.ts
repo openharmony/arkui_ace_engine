@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-import { float64, isFiniteNumber, uint32 } from "@koalaui/common"
+import { float64, isFiniteNumber, uint32 } from '@koalaui/common'
 
 export class EasingSupport {
     private x: Float64Array
     private y: Float64Array
 
     private constructor(size: uint32, xSupplier: (value: float64) => float64, ySupplier: (value: float64) => float64) {
-        if (!Number.isInteger(size) || size <= 1) throw new Error("easing size must be integer value greater than 1, but is " + size)
+        if (!Number.isInteger(size) || size <= 1) throw new Error('easing size must be integer value greater than 1, but is ' + size)
         this.x = new Float64Array(size)
         this.y = new Float64Array(size)
         this.x[0] = xSupplier(0)

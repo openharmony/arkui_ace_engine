@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { int32, uint32 } from "@koalaui/common"
-import { TreePath } from "./TreePath"
+import { int32, uint32 } from '@koalaui/common'
+import { TreePath } from './TreePath'
 
 /**
  * This class provides basic functionality for tree building or incremental tree updating.
@@ -58,7 +58,7 @@ export abstract class TreeUpdater<Node> {
      */
     up(): void {
         let parent = this.current.parent
-        if (parent === undefined) throw new Error("unexpected")
+        if (parent === undefined) throw new Error('unexpected')
         this.current = parent
     }
 

@@ -14,20 +14,20 @@
  */
  
 
-@Retention({policy: "SOURCE"})
+@Retention({policy: 'SOURCE'})
 export @interface memo {}
 
-@Retention({policy: "SOURCE"})
+@Retention({policy: 'SOURCE'})
 export @interface memo_intrinsic {}
 
-@Retention({policy: "SOURCE"})
+@Retention({policy: 'SOURCE'})
 export @interface memo_entry {}
 
-@Retention({policy: "SOURCE"})
+@Retention({policy: 'SOURCE'})
 export @interface memo_stable {}
 
-@Retention({policy: "SOURCE"})
+@Retention({policy: 'SOURCE'})
 export @interface memo_skip {}
 
-@Retention({policy: "SOURCE"})
+@Retention({policy: 'SOURCE'})
 export @interface memo_wrap {}

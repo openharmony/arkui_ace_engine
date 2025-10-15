@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-import { int64 } from "@koalaui/common"
-import { GlobalStateManager } from "../states/GlobalStateManager"
-import { MutableState, StateContext } from "../states/State"
+import { int64 } from '@koalaui/common'
+import { GlobalStateManager } from '../states/GlobalStateManager'
+import { MutableState, StateContext } from '../states/State'
 
-const GLOBAL_ANIMATION_TIMER = "ohos.koala.runtime.global.animation.timer"
+const GLOBAL_ANIMATION_TIMER = 'ohos.koala.runtime.global.animation.timer'
 
 /**
  * @returns the state for the global animation timer, or `undefined`
@@ -34,6 +34,6 @@ export function getAnimationTimer(context: StateContext = GlobalStateManager.ins
  * @internal
  */
 export function createAnimationTimer(context: StateContext, initial: int64 = 0): MutableState<int64> {
-    if (getAnimationTimer(context)) throw new Error("the global animation timer is already initialized")
+    if (getAnimationTimer(context)) throw new Error('the global animation timer is already initialized')
     return context.namedState(GLOBAL_ANIMATION_TIMER, () => initial, true)
 }

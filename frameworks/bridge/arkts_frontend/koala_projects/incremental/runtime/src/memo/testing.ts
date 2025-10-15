@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-import { KoalaCallsiteKey, uint32 } from "@koalaui/common"
-import { GlobalStateManager } from "../states/GlobalStateManager"
-import { ComputableState, StateManager } from "../states/State"
+import { KoalaCallsiteKey, uint32 } from '@koalaui/common'
+import { GlobalStateManager } from '../states/GlobalStateManager'
+import { ComputableState, StateManager } from '../states/State'
 import { State } from 'arkui.incremental.runtime.state';
-import { IncrementalNode } from "../tree/IncrementalNode"
-import { Disposable } from "../states/Disposable"
-import { memoRoot } from "./entry"
-import { NodeAttach } from "./node"
+import { IncrementalNode } from '../tree/IncrementalNode'
+import { Disposable } from '../states/Disposable'
+import { memoRoot } from './entry'
+import { NodeAttach } from './node'
 
 /** @internal */
 export class TestNode extends IncrementalNode {
-    content: string = "<UNDEFINED>"
+    content: string = '<UNDEFINED>'
 
     constructor(kind: uint32 = 1) {
         super(kind)
@@ -45,7 +45,7 @@ export class TestNode extends IncrementalNode {
     static attach(
         /** @memo */
         content: (node: TestNode) => void
-    ) {
+    ): void {
         NodeAttach(():TestNode => new TestNode(), content)
     }
 
@@ -104,7 +104,7 @@ export function testUpdate(withCallbacks: boolean = true, manager: StateManager 
 }
 
 /** @internal */
-export function testTick<Node extends IncrementalNode>(root: State<Node>, withCallbacks: boolean = true) {
+export function testTick<Node extends IncrementalNode>(root: State<Node>, withCallbacks: boolean = true): void {
     testUpdate(withCallbacks)
     root.value
 }

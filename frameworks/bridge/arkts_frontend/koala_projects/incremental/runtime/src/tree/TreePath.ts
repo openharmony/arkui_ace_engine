@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { uint32 } from "@koalaui/common"
+import { uint32 } from '@koalaui/common'
 
 /**
  * This class represents a path to a node in a tree.
@@ -66,7 +66,7 @@ export class TreePath<Node> {
     }
 
     toString(): string {
-        let parent = this.parent ?? ""
+        let parent = this.parent ?? ''
         return `${parent}/${this.node}`
     }
 }
