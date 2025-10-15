@@ -1646,7 +1646,7 @@ bool JSParagraphStyleSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) cons
     CHECK_NULL_RETURN(GetParagraphStyle().Equal(paragraphSpan->GetParagraphStyle()), false);
 
     auto jsParagraphStyleSpan = DynamicCast<JSParagraphStyleSpan>(other);
-    CHECK_NULL_RETURN(jsParagraphStyleSpan, false);
+    CHECK_NULL_RETURN(jsParagraphStyleSpan, true);
 
     const auto& thisObj = leadingMarginSpanObj_;
     const auto& otherObj = jsParagraphStyleSpan->leadingMarginSpanObj_;
