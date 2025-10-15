@@ -323,7 +323,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     });
     stateMgmtProfiler.end();
     // for interop
-    if (InteropConfigureStateMgmt.instance.needsInterop() && this._notifyInteropFireChange) {
+    if (InteropConfigureStateMgmt.needsInterop() && this._notifyInteropFireChange) {
       this._notifyInteropFireChange();
     }
   }

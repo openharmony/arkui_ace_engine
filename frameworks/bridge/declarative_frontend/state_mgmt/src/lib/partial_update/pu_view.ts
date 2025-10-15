@@ -153,7 +153,7 @@ abstract class ViewPU extends PUV2ViewBase
     }
 
     // for interop
-    if (InteropConfigureStateMgmt.instance.needsInterop()) {
+    if (InteropConfigureStateMgmt.needsInterop()) {
       if (!this.localStoragebackStore_) {
         if (this.findLocalStorageInterop !== undefined && typeof this.findLocalStorageInterop === 'function') {
           this.localStoragebackStore_ = this.findLocalStorageInterop();
@@ -696,7 +696,7 @@ abstract class ViewPU extends PUV2ViewBase
   */
   public findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
     // for interop
-    if (InteropConfigureStateMgmt.instance.needsInterop()) {
+    if (InteropConfigureStateMgmt.needsInterop()) {
       return this.providedVars_.get(providedPropName) || (this.parent_ && this.parent_.findProvidePU__(providedPropName)) ||
       (this.findProvideInterop !== undefined && typeof this.findProvideInterop === 'function' ? this.findProvideInterop(providedPropName) : undefined) ||
       (ViewPU._findProvide_ViewPU_Interop !== undefined && typeof ViewPU._findProvide_ViewPU_Interop === 'function' ?

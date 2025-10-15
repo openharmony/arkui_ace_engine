@@ -14,33 +14,25 @@
  */
 
 class InteropConfigureStateMgmt {
-    private static instance__?: InteropConfigureStateMgmt;
+    private static interopInUse_: boolean = false;
 
-    private interopInUse_: boolean = false;
-
-    public static get instance(): InteropConfigureStateMgmt {
-        return InteropConfigureStateMgmt.instance__
-            ? InteropConfigureStateMgmt.instance__
-            : (InteropConfigureStateMgmt.instance__ = new InteropConfigureStateMgmt());
+    public static needsInterop(): boolean {
+        return InteropConfigureStateMgmt.interopInUse_;
     }
 
-    public needsInterop(): boolean {
-        return this.interopInUse_;
-    }
-
-    public openInterop(): void {
-        this.interopInUse_ = true;
+    public static openInterop(): void {
+        InteropConfigureStateMgmt.interopInUse_ = true;
     }
     
-    public closeInterop(): void {
-        this.interopInUse_ = false;
+    public static closeInterop(): void {
+        InteropConfigureStateMgmt.interopInUse_ = false;
     }
 }
 
 function openInterop(): void {
-    InteropConfigureStateMgmt.instance.openInterop();
+    InteropConfigureStateMgmt.openInterop();
 }
 
 function closeInterop(): void {
-    InteropConfigureStateMgmt.instance.closeInterop();
+    InteropConfigureStateMgmt.closeInterop();
 }

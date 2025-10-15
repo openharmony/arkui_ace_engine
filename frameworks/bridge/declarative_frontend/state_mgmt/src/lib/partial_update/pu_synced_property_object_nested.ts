@@ -149,7 +149,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
         ObservedObject.addOwningProperty(this.obsObject_, this);
         this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.obsObject_);
       // for interop
-      } else if (InteropConfigureStateMgmt.instance.needsInterop() && typeof this.obsObject_ === 'object' &&
+      } else if (InteropConfigureStateMgmt.needsInterop() && typeof this.obsObject_ === 'object' &&
         'addWatchSubscriber' in this.obsObject_ && typeof this.obsObject_.addWatchSubscriber === 'function') {
         const callback = () => {
             this.notifyPropertyHasChangedPU();
