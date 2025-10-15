@@ -531,6 +531,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSetAboutToDeleteTest, TestS
     value.SetOffset(TEST_OFFSET);
     value.SetRichEditorDeleteDirection(TEST_DELETE_DIRECTION);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
     auto result = eventHub->FireAboutToDelete(value);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->resourceId, expectedResId);

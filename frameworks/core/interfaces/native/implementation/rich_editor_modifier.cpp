@@ -96,8 +96,8 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractS
     dst.value = Converter::ArkValue<Ark_String>(src.GetValue(), ctx);
     dst.textStyle = Converter::ArkValue<Ark_RichEditorTextStyleResult>(src, ctx);
     dst.previewText = Converter::ArkValue<Opt_String>(src.GetPreviewText(), ctx);
-    dst.offsetInSpan.value0 = Converter::ArkValue<Ark_Int32>(src.GetSpanIndex());
-    dst.offsetInSpan.value1 = Converter::ArkValue<Ark_Int32>(src.OffsetInSpan());
+    dst.offsetInSpan.value0 = Converter::ArkValue<Ark_Int32>(src.OffsetInSpan());
+    dst.offsetInSpan.value1 = Converter::ArkValue<Ark_Int32>(src.OffsetInSpan() + src.GetEraseLength());
     dst.symbolSpanStyle = ArkValue<Opt_RichEditorSymbolSpanStyle>(Ark_Empty());
     dst.valueResource = ArkValue<Opt_Resource>(Ark_Empty());
     dst.paragraphStyle = Converter::ArkValue<Opt_RichEditorParagraphStyle>(src.GetTextStyle(), ctx);
@@ -106,6 +106,7 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractS
         : Converter::ArkValue<Opt_RichEditorUrlStyle>(urlAddress, ctx);
     // style for symbol span
     CHECK_NULL_VOID(src.GetType() == SpanResultType::SYMBOL);
+    dst.value = Converter::ArkValue<Ark_String>(src.GetValueString(), ctx);
     dst.symbolSpanStyle = ArkValue<Opt_RichEditorSymbolSpanStyle>(src.GetSymbolSpanStyle(), ctx);
     if (auto valueResource = src.GetValueResource()) {
         dst.valueResource = ArkValue<Opt_Resource>(*valueResource, ctx);
@@ -134,8 +135,8 @@ void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const RichEditorAbstract
         .margin = src.GetMargin()
     };
     dst.imageStyle.layoutStyle = ArkValue<Opt_RichEditorLayoutStyle>(imageStyleResult);
-    dst.offsetInSpan.value0 = Converter::ArkValue<Ark_Int32>(src.GetSpanIndex());
-    dst.offsetInSpan.value1 = Converter::ArkValue<Ark_Int32>(src.OffsetInSpan());
+    dst.offsetInSpan.value0 = Converter::ArkValue<Ark_Int32>(src.OffsetInSpan());
+    dst.offsetInSpan.value1 = Converter::ArkValue<Ark_Int32>(src.OffsetInSpan() + src.GetEraseLength());
 }
 
 template<typename To>
@@ -190,11 +191,12 @@ PlaceholderOptions GetThemePlaceholderOptions()
     TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
     auto richEditorTheme = pipelineContext->GetTheme<OHOS::Ace::NG::RichEditorTheme>();
     return PlaceholderOptions {
-        .fontSize = textStyle.GetFontSize(),
+        .value = std::nullopt,
         .fontWeight = textStyle.GetFontWeight(),
-        .fontFamilies = textStyle.GetFontFamilies(),
+        .fontSize = textStyle.GetFontSize(),
+        .fontColor = richEditorTheme ? richEditorTheme->GetPlaceholderColor() : Color(),
         .fontStyle = textStyle.GetFontStyle(),
-        .fontColor = richEditorTheme ? richEditorTheme->GetPlaceholderColor() : Color()
+        .fontFamilies = textStyle.GetFontFamilies()
     };
 }
 
@@ -686,7 +688,7 @@ void SetBarStateImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<DisplayMode>(value);
-    RichEditorModelNG::SetBarState(frameNode, convValue);
+    RichEditorModelNG::SetBarState(frameNode, convValue.value_or(DisplayMode::AUTO));
 }
 void SetMaxLengthImpl(Ark_NativePointer node,
                       const Opt_Int32* value)
@@ -702,9 +704,10 @@ void SetMaxLinesImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<int32_t>(value);
-    Validator::ValidatePositive(convValue);
-    RichEditorModelNG::SetMaxLines(frameNode, convValue.value_or(UINT_MAX));
+    auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
+    auto isValid = convValue && (convValue.value() > 0);
+    auto maxLineValue = isValid ? Converter::OptConvert<uint32_t>(*value).value_or(UINT_MAX) : UINT_MAX;
+    RichEditorModelStatic::SetMaxLines(frameNode, maxLineValue);
 }
 void SetKeyboardAppearanceImpl(Ark_NativePointer node,
                                const Opt_KeyboardAppearance* value)
