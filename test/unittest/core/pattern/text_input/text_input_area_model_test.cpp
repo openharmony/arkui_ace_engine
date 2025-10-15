@@ -1839,6 +1839,14 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic029, TestSize.Level1)
     TextFieldModelStatic::SetShowError(frameNode, std::nullopt, false);
     EXPECT_FALSE(layoutProperty->GetShowErrorText().has_value());
 
+    std::function<RefPtr<UINode>()> nullfunc;
+    auto builder = []() -> RefPtr<UINode> {
+        RefPtr<UINode> uiNode;
+        return uiNode;
+    };
+    TextFieldModelStatic::SetShowUnit(frameNode, std::move(nullfunc));
+    TextFieldModelStatic::SetShowUnit(frameNode, std::move(builder));
+
     RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
     TextFieldModelStatic::GetController(frameNode, std::make_optional(u"placeholder"), std::make_optional(u"value"));
     EXPECT_TRUE(layoutProperty->GetPlaceholder().has_value());

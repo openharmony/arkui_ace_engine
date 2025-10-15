@@ -82,6 +82,13 @@ void TextFieldModelStatic::SetShowUnit(FrameNode* frameNode, std::function<RefPt
     }
     CHECK_NULL_VOID(unitNode);
     pattern->SetUnitNode(unitNode);
+
+    auto unitFrameNode = AceType::DynamicCast<FrameNode>(unitNode);
+    CHECK_NULL_VOID(unitFrameNode);
+    auto renderContext = unitFrameNode->GetRenderContext();
+    if (renderContext && !renderContext->HasForegroundColor() && !renderContext->HasForegroundColorStrategy()) {
+        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
+    }
     pattern->ProcessResponseArea();
 }
 
