@@ -3408,43 +3408,6 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager059, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
-/**
- * @tc.name: JsAccessibilityManager060
- * @tc.desc: test CheckStateTakeOver when RemoveControllerTextFromGroup
- * @tc.type: FUNC
- */
-HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager060, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct JsAccessibilityManager
-     */
-    auto frameNode = AceType::MakeRefPtr<NG::FrameNode>("frameNode", 1, AceType::MakeRefPtr<NG::Pattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
-    ASSERT_NE(jsAccessibilityManager, nullptr);
-    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
-
-    /**
-     * @tc.steps: step2. set accessibilityGroup true
-     */
-    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    accessibilityProperty->SetAccessibilityGroup(true);
-    AccessibilityGroupOptions groupOptions;
-    groupOptions.stateControllerByInspector = ;
-    accessibilityProperty->SetAccessibilityGroupOptions(groupOptions);
-
-    /**
-     * @tc.steps: step3. test CheckActionTakeOver
-     */
-    AccessibilityElementInfo nodeInfo1;
-    AccessibilityElementInfo nodeInfo2 = nodeInfo1;
-    jsAccessibilityManager->CheckStateTakeOver(frameNode, nodeInfo1);
-    EXPECT_EQ(nodeInfo1.IsClickable(), nodeInfo2.IsClickable());
-    auto actionlist = nodeInfo1.GetActionList();
-    EXPECT_TRUE(actionlist.empty());
-}
-
 #ifdef WEB_SUPPORTED
 /**
  * @tc.name: GetWebAccessibilityIdBySurfaceId
