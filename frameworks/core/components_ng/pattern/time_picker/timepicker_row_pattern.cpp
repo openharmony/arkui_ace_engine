@@ -200,7 +200,7 @@ void TimePickerRowPattern::ClearFocus()
 {
     CHECK_EQUAL_VOID(IsCircle(), false);
     if (!isClearFocus_ && (HasSecondNode() == hasSecond_)) {
-        return ;
+        return;
     }
     isClearFocus_ = true;
     if (!selectedColumnId_.empty()) {
@@ -908,7 +908,6 @@ void TimePickerRowPattern::HandleSecondBuildTimeRange()
     auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(secondColumnPattern);
     optionsTotalCount_[secondColumn] = 0;
-    options_[secondColumn].clear();
 
     for (uint32_t second = INDEX_SECOND_STRAT; second <= INDEX_SECOND_END; second++) { // time's second from 0 to 59
         options_[secondColumn][second] = GetSecondColumnFormatString(second);
@@ -1263,15 +1262,11 @@ void TimePickerRowPattern::FlushColumn()
         hourColumnPattern->SetOptions(GetOptionsCount());
         hourColumnPattern->SetShowCount(GetShowCount());
         hourColumnPattern->FlushCurrentOptions();
-        hourColumn->MarkModifyDone();
-        hourColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else if (amPmColumn) {
         auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(amPmColumnPattern);
         amPmColumnPattern->SetShowCount(AM_PM_COUNT);
         amPmColumnPattern->FlushCurrentOptions();
-        amPmColumn->MarkModifyDone();
-        amPmColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
         CHECK_NULL_VOID(hourColumn);
         auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
@@ -1279,8 +1274,6 @@ void TimePickerRowPattern::FlushColumn()
         hourColumnPattern->SetOptions(GetOptionsCount());
         hourColumnPattern->SetShowCount(GetShowCount());
         hourColumnPattern->FlushCurrentOptions();
-        hourColumn->MarkModifyDone();
-        hourColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 
     auto minuteColumn = allChildNode_["minute"].Upgrade();
@@ -1289,8 +1282,6 @@ void TimePickerRowPattern::FlushColumn()
     CHECK_NULL_VOID(minuteColumnPattern);
     minuteColumnPattern->SetShowCount(GetShowCount());
     minuteColumnPattern->FlushCurrentOptions();
-    minuteColumn->MarkModifyDone();
-    minuteColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     if (hasSecond_) {
         auto secondColumn = allChildNode_["second"].Upgrade();
         CHECK_NULL_VOID(secondColumn);
