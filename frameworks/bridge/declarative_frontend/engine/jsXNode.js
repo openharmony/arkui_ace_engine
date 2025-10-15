@@ -480,7 +480,7 @@ class JSBuilderNode extends BaseNode {
                 // update + initial render calls, like in if and ForEach case, convert to stack as well
                 ObserveV2.getObserve().startRecordDependencies(this, elmtId, true);
             }
-            if (this._supportNestingBuilder || this.isReactiveBuilderNode()) {
+            if (this._supportNestingBuilder || this.__isReactiveBuilderNode__ViewBuildNodeBase__Internal()) {
                 compilerAssignedUpdateFunc(elmtId, isFirstRender);
             }
             else {
@@ -660,10 +660,11 @@ class ReactiveBuilderNodeBase extends JSBuilderNode {
     }
     buildWithNestingBuilder(builder, supportLazyBuild) {
         if (this.isArray(this.params_)) {
-            this.nodePtr_ = super.createReactive(builder.builder?.bind(this), this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+            this.nodePtr_ = super.createReactive(builder.builder?.bind(this), this.params_,
+            this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
     }
-    isReactiveBuilderNode() {
+    __isReactiveBuilderNode__ViewBuildNodeBase__Internal() {
         return true;
     }
     isArray(param) {
@@ -690,6 +691,7 @@ class ReactiveBuilderNodeBase extends JSBuilderNode {
         }
         catch (err) {
             this.updateEnd();
+            __JSScopeUtil__.restoreInstanceId();
             throw err;
         }
         this.updateEnd();

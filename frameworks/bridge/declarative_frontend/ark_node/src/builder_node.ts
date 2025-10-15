@@ -398,7 +398,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
         // update + initial render calls, like in if and ForEach case, convert to stack as well
         ObserveV2.getObserve().startRecordDependencies(this, elmtId, true);
       }
-      if (this._supportNestingBuilder || this.isReactiveBuilderNode()) {
+      if (this._supportNestingBuilder || this.__isReactiveBuilderNode__ViewBuildNodeBase__Internal()) {
         compilerAssignedUpdateFunc(elmtId, isFirstRender);
       } else {
         compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
@@ -597,7 +597,7 @@ class ReactiveBuilderNodeBase extends JSBuilderNode {
       this.nodePtr_ = super.createReactive(builder.builder?.bind(this), this.params_ as Array<Object>, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
     }
   }
-  public isReactiveBuilderNode(): boolean {
+  public __isReactiveBuilderNode__ViewBuildNodeBase__Internal(): boolean {
     return true;
   }
   private isArray(param: Object): boolean {
@@ -622,6 +622,7 @@ class ReactiveBuilderNodeBase extends JSBuilderNode {
       }).forEach(elmtId => this.UpdateElement(elmtId));
     } catch (err) {
       this.updateEnd();
+      __JSScopeUtil__.restoreInstanceId();
       throw err;
     }
     this.updateEnd();

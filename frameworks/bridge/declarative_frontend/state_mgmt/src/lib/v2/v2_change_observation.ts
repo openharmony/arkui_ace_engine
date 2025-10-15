@@ -666,7 +666,8 @@ class ObserveV2 {
         const view = this.id2cmp_[elmtId]?.deref();
 
         // Early continue for invalid views
-        if (!(view instanceof ViewV2 || view instanceof ViewPU ||(view instanceof ViewBuildNodeBase && view?.isReactiveBuilderNode()))) {
+        if (!(view instanceof ViewV2 || view instanceof ViewPU ||
+            (view instanceof ViewBuildNodeBase && view?.__isReactiveBuilderNode__ViewBuildNodeBase__Internal()))) {
             continue;
         }
 
@@ -1032,7 +1033,7 @@ class ObserveV2 {
           view.scheduleDelayedUpdate(elmtId);
         }
       } // if ViewV2 or ViewPU
-      else if (view instanceof ViewBuildNodeBase && view?.isReactiveBuilderNode()) {
+      else if (view instanceof ViewBuildNodeBase && view?.__isReactiveBuilderNode__ViewBuildNodeBase__Internal()) {
         view.UpdateElement(elmtId);
       }
     });

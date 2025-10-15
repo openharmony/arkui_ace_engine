@@ -123,6 +123,7 @@ RefPtr<NG::UINode> JSBaseNode::GetAndExecMultiArgsBuilderFunc(const JSCallbackIn
     if (newNode) {
         newNode->SetBuilderFunc(std::move(lazyBuilderFunc));
     }
+    realNode_ = newNode;
     return newNode;
 }
 

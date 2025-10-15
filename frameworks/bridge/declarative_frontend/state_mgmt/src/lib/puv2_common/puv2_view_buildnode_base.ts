@@ -66,16 +66,10 @@ abstract class ViewBuildNodeBase {
         return `ViewBuildNodeBase '${this.constructor.name}'[${this.id__()}]`;
     }
 
-    public UpdateElement(elmtId: number): void {
-        stateMgmtConsole.debug(`Fail to update elmtId ${elmtId} in ${this.debugInfo__()}`);
-    }
+    public abstract UpdateElement(elmtId: number): void;
+    public abstract getInstanceId(): number;
 
-    public getInstanceId(): number {
-        stateMgmtConsole.warn(`Fail to getInstanceId in ${this.debugInfo__()}`);
-        return -1;
-    }
-
-    public isReactiveBuilderNode(): boolean {
+    public __isReactiveBuilderNode__ViewBuildNodeBase__Internal(): boolean {
         return false;
     }
 
