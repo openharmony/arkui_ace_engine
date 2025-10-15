@@ -483,15 +483,21 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_003, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, OnScrollBarColorUpdate005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    WebPattern webpattern;
-    webpattern.delegate_ = nullptr;
-    EXPECT_EQ(webpattern.delegate_, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
     const std::string value;
-    webpattern.OnScrollBarColorUpdate(value);
+    webPattern->OnScrollBarColorUpdate(value);
     SystemProperties::SetExtSurfaceEnabled(true);
-    webpattern.InitEnhanceSurfaceFlag();
+    webPattern->InitEnhanceSurfaceFlag();
     SystemProperties::SetExtSurfaceEnabled(false);
-    webpattern.InitEnhanceSurfaceFlag();
+    webPattern->InitEnhanceSurfaceFlag();
 #endif
 }
 

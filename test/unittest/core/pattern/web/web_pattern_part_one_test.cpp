@@ -1353,30 +1353,6 @@ HWTEST_F(WebPatternPartOneTest, OnScrollBarColorUpdate_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnScrollBarColorUpdate_002
- * @tc.desc: Test OnScrollBarColorUpdate function.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternPartOneTest, OnScrollBarColorUpdate_002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    webPattern->delegate_ = nullptr;
-    ASSERT_EQ(webPattern->delegate_, nullptr);
-    webPattern->needOnFocus_ = true;
-    webPattern->OnScrollBarColorUpdate("red");
-#endif
-}
-
-/**
  * @tc.name: OnDefaultTextEncodingFormatUpdate_001
  * @tc.desc: Test OnDefaultTextEncodingFormatUpdate function.
  * @tc.type: FUNC

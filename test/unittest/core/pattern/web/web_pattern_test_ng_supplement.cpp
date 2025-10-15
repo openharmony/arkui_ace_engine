@@ -1756,11 +1756,11 @@ HWTEST_F(WebPatternTestNgSupplement, OnRootLayerChangedTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: FilterScrollEventHandlevVlocity_001
- * @tc.desc: FilterScrollEventHandlevVlocity.
+ * @tc.name: FilterScrollEventHandleVelocity_001
+ * @tc.desc: FilterScrollEventHandleVelocity.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandlevVlocity_001, TestSize.Level1)
+HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandleVelocity_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1781,16 +1781,16 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandlevVlocity_001, TestSi
     webPattern->nestedScroll_.scrollLeft = NestedScrollMode::PARENT_FIRST;
     webPattern->isParentReachEdge_ = true;
     webPattern->SetNestedScrollParent(parent);
-    EXPECT_FALSE(webPattern->FilterScrollEventHandlevVlocity(2.0f));
+    EXPECT_FALSE(webPattern->FilterScrollEventHandleVelocity(2.0f));
 #endif
 }
 
 /**
- * @tc.name: FilterScrollEventHandlevVlocity_002
- * @tc.desc: FilterScrollEventHandlevVlocity.
+ * @tc.name: FilterScrollEventHandleVelocity_002
+ * @tc.desc: FilterScrollEventHandleVelocity.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandlevVlocity_002, TestSize.Level1)
+HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandleVelocity_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1811,16 +1811,16 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandlevVlocity_002, TestSi
     webPattern->nestedScroll_.scrollLeft = NestedScrollMode::PARENT_FIRST;
     webPattern->SetNestedScrollParent(parent);
     EXPECT_CALL(*parent, HandleScrollVelocity).Times(1).WillOnce(Return(true));
-    EXPECT_TRUE(webPattern->FilterScrollEventHandlevVlocity(2.0f));
+    EXPECT_TRUE(webPattern->FilterScrollEventHandleVelocity(2.0f));
 #endif
 }
 
 /**
- * @tc.name: FilterScrollEventHandlevVlocity_003
- * @tc.desc: FilterScrollEventHandlevVlocity.
+ * @tc.name: FilterScrollEventHandleVelocity_003
+ * @tc.desc: FilterScrollEventHandleVelocity.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandlevVlocity_003, TestSize.Level1)
+HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandleVelocity_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1840,7 +1840,7 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandlevVlocity_003, TestSi
     webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
     webPattern->nestedScroll_.scrollUp = NestedScrollMode::PARENT_FIRST;
     webPattern->SetNestedScrollParent(parent);
-    EXPECT_FALSE(webPattern->FilterScrollEventHandlevVlocity(2.0f));
+    EXPECT_FALSE(webPattern->FilterScrollEventHandleVelocity(2.0f));
 #endif
 }
 
