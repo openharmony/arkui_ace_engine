@@ -31,7 +31,6 @@ struct MyDeserializer : CustomDeserializer {
     virtual InteropCustomObject deserialize(DeserializerBase* deserializer, const std::string& kind) {
         InteropString value = deserializer->readString();
         (void)value;
-        //fprintf(stderr, "native deserialize() for %s, got %s\n", kind.c_str(), value.chars);
         InteropCustomObject result;
         strcpy(result.kind, "NativeError");
         result.id = 0;

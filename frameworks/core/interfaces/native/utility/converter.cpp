@@ -107,11 +107,10 @@ namespace {
     std::string GetReplaceContentStr(int32_t pos, const std::string& type,
         std::vector<Converter::ResourceConverter::ParamType>& params, size_t containCount)
     {
-        auto index = pos + containCount;
-        if (index < 0 || index >= params.size()) {
+        auto index = static_cast<size_t>(pos) + containCount;
+        if (index >= params.size()) {
             return std::string();
         }
-        //return params.at(index);
         return ""; // TODO: Correct formatting for all types
     }
     void ReplaceHolder(std::optional<std::string>& originStr,
@@ -2117,7 +2116,8 @@ std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src, DimensionUnit 
 }
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Union_F64_String_Resource, Ark_Int32>(
     const Ark_Union_F64_String_Resource&, DimensionUnit);
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(const Ark_Dimension&, DimensionUnit);
+template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(
+    const Ark_Dimension&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(const Ark_Length&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(const Opt_Length&, DimensionUnit);
 

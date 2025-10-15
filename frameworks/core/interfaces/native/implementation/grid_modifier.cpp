@@ -206,7 +206,6 @@ void SetScrollBarWidthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridModelNG::SetScrollBarWidth(frameNode, convValue);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
                            const Opt_Union_Color_Number_String* value)
@@ -214,7 +213,6 @@ void SetScrollBarColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridModelNG::SetScrollBarColor(frameNode, convValue);
 }
 void SetScrollBarImpl(Ark_NativePointer node,
                       const Opt_BarState* value)
@@ -222,7 +220,6 @@ void SetScrollBarImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridModelNG::SetScrollBar(frameNode, convValue);
 }
 void SetOnScrollBarUpdateImpl(Ark_NativePointer node,
                               const Opt_Callback_Number_Number_ComputedBarAttribute* value)
@@ -464,7 +461,6 @@ void SetNestedScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridModelNG::SetNestedScroll(frameNode, convValue);
 }
 void SetEnableScrollInteractionImpl(Ark_NativePointer node,
                                     const Opt_Boolean* value)
@@ -472,7 +468,6 @@ void SetEnableScrollInteractionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridModelNG::SetEnableScrollInteraction(frameNode, convValue);
 }
 void SetFrictionImpl(Ark_NativePointer node,
                      const Opt_Union_Number_Resource* value)
@@ -480,7 +475,6 @@ void SetFrictionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridModelNG::SetFriction(frameNode, convValue);
 }
 void SetAlignItemsImpl(Ark_NativePointer node,
                        const Opt_GridItemAlignment* value)
@@ -563,7 +557,6 @@ void SetEdgeEffectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //GridModelNG::SetEdgeEffect(frameNode, convValue);
 }
 } // GridAttributeModifier
 const GENERATED_ArkUIGridModifier* GetGridModifier()

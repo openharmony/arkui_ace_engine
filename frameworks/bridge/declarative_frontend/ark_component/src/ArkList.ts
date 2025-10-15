@@ -679,7 +679,7 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
   allowChildTypes(): string[] {
     return ["ListItem", "ListItemGroup"];
   }
-  lanes(value: number | LengthConstrain, gutter?: any): this {
+  lanes(value: number | LengthConstrain, gutter?: undefined): this {
     let opt: ArkLanesOpt = new ArkLanesOpt();
     opt.gutter = gutter;
     if (isUndefined(value)) {
