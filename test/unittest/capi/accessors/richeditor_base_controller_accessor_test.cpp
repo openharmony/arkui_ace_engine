@@ -208,7 +208,10 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, getCaretOffsetTest, TestSize.Leve
     ASSERT_NE(accessor_->getCaretOffset, nullptr);
 
     EXPECT_CALL(*mockRichEditorController_, GetCaretOffset()).Times(1);
-    auto idx = Converter::Convert<int32_t>(accessor_->getCaretOffset(peer_));
+    Opt_Int32 offsetResult = accessor_->getCaretOffset(peer_);
+    auto idxOpt = Converter::OptConvert<int32_t>(offsetResult);
+    ASSERT_TRUE(idxOpt.has_value());
+    auto idx = idxOpt.value();
     ASSERT_EQ(idx, TEST_IDX);
 }
 
@@ -223,7 +226,10 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, setCaretOffsetTest, TestSize.Leve
 
     EXPECT_CALL(*mockRichEditorController_, SetCaretOffset(TEST_IDX_2)).Times(1);
     auto offset = Converter::ArkValue<Ark_Int32>(TEST_IDX_2);
-    bool result = accessor_->setCaretOffset(peer_, &offset);
+    Opt_Boolean setResult = accessor_->setCaretOffset(peer_, offset);
+    auto resultOpt = Converter::OptConvert<bool>(setResult);
+    ASSERT_TRUE(resultOpt.has_value());
+    bool result = resultOpt.value();
     ASSERT_FALSE(result);
 }
 
@@ -250,7 +256,10 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, isEditingTest, TestSize.Level1)
     ASSERT_NE(accessor_->isEditing, nullptr);
 
     EXPECT_CALL(*mockRichEditorController_, IsEditing()).Times(1);
-    bool result = accessor_->isEditing(peer_);
+    Opt_Boolean isEditingResult = accessor_->isEditing(peer_);
+    auto resultOpt = Converter::OptConvert<bool>(isEditingResult);
+    ASSERT_TRUE(resultOpt.has_value());
+    bool result = resultOpt.value();
     ASSERT_FALSE(result);
 }
 
@@ -318,7 +327,10 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, getTypingStyleTest, TestSize.Leve
     ASSERT_NE(accessor_->getTypingStyle, nullptr);
     accessor_->getTypingStyle(peer_);
     controller2_->style_ = GetUpdateSpanStyle();
-    auto result = accessor_->getTypingStyle(peer_);
+    Opt_RichEditorTextStyle styleResult = accessor_->getTypingStyle(peer_);
+    auto resultOpt = Converter::GetOpt(styleResult);
+    ASSERT_TRUE(resultOpt.has_value());
+    auto result = resultOpt.value();
     CheckRichEditorTextStyle(result);
 }
 
@@ -347,7 +359,10 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, GetLayoutManagerTest, TestSize.Le
     auto layoutInfo = OHOS::Ace::NG::LayoutInfoInterface();
     EXPECT_CALL(*mockRichEditorController_,
         GetLayoutInfoInterface()).Times(1).WillOnce(Return(layoutInfo.GetLayoutInfoInterface()));
-    Ark_NativePointer manager = accessor_->getLayoutManager(peer_);
+    Opt_LayoutManager layoutManager = accessor_->getLayoutManager(peer_);
+    auto managerOpt = Converter::GetOpt(layoutManager);
+    ASSERT_TRUE(managerOpt.has_value());
+    Ark_LayoutManager manager = managerOpt.value();
     ASSERT_NE(manager, nullptr);
 }
 

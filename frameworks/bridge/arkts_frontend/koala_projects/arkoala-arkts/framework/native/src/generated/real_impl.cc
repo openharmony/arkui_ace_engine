@@ -15686,19 +15686,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
+    Opt_Int32 GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
     {
         return {};
     }
-    Ark_Boolean SetCaretOffsetImpl(Ark_RichEditorBaseController peer,
-                                   const Ark_Number* offset)
+    Opt_Boolean SetCaretOffsetImpl(Ark_RichEditorBaseController peer,
+                                   Ark_Int32 offset)
     {
         return {};
     }
     void CloseSelectionMenuImpl(Ark_RichEditorBaseController peer)
     {
     }
-    Ark_RichEditorTextStyle GetTypingStyleImpl(Ark_RichEditorBaseController peer)
+    Opt_RichEditorTextStyle GetTypingStyleImpl(Ark_RichEditorBaseController peer)
     {
         return {};
     }
@@ -15712,18 +15712,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           const Opt_SelectionOptions* options)
     {
     }
-    Ark_Boolean IsEditingImpl(Ark_RichEditorBaseController peer)
+    Opt_Boolean IsEditingImpl(Ark_RichEditorBaseController peer)
     {
         return {};
     }
     void StopEditingImpl(Ark_RichEditorBaseController peer)
     {
     }
-    Ark_LayoutManager GetLayoutManagerImpl(Ark_RichEditorBaseController peer)
+    Opt_LayoutManager GetLayoutManagerImpl(Ark_RichEditorBaseController peer)
     {
         return {};
     }
-    Ark_PreviewText GetPreviewTextImpl(Ark_RichEditorBaseController peer)
+    Opt_PreviewText GetPreviewTextImpl(Ark_RichEditorBaseController peer)
     {
         return {};
     }
@@ -15748,27 +15748,27 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number AddTextSpanImpl(Ark_RichEditorController peer,
-                               const Ark_ResourceStr* content,
-                               const Opt_RichEditorTextSpanOptions* options)
+    Opt_Int32 AddTextSpanImpl(Ark_RichEditorController peer,
+                              const Ark_ResourceStr* content,
+                              const Opt_RichEditorTextSpanOptions* options)
     {
         return {};
     }
-    Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
-                                const Ark_Union_PixelMap_ResourceStr* value,
-                                const Opt_RichEditorImageSpanOptions* options)
+    Opt_Int32 AddImageSpanImpl(Ark_RichEditorController peer,
+                               const Ark_Union_PixelMap_ResourceStr* value,
+                               const Opt_RichEditorImageSpanOptions* options)
     {
         return {};
     }
-    Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
-                                  const CustomNodeBuilder* value,
-                                  const Opt_RichEditorBuilderSpanOptions* options)
+    Opt_Int32 AddBuilderSpanImpl(Ark_RichEditorController peer,
+                                 const CustomNodeBuilder* value,
+                                 const Opt_RichEditorBuilderSpanOptions* options)
     {
         return {};
     }
-    Ark_Number AddSymbolSpanImpl(Ark_RichEditorController peer,
-                                 const Ark_Resource* value,
-                                 const Opt_RichEditorSymbolSpanOptions* options)
+    Opt_Int32 AddSymbolSpanImpl(Ark_RichEditorController peer,
+                                const Ark_Resource* value,
+                                const Opt_RichEditorSymbolSpanOptions* options)
     {
         return {};
     }
@@ -15784,26 +15784,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_RichEditorRange* value)
     {
     }
-    Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult GetSpansImpl(Ark_RichEditorController peer,
-                                                                                const Opt_RichEditorRange* value)
+    Opt_Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult GetSpansImpl(Ark_RichEditorController peer,
+                                                                                    const Opt_RichEditorRange* value)
     {
         return {};
     }
-    Array_RichEditorParagraphResult GetParagraphsImpl(Ark_RichEditorController peer,
-                                                      const Opt_RichEditorRange* value)
+    Opt_Array_RichEditorParagraphResult GetParagraphsImpl(Ark_RichEditorController peer,
+                                                          const Opt_RichEditorRange* value)
     {
         return {};
     }
-    Ark_RichEditorSelection GetSelectionImpl(Ark_RichEditorController peer)
+    Opt_RichEditorSelection GetSelectionImpl(Ark_RichEditorController peer)
     {
         return {};
     }
-    Array_RichEditorSpan FromStyledStringImpl(Ark_RichEditorController peer,
-                                              Ark_StyledString value)
+    Opt_Array_RichEditorSpan FromStyledStringImpl(Ark_RichEditorController peer,
+                                                  Ark_StyledString value)
     {
         return {};
     }
-    Ark_StyledString ToStyledStringImpl(Ark_RichEditorController peer,
+    Opt_StyledString ToStyledStringImpl(Ark_RichEditorController peer,
                                         const Ark_RichEditorRange* value)
     {
         return {};
@@ -15829,11 +15829,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              Ark_StyledString styledString)
     {
     }
-    Ark_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController peer)
+    Opt_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController peer)
     {
         return {};
     }
-    Ark_RichEditorRange GetSelectionImpl(Ark_RichEditorStyledStringController peer)
+    Opt_RichEditorRange GetSelectionImpl(Ark_RichEditorStyledStringController peer)
     {
         return {};
     }
@@ -16450,7 +16450,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              Ark_StyledString styledString)
     {
     }
-    Ark_MutableStyledString GetStyledStringImpl(Ark_StyledStringController peer)
+    Opt_MutableStyledString GetStyledStringImpl(Ark_StyledStringController peer)
     {
         return {};
     }
@@ -16912,7 +16912,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void CloseSelectionMenuImpl(Ark_TextBaseController peer)
     {
     }
-    Ark_LayoutManager GetLayoutManagerImpl(Ark_TextBaseController peer)
+    Opt_LayoutManager GetLayoutManagerImpl(Ark_TextBaseController peer)
     {
         return {};
     }
@@ -17035,23 +17035,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Boolean IsEditingImpl(Ark_TextEditControllerEx peer)
+    Opt_Boolean IsEditingImpl(Ark_TextEditControllerEx peer)
     {
         return {};
     }
     void StopEditingImpl(Ark_TextEditControllerEx peer)
     {
     }
-    Ark_Boolean SetCaretOffsetImpl(Ark_TextEditControllerEx peer,
+    Opt_Boolean SetCaretOffsetImpl(Ark_TextEditControllerEx peer,
                                    const Ark_Number* offset)
     {
         return {};
     }
-    Ark_Number GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
+    Opt_Number GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
     {
         return {};
     }
-    Ark_PreviewText GetPreviewTextImpl(Ark_TextEditControllerEx peer)
+    Opt_PreviewText GetPreviewTextImpl(Ark_TextEditControllerEx peer)
     {
         return {};
     }

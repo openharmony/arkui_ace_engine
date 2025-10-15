@@ -295,7 +295,10 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTest, TestSize.Level1)
     auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEST_VALUE, &ctx);
     auto options = Converter::ArkValue<Opt_RichEditorTextSpanOptions>(textSpanOptions);
 
-    auto code = accessor_->addTextSpan(peer_, &value, &options);
+    Opt_Int32 addResult = accessor_->addTextSpan(peer_, &value, &options);
+    auto resultOpt = Converter::OptConvert<Ark_Int32>(addResult);
+    ASSERT_TRUE(resultOpt.has_value());
+    Ark_Int32 code = resultOpt.value();
     EXPECT_NE(code, 1);
     const TextSpanOptions& result = mockRichEditorController_->textSpanOptions_;
     ASSERT_TRUE(result.offset);
@@ -447,7 +450,10 @@ HWTEST_F(RichEditorControllerAccessorTest, getSpansTest, TestSize.Level1)
     options.end = TEST_VALUE.length() * 2;
 
     auto value = Converter::ArkValue<Opt_RichEditorRange>(options);
-    auto spans = accessor_->getSpans(peer_, &value);
+    Opt_Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult spansResult = accessor_->getSpans(peer_, &value);
+    auto resultOpt = Converter::GetOpt(spansResult);
+    ASSERT_TRUE(resultOpt.has_value());
+    Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult spans = resultOpt.value();
 
     ASSERT_TRUE(spans.length == 1);
     auto spansVec =
@@ -511,7 +517,10 @@ HWTEST_F(RichEditorControllerAccessorTest, getSelectionTest, TestSize.Level1)
     richEditorPattern->AddTextSpan(textSpanOptions);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), TEST_VALUE.length() * 2);
 
-    auto selection = accessor_->getSelection(peer_);
+    Opt_RichEditorSelection selectionResult = accessor_->getSelection(peer_);
+    auto resultOpt = Converter::GetOpt(selectionResult);
+    ASSERT_TRUE(resultOpt.has_value());
+    Ark_RichEditorSelection selection = resultOpt.value();
     EXPECT_EQ(Converter::Convert<int32_t>(selection.selection.value0), TEST_VALUE.length() * 2);
     EXPECT_EQ(Converter::Convert<int32_t>(selection.selection.value1), TEST_VALUE.length() * 2);
 

@@ -54,18 +54,28 @@ void SetStyledStringImpl(Ark_RichEditorStyledStringController peer,
     CHECK_NULL_VOID(styledString);
     peer->SetStyledString(styledString->spanString);
 }
-Ark_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController peer)
+Opt_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController peer)
 {
     auto mutableString = PeerUtils::CreatePeer<MutableStyledStringPeer>();
-    CHECK_NULL_RETURN(peer && mutableString, mutableString);
+    if (!peer || !mutableString) {
+        PeerUtils::DestroyPeer(mutableString);
+        return Converter::ArkValue<Opt_MutableStyledString>(Ark_Empty());
+    }
+    auto controller = (peer->GetTargetController()).Upgrade();
+    if (!controller) {
+        PeerUtils::DestroyPeer(mutableString);
+        return Converter::ArkValue<Opt_MutableStyledString>(Ark_Empty());
+    }
     mutableString->spanString = AceType::DynamicCast<MutableSpanString>(peer->GetStyledString());
-    return mutableString;
+    return Converter::ArkValue<Opt_MutableStyledString>(mutableString);
 }
-Ark_RichEditorRange GetSelectionImpl(Ark_RichEditorStyledStringController peer)
+Opt_RichEditorRange GetSelectionImpl(Ark_RichEditorStyledStringController peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_RichEditorRange>(Ark_Empty()));
+    auto controller = (peer->GetTargetController()).Upgrade();
+    CHECK_NULL_RETURN(controller, Converter::ArkValue<Opt_RichEditorRange>(Ark_Empty()));
     SelectionRangeInfo selection = peer->GetSelection();
-    return Converter::ArkValue<Ark_RichEditorRange>(selection);
+    return Converter::ArkValue<Opt_RichEditorRange>(selection);
 }
 void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
                           const Ark_StyledStringChangedListener* listener)
