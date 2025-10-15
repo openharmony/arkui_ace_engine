@@ -2036,4 +2036,23 @@ HWTEST_F(NavigationPatternTestTwoNg, TriggerCustomAnimation001, TestSize.Level1)
     navigationPattern->TriggerCustomAnimation(preTopNavDestination, newTopNavDestination, true);
     EXPECT_FALSE(eventHub->IsEnabled());
 }
+
+/**
+ * @tc.name: OnDpiConfigurationUpdate001
+ * @tc.desc: Branch: no branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, OnDpiConfigurationUpdate001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    pattern->SetNavigationStack(navigationStack);
+    
+    pattern->ifNeedInit_ = false;
+    
+    pattern->OnDpiConfigurationUpdate();
+    EXPECT_TRUE(pattern->ifNeedInit_);
+}
 } // namespace OHOS::Ace::NG

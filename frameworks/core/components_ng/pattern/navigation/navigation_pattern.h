@@ -77,6 +77,7 @@ public:
     void UpdateColorModeForNodes(const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
 
     void OnLanguageConfigurationUpdate() override;
+    void OnDpiConfigurationUpdate() override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -599,6 +600,11 @@ public:
     bool IsTopFullScreenChanged() const
     {
         return isTopFullScreenPage_;
+    }
+    
+    bool CheckNeedInitRangeCalculation(SizeF& newSize)
+    {
+        return newSize != navigationSize_;
     }
 private:
     void UpdateCanForceSplitLayout(const SizeF& frameSize);
