@@ -1096,6 +1096,21 @@ void OnNativeEmbedVisibilityChange(const CallbackHelper<OnNativeEmbedVisibilityC
     arkCallback.InvokeSync(parameter);
 }
 
+void OnNativeEmbedObjectParamChange(const CallbackHelper<OnNativeEmbedObjectParamChangeCallback>& arkCallback,
+    int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedParamDataInfo>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_NativeEmbedParamDataInfo parameter;
+    parameter.embedId = Converter::ArkValue<Ark_String>(eventInfo->GetEmbedId());
+    parameter.objectAttributeId = Converter::ArkValue<Opt_String>(eventInfo->GetObjectAttributeId());
+    Converter::ArkArrayHolder<Array_NativeEmbedParamItem> vecHolder(eventInfo->GetParamItems());
+    auto tempValue = vecHolder.ArkValue();
+    parameter.paramItems = Converter::ArkValue<Opt_Array_NativeEmbedParamItem>(tempValue);
+    arkCallback.InvokeSync(parameter);
+}
+
 void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_Void>& arkCallback,
     int32_t instanceId, const BaseEventInfo* info)
 {

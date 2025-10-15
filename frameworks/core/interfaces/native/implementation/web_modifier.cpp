@@ -2417,6 +2417,12 @@ void SetBindSelectionMenuImpl(Ark_NativePointer node,
 void SetRotateRenderEffectImpl(Ark_NativePointer node,
                                const Opt_WebRotateEffect* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<WebRotateEffect>(*value);
+    WebModelStatic::SetRotateRenderEffect(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 
 void SetOnOverrideErrorPageImpl(Ark_NativePointer node,
@@ -2462,6 +2468,21 @@ void SetOnNativeEmbedMouseEventImpl(Ark_NativePointer node,
 void SetOnNativeEmbedObjectParamChangeImpl(Ark_NativePointer node,
                                            const Opt_OnNativeEmbedObjectParamChangeCallback* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    auto onNativeEmbedObjectParamChange = [callback = CallbackHelper(*optValue), instanceId](
+        const BaseEventInfo* info) {
+        OnNativeEmbedObjectParamChange(callback, instanceId, info);
+    };
+    WebModelStatic::SetNativeEmbedObjectParamChangeId(frameNode, onNativeEmbedObjectParamChange);
+#endif // WEB_SUPPORTED
 }
 
 void SetEnableDataDetectorImpl(Ark_NativePointer node,
@@ -2522,6 +2543,16 @@ void SetGestureFocusModeImpl(Ark_NativePointer node,
 void SetForceEnableZoomImpl(Ark_NativePointer node,
                             const Opt_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // Implement Reset value
+        return;
+    }
+    WebModelStatic::SetForceEnableZoom(frameNode, *convValue);
+#endif // WEB_SUPPORTED
 }
 
 void SetBackToTopImpl(Ark_NativePointer node,
