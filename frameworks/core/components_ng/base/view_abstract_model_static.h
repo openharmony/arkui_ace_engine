@@ -348,6 +348,7 @@ public:
     static void SetDragPreview(FrameNode* frameNode, const std::optional<DragDropInfo>& DragDropInfo);
     static void SetBackgroundImage(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
+    static void SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetBackgroundImagePosition(FrameNode* frameNode, BackgroundImagePosition& bgImgPosition, bool isReset);

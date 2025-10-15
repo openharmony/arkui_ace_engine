@@ -22,14 +22,14 @@ import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { extractors, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from "#handwritten"
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
-import { DrawContext, LengthMetrics } from "arkui.Graphics"
+import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisModel, MouseButton, MouseAction } from "./enums"
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
 import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
 import { Resource_serializer } from "./../framework/resource"
 import { Resource } from "global.resource"
 import { TextRange_serializer, TextRange } from "./textCommon"
-import { LengthMetrics_serializer } from "./../Graphics"
+import { LengthMetrics_serializer, ColorMetrics_serializer } from "./../Graphics"
 import { ResizableOptions_serializer, ResizableOptions } from "./image"
 import { uiEffect_VisualEffect_serializer, uiEffect_Filter_serializer, uiEffect_BrightnessBlender_serializer } from "./../framework/ohos.graphics.uiEffect"
 import { FocusBoxStyle_serializer, FocusBoxStyle, FocusPriority } from "./focus"
@@ -2663,30 +2663,38 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setMargin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBackgroundColorAttribute(value: ResourceColor | undefined): void {
+    setBackgroundColorAttribute(value: ResourceColor | ColorMetrics | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof ResourceColor) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+                const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
+                if (valueTmpValueForIdx0 instanceof Color) {
+                    thisSerializer.writeInt8((0).toChar())
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
+                } else if (valueTmpValueForIdx0 instanceof number) {
+                    thisSerializer.writeInt8((1).toChar())
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof string) {
+                    thisSerializer.writeInt8((2).toChar())
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
+                    thisSerializer.writeInt8((3).toChar())
+                    const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
+                }
+            } else if (valueTmpValue instanceof ColorMetrics) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
-                const valueTmpValueForIdx2  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx1  = valueTmpValue as ColorMetrics
+                ColorMetrics_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -4765,7 +4773,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBackground(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBackgroundImage0Attribute(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): void {
+    setBackgroundImage0Attribute(src: ResourceStr | image.PixelMap | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (src !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4787,13 +4795,6 @@ export class ArkCommonMethodPeer extends PeerNode {
                 const srcTmpValueForIdx1  = srcTmpValue as image.PixelMap
                 image_PixelMap_serializer.write(thisSerializer, srcTmpValueForIdx1)
             }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (repeat !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const repeatTmpValue  = (repeat as ImageRepeat)
-            thisSerializer.writeInt32(repeatTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -4833,6 +4834,41 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setBackgroundImage1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBackgroundImage2Attribute(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (src !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const srcTmpValue  = src!
+            if (srcTmpValue instanceof ResourceStr) {
+                thisSerializer.writeInt8((0).toChar())
+                const srcTmpValueForIdx0  = srcTmpValue as ResourceStr
+                if (srcTmpValueForIdx0 instanceof string) {
+                    thisSerializer.writeInt8((0).toChar())
+                    const srcTmpValueForIdx0ForIdx0  = srcTmpValueForIdx0 as string
+                    thisSerializer.writeString(srcTmpValueForIdx0ForIdx0)
+                } else if (srcTmpValueForIdx0 instanceof Resource) {
+                    thisSerializer.writeInt8((1).toChar())
+                    const srcTmpValueForIdx0ForIdx1  = srcTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, srcTmpValueForIdx0ForIdx1)
+                }
+            } else if (srcTmpValue instanceof image.PixelMap) {
+                thisSerializer.writeInt8((1).toChar())
+                const srcTmpValueForIdx1  = srcTmpValue as image.PixelMap
+                image_PixelMap_serializer.write(thisSerializer, srcTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (repeat !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const repeatTmpValue  = (repeat as ImageRepeat)
+            thisSerializer.writeInt32(repeatTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setBackgroundImage0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBackgroundBlurStyleAttribute(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): void {
@@ -7172,7 +7208,7 @@ export interface CommonMethod {
     margin(value: Padding | Length | LocalizedPadding | undefined): this {
         throw new Error("Unimplemented method margin")
     }
-    backgroundColor(value: ResourceColor | undefined): this {
+    backgroundColor(value: ResourceColor | ColorMetrics | undefined): this {
         throw new Error("Unimplemented method backgroundColor")
     }
     pixelRound(value: PixelRoundPolicy | undefined): this {
@@ -7620,10 +7656,13 @@ export interface CommonMethod {
     background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         throw new Error("Unimplemented method background")
     }
-    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this {
+    backgroundImage(value: ResourceStr | image.PixelMap | undefined): this {
         throw new Error("Unimplemented method backgroundImage")
     }
     backgroundImage(src: ResourceStr | image.PixelMap | undefined, options?: BackgroundImageOptions): this {
+        throw new Error("Unimplemented method backgroundImage")
+    }
+    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this {
         throw new Error("Unimplemented method backgroundImage")
     }
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
@@ -7763,8 +7802,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     padding_value?: Padding | Length | LocalizedPadding | undefined
     safeAreaPadding_value?: Padding | LengthMetrics | LocalizedPadding | undefined
     margin_value?: Padding | Length | LocalizedPadding | undefined
-    backgroundColor_value?: ResourceColor | undefined
+    backgroundColor_value?: ResourceColor | ColorMetrics | undefined
     pixelRound_value?: PixelRoundPolicy | undefined
+    backgroundImage_value?: ResourceStr | image.PixelMap | undefined
     backgroundImageSize_value?: SizeOptions | ImageSize | undefined
     backgroundImagePosition_value?: Position | Alignment | undefined
     backgroundEffect_value?: BackgroundEffectOptions | undefined
@@ -7946,7 +7986,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     margin(value: Padding | Length | LocalizedPadding | undefined): this {
         return this
     }
-    backgroundColor(value: ResourceColor | undefined): this {
+    backgroundColor(value: ResourceColor | ColorMetrics | undefined): this {
         return this
     }
     pixelRound(value: PixelRoundPolicy | undefined): this {
@@ -8394,10 +8434,13 @@ export class ArkCommonMethodStyle implements CommonMethod {
     background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         return this
     }
-    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this {
+    backgroundImage(value: ResourceStr | image.PixelMap | undefined): this {
         return this
     }
-    backgroundImage(src: ResourceStr | image.PixelMap | undefined, options?: BackgroundImageOptions): this {
+    backgroundImage(src: ResourceStr | image.PixelMap | undefined, options: BackgroundImageOptions): this {
+        return this
+    }
+    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat: ImageRepeat): this {
         return this
     }
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
@@ -8988,9 +9031,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public backgroundColor(value: ResourceColor | undefined): this {
+    public backgroundColor(value: ResourceColor | ColorMetrics | undefined): this {
         if (this.checkPriority("backgroundColor")) {
-            const value_casted = value as (ResourceColor | undefined)
+            const value_casted = value as (ResourceColor | ColorMetrics | undefined)
             this.getPeer()?.setBackgroundColorAttribute(value_casted)
             return this
         }
@@ -10174,20 +10217,28 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this {
+    public backgroundImage(src: ResourceStr | image.PixelMap | undefined): this {
         if (this.checkPriority("backgroundImage")) {
             const src_casted = src as (ResourceStr | image.PixelMap | undefined)
-            const repeat_casted = repeat as (ImageRepeat | undefined)
-            this.getPeer()?.setBackgroundImage0Attribute(src_casted, repeat_casted)
+            this.getPeer()?.setBackgroundImage0Attribute(src_casted)
             return this
         }
         return this
     }
-    public backgroundImage(src: ResourceStr | image.PixelMap | undefined, options?: BackgroundImageOptions): this {
+    public backgroundImage(src: ResourceStr | image.PixelMap | undefined, options: BackgroundImageOptions): this {
         if (this.checkPriority("backgroundImage")) {
             const src_casted = src as (ResourceStr | image.PixelMap | undefined)
-            const options_casted = options as (BackgroundImageOptions | undefined)
+            const options_casted = options as (BackgroundImageOptions)
             this.getPeer()?.setBackgroundImage1Attribute(src_casted, options_casted)
+            return this
+        }
+        return this
+    }
+    public backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat: ImageRepeat): this {
+        if (this.checkPriority("backgroundImage")) {
+            const src_casted = src as (ResourceStr | image.PixelMap | undefined)
+            const repeat_casted = repeat as (ImageRepeat)
+            this.getPeer()?.setBackgroundImage2Attribute(src_casted, repeat_casted)
             return this
         }
         return this
