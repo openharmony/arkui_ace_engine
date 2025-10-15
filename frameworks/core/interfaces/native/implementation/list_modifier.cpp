@@ -216,7 +216,6 @@ void SetContentStartOffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
-        // Implement Reset value
         ListModelStatic::SetContentStartOffset(frameNode, 0);
         return;
     }
@@ -229,7 +228,6 @@ void SetContentEndOffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
-        // Implement Reset value
         ListModelStatic::SetContentEndOffset(frameNode, 0);
         return;
     }
@@ -271,7 +269,6 @@ void SetMultiSelectableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
         ListModelStatic::SetMultiSelectable(frameNode, false);
         return;
     }
@@ -296,7 +293,6 @@ void SetChainAnimationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
         ListModelStatic::SetChainAnimation(frameNode, false);
         return;
     }
@@ -336,7 +332,6 @@ void SetChildrenMainSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
         ListModelStatic::ResetListChildrenMainSize(frameNode);
         return;
     }
@@ -368,7 +363,6 @@ void SetOnScrollIndexImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
         ListModelStatic::SetOnScrollIndex(frameNode, nullptr);
         return;
     }
@@ -388,7 +382,6 @@ void SetOnScrollVisibleContentChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
         ListModelStatic::SetOnScrollVisibleContentChange(frameNode, nullptr);
         return;
     }
@@ -520,7 +513,6 @@ void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
         ListModelStatic::SetOnScrollFrameBegin(frameNode, nullptr);
         return;
     }
