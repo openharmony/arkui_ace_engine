@@ -276,13 +276,79 @@ public:
                      holder.end());
     }
 
-    void UnRegisterWillDrawCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb) {}
+    void UnRegisterWillDrawCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedWillDrawCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedWillDrawCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(
+                         holder.begin(), holder.end(), [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            holder.end());
+    }
 
-    void RegisterWillDrawCallback(int32_t uiContextInstanceId, ani_ref& cb) {}
+    void RegisterWillDrawCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedWillDrawCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedWillDrawCbMap_.end()) {
+            specifiedWillDrawCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
 
-    void UnRegisterDidLayoutCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb) {}
+    void UnRegisterDidLayoutCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedDidLayoutCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedDidLayoutCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(
+                         holder.begin(), holder.end(), [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            holder.end());
+    }
 
-    void RegisterDidLayoutCallback(int32_t uiContextInstanceId, ani_ref& cb) {}
+    void RegisterDidLayoutCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedDidLayoutCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedDidLayoutCbMap_.end()) {
+            specifiedDidLayoutCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
 
     void RegisterDidClickCallback(int32_t uiContextInstanceId, ani_ref& cb)
     {
@@ -435,6 +501,28 @@ public:
                                        callbackParams.data(),
                                        &fnReturnVal);
         }
+    }
+
+    void HandleWillDraw(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedWillDrawCbMap_.find(currentId);
+        if (iter == specifiedWillDrawCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
+
+    void HandleDidLayout(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedDidLayoutCbMap_.find(currentId);
+        if (iter == specifiedDidLayoutCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
     }
 
     void HandleBeforePanStart(ani_env* env)
@@ -659,6 +747,8 @@ private:
     std::list<ani_ref> unspecifiedNavigationListeners_;
     std::unordered_map<std::string, std::list<ani_ref>> specifiedCNavigationListeners_;
     std::unordered_map<int32_t, std::list<ani_ref>> specifiedRouterPageListeners_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedWillDrawCbMap_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedDidLayoutCbMap_;
 };
 
 static UiObserver* Unwrapp(ani_env* env, ani_object object)
@@ -702,9 +792,7 @@ static void On([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
 
     const int idMs = 100000;
-    if (typeStr == "densityUpdate") {
-        observer->RegisterDensityCallback(idMs, fnObjGlobalRef);
-    } else if (typeStr == "beforePanStart") {
+    if (typeStr == "beforePanStart") {
         observer->RegisterBeforePanStartCallback(idMs, fnObjGlobalRef);
     } else if (typeStr == "afterPanStart") {
         observer->RegisterAfterPanStartCallback(idMs, fnObjGlobalRef);
@@ -716,11 +804,65 @@ static void On([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object
         observer->RegisterWillClickCallback(idMs, fnObjGlobalRef);
     } else if (typeStr == "didClick") {
         observer->RegisterDidClickCallback(idMs, fnObjGlobalRef);
-    } else if (typeStr == "willDraw") {
-        observer->RegisterWillDrawCallback(idMs, fnObjGlobalRef);
-    } else if (typeStr == "didLayout") {
-        observer->RegisterDidLayoutCallback(idMs, fnObjGlobalRef);
     }
+}
+
+static void OnDensityUpdate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    const int idMs = 100000;
+    observer->RegisterDensityCallback(idMs, fnObjGlobalRef);
+}
+
+static void OnWillDraw([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    auto willDrawCallback = [observer, env]() { observer->HandleWillDraw(env); };
+    NG::UIObserverHandler::GetInstance().SetDrawCommandSendHandleFunc(willDrawCallback);
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    const int idMs = 100000;
+    observer->RegisterWillDrawCallback(idMs, fnObjGlobalRef);
+}
+
+static void OnDidLayout([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    const int idMs = 100000;
+    auto didLayoutCallback = [observer, env]() { observer->HandleDidLayout(env); };
+    NG::UIObserverHandler::GetInstance().SetLayoutDoneHandleFunc(didLayoutCallback);
+    observer->RegisterDidLayoutCallback(idMs, fnObjGlobalRef);
 }
 
 static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_string type, ani_fn_object fnObj)
@@ -739,9 +881,7 @@ static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object objec
     }
 
     const int idMs = 100000;
-    if (typeStr == "densityUpdate") {
-        observer->UnRegisterDensityCallback(env, idMs, fnObjGlobalRef);
-    } else if (typeStr == "beforePanStart") {
+    if (typeStr == "beforePanStart") {
         observer->UnRegisterBeforePanStartCallback(env, idMs, fnObjGlobalRef);
     } else if (typeStr == "afterPanStart") {
         observer->UnRegisterAfterPanStartCallback(env, idMs, fnObjGlobalRef);
@@ -753,11 +893,61 @@ static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object objec
         observer->UnRegisterWillClickCallback(env, idMs, fnObjGlobalRef);
     } else if (typeStr == "didClick") {
         observer->UnRegisterDidClickCallback(env, idMs, fnObjGlobalRef);
-    } else if (typeStr == "willDraw") {
-        observer->UnRegisterWillDrawCallback(env, idMs, fnObjGlobalRef);
-    } else if (typeStr == "didLayout") {
-        observer->UnRegisterDidLayoutCallback(env, idMs, fnObjGlobalRef);
     }
+}
+
+static void OffDensityUpdate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
+{
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+
+    const int idMs = 100000;
+    observer->UnRegisterDensityCallback(env, idMs, fnObjGlobalRef);
+}
+
+static void OffWillDraw([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
+{
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+
+    const int idMs = 100000;
+    observer->UnRegisterWillDrawCallback(env, idMs, fnObjGlobalRef);
+}
+
+static void OffDidLayout([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
+{
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+
+    const int idMs = 100000;
+    observer->UnRegisterDidLayoutCallback(env, idMs, fnObjGlobalRef);
 }
 
 static void OnNavDestinationUpdateWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -1022,7 +1212,7 @@ bool ANI_ConstructorForAni(ani_env* env)
     }
 
     std::array methodsObserver = {
-        ani_native_function { "on", "C{std.core.String}C{Lstd.core.Object}:", reinterpret_cast<void*>(OHOS::Ace::On) },
+        ani_native_function { "on", "C{std.core.String}C{std.core.Object}:", reinterpret_cast<void*>(OHOS::Ace::On) },
         ani_native_function { "off", "C{std.core.String}C{std.core.Object}:", reinterpret_cast<void*>(OHOS::Ace::Off) },
         ani_native_function {
             "on", NAVDESTINATION_PARAM_WITHID, reinterpret_cast<void*>(OHOS::Ace::OnNavDestinationUpdateWithId) },
@@ -1055,6 +1245,15 @@ bool ANI_ConstructorForAni(ani_env* env)
             "offNavDestinationSwitch",
             "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Object}:",
             reinterpret_cast<void*>(OHOS::Ace::offNavDestinationSwitchWithId) },
+
+        ani_native_function { "onDensityUpdate", nullptr, reinterpret_cast<void*>(OHOS::Ace::OnDensityUpdate) },
+        ani_native_function { "offDensityUpdate", nullptr, reinterpret_cast<void*>(OHOS::Ace::OffDensityUpdate) },
+
+        ani_native_function { "onWillDraw", nullptr, reinterpret_cast<void*>(OHOS::Ace::OnWillDraw) },
+        ani_native_function { "offWillDraw", nullptr, reinterpret_cast<void*>(OHOS::Ace::OffWillDraw) },
+
+        ani_native_function { "onDidLayout", nullptr, reinterpret_cast<void*>(OHOS::Ace::OnDidLayout) },
+        ani_native_function { "offDidLayout", nullptr, reinterpret_cast<void*>(OHOS::Ace::OffDidLayout) },
     };
     if (ANI_OK != env->Class_BindNativeMethods(clsObserver, methodsObserver.data(), methodsObserver.size())) {
         return false;
