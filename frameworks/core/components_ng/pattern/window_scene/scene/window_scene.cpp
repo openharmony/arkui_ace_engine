@@ -219,6 +219,7 @@ void WindowScene::OnAttachToFrameNode()
     Rosen::SceneSessionManager::GetInstance().NotifyOnAttachToFrameNode(session_);
     RegisterFocusCallback();
     WindowPattern::OnAttachToFrameNode();
+    session_->ResetLockedCacheSnapshot();
 }
 
 void WindowScene::InsertSurfaceNodeId(uint64_t nodeId)
