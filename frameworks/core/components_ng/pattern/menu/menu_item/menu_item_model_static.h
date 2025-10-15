@@ -35,12 +35,14 @@ public:
     static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& families);
     static void SetSelectIcon(FrameNode* frameNode, bool isShow = false);
     static void SetSelectIconSrc(FrameNode* frameNode, const std::optional<std::string>& src);
-    static void SetSelectIconSymbol(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply);
+    static void SetSelectIconSymbol(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply);
     static void SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange);
     static void AddChild(FrameNode* frameNode, const RefPtr<NG::UINode>& customNode);
     static void AddRowChild(FrameNode* frameNode, const MenuItemProperties& menuItemProps);
     static void UpdateMenuProperty(FrameNode* frameNode, const MenuItemProperties& menuItemProps);
     static void SetSelectedChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& selectedChangeEvent);
+    static void SetSymbolStartIcon(FrameNode *frameNode, std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
+    static void SetSymbolEndIcon(FrameNode *frameNode, std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
 private:
     static void DoMountRow(const RefPtr<NG::FrameNode>& menuItem);
     static void UpdateRadius(const RefPtr<NG::FrameNode>& menuItem);

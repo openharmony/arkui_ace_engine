@@ -15,13 +15,14 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_static.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-using SelectIconType = std::variant<bool, std::optional<std::string>, void*>;
+using SelectIconType = std::variant<bool, std::optional<std::string>, std::optional<SymbolGlyphModifierPeer *>>;
 std::optional<bool> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
 {
     std::optional<bool> result;
@@ -71,7 +72,7 @@ SelectIconType Convert(const Ark_String& src)
 template<>
 SelectIconType Convert(const Ark_SymbolGlyphModifier& src)
 {
-    return nullptr;
+    return Converter::OptConvert<Ark_SymbolGlyphModifier>(src);
 }
 
 template<>
@@ -118,22 +119,18 @@ void SetMenuItemOptionsImpl(Ark_NativePointer node,
                 };
                 menuItemProps.buildFunc = builder;
             }
-            menuItemProps.startApply = nullptr;
-            auto symbolStart = Converter::OptConvert<Ark_SymbolGlyphModifier>(value0.symbolStartIcon);
-            if (symbolStart.has_value()) {
-                auto startApply =
-                    Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(symbolStart.value());
-                menuItemProps.startApply = startApply ? startApply.value() : nullptr;
-            }
-            menuItemProps.endApply = nullptr;
-            auto symbolEnd = Converter::OptConvert<Ark_SymbolGlyphModifier>(value0.symbolEndIcon);
-            if (symbolEnd.has_value()) {
-                auto endApply = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(symbolEnd.value());
-                menuItemProps.endApply = endApply ? endApply.value() : nullptr;
-            }
-            LOGE("MenuItemModifier::SetMenuItemOptionsImpl symbolStart and symbolEnd attributes are stubs.");
             MenuItemModelStatic::AddRowChild(frameNode, menuItemProps);
             MenuItemModelStatic::UpdateMenuProperty(frameNode, menuItemProps);
+            auto symbolStart = Converter::OptConvert<Ark_SymbolGlyphModifier>(value0.symbolStartIcon);
+            if (symbolStart && *symbolStart) {
+                MenuItemModelStatic::SetSymbolStartIcon(frameNode, (*symbolStart)->symbolApply);
+                PeerUtils::DestroyPeer(*symbolStart);
+            }
+            auto symbolEnd = Converter::OptConvert<Ark_SymbolGlyphModifier>(value0.symbolEndIcon);
+            if (symbolEnd && *symbolEnd) {
+                MenuItemModelStatic::SetSymbolEndIcon(frameNode, (*symbolEnd)->symbolApply);
+                PeerUtils::DestroyPeer(*symbolEnd);
+            }
         },
         [frameNode, node](const CustomNodeBuilder& value1) {
             CallbackHelper(value1).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
@@ -168,7 +165,12 @@ void SetSelectIconImpl(Ark_NativePointer node,
             MenuItemModelStatic::SetSelectIcon(frameNode, true);
             MenuItemModelStatic::SetSelectIconSrc(frameNode, *iconStrPtr);
         }
-        LOGE("MenuItemModifier::SelectIconImpl is not implemented, Ark_CustomObject is not supported!");
+        if (auto iconSymbolPtr = std::get_if<std::optional<SymbolGlyphModifierPeer *>>(&(*iconOpt));
+            (iconSymbolPtr && (*iconSymbolPtr) && (*(*iconSymbolPtr)))) {
+            MenuItemModelStatic::SetSelectIcon(frameNode, true);
+            MenuItemModelStatic::SetSelectIconSymbol(frameNode, (*(*iconSymbolPtr))->symbolApply);
+            PeerUtils::DestroyPeer(*(*iconSymbolPtr));
+        }
     }
 }
 void SetOnChangeImpl(Ark_NativePointer node,

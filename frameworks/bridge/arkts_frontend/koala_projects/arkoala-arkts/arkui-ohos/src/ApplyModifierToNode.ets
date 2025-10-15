@@ -11,8 +11,10 @@ export function applySymbolGlyphModifierToNode(modifier: SymbolGlyphModifier, no
     if (currentState === undefined) {
         currentState = node_casted.getOrCreateStateStyleMutable()!
     }
-    applyUIAttributes(modifier, modifier, currentState.value)
-    modifier.applyModifierPatch(node_casted)
+    let newModifier = new SymbolGlyphModifier()
+    newModifier.mergeModifier(modifier)
+    applyUIAttributes(newModifier, newModifier, currentState.value)
+    newModifier.applyModifierPatch(node_casted)
 }
 
 export function applyTextModifierToNode(modifier: TextModifier, nodePtr: KPointer): void {
