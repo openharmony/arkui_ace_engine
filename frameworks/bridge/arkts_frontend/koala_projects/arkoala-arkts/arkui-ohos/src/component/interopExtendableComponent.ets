@@ -164,14 +164,17 @@ export function createInteropView(staticComponent: ExtendableComponent): ESValue
     };
     const createDummyViewV2 = ESValue.getGlobal().getProperty('createDummyViewV2');
     const findProvider = (varName: string) => {
-        const result = staticComponent.findProvideV2<Object>(varName) as ProviderDecoratedVariable<Object> | undefined;
+        const result = (
+            staticComponent.findProvidedVarV2<Object>(varName) ||
+            staticComponent.findProvideV2<Object>(varName)
+        ) as ProviderDecoratedVariable<Object> | undefined | null;
         if (result == undefined) {
             return undefined;
         }
         const value = result.get();
-        if(result.viewV2 === undefined) {
-          const dummyViewV2 = createDummyViewV2.invoke(result, varName, value).unwrap() as Object;
-          result.viewV2 = dummyViewV2;
+        if (result.viewV2 === undefined) {
+            const dummyViewV2 = createDummyViewV2.invoke(result, varName, value).unwrap() as Object;
+            result.viewV2 = dummyViewV2;
         }
         return [result.viewV2, varName];
     };

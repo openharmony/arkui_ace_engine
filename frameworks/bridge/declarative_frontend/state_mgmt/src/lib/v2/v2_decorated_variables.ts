@@ -156,6 +156,10 @@ class VariableUtilV2 {
           }
         }
 
+        if (InteropConfigureStateMgmt.needsInterop() && checkView instanceof ViewInterop) {
+          return checkView.findProvideV2(aliasName);
+        }
+
         checkView = checkView.getParent();
       }; // while
       stateMgmtConsole.warn(`findProvider: ${view.debugInfo__()} @Consumer('${aliasName}'), no matching @Provider found amongst ancestor @ComponentV2's!`);
