@@ -1804,6 +1804,20 @@ void XComponentPattern::OnSurfaceDestroyed(FrameNode* frameNode)
         auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
+    } else {
+#ifdef RENDER_EXTRACT_SUPPORTED
+        RefPtr<FrameNode> host;
+        if (!frameNode) {
+            host = GetHost();
+            CHECK_NULL_VOID(host);
+            frameNode = Referenced::RawPtr(host);
+        }
+        CHECK_NULL_VOID(frameNode);
+        auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] native OnSurfaceDestroyed", GetId().c_str());
+        eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
+#endif
     }
 }
 
