@@ -32,41 +32,39 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetAngleImpl(Ark_SwipeGestureEvent peer)
+Ark_Float64 GetAngleImpl(Ark_SwipeGestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& angle = info->GetAngle();
-    return Converter::ArkValue<Ark_Number>(static_cast<float>(angle));
+    return Converter::ArkValue<Ark_Float64>(static_cast<float>(angle));
 }
 void SetAngleImpl(Ark_SwipeGestureEvent peer,
-                  const Ark_Number* angle)
+                  Ark_Float64 angle)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(angle);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    info->SetAngle(Converter::Convert<float>(*angle));
+    info->SetAngle(Converter::Convert<float>(angle));
 }
-Ark_Number GetSpeedImpl(Ark_SwipeGestureEvent peer)
+Ark_Float64 GetSpeedImpl(Ark_SwipeGestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
     double value = event->GetSpeed();
-    return Converter::ArkValue<Ark_Number>(static_cast<float>(value));
+    return Converter::ArkValue<Ark_Float64>(static_cast<float>(value));
 }
 void SetSpeedImpl(Ark_SwipeGestureEvent peer,
-                  const Ark_Number* speed)
+                  Ark_Float64 speed)
 {
     CHECK_NULL_VOID(peer);
     auto event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    CHECK_NULL_VOID(speed);
-    auto convValue = Converter::Convert<float>(*speed);
+    auto convValue = Converter::Convert<float>(speed);
     event->SetSpeed(convValue);
 }
 } // SwipeGestureEventAccessor

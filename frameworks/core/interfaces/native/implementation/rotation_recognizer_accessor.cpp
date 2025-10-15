@@ -33,11 +33,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetAngleImpl(Ark_RotationRecognizer peer)
+Ark_Float64 GetAngleImpl(Ark_RotationRecognizer peer)
 {
-    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_ANGLE);
+    auto errorValue = Converter::ArkValue<Ark_Float64>(DEFAULT_ANGLE);
     CHECK_NULL_RETURN(peer, errorValue);
-    return Converter::ArkValue<Ark_Number>(peer->GetAngle());
+    return Converter::ArkValue<Ark_Float64>(peer->GetAngle());
 }
 } // RotationRecognizerAccessor
 const GENERATED_ArkUIRotationRecognizerAccessor* GetRotationRecognizerAccessor()
