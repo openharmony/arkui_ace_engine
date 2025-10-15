@@ -2292,6 +2292,7 @@ HWTEST_F(RichEditorEditTestNg, SetMaxLines002, TestSize.Level1)
  */
 HWTEST_F(RichEditorEditTestNg, SetMaxLines003, TestSize.Level1)
 {
+    ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     EXPECT_EQ(richEditorPattern->GetMaxLines(), INT_MAX);
 }
