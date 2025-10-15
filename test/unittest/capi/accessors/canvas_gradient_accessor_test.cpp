@@ -67,8 +67,9 @@ HWTEST_F(CanvasGradientAccessorTest, addColorStopTest, TestSize.Level1)
     for (const auto& [offset, color, expectedOffset, expectedColor] : gradientTestPlan) {
         Ark_Number arkOffset = Converter::ArkValue<Ark_Number>(offset);
         Ark_String arkColor = Converter::ArkValue<Ark_String>(color);
+        auto color = Converter::ArkUnion<Ark_Union_String_ColorMetrics, Ark_String>(arkColor);
         gradient->ClearColors();
-        accessor_->addColorStop(peer_, &arkOffset, &arkColor);
+        accessor_->addColorStop(peer_, &arkOffset, &color);
         auto colors = gradient->GetColors();
         EXPECT_EQ(colors.size(), DEFAULT_COLORS_SIZE);
         for (const auto& color : gradient->GetColors()) {

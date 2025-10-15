@@ -628,6 +628,9 @@ struct ArkUIAniTextBasedModifier {
     void* (*fromSymbolModifierPeer)(void* ptr);
     void* (*toSymbolModifierPeer)(std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)>& symbolApply,
         void* symbolModifierAni);
+    void* (*fromTextModifierPeer)(void* ptr);
+    void* (*toTextModifierPeer)(std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)>& textApply,
+        void* textModifierAni);
 };
 struct ArkUIAniStyledStringModifier {
     void (*setPixelMap)(ArkUIStyledString peer, void* nativePixelMap);

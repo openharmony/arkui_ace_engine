@@ -115,8 +115,6 @@ void ViewAbstractModelStatic::BindMenuGesture(FrameNode* targetNode,
             NG::ViewAbstract::BindMenuWithCustomNode(
                 std::move(builderFunc), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
         };
-    } else {
-        return;
     }
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(showMenu));

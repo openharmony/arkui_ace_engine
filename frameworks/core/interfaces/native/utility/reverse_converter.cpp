@@ -122,9 +122,9 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     auto minute = data->GetValue(MINUTE)->GetInt();
     auto second = data->GetValue(SECOND)->GetInt();
     dst = {
-        .hour = ArkValue<Ark_Number>(hour),
-        .minute = ArkValue<Ark_Number>(minute),
-        .second = ArkValue<Ark_Number>(second),
+        .hour = ArkValue<Ark_Int32>(hour),
+        .minute = ArkValue<Ark_Int32>(minute),
+        .second = ArkValue<Ark_Int32>(second),
     };
 }
 

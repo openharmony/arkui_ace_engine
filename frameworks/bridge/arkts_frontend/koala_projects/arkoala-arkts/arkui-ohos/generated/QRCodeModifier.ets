@@ -42,7 +42,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
     _backgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _backgroundColor_0_0value?: ResourceColor | undefined
     _contentOpacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _contentOpacity_0_0value?: number | Resource | undefined
+    _contentOpacity_0_0value?: double | Resource | undefined
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkQRCodePeer;
@@ -86,7 +86,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
         {
             switch (this._contentOpacity_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setContentOpacityAttribute((this._contentOpacity_0_0value as number | Resource | undefined));
+                    peer.setContentOpacityAttribute((this._contentOpacity_0_0value as double | Resource | undefined));
                     this._contentOpacity_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -96,7 +96,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
                 }
                 default: {
                     this._contentOpacity_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setContentOpacityAttribute((undefined as number | Resource | undefined));
+                    peer.setContentOpacityAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -138,7 +138,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
                     break;
                 }
                 default: {
-                    this.contentOpacity((undefined as number | Resource | undefined));
+                    this.contentOpacity((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -165,7 +165,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
         }
         return this
     }
-    contentOpacity(value: number | Resource | undefined): this {
+    contentOpacity(value: double | Resource | undefined): this {
         if (((this._contentOpacity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._contentOpacity_0_flag = AttributeUpdaterFlag.UPDATE

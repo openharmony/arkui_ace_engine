@@ -90,18 +90,14 @@ void ExitFullscreenImpl(Ark_VideoController peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerExitFullscreen();
 }
-void SetCurrentTimeDefaultImpl(Ark_VideoController peer,
-                               Ark_Float64 value)
+void SetCurrentTimeImpl(Ark_VideoController peer,
+                        Ark_Float64 value,
+                        const Opt_SeekMode* seekMode)
 {
     CHECK_NULL_VOID(value);
     auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerSetCurrentTime(Converter::Convert<double>(value));
-}
-void SetCurrentTimeWithModeImpl(Ark_VideoController peer,
-                                Ark_Float64 value,
-                                Ark_SeekMode seekMode)
-{
 }
 void ResetImpl(Ark_VideoController peer)
 {
@@ -121,8 +117,7 @@ const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor()
         VideoControllerAccessor::StopImpl,
         VideoControllerAccessor::RequestFullscreenImpl,
         VideoControllerAccessor::ExitFullscreenImpl,
-        VideoControllerAccessor::SetCurrentTimeDefaultImpl,
-        VideoControllerAccessor::SetCurrentTimeWithModeImpl,
+        VideoControllerAccessor::SetCurrentTimeImpl,
         VideoControllerAccessor::ResetImpl,
     };
     return &VideoControllerAccessorImpl;

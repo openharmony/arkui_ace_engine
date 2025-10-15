@@ -3144,7 +3144,6 @@ export class ArkUIGeneratedNativeModule {
     native static _AnimationExtender_AnimationTranslate(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _AnimationExtender_AnimateToImmediatelyImpl(thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _AnimationExtender_KeyframeAnimationImpl(thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _AppearSymbolEffect_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
@@ -3323,7 +3322,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CanvasGradient_getFinalizer(): KPointer
     @ani.unsafe.Quick
-    native static _CanvasGradient_addColorStop(ptr: KPointer, offset: number, color: KStringPtr): void
+    native static _CanvasGradient_addColorStop(ptr: KPointer, offset: KDouble, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CanvasPath_construct(): KPointer
     @ani.unsafe.Direct
@@ -3533,12 +3532,14 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasRenderingContext2D_startImageAnalyzer(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CanvasRenderingContext2D_stopImageAnalyzer(ptr: KPointer): void
-    native static _CanvasRenderingContext2D_onOnAttach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    native static _CanvasRenderingContext2D_offOnAttach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _CanvasRenderingContext2D_onOnDetach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _CanvasRenderingContext2D_onAttach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _CanvasRenderingContext2D_offOnDetach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _CanvasRenderingContext2D_offAttach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _CanvasRenderingContext2D_onDetach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _CanvasRenderingContext2D_offDetach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CanvasRenderingContext2D_getHeight(ptr: KPointer): number
     @ani.unsafe.Direct
@@ -4494,9 +4495,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LongPressRecognizer_getDuration(ptr: KPointer): number
     @ani.unsafe.Direct
-    native static _Matrix2D_construct0(): KPointer
-    @ani.unsafe.Direct
-    native static _Matrix2D_construct1(unit: KInt): KPointer
+    native static _Matrix2D_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _Matrix2D_getFinalizer(): KPointer
     @ani.unsafe.Direct
@@ -5785,9 +5784,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _VideoController_exitFullscreen(ptr: KPointer): void
     @ani.unsafe.Quick
-    native static _VideoController_setCurrentTimeDefault(ptr: KPointer, value: KDouble): void
-    @ani.unsafe.Quick
-    native static _VideoController_setCurrentTimeWithMode(ptr: KPointer, value: KDouble, seekMode: KInt): void
+    native static _VideoController_setCurrentTime(ptr: KPointer, value: KDouble, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _VideoController_reset(ptr: KPointer): void
     @ani.unsafe.Direct

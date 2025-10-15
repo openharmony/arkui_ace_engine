@@ -4051,10 +4051,16 @@ void SetGeometryTransition0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto id = Converter::OptConvertPtr<std::string>(value).value_or("");
-    bool followWithoutTransition {false};
-    bool doRegisterSharedTransition {false};
-    ViewAbstractModelStatic::SetGeometryTransition(frameNode, id, followWithoutTransition, doRegisterSharedTransition);
+    auto idOpt = Converter::OptConvertPtr<std::string>(value);
+    if (!idOpt) {
+        return; // undefined return, same with ArktsDyn
+    }
+    // follow flag
+    bool followWithoutTransition { false };
+    // hierarchy flag
+    bool doRegisterSharedTransition { true };
+    ViewAbstractModelStatic::SetGeometryTransition(
+        frameNode, idOpt.value(), followWithoutTransition, doRegisterSharedTransition);
 }
 void SetRestoreIdImpl(Ark_NativePointer node,
                       const Opt_Int32* value)
@@ -4728,9 +4734,9 @@ void SetTransition1Impl(Ark_NativePointer node,
     }
     auto effectPeer = *optValue;
     if (effectPeer && effectPeer->handler) {
-        // ViewAbstract::SetChainedTransition(frameNode, effectPeer->handler, std::move(finishCallback));
+        ViewAbstract::SetChainedTransition(frameNode, effectPeer->handler, std::move(finishCallback));
     } else {
-        // ViewAbstract::CleanTransition(frameNode);
+        ViewAbstract::CleanTransition(frameNode);
     }
 }
 void SetBlurImpl(Ark_NativePointer node,
@@ -4980,18 +4986,24 @@ void SetGeometryTransition1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_EQUAL_VOID(id && options, false);
-    auto idValue = Converter::OptConvertPtr<std::string>(id).value_or("");
-    auto optOptions = Converter::OptConvertPtr<GeometryTransitionOptions>(options);
-    auto followWithoutTransition {false};
-    auto hierarchyStrategy = TransitionHierarchyStrategy::NONE;
-    auto doRegisterSharedTransition {false};
-    if (optOptions.has_value()) {
-        followWithoutTransition = optOptions.value().follow.value_or(false);
-        hierarchyStrategy = optOptions.value().hierarchyStrategy.value_or(TransitionHierarchyStrategy::NONE);
-        doRegisterSharedTransition = hierarchyStrategy == TransitionHierarchyStrategy::ADAPTIVE;
+    auto idOpt = Converter::OptConvertPtr<std::string>(id);
+    if (!idOpt) {
+        return; // undefined return, same with ArktsDyn
     }
-    // ViewAbstract::SetGeometryTransition(frameNode, idValue, followWithoutTransition, doRegisterSharedTransition);
+    auto optOptions = Converter::OptConvertPtr<GeometryTransitionOptions>(options);
+    // follow flag
+    bool followWithoutTransition { false };
+    // hierarchy flag
+    bool doRegisterSharedTransition { true };
+    if (optOptions.has_value()) {
+        followWithoutTransition = optOptions->follow.value_or(false);
+        if (optOptions->hierarchyStrategy &&
+            optOptions->hierarchyStrategy.value() == TransitionHierarchyStrategy::NONE) {
+            doRegisterSharedTransition = false;
+        }
+    }
+    ViewAbstractModelStatic::SetGeometryTransition(
+        frameNode, idOpt.value(), followWithoutTransition, doRegisterSharedTransition);
 }
 void SetBindTipsImpl(Ark_NativePointer node,
                      const Opt_TipsMessageType* message,
@@ -5020,7 +5032,8 @@ void SetBindTipsImpl(Ark_NativePointer node,
         [] (const Ark_StyledString& value) {
             return;
         },
-        [] () {
+        [frameNode, popupParam, styledString] () {
+            ViewAbstractModelStatic::BindTips(frameNode, popupParam, styledString);
             return;
         });
 }
@@ -5055,9 +5068,7 @@ void SetBindPopupImpl(Ark_NativePointer node,
             auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
             CHECK_NULL_VOID(popupParam);
             onWillDismissPopup(value.onWillDismiss, popupParam);
-            if (optShow) {
-                popupParam->SetIsShow(*optShow);
-            }
+            popupParam->SetIsShow(optShow.value_or(false));
            ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
         },
         [frameNode, node, optShow, onWillDismissPopup](const Ark_CustomPopupOptions& value) {
@@ -5065,24 +5076,18 @@ void SetBindPopupImpl(Ark_NativePointer node,
             CHECK_NULL_VOID(popupParam);
             onWillDismissPopup(value.onWillDismiss, popupParam);
             if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
-                if (optShow) {
-                    popupParam->SetIsShow(*optShow);
-                }
+                popupParam->SetIsShow(optShow.value_or(false));
                 CallbackHelper(value.builder).BuildAsync([frameNode, popupParam](const RefPtr<UINode>& uiNode) {
                     ViewAbstractModelStatic::BindPopup(frameNode, popupParam, uiNode);
                     }, node);
             } else {
-                if (optShow) {
-                    popupParam->SetIsShow(*optShow);
-                }
+                popupParam->SetIsShow(optShow.value_or(false));
                 ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
             }
         },
         [frameNode, optShow]() {
             auto popupParam = AceType::MakeRefPtr<PopupParam>();
-            if (optShow) {
-                popupParam->SetIsShow(*optShow);
-            }
+            popupParam->SetIsShow(optShow.value_or(false));
             ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
         });
 }
@@ -5161,24 +5166,31 @@ void BindContextMenuBase(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(content);
-    if (!optValue) {
-        // Implement Reset value
-        return;
-    }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     auto type = Converter::OptConvertPtr<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
-    auto contentBuilder = [callback = CallbackHelper(*optValue), node, frameNode, type](
-                              MenuParam menuParam, std::function<void()>&& previewBuildFunc) {
-        callback.BuildAsync([frameNode, type, menuParam, previewBuildFunc](const RefPtr<UINode>& uiNode) mutable {
-            auto builder = [frameNode, uiNode]() {
-                PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-                ViewStackProcessor::GetInstance()->Push(uiNode);
-            };
+    std::function<void(MenuParam, std::function<void()> &&)> contentBuilder;
+    if (!optValue) {
+        contentBuilder = [node, frameNode, type](MenuParam menuParam, std::function<void()>&& previewBuildFunc) {
             ViewAbstractModelStatic::BindContextMenuStatic(
-                AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
+                AceType::Claim(frameNode), type, nullptr, menuParam, std::move(previewBuildFunc));
             ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
-            }, node);
-    };
+        };
+    } else {
+        contentBuilder = [callback = CallbackHelper(*optValue), node, frameNode, type](
+                             MenuParam menuParam, std::function<void()>&& previewBuildFunc) {
+            callback.BuildAsync(
+                [frameNode, type, menuParam, previewBuildFunc](const RefPtr<UINode>& uiNode) mutable {
+                    auto builder = [frameNode, uiNode]() {
+                        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                        ViewStackProcessor::GetInstance()->Push(uiNode);
+                    };
+                    ViewAbstractModelStatic::BindContextMenuStatic(
+                        AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
+                    ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
+                },
+                node);
+        };
+    }
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
     Converter::VisitUnion(menuOption->preview,

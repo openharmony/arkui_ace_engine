@@ -52,9 +52,9 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
     _pathColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _pathColor_0_0value?: ResourceColor | undefined
     _pathStrokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _pathStrokeWidth_0_0value?: number | string | undefined
+    _pathStrokeWidth_0_0value?: double | string | undefined
     _onPatternComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onPatternComplete_0_0value?: ((input: Array<number>) => void) | undefined
+    _onPatternComplete_0_0value?: ((input: Array<int32>) => void) | undefined
     _autoReset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _autoReset_0_0value?: boolean | undefined
     _onDotConnect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -196,7 +196,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             switch (this._pathStrokeWidth_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setPathStrokeWidthAttribute((this._pathStrokeWidth_0_0value as number | string | undefined));
+                    peer.setPathStrokeWidthAttribute((this._pathStrokeWidth_0_0value as double | string | undefined));
                     this._pathStrokeWidth_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -206,7 +206,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
                 }
                 default: {
                     this._pathStrokeWidth_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setPathStrokeWidthAttribute((undefined as number | string | undefined));
+                    peer.setPathStrokeWidthAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -214,7 +214,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             switch (this._onPatternComplete_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnPatternCompleteAttribute((this._onPatternComplete_0_0value as ((input: Array<number>) => void) | undefined));
+                    peer.setOnPatternCompleteAttribute((this._onPatternComplete_0_0value as ((input: Array<int32>) => void) | undefined));
                     this._onPatternComplete_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -224,7 +224,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
                 }
                 default: {
                     this._onPatternComplete_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnPatternCompleteAttribute((undefined as ((input: Array<number>) => void) | undefined));
+                    peer.setOnPatternCompleteAttribute((undefined as ((input: Array<int32>) => void) | undefined));
                 }
             }
         }
@@ -403,7 +403,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
                     break;
                 }
                 default: {
-                    this.pathStrokeWidth((undefined as number | string | undefined));
+                    this.pathStrokeWidth((undefined as double | string | undefined));
                 }
             }
         }
@@ -416,7 +416,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
                     break;
                 }
                 default: {
-                    this.onPatternComplete((undefined as ((input: Array<number>) => void) | undefined));
+                    this.onPatternComplete((undefined as ((input: Array<int32>) => void) | undefined));
                 }
             }
         }
@@ -550,7 +550,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         }
         return this
     }
-    pathStrokeWidth(value: number | string | undefined): this {
+    pathStrokeWidth(value: double | string | undefined): this {
         if (((this._pathStrokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._pathStrokeWidth_0_0value) !== (value)))
         {
             this._pathStrokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
@@ -561,7 +561,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         }
         return this
     }
-    onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
+    onPatternComplete(value: ((input: Array<int32>) => void) | undefined): this {
         if (((this._onPatternComplete_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onPatternComplete_0_flag = AttributeUpdaterFlag.UPDATE

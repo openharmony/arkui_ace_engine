@@ -1854,7 +1854,6 @@ HWTEST_F(ClickRecognizerTestNg, UpdateInfoWithDownEventTest001, TestSize.Level1)
     downEvent.type = TouchType::DOWN;
     TouchEvent upEvent = TouchEvent();
     upEvent.type = TouchType::UP;
-
     const std::vector<MockClickRecognizerCase> mockClickRecognizerCases = {
         {1, 1, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 1, 1,
             Dimension(std::numeric_limits<double>::infinity()), RefereeState::SUCCEED, {downEvent, upEvent}},

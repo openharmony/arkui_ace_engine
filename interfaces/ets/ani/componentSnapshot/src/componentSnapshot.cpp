@@ -96,6 +96,20 @@ static ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg
     return reinterpret_cast<ani_ref>(obj);
 }
 
+void AniThrowError(ani_env* env, ani_int code, const std::string& msg)
+{
+    CHECK_NULL_VOID(env);
+    auto errObj = CreateStsError(env, code, msg);
+    if (errObj == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT,  "Get error object failed!");
+        return;
+    }
+    if (ANI_OK != env->ThrowError(static_cast<ani_error>(errObj))) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Throw ani error object failed!");
+        return;
+    }
+}
+
 std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
 {
     ani_size strSize;
@@ -504,9 +518,11 @@ static ani_object ANI_GetSync([[maybe_unused]] ani_env* env, ani_string componen
             break;
         case OHOS::Ace::ERROR_CODE_INTERNAL_ERROR:
             TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error!");
+            AniThrowError(env, pair.first, "Internal error!");
             break;
         case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT:
             TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot timeout!");
+            AniThrowError(env, pair.first, "ComponentSnapshot timeout!");
             break;
         default:
             TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Unkonw error coed!");
@@ -567,9 +583,11 @@ static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_dou
             break;
         case OHOS::Ace::ERROR_CODE_INTERNAL_ERROR:
             TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error!");
+            AniThrowError(env, pair.first, "Internal error!");
             break;
         case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT:
             TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot timeout!");
+            AniThrowError(env, pair.first, "ComponentSnapshot timeout!");
             break;
     }
     return pixelMap;

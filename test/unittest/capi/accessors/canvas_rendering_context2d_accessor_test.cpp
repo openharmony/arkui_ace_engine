@@ -236,21 +236,21 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_getWidthTest, TestSize.L
 }
 
 /**
- * @tc.name: onOnAttachTest
- * @tc.desc: check add callbacks using onOnAttach
+ * @tc.name: onAttachTest
+ * @tc.desc: check add callbacks using onAttach
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_onOnAttachTest, TestSize.Level1)
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_onAttachTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_TRUE(mockPatternKeeper_);
-    ASSERT_NE(accessor_->onOnAttach, nullptr);
+    ASSERT_NE(accessor_->onAttach, nullptr);
     struct CheckEvent {
         int32_t resourceId;
     };
     static size_t eventsSize = 10;
-    using TestCallback = std::pair<Callback_Void, std::optional<CheckEvent>>;
+    using TestCallback = std::pair<VoidCallback, std::optional<CheckEvent>>;
     static std::vector<TestCallback> checkEvents;
     for (size_t i = 0; i < eventsSize; ++i) {
         auto callback = [](const Ark_Int32 resourceId) {
@@ -258,11 +258,11 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_onOnAttachTest, TestSize
                 .resourceId = resourceId,
             };
         };
-        checkEvents.emplace_back(std::make_pair(ArkValue<Callback_Void>(callback, i), std::nullopt));
+        checkEvents.emplace_back(std::make_pair(ArkValue<VoidCallback>(callback, i), std::nullopt));
     }
     int arkCounter = 0;
     for (size_t i = 0; i < eventsSize; ++i) {
-        accessor_->onOnAttach(vmContext_, peer_, &checkEvents[i].first);
+        accessor_->onAttach(vmContext_, peer_, &checkEvents[i].first);
         EXPECT_FALSE(checkEvents[i].second);
         for (size_t j = 0; j <= i; ++j) {
             mockPatternKeeper_->AttachRenderContext();
@@ -276,21 +276,21 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_onOnAttachTest, TestSize
 }
 
 /**
- * @tc.name: onOnDetachTest
- * @tc.desc: check add callbacks using onOnDetach
+ * @tc.name: onDetachTest
+ * @tc.desc: check add callbacks using onDetach
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_onOnDetachTest, TestSize.Level1)
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_onDetachTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_TRUE(mockPatternKeeper_);
-    ASSERT_NE(accessor_->onOnAttach, nullptr);
+    ASSERT_NE(accessor_->onAttach, nullptr);
     struct CheckEvent {
         int32_t resourceId;
     };
     static size_t eventsSize = 10;
-    using TestCallback = std::pair<Callback_Void, std::optional<CheckEvent>>;
+    using TestCallback = std::pair<VoidCallback, std::optional<CheckEvent>>;
     static std::vector<TestCallback> checkEvents;
     for (size_t i = 0; i < eventsSize; ++i) {
         auto callback = [](const Ark_Int32 resourceId) {
@@ -298,11 +298,11 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_onOnDetachTest, TestSize
                 .resourceId = resourceId,
             };
         };
-        checkEvents.emplace_back(std::make_pair(ArkValue<Callback_Void>(callback, i), std::nullopt));
+        checkEvents.emplace_back(std::make_pair(ArkValue<VoidCallback>(callback, i), std::nullopt));
     }
     int arkCounter = 0;
     for (size_t i = 0; i < eventsSize; ++i) {
-        accessor_->onOnDetach(peer_, &checkEvents[i].first);
+        accessor_->onDetach(peer_, &checkEvents[i].first);
         EXPECT_FALSE(checkEvents[i].second);
         for (size_t j = 0; j <= i; ++j) {
             mockPatternKeeper_->DetachRenderContext();
@@ -316,21 +316,21 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_onOnDetachTest, TestSize
 }
 
 /**
- * @tc.name: offOnAttachTest
- * @tc.desc: check remove single callback using offOnAttach
+ * @tc.name: offAttachTest
+ * @tc.desc: check remove single callback using offAttach
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnAttachTest, TestSize.Level1)
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offAttachTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_TRUE(mockPatternKeeper_);
-    ASSERT_NE(accessor_->onOnAttach, nullptr);
+    ASSERT_NE(accessor_->onAttach, nullptr);
     struct CheckEvent {
         int32_t resourceId;
     };
     static size_t eventsSize = 10;
-    using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;
+    using TestCallback = std::pair<Opt_VoidCallback, std::optional<CheckEvent>>;
     static std::vector<TestCallback> checkEvents;
     for (size_t i = 0; i < eventsSize; ++i) {
         auto callback = [](const Ark_Int32 resourceId) {
@@ -338,13 +338,13 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnAttachTest, TestSiz
                 .resourceId = resourceId,
             };
         };
-        auto arkCallback = ArkValue<Callback_Void>(callback, i);
-        checkEvents.emplace_back(std::make_pair(ArkValue<Opt_Callback_Void>(arkCallback), std::nullopt));
-        accessor_->onOnAttach(vmContext_, peer_, &arkCallback);
+        auto arkCallback = ArkValue<VoidCallback>(callback, i);
+        checkEvents.emplace_back(std::make_pair(ArkValue<Opt_VoidCallback>(arkCallback), std::nullopt));
+        accessor_->onAttach(vmContext_, peer_, &arkCallback);
     }
     int arkCounter = 0;
     for (size_t i = 0; i < eventsSize; ++i) {
-        accessor_->offOnAttach(vmContext_, peer_, &checkEvents[i].first);
+        accessor_->offAttach(vmContext_, peer_, &checkEvents[i].first);
         checkEvents[i].second = std::nullopt;
         for (size_t j = 0; j < eventsSize; ++j) {
             mockPatternKeeper_->AttachRenderContext();
@@ -362,21 +362,21 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnAttachTest, TestSiz
 }
 
 /**
- * @tc.name: offOnAttachTestAll
- * @tc.desc: check remove all callbacks using offOnAttachTest
+ * @tc.name: offAttachTestAll
+ * @tc.desc: check remove all callbacks using offAttachTest
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnAttachTestAll, TestSize.Level1)
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offAttachTestAll, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_TRUE(mockPatternKeeper_);
-    ASSERT_NE(accessor_->onOnAttach, nullptr);
+    ASSERT_NE(accessor_->onAttach, nullptr);
     struct CheckEvent {
         int32_t resourceId;
     };
     static size_t eventsSize = 10;
-    using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;
+    using TestCallback = std::pair<Opt_VoidCallback, std::optional<CheckEvent>>;
     static std::vector<TestCallback> checkEvents;
     for (size_t i = 0; i < eventsSize; ++i) {
         auto callback = [](const Ark_Int32 resourceId) {
@@ -384,12 +384,12 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnAttachTestAll, Test
                 .resourceId = resourceId,
             };
         };
-        auto arkCallback = ArkValue<Callback_Void>(callback, i);
-        checkEvents.emplace_back(std::make_pair(ArkValue<Opt_Callback_Void>(arkCallback), std::nullopt));
-        accessor_->onOnAttach(vmContext_, peer_, &arkCallback);
+        auto arkCallback = ArkValue<VoidCallback>(callback, i);
+        checkEvents.emplace_back(std::make_pair(ArkValue<Opt_VoidCallback>(arkCallback), std::nullopt));
+        accessor_->onAttach(vmContext_, peer_, &arkCallback);
     }
-    auto optCallback = ArkValue<Opt_Callback_Void>();
-    accessor_->offOnAttach(vmContext_, peer_, &optCallback);
+    auto optCallback = ArkValue<Opt_VoidCallback>();
+    accessor_->offAttach(vmContext_, peer_, &optCallback);
     mockPatternKeeper_->AttachRenderContext();
     for (size_t j = 0; j < eventsSize; ++j) {
         EXPECT_FALSE(checkEvents[j].second);
@@ -399,21 +399,21 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnAttachTestAll, Test
 }
 
 /**
- * @tc.name: offOnDetachTest
- * @tc.desc: check remove single callback using offOnDetach
+ * @tc.name: offDetachTest
+ * @tc.desc: check remove single callback using offDetach
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnDetachTest, TestSize.Level1)
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offDetachTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_TRUE(mockPatternKeeper_);
-    ASSERT_NE(accessor_->onOnAttach, nullptr);
+    ASSERT_NE(accessor_->onAttach, nullptr);
     struct CheckEvent {
         int32_t resourceId;
     };
     static size_t eventsSize = 10;
-    using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;
+    using TestCallback = std::pair<Opt_VoidCallback, std::optional<CheckEvent>>;
     static std::vector<TestCallback> checkEvents;
     for (size_t i = 0; i < eventsSize; ++i) {
         auto callback = [](const Ark_Int32 resourceId) {
@@ -421,13 +421,13 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnDetachTest, TestSiz
                 .resourceId = resourceId,
             };
         };
-        auto arkCallback = ArkValue<Callback_Void>(callback, i);
-        checkEvents.emplace_back(std::make_pair(ArkValue<Opt_Callback_Void>(arkCallback), std::nullopt));
-        accessor_->onOnDetach(peer_, &arkCallback);
+        auto arkCallback = ArkValue<VoidCallback>(callback, i);
+        checkEvents.emplace_back(std::make_pair(ArkValue<Opt_VoidCallback>(arkCallback), std::nullopt));
+        accessor_->onDetach(peer_, &arkCallback);
     }
     int arkCounter = 0;
     for (size_t i = 0; i < eventsSize; ++i) {
-        accessor_->offOnDetach(peer_, &checkEvents[i].first);
+        accessor_->offDetach(peer_, &checkEvents[i].first);
         checkEvents[i].second = std::nullopt;
         for (size_t j = 0; j < eventsSize; ++j) {
             mockPatternKeeper_->DetachRenderContext();
@@ -445,21 +445,21 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnDetachTest, TestSiz
 }
 
 /**
- * @tc.name: offOnDetachTestAll
- * @tc.desc: check remove all callbacks using offOnDetach
+ * @tc.name: offDetachTestAll
+ * @tc.desc: check remove all callbacks using offDetach
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnDetachTestAll, TestSize.Level1)
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offDetachTestAll, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_TRUE(mockPatternKeeper_);
-    ASSERT_NE(accessor_->onOnAttach, nullptr);
+    ASSERT_NE(accessor_->onAttach, nullptr);
     struct CheckEvent {
         int32_t resourceId;
     };
     static size_t eventsSize = 10;
-    using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;
+    using TestCallback = std::pair<Opt_VoidCallback, std::optional<CheckEvent>>;
     static std::vector<TestCallback> checkEvents;
     for (size_t i = 0; i < eventsSize; ++i) {
         auto callback = [](const Ark_Int32 resourceId) {
@@ -467,12 +467,12 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnDetachTestAll, Test
                 .resourceId = resourceId,
             };
         };
-        auto arkCallback = ArkValue<Callback_Void>(callback, i);
-        checkEvents.emplace_back(std::make_pair(ArkValue<Opt_Callback_Void>(arkCallback), std::nullopt));
-        accessor_->onOnDetach(peer_, &arkCallback);
+        auto arkCallback = ArkValue<VoidCallback>(callback, i);
+        checkEvents.emplace_back(std::make_pair(ArkValue<Opt_VoidCallback>(arkCallback), std::nullopt));
+        accessor_->onDetach(peer_, &arkCallback);
     }
-    auto optCallback = ArkValue<Opt_Callback_Void>();
-    accessor_->offOnDetach(peer_, &optCallback);
+    auto optCallback = ArkValue<Opt_VoidCallback>();
+    accessor_->offDetach(peer_, &optCallback);
     mockPatternKeeper_->DetachRenderContext();
     for (size_t j = 0; j < eventsSize; ++j) {
         EXPECT_FALSE(checkEvents[j].second);

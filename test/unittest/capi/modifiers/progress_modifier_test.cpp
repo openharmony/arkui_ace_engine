@@ -453,9 +453,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidValues, TestSize.Lev
     capsuleStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>(true);
     capsuleStyle.borderColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#12131415");
     capsuleStyle.borderWidth = Converter::ArkValue<Opt_Length>("7px");
-#ifdef WRONG_GEN
     capsuleStyle.content = Converter::ArkValue<Opt_String>("content");
-#endif
     capsuleStyle.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#23456134");
     capsuleStyle.showDefaultPercentage = Converter::ArkValue<Opt_Boolean>(true);
     capsuleStyle.font = Converter::ArkValue<Opt_Font>(Ark_Empty());

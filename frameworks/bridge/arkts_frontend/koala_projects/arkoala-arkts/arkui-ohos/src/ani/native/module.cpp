@@ -83,12 +83,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_Extractors_FromImagePixelMapPtr",
-            "J:L@ohos/multimedia/image/image/PixelMap;",
+            "l:C{@ohos.multimedia.image.image.PixelMap}",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromImagePixelMapPtr)
         },
         ani_native_function {
             "_Extractors_ToImagePixelMapPtr",
-            "L@ohos/multimedia/image/image/PixelMap;:J",
+            "C{@ohos.multimedia.image.image.PixelMap}:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToImagePixelMapPtr)
         },
         ani_native_function {
@@ -747,6 +747,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToSymbolGlyphModifierPtr)
         },
         ani_native_function {
+            "_Extractors_FromTextModifierPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromTextModifierPtr)
+        },
+        ani_native_function {
+            "_Extractors_ToTextModifierPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToTextModifierPtr)
+        },
+        ani_native_function {
             "_ImageSpan_Set_PixelMap",
             "lC{@ohos.multimedia.image.image.PixelMap}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetImageSpanPixelMap)
@@ -1260,7 +1270,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_ForEach_FinishRender",
-            "J:V",
+            "l:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ForEachFinishRender)
         },
         ani_native_function {

@@ -89,7 +89,7 @@ void SetFormatImpl(Ark_NativePointer node,
     TextClockModelStatic::SetFormat(frameNode, convValue);
 }
 void SetOnDateChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Number_Void* value)
+                         const Opt_Callback_I64_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -130,7 +130,7 @@ void SetFontStyleImpl(Ark_NativePointer node,
     TextClockModelStatic::SetFontStyle(frameNode, convValue.value_or(DEFAULT_FONT_STYLE));
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

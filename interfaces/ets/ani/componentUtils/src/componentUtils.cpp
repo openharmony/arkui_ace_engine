@@ -238,15 +238,18 @@ static ani_object getRotateResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::
 static ani_object getTransform([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     const int32_t size = 16;
-    ani_array array = nullptr;
-    env->Array_New(size, nullptr, &array);
 
     ani_class doubleClass = nullptr;
     env->FindClass("std.core.Double", &doubleClass);
     ani_method doubleCtor = nullptr;
     env->Class_FindMethod(doubleClass, "<ctor>", "d:", &doubleCtor);
 
-    for (int32_t i = 0; i < size; i++) {
+    ani_array array = nullptr;
+    ani_object init {};
+    env->Object_New(doubleClass, doubleCtor, &init, ani_double(rectangle.matrix4[0]));
+    env->Array_New(size, init, &array);
+
+    for (int32_t i = 1; i < size; i++) {
         ani_object boxedDouble {};
         env->Object_New(doubleClass, doubleCtor, &boxedDouble, ani_double(rectangle.matrix4[i]));
         env->Array_Set(array, i, boxedDouble);

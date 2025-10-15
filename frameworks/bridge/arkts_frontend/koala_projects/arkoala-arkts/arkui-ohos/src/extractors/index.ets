@@ -76,7 +76,7 @@ import { UIContextImpl } from 'arkui/base/UIContextImpl';
 import { int32 } from '@koalaui/common';
 import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
 import { toPeerPtr } from '@koalaui/interop';
-import { applySymbolGlyphModifierToNode } from "./../ApplyModifierToNode"
+import { applySymbolGlyphModifierToNode, applyTextModifierToNode } from "./../ApplyModifierToNode"
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -153,11 +153,13 @@ export namespace extractors {
   }
 
   export function toTextModifierPtr(value: TextModifier): KPointer {
-    return 123;
+    let callBack = (node: KPointer) => {
+      applyTextModifierToNode(value, node);
+    };
+    return ArkUIAniModule._Extractors_ToTextModifierPtr(callBack, value);
   }
   export function fromTextModifierPtr(ptr: KPointer): TextModifier {
-    const x: Object = {};
-    return x as TextModifier;
+    return ArkUIAniModule._Extractors_FromTextModifierPtr(ptr);
   }
   // end
 

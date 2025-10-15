@@ -21,14 +21,18 @@ import { ObserveWrappedBase } from './observeWrappedBase';
 
 export class WrappedDate extends Date implements IObservedObject, ObserveWrappedBase, ISubscribedWatches {
     private store_: Date;
+    @JSONStringifyIgnore
     private meta_: IMutableStateMeta;
     // support for @Watch
     // each IObservedObject manages a set of @Wtch subscribers
     // when a object property changes need to call execureOnSubscribingWatches
     // compare interface
+    @JSONStringifyIgnore
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     // IObservedObject interface
+    @JSONStringifyIgnore
     private ____V1RenderId: RenderIdType = 0;
+    @JSONStringifyIgnore
     private allowDeep_: boolean;
 
     /**

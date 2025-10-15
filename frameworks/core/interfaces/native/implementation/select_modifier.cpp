@@ -20,10 +20,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_model_static.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/interfaces/native/implementation/text_modifier_peer.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -101,6 +104,11 @@ SelectParam Convert(const Ark_SelectOption& src)
     auto icon = OptConvert<std::string>(src.icon);
     if (icon) {
         param.icon = icon.value();
+    }
+    auto symbolIcon = Converter::OptConvert<Ark_SymbolGlyphModifier>(src.symbolIcon);
+    if (symbolIcon && *symbolIcon) {
+        param.symbolIcon = (*symbolIcon)->symbolApply;
+        PeerUtils::DestroyPeer(*symbolIcon);
     }
     return param;
 }
@@ -321,10 +329,10 @@ void SetSelectedOptionFontImpl(Ark_NativePointer node,
         SelectModelNG::SetSelectedOptionFontFamily(frameNode, arkVal->fontFamilies);
         SelectModelStatic::SetSelectedOptionItalicFontStyle(frameNode, arkVal->fontStyle);
     } else {
-        SelectModelStatic::SetFontSize(frameNode, std::nullopt);
-        SelectModelStatic::SetFontWeight(frameNode, std::nullopt);
-        SelectModelNG::SetFontFamily(frameNode, {});
-        SelectModelStatic::SetItalicFontStyle(frameNode, std::nullopt);
+        SelectModelStatic::SetSelectedOptionFontSize(frameNode, std::nullopt);
+        SelectModelStatic::SetSelectedOptionFontWeight(frameNode, std::nullopt);
+        SelectModelNG::SetSelectedOptionFontFamily(frameNode, {});
+        SelectModelStatic::SetSelectedOptionItalicFontStyle(frameNode, std::nullopt);
     }
 }
 void SetSelectedOptionFontColorImpl(Ark_NativePointer node,
@@ -353,10 +361,10 @@ void SetOptionFontImpl(Ark_NativePointer node,
         SelectModelNG::SetOptionFontFamily(frameNode, arkVal->fontFamilies);
         SelectModelStatic::SetOptionItalicFontStyle(frameNode, arkVal->fontStyle);
     } else {
-        SelectModelStatic::SetFontSize(frameNode, std::nullopt);
-        SelectModelStatic::SetFontWeight(frameNode, std::nullopt);
-        SelectModelNG::SetFontFamily(frameNode, {});
-        SelectModelStatic::SetItalicFontStyle(frameNode, std::nullopt);
+        SelectModelStatic::SetOptionFontSize(frameNode, std::nullopt);
+        SelectModelStatic::SetOptionFontWeight(frameNode, std::nullopt);
+        SelectModelNG::SetOptionFontFamily(frameNode, {});
+        SelectModelStatic::SetOptionItalicFontStyle(frameNode, std::nullopt);
     }
 }
 void SetOptionFontColorImpl(Ark_NativePointer node,
@@ -509,24 +517,46 @@ void SetTextModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (value->tag == INTEROP_TAG_UNDEFINED || !value->value) {
+        SelectModelStatic::SetTextModifierApply(frameNode, nullptr);
+        return;
+    }
+    SelectModelStatic::SetTextModifierApply(frameNode, value->value->textApply);
 }
 void SetArrowModifierImpl(Ark_NativePointer node,
                           const Opt_SymbolGlyphModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto symbolIcon = Converter::OptConvert<Ark_SymbolGlyphModifier>(*value);
+    if (symbolIcon && *symbolIcon) {
+        SelectModelStatic::SetArrowModifierApply(frameNode, (*symbolIcon)->symbolApply);
+        PeerUtils::DestroyPeer(*symbolIcon);
+        return;
+    }
+    SelectModelStatic::SetArrowModifierApply(frameNode, nullptr);
 }
 void SetOptionTextModifierImpl(Ark_NativePointer node,
                                const Opt_TextModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (value->tag == INTEROP_TAG_UNDEFINED || !value->value) {
+        SelectModelStatic::SetOptionTextModifier(frameNode, nullptr);
+        return;
+    }
+    SelectModelStatic::SetOptionTextModifier(frameNode, value->value->textApply);
 }
 void SetSelectedOptionTextModifierImpl(Ark_NativePointer node,
                                        const Opt_TextModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (value->tag == INTEROP_TAG_UNDEFINED || !value->value) {
+        SelectModelStatic::SetSelectedOptionTextModifier(frameNode, nullptr);
+        return;
+    }
+    SelectModelStatic::SetSelectedOptionTextModifier(frameNode, value->value->textApply);
 }
 void SetDividerStyleImpl(Ark_NativePointer node,
                          const Opt_DividerStyleOptions* value)

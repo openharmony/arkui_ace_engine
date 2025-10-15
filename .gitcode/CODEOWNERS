@@ -3066,6 +3066,7 @@ interfaces/ets/ani/inspector/ @ArkUI_ability_group
 interfaces/ets/ani/overlayManager/ @arkuipopupwindow_all
 interfaces/ets/ani/promptaction/ @arkuipopupwindow_all
 interfaces/ets/ani/componentSnapshot/src/componentSnapshot.cpp @ArkUI_Event
+interfaces/ets/ani/test/ @ArkUI_Event
 frameworks/core/interfaces/ani/ani_api.h @arkui_architecture
 
 [Innerkits Interfaces]

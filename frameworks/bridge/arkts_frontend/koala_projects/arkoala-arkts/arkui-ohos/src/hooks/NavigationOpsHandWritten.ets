@@ -24,6 +24,8 @@ import { ArkStackComponent, ArkStackPeer } from "../component/stack"
 import { __context } from "@koalaui/runtime"
 import { PageMapBuilder } from "../component/builder"
 import { setNeedCreate } from "../ArkComponentRoot"
+import { ObserveSingleton } from "../stateManagement/base/observeSingleton"
+import { ExtendableComponent } from "../component/extendableComponent"
 
 export class NavigationOpsHandWritten {
     static hookSetNavigationOptionsImpl(component: ArkNavigationComponent, pathInfos?: NavPathStack) {
@@ -46,12 +48,20 @@ export class NavigationOpsHandWritten {
         thisSerializer.release()
 
         if (pathInfos != undefined) {
+            const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
+            const currentExtendableComponent = ExtendableComponent.current;
             const updater: (name: string, param: object|null|undefined)=>PeerNode =
             (name: string, param: object|null|undefined) => {
                 return createUiDetachedRoot((): PeerNode => ArkStackPeer.create(new ArkStackComponent()), () => {
                     setNeedCreate(true)
+                    const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
+                    const lastExtendableComponent = ExtendableComponent.current;
+                    ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
+                    ExtendableComponent.current = currentExtendableComponent;
                     component._navDestination(name, param);
                     setNeedCreate(false)
+                    ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
+                    ExtendableComponent.current = lastExtendableComponent;
                 })
             }
             const value_casted = updater as ((name: string, param: object|null|undefined) => PeerNode)
