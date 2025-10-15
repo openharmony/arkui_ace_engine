@@ -220,7 +220,8 @@ const Consumer = (aliasName?: string) => {
         return undefined;
       },
       set(val) {
-        this.defaultConsumer = providerName;
+        this.defaultProviderName = providerName;
+        this.defaultVarName = varName;
         this.defaultVal = val;
         let providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
         if (providerInfo && providerInfo[0] && providerInfo[1]) {

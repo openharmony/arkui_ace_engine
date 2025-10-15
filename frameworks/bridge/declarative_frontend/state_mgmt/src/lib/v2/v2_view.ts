@@ -51,7 +51,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     private monitorIdsDelayedUpdateForAddMonitor_: Set<number> = new Set();
     private computedIdsDelayedUpdate: Set<number> = new Set();
 
-    public defaultConsumer: any = undefined;
+    public defaultProviderName: any = undefined;
+    public defaultVarName: any = undefined;
     public defaultVal: any = undefined;
 
     private recyclePoolV2_: RecyclePoolV2 | undefined = undefined;
@@ -392,8 +393,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         refs[name].resetComputed(name);
      }
 
-    public reconnectToConsumerV2<T>(varName: string, consumerVal: T): void {
-        let providerInfo = ProviderConsumerUtilV2.findProvider(this, varName);
+    public reconnectToConsumerV2<T>(providerName: string, varName: string, consumerVal: T): void {
+        let providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
         if (providerInfo && providerInfo[0] && providerInfo[1]) {
             this[varName] = providerInfo[0][providerInfo[1]];
             ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
