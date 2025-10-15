@@ -31,7 +31,7 @@ export interface Disposable {
 /**
  * @param array - an array whose elements will be disposed from the first to the last
  */
-export function disposeContentForward<Type extends Disposable>(array: ReadonlyArray<Type | undefined>) {
+export function disposeContentForward<Type extends Disposable>(array: ReadonlyArray<Type | undefined>): void {
     const length = array.length
     for (let i = 0; i < length; i++) {
         array[i]?.dispose()
@@ -41,7 +41,7 @@ export function disposeContentForward<Type extends Disposable>(array: ReadonlyAr
 /**
  * @param array - an array whose elements will be disposed from the last to the first
  */
-export function disposeContentBackward<Type extends Disposable>(array: ReadonlyArray<Type | undefined>) {
+export function disposeContentBackward<Type extends Disposable>(array: ReadonlyArray<Type | undefined>): void {
     let i = array.length
     while (0 < i--) {
         array[i]?.dispose()
@@ -51,7 +51,7 @@ export function disposeContentBackward<Type extends Disposable>(array: ReadonlyA
 /**
  * @param it - an iterator that provides elements to dispose one by one
  */
-export function disposeContent<Type extends Disposable>(it: IterableIterator<Type | undefined>) {
+export function disposeContent<Type extends Disposable>(it: IterableIterator<Type | undefined>): void {
     while (true) {
         const result = it.next()
         if (result.done) break

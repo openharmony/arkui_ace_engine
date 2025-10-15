@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { KoalaCallsiteKey } from "@koalaui/common"
-import { scheduleCallback } from "../states/GlobalStateManager"
-import { StateContext } from "arkui.incremental.runtime.state"
-import { __context, __id } from "../internals"
+import { KoalaCallsiteKey } from '@koalaui/common'
+import { scheduleCallback } from '../states/GlobalStateManager'
+import { StateContext } from 'arkui.incremental.runtime.state'
+import { __context, __id } from '../internals'
 
 /**
  * Executes the specified function if the given value has changed.
@@ -40,7 +40,7 @@ export function RunEffect<Value>(value: Value, effect: (value: Value) => void): 
     watch(__context(), __id(), true, value, effect)
 }
 
-function watch<Value>(context: StateContext, id: KoalaCallsiteKey, modified: boolean, value: Value, listener: (value: Value) => void) {
+function watch<Value>(context: StateContext, id: KoalaCallsiteKey, modified: boolean, value: Value, listener: (value: Value) => void): void {
     const scope = context.scope<void>(id, 1)
     const state = scope.param<Value>(0, value)
     if (scope.unchanged) {

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { uint32 } from "@koalaui/common"
+import { uint32 } from '@koalaui/common'
 
 /**
  * An array of prime numbers that can be used as a kind of IncrementalNode.

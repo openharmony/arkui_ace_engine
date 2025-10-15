@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import { float64, int64, uint32 } from "@koalaui/common"
-import { RunEffect } from "../memo/changeListener"
-import { remember } from "../memo/remember"
-import { AnimatedState, ImplicitAnimationProvider, MutableAnimatedState, ParametrizedAnimationProvider, StateAnimator, animatedState, mutableAnimatedState, stateAnimator } from "./AnimatedState"
-import { AnimationRange, NumberAnimationRange } from "./AnimationRange"
-import { Easing, EasingCurve } from "./Easing"
-import { AnimationSpec, TimeAnimation, animation, constAnimation, periodicAnimation, transition } from "./TimeAnimation"
+import { float64, int64, uint32 } from '@koalaui/common'
+import { RunEffect } from '../memo/changeListener'
+import { remember } from '../memo/remember'
+import { AnimatedState, ImplicitAnimationProvider, MutableAnimatedState, ParametrizedAnimationProvider, StateAnimator, animatedState, mutableAnimatedState, stateAnimator } from './AnimatedState'
+import { AnimationRange, NumberAnimationRange } from './AnimationRange'
+import { Easing, EasingCurve } from './Easing'
+import { AnimationSpec, TimeAnimation, animation, constAnimation, periodicAnimation, transition } from './TimeAnimation'
 
 /**
  * Function allowing to sample particular function with given rate.
@@ -104,7 +104,7 @@ export function rememberMutableAnimatedState<Value>(initial: Value, animationPro
  */
 /** @memo */
 export function rememberMutableAnimatedStateNumber(initial: float64, animationSpec: Partial<AnimationSpec>): MutableAnimatedState<float64> {
-    return remember((): MutableAnimatedState<float64> => mutableAnimatedState(initial, (from: float64, to: float64) => from == to
+    return remember((): MutableAnimatedState<float64> => mutableAnimatedState(initial, (from: float64, to: float64) => from === to
         ? constAnimation(to)
         : animation(animationSpec, NumberAnimationRange(from, to))))
 }

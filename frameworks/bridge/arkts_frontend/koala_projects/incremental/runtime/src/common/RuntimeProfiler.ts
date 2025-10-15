@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { int32 } from "@koalaui/common"
+import { int32 } from '@koalaui/common'
 
 /**
  * Adds statistics for constructing/disposing of the TreeNode instances.
@@ -26,8 +26,8 @@ export class RuntimeProfiler {
         ? new Map<int32, Set<Object>>()
         : undefined
 
-    static nodeCreated(nodeType: int32, node: Object) {
-        if (RuntimeProfiler.map === undefined) return
+    static nodeCreated(nodeType: int32, node: Object): void {
+        if (RuntimeProfiler.map === undefined) { return }
         let set = RuntimeProfiler.map!.get(nodeType)
         if (set === undefined) {
             set = new Set<Object>()
@@ -36,25 +36,25 @@ export class RuntimeProfiler {
         set.add(node)
     }
 
-    static nodeDisposed(nodeType: int32, node: Object) {
-        if (RuntimeProfiler.map === undefined) return
+    static nodeDisposed(nodeType: int32, node: Object): void {
+        if (RuntimeProfiler.map === undefined) { return }
         let set = RuntimeProfiler.map!.get(nodeType)
-        if (set === undefined) throw new Error("node never existed")
-        if (!set.delete(node)) console.log("node is already disposed")
+        if (set === undefined) { throw new Error('node never existed') }
+        if (!set.delete(node)) { console.log('node is already disposed') }
     }
 
     static startTrace = (s: string) => {}
 
     static endTrace = () => {}
 
-    static initTrace(start: (s: string) => void, end: () => void) {
+    static initTrace(start: (s: string) => void, end: () => void): void {
         RuntimeProfiler.startTrace = start
         RuntimeProfiler.endTrace = end
     }
 
     static nativeLog = (s: string) => {}
 
-    static initNativeLog(cb: (s: string) => void) {
+    static initNativeLog(cb: (s: string) => void): void {
         RuntimeProfiler.nativeLog = cb
     }
 
@@ -87,19 +87,19 @@ export class RuntimeProfiler {
     private mutableStates = 0
     private computableValues = 0
 
-    static enable() {
+    static enable(): void {
         RuntimeProfiler.instance = new RuntimeProfiler()
     }
 
-    static disable() {
+    static disable(): void {
         RuntimeProfiler.instance = undefined
     }
 
     static enabled(): boolean {
-        return RuntimeProfiler.instance != undefined
+        return RuntimeProfiler.instance !== undefined
     }
 
-    reset() {
+    reset(): void {
         this.invalidations = 0
         this.computes = 0
         this.builds = 0
@@ -115,7 +115,7 @@ export class RuntimeProfiler {
         this.computableValues = 0
     }
 
-    report() {
+    report(): void {
         console.log(this.getReport())
     }
 
@@ -124,10 +124,10 @@ export class RuntimeProfiler {
         const buildTime = Math.round(1000 * (this.buildExitTime - this.buildEnterTime))
         const layoutTime = Math.round(1000 * (this.layoutExitTime - this.layoutEnterTime))
         const drawTime = Math.round(1000 * (this.drawExitTime - this.drawEnterTime))
-        if (this.updateTime < updateTime) this.updateTime = updateTime
-        if (this.buildTime < buildTime) this.buildTime = buildTime
-        if (this.layoutTime < layoutTime) this.layoutTime = layoutTime
-        if (this.drawTime < drawTime) this.drawTime = drawTime
+        if (this.updateTime < updateTime) { this.updateTime = updateTime }
+        if (this.buildTime < buildTime) { this.buildTime = buildTime }
+        if (this.layoutTime < layoutTime) { this.layoutTime = layoutTime }
+        if (this.drawTime < drawTime) { this.drawTime = drawTime }
 
         // Improve: OHOS does not properly handle \n in template literals
         const array = Array.of<string>(
@@ -147,20 +147,20 @@ export class RuntimeProfiler {
             `FPS: ${this.lastFPS}`,
         )
         RuntimeProfiler.map?.forEach((set:Set<Object>, kind:int32) => {
-            if (set.size > 0) array.push(kind + ":" + set.size)
+            if (set.size > 0) { array.push(kind + ':' + set.size) }
         })
-        return array.join("\n")
+        return array.join('\n')
     }
 
-    invalidation() { this.invalidations++ }
-    compute() { this.computes++ }
-    build() { this.builds++ }
-    node() { this.nodes++ }
-    realDraw() { this.realDraws++ }
-    cachedDraw() { this.cachedDraws++ }
-    layout() {  this.layouts++ }
-    measure() { this.measures++ }
-    frame(ms: number) {
+    invalidation(): void { this.invalidations++ }
+    compute(): void { this.computes++ }
+    build(): void { this.builds++ }
+    node(): void { this.nodes++ }
+    realDraw(): void { this.realDraws++ }
+    cachedDraw(): void { this.cachedDraws++ }
+    layout(): void { this.layouts++ }
+    measure(): void { this.measures++ }
+    frame(ms: number): void {
         if (ms - this.lastTime <= 1000) {
             this.frames++
         } else {
@@ -169,31 +169,31 @@ export class RuntimeProfiler {
             this.lastTime = ms
         }
     }
-    buildRootEnter() {
+    buildRootEnter(): void {
         this.buildEnterTime = Date.now()
     }
-    buildRootExit() {
+    buildRootExit(): void {
         this.buildExitTime = Date.now()
     }
-    layoutEnter() {
+    layoutEnter(): void {
         this.layoutEnterTime = Date.now()
     }
-    layoutExit() {
+    layoutExit(): void {
         this.layoutExitTime = Date.now()
     }
-    drawEnter() {
+    drawEnter(): void {
         this.drawEnterTime = Date.now()
     }
-    drawExit() {
+    drawExit(): void {
         this.drawExitTime = Date.now()
     }
-    updateSnapshotEnter() {
+    updateSnapshotEnter(): void {
         this.updateEnterTime = Date.now()
     }
-    updateSnapshotExit() {
+    updateSnapshotExit(): void {
         this.updateExitTime = Date.now()
     }
-    updateSnapshot(modified: int32, all?: int32) {
+    updateSnapshot(modified: int32, all?: int32): void {
         if (all === undefined) {
             this.computableValues = modified - this.mutableStates
 
