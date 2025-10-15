@@ -1654,6 +1654,18 @@ HWTEST_F(TextAreaModifierTest, setContentTypeTest, TestSize.Level1)
         { ARK_CONTENT_TYPE_NICKNAME, "TextContentType.NICKNAME" },
         { ARK_CONTENT_TYPE_DETAIL_INFO_WITHOUT_STREET, "TextContentType.DETAIL_INFO_WITHOUT_STREET" },
         { ARK_CONTENT_TYPE_FORMAT_ADDRESS, "TextContentType.FORMAT_ADDRESS" },
+        { ARK_CONTENT_TYPE_PASSPORT_NUMBER, "TextContentType.PASSPORT_NUMBER" },
+        { ARK_CONTENT_TYPE_VALIDITY, "TextContentType.VALIDITY" },
+        { ARK_CONTENT_TYPE_ISSUE_AT, "TextContentType.ISSUE_AT" },
+        { ARK_CONTENT_TYPE_ORGANIZATION, "TextContentType.ORGANIZATION" },
+        { ARK_CONTENT_TYPE_TAX_ID, "TextContentType.TAX_ID" },
+        { ARK_CONTENT_TYPE_ADDRESS_CITY_AND_STATE, "TextContentType.ADDRESS_CITY_AND_STATE" },
+        { ARK_CONTENT_TYPE_FLIGHT_NUMBER, "TextContentType.FLIGHT_NUMBER" },
+        { ARK_CONTENT_TYPE_LICENSE_NUMBER, "TextContentType.LICENSE_NUMBER" },
+        { ARK_CONTENT_TYPE_LICENSE_FILE_NUMBER, "TextContentType.LICENSE_FILE_NUMBER" },
+        { ARK_CONTENT_TYPE_LICENSE_PLATE, "TextContentType.LICENSE_PLATE" },
+        { ARK_CONTENT_TYPE_ENGINE_NUMBER, "TextContentType.ENGINE_NUMBER" },
+        { ARK_CONTENT_TYPE_LICENSE_CHASSIS_NUMBER, "TextContentType.LICENSE_CHASSIS_NUMBER" },
         { static_cast<Ark_ContentType>(10000), "TextContentType.UNSPECIFIED" }
     };
     for (const auto& [value, expectVal] : testPlan) {
