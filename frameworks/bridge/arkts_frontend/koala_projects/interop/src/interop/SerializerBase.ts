@@ -12,17 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { float32, float64, int32, int64 } from "@koalaui/common"
-import { pointer, KPointer, KSerializerBuffer } from "./InteropTypes"
-import { wrapCallback } from "./InteropOps"
-import { InteropNativeModule } from "./InteropNativeModule"
-import { ResourceHolder, ResourceId } from "../arkts/ResourceManager"
-import { MaterializedBase } from "./MaterializedBase"
-import { nullptr } from "./Wrapper"
-import { NativeBuffer } from "./NativeBuffer"
+import { float32, float64, int32, int64 } from '@koalaui/common'
+import { pointer, KPointer, KSerializerBuffer } from './InteropTypes'
+import { wrapCallback } from './InteropOps'
+import { InteropNativeModule } from './InteropNativeModule'
+import { ResourceHolder, ResourceId } from '../arkts/ResourceManager'
+import { MaterializedBase } from './MaterializedBase'
+import { nullptr } from './Wrapper'
 
 // imports required interfaces (now generation is disabled)
-// import { Resource } from "@arkoala/arkui"
+// import { Resource } from '@arkoala/arkui'
 /**
  * Value representing possible JS runtime object type.
  * Must be synced with "enum RuntimeType" in C++.
@@ -56,14 +55,14 @@ export enum Tags {
 
 export function runtimeType(value: any): int32 {
     let type = typeof value
-    if (type == "number") return RuntimeType.NUMBER
-    if (type == "string") return RuntimeType.STRING
-    if (type == "undefined") return RuntimeType.UNDEFINED
-    if (type == "object") return RuntimeType.OBJECT
-    if (type == "boolean") return RuntimeType.BOOLEAN
-    if (type == "bigint") return RuntimeType.BIGINT
-    if (type == "function") return RuntimeType.FUNCTION
-    if (type == "symbol") return RuntimeType.SYMBOL
+    if (type == 'number') return RuntimeType.NUMBER
+    if (type == 'string') return RuntimeType.STRING
+    if (type == 'undefined') return RuntimeType.UNDEFINED
+    if (type == 'object') return RuntimeType.OBJECT
+    if (type == 'boolean') return RuntimeType.BOOLEAN
+    if (type == 'bigint') return RuntimeType.BIGINT
+    if (type == 'function') return RuntimeType.FUNCTION
+    if (type == 'symbol') return RuntimeType.SYMBOL
 
     throw new Error(`bug: ${value} is ${type}`)
 }
@@ -81,10 +80,10 @@ export function registerCallback(value: object|undefined): int32 {
 }
 
 export function toPeerPtr(value: object): KPointer {
-    if (value.hasOwnProperty("peer"))
+    if (value.hasOwnProperty('peer'))
         return unsafeCast<MaterializedBase>(value).getPeer()?.ptr ?? nullptr
     else
-        throw new Error("Value is not a MaterializedBase instance")
+        throw new Error('Value is not a MaterializedBase instance')
 }
 
 export interface CallbackResource {
@@ -123,13 +122,13 @@ export class SerializerBase {
             return new SerializerBase()
         }
         if (this.poolTop === this.pool.length) {
-            throw new Error("Pool empty! Release one of taken serializers")
+            throw new Error('Pool empty! Release one of taken serializers')
         }
         return SerializerBase.pool[this.poolTop++]
     }
 
     private static customSerializers: CustomSerializer | undefined = undefined
-    static registerCustomSerializer(serializer: CustomSerializer) {
+    static registerCustomSerializer(serializer: CustomSerializer): void {
         if (SerializerBase.customSerializers == undefined) {
             SerializerBase.customSerializers = serializer
         } else {
@@ -152,14 +151,14 @@ export class SerializerBase {
         this.buffer = new ArrayBuffer(96)
         this.view = new DataView(this.buffer)
     }
-    public release() {
+    public release(): void {
         this.releaseResources()
         if (SerializerBase.isMultithread) {
             return
         }
         this.position = 0
         if (this !== SerializerBase.pool[SerializerBase.poolTop - 1]) {
-            throw new Error("Serializers should be release in LIFO order")
+            throw new Error('Serializers should be release in LIFO order')
         }
         SerializerBase.poolTop -= 1;
     }
@@ -177,7 +176,7 @@ export class SerializerBase {
     }
     currentPosition(): int32 { return this.position }
 
-    private checkCapacity(value: int32) {
+    private checkCapacity(value: int32): void {
         if (value < 1) {
             throw new Error(`${value} is less than 1`)
         }
@@ -230,7 +229,7 @@ export class SerializerBase {
         })
         return [promise, resourceId]
     }
-    writeCallbackResource(resource: CallbackResource) {
+    writeCallbackResource(resource: CallbackResource): void {
         this.writeInt32(resource.resourceId)
         this.writePointer(resource.hold)
         this.writePointer(resource.release)
@@ -243,13 +242,13 @@ export class SerializerBase {
         this.writePointer(release)
         return resourceId
     }
-    private releaseResources() {
+    private releaseResources(): void {
         for (const resourceId of this.heldResources)
             InteropNativeModule._ReleaseCallbackResource(resourceId)
         // Improve: think about effective array clearing/pushing
         this.heldResources = []
     }
-    writeCustomObject(kind: string, value: any) {
+    writeCustomObject(kind: string, value: any): void {
         let current = SerializerBase.customSerializers
         while (current) {
             if (current.supports(kind)) {
@@ -261,7 +260,7 @@ export class SerializerBase {
         console.log(`Unsupported custom serialization for ${kind}, write undefined`)
         this.writeInt8(Tags.UNDEFINED)
     }
-    writeNumber(value: number|undefined) {
+    writeNumber(value: number|undefined): void {
         this.checkCapacity(5)
         if (value == undefined) {
             this.view.setInt8(this.position, Tags.UNDEFINED)
@@ -278,52 +277,52 @@ export class SerializerBase {
         this.view.setFloat32(this.position + 1, value, true)
         this.position += 5
     }
-    writeInt8(value: int32) {
+    writeInt8(value: int32): void {
         this.checkCapacity(1)
         this.view.setInt8(this.position, value)
         this.position += 1
     }
-    writeInt32(value: int32) {
+    writeInt32(value: int32): void {
         this.checkCapacity(4)
         this.view.setInt32(this.position, value, true)
         this.position += 4
     }
-    writeInt64(value: int64) {
+    writeInt64(value: int64): void {
         this.checkCapacity(8)
         this.view.setBigInt64(this.position, BigInt(value), true)
         this.position += 8
     }
-    writePointer(value: pointer) {
+    writePointer(value: pointer): void {
         this.checkCapacity(8)
         this.view.setBigInt64(this.position, BigInt(value ?? 0), true)
         this.position += 8
     }
-    writeFloat32(value: float32) {
+    writeFloat32(value: float32): void {
         this.checkCapacity(4)
         this.view.setFloat32(this.position, value, true)
         this.position += 4
     }
-    writeFloat64(value: float64) {
+    writeFloat64(value: float64): void {
         this.checkCapacity(8)
         this.view.setFloat64(this.position, value, true)
         this.position += 8
     }
-    writeBoolean(value: boolean|undefined) {
+    writeBoolean(value: boolean|undefined): void {
         this.checkCapacity(1)
         this.view.setInt8(this.position, value == undefined ? RuntimeType.UNDEFINED : +value)
         this.position++
     }
-    writeFunction(value: object | undefined) {
+    writeFunction(value: object | undefined): void {
         this.writeInt32(registerCallback(value))
     }
-    writeString(value: string) {
+    writeString(value: string): void {
         this.checkCapacity(4 + value.length * 4) // length, data
         let encodedLength =
             InteropNativeModule._ManagedStringWrite(value, new Uint8Array(this.view.buffer, 0), this.view.buffer.byteLength, this.position + 4)
         this.view.setInt32(this.position, encodedLength, true)
         this.position += encodedLength + 4
     }
-    writeBuffer(buffer: ArrayBuffer) {
+    writeBuffer(buffer: ArrayBuffer): void {
         this.holdAndWriteObject(buffer)
         const ptr = InteropNativeModule._GetNativeBufferPointer(buffer)
         this.writePointer(ptr)
@@ -333,7 +332,7 @@ export class SerializerBase {
 
 class DateSerializer extends CustomSerializer {
     constructor() {
-        super(["Date"])
+        super(['Date'])
     }
 
     serialize(serializer: SerializerBase, value: object, kind: string): void {
@@ -342,6 +341,6 @@ class DateSerializer extends CustomSerializer {
 }
 SerializerBase.registerCustomSerializer(new DateSerializer())
 
-export function unsafeCast<T>(value: unknown) {
+export function unsafeCast<T>(value: unknown): T {
     return value as unknown as T
 }

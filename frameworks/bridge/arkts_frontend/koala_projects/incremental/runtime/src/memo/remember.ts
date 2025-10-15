@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { functionOverValue } from "@koalaui/common"
-import { __context, __id } from "../internals"
-import { scheduleCallback } from "../states/GlobalStateManager"
-import { ArrayState, ControlledScope, MutableState, StateContext } from "../states/State"
+import { functionOverValue } from '@koalaui/common'
+import { __context, __id } from '../internals'
+import { scheduleCallback } from '../states/GlobalStateManager'
+import { ArrayState, ControlledScope, MutableState, StateContext } from '../states/State'
 
 /**
  * It calculates the value of the given lambda and caches its result.
@@ -49,7 +49,8 @@ export function memoize<Value>(compute: () => Value): Value {
  */
 /** @memo:intrinsic */
 export function memoLifecycle(onAttach: () => void, onDetach: () => void): void {
-    const scope = (__context() as StateContext).scopeEx<undefined>(__id(), 0, undefined, undefined, (_: undefined) => onDetach(), true) // do not recalculate if used states were updated
+    const scope = (__context() as StateContext).scopeEx<undefined>(__id(), 0, undefined, undefined, (_: undefined) => onDetach(), true)
+    // do not recalculate if used states were updated
     if (scope.unchanged) {
         scope.cached
     } else {

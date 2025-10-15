@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { className, float64, float64ToInt, int32, uint32 } from "@koalaui/common"
-import { RuntimeProfiler } from "../common/RuntimeProfiler"
-import { Disposable } from "../states/Disposable"
-import { ReadonlyTreeNode } from "./ReadonlyTreeNode"
+import { className, float64, float64ToInt, int32, uint32 } from '@koalaui/common'
+import { RuntimeProfiler } from '../common/RuntimeProfiler'
+import { Disposable } from '../states/Disposable'
+import { ReadonlyTreeNode } from './ReadonlyTreeNode'
 
 /**
  * A tree node used to build an incremental runtime and a component tree.
@@ -94,7 +94,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      */
     get index(): int32 {
         const parent = this.myParent
-        if (parent?.myIndicesValid == false) {
+        if (parent?.myIndicesValid === false) {
             parent!.myIndicesValid = true
             // recalculate indices of all children
             const children = parent!.myChildren
@@ -114,7 +114,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      * @returns true if this TreeNode is instance of given kind.
      */
     isKind(kind: uint32): boolean {
-        return this.kind % kind == 0
+        return this.kind % kind === 0
     }
 
     /**
@@ -273,7 +273,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
     }
 
     toHierarchy(): string {
-        return this.collectNodes().map((node: TreeNode) => "  ".repeat(node.depth) + node.toString()).join("\n")
+        return this.collectNodes().map((node: TreeNode) => '  '.repeat(node.depth) + node.toString()).join('\n')
     }
 
     collectNodes(): Array<TreeNode> {
