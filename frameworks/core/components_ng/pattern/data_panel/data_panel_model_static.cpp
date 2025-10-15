@@ -37,6 +37,12 @@ void SetDefaultBorderRadius(FrameNode* frameNode)
 }
 } // namespace
 
+RefPtr<FrameNode> DataPanelModelStatic::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::GetOrCreateFrameNode(
+        V2::DATA_PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DataPanelPattern>(); });
+}
+
 void DataPanelModelStatic::SetTrackBackground(FrameNode* frameNode, const std::optional<Color>& trackBackgroundColor)
 {
     if (trackBackgroundColor.has_value()) {

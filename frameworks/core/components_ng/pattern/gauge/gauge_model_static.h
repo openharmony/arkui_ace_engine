@@ -22,6 +22,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT GaugeModelStatic {
 public:
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetValue(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMin(FrameNode* frameNode, const std::optional<float>& min);
     static void SetMax(FrameNode* frameNode, const std::optional<float>& max);
@@ -29,6 +30,7 @@ public:
     static void SetIndicatorSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void SetDescription(FrameNode* frameNode, const RefPtr<AceType>& customNode);
+    static void SetIsShowLimitValue(FrameNode* frameNode, bool isShowLimitValue);
 };
 } // namespace OHOS::Ace::NG
 
