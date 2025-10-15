@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/interfaces/native/implementation/nav_path_info_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/promise_helper.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -55,18 +56,34 @@ void PushDestination0Impl(Ark_VMContext vmContext,
                           const Opt_Boolean* animated,
                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(info);
-    auto navStack = peer->GetNavPathStack();
-    if (!navStack) {
-        LOGE("NavPathStackAccessor::PushDestination0Impl. Navigation Stack isn't bound to a component.");
-        return;
-    }
-    auto navInfo = info->data;
-    Ark_NavigationOptions options;
-    options.animated = *animated;
-    auto navOptions = Converter::Convert<NavigationOptions>(options);
-    navStack->NavigationContext::PathStack::PushDestination(navInfo, navOptions);
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
+    auto finishFunc = [promise](int32_t errorCode, std::string errorMessage) {
+        if (errorCode == ERROR_CODE_NO_ERROR) {
+            promise->Resolve();
+        } else {
+            promise->Reject({ std::to_string(errorCode), errorMessage });
+        }
+    };
+
+    auto execFunc = [peer, info, animated, finishFunc]() {
+        CHECK_NULL_VOID(peer);
+        CHECK_NULL_VOID(info);
+        auto navStack = peer->GetNavPathStack();
+        if (!navStack) {
+            LOGE("NavPathStackAccessor::PushDestination0Impl. Navigation Stack isn't bound to a component.");
+            finishFunc(ERROR_CODE_PARAM_INVALID,
+                "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified; 2. Incorrect "
+                "parameter types; 3. Parameter verification failed.");
+            return;
+        }
+        auto navInfo = info->data;
+        navInfo.promise_ = finishFunc;
+        Ark_NavigationOptions options;
+        options.animated = *animated;
+        auto navOptions = Converter::Convert<NavigationOptions>(options);
+        navStack->NavigationContext::PathStack::PushDestination(navInfo, navOptions);
+    };
+    promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
 void PushDestination1Impl(Ark_VMContext vmContext,
                           Ark_AsyncWorkerPtr asyncWorker,
@@ -75,16 +92,32 @@ void PushDestination1Impl(Ark_VMContext vmContext,
                           const Opt_NavigationOptions* options,
                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(info);
-    auto navStack = peer->GetNavPathStack();
-    if (!navStack) {
-        LOGE("NavPathStackAccessor::PushDestination1Impl. Navigation Stack isn't bound to a component.");
-        return;
-    }
-    auto navInfo = info->data;
-    auto navOptions = Converter::Convert<NavigationOptions>(options->value);
-    navStack->NavigationContext::PathStack::PushDestination(navInfo, navOptions);
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
+    auto finishFunc = [promise](int32_t errorCode, std::string errorMessage) {
+        if (errorCode == ERROR_CODE_NO_ERROR) {
+            promise->Resolve();
+        } else {
+            promise->Reject({ std::to_string(errorCode), errorMessage });
+        }
+    };
+
+    auto execFunc = [peer, info, options, finishFunc]() {
+        CHECK_NULL_VOID(peer);
+        CHECK_NULL_VOID(info);
+        auto navStack = peer->GetNavPathStack();
+        if (!navStack) {
+            LOGE("NavPathStackAccessor::PushDestination0Impl. Navigation Stack isn't bound to a component.");
+            finishFunc(ERROR_CODE_PARAM_INVALID,
+                "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified; 2. Incorrect "
+                "parameter types; 3. Parameter verification failed.");
+            return;
+        }
+        auto navInfo = info->data;
+        navInfo.promise_ = finishFunc;
+        auto navOptions = Converter::Convert<NavigationOptions>(options->value);
+        navStack->NavigationContext::PathStack::PushDestination(navInfo, navOptions);
+    };
+    promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
 void PushPathByName0Impl(Ark_NavPathStack peer,
                          const Ark_String* name,
@@ -193,16 +226,32 @@ void ReplaceDestinationImpl(Ark_VMContext vmContext,
                             const Opt_NavigationOptions* options,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(info);
-    auto navStack = peer->GetNavPathStack();
-    if (!navStack) {
-        LOGE("NavPathStackAccessor::ReplaceDestinationImpl. Navigation Stack isn't bound to a component.");
-        return;
-    }
-    auto navInfo = info->data;
-    auto navOptions = Converter::Convert<NavigationOptions>(options->value);
-    navStack->NavigationContext::PathStack::ReplaceDestination(navInfo, navOptions);
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
+    auto finishFunc = [promise](int32_t errorCode, std::string errorMessage) {
+        if (errorCode == ERROR_CODE_NO_ERROR) {
+            promise->Resolve();
+        } else {
+            promise->Reject({ std::to_string(errorCode), errorMessage });
+        }
+    };
+
+    auto execFunc = [peer, info, options, finishFunc]() {
+        CHECK_NULL_VOID(peer);
+        CHECK_NULL_VOID(info);
+        auto navStack = peer->GetNavPathStack();
+        if (!navStack) {
+            LOGE("NavPathStackAccessor::PushDestination0Impl. Navigation Stack isn't bound to a component.");
+            finishFunc(ERROR_CODE_PARAM_INVALID,
+                "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified; 2. Incorrect "
+                "parameter types; 3. Parameter verification failed.");
+            return;
+        }
+        auto navInfo = info->data;
+        navInfo.promise_ = finishFunc;
+        auto navOptions = Converter::Convert<NavigationOptions>(options->value);
+        navStack->NavigationContext::PathStack::ReplaceDestination(navInfo, navOptions);
+    };
+    promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
 void ReplacePathByNameImpl(Ark_NavPathStack peer,
                            const Ark_String* name,
