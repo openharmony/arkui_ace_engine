@@ -1,27 +1,48 @@
 
 import { int32, KoalaCallsiteKey, observableProxy } from "@koalaui/common"
-import { MutableState, rememberDisposable, mutableState, __context, StateContext, memoEntry, __id, StateManager, ComputableState, remember, memoize } from "@koalaui/runtime"
+import { GlobalStateManager, MutableState, rememberDisposable, mutableState, __context, StateContext, memoEntry, __id, StateManager, ComputableState, memoEntry1, memoize } from "@koalaui/runtime"
 import { PeerNode } from "arkui/PeerNode";
 import { ArkContentSlotPeer } from "arkui/component/contentSlot";
-import { ArkUIGeneratedNativeModule } from "#components"
 import { SerializerBase } from "@koalaui/interop";
-import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextImpl, ContextRecord } from "arkui/base/UIContextImpl"
 import { ArkUIAniModule } from "arkui.ani"
 import { setNeedCreate } from "arkui/ArkComponentRoot"
-import { ArkCommonMethodComponent, CommonMethod } from 'arkui/component/common'
-import { CascadeMemoState } from 'arkui/stateManagement/remember';
+import { TaskScheduler } from "arkui/TaskScheduler"
 import { AceTrace } from "arkui/base/AceTrace";
 
 
+TaskScheduler.instance
+class ContextScope {
+    private oldManager: StateManager|undefined
+    private manager: StateManager
+    constructor(manager: StateManager) {
+        this.manager = manager
+    }
+    enter() {
+        this.oldManager = GlobalStateManager.GetLocalManager()
+        GlobalStateManager.SetLocalManager(this.manager)
+        const data: ContextRecord | undefined = this.manager.contextData ? this.manager.contextData as ContextRecord : undefined
+        let uiContext = data?.uiContext as UIContextImpl
+        ArkUIAniModule._Common_Sync_InstanceId(uiContext!.getInstanceId())
+        ArkUIAniModule._SetParallelScoped(true)
+    }
+
+    leave() {
+        ArkUIAniModule._SetParallelScoped(false)
+        ArkUIAniModule._Common_Restore_InstanceId()
+        GlobalStateManager.SetLocalManager(this.oldManager)
+    }
+}
+
 /** @memo:stable */
-export class ParallelNode {
+export class ParallelNode<T> {
     private __needAttach?: MutableState<boolean> = mutableState<boolean>(false);
     private status: int32 = 0; // 0: initial 1: building 2:builded 3:attached
     private manager: StateManager | undefined = undefined;
     private rootState: ComputableState<PeerNode> | undefined = undefined
     private peerNode: PeerNode | undefined = undefined
     private options?: ParallelOption
+    _args :T | undefined = undefined;
     private get needAttach(): boolean {
         return this.__needAttach!.value;
     }
@@ -35,89 +56,148 @@ export class ParallelNode {
 
     /** @memo */
     build(
+        paramCompute: () => T,
         /** @memo */
-        builder: () => void, updateUseParallel: boolean = false) {
+        builder: (args: T) => void,  updateUseParallel?: boolean) {
+        this._args = memoize<T>(paramCompute);
         if (this.needAttach && this.status == 2) {
-            this.manager!.merge(__context(), this.rootState!, () => {
-                if (updateUseParallel) {
-                    const task = () => {
-                        AceTrace.begin('update use Parallel')
-                        this.manager!.syncChanges()
-                        this.manager!.updateSnapshot()
-                        this.rootState!.value
-                        AceTrace.end()
-                    }
-                    //@ts-ignore
-                    taskpool.execute(task).then(() => { }).catch((err: Error) => {
-                        console.error('update use Parallel in taskpool error :', err);
-                        console.error(err.stack);
-                    })
-                    return;
-                }
-                this.manager!.syncChanges()
-                this.manager!.updateSnapshot()
-                this.rootState!.value
-            });
+            this.manager!.merge(__context(), this.rootState!);
+            this.update(updateUseParallel)
             this.options?.completed?.()
             this.status = 3; // is attached
             return;
         }
         if (this.status == 0) {
-            this.manager = __context().fork(
-                (manager: StateContext) => {
-                    const stateManager = manager as StateManager
-                    const data: ContextRecord | undefined = stateManager.contextData ? stateManager.contextData as ContextRecord : undefined
-                    let uiContext = data?.uiContext as UIContextImpl
-                    ArkUIAniModule._Common_Sync_InstanceId(uiContext!.getInstanceId());
-                    ArkUIAniModule._SetParallelScoped(true)
-                    this.peerNode = ArkContentSlotPeer.create(undefined)
-                    const result = setNeedCreate(true);
-
-                    this.rootState = stateManager.updatableNode<PeerNode>(this.peerNode!, (context: StateContext) => {
-                        const frozen = stateManager.frozen
-                        stateManager.frozen = true
-                        memoEntry<void>(context, 0, builder)
-                        stateManager.frozen = frozen
-                    })
-                    this.rootState!.value
-                    setNeedCreate(result);
-                    ArkUIAniModule._SetParallelScoped(false)
-                    ArkUIAniModule._Common_Restore_InstanceId();
-                },
-                () => {
-                    (__context() as StateManager)?.scheduleCallback(() => {
-                        this.status = 2;
-                        this.needAttach = true
-                    })
-                }) as StateManager;
-            this.status = 1;
+            const manager = (__context() as StateManager)
+            this.manager = manager!.fork() as StateManager
+            this.run(manager, this.manager!, builder)
+            this.status = 1
             return;
         }
-        this.manager!.merge(__context(), this.rootState!, () => {
-            if (updateUseParallel) {
-                const task = () => {
-                    AceTrace.begin('update use Parallel')
-                    this.manager!.syncChanges()
-                    this.manager!.updateSnapshot()
-                    this.rootState!.value
-                    AceTrace.end()
-                }
-                //@ts-ignore
-                taskpool.execute(task).then(() => { }).catch((err: Error) => {
-                    console.error('update use Parallel in taskpool error :', err);
+        if (this.status == 3) {
+            this.manager!.merge(__context(), this.rootState!);
+            this.update(updateUseParallel)
+        }
+    }
+
+    /** @memo */
+    buildNoArgs(
+        /** @memo */
+        builder: () => void,  updateUseParallel?: boolean) {
+        if (this.needAttach && this.status == 2) {
+            this.manager!.merge(__context(), this.rootState!);
+            this.update(updateUseParallel)
+            this.options?.completed?.()
+            this.status = 3; // is attached
+            return;
+        }
+        if (this.status == 0) {
+            const manager = (__context() as StateManager)
+            this.manager = manager.fork() as StateManager
+            this.runNoArg(manager, this.manager!, builder)
+            this.status = 1
+            return;
+        }
+        if (this.status == 3) {
+            this.manager!.merge(__context(), this.rootState!);
+            this.update(updateUseParallel)
+        }
+    }
+
+    run(mainManager: StateManager, manager: StateManager,
+        /** @memo */
+        builder: (args: T) => void) {
+        const task = () => {
+            let scope = new ContextScope(manager)
+            scope.enter()
+            this.peerNode = ArkContentSlotPeer.create(undefined) // temp node
+            const result = setNeedCreate(true)
+            this.rootState = manager!.updatableNode<PeerNode>(this.peerNode!, (context: StateContext) => {
+                try {
+                    const frozen = manager.frozen
+                    manager.frozen = true
+                    memoEntry1<T,void>(context, 0, builder, this._args!)
+                    manager.frozen = frozen
+                } catch(err: Error) {
+                    console.error('parallel run in taskpool error :', err);
                     console.error(err.stack);
-                })
-                return;
-            }
-            this.manager!.syncChanges()
-            this.manager!.updateSnapshot()
+                }
+            })
             this.rootState!.value
-        });
+            setNeedCreate(result)
+            scope.leave()
+
+            TaskScheduler.postToMain(() => {
+                AceTrace.begin(`parallelize run complete`)
+                this.status = 2
+                this.needAttach = true
+                AceTrace.end()
+                ArkUIAniModule._CustomNode_RequestFrame()
+            })
+            return undefined
+        }
+        AceTrace.begin(`submit`)
+        TaskScheduler.instance.submit(task)
+        AceTrace.end()
+    }
+
+    runNoArg(mainManager: StateManager, manager: StateManager,
+        /** @memo */
+        builder: () => void) {
+        const task = () => {
+            let scope = new ContextScope(manager)
+            scope.enter()
+            this.peerNode = ArkContentSlotPeer.create(undefined) // temp node
+            const result = setNeedCreate(true)
+            this.rootState = manager!.updatableNode<PeerNode>(this.peerNode!, (context: StateContext) => {
+                try {
+                    const frozen = manager.frozen
+                    manager.frozen = true
+                    memoEntry<void>(context, 0, builder)
+                    manager.frozen = frozen
+                } catch(err: Error) {
+                    console.error('parallel run in taskpool error :', err);
+                    console.error(err.stack);
+                }
+            })
+            this.rootState!.value
+            setNeedCreate(result)
+            scope.leave()
+
+            TaskScheduler.postToMain(() => {
+                AceTrace.begin(`parallelize run complete`)
+                this.status = 2
+                this.needAttach = true
+                AceTrace.end()
+                ArkUIAniModule._CustomNode_RequestFrame()
+            })
+            return undefined
+        }
+        AceTrace.begin(`submit`)
+        TaskScheduler.instance.submit(task)
+        AceTrace.end()
+    }
+
+    update(updateUseParallel?: boolean) {
+        if (updateUseParallel) {
+            const task = () => {
+                this.rootState!.forceCompleteRerender()
+                this.rootState!.value
+            }
+            TaskScheduler.instance.submit(task)
+            return;
+        }
+        let scope = new ContextScope(this.manager!)
+        scope.enter()
+        const result = setNeedCreate(true)
+        this.rootState!.forceCompleteRerender()
+        this.rootState!.value
+        setNeedCreate(result)
+        scope.leave()
     }
 
     dispose(): void {
         this.manager?.terminate<PeerNode>(this.rootState!)
-
     }
 }
 
@@ -129,26 +209,52 @@ export interface ParallelOption {
 }
 
 /** @memo */
-export function ParallelizeUI(
-  options: ParallelOption | undefined,
-  /** @memo */
-  content_: () => void,
+export function ParallelizeUI<T>(
+    options: ParallelOption | undefined,
+    paramCompute: () => T,
+    /** @memo */
+    content_: (param: T) => void,
 ) {
     const option = rememberDisposable<ParallelOption | undefined>(() => {
         return options;
-    }, () => {});
-     if (option?.enable === false) {
+    }, () => { });
+
+    if (option?.enable === false) {
+        content_(paramCompute());
+        return;
+    }
+    SerializerBase.setMultithreadMode();
+    const receiver = rememberDisposable<ParallelNode<T>>(() => {
+        return new ParallelNode<T>(options);
+    }, (parallelNode: ParallelNode<T> | undefined) => {
+        parallelNode?.dispose()
+    })
+    if (content_ !== undefined) {
+        receiver.build(paramCompute, content_);
+    }
+}
+
+/** @memo */
+export function ParallelizeUI(
+    options: ParallelOption | undefined,
+    /** @memo */
+    content_: () => void,
+) {
+    const option = rememberDisposable<ParallelOption | undefined>(() => {
+        return options;
+    }, () => { });
+    if (option?.enable === false) {
         content_();
         return;
     }
 
     SerializerBase.setMultithreadMode();
-    const receiver = rememberDisposable<ParallelNode>(() => {
-        return new ParallelNode(options);
-    }, (parallelNode: ParallelNode | undefined) => {
+    const receiver = rememberDisposable<ParallelNode<undefined>>(() => {
+        return new ParallelNode<undefined>(options);
+    }, (parallelNode: ParallelNode<undefined> | undefined) => {
         parallelNode?.dispose()
     })
     if (content_ !== undefined) {
-        receiver.build(content_, options?.updateUseParallel);
+        receiver.buildNoArgs(content_!, options?.updateUseParallel);
     }
 }

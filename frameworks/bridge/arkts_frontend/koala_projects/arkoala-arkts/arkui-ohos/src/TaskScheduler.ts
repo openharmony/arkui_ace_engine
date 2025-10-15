@@ -70,4 +70,8 @@ export class TaskScheduler {
         })
     }
 
+    static postToMain(task: () => void) {
+        EAWorker.postToMain<void>(task)
+    }
+
 }
