@@ -45,6 +45,10 @@ public:
     static void SetStrokeRadius(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void SetValue(FrameNode* frameNode, const std::optional<double>& valueOpt);
+    static void Initialize(FrameNode* frameNode, double min, double value, double cachedValue, double max,
+        NG::ProgressType type);
+    static void SetTextDefaultStyle(FrameNode* frameNode, const RefPtr<FrameNode>& textNode,
+        double value, double maxValue);
 };
 
 } // namespace OHOS::Ace::NG

@@ -77,9 +77,7 @@ auto g_setCapsuleStyle = [](FrameNode* frameNode, const Ark_CapsuleStyleOptions&
     // showDefaultPercentage
     ProgressModelStatic::SetShowText(frameNode, Converter::OptConvert<bool>(options.showDefaultPercentage));
     // content
-#ifdef WRONG_GEN
     ProgressModelStatic::SetText(frameNode, Converter::OptConvert<std::string>(options.content));
-#endif
     // fontColor
     ProgressModelStatic::SetFontColor(frameNode, Converter::OptConvert<Color>(options.fontColor));
     // font
@@ -144,9 +142,7 @@ auto g_setUndefinedStyle = [](FrameNode* frameNode) {
     // showDefaultPercentage
     ProgressModelStatic::SetShowText(frameNode, std::nullopt);
     // content
-#ifdef WRONG_GEN
     ProgressModelStatic::SetText(frameNode, std::nullopt);
-#endif
     // fontColor
     ProgressModelStatic::SetFontColor(frameNode, std::nullopt);
     // font
@@ -249,9 +245,7 @@ void SetProgressOptionsImpl(Ark_NativePointer node,
     } else if (LessOrEqual(value, 0)) {
         value = 0;
     }
-    ProgressModelNG::SetTotal(frameNode, total);
-    ProgressModelNG::SetValue(frameNode, value);
-    ProgressModelNG::SetType(frameNode, convValue.type);
+    ProgressModelStatic::Initialize(frameNode, 0.0, value, 0.0, total, convValue.type);
 }
 } // ProgressInterfaceModifier
 namespace ProgressAttributeModifier {
