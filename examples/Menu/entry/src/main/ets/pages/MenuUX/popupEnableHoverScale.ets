@@ -76,7 +76,8 @@ struct Index {
   @State isShow: boolean = false
   @State customPopup: boolean = false;
 
-  @Builder popupBuilder() {
+  @Builder
+  popupBuilder() {
     Row({ space: 2 }) {
       Image($r('app.media.app_icon')).width(24).height(24).margin({ left: -5 })
       Text('Custom Popup').fontSize(10)
@@ -85,7 +86,7 @@ struct Index {
 
   build() {
     RelativeContainer() {
-      Column({space: 10}) {
+      Column({ space: 10 }) {
         Button('测试区域:' + this.arrayStr[this.index])
           .onClick(() => {
             if (this.index < 2) {
@@ -100,13 +101,15 @@ struct Index {
             this.showInSubwindow = !this.showInSubwindow
           })
 
-        Row(){
-          Text('enableHoverMode: ' )
-          TextPicker({ range: [
-            'true',
-            'false',
-            'undefined',
-          ], selected: 0 })
+        Row() {
+          Text('enableHoverMode: ')
+          TextPicker({
+            range: [
+              'true',
+              'false',
+              'undefined',
+            ], selected: 0
+          })
             .width(100)
             .height(60)
             .selectedTextStyle({ font: { size: 14 } })
@@ -128,14 +131,17 @@ struct Index {
               }
             })
         }
-        Row(){
-          Text('placement: ' )
-          TextPicker({ range: [
-            'Bottom',
-            'Left',
-            'Top',
-            'Right',
-          ], selected: 0 })
+
+        Row() {
+          Text('placement: ')
+          TextPicker({
+            range: [
+              'Bottom',
+              'Left',
+              'Top',
+              'Right',
+            ], selected: 0
+          })
             .width(100)
             .height(60)
             .selectedTextStyle({ font: { size: 14 } })
@@ -182,7 +188,6 @@ struct Index {
           })
 
 
-
         Button('CustomPopup')
           .onClick(() => {
             this.customPopup = !this.customPopup;
@@ -190,12 +195,12 @@ struct Index {
           .bindPopup(this.customPopup, {
             builder: this.popupBuilder,
             placement: this.placement,
-            mask: {color:'#33000000'},
+            mask: { color: '#33000000' },
             popupColor: Color.Yellow,
             enableArrow: true,
             enableHoverMode: this.enableHoverMode,
             showInSubWindow: this.showInSubwindow,
-            transition:TransitionEffect.asymmetric(
+            transition: TransitionEffect.asymmetric(
               TransitionEffect.OPACITY.animation({ duration: 4000, curve: Curve.Ease }).combine(
                 TransitionEffect.translate({ x: 50, y: 50 })),
               TransitionEffect.OPACITY.animation({ duration: 4000, curve: Curve.Ease }).combine(
@@ -212,7 +217,11 @@ struct Index {
           .id('OpenPopup')
           .onClick(() => {
             let context = this.getUIContext();
-            const popupParam: PopupParam = {enableHoverMode: this.enableHoverMode, showInSubWindow: this.showInSubwindow, placement: this.placement,};
+            const popupParam: PopupParam = {
+              enableHoverMode: this.enableHoverMode,
+              showInSubWindow: this.showInSubwindow,
+              placement: this.placement,
+            };
             const contentNode = new ComponentContent(context, wrapBuilder(buildText), popupParam);
             showPopup(context, this.getUniqueId(), contentNode, popupParam);
           })
