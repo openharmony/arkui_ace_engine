@@ -311,7 +311,8 @@ void JSList::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj)
     auto nativeMainSizeObj = JSRef<JSObject>::Cast(nativeMainSize);
     JSListChildrenMainSize* jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    if (nativeMainSize->IsEmpty() || !nativeMainSize->IsObject() || !jsChildrenMainSize->IsHostEqual(frameNode)) {
+    if (nativeMainSize->IsEmpty() || !nativeMainSize->IsObject() ||
+        (jsChildrenMainSize && !jsChildrenMainSize->IsHostEqual(frameNode))) {
         InitNativeMainSize(childrenSizeObj, listChildrenMainSize);
         listChildrenMainSize->UpdateDefaultSize(Dimension(defaultSize, DimensionUnit::VP).ConvertToPx());
         SyncChildrenSize(childrenSizeObj, listChildrenMainSize);
