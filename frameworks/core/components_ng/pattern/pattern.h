@@ -84,6 +84,8 @@ public:
         return true;
     }
 
+    virtual void OnHostChildUpdateDone() {}
+
     virtual bool ConsumeChildrenAdjustment(const OffsetF& /* offset */)
     {
         return false;
