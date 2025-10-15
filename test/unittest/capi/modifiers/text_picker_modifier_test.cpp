@@ -505,10 +505,10 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringArray, TestSize.Lev
         if (std::get<HAS_SELECTEDS_ID>(value)) {
             Ark_Number arkSelected = Converter::ArkValue<Ark_Number>(std::get<SELECTEDS_ID>(value));
             arkTextPickerOptions.selected =
-                Converter::ArkUnion<Opt_Union_Number_Array_Number_Bindable_Bindable, Ark_Number>(arkSelected);
+                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable, Ark_Number>(arkSelected);
         } else {
             arkTextPickerOptions.selected =
-                Converter::ArkUnion<Opt_Union_Number_Array_Number_Bindable_Bindable>(Ark_Empty());
+                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable>(Ark_Empty());
         }
         Opt_TextPickerOptions inputValueOptions = Converter::ArkValue<Opt_TextPickerOptions>(arkTextPickerOptions);
 
@@ -628,10 +628,10 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsRangeArray, TestSize.Leve
         if (std::get<HAS_SELECTEDS_ID>(value)) {
             Ark_Number arkSelected = Converter::ArkValue<Ark_Number>(std::get<SELECTEDS_ID>(value));
             arkTextPickerOptions.selected =
-                Converter::ArkUnion<Opt_Union_Number_Array_Number_Bindable_Bindable, Ark_Number>(arkSelected);
+                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable, Ark_Number>(arkSelected);
         } else {
             arkTextPickerOptions.selected =
-                Converter::ArkUnion<Opt_Union_Number_Array_Number_Bindable_Bindable>(Ark_Empty());
+                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable>(Ark_Empty());
         }
         Opt_TextPickerOptions inputValueOptions = Converter::ArkValue<Opt_TextPickerOptions>(arkTextPickerOptions);
 
@@ -792,10 +792,10 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringMultiArray, TestSiz
 
         if (std::get<HAS_SELECTEDS_ID>(value)) {
             arkTextPickerOptions.selected =
-                Converter::ArkUnion<Opt_Union_Number_Array_Number_Bindable_Bindable, Array_Number>(arkSelected);
+                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable, Array_Number>(arkSelected);
         } else {
             arkTextPickerOptions.selected =
-                Converter::ArkUnion<Opt_Union_Number_Array_Number_Bindable_Bindable>(Ark_Empty());
+                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable>(Ark_Empty());
         }
         Opt_TextPickerOptions inputValueOptions = Converter::ArkValue<Opt_TextPickerOptions>(arkTextPickerOptions);
 
@@ -858,10 +858,10 @@ void CreateOptions(Array_TextCascadePickerRangeContent& arrayRoot,
     Array_Number arkSelected = arkSelectedHolder.ArkValue();
     if (std::get<HAS_SELECTEDS_ID>(value)) {
         arkTextPickerOptions.selected =
-            Converter::ArkUnion<Opt_Union_Number_Array_Number_Bindable_Bindable, Array_Number>(arkSelected);
+            Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable, Array_Number>(arkSelected);
     } else {
         arkTextPickerOptions.selected =
-            Converter::ArkUnion<Opt_Union_Number_Array_Number_Bindable_Bindable>(Ark_Empty());
+            Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable>(Ark_Empty());
     }
 }
 

@@ -28139,31 +28139,25 @@ KInteropReturnBuffer impl_DecorationStyle_getStyle(Ark_NativePointer thisPtr) {
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(DecorationStyle_getStyle, KInteropReturnBuffer, Ark_NativePointer)
-void impl_DialogExtender_showTimePickerDialog(KSerializerBuffer thisArray, int32_t thisLength)
-{
-    DeserializerBase thisDeserializer(thisArray, thisLength);
-    Ark_TimePickerDialogOptions optionsValueTemp = TimePickerDialogOptions_serializer::read(thisDeserializer);
-    ;
-    GetAccessors()->getDialogExtenderAccessor()->showTimePickerDialog(
-        static_cast<Ark_TimePickerDialogOptions*>(&optionsValueTemp));
+void impl_DialogExtender_showTimePickerDialog(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_TimePickerDialogOptions optionsValueTemp = TimePickerDialogOptions_serializer::read(thisDeserializer);;
+        GetAccessors()->getDialogExtenderAccessor()->showTimePickerDialog(
+            static_cast<Ark_TimePickerDialogOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V2(DialogExtender_showTimePickerDialog, KSerializerBuffer, int32_t)
-void impl_DialogExtender_showTextPickerDialog(KSerializerBuffer thisArray, int32_t thisLength)
-{
-    DeserializerBase thisDeserializer(thisArray, thisLength);
-    Ark_TextPickerDialogOptions optionsValueTemp = TextPickerDialogOptions_serializer::read(thisDeserializer);
-    ;
-    GetAccessors()->getDialogExtenderAccessor()->showTextPickerDialog(
-        static_cast<Ark_TextPickerDialogOptions*>(&optionsValueTemp));
+void impl_DialogExtender_showTextPickerDialog(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_TextPickerDialogOptions optionsValueTemp = TextPickerDialogOptions_serializer::read(thisDeserializer);;
+        GetAccessors()->getDialogExtenderAccessor()->showTextPickerDialog(
+            static_cast<Ark_TextPickerDialogOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V2(DialogExtender_showTextPickerDialog, KSerializerBuffer, int32_t)
-void impl_DialogExtender_showDatePickerDialog(KSerializerBuffer thisArray, int32_t thisLength)
-{
-    DeserializerBase thisDeserializer(thisArray, thisLength);
-    Ark_DatePickerDialogOptions optionsValueTemp = DatePickerDialogOptions_serializer::read(thisDeserializer);
-    ;
-    GetAccessors()->getDialogExtenderAccessor()->showDatePickerDialog(
-        static_cast<Ark_DatePickerDialogOptions*>(&optionsValueTemp));
+void impl_DialogExtender_showDatePickerDialog(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_DatePickerDialogOptions optionsValueTemp = DatePickerDialogOptions_serializer::read(thisDeserializer);;
+        GetAccessors()->getDialogExtenderAccessor()->showDatePickerDialog(
+            static_cast<Ark_DatePickerDialogOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V2(DialogExtender_showDatePickerDialog, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_DisappearSymbolEffect_construct(KSerializerBuffer thisArray, int32_t thisLength) {

@@ -211,6 +211,21 @@ PickerDialogEvent BuildPickerDialogEvents(const Ark_DatePickerDialogOptions& opt
     return dialogEvent;
 }
 
+std::optional<Ark_Date> ProcessDateStr(const std::string info)
+{
+    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(info);
+    CHECK_NULL_RETURN(argsPtr, std::nullopt);
+    const auto year = argsPtr->GetValue("year")->GetInt();
+    const auto month = argsPtr->GetValue("month")->GetInt() + 1; // 0-11 means 1 to 12 months
+    const auto day = argsPtr->GetValue("day")->GetInt();
+
+    PickerDateTime dateTime;
+    dateTime.SetDate(PickerDate(year, month, day));
+    dateTime.SetTime(PickerTime::Current());
+    auto result = Converter::ArkValue<Ark_Date>(dateTime.ToString(true));
+    return result;
+}
+
 PickerDialogInteractiveEvent BuildSelectInteractiveEvents(const Ark_DatePickerDialogOptions& arkOptions)
 {
     PickerDialogInteractiveEvent events;
@@ -224,8 +239,10 @@ PickerDialogInteractiveEvent BuildSelectInteractiveEvents(const Ark_DatePickerDi
     if (dateAcceptCallbackOpt) {
         events.dateAcceptEvent = [arkCallback = CallbackHelper(*dateAcceptCallbackOpt)](
                                      const std::string& info) -> void {
-            auto result = Converter::ArkValue<Ark_Date>(info);
-            arkCallback.Invoke(result);
+            auto result = ProcessDateStr(info);
+            if (result) {
+                arkCallback.Invoke(result.value());
+            }
         };
     }
     // onDateChange
@@ -233,8 +250,10 @@ PickerDialogInteractiveEvent BuildSelectInteractiveEvents(const Ark_DatePickerDi
     if (dateChangeCallbackOpt) {
         events.dateChangeEvent = [arkCallback = CallbackHelper(*dateChangeCallbackOpt)](
                                      const std::string& info) -> void {
-            auto result = Converter::ArkValue<Ark_Date>(info);
-            arkCallback.Invoke(result);
+            auto result = ProcessDateStr(info);
+            if (result) {
+                arkCallback.Invoke(result.value());
+            }
         };
     }
     return events;

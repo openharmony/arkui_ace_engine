@@ -1505,26 +1505,26 @@ export class TextPickerDialogOptions_serializer {
         if (valueHolderForSelected !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSelectedTmpValue  = valueHolderForSelected!
-            if (valueHolderForSelectedTmpValue instanceof number) {
+            if (valueHolderForSelectedTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForSelectedTmpValueForIdx0  = valueHolderForSelectedTmpValue as number
-                valueSerializer.writeNumber(valueHolderForSelectedTmpValueForIdx0)
-            } else if (TypeChecker.isArray_Number(valueHolderForSelectedTmpValue)) {
+                const valueHolderForSelectedTmpValueForIdx0  = valueHolderForSelectedTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForSelectedTmpValueForIdx0)
+            } else if (TypeChecker.isArray_Int32(valueHolderForSelectedTmpValue)) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForSelectedTmpValueForIdx1  = valueHolderForSelectedTmpValue as Array<number>
+                const valueHolderForSelectedTmpValueForIdx1  = valueHolderForSelectedTmpValue as Array<int32>
                 valueSerializer.writeInt32((valueHolderForSelectedTmpValueForIdx1.length).toInt())
                 for (let valueHolderForSelectedTmpValueForIdx1CounterI = 0; valueHolderForSelectedTmpValueForIdx1CounterI < valueHolderForSelectedTmpValueForIdx1.length; valueHolderForSelectedTmpValueForIdx1CounterI++) {
-                    const valueHolderForSelectedTmpValueForIdx1TmpElement : number = valueHolderForSelectedTmpValueForIdx1[valueHolderForSelectedTmpValueForIdx1CounterI]
-                    valueSerializer.writeNumber(valueHolderForSelectedTmpValueForIdx1TmpElement)
+                    const valueHolderForSelectedTmpValueForIdx1TmpElement : int32 = valueHolderForSelectedTmpValueForIdx1[valueHolderForSelectedTmpValueForIdx1CounterI]
+                    valueSerializer.writeInt32(valueHolderForSelectedTmpValueForIdx1TmpElement)
                 }
-            } else if (valueHolderForSelectedTmpValue instanceof Bindable<number>) {
+            } else if (valueHolderForSelectedTmpValue instanceof Bindable<int32>) {
                 valueSerializer.writeInt8((2).toChar())
-                const valueHolderForSelectedTmpValueForIdx2  = valueHolderForSelectedTmpValue as Bindable<number>
-                Bindable_Number_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx2)
-            } else if (valueHolderForSelectedTmpValue instanceof Bindable<Array<number>>) {
+                const valueHolderForSelectedTmpValueForIdx2  = valueHolderForSelectedTmpValue as Bindable<int32>
+                Bindable_I32_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx2)
+            } else if (valueHolderForSelectedTmpValue instanceof Bindable<Array<int32>>) {
                 valueSerializer.writeInt8((3).toChar())
-                const valueHolderForSelectedTmpValueForIdx3  = valueHolderForSelectedTmpValue as Bindable<Array<number>>
-                Bindable_Array_Number_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx3)
+                const valueHolderForSelectedTmpValueForIdx3  = valueHolderForSelectedTmpValue as Bindable<Array<int32>>
+                Bindable_Array_I32_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1545,10 +1545,10 @@ export class TextPickerDialogOptions_serializer {
         if (valueHolderForDefaultPickerItemHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDefaultPickerItemHeightTmpValue  = valueHolderForDefaultPickerItemHeight!
-            if (valueHolderForDefaultPickerItemHeightTmpValue instanceof number) {
+            if (valueHolderForDefaultPickerItemHeightTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForDefaultPickerItemHeightTmpValueForIdx0  = valueHolderForDefaultPickerItemHeightTmpValue as number
-                valueSerializer.writeNumber(valueHolderForDefaultPickerItemHeightTmpValueForIdx0)
+                const valueHolderForDefaultPickerItemHeightTmpValueForIdx0  = valueHolderForDefaultPickerItemHeightTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForDefaultPickerItemHeightTmpValueForIdx0)
             } else if (valueHolderForDefaultPickerItemHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForDefaultPickerItemHeightTmpValueForIdx1  = valueHolderForDefaultPickerItemHeightTmpValue as string
@@ -1892,29 +1892,29 @@ export class TextPickerDialogOptions_serializer {
         }
         const valueTmpResult : ResourceStr | Array<ResourceStr> | Bindable<ResourceStr> | Bindable<Array<ResourceStr>> | undefined = valueTmpBuf
         const selectedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let selectedTmpBuf : number | Array<number> | Bindable<number> | Bindable<Array<number>> | undefined = undefined
+        let selectedTmpBuf : int32 | Array<int32> | Bindable<int32> | Bindable<Array<int32>> | undefined = undefined
         if ((selectedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const selectedTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let selectedTmpBuf_ : number | Array<number> | Bindable<number> | Bindable<Array<number>> | undefined
+            let selectedTmpBuf_ : int32 | Array<int32> | Bindable<int32> | Bindable<Array<int32>> | undefined
             if (selectedTmpBuf_UnionSelector == (0).toChar()) {
-                selectedTmpBuf_ = (valueDeserializer.readNumber() as number)
+                selectedTmpBuf_ = valueDeserializer.readInt32()
             } else if (selectedTmpBuf_UnionSelector == (1).toChar()) {
                 const selectedTmpBuf_BufULength : int32 = valueDeserializer.readInt32()
-                let selectedTmpBuf_BufU : Array<number> = new Array<number>(selectedTmpBuf_BufULength)
+                let selectedTmpBuf_BufU : Array<int32> = new Array<int32>(selectedTmpBuf_BufULength)
                 for (let selectedTmpBuf_BufUBufCounterI = 0; selectedTmpBuf_BufUBufCounterI < selectedTmpBuf_BufULength; selectedTmpBuf_BufUBufCounterI++) {
-                    selectedTmpBuf_BufU[selectedTmpBuf_BufUBufCounterI] = (valueDeserializer.readNumber() as number)
+                    selectedTmpBuf_BufU[selectedTmpBuf_BufUBufCounterI] = valueDeserializer.readInt32()
                 }
                 selectedTmpBuf_ = selectedTmpBuf_BufU
             } else if (selectedTmpBuf_UnionSelector == (2).toChar()) {
-                selectedTmpBuf_ = Bindable_Number_serializer.read(valueDeserializer)
+                selectedTmpBuf_ = Bindable_I32_serializer.read(valueDeserializer)
             } else if (selectedTmpBuf_UnionSelector == (3).toChar()) {
-                selectedTmpBuf_ = Bindable_Array_Number_serializer.read(valueDeserializer)
+                selectedTmpBuf_ = Bindable_Array_I32_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for selectedTmpBuf_ has to be chosen through deserialisation.")
             }
-            selectedTmpBuf = (selectedTmpBuf_ as number | Array<number> | Bindable<number> | Bindable<Array<number>>)
+            selectedTmpBuf = (selectedTmpBuf_ as int32 | Array<int32> | Bindable<int32> | Bindable<Array<int32>>)
         }
-        const selectedTmpResult : number | Array<number> | Bindable<number> | Bindable<Array<number>> | undefined = selectedTmpBuf
+        const selectedTmpResult : int32 | Array<int32> | Bindable<int32> | Bindable<Array<int32>> | undefined = selectedTmpBuf
         const columnWidthsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let columnWidthsTmpBuf : Array<LengthMetrics> | undefined = undefined
         if ((columnWidthsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1927,20 +1927,20 @@ export class TextPickerDialogOptions_serializer {
         }
         const columnWidthsTmpResult : Array<LengthMetrics> | undefined = columnWidthsTmpBuf
         const defaultPickerItemHeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let defaultPickerItemHeightTmpBuf : number | string | undefined = undefined
+        let defaultPickerItemHeightTmpBuf : double | string | undefined = undefined
         if ((defaultPickerItemHeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const defaultPickerItemHeightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let defaultPickerItemHeightTmpBuf_ : number | string | undefined
+            let defaultPickerItemHeightTmpBuf_ : double | string | undefined
             if (defaultPickerItemHeightTmpBuf_UnionSelector == (0).toChar()) {
-                defaultPickerItemHeightTmpBuf_ = (valueDeserializer.readNumber() as number)
+                defaultPickerItemHeightTmpBuf_ = valueDeserializer.readFloat64()
             } else if (defaultPickerItemHeightTmpBuf_UnionSelector == (1).toChar()) {
                 defaultPickerItemHeightTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for defaultPickerItemHeightTmpBuf_ has to be chosen through deserialisation.")
             }
-            defaultPickerItemHeightTmpBuf = (defaultPickerItemHeightTmpBuf_ as number | string)
+            defaultPickerItemHeightTmpBuf = (defaultPickerItemHeightTmpBuf_ as double | string)
         }
-        const defaultPickerItemHeightTmpResult : number | string | undefined = defaultPickerItemHeightTmpBuf
+        const defaultPickerItemHeightTmpResult : double | string | undefined = defaultPickerItemHeightTmpBuf
         const canLoopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let canLoopTmpBuf : boolean | undefined = undefined
         if ((canLoopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
