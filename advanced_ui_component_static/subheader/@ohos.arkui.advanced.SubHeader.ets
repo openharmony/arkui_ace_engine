@@ -652,7 +652,7 @@ export struct SubHeader {
         iconOptions: {
           icon: this.icon as ResourceStr,
           symbolicIconOption: this.iconSymbolOptions,
-        },
+        } as IconOptions,
       });
     } else if (this.secondaryTitle && this.primaryTitle) {
       this.SubTitleStyle({ content: this.primaryTitle as ResourceStr, subContent: this.secondaryTitle as ResourceStr });
