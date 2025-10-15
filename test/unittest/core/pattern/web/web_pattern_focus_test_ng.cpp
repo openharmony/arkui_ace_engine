@@ -237,7 +237,7 @@ public:
     {
         return false;
     }
-    bool IsAtBottom(bool considerRepeat = false) const override
+    bool IsAtBottom(bool considerRepeat = false, bool fromController = false) const override
     {
         return false;
     }

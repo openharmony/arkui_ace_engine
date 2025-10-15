@@ -149,7 +149,7 @@ public:
     void NotifyDataChange(int32_t index, int32_t count) override;
 
     bool IsAtTop() const override;
-    bool IsAtBottom(bool considerRepeat = false) const override;
+    bool IsAtBottom(bool considerRepeat = false, bool fromController = false) const override;
     void OnTouchDown(const TouchEventInfo& info) override;
     OverScrollOffset GetOutBoundaryOffset(float delta, bool useChainDelta = true) const;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
