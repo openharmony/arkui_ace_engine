@@ -6958,20 +6958,6 @@ export interface MenuOptions extends ContextMenuOptions {
     title?: ResourceStr;
     showInSubWindow?: boolean;
 }
-export interface TouchTestInfo {
-    windowX: double;
-    windowY: double;
-    parentX: double;
-    parentY: double;
-    x: double;
-    y: double;
-    rect: RectResult;
-    id: string;
-}
-export interface TouchResult {
-    strategy: TouchTestStrategy;
-    id?: string | undefined;
-}
 export interface PixelStretchEffectOptions {
     top?: Length;
     bottom?: Length;
