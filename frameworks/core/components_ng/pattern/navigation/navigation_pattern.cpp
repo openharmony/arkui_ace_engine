@@ -5820,7 +5820,8 @@ bool NavigationPattern::CheckNeedCreate(int32_t index)
         addByNavRouter_ = false;
         uiNode = navigationStack_->Get();
     } else {
-        uiNode = navigationStack_->Get(index);
+        auto pathIndex = navigationStack_->GetAllPathIndex();
+        uiNode = navigationStack_->Get(pathIndex[index]);
     }
     return uiNode == nullptr;
 }
