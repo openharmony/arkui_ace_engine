@@ -7609,4 +7609,30 @@ HWTEST_F(NativeNodeTest, NativeThreadSafeNodeTest004, TestSize.Level1)
     nodeAPI2->disposeNode(threadSafeNode);
     nodeAPI2->disposeNode(threadSafeChildNode);
 }
+
+/**
+ * @tc.name: NativeNodeTimePickerStringToColorTest
+ * @tc.desc: Test timePicker String to Color function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTimePickerStringToColorTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TIME_PICKER, nullptr, true});
+    ArkUI_NumberValue value[] = {{.i32 = true}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), nullptr, nullptr};
+
+    // Case 1: valid hex color string (should be parsed by StringToColorInt internally)
+    item.string = "#ffff00ff";
+    nodeAPI->setAttribute(rootNode, NODE_TIME_PICKER_DISAPPEAR_TEXT_STYLE, &item);
+
+    // Case 2: invalid color string (StringToColorInt should mark as default and use fallback)
+    item.string = "not_a_color";
+    nodeAPI->setAttribute(rootNode, NODE_TIME_PICKER_DISAPPEAR_TEXT_STYLE, &item);
+
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TIME_PICKER_DISAPPEAR_TEXT_STYLE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TIME_PICKER_DISAPPEAR_TEXT_STYLE), nullptr);
+    nodeAPI->disposeNode(rootNode);
+}
 } // namespace OHOS::Ace

@@ -14,6 +14,7 @@
  */
 #include "style_modifier.h"
 
+#include <cerrno>
 #include <cstdlib>
 #include <utility>
 
@@ -325,25 +326,39 @@ void ResetAttributeItem()
     g_attributeItem.string = nullptr;
     g_attributeItem.object = nullptr;
 }
+
+bool IsColorWithMagic(const char* string)
+{
+    if (!string || strlen(string) != NUM_9 || string[0] != '#') {
+        return false;
+    }
+
+    for (int i = 1; i < NUM_9; ++i) {
+        if (!isxdigit(static_cast<unsigned char>(string[i]))) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 uint32_t StringToColorInt(const char* string, uint32_t defaultValue = 0)
 {
-    std::smatch matches;
-    std::string colorStr(string);
-    if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC)) {
-        colorStr.erase(0, 1);
-        constexpr int colorNumFormat = 16;
-        errno = 0;
+    if (IsColorWithMagic(string)) {
+        const char* hexString = string + 1; // skip '#'
         char* end = nullptr;
-        unsigned long int value = strtoul(colorStr.c_str(), &end, colorNumFormat);
+        errno = 0;
+        unsigned long int value = strtoul(hexString, &end, NUM_16);
         if (errno == ERANGE) {
-            LOGE("%{public}s is out of range.", colorStr.c_str());
+            LOGE("%{public}s is out of range.", hexString);
         }
-        if (value == 0 && end == colorStr.c_str()) {
-            LOGW("input %{public}s can not covert to number, use default color：0x00000000" , colorStr.c_str());
+        if (value == 0 && end == hexString) {
+            LOGW("input %{public}s can not covert to number, use default color：0x00000000" , hexString);
         }
-    
+
         return value;
     }
+
     return defaultValue;
 }
 
