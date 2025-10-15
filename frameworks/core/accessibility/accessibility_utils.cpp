@@ -411,7 +411,7 @@ const std::unordered_map<AccessibilityRoleType, std::string> accessibilityAceRol
     { AccessibilityRoleType::SELECT, "select" },
     { AccessibilityRoleType::SHAPE, "shape" },
     { AccessibilityRoleType::SIDEBAR_CONTAINER, "sidebarcontainer" },
-    { AccessibilityRoleType::SLIDER, V2::SEARCH_ETS_TAG },
+    { AccessibilityRoleType::SLIDER, V2::SLIDER_ETS_TAG },
     { AccessibilityRoleType::SPAN, V2::SPAN_ETS_TAG },
     { AccessibilityRoleType::STACK, V2::STACK_ETS_TAG },
     { AccessibilityRoleType::STEPPER, V2::STEPPER_ETS_TAG },
