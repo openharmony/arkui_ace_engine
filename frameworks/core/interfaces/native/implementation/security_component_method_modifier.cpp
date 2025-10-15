@@ -255,6 +255,8 @@ void SetPaddingImpl(Ark_NativePointer node,
         padding.top = Converter::OptConvert<Dimension>(dimensionTmp);
         padding.right = Converter::OptConvert<Dimension>(dimensionTmp);
         padding.bottom = Converter::OptConvert<Dimension>(dimensionTmp);
+    } else {
+        return;
     }
     SecurityComponentModelNG::SetBackgroundPadding(frameNode, padding.left, padding.right, padding.top,
         padding.bottom);
@@ -281,10 +283,10 @@ void SetKeyImpl(Ark_NativePointer node,
 void SetWidthImpl(Ark_NativePointer node,
                const Opt_Length* value)
 {
+    CHECK_NULL_VOID(value);
     if (value->tag == INTEROP_TAG_UNDEFINED) {
         return;
     }
-    CHECK_NULL_VOID(value);
     Opt_Union_Length_LayoutPolicy tmpValue = {};
     tmpValue.tag = value->tag;
     Ark_Union_Length_LayoutPolicy tmpArkValue = {};
@@ -296,10 +298,10 @@ void SetWidthImpl(Ark_NativePointer node,
 void SetHeightImpl(Ark_NativePointer node,
                 const Opt_Length* value)
 {
+    CHECK_NULL_VOID(value);
     if (value->tag == INTEROP_TAG_UNDEFINED) {
         return;
     }
-    CHECK_NULL_VOID(value);
     Opt_Union_Length_LayoutPolicy tmpValue = {};
     tmpValue.tag = value->tag;
     Ark_Union_Length_LayoutPolicy tmpArkValue = {};
