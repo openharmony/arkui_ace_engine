@@ -467,7 +467,7 @@ void SetNestedScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::GetOptPtr(value);
     if (!convValue) {
-        // Implement Reset value
+        ScrollableModelStatic::SetNestedScroll(frameNode, std::nullopt, std::nullopt);
         return;
     }
     auto forward = Converter::OptConvert<NestedScrollMode>(convValue->scrollForward);
@@ -481,7 +481,7 @@ void SetEnableScrollInteractionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        GridModelStatic::SetScrollEnabled(frameNode, std::nullopt);
         return;
     }
     auto scrollEnabled = *convValue;
@@ -555,9 +555,18 @@ void SetCachedCount1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int32_t>(count);
-    GridModelStatic::SetCachedCount(frameNode, convValue);
+    if (!convValue) {
+        GridModelStatic::SetCachedCount(frameNode, std::nullopt);
+    } else {
+        GridModelStatic::SetCachedCount(frameNode, *convValue);
+    }
+
     auto showValue = Converter::OptConvertPtr<bool>(show);
-    GridModelStatic::SetShowCached(frameNode, showValue);
+    if (!showValue) {
+        GridModelStatic::SetShowCached(frameNode, std::nullopt);
+    } else {
+        GridModelStatic::SetShowCached(frameNode, *showValue);
+    }
 }
 void SetEdgeEffectImpl(Ark_NativePointer node, const Opt_EdgeEffect* value, const Opt_EdgeEffectOptions* options)
 {

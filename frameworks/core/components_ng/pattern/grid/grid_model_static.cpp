@@ -232,9 +232,13 @@ void GridModelStatic::SetNestedScroll(FrameNode* frameNode, const NestedScrollOp
     pattern->SetNestedScroll(nestedOpt);
 }
 
-void GridModelStatic::SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled)
+void GridModelStatic::SetScrollEnabled(FrameNode* frameNode, const std::optional<bool>& scrollEnabled)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollEnabled, scrollEnabled, frameNode);
+    if (scrollEnabled) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollEnabled, scrollEnabled.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(GridLayoutProperty, ScrollEnabled, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
 }
 
 void GridModelStatic::SetFriction(FrameNode* frameNode, const std::optional<double>& value)

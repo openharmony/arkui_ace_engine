@@ -29,14 +29,14 @@ class WaterFlowStaticTest : public WaterFlowTestNg {};
 HWTEST_F(WaterFlowStaticTest, SetColumnsTemplate, TestSize.Level1)
 {
     CreateWaterFlow();
-    std::optional<std::string> rowsTemplate = "1fr";
-    WaterFlowModelStatic::SetColumnsTemplate(AceType::RawPtr(frameNode_), rowsTemplate);
+    std::optional<std::string> columnsTemplate = "1fr";
+    WaterFlowModelStatic::SetColumnsTemplate(AceType::RawPtr(frameNode_), columnsTemplate);
     ASSERT_NE(layoutProperty_, nullptr);
     auto ret = layoutProperty_->GetColumnsTemplateValue("");
-    EXPECT_EQ(ret, rowsTemplate.value());
+    EXPECT_EQ(ret, columnsTemplate.value());
 
-    rowsTemplate.reset();
-    WaterFlowModelStatic::SetColumnsTemplate(AceType::RawPtr(frameNode_), rowsTemplate);
+    columnsTemplate.reset();
+    WaterFlowModelStatic::SetColumnsTemplate(AceType::RawPtr(frameNode_), columnsTemplate);
     EXPECT_FALSE(layoutProperty_->GetColumnsTemplate().has_value());
 }
 
