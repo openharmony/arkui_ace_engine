@@ -99,7 +99,7 @@ void SetOnDateChangeImpl(Ark_NativePointer node,
         return;
     }
     auto onDateChange = [arkCallback = CallbackHelper(*optValue)](const std::string& data) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(std::stof(data)));
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(std::stoi(data)));
     };
     TextClockModelNG::SetOnDateChange(frameNode, std::move(onDateChange));
 }
