@@ -1942,10 +1942,9 @@ private:
     // record caret bottom position relative to window when keyboard avoid
     std::optional<float> lastCaretPos_ = std::nullopt;
     int32_t touchedFingerCount_ = 0;
-#if defined(IOS_PLATFORM)
-    TextCompose compose_;
-    bool unmarkText_;
-#endif    
+#if defined(CROSS_PLATFORM)
+    std::shared_ptr<TextEditingValue> editingValue_;
+#endif
 };
 } // namespace OHOS::Ace::NG
 
