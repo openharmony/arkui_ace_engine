@@ -33,6 +33,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
+#include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene_model.h"
 
