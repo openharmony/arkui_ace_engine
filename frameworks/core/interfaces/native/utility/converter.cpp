@@ -1195,7 +1195,10 @@ Font Convert(const Ark_Font& src)
         font.fontFamilies = fontfamiliesOpt->families;
         font.fontFamiliesNG = std::optional<std::vector<std::string>>(fontfamiliesOpt->families);
     }
-    auto fontSize = OptConvert<Dimension>(src.size);
+    std::optional<Dimension> fontSize = std::nullopt;
+    if (src.size.tag != INTEROP_TAG_UNDEFINED) {
+        fontSize = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(src.size.value, DimensionUnit::FP);
+    }
     if (fontSize) {
         Validator::ValidateNonNegative(fontSize);
         Validator::ValidateNonPercent(fontSize);

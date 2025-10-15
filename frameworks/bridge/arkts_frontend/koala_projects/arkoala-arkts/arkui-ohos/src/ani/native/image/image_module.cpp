@@ -102,6 +102,7 @@ ani_object ExtractorsFromImagePixelMapPtr(ani_env* env, [[maybe_unused]]ani_obje
     CHECK_NULL_RETURN(pixelMapPeer, nullptr);
     CHECK_NULL_RETURN(pixelMapPeer->pixelMap, nullptr);
     auto mediaPixelMap = pixelMapPeer->pixelMap->GetPixelMapSharedPtr();
+    delete pixelMapPeer;
     CHECK_NULL_RETURN(mediaPixelMap, nullptr);
     return Media::PixelMapTaiheAni::CreateEtsPixelMap(env, mediaPixelMap);
 }

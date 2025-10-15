@@ -16,7 +16,8 @@ export class BusinessError_serializer {
     public static read<T = void>(buffer: DeserializerBase): BusinessError<T> {
         let valueDeserializer : DeserializerBase = buffer
         let ptr = valueDeserializer.readPointer()
-        let x = {} as Object
-        return x as BusinessError<T>
+        // instructive change begin
+        return { code: 0, message: '', name: '' } as BusinessError<T>
+        // instructive change end
     }
 }

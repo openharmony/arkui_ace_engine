@@ -133,10 +133,13 @@ void SetFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto size = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(size);
-    Validator::ValidateNonPercent(size);
-    TextTimerModelStatic::SetFontSize(frameNode, size.value_or(DEFAULT_FONT_SIZE));
+    std::optional<Dimension> convValue = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        convValue = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(value->value, DimensionUnit::FP);
+    }
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
+    TextTimerModelStatic::SetFontSize(frameNode, convValue.value_or(DEFAULT_FONT_SIZE));
 }
 void SetFontStyleImpl(Ark_NativePointer node,
                       const Opt_FontStyle* value)
