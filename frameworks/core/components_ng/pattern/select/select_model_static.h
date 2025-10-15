@@ -25,8 +25,6 @@ class ACE_EXPORT SelectModelStatic {
 public:
     static void SetDivider(FrameNode* frameNode, const std::optional<NG::SelectDivider>& divider);
     static void SetArrowPosition(FrameNode* frameNode, const std::optional<ArrowPosition>& value);
-    static void SetArrowModifierApply(FrameNode* frameNode,
-        const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply);
     static void SetSpace(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetSelected(FrameNode* frameNode, const std::optional<int32_t>& idx);
