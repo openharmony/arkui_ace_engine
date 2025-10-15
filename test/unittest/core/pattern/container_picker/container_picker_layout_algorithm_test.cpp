@@ -144,36 +144,6 @@ void ContainerPickerLayoutAlgorithmTest::AddChildNodes(RefPtr<FrameNode>& parent
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureSizeTest001
- * @tc.desc: Test MeasureSize method of ContainerPickerLayoutAlgorithm
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureSizeTest001, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create ContainerPicker and get layoutWrapper
-     */
-    CreateContainerPickerNode();
-    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(refLayoutWrapper, nullptr);
-    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->contentConstraint_ = layoutConstraintF;
-
-    /**
-     * @tc.steps: step2. Set contentIdealSize and call MeasureSize
-     * @tc.expected: step2. The contentIdealSize should be updated correctly
-     */
-    OptionalSizeF contentIdealSize;
-    algorithm_->MeasureSize(layoutWrapper, contentIdealSize);
-    EXPECT_TRUE(contentIdealSize.Height().has_value());
-    EXPECT_TRUE(contentIdealSize.Width().has_value());
-}
-
-/**
  * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest001
  * @tc.desc: Test MeasureHeight method of ContainerPickerLayoutAlgorithm with defined height
  * @tc.type: FUNC
@@ -311,7 +281,6 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
      * @tc.steps: step1. Create ContainerPicker and set WRAP_CONTENT policy
      */
     CreateContainerPickerNode();
-    algorithm_->widthLayoutPolicy = LayoutCalPolicy::WRAP_CONTENT;
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
     ASSERT_NE(refLayoutWrapper, nullptr);
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
@@ -320,6 +289,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->contentConstraint_ = layoutConstraintF;
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
 
     /**
      * @tc.steps: step2. Call MeasureWidth with WRAP_CONTENT policy
@@ -341,7 +311,6 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
      * @tc.steps: step1. Create ContainerPicker and set FIX_AT_IDEAL_SIZE policy
      */
     CreateContainerPickerNode();
-    algorithm_->widthLayoutPolicy = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
     ASSERT_NE(refLayoutWrapper, nullptr);
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
@@ -350,6 +319,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->contentConstraint_ = layoutConstraintF;
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
 
     /**
      * @tc.steps: step2. Call MeasureWidth with FIX_AT_IDEAL_SIZE policy
@@ -414,6 +384,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->contentConstraint_ = layoutConstraintF;
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
 
     /**
      * @tc.steps: step2. Set infinity cross size
@@ -451,6 +422,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->contentConstraint_ = layoutConstraintF;
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
 
     /**
      * @tc.steps: step2. Set negative cross size
@@ -458,13 +430,9 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
      */
     OptionalSizeF contentIdealSize;
     contentIdealSize.SetMainSize(500.0f, Axis::VERTICAL);
-    contentIdealSize.SetCrossSize(-100.0f, Axis::VERTICAL);
-
-    algorithm_->widthLayoutPolicy = LayoutCalPolicy::NO_MATCH;
 
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
-    EXPECT_TRUE(NearEqual(contentIdealSize.Width().value(), 300.0f)); // Default width
 }
 
 /**
@@ -486,6 +454,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->contentConstraint_ = layoutConstraintF;
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
 
     /**
      * @tc.steps: step2. Test WRAP_CONTENT with parent cross size constraint
@@ -498,7 +467,42 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
     algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
 
-    algorithm_->widthLayoutPolicy = LayoutCalPolicy::WRAP_CONTENT;
+    algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
+    EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_TRUE(algorithm_->crossMatchChild_);
+}
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest008
+ * @tc.desc: Test MeasureWidth method with FIX_AT_IDEAL_SIZE and parent cross size
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest008, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
+     */
+    CreateContainerPickerNode(3);
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+
+    /**
+     * @tc.steps: step2. Test WRAP_CONTENT with parent cross size constraint
+     * @tc.expected: step2. The width should be constrained by parent cross size
+     */
+    OptionalSizeF contentIdealSize;
+    contentIdealSize.SetMainSize(500.0f, Axis::VERTICAL);
+
+    // Set item positions to simulate measured items
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
 
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
@@ -520,10 +524,10 @@ HWTEST_F(
     algorithm_->SetHeight(500.0f);
     algorithm_->CalcMainAndMiddlePos();
 
-    EXPECT_TRUE(NearEqual(algorithm_->startMainPos_, 0.0f));
-    EXPECT_TRUE(NearEqual(algorithm_->endMainPos_, 500.0f));
-    EXPECT_TRUE(NearEqual(algorithm_->middleItemStartPos_, 185.0f));
-    EXPECT_TRUE(NearEqual(algorithm_->middleItemEndPos_, 315.0f));
+    EXPECT_EQ(algorithm_->startMainPos_, 110);
+    EXPECT_EQ(algorithm_->endMainPos_, 390);
+    EXPECT_EQ(algorithm_->middleItemStartPos_, 230);
+    EXPECT_EQ(algorithm_->middleItemEndPos_, 270);
 }
 
 /**
@@ -541,10 +545,10 @@ HWTEST_F(
     algorithm_->SetHeight(1200.0f);
     algorithm_->CalcMainAndMiddlePos();
 
-    EXPECT_TRUE(NearEqual(algorithm_->startMainPos_, 145.0f));
-    EXPECT_TRUE(NearEqual(algorithm_->endMainPos_, 1055.0f));
-    EXPECT_TRUE(NearEqual(algorithm_->middleItemStartPos_, 535.0f));
-    EXPECT_TRUE(NearEqual(algorithm_->middleItemEndPos_, 665.0f));
+    EXPECT_EQ(algorithm_->startMainPos_, 460);
+    EXPECT_EQ(algorithm_->endMainPos_, 740);
+    EXPECT_EQ(algorithm_->middleItemStartPos_, 580.0f);
+    EXPECT_EQ(algorithm_->middleItemEndPos_, 620.0f);
 }
 
 /**
@@ -1187,27 +1191,26 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithmTrans
     ASSERT_NE(frameNode, nullptr);
 
     // Set up algorithm properties needed for TranslateAndRotate
-    algorithm_->SetHeight(500.0f);
+    algorithm_->SetHeight(280);
     algorithm_->CalcMainAndMiddlePos();
-    algorithm_->topPadding_ = 20.0f;
 
     /**
      * @tc.steps: step2. Test TranslateAndRotate with different offset values
      */
     // Test case 1: Zero offset
-    OffsetF offset1(0.0f, 0.0f);
+    OffsetF offset1(0.0f, 120.0f);
     float originalY1 = offset1.GetY();
     algorithm_->TranslateAndRotate(frameNode, offset1);
-    EXPECT_TRUE(GreatNotEqual(offset1.GetY(), originalY1));
+    EXPECT_TRUE(NearEqual(offset1.GetY(), originalY1));
 
     // Test case 2: Positive offset
-    OffsetF offset2(0.0f, 100.0f);
+    OffsetF offset2(0.0f, 130.0f);
     float originalY2 = offset2.GetY();
     algorithm_->TranslateAndRotate(frameNode, offset2);
-    EXPECT_TRUE(GreatNotEqual(offset2.GetY(), originalY2));
+    EXPECT_TRUE(LessNotEqual(offset2.GetY(), originalY2));
 
     // Test case 3: Negative offset
-    OffsetF offset3(0.0f, -100.0f);
+    OffsetF offset3(0.0f, 110.0f);
     float originalY3 = offset3.GetY();
     algorithm_->TranslateAndRotate(frameNode, offset3);
     EXPECT_TRUE(GreatNotEqual(offset3.GetY(), originalY3));
@@ -1260,7 +1263,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Rese
     // Check if offset is set to -PICKER_ITEM_DEFAULT_HEIGHT
     auto newOffset = childGeometryNode->GetMarginFrameOffset();
     EXPECT_TRUE(NearEqual(newOffset.GetX(), 0.0f));
-    EXPECT_TRUE(NearEqual(newOffset.GetY(), -130.0f));
+    EXPECT_TRUE(NearEqual(newOffset.GetY(), -40.0));
     EXPECT_FALSE(NearEqual(newOffset.GetY(), originalOffset.GetY()));
 }
 

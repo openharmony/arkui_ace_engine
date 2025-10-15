@@ -53,14 +53,23 @@ RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
 
 RefPtr<NodePaintMethod> ContainerPickerPattern::CreateNodePaintMethod()
 {
+    const auto props = GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_RETURN(props, nullptr);
+    auto safeAreaPaddingProperty = props->GetOrCreateSafeAreaPadding();
     auto paint = MakeRefPtr<ContainerPickerPaintMethod>();
+    paint->SetSafeAreaPadding(safeAreaPaddingProperty);
     return paint;
 }
 
 PaddingPropertyF ContainerPickerPattern::CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate)
 {
-    safeAreaPadding.top = std::nullopt;
-    safeAreaPadding.bottom = std::nullopt;
+    if (!needRotate) {
+        safeAreaPadding.top = std::nullopt;
+        safeAreaPadding.bottom = std::nullopt;
+    } else {
+        safeAreaPadding.left = std::nullopt;
+        safeAreaPadding.right = std::nullopt;
+    }
     return safeAreaPadding;
 }
 
@@ -107,15 +116,16 @@ bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
 
 float ContainerPickerPattern::ShortestDistanceBetweenCurrentAndTarget()
 {
+    auto defaultItemHeight = static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx());
     int32_t targetIndex = targetIndex_.value();
     if (!isLoop_) {
         auto deltaIndex = targetIndex - selectedIndex_;
-        return PICKER_ITEM_DEFAULT_HEIGHT * deltaIndex;
+        return defaultItemHeight * deltaIndex;
     }
     auto forwardDelta = (targetIndex - selectedIndex_ + totalItemCount_) % totalItemCount_;
     auto backwardDelta = (selectedIndex_ - targetIndex + totalItemCount_) % totalItemCount_;
-    return forwardDelta <= backwardDelta ? forwardDelta * PICKER_ITEM_DEFAULT_HEIGHT
-                                         : backwardDelta * PICKER_ITEM_DEFAULT_HEIGHT * -1;
+    return forwardDelta <= backwardDelta ? forwardDelta * defaultItemHeight
+                                         : backwardDelta * defaultItemHeight * -1;
 }
 
 void ContainerPickerPattern::HandleTargetIndex(
@@ -164,7 +174,7 @@ void ContainerPickerPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                 pattern->PostIdleTask(frameNode);
                 return;
             }
-            auto offScreenItemsIndex = pattern->GetOffScreemItems();
+            auto offScreenItemsIndex = pattern->GetOffScreenItems();
             for (auto it = offScreenItemsIndex.begin(); it != offScreenItemsIndex.end();) {
                 if (GetSysTimestamp() > deadline) {
                     break;
@@ -182,7 +192,7 @@ void ContainerPickerPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                 }
                 it = offScreenItemsIndex.erase(it);
             }
-            pattern->SetOffScreemItems(offScreenItemsIndex);
+            pattern->SetOffScreenItems(offScreenItemsIndex);
             if (!offScreenItemsIndex.empty()) {
                 pattern->PostIdleTask(frameNode);
             }
@@ -195,7 +205,7 @@ void ContainerPickerPattern::GetLayoutProperties(const RefPtr<ContainerPickerLay
     layoutConstraint_ = algo->GetLayoutConstraint();
     itemPosition_ = std::move(algo->GetItemPosition());
     currentOffset_ -= algo->GetCurrentOffset();
-    offScreenItemsIndex_ = algo->GetOffScreemItems();
+    offScreenItemsIndex_ = algo->GetOffScreenItems();
     contentMainSize_ = algo->GetContentMainSize();
     height_ = algo->GetHeight();
     crossMatchChild_ = algo->IsCrossMatchChild();
@@ -217,8 +227,9 @@ void ContainerPickerPattern::OnModifyDone()
     containerPickerId_ = host->GetId();
     totalItemCount_ = host->TotalChildCount();
     isLoop_ = IsLoop();
-    host->MarkDirtyNode((crossMatchChild_ ? PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD : PROPERTY_UPDATE_MEASURE_SELF) |
-                        PROPERTY_UPDATE_RENDER);
+    
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    PickerMarkDirty();
 }
 
 void ContainerPickerPattern::FireChangeEvent()
