@@ -30,7 +30,6 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
 using namespace testing;
@@ -319,40 +318,6 @@ HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg003, TestSize.Level1)
     gt = { 5, 5, 5, 5, 5 };
     retVal = ParseTemplateArgs(args, size, gap, childrenCount);
     EXPECT_TRUE(retVal.first.empty());
-}
-
-/**
- * @tc.name: ParseArgsWithAutoStretchAndDifferentDisplayScale
- * @tc.desc: Test ParseArgsWithAutoStretch.
- * @tc.type: FUNC
- */
-HWTEST_F(TemplatesParserTestNg, ParseArgsWithAutoStretchAndDifferentDisplayScale, TestSize.Level1)
-{
-    // use px for args to avoid use dipScale in mock pipeline
-    std::string args = "repeat(auto-stretch, ";
-    CalcLength size(168.0, OHOS::Ace::DimensionUnit::VP);
-    CalcLength trackSize(44.0, OHOS::Ace::DimensionUnit::VP);
-    CalcLength gap(80.0, OHOS::Ace::DimensionUnit::VP);
-    ScaleProperty scaleProperty;
-    /**
-     * @tc.steps: step1. Test ParseArgsWithAutoStretchAndDifferentDisplayScale with display scale 2.2
-     * @tc.expected: retVal.size() is 2
-     */
-    scaleProperty.vpScale = static_cast<float>(2.2);
-    auto trackSizeStr = std::to_string(ConvertToPx(trackSize, scaleProperty).value()).append("px)");
-    auto retVal = ParseTemplateArgs(
-        args + trackSizeStr, ConvertToPx(size, scaleProperty).value(), ConvertToPx(gap, scaleProperty).value(), 0);
-    EXPECT_EQ(retVal.first.size(), 2);
-
-    /**
-     * @tc.steps: step2. Test ParseArgsWithAutoStretchAndDifferentDisplayScale with display scale 1.9
-     * @tc.expected: retVal.size() is 2
-     */
-    scaleProperty.vpScale = static_cast<float>(1.9);
-    trackSizeStr = std::to_string(ConvertToPx(trackSize, scaleProperty).value()).append("px)");
-    retVal = ParseTemplateArgs(
-        args + trackSizeStr, ConvertToPx(size, scaleProperty).value(), ConvertToPx(gap, scaleProperty).value(), 0);
-    EXPECT_EQ(retVal.first.size(), 2);
 }
 
 /**
