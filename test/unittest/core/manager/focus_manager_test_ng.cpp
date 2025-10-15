@@ -663,7 +663,6 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest019, TestSize.Level1)
     pageNode->AddChild(columnNode);
     columnNode->AddChild(buttonNode1);
     columnNode->AddChild(buttonNode2);
-
     EXPECT_EQ(pagePattern->GetViewRootScope(), columnFocusHub);
     pagePattern->FocusViewShow();
     PipelineContext::GetCurrentContext()->FlushFocusView();
