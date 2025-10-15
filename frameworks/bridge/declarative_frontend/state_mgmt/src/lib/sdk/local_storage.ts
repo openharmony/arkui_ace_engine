@@ -411,7 +411,7 @@ class LocalStorage extends NativeLocalStorage {
         stateMgmtProfiler.end();
         return false;
       }
-      if (InteropConfigureStateMgmt.instance.needsInterop()) {
+      if (InteropConfigureStateMgmt.needsInterop()) {
         if (!this.storage_.delete(propName)) {
           return false;
         }
@@ -453,7 +453,7 @@ class LocalStorage extends NativeLocalStorage {
         return false;
       }
     }
-    if (InteropConfigureStateMgmt.instance.needsInterop()) {
+    if (InteropConfigureStateMgmt.needsInterop()) {
       if (
         'checkClearKeyFunc_' in this.storage_ &&
         typeof this.storage_.checkClearKeyFunc_ === 'function' &&
