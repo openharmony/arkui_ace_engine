@@ -953,7 +953,7 @@ HWTEST_F(TextPickerModelTestNg, SetDisappearTextStyle001, TestSize.Level1)
 HWTEST_F(TextPickerModelTestNg, getTextPickerRange001, TestSize.Level1)
 {
     /**
-     * @tc.step: step1. create textpicker model.
+     * @tc.step: step1. Create textpicker model.
      */
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
