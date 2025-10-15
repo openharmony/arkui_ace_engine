@@ -1119,16 +1119,22 @@ void DialogLayoutAlgorithm::DialogOverflowAdjust(
         return;
     }
 
-    auto viewTop = GreatNotEqual(safeAreaInsets_.top_.Length(), 0) ? safeAreaInsets_.top_.end : 0;
-    auto viewBottom =
+    auto availableTop = GreatNotEqual(safeAreaInsets_.top_.Length(), 0) ? safeAreaInsets_.top_.end : 0;
+    auto availableBottom  =
         GreatNotEqual(safeAreaInsets_.bottom_.Length(), 0) ? safeAreaInsets_.bottom_.start : wrapperSize_.Height();
-    auto limitAreaPadding = ((1 - DIALOG_VIEWPORT_HEIGHT_RATIO) / HALF) * (viewBottom - viewTop);
-    auto limitTop = viewTop + limitAreaPadding;
-    auto limitBottom = viewBottom - limitAreaPadding;
+    // Calculate the dialog’s allowed vertical range
+    auto limitAreaPadding = ((1 - DIALOG_VIEWPORT_HEIGHT_RATIO) / HALF) * (availableBottom  - availableTop);
+    auto limitTop = availableTop + limitAreaPadding;
+    auto limitBottom = availableBottom  - limitAreaPadding;
+    // Adjust allowed area for foldable devices
+    if (alignBottomScreen_) {
+        limitTop = foldCreaseRect.Bottom();
+    }
     if (GreatNotEqual(limitTop, limitBottom)) {
         return;
     }
 
+    // Case 1: Dialog exceeds the upper limit
     float childBottom = 0.0f;
     if (LessNotEqual(childOffset.GetY(), limitTop)) {
         childOffset.SetY(limitTop);
@@ -1145,6 +1151,7 @@ void DialogLayoutAlgorithm::DialogOverflowAdjust(
         return;
     }
 
+    // Case 2: Dialog exceeds the lower limit
     childBottom = childOffset.GetY() + childSize.Height() + embeddedDialogOffsetY_ + stackRootDialogOffsetY_;
     if (GreatNotEqual(childBottom, limitBottom)) {
         childOffset.SetY(childOffset.GetY() - (childBottom - limitBottom));
