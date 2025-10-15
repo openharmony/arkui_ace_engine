@@ -1296,6 +1296,10 @@ HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions003, TestSize.Level1)
     pattern->UpdateAIMenuOptions();
     EXPECT_EQ(pattern->IsShowAIMenuOption(), false);
     EXPECT_EQ(pattern->IsAskCeliaEnabled(), true);
+
+    pattern->textSelector_.Update(0, 0);
+    pattern->isEditing_ = false;
+    EXPECT_EQ(pattern->IsShowAIMenuOption(), false);
 }
 
 /**
