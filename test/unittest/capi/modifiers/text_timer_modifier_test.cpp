@@ -1282,12 +1282,8 @@ HWTEST_F(TextTimerModifierTest, DISABLED_setOnTimerTest, TestSize.Level1)
 
     static constexpr int32_t contextId = 123;
     static bool isCalled = false;
-// fix Opt_Callback_Number_Number_Void > Opt_Callback_Int64_Int64_Void this is time so int64 is required
-#ifdef WRONG_GEN
+
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Int64 utc, const Ark_Int64 elapsedTime) {
-#else
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number utc, const Ark_Number elapsedTime) {
-#endif
         isCalled = true;
         checkEvent = {
             .nodeId = resourceId,
@@ -1296,8 +1292,8 @@ HWTEST_F(TextTimerModifierTest, DISABLED_setOnTimerTest, TestSize.Level1)
         };
     };
 
-    auto arkCallback = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, contextId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Number_Void>(arkCallback);
+    auto arkCallback = Converter::ArkValue<TimerCallback>(checkCallback, contextId);
+    auto optCallback = Converter::ArkValue<Opt_TimerCallback>(arkCallback);
     modifier_->setOnTimer(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
