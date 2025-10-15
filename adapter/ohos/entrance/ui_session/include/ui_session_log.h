@@ -16,7 +16,6 @@
 #ifndef OHOS_ACE_UI_SERVICE_HILOG_H
 #define OHOS_ACE_UI_SERVICE_HILOG_H
 
-#include "hilog/log.h"
 
 #define UISERVICE_LOG_DOMAIN 0xD003936
 #define UISERVICE_LOG_TAG "AceUISession"
@@ -24,6 +23,11 @@
 #define UISERVICE_FILENAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 #define ACE_FMT_PREFIX "[%{public}s:%{public}d]"
 
+
+#ifdef ACE_UNITTEST
+#define PRINT_LOG(level, fmt, ...)
+#else
+#include "hilog/log.h"
 #ifdef IS_RELEASE_VERSION
 #define PRINT_LOG(level, fmt, ...) \
     HILOG_IMPL(LOG_CORE, LOG_##level, UISERVICE_LOG_DOMAIN, UISERVICE_LOG_TAG, fmt, ##__VA_ARGS__)
@@ -31,6 +35,7 @@
 #define PRINT_LOG(level, fmt, ...)                                                                                     \
     HILOG_IMPL(LOG_CORE, LOG_##level, UISERVICE_LOG_DOMAIN, UISERVICE_LOG_TAG, ACE_FMT_PREFIX fmt, UISERVICE_FILENAME, \
         __LINE__, ##__VA_ARGS__)
+#endif
 #endif
 
 #define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)

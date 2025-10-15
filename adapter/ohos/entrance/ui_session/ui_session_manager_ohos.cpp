@@ -16,9 +16,8 @@
 #include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
 
 namespace OHOS::Ace {
-std::mutex UiSessionManager::mutex_;
-std::shared_mutex UiSessionManager::reportObjectMutex_;
 constexpr int32_t ONCE_IPC_SEND_DATA_MAX_SIZE = 131072;
+
 UiSessionManager* UiSessionManager::GetInstance()
 {
     static UiSessionManagerOhos instance;
