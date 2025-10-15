@@ -27,14 +27,18 @@ final class CONSTANT {
 export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWrappedBase, ISubscribedWatches {
     public store_: Set<K>;
     // Use public access to enable unit testing.
+    @JSONStringifyIgnore
     public meta_: IMutableKeyedStateMeta;
     // support for @Watch
     // each IObservedObject manages a set of @Watch subscribers
     // when a object property changes need to call executeOnSubscribingWatches
     // compare interface
+    @JSONStringifyIgnore
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     // IObservedObject interface
+    @JSONStringifyIgnore
     private ____V1RenderId: RenderIdType = 0;
+    @JSONStringifyIgnore
     private allowDeep_: boolean;
     /**
      * Constructs a Set from another Set

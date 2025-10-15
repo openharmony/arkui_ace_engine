@@ -28,11 +28,15 @@ final class CONSTANT {
 export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, ObserveWrappedBase, ISubscribedWatches {
     public store_: Map<K, V>;
     // Use public access to enable unit testing.
+    @JSONStringifyIgnore
     protected meta_: IMutableKeyedStateMeta;
     // support for @Watch
+    @JSONStringifyIgnore
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     // IObservedObject interface
+    @JSONStringifyIgnore
     private ____V1RenderId: RenderIdType = 0;
+    @JSONStringifyIgnore
     private allowDeep_: boolean;
     private isAPI_ : boolean;
     /**
