@@ -94,13 +94,12 @@ void SetDirectionImpl(Ark_PanGestureOptions peer,
     peer->handler->SetDirection(convDirection.value_or(DEFAULT_PAN_DIRECTION));
 }
 void SetDistanceImpl(Ark_PanGestureOptions peer,
-                     const Ark_Number* value)
+                     Ark_Float64 value)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->handler);
-    CHECK_NULL_VOID(value);
     auto distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
-    auto convDistance = Converter::OptConvert<float>(*value);
+    auto convDistance = Converter::OptConvert<float>(value);
     if (convDistance.has_value()) {
         Dimension dimension = LessNotEqual(convDistance.value(), 0.0) ?
             DEFAULT_PAN_DISTANCE : Dimension(convDistance.value(), DimensionUnit::VP);
@@ -109,12 +108,11 @@ void SetDistanceImpl(Ark_PanGestureOptions peer,
     peer->handler->SetDistance(distance);
 }
 void SetFingersImpl(Ark_PanGestureOptions peer,
-                    const Ark_Number* value)
+                    Ark_Int32 value)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->handler);
-    CHECK_NULL_VOID(value);
-    auto convFingers = Converter::OptConvert<int32_t>(*value);
+    auto convFingers = Converter::OptConvert<int32_t>(value);
     auto fingers = convFingers.value_or(DEFAULT_PAN_FINGERS);
     fingers = fingers <= DEFAULT_PAN_FINGERS ? DEFAULT_PAN_FINGERS : fingers;
     fingers = fingers > DEFAULT_MAX_PAN_FINGERS ? DEFAULT_PAN_FINGERS : fingers;
@@ -127,16 +125,16 @@ Ark_PanDirection GetDirectionImpl(Ark_PanGestureOptions peer)
     auto direction = peer->handler->GetDirection();
     return Converter::ArkValue<Ark_PanDirection>(direction, Converter::FC);
 }
-Ark_Number GetDistanceImpl(Ark_PanGestureOptions peer)
+Ark_Float64 GetDistanceImpl(Ark_PanGestureOptions peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->handler, errValue);
     auto distance = peer->handler->GetDistance();
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, errValue);
     auto distance_new = context->ConvertPxToVp(Dimension(distance, DimensionUnit::PX));
-    return Converter::ArkValue<Ark_Number>(distance_new);
+    return Converter::ArkValue<Ark_Float64>(distance_new);
 }
 } // PanGestureOptionsAccessor
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()

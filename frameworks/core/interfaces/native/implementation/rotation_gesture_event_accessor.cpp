@@ -32,23 +32,22 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetAngleImpl(Ark_RotationGestureEvent peer)
+Ark_Float64 GetAngleImpl(Ark_RotationGestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& angle = info->GetAngle();
-    return Converter::ArkValue<Ark_Number>(static_cast<float>(angle));
+    return Converter::ArkValue<Ark_Float64>(static_cast<float>(angle));
 }
 void SetAngleImpl(Ark_RotationGestureEvent peer,
-                  const Ark_Number* angle)
+                  Ark_Float64 angle)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(angle);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    info->SetAngle(Converter::Convert<float>(*angle));
+    info->SetAngle(Converter::Convert<float>(angle));
 }
 } // RotationGestureEventAccessor
 const GENERATED_ArkUIRotationGestureEventAccessor* GetRotationGestureEventAccessor()

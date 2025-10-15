@@ -422,22 +422,22 @@ HWTEST_F(GestureEventAccessorTest, SetFingerListTestEmpty, TestSize.Level1)
 HWTEST_F(GestureEventAccessorTest, SetFingerListTest, TestSize.Level1)
 {
     Ark_FingerInfo info1 = {
-        .id = Converter::ArkValue<Ark_Number>(12),
-        .globalX = Converter::ArkValue<Ark_Number>(150.5),
-        .globalY = Converter::ArkValue<Ark_Number>(170.25),
-        .localX = Converter::ArkValue<Ark_Number>(40.5),
-        .localY = Converter::ArkValue<Ark_Number>(80.25),
-        .displayX = Converter::ArkValue<Ark_Number>(200.25),
-        .displayY = Converter::ArkValue<Ark_Number>(300.75),
+        .id = Converter::ArkValue<Ark_Int32>(12),
+        .globalX = Converter::ArkValue<Ark_Float64>(150.5),
+        .globalY = Converter::ArkValue<Ark_Float64>(170.25),
+        .localX = Converter::ArkValue<Ark_Float64>(40.5),
+        .localY = Converter::ArkValue<Ark_Float64>(80.25),
+        .displayX = Converter::ArkValue<Ark_Float64>(200.25),
+        .displayY = Converter::ArkValue<Ark_Float64>(300.75),
     };
     Ark_FingerInfo info2 = {
-        .id = Converter::ArkValue<Ark_Number>(98),
-        .globalX = Converter::ArkValue<Ark_Number>(450.10),
-        .globalY = Converter::ArkValue<Ark_Number>(670.0),
-        .localX = Converter::ArkValue<Ark_Number>(140.65),
-        .localY = Converter::ArkValue<Ark_Number>(180.35),
-        .displayX = Converter::ArkValue<Ark_Number>(800.40),
-        .displayY = Converter::ArkValue<Ark_Number>(900.82),
+        .id = Converter::ArkValue<Ark_Int32>(98),
+        .globalX = Converter::ArkValue<Ark_Float64>(450.10),
+        .globalY = Converter::ArkValue<Ark_Float64>(670.0),
+        .localX = Converter::ArkValue<Ark_Float64>(140.65),
+        .localY = Converter::ArkValue<Ark_Float64>(180.35),
+        .displayX = Converter::ArkValue<Ark_Float64>(800.40),
+        .displayY = Converter::ArkValue<Ark_Float64>(900.82),
     };
     std::vector<Ark_FingerInfo> vec = { info1, info2 };
     auto arrayHolder = Converter::ArkArrayHolder<Array_FingerInfo>(vec);

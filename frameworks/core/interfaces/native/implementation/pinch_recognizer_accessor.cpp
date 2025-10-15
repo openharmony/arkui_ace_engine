@@ -33,11 +33,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetDistanceImpl(Ark_PinchRecognizer peer)
+Ark_Float64 GetDistanceImpl(Ark_PinchRecognizer peer)
 {
-    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_DISTANCE);
+    auto errorValue = Converter::ArkValue<Ark_Float64>(DEFAULT_DISTANCE);
     CHECK_NULL_RETURN(peer, errorValue);
-    return Converter::ArkValue<Ark_Number>(peer->GetDistance());
+    return Converter::ArkValue<Ark_Float64>(peer->GetDistance());
 }
 } // PinchRecognizerAccessor
 const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor()

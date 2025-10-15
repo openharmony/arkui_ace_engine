@@ -32,73 +32,70 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetScaleImpl(Ark_PinchGestureEvent peer)
+Ark_Float64 GetScaleImpl(Ark_PinchGestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     PinchGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
     LOGW("ARKOALA PinchGestureEventAccessor::GetScaleImpl returns Ark_Int32, "
         "but should return Ark_Number.");
     double value = event->GetScale();
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetScaleImpl(Ark_PinchGestureEvent peer,
-                  const Ark_Number* scale)
+                  Ark_Float64 scale)
 {
     CHECK_NULL_VOID(peer);
     PinchGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    CHECK_NULL_VOID(scale);
 
-    auto convValue = Converter::Convert<float>(*scale);
+    auto convValue = Converter::Convert<float>(scale);
     event->SetScale(convValue);
 }
-Ark_Number GetPinchCenterXImpl(Ark_PinchGestureEvent peer)
+Ark_Float64 GetPinchCenterXImpl(Ark_PinchGestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     PinchGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
     LOGW("ARKOALA PinchGestureEventAccessor::GetPinchCenterXImpl returns Ark_Int32, "
         "but should return Ark_Number.");
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetPinchCenter().GetX());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetPinchCenterXImpl(Ark_PinchGestureEvent peer,
-                         const Ark_Number* pinchCenterX)
+                         Ark_Float64 pinchCenterX)
 {
     CHECK_NULL_VOID(peer);
     PinchGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    CHECK_NULL_VOID(pinchCenterX);
 
-    auto convValue = Converter::Convert<float>(*pinchCenterX);
+    auto convValue = Converter::Convert<float>(pinchCenterX);
     Offset pinchCenter;
     pinchCenter.SetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
     pinchCenter.SetY(event->GetPinchCenter().GetY());
     event->SetPinchCenter(pinchCenter);
 }
-Ark_Number GetPinchCenterYImpl(Ark_PinchGestureEvent peer)
+Ark_Float64 GetPinchCenterYImpl(Ark_PinchGestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     PinchGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
     LOGW("ARKOALA PinchGestureEventAccessor::GetPinchCenterYImpl returns Ark_Int32, "
         "but should return Ark_Number.");
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetPinchCenter().GetY());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetPinchCenterYImpl(Ark_PinchGestureEvent peer,
-                         const Ark_Number* pinchCenterY)
+                         Ark_Float64 pinchCenterY)
 {
     CHECK_NULL_VOID(peer);
     PinchGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    CHECK_NULL_VOID(pinchCenterY);
 
-    auto convValue = Converter::Convert<float>(*pinchCenterY);
+    auto convValue = Converter::Convert<float>(pinchCenterY);
     Offset pinchCenter;
     pinchCenter.SetX(event->GetPinchCenter().GetX());
     pinchCenter.SetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));

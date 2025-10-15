@@ -28,25 +28,25 @@ using ::testing::NiceMock;
 
 namespace {
 const std::vector<std::pair<Ark_Number, float>> arkNumberFloatXTestPlan = {
-    { Converter::ArkValue<Ark_Number>(100.00f), 100.00f },
-    { Converter::ArkValue<Ark_Number>(0.00f), 0.00f },
-    { Converter::ArkValue<Ark_Number>(-100.00f), -100.00f },
-    { Converter::ArkValue<Ark_Number>(12.34f), 12.34f },
-    { Converter::ArkValue<Ark_Number>(-56.73f), -56.73f },
+    { Converter::ArkValue<Ark_Float64>(100.00f), 100.00f },
+    { Converter::ArkValue<Ark_Float64>(0.00f), 0.00f },
+    { Converter::ArkValue<Ark_Float64>(-100.00f), -100.00f },
+    { Converter::ArkValue<Ark_Float64>(12.34f), 12.34f },
+    { Converter::ArkValue<Ark_Float64>(-56.73f), -56.73f },
 };
 const std::vector<std::pair<Ark_Number, float>> arkNumberFloatYTestPlan = {
-    { Converter::ArkValue<Ark_Number>(-1.01f), -1.01f },
-    { Converter::ArkValue<Ark_Number>(-0.54f), -0.54f },
-    { Converter::ArkValue<Ark_Number>(0.00f), 0.00f },
-    { Converter::ArkValue<Ark_Number>(0.98f), 0.98f },
-    { Converter::ArkValue<Ark_Number>(1.00f), 1.00f },
+    { Converter::ArkValue<Ark_Float64>(-1.01f), -1.01f },
+    { Converter::ArkValue<Ark_Float64>(-0.54f), -0.54f },
+    { Converter::ArkValue<Ark_Float64>(0.00f), 0.00f },
+    { Converter::ArkValue<Ark_Float64>(0.98f), 0.98f },
+    { Converter::ArkValue<Ark_Float64>(1.00f), 1.00f },
 };
 const std::vector<std::pair<Ark_Number, int32_t>> arkNumberIntTestPlan = {
-    { Converter::ArkValue<Ark_Number>(100), 100 },
-    { Converter::ArkValue<Ark_Number>(0), 0 },
-    { Converter::ArkValue<Ark_Number>(-100), -100 },
-    { Converter::ArkValue<Ark_Number>(12), 12 },
-    { Converter::ArkValue<Ark_Number>(-56), -56 },
+    { Converter::ArkValue<Ark_Int32>(100), 100 },
+    { Converter::ArkValue<Ark_Int32>(0), 0 },
+    { Converter::ArkValue<Ark_Int32>(-100), -100 },
+    { Converter::ArkValue<Ark_Int32>(12), 12 },
+    { Converter::ArkValue<Ark_Int32>(-56), -56 },
 };
 const std::vector<int32_t> sizeArrayTestPlan = { 0, 1, 2, 3, 4, 5 };
 } // namespace

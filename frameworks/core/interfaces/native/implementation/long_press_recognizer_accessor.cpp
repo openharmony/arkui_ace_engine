@@ -39,11 +39,11 @@ Ark_Boolean IsRepeatImpl(Ark_LongPressRecognizer peer)
     CHECK_NULL_RETURN(peer, errorValue);
     return Converter::ArkValue<Ark_Boolean>(peer->GetRepeat());
 }
-Ark_Number GetDurationImpl(Ark_LongPressRecognizer peer)
+Ark_Int32 GetDurationImpl(Ark_LongPressRecognizer peer)
 {
-    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_LONG_PRESS_DURATION);
+    auto errorValue = Converter::ArkValue<Ark_Int32>(DEFAULT_LONG_PRESS_DURATION);
     CHECK_NULL_RETURN(peer, errorValue);
-    return Converter::ArkValue<Ark_Number>(peer->GetDuration());
+    return Converter::ArkValue<Ark_Int32>(peer->GetDuration());
 }
 } // LongPressRecognizerAccessor
 const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor()
