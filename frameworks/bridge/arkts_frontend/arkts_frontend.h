@@ -394,6 +394,7 @@ public:
     }
 
     void* GetEnv() override;
+    ani_ref GetApp();
     ani_vm *GetVM() override;
     static void PreloadAceModule(void* aniEnv);
     static void* preloadArkTSRuntime;
