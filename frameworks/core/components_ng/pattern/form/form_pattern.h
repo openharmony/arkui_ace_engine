@@ -95,6 +95,16 @@ enum class FormChildNodeType : int32_t {
      * developer mode tips node
     */
     DEVELOPER_MODE_TIPS_IMAGE_NODE,
+
+    /**
+     * due control text node
+     */
+    DUE_CONTROL_TEXT_NODE,
+ 
+    /**
+     * due control image node
+     */
+    DUE_CONTROL_IMAGE_NODE,
 };
 
 class FormPattern : public Pattern {
@@ -286,6 +296,7 @@ private:
     void InitAddUnTrustAndSnapshotCallback(int32_t instanceId);
     void InitOtherCallback(int32_t instanceId);
     void InitUpdateFormDoneCallback(int32_t instanceID);
+    void InitDueControlFormCallback(int32_t instanceID);
     bool IsFormBundleExempt(int64_t formId) const;
     bool IsFormBundleProtected(const std::string &bundleName, int64_t formId) const;
     bool IsFormBundleDebugSignature(const std::string &bundleName) const;
@@ -306,6 +317,9 @@ private:
     void InitializeFormAccessibility();
     void SetForbiddenRootNodeAccessibilityAction(RefPtr<FrameNode> &forbiddeRootNode);
     void SetFormAccessibilityAction();
+    void HandleFormDueControl(bool isDisablePolicy, bool isControl);
+    bool IsFormDueControl(const std::string &bundleName, const std::string &moduleName, const std::string &abilityName,
+        const std::string &formName, const int32_t dimension, const bool isDisablePolicy);
 
     RefPtr<RenderContext> externalRenderContext_;
 
