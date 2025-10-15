@@ -469,8 +469,14 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src,
 {
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
     // read pixel map is not supported
+    std::pair<const Dimension, const Dimension> pair = { Dimension::FromString(src.leadingMarginSize[0]),
+        Dimension::FromString(src.leadingMarginSize[1]) };
+    Ark_LeadingMarginPlaceholder arkLeadingMargin = {
+        .size = Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(pair, ctx),
+        .pixelMap = image_PixelMapPeer::Create(src.leadingMarginPixmap)
+    };
     dst.leadingMargin = Converter::ArkUnion<
-        Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_Dimension>(src.leadingMarginSize[0], ctx);
+        Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(arkLeadingMargin, ctx);
     dst.wordBreak = Converter::ArkValue<Opt_WordBreak>(static_cast<WordBreak>(src.wordBreak));
     dst.lineBreakStrategy = Converter::ArkValue<Opt_LineBreakStrategy>(
         static_cast<LineBreakStrategy>(src.lineBreakStrategy));
@@ -481,8 +487,14 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& sr
 {
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
     // read pixel map is not supported
+    std::pair<const Dimension, const Dimension> pair = { Dimension::FromString(src.leadingMarginSize[0]),
+        Dimension::FromString(src.leadingMarginSize[1]) };
+    Ark_LeadingMarginPlaceholder arkLeadingMargin = {
+        .size = Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(pair, ctx),
+        .pixelMap = image_PixelMapPeer::Create(nullptr)
+    };
     dst.leadingMargin = Converter::ArkUnion<
-        Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_Dimension>(src.leadingMarginSize[0], ctx);
+        Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(arkLeadingMargin, ctx);
     dst.wordBreak = Converter::ArkValue<Opt_WordBreak>(static_cast<WordBreak>(src.wordBreak));
     dst.lineBreakStrategy = Converter::ArkValue<Opt_LineBreakStrategy>(
         static_cast<LineBreakStrategy>(src.lineBreakStrategy));
@@ -571,11 +583,13 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, 
     dst.offsetInSpan.value1 = ArkValue<Ark_Int32>(src.offsetInSpan[1]);
     dst.symbolSpanStyle = ArkValue<Opt_RichEditorSymbolSpanStyle>(Ark_Empty());
     dst.valueResource = ArkValue<Opt_Resource>(Ark_Empty());
-    dst.paragraphStyle = ArkValue<Opt_RichEditorParagraphStyle>(src.textStyle, ctx);
+    bool isSymbol = (src.type == SelectSpanType::TYPESYMBOLSPAN);
+    dst.paragraphStyle = isSymbol ? ArkValue<Opt_RichEditorParagraphStyle>(Ark_Empty())
+        : ArkValue<Opt_RichEditorParagraphStyle>(src.textStyle, ctx);
     dst.previewText = ArkValue<Opt_String>(src.previewText, ctx);
     dst.urlStyle = ArkValue<Opt_RichEditorUrlStyle>(Ark_Empty());
     // style for symbol span
-    CHECK_NULL_VOID(src.type == SelectSpanType::TYPESYMBOLSPAN);
+    CHECK_NULL_VOID(isSymbol);
     dst.symbolSpanStyle = ArkValue<Opt_RichEditorSymbolSpanStyle>(src.symbolSpanStyle, ctx);
     CHECK_NULL_VOID(src.valueResource);
     dst.valueResource = ArkValue<Opt_Resource>(*(src.valueResource), ctx);
@@ -584,9 +598,15 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, 
 void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const ResultObject& src, ConvContext *ctx)
 {
     dst.spanPosition = ArkValue<Ark_RichEditorSpanPosition>(src.spanPosition);
+    bool isBuilderSpan = src.valueString == u" " && src.valuePixelMap == nullptr;
     dst.valuePixelMap = ArkValue<Opt_image_PixelMap>(image_PixelMapPeer::Create(src.valuePixelMap));
     dst.valueResourceStr = ArkUnion<Opt_ResourceStr, Ark_String>(src.valueString, ctx);
-    dst.imageStyle = ArkValue<Ark_RichEditorImageSpanStyleResult>(src.imageStyle);
+    ImageStyleResult builderStyle {
+        .size = {src.imageStyle.size[0], src.imageStyle.size[1]},
+        .verticalAlign = static_cast<int32_t>(VerticalAlign::BOTTOM)
+    };
+    dst.imageStyle = isBuilderSpan ? ArkValue<Ark_RichEditorImageSpanStyleResult>(builderStyle)
+        : ArkValue<Ark_RichEditorImageSpanStyleResult>(src.imageStyle);
     dst.offsetInSpan.value0 = ArkValue<Ark_Int32>(src.offsetInSpan[0]);
     dst.offsetInSpan.value1 = ArkValue<Ark_Int32>(src.offsetInSpan[1]);
 }
@@ -602,6 +622,20 @@ void AssignArkValue(Ark_RichEditorSelection& dst, const SelectionInfo& src, Conv
     } else {
         dst.spans = ArkValue<Array_Union_RichEditorTextSpanResult_RichEditorImageSpanResult>(values, ctx);
     }
+}
+
+RefPtr<ResourceObject> GetResourceObject(const Ark_Resource& resource)
+{
+    ResourceConverter converter(resource);
+    auto symbolId = converter.ToSymbol();
+    CHECK_NULL_RETURN((symbolId.has_value() && symbolId.value() <= INT32_MAX), nullptr);
+    auto resourceId = static_cast<int32_t>(symbolId.value());
+    std::vector<ResourceObjectParams> resObjParamsList;
+    auto type = OptConvert<int32_t>(resource.type).value_or(0);
+    auto bundleName = Convert<std::string>(resource.bundleName);
+    auto moduleName = Convert<std::string>(resource.moduleName);
+    return AceType::MakeRefPtr<ResourceObject>(
+        resourceId, type, resObjParamsList, bundleName, moduleName, Container::CurrentIdSafely());
 }
 } // OHOS::Ace::NG::Converter
 
@@ -699,6 +733,7 @@ Ark_Int32 AddSymbolSpanImpl(Ark_RichEditorController peer,
     auto convValue = Converter::OptConvert<Converter::SymbolData>(*value);
     CHECK_NULL_RETURN(convValue && convValue->symbol, Converter::ArkValue<Ark_Int32>(-1));
     locOptions.symbolId = convValue->symbol.value();
+    locOptions.resourceObject = Converter::GetResourceObject(*value);
     return Converter::ArkValue<Ark_Int32>(peerImpl->AddSymbolSpanImpl(locOptions));
 }
 void UpdateSpanStyleImpl(Ark_RichEditorController peer,

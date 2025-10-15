@@ -202,4 +202,14 @@ void RichEditorModelStatic::SetMaxLength(FrameNode* frameNode, std::optional<int
     CHECK_NULL_VOID(pattern);
     pattern->SetMaxLength(value);
 }
+
+void RichEditorModelStatic::SetMaxLines(FrameNode* frameNode, uint32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxLinesHeight(FLT_MAX);
+    pattern->SetMaxLines(value);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value, frameNode);
+}
 } // namespace OHOS::Ace::NG
