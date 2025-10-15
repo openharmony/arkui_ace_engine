@@ -5585,4 +5585,7 @@ export class TypeChecker {
     static isArray_ScriptItem(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+    static isArray_NativePointer(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
 }
