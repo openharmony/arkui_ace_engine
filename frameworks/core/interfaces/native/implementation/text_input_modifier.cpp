@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/text_input_controller_peer.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter_union.h"
@@ -627,14 +628,13 @@ void SetCancelButton1Impl(Ark_NativePointer node, const Opt_CancelButtonSymbolOp
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     auto cleanButtonStyle = optValue ? Converter::OptConvert<CleanNodeStyle>(optValue->style) : std::nullopt;
-    auto symbol = optValue ? Converter::OptConvert<Ark_SymbolGlyphModifier>(optValue->icon) : std::nullopt;
+    auto symbolModifier = optValue ? Converter::OptConvert<Ark_SymbolGlyphModifier>(optValue->icon) : std::nullopt;
     TextFieldModelStatic::SetCleanNodeStyle(frameNode, cleanButtonStyle);
     TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
     TextFieldModelNG::SetCancelButtonSymbol(frameNode, true);
-    if (symbol) {
-        // Implement Reset value
-        TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
-        LOGE("TextInputModifier::CancelButton1Impl need to know what data is in value->icon");
+    if (symbolModifier && *symbolModifier) {
+        TextFieldModelNG::SetCancelSymbolIcon(frameNode, (*symbolModifier)->symbolApply);
+        PeerUtils::DestroyPeer(*symbolModifier);
     }
 }
 void SetSelectAllImpl(Ark_NativePointer node,
