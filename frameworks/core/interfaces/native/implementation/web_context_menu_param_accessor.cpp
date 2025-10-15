@@ -120,7 +120,7 @@ Ark_ContextMenuDataMediaType GetContextMenuMediaTypeImpl(Ark_WebContextMenuParam
 {
     Ark_ContextMenuDataMediaType value = ARK_CONTEXT_MENU_DATA_MEDIA_TYPE_NONE;
     CHECK_NULL_RETURN(peer && peer->handler, value);
-    return value;
+    return static_cast<Ark_ContextMenuDataMediaType>(peer->handler->GetContextMenuMediaType());
 }
 } // WebContextMenuParamAccessor
 const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor()
