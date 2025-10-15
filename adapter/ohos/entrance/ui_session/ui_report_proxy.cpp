@@ -150,6 +150,42 @@ void UiReportProxy::ReportWebUnfocusEvent(int64_t accessibilityId, const std::st
     }
 }
 
+void UiReportProxy::ReportScrollEvent(const std::string& data)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option;
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ReportScrollEvent write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("ReportScrollEvent write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(REPORT_SCROLL_EVENT, messageData, reply, option) != ERR_NONE) {
+        LOGW("ReportScrollEvent send request failed");
+    }
+}
+
+void UiReportProxy::ReportLifeCycleEvent(const std::string& data)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option;
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ReportLifeCycleEvent write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("ReportLifeCycleEvent write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(REPORT_LIFE_CYCLE_EVENT, messageData, reply, option) != ERR_NONE) {
+        LOGW("ReportLifeCycleEvent send request failed");
+    }
+}
+
 void UiReportProxy::SendBaseInfo(const std::string& data)
 {
     MessageParcel messageData;

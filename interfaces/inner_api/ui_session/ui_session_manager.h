@@ -73,6 +73,16 @@ public:
      */
     virtual void ReportComponentChangeEvent(
         int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value) {};
+    
+    /**
+     * @description: execute callback when scroll event occurs
+     */
+    virtual void ReportScrollEvent(const std::string& data) {};
+
+    /**
+     * @description: execute callback when life cycle event occurs
+     */
+    virtual void ReportLifeCycleEvent(const std::string& data) {};
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     /**
      * @description: save report communication stub side
@@ -105,6 +115,8 @@ public:
     virtual void OnRouterChange(const std::string& path, const std::string& event) {};
     virtual void SetRouterChangeEventRegistered(bool status) {};
     virtual void SetComponentChangeEventRegistered(bool status) {};
+    virtual void SetScrollEventRegistered(bool status) {};
+    virtual void SetLifeCycleEventRegistered(bool status) {};
     virtual bool GetClickEventRegistered()
     {
         return false;
@@ -122,6 +134,14 @@ public:
         return false;
     };
     virtual bool GetWebFocusRegistered()
+    {
+        return false;
+    };
+    virtual bool GetScrollEventRegistered()
+    {
+        return false;
+    };
+    virtual bool GetLifeCycleEventRegistered()
     {
         return false;
     };
@@ -172,6 +192,8 @@ protected:
     std::atomic<int32_t> searchEventRegisterProcesses_ = 0;
     std::atomic<int32_t> routerChangeEventRegisterProcesses_ = 0;
     std::atomic<int32_t> componentChangeEventRegisterProcesses_ = 0;
+    std::atomic<int32_t> scrollEventRegisterProcesses_ = 0;
+    std::atomic<int32_t> lifeCycleEventRegisterProcesses_ = 0;
     bool webFocusEventRegistered = false;
     InspectorFunction inspectorFunction_ = 0;
     NotifyAllWebFunction notifyWebFunction_ = 0;

@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -301,6 +302,7 @@ void PagePattern::RecordPageEvent(bool isShow)
         }
         Recorder::EventRecorder::Get().OnPageShow(
             pageInfo_->GetPageUrl(), param, pageInfo_->GetRouteName().value_or(""));
+        UiSessionManager::GetInstance()->OnRouterChange(pageInfo_->GetFullPath(), "onPageShow");
     } else {
         int64_t duration = 0;
         if (entryPageInfo && entryPageInfo->GetShowTime() > 0) {
@@ -308,6 +310,7 @@ void PagePattern::RecordPageEvent(bool isShow)
         }
         Recorder::EventRecorder::Get().OnPageHide(
             pageInfo_->GetPageUrl(), duration, pageInfo_->GetRouteName().value_or(""));
+        UiSessionManager::GetInstance()->OnRouterChange(pageInfo_->GetFullPath(), "onPageHide");
     }
 }
 

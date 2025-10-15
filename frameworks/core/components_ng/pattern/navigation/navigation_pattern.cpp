@@ -1798,6 +1798,7 @@ void NavigationPattern::ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& 
     auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
     navigationNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+    UiSessionManager::GetInstance()->OnRouterChange(navigationNode->GetNavigationPathInfo(), "onPageChange");
     navigationStack_->UpdateReplaceValue(0);
 
     auto context = navigationNode->GetContext();
@@ -1867,6 +1868,7 @@ void NavigationPattern::TransitionWithOutAnimation(RefPtr<NavDestinationGroupNod
         auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
         navigationNode->OnAccessibilityEvent(
             AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+        UiSessionManager::GetInstance()->OnRouterChange(navigationNode->GetNavigationPathInfo(), "onPageChange");
         return;
     }
 
@@ -1907,6 +1909,7 @@ void NavigationPattern::TransitionWithOutAnimation(RefPtr<NavDestinationGroupNod
     auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
     navigationNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+    UiSessionManager::GetInstance()->OnRouterChange(navigationNode->GetNavigationPathInfo(), "onPageChange");
 }
 
 void NavigationPattern::TransitionWithAnimation(RefPtr<NavDestinationGroupNode> preTopNavDestination,
@@ -2871,6 +2874,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
     auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
     hostNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+    UiSessionManager::GetInstance()->OnRouterChange(hostNode->GetNavigationPathInfo(), "onPageChange");
     do {
         if (replaceValue != 0) {
             if (preTopNavDestination) {
@@ -4068,6 +4072,7 @@ void NavigationPattern::RecoveryToLastStack(
     auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
     hostNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+    UiSessionManager::GetInstance()->OnRouterChange(hostNode->GetNavigationPathInfo(), "onPageChange");
 }
 
 bool NavigationPattern::ExecuteAddAnimation(RefPtr<NavDestinationGroupNode> preTopNavDestination,
