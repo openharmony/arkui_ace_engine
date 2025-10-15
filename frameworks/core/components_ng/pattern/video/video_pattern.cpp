@@ -629,8 +629,7 @@ void VideoPattern::ChangePlayerStatus(const PlaybackStatus& status)
     switch (status) {
 #ifdef OHOS_PLATFORM
         case PlaybackStatus::INITIALIZED:
-            PrepareSurface();
-            if (mediaPlayer_ && mediaPlayer_->PrepareAsync() != 0) {
+            if (PrepareSurface() && mediaPlayer_->PrepareAsync() != 0) {
                 TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
             }
             break;
@@ -954,9 +953,9 @@ void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
     }
 }
 
-void VideoPattern::PrepareSurface()
+bool VideoPattern::PrepareSurface()
 {
-    CHECK_NULL_VOID(mediaPlayer_);
+    CHECK_NULL_RETURN(mediaPlayer_, false);
     if (!SystemProperties::GetExtSurfaceEnabled()) {
         renderSurface_->SetRenderContext(renderContextForMediaPlayer_);
     }
@@ -966,7 +965,9 @@ void VideoPattern::PrepareSurface()
     }
     if (mediaPlayer_->SetSurface() != 0) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "mediaPlayer renderSurface set failed");
+        return false;
     }
+    return true;
 }
 
 void VideoPattern::OnAttachToFrameNode()
