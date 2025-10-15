@@ -51,12 +51,13 @@ export interface IExtendableComponent {
     getDialogController(): promptAction.DialogController | undefined;
     __removeChildWhenDispose__IExtendableComponent_Internal(): void;
     __addMeToParent__IExtendableComponent_Internal(): void;
+    isViewActive(): boolean;
     setActiveInternal(active: boolean, isReuse: boolean): void;
 }
 
 export abstract class ExtendableComponent implements LifeCycle {
     static current: object | undefined = undefined;
-    isActive_: number = 1;
+    private isActive_: number = 1;
 
     private parent_: ExtendableComponent | undefined;
     private providedVars_: Map<string, IProvideDecoratedVariable<object>> = new Map<string, IProvideDecoratedVariable<object>>();
@@ -99,6 +100,18 @@ export abstract class ExtendableComponent implements LifeCycle {
             child?.setParent(undefined);
         });
         this.childrenWeakRefMap_.clear();
+    }
+
+    getActive(): number {
+        return this.isActive_;
+    }
+
+    setActive(activeCount: number): void {
+        this.isActive_ = activeCount;
+    }
+
+    isViewActive(): boolean {
+        return this.delegate_!.isViewActive();
     }
 
     propagateToChild(active: boolean, isReuse: boolean): void {
