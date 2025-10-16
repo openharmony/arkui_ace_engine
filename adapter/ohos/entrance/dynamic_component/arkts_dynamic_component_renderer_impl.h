@@ -27,6 +27,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 
+namespace OHOS {
+namespace Rosen {
+    class RSUIContext;
+    class RSTransaction;
+}
+}
+
 namespace OHOS::Ace::NG {
 
 class ArktsDynamicComponentRendererImpl : public DynamicComponentRenderer {
@@ -45,6 +52,10 @@ public:
     void UpdateViewportConfig(
         const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt,
         const OffsetF& offset) override;
+    static std::shared_ptr<Rosen::RSUIContext> GetRSUIContextByInstanceId(int32_t instanceId);
+    static std::shared_ptr<Rosen::RSTransaction> GetSyncRSTransactionByInstanceId(int32_t instanceId);
+    std::shared_ptr<Rosen::RSTransaction> GetCommonRSTransactionByRSUIcontext(
+        const std::shared_ptr<Rosen::RSUIContext>& rsUIContext);
 
     void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     bool TransferKeyEvent(const KeyEvent& event) override;
@@ -90,6 +101,9 @@ private:
     void DeleteWorkerUsing(int32_t workerId);
     void OnDestroyContent();
     void AfterDestroyContent();
+    void UpdateDynamicViewportConfig(const SizeF& size, float density,
+        int32_t orientation, AnimationOption animationOpt, const OffsetF& offset);
+    int32_t GetSCBOrientation(const RefPtr<FrameNode>& windowSceneNode);
 
     void CreateDynamicContent();
     void SetUIContentJsContext();
