@@ -56,6 +56,7 @@ enum class WindowSizeChangeReason : uint32_t {
     RECOVER_IN_IMPLICIT = 33,
     OCCUPIED_AREA_CHANGE = 34,
     SNAPSHOT_ROTATION = 37,
+    SCENE_WITH_ANIMATION = 38,
     END,
 };
 } // namespace OHOS::Ace

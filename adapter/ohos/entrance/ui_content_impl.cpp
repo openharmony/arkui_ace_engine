@@ -4018,7 +4018,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 auto isNeedAvoidWindowMode = IsNeedAvoidWindowMode(rsWindow);
                 pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
             }
-            if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
+            if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
+                reason == OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
                 pipelineContext->FlushBuild();
                 pipelineContext->StartWindowAnimation();
                 if (container->GetUIContentType() != UIContentType::DYNAMIC_COMPONENT) {
@@ -4072,7 +4073,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
     bool isReasonRotationOrDPI = (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC ||
-        reason == OHOS::Rosen::WindowSizeChangeReason::RESIZE_WITH_ANIMATION);
+        reason == OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION);
     if (container->IsUseStageModel() && isReasonRotationOrDPI) {
         if (container->IsUIExtensionWindow()) {
             pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
