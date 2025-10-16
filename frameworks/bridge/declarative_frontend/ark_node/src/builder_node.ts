@@ -286,6 +286,9 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     __JSScopeUtil__.restoreInstanceId();
   }
   public updateConfiguration(): void {
+    if (this === undefined) {
+        return;
+    }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.updateStart();
     try {

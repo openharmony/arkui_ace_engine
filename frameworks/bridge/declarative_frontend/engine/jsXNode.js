@@ -358,6 +358,9 @@ class JSBuilderNode extends BaseNode {
         __JSScopeUtil__.restoreInstanceId();
     }
     updateConfiguration() {
+        if (this === undefined) {
+            return;
+        }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.updateStart();
         try {
