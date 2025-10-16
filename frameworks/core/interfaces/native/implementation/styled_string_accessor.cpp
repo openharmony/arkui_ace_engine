@@ -335,7 +335,7 @@ void Unmarshalling0Impl(Ark_VMContext vmContext,
         promise->Reject<Opt_StyledString>({"buffer is empty"});
         return;
     }
-    buffer->resource.hold(buffer->resource.resourceId);
+    (buffer->resource.hold) ? (*buffer->resource.hold)(buffer->resource.resourceId): (void)0;
 
     auto instanceId = Container::CurrentIdSafely();
 
@@ -356,7 +356,7 @@ void Unmarshalling0Impl(Ark_VMContext vmContext,
     auto unmarshallingExec = [promise, buffer = std::move(buffer), instanceId, unmarshall = std::move(unmarshall)]() {
         auto data = static_cast<uint8_t*>(buffer->data);
         auto buff = data ? std::vector<uint8_t>(data, data + buffer->length) : std::vector<uint8_t>();
-        buffer->resource.release(buffer->resource.resourceId);
+        (buffer->resource.release) ? (*buffer->resource.release)(buffer->resource.resourceId): (void)0;
 
         Ark_StyledString peer = StyledStringPeer::Create();
         peer->spanString = SpanString::DecodeTlv(buff, std::move(unmarshall), instanceId);
