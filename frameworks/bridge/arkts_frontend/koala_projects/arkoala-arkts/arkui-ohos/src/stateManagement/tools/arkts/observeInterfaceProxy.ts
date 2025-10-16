@@ -23,16 +23,14 @@ import { NullableObject } from '../../base/types';
 import { UIUtils } from '../../utils';
 import { uiUtils } from '../../base/uiUtilsImpl';
 
-export class InterfaceProxyHandler<T extends Object>
-    extends proxy.DefaultProxyHandler<T>
-    implements IObservedObject, ISubscribedWatches
-{
+export class InterfaceProxyHandler implements reflect.InvocationHandler, IObservedObject, ISubscribedWatches {
     private readonly __meta: IMutableStateMeta = STATE_MGMT_FACTORY.makeMutableStateMeta();
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     private ____V1RenderId: RenderIdType = 0;
     private allowDeep_: boolean;
-    constructor(allowDeep: boolean) {
-        super();
+    private _target: Object;
+    constructor(target: Object, allowDeep: boolean) {
+        this._target = target;
         this.allowDeep_ = allowDeep;
     }
     public addWatchSubscriber(watchId: WatchIdType): void {
@@ -50,24 +48,34 @@ export class InterfaceProxyHandler<T extends Object>
     public shouldAddRef(): boolean {
         return this.allowDeep_ || OBSERVE.shouldAddRef(this.____V1RenderId);
     }
-    public get(target: T, name: string): Any {
-        const value = super.get(target, name);
+    get(target: Object, method: reflect.InstanceMethod): Any {
+        const value = method.invoke(this._target);
         if (typeof value !== 'function' && this.shouldAddRef()) {
             this.__meta.addRef();
         }
         return uiUtils.makeObserved(value, this.allowDeep_);
     }
-    public set(target: T, name: string, newValue: Any): boolean {
-        if (super.get(target, name) !== newValue) {
-            const result = super.set(target, name, newValue);
-            this.__meta.fireChange();
-            this.executeOnSubscribingWatches(name);
-            return result;
+    set (target: Object, method: reflect.InstanceMethod, newValue: Any): void {
+        const varName = method.getName().substring(5);
+        const GETTER_PREFIX = '<get>';
+        const targetType = Type.of(this._target) as ClassType;
+        try {
+            const getter = targetType.getMethodByName(GETTER_PREFIX + varName);
+            if (getter && getter.invoke(this._target, []) !== newValue) {
+                method.invoke(this._target, [newValue]);
+                this.__meta.fireChange();
+                this.executeOnSubscribingWatches(varName);
+            }
+        } catch (e) {
+            console.log(e);
         }
-        return true;
     }
 
-    public invoke(target: T, method: Method, args: FixedArray<Any>): Any {
-        return method.invoke(target, args);
+    invoke(target: Object, method: reflect.InstanceMethod, args: FixedArray<Any>): Any {
+        return method.invoke(this._target, args);
+    }
+
+    get target(): Object {
+        return this._target;
     }
 }

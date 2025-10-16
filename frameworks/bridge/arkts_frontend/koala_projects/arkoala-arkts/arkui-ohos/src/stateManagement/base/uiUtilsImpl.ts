@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { StateMgmtTool } from '#stateMgmtTool';
+import { StateMgmtTool, InterfaceProxyHandler } from '#stateMgmtTool';
 import { NullableObject } from './types';
 import { WrappedArray } from './observeWrappedArray';
 import { WrappedDate } from './observeWrappedDate';
@@ -150,7 +150,8 @@ export class UIUtilsImpl {
             return source;
         }
         if (UIUtilsImpl.isProxied(source!)) {
-            return proxy.Proxy.tryGetTarget(source! as Object)! as Object as T;
+            const handler = StateMgmtTool.tryGetHandler(source as Object);
+            return (handler as InterfaceProxyHandler).target as T;
         }
         if (
             source instanceof WrappedArray ||
