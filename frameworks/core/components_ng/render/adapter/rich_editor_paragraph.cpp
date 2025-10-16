@@ -37,7 +37,7 @@ void RichEditorParagraph::Layout(float width)
     CHECK_NULL_VOID(paragraph_);
     layoutWidth_ = width;
     height_ = paragraph_->GetHeight();
-    lineCount_ = paragraph_->GetLineCount();
+    lineCount_ = static_cast<size_t>(std::max(paragraph_->GetLineCount(), 0));
 }
 
 void RichEditorParagraph::ReLayout(float width, const ParagraphStyle& paraStyle,
@@ -48,7 +48,7 @@ void RichEditorParagraph::ReLayout(float width, const ParagraphStyle& paraStyle,
     CHECK_NULL_VOID(paragraph_);
     layoutWidth_ = width;
     height_ = paragraph_->GetHeight();
-    lineCount_ = paragraph_->GetLineCount();
+    lineCount_ = static_cast<size_t>(std::max(paragraph_->GetLineCount(), 0));
 }
 
 float RichEditorParagraph::GetHeight()
