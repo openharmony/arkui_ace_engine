@@ -38,6 +38,8 @@ public:
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
     void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetPlaceholder(PlaceholderOptions& options) override;
+    void SetSelectDetectEnable(const bool value) override;
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void SetTextDetectEnable(bool value) override;
     void SetSupportPreviewText(bool value) override;
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override;
@@ -67,6 +69,12 @@ public:
     void SetSupportStyledUndo(bool enabled) override;
     void SetScrollBarColor(std::optional<Color> value) override;
 
+    static void SetSelectDetectEnable(FrameNode* frameNode, const bool value);
+    static bool GetSelectDetectEnable(FrameNode* frameNode);
+    static void ResetSelectDetectEnable(FrameNode* frameNode);
+    static void SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types);
+    static std::vector<TextDataDetectType> GetSelectDetectConfig(FrameNode* frameNode);
+    static void ResetSelectDetectConfig(FrameNode* frameNode);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
     static void SetOnIMEInputComplete(FrameNode* frameNode,

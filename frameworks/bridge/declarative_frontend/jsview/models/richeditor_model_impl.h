@@ -38,6 +38,8 @@ class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
     void SetTextDetectEnable(bool value) override {}
     void SetSupportPreviewText(bool value) override {}
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override {}
+    void SetSelectDetectEnable(const bool value) override {}
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override {}
     void SetSelectedBackgroundColor(const Color& selectedColor) override {}
     void SetCaretColor(const Color& color) override {}
     void SetOnEditingChange(std::function<void(const bool&)>&& func) override {}
