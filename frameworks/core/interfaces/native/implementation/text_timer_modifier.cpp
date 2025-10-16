@@ -186,12 +186,10 @@ void SetOnTimerImpl(Ark_NativePointer node,
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue), node = AceType::WeakClaim(frameNode)](
         int64_t utc, int64_t elapsedTime) {
-#ifdef WRONG_GEN
         PipelineContext::SetCallBackNode(node);
         auto utcResult = Converter::ArkValue<Ark_Int64>(utc);
         auto elapsedTimeResult = Converter::ArkValue<Ark_Int64>(elapsedTime);
         arkCallback.Invoke(utcResult, elapsedTimeResult);
-#endif
     };
     TextTimerModelNG::SetOnTimer(frameNode, std::move(onChange));
 }
