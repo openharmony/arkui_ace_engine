@@ -232,6 +232,27 @@ HWTEST_F(WebModelStaticTest, SetZoomAccessEnabled002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetZoomControlAccess001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetZoomControlAccess001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    WebModelStatic::SetZoomControlAccess(AccessibilityManager::RawPtr(frameNode), true);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckZoomControlAccess(true), true);
+#endif
+}
+
+/**
  * @tc.name: SetCacheMode001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
