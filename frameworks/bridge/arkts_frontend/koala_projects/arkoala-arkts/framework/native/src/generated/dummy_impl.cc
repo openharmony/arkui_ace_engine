@@ -24066,6 +24066,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {42};
     }
+    Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
+                            Ark_AxisType axisType)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("hasAxis(");
+        WriteToString(&out, axisType);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
     Ark_AxisAction GetActionImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
@@ -44067,6 +44081,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AxisEventAccessor::GetFinalizerImpl,
             AxisEventAccessor::GetHorizontalAxisValueImpl,
             AxisEventAccessor::GetVerticalAxisValueImpl,
+            AxisEventAccessor::HasAxisImpl,
             AxisEventAccessor::GetActionImpl,
             AxisEventAccessor::SetActionImpl,
             AxisEventAccessor::GetDisplayXImpl,

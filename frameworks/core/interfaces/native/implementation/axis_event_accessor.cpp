@@ -69,6 +69,14 @@ Ark_Number GetVerticalAxisValueImpl(Ark_AxisEvent peer)
     double value = event->GetVerticalAxis();
     return Converter::ArkValue<Ark_Number>(value);
 }
+Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
+                        Ark_AxisType axisType)
+{
+    CHECK_NULL_RETURN(peer, false);
+    AxisInfo* event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, false);
+    return Converter::ArkValue<Ark_Boolean>(event->HasAxis(static_cast<AxisType>(axisType)));
+}
 Ark_AxisAction GetActionImpl(Ark_AxisEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_AxisAction>(AxisAction::NONE);
@@ -277,6 +285,7 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::GetFinalizerImpl,
         AxisEventAccessor::GetHorizontalAxisValueImpl,
         AxisEventAccessor::GetVerticalAxisValueImpl,
+        AxisEventAccessor::HasAxisImpl,
         AxisEventAccessor::GetActionImpl,
         AxisEventAccessor::SetActionImpl,
         AxisEventAccessor::GetDisplayXImpl,
