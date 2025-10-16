@@ -69,7 +69,10 @@ public:
     }
 
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
+
     void OnModifyDone() override;
     void OnWindowHide() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -396,9 +399,12 @@ public:
     }
 
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style);
+    void SetSystemBarStyleMultiThread(const RefPtr<SystemBarStyle>& style);
 
     void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
 
     bool IsFullPageNavigation() const
     {

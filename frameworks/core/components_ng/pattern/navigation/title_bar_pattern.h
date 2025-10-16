@@ -313,7 +313,13 @@ private:
     void AnimateTo(float offset, bool isFullTitleMode = false);
 
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
 
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
@@ -347,6 +353,7 @@ private:
         animation_.reset();
     }
     void UpdateBackgroundStyle(RefPtr<FrameNode>& host);
+    void UpdateBackgroundStyleMultiThread(RefPtr<FrameNode>& host);
     void MountSubTitle(const RefPtr<TitleBarNode>& hostNode);
     void ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty,

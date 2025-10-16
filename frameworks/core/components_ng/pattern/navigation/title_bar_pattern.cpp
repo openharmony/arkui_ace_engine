@@ -18,6 +18,7 @@
 #include <sstream>
 
 #include "base/i18n/localization.h"
+#include "base/utils/multi_thread.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/button/button_theme.h"
@@ -1128,6 +1129,7 @@ void TitleBarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateClipEdge(true);
 
@@ -1146,6 +1148,20 @@ void TitleBarPattern::OnAttachToFrameNode()
             NavigationTitleUtil::FoldStatusChangedAnimation(host);
         });
     UpdateHalfFoldHoverChangedCallbackId(halfFoldHoverCallbackId);
+}
+
+void TitleBarPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
+void TitleBarPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
 void TitleBarPattern::InitFoldCreaseRegion()
@@ -1423,6 +1439,8 @@ void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions& opt)
 
 void TitleBarPattern::UpdateBackgroundStyle(RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, UpdateBackgroundStyle, host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (options_.bgOptions.color.has_value()) {
@@ -1445,6 +1463,7 @@ void TitleBarPattern::UpdateBackgroundStyle(RefPtr<FrameNode>& host)
 void TitleBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
