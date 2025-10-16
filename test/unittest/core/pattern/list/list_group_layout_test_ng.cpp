@@ -22,6 +22,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_height_offset_calculator.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -356,6 +357,36 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, CheckJumpBackwardForBigOffset007, TestSiz
     EXPECT_EQ(endIndex, 2);
     EXPECT_EQ(endPos, 1.0f);
     EXPECT_FALSE(result);
+}
+
+
+/**
+ * @tc.name: CheckJumpForwardForBigOffset008
+ * @tc.desc: Test ListItemGroup BigOffsetWithScrollBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, BigOffsetWithScrollBar, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateListItems(30000);
+    CreateDone();
+
+    FlushIdleTask(pattern_);
+    UpdateCurrentOffset(-200000, SCROLL_FROM_BAR);
+
+    auto calculateForward = ListHeightOffsetCalculator(pattern_->itemPosition_, 0, 1, Axis::VERTICAL, 0);
+    calculateForward.SetPosMap(pattern_->posMap_);
+    calculateForward.GetEstimateHeightAndOffset(frameNode_);
+    auto currentOffset = calculateForward.GetEstimateOffset();
+    EXPECT_EQ(currentOffset, 200000);
+
+    UpdateCurrentOffset(100000, SCROLL_FROM_BAR);
+    auto calculateBackward = ListHeightOffsetCalculator(pattern_->itemPosition_, 0, 1, Axis::VERTICAL, 0);
+    calculateBackward.SetPosMap(pattern_->posMap_);
+    calculateBackward.GetEstimateHeightAndOffset(frameNode_);
+    currentOffset = calculateBackward.GetEstimateOffset();
+    EXPECT_EQ(currentOffset, 100000);
 }
 
 /**
