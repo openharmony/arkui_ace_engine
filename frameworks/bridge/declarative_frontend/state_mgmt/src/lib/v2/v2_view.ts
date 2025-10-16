@@ -393,6 +393,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         refs[name].resetComputed(name);
      }
 
+    // The Consumer uses providerName when findProvider
+    // but uses varName when connect or disconnect.
     public __reconnectToConsumerV2__View2__Internal<T>(providerName: string, varName: string, consumerVal: T): void {
         let providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
         if (providerInfo && providerInfo[0] && providerInfo[1]) {
