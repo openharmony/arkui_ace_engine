@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Ani {
 
 ani_long Commonconstruct(ani_env* env, [[maybe_unused]] ani_object aniClass,
-                             ani_int id, ani_int flags)
+    ani_int id, ani_int flags)
 {
     ani_long nativeObj {};
     const auto* modifier = GetNodeAniModifier();
@@ -30,7 +30,7 @@ ani_long Commonconstruct(ani_env* env, [[maybe_unused]] ani_object aniClass,
     return customNode;
 }
 void SetCommonOptions(ani_env* env, [[maybe_unused]] ani_object aniClass,
-                             ani_long pointer)
+    ani_long pointer)
 {
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_VOID(modifier);

@@ -21,9 +21,9 @@
 namespace OHOS::Ace::Ani {
 
 ani_long Commonconstruct(ani_env* env, [[maybe_unused]] ani_object aniClass,
-                             ani_int id, ani_int flags);
+    ani_int id, ani_int flags);
 void SetCommonOptions(ani_env* env, [[maybe_unused]] ani_object aniClass,
-                             ani_long pointer);
+    ani_long pointer);
 } // namespace OHOS::Ace::Ani
  
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_CUSTOM_NODE_MODULE

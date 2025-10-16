@@ -56,5 +56,9 @@ HWTEST_F(CommonViewTestNg, CommonViewTest002, TestSize.Level1)
     auto frameNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     EXPECT_FALSE(frameNode == nullptr);
     frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto alignment = layoutProperty->GetPositionProperty()->GetAlignment();
+    ASSERT_EQ(alignment, Alignment::TOP_LEFT);
 }
 } // namespace OHOS::Ace::NG
