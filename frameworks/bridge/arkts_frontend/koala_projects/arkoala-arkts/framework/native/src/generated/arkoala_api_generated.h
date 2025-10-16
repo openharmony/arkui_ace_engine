@@ -13371,8 +13371,8 @@ typedef struct Opt_FrameNode {
 typedef struct Ark_FullScreenEnterEvent {
     /* kind: Interface */
     Ark_FullScreenExitHandler handler;
-    Opt_Number videoWidth;
-    Opt_Number videoHeight;
+    Opt_Int32 videoWidth;
+    Opt_Int32 videoHeight;
 } Ark_FullScreenEnterEvent;
 typedef struct Opt_FullScreenEnterEvent {
     Ark_Tag tag;
