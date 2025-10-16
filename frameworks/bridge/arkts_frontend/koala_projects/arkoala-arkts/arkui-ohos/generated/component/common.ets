@@ -7727,9 +7727,15 @@ export interface CommonMethod {
         throw new Error("Unimplemented method onGestureRecognizerJudgeBegin")
     }
     overload alignRules { alignRulesWithAlignRuleOptionTypedValue, alignRulesWithLocalizedAlignRuleOptionsTypedValue }
-    overload accessibilityGroup { accessibilityGroupWithValue, accessibilityGroupWithConfig }
-    overload accessibilityText { accessibilityTextOfStringType, accessibilityTextOfResourceType }
-    overload accessibilityDescription { accessibilityDescriptionOfStringType, accessibilityDescriptionOfResourceType }
+    accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {
+        throw new Error("Unimplemented method accessibilityGroup")
+    }
+    accessibilityText(value: Resource | string | undefined): this {
+        throw new Error("Unimplemented method accessibilityText")
+    }
+    accessibilityDescription(value: Resource | string | undefined): this {
+        throw new Error("Unimplemented method accessibilityDescription")
+    }
     // instructive change begin
     applyAttributesFinish(): void {}
     // instructive change end
@@ -9962,6 +9968,20 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public accessibilityText(value: Resource | string | undefined): this {
+        if (this.checkPriority("accessibilityText")) {
+            if (value instanceof Resource) {
+                const value_casted = value as (Resource | undefined)
+                this.getPeer()?.setAccessibilityTextOfResourceTypeAttribute(value_casted)
+                return this
+            } else {
+                const value_casted = value as (string | undefined)
+                this.getPeer()?.setAccessibilityTextOfStringTypeAttribute(value_casted)
+                return this
+            }
+        }
+        return this
+    }
     public accessibilityRole(value: AccessibilityRoleType | undefined): this {
         if (this.checkPriority("accessibilityRole")) {
             const value_casted = value as (AccessibilityRoleType | undefined)
@@ -9999,6 +10019,20 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const value_casted = value as (Resource | undefined)
             this.getPeer()?.setAccessibilityDescriptionOfResourceTypeAttribute(value_casted)
             return this
+        }
+        return this
+    }
+    public accessibilityDescription(value: Resource | string | undefined): this {
+        if (this.checkPriority("accessibilityDescription")) {
+            if (value instanceof Resource) {
+                const value_casted = value as (Resource | undefined)
+                this.getPeer()?.setAccessibilityDescriptionOfResourceTypeAttribute(value_casted)
+                return this
+            } else {
+                const value_casted = value as (string | undefined)
+                this.getPeer()?.setAccessibilityDescriptionOfStringTypeAttribute(value_casted)
+                return this
+            }
         }
         return this
     }
@@ -10507,6 +10541,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("accessibilityGroupWithConfig")) {
             const isGroup_casted = isGroup as (boolean | undefined)
             const config_casted = config as (AccessibilityOptions | undefined)
+            this.getPeer()?.setAccessibilityGroupWithConfigAttribute(isGroup_casted, config_casted)
+            return this
+        }
+        return this
+    }
+    public accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {
+        if (this.checkPriority("accessibilityGroup")) {
+            const isGroup_casted = isGroup as (boolean | undefined)
+            const config_casted = accessibilityOptions as (AccessibilityOptions | undefined)
             this.getPeer()?.setAccessibilityGroupWithConfigAttribute(isGroup_casted, config_casted)
             return this
         }
