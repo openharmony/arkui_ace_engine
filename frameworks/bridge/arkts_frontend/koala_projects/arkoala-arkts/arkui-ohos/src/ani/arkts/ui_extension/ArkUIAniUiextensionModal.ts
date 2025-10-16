@@ -15,12 +15,13 @@
 
 import { KLong, KInt, InteropNativeModule } from "@koalaui/interop"
 import Want from "@ohos.app.ability.Want"
+import { RecordData } from "@ohos.base"
 import { ArkUIAniUiextensionLoadLibraryHelp } from "./ArkUIAniUiextensionLoadLibraryHelp"
 
 export type ResultCallback = (code: number, want: Want) => void;
 export type ReleaseCallback = (code: number) => void;
 export type ErrorCallback = (code: number, name: string, message: string) => void;
-export type ReciveCallback = (param: Record<string, Object>) => void;
+export type ReciveCallback = (param: Record<string, RecordData>) => void;
 export type TerminationCallback = (code: number, want: Want) => void;
 export type DrawReadyCallback = () => void;
 
@@ -49,8 +50,8 @@ export class ArkUIAniUiextensionProxyModal {
         ArkUIAniUiextensionLoadLibraryHelp.LoadLibrary();
     }
 
-    native static _Send_Data(ptr: KLong, value: Record<string, Object>) : void;
-    native static _Send_Data_Sync(ptr: KLong, value: Record<string, Object>) : Record<string, Object>;
+    native static _Send_Data(ptr: KLong, value: Record<string, RecordData>) : void;
+    native static _Send_Data_Sync(ptr: KLong, value: Record<string, RecordData>) : Record<string, RecordData>;
 }
 
 export class ArkUIAniUiextensionModal {
@@ -65,5 +66,5 @@ export class ArkUIAniUiextensionModal {
     native static _Uiextension_Set_OnReciveCallback(nodePointer: KLong, value?: ReciveCallback) : void;
     native static _Uiextension_Set_OnTerminationCallback(nodePointer: KLong, value?: TerminationCallback) : void;
     native static _Uiextension_Set_OnReleaseCallback(nodePointer: KLong, value?: ReleaseCallback) : void;
-    native static _Uiextension_Set_OnDrawReadyCallback(nodePointer: KLong, value: DrawReadyCallback) : void;
+    native static _Uiextension_Set_OnDrawReadyCallback(nodePointer: KLong, value?: DrawReadyCallback) : void;
 }
