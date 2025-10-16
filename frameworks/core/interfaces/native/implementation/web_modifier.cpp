@@ -2542,6 +2542,16 @@ void SetForceEnableZoomImpl(Ark_NativePointer node,
 void SetBackToTopImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        WebModelStatic::SetBackToTop(frameNode, false);
+        return;
+    }
+    WebModelStatic::SetBackToTop(frameNode, *convValue);
+#endif // WEB_SUPPORTED
 }
 
 void SetOnDetectedBlankScreenImpl(Ark_NativePointer node,

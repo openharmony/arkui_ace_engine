@@ -1306,6 +1306,14 @@ void WebModelStatic::SetAdsBlockedEventId(
     webEventHub->SetOnAdsBlockedEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetBackToTop(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateBackToTop(isEnabled);
+}
+
 void WebModelStatic::NotifyPopupWindowResultStatic(int32_t webId, bool result)
 {
 #if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)

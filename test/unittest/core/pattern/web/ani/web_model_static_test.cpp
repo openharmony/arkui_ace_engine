@@ -2688,6 +2688,7 @@ HWTEST_F(WebModelStaticTest, SetBackToTop001, TestSize.Level1)
     auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
     ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
+
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
