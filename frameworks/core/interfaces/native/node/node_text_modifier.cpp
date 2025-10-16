@@ -17,6 +17,7 @@
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
@@ -247,8 +248,21 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPt
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
     TextModelNG::SetTextColor(frameNode, Color(color));
-    NodeModifier::ProcessResourceObj<Color>(frameNode, "TextColor", Color(color), fontColorRawPtr);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj;
+        if (!fontColorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontColorRawPtr));
+        }
+        if (resObj) {
+            pattern->RegisterResource<Color>("TextColor", resObj, result);
+        }
+    }
 }
 
 void ResetFontColor(ArkUINodeHandle node)
@@ -1160,9 +1174,21 @@ void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, vo
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
     TextModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
-    NodeModifier::ProcessResourceObj<Color>(
-        frameNode, "SelectedBackgroundColor", Color(color), selectedBackgroundColorRawPtr);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj;
+        if (!selectedBackgroundColorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(selectedBackgroundColorRawPtr));
+        }
+        if (resObj) {
+            pattern->RegisterResource<Color>("SelectedBackgroundColor", resObj, result);
+        }
+    }
 }
 
 ArkUI_Uint32 GetTextSelectedBackgroundColor(ArkUINodeHandle node)
