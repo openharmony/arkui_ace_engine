@@ -17,7 +17,7 @@ class InteropStorageV2 extends StorageHelper {
   private static instance_: InteropStorageV2 | undefined = undefined;
 
   // get value from AppStorage in ArkTS1.2
-  getStaticValue_: (value: string) => any = () => {
+  getStaticValue_: (value: string) => object = () => {
     throw new Error('not implement');
   };
   removeStaticValue_: (value: string) => boolean = () => {
@@ -50,7 +50,7 @@ class InteropStorageV2 extends StorageHelper {
       // nonexistence then search in 1.2 
       const interopValue = this.getStaticValue_(key!);
       if (interopValue) {
-        return interopValue;
+        return interopValue as T;
       }
     }
     // existence or not in 1.2
@@ -83,12 +83,12 @@ class InteropStorageV2 extends StorageHelper {
 }
 
 function bindStaticAppStorageV2(
-  getStaticValue: (value: string) => any,
+  getStaticValue: (value: string) => object,
   removeStaticValue: (value: string) => boolean,
   getStaticTotalKeys: () => Array<string>,
 
   // set callback to ArkTS1.2
-  setGetValueFunc: (event: (value: string) => any | undefined) => void,
+  setGetValueFunc: (event: (value: string) => object | undefined) => void,
   setRemoveValueFunc: (event: (value: string | undefined) => boolean) => void,
   setGetKeysFunc: (event: () =>  Array<string>) => void,
 ): void {

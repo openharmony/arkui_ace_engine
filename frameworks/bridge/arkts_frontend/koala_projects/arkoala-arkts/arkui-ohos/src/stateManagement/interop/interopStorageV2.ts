@@ -55,7 +55,7 @@ export class InteropAppStorageV2 {
         // 1.1 part call 1.2 functions
         const getValue = (key: string): object | undefined => {
             const obj = AppStorageV2Impl.instance().getValue(key);
-            if (obj == undefined) {
+            if (obj === undefined) {
                 return undefined
             }
             return obj;

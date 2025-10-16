@@ -116,7 +116,7 @@ export class AppStorageV2Impl {
 
     public getValue(key: string): object | undefined {
         const obj = this.memorizedValues_.get(key);
-        if (obj == undefined) {
+        if (obj === undefined) {
             return undefined;
         }
         return obj!;
