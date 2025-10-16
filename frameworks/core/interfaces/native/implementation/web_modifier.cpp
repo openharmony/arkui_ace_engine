@@ -2428,11 +2428,43 @@ void SetOnOverrideErrorPageImpl(Ark_NativePointer node,
 void SetOnPdfScrollAtBottomImpl(Ark_NativePointer node,
                                 const Opt_Callback_OnPdfScrollEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onPdfScrollAtBottom = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnPdfScrollAtBottom(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnPdfScrollAtBottom(frameNode, std::move(onPdfScrollAtBottom));
+#endif // WEB_SUPPORTED
 }
 
 void SetOnPdfLoadEventImpl(Ark_NativePointer node,
                            const Opt_Callback_OnPdfLoadEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onPdfLoadEvent = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnPdfLoadEvent(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnPdfLoadEvent(frameNode, std::move(onPdfLoadEvent));
+#endif // WEB_SUPPORTED
 }
 
 void SetOnSafeBrowsingCheckFinishImpl(Ark_NativePointer node,
