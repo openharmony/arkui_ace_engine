@@ -393,7 +393,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         refs[name].resetComputed(name);
      }
 
-    public reconnectToConsumerV2<T>(providerName: string, varName: string, consumerVal: T): void {
+    public __reconnectToConsumerV2__View2__Internal<T>(providerName: string, varName: string, consumerVal: T): void {
         let providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
         if (providerInfo && providerInfo[0] && providerInfo[1]) {
             this[varName] = providerInfo[0][providerInfo[1]];
