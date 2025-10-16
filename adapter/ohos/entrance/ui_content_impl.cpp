@@ -5590,7 +5590,7 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostSyncTask(
+    taskExecutor->PostTask(
         [instanceId = instanceId_, color] {
             auto container = Platform::AceContainer::GetContainer(instanceId);
             CHECK_NULL_VOID(container);
