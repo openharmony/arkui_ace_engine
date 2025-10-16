@@ -46,4 +46,15 @@ HWTEST_F(CommonViewTestNg, CommonViewTest001, TestSize.Level1)
     EXPECT_EQ(blankNode->IsAtomicNode(), false);
 }
 
+/**
+ * @tc.name: CommonViewTest002
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonViewTestNg, CommonViewTest002, TestSize.Level1)
+{
+    auto frameNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_FALSE(frameNode == nullptr);
+    frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+}
 } // namespace OHOS::Ace::NG
