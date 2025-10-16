@@ -34043,11 +34043,16 @@ void impl_SslErrorHandler_handleConfirm(Ark_NativePointer thisPtr) {
         GetAccessors()->getSslErrorHandlerAccessor()->handleConfirm(self);
 }
 KOALA_INTEROP_DIRECT_V1(SslErrorHandler_handleConfirm, Ark_NativePointer)
-void impl_SslErrorHandler_handleCancel(Ark_NativePointer thisPtr) {
+void impl_SslErrorHandler_handleCancel0(Ark_NativePointer thisPtr) {
         Ark_SslErrorHandler self = reinterpret_cast<Ark_SslErrorHandler>(thisPtr);
-        GetAccessors()->getSslErrorHandlerAccessor()->handleCancel(self);
+        GetAccessors()->getSslErrorHandlerAccessor()->handleCancel0(self);
 }
-KOALA_INTEROP_DIRECT_V1(SslErrorHandler_handleCancel, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_V1(SslErrorHandler_handleCancel0, Ark_NativePointer)
+void impl_SslErrorHandler_handleCancel1(Ark_NativePointer thisPtr, Ark_Boolean abortLoading) {
+        Ark_SslErrorHandler self = reinterpret_cast<Ark_SslErrorHandler>(thisPtr);
+        GetAccessors()->getSslErrorHandlerAccessor()->handleCancel1(self, abortLoading);
+}
+KOALA_INTEROP_DIRECT_V2(SslErrorHandler_handleCancel1, Ark_NativePointer, Ark_Boolean)
 void impl_StateStylesOps_onStateStyleChange(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Callback_StateStylesChange stateStyleChangeValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 currentState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_StateStylesChange)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 currentState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_StateStylesChange))))};;

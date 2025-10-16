@@ -400,7 +400,7 @@ bool TransferSslErrorHandlerToStatic(void* peer, void* nativePtr)
     CHECK_NULL_RETURN(objectPeer, false);
     auto* transfer = reinterpret_cast<WebTransferBase<RefPtr<SslErrorResult>>*>(nativePtr);
     CHECK_NULL_RETURN(transfer, false);
-    objectPeer->handler = transfer->get<0>();
+    objectPeer->sslErrorHandler = transfer->get<0>();
     return true;
 #else
     return false;
@@ -412,7 +412,7 @@ napi_value TransferSslErrorHandlerToDynamic(napi_env env, void* peer)
 #ifdef WEB_SUPPORTED
     auto* objectPeer = reinterpret_cast<SslErrorHandlerPeer *>(peer);
     CHECK_NULL_RETURN(objectPeer, nullptr);
-    return OHOS::Ace::Framework::CreateJSWebSslErrorObject(env, objectPeer->handler);
+    return OHOS::Ace::Framework::CreateJSWebSslErrorObject(env, objectPeer->sslErrorHandler);
 #else
     return nullptr;
 #endif // WEB_SUPPORTED

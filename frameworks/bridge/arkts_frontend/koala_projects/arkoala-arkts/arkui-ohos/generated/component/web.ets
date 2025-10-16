@@ -672,14 +672,22 @@ export class SslErrorHandler implements MaterializedBase {
         return
     }
     public handleCancel(): void {
-        this.handleCancel_serialize()
+        this.handleCancel0_serialize()
+        return
+    }
+    public handleCancel(abortLoading: boolean): void {
+        const abortLoading_casted = abortLoading as (boolean)
+        this.handleCancel1_serialize(abortLoading_casted)
         return
     }
     handleConfirm_serialize(): void {
         ArkUIGeneratedNativeModule._SslErrorHandler_handleConfirm(this.peer!.ptr)
     }
-    handleCancel_serialize(): void {
-        ArkUIGeneratedNativeModule._SslErrorHandler_handleCancel(this.peer!.ptr)
+    handleCancel0_serialize(): void {
+        ArkUIGeneratedNativeModule._SslErrorHandler_handleCancel0(this.peer!.ptr)
+    }
+    handleCancel1_serialize(abortLoading: boolean): void {
+        ArkUIGeneratedNativeModule._SslErrorHandler_handleCancel1(this.peer!.ptr, abortLoading ? 1 : 0)
     }
 }
 export class WebContextMenuParamInternal {

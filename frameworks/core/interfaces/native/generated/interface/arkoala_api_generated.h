@@ -26541,7 +26541,9 @@ typedef struct GENERATED_ArkUISslErrorHandlerAccessor {
     Ark_SslErrorHandler (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*handleConfirm)(Ark_SslErrorHandler peer);
-    void (*handleCancel)(Ark_SslErrorHandler peer);
+    void (*handleCancel0)(Ark_SslErrorHandler peer);
+    void (*handleCancel1)(Ark_SslErrorHandler peer,
+                          Ark_Boolean abortLoading);
 } GENERATED_ArkUISslErrorHandlerAccessor;
 
 typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
