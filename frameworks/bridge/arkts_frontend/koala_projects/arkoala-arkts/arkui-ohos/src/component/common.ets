@@ -30,14 +30,6 @@ export interface ContentModifier<T = void> {
 
 export class DrawModifier {
     weakRefOfPeerNode?: WeakRef<PeerNode>;
-    public drawBehind(drawContext: DrawContext): void { }
-
-    public drawContent(drawContext: DrawContext): void { }
-
-    public drawFront(drawContext: DrawContext): void { }
-
-    public drawForeground(drawContext: DrawContext): void { }
-
     public invalidate(): void {
         let peerNode: PeerNode | undefined = this.weakRefOfPeerNode?.deref();
         if (peerNode && peerNode.peer.ptr) {
