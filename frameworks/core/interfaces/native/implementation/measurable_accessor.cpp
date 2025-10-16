@@ -108,10 +108,10 @@ void ProcessMaxHeight(const CalcDimension& maxHeight, RefPtr<LayoutProperty>& la
     }
 }
 const Ark_DirectionalEdgesT DEFAULT_EDGES = {
-    .top = Converter::ArkValue<Ark_Number>(0.0f),
-    .bottom = Converter::ArkValue<Ark_Number>(0.0f),
     .start = Converter::ArkValue<Ark_Number>(0.0f),
     .end = Converter::ArkValue<Ark_Number>(0.0f),
+    .top = Converter::ArkValue<Ark_Number>(0.0f),
+    .bottom = Converter::ArkValue<Ark_Number>(0.0f),
 };
 const Ark_MeasureResult DEFAULT_MEASURE_RESULT = {
     .width = Converter::ArkValue<Ark_Number>(0.0f),
