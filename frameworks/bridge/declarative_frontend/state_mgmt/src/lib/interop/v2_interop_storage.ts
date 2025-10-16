@@ -100,14 +100,14 @@ function bindStaticAppStorageV2(
 
   setGetValueFunc((key: string) => {
     const obj = AppStorageV2Impl.instance().getValue(key)
-    if (obj == undefined) {
+    if (obj === undefined) {
         return undefined;
     }
     return obj;
   });
 
   setRemoveValueFunc((key: string | undefined) => {
-    if (key == undefined) {
+    if (key === undefined) {
         return false;
     }
     AppStorageV2Impl.instance().remove(key);
