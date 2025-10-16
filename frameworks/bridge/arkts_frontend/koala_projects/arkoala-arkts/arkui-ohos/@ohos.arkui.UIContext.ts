@@ -34,8 +34,11 @@ import { Nullable, WidthBreakpoint, HeightBreakpoint } from 'arkui/framework';
 import { KeyProcessingMode } from 'arkui/framework';
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { default as mediaquery } from '@ohos/mediaquery';
-import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions }from 'arkui/framework';
-import { ActionSheetOptions} from 'arkui/framework';
+import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions } from 'arkui/framework';
+import { ActionSheetOptions } from 'arkui/framework';
+import { TimePickerDialogOptions } from 'arkui/framework';
+import { TextPickerDialogOptions } from 'arkui/framework';
+import { DatePickerDialogOptions } from 'arkui/framework';
 import inspector from '@ohos/arkui/inspector';
 import router from '@ohos/router';
 import { ComponentContent } from 'arkui/ComponentContent';
@@ -642,6 +645,18 @@ export class UIContext {
 
     public showActionSheet(options: ActionSheetOptions): void {
         throw Error("showActionSheet not implemented in UIContext!")
+    }
+
+    public showTimePickerDialog(options: TimePickerDialogOptions): void {
+        throw Error("showTimePickerDialog not implemented in UIContext!")
+    }
+
+    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+        throw Error("showTextPickerDialog not implemented in UIContext!")
+    }
+
+    public showDatePickerDialog(options: DatePickerDialogOptions): void {
+        throw Error("showDatePickerDialog not implemented in UIContext!")
     }
     // @ts-ignore
     public freezeUINode(id: long, isFrozen: boolean): void {
