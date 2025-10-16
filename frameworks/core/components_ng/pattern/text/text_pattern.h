@@ -932,6 +932,7 @@ public:
     virtual void MarkContentNodeForRender() {};
 
 protected:
+    virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
     int32_t GetClickedSpanPosition()
     {
         return clickedSpanPosition_;

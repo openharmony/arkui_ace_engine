@@ -1125,6 +1125,36 @@ void JSRichEditor::SetOnPaste(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetOnPaste(std::move(onPaste));
 }
 
+void JSRichEditor::SetSelectDetectEnable(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        auto enabled = info[0]->ToBoolean();
+        RichEditorModel::GetInstance()->SetSelectDetectEnable(enabled);
+    }
+}
+
+void JSRichEditor::SetSelectDetectConfig(const JSCallbackInfo& info)
+{
+    std::vector<TextDataDetectType> typesList;
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto args = info[0];
+    auto paramObject = JSRef<JSObject>::Cast(args);
+    auto getTypes = paramObject->GetProperty("types");
+    if (!getTypes->IsArray()) {
+        return;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(getTypes);
+    for (size_t i = 0; i < array->Length(); ++i) {
+        JSRef<JSVal> type = array->GetValueAt(i);
+        if (type->IsNumber()) {
+            typesList.push_back(static_cast<TextDataDetectType>(type->ToNumber<int32_t>()));
+        }
+    }
+    RichEditorModel::GetInstance()->SetSelectDetectConfig(typesList);
+}
+
 void JSRichEditor::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1573,6 +1603,8 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("copyOptions", &JSRichEditor::SetCopyOptions);
     JSClass<JSRichEditor>::StaticMethod("bindSelectionMenu", &JSRichEditor::BindSelectionMenu);
     JSClass<JSRichEditor>::StaticMethod("onPaste", &JSRichEditor::SetOnPaste);
+    JSClass<JSRichEditor>::StaticMethod("enableSelectedDataDetector", &JSRichEditor::SetSelectDetectEnable);
+    JSClass<JSRichEditor>::StaticMethod("selectedDataDetectorConfig", &JSRichEditor::SetSelectDetectConfig);
     JSClass<JSRichEditor>::StaticMethod("enableDataDetector", &JSRichEditor::JsEnableDataDetector);
     JSClass<JSRichEditor>::StaticMethod("enablePreviewText", &JSRichEditor::JsEnablePreviewText);
     JSClass<JSRichEditor>::StaticMethod("dataDetectorConfig", &JSRichEditor::JsDataDetectorConfig);
