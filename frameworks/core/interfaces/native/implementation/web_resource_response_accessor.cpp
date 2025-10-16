@@ -74,7 +74,8 @@ Opt_Union_String_I32_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceRespon
                 break;
         }
     }
-    return result;
+    return Converter::ArkUnion<Opt_Union_String_I32_Buffer_Resource, Ark_String>(
+        "undefined", Converter::FC);
 }
 Ark_String GetResponseEncodingImpl(Ark_WebResourceResponse peer)
 {
