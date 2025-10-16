@@ -17,7 +17,7 @@
 #include "application_context.h"
 
 namespace OHOS::Ace {
-StorageImpl::StorageImpl(int areaMode) : Storage()
+StorageImpl::StorageImpl(int areaMode, bool useStatic) : Storage()
 {
     std::string fileName = "";
     // areaMode >= 0 means using global path
@@ -38,7 +38,7 @@ StorageImpl::StorageImpl(int areaMode) : Storage()
     if (fileName.empty()) {
         LOGE("Cannot get storage date file path.");
     }
-    fileName_ = fileName + "/persistent_storage";
+    fileName_ = fileName + "/persistent_storage" + (useStatic ? "_static" : "");
 };
 
 std::shared_ptr<NativePreferences::Preferences> StorageImpl::GetPreference(const std::string& fileName)
@@ -84,8 +84,8 @@ void StorageImpl::Delete(const std::string& key)
     pref->FlushSync();
 }
 
-RefPtr<Storage> StorageProxyImpl::GetStorage(int areaMode) const
+RefPtr<Storage> StorageProxyImpl::GetStorage(int areaMode, bool useStatic) const
 {
-    return AceType::MakeRefPtr<StorageImpl>(areaMode);
+    return AceType::MakeRefPtr<StorageImpl>(areaMode, useStatic);
 }
 } // namespace OHOS::Ace

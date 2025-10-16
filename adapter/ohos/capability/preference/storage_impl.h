@@ -27,7 +27,7 @@ class StorageImpl : public Storage {
     DECLARE_ACE_TYPE(StorageImpl, Storage);
 
 public:
-    explicit StorageImpl(int areaMode = -1);
+    explicit StorageImpl(int areaMode = AREA_MODE_FOR_MODULE_PATH, bool useStatic = false);
     ~StorageImpl() override = default;
 
     void SetString(const std::string& key, const std::string& value) override;
@@ -55,7 +55,7 @@ private:
 };
 
 class StorageProxyImpl : public StorageInterface {
-    RefPtr<Storage> GetStorage(int areaMode = -1) const override;
+    RefPtr<Storage> GetStorage(int areaMode = AREA_MODE_FOR_MODULE_PATH, bool useStatic = false) const override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_PERFERENCE_STORAGE_IMPL_H
