@@ -31,6 +31,10 @@ const char APPEND_TEXT[] = "appendText";
 #if defined(IOS_PLATFORM)
 const char UNMARK_TEXT[] = "unmarkText";
 #endif
+#if defined(ANDROID_PLATFORM)
+const char COMPOSING_START[] = "composingStart";
+const char COMPOSING_END[] = "composingEnd";
+#endif
 
 } // namespace
 
@@ -42,6 +46,9 @@ void TextEditingValue::ParseFromJson(const JsonValue& json)
     appendText = json.GetString(APPEND_TEXT);
 #if defined(IOS_PLATFORM)
     unmarkText = json.GetBool(UNMARK_TEXT);
+#endif
+#if defined(ANDROID_PLATFORM)
+    compose.Update(json.GetInt(COMPOSING_START, -1), json.GetInt(COMPOSING_END, -1));
 #endif
     selection.baseOffset = json.GetInt(SELECTION_START, -1);
     selection.extentOffset = json.GetInt(SELECTION_END, -1);
