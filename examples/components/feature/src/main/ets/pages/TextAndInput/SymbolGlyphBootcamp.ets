@@ -609,7 +609,32 @@ export struct SymbolGlyphBootcamp {
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
   @State selection: string | null = null;
+  linearGradientOptions1: LinearGradientOptions = {
+    angle: 45,
+    colors: [[Color.Red, 0.0], [Color.Blue, 0.3], [Color.Green, 0.5]]
+  };
+  @State enableCompShaderStyle: boolean = false;
+  @State compShaderStyle: boolean = true;
+  @State enableCompSymbolShadow: boolean = false;
+  @State compSymbolShadow: boolean = true;
+  @State enableCompSymbolEffect : boolean = false;
+  @State compSymbolEffect: boolean = true;
+  @State enableCompSymbolEffect1 : boolean = false;
+  @State compSymbolEffect1: boolean = true;
+  @State isActive: boolean = true;
+  @State renderMode: number = 1;
+  @State triggerValueReplace1: number = 0;
+  @State triggerValueReplace2: number = 0;
   scroller: Scroller = new Scroller()
+
+
+
+  options: ShadowOptions = {
+    radius: 10.0,
+    color: Color.Blue,
+    offsetX: 10,
+    offsetY: 10,
+  };
 
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
@@ -1333,7 +1358,8 @@ export struct SymbolGlyphBootcamp {
             this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
             return HitTestMode.Default;
           })
-
+          .shaderStyle(useEnabled(this.enableCompShaderStyle, this.compShaderStyle ?
+            new LinearGradientStyle(this.linearGradientOptions1) : undefined ))
       }
 
       if (this.enableSymbolEffectIsActive) {
@@ -1361,6 +1387,46 @@ export struct SymbolGlyphBootcamp {
           })
         }.margin({ left: 30, top: 50 })
 
+      }
+      if (this.enableCompSymbolShadow) {
+        Column() {
+          SymbolGlyph($r('sys.symbol.ohos_wifi'))
+            .fontSize(96)
+            .symbolEffect(new HierarchicalSymbolEffect(EffectFillStyle.ITERATIVE),
+              useEnabled(this.enableCompSymbolShadow, this.compSymbolShadow ? this.isActive : !this.isActive))
+            .symbolShadow(this.options)
+          Button(this.isActive ? '关闭' : '播放')
+            .onClick(() => {
+              this.isActive = !this.isActive;
+            })
+        }.margin({ right: 20 })
+      }
+      if (this.enableCompSymbolEffect) {
+        Column() {
+          SymbolGlyph(useEnabled(this.enableCompSymbolEffect,
+            this.compSymbolEffect ? $r('sys.symbol.eye_slash') : $r('sys.symbol.eye')))
+            .fontSize(96)
+            .renderingStrategy(this.renderMode)
+            .symbolEffect(new ReplaceSymbolEffect(EffectScope.LAYER, ReplaceEffectType.SLASH_OVERLAY), this.triggerValueReplace1)
+          Button('trigger')
+            .onClick(() => {
+              this.compSymbolEffect = !this.compSymbolEffect;
+              this.triggerValueReplace1 = this.triggerValueReplace1 + 1;
+            })
+        }.margin({ right: 20 })
+      }
+      if (this.enableCompSymbolEffect1) {
+        Column() {
+          SymbolGlyph(useEnabled(this.enableCompSymbolEffect1,
+            this.compSymbolEffect1 ? $r('sys.symbol.checkmark_circle') : $r('sys.symbol.repeat_1')))
+            .fontSize(96)
+            .symbolEffect(new ReplaceSymbolEffect(EffectScope.WHOLE, ReplaceEffectType.CROSS_FADE), this.triggerValueReplace2)
+          Button('trigger')
+            .onClick(() => {
+              this.compSymbolEffect1 = !this.compSymbolEffect1;
+              this.triggerValueReplace2 = this.triggerValueReplace2 + 1;
+            })
+        }.margin({ right: 20 })
       }
     }
   }
@@ -1656,6 +1722,42 @@ export struct SymbolGlyphBootcamp {
           CompOpacityBlocks({
             enableCompOpacity: $enableCompOpacity,
             compOpacity: $compOpacity
+          })
+          RadioBlock({
+            title: 'shaderStyle',
+            isEnabled: $enableCompShaderStyle,
+            value: $enableCompShaderStyle,
+            dataSource: [
+              { label: 'true', value: true },
+              { label: 'false', value: false },
+            ]
+          })
+          RadioBlock({
+            title: 'symbolShadow',
+            isEnabled: $enableCompSymbolShadow,
+            value: $compSymbolShadow,
+            dataSource: [
+              { label: 'true', value: true },
+              { label: 'false', value: false },
+            ]
+          })
+          RadioBlock({
+            title: 'symbolEffect',
+            isEnabled: $enableCompSymbolEffect,
+            value: $compSymbolEffect,
+            dataSource: [
+              { label: 'true', value: true },
+              { label: 'false', value: false },
+            ]
+          })
+          RadioBlock({
+            title: 'symbolEffect1',
+            isEnabled: $enableCompSymbolEffect1,
+            value: $compSymbolEffect1,
+            dataSource: [
+              { label: 'true', value: true },
+              { label: 'false', value: false },
+            ]
           })
           ListItemGroup({
             header: this.ListItemGroupHeaders('通用属性1')
