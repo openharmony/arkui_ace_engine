@@ -2467,11 +2467,26 @@ void SetOnNativeEmbedObjectParamChangeImpl(Ark_NativePointer node,
 void SetEnableDataDetectorImpl(Ark_NativePointer node,
                                const Opt_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    WebModelStatic::SetEnableDataDetector(frameNode, convValue.value_or(false));
+#endif // WEB_SUPPORTED
 }
 
 void SetDataDetectorConfigImpl(Ark_NativePointer node,
                                const Opt_TextDataDetectorConfig* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<TextDetectConfig>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetDataDetectorConfig(frameNode, *convValue);
+#endif // WEB_SUPPORTED
 }
 
 void SetOnActivateContentImpl(Ark_NativePointer node,
