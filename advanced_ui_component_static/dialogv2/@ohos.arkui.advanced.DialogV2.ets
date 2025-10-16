@@ -431,9 +431,11 @@ struct TipsDialogContentLayout {
         minHeight: CHECKBOX_CONTAINER_HEIGHT,
         maxHeight: constraint.maxHeight
       }
-      let checkBoxMeasureResult: MeasureResult = checkboxChild.measure(checkboxConstraint);
-      checkBoxHeight = checkBoxMeasureResult.height;
-      height += checkBoxHeight;
+      let checkBoxMeasureResult: MeasureResult | undefined = checkboxChild.measure(checkboxConstraint);
+      if (checkBoxMeasureResult) {
+        checkBoxHeight = checkBoxMeasureResult.height;
+        height += checkBoxHeight;
+      }
     }
 
     let imageChild: Measurable = children[this.imageIndex.toInt()];
@@ -446,24 +448,28 @@ struct TipsDialogContentLayout {
       maxWidth: constraint.maxWidth,
       maxHeight: imageMaxHeight
     }
-    let imageMeasureResult: MeasureResult = imageChild.measure(imageConstraint);
-    height += imageMeasureResult.height;
+    let imageMeasureResult: MeasureResult | undefined = imageChild.measure(imageConstraint);
+    if (imageMeasureResult) {
+      height += imageMeasureResult.height;
 
-    if (this.title !== null || this.content !== null) {
-      let textChild: Measurable = children[this.textIndex.toInt()];
-      let contentMaxHeight: number = Number(constraint.maxHeight as number) -
-      imageMeasureResult.height - checkBoxHeight;
-      let contentConstraint: ConstraintSizeOptions =
-        {
-          maxWidth: constraint.maxWidth,
-          maxHeight: Math.max(contentMaxHeight, TEXT_MIN_HEIGHT)
-        };
-      let contentMeasureResult: MeasureResult = textChild.measure(contentConstraint);
-      height += contentMeasureResult.height;
+      if (this.title !== null || this.content !== null) {
+        let textChild: Measurable = children[this.textIndex.toInt()];
+        let contentMaxHeight: number = Number(constraint.maxHeight as number) -
+        imageMeasureResult.height - checkBoxHeight;
+        let contentConstraint: ConstraintSizeOptions =
+          {
+            maxWidth: constraint.maxWidth,
+            maxHeight: Math.max(contentMaxHeight, TEXT_MIN_HEIGHT)
+          };
+        let contentMeasureResult: MeasureResult | undefined = textChild.measure(contentConstraint);
+        if (contentMeasureResult) {
+          height += contentMeasureResult.height;
+        }
+      }
+      sizeResult.height = height;
+      this.$minContentHeight?.(Math.max(checkBoxHeight +
+      imageMeasureResult.height + textMinHeight, MIN_CONTENT_HEIGHT));
     }
-    sizeResult.height = height;
-    this.$minContentHeight?.(Math.max(checkBoxHeight +
-    imageMeasureResult.height + textMinHeight, MIN_CONTENT_HEIGHT));
     return sizeResult;
   }
 
@@ -738,18 +744,22 @@ struct ConfirmDialogContentLayout {
       minHeight: CHECKBOX_CONTAINER_HEIGHT,
       maxHeight: constraint.maxHeight
     }
-    let checkBoxMeasureResult: MeasureResult = checkboxChild.measure(checkboxConstraint);
-    height += checkBoxMeasureResult.height;
+    let checkBoxMeasureResult: MeasureResult | undefined = checkboxChild.measure(checkboxConstraint);
+    if (checkBoxMeasureResult) {
+      height += checkBoxMeasureResult.height;
 
-    let textChild: Measurable = children[this.textIndex.toInt()];
-    let textConstraint: ConstraintSizeOptions = {
-      maxWidth: constraint.maxWidth,
-      maxHeight: Number(constraint.maxHeight as number) - height
+      let textChild: Measurable = children[this.textIndex.toInt()];
+      let textConstraint: ConstraintSizeOptions = {
+        maxWidth: constraint.maxWidth,
+        maxHeight: Number(constraint.maxHeight as number) - height
+      }
+      let textMeasureResult: MeasureResult | undefined = textChild.measure(textConstraint);
+      if (textMeasureResult) {
+        height += textMeasureResult.height;
+        sizeResult.height = height;
+        this.$minContentHeight?.(Math.max(checkBoxMeasureResult.height + TEXT_MIN_HEIGHT, MIN_CONTENT_HEIGHT));
+      }
     }
-    let textMeasureResult: MeasureResult = textChild.measure(textConstraint);
-    height += textMeasureResult.height;
-    sizeResult.height = height;
-    this.$minContentHeight?.(Math.max(checkBoxMeasureResult.height + TEXT_MIN_HEIGHT, MIN_CONTENT_HEIGHT));
     return sizeResult;
   }
 
@@ -1098,14 +1108,18 @@ struct CustomDialogLayout {
       minHeight: this.titleMinHeight,
       maxHeight: constraint.maxHeight
     };
-    let titleMeasureResult: MeasureResult = titleChild.measure(titleConstraint);
-    this.$titleHeight?.(titleMeasureResult.height);
-    height += titleMeasureResult.height;
+    let titleMeasureResult: MeasureResult | undefined = titleChild.measure(titleConstraint);
+    if (titleMeasureResult) {
+      this.$titleHeight?.(titleMeasureResult.height);
+      height += titleMeasureResult.height;
+    }
 
     let buttonChild: Measurable = children[this.buttonIndex.toInt()];
-    let buttonMeasureResult: MeasureResult = buttonChild.measure(constraint);
-    this.$buttonHeight?.(buttonMeasureResult.height);
-    height += buttonMeasureResult.height;
+    let buttonMeasureResult: MeasureResult | undefined = buttonChild.measure(constraint);
+    if (buttonMeasureResult) {
+      this.$buttonHeight?.(buttonMeasureResult.height);
+      height += buttonMeasureResult.height;
+    }
 
     let contentChild: Measurable = children[this.contentIndex.toInt()];
     let contentConstraint: ConstraintSizeOptions = {
@@ -1113,9 +1127,11 @@ struct CustomDialogLayout {
       maxHeight: Number(constraint.maxHeight as number) - height
     };
 
-    let contentMeasureResult: MeasureResult = contentChild.measure(contentConstraint);
-    height += contentMeasureResult.height;
-    sizeResult.height = height;
+    let contentMeasureResult: MeasureResult | undefined = contentChild.measure(contentConstraint);
+    if (contentMeasureResult) {
+      height += contentMeasureResult.height;
+      sizeResult.height = height;
+    }
     return sizeResult;
   }
 
@@ -1241,12 +1257,14 @@ struct CustomDialogContentComponent {
     let height: number = 0;
     children.forEach((child) => {
       this.contentMaxHeight = '100%';
-      let measureResult: MeasureResult = child.measure(constraint);
+      let measureResult: MeasureResult | undefined = child.measure(constraint);
       if (maxHeight - this.buttonHeight - this.titleHeight < this.minContentHeight) {
         this.contentMaxHeight = MAX_CONTENT_HEIGHT;
         measureResult = child.measure(constraint);
       }
-      height += measureResult.height;
+      if (measureResult) {
+        height += measureResult.height;
+      }
     });
     sizeResult.height = height;
     sizeResult.width = maxWidth;

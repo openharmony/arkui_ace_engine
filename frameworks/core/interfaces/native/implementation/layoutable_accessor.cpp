@@ -97,35 +97,38 @@ void LayoutImpl(Ark_Layoutable peer,
     }
     child->Layout();
 }
-Ark_DirectionalEdgesT GetMarginImpl(Ark_Layoutable peer)
+Opt_DirectionalEdgesT GetMarginImpl(Ark_Layoutable peer)
 {
-    CHECK_NULL_RETURN(peer && peer->measureLayoutParam, DEFAULT_EDGES);
+    CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
-    CHECK_NULL_RETURN(child, DEFAULT_EDGES);
+    CHECK_NULL_RETURN(child, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto layoutProperty = child->GetLayoutProperty();
-    CHECK_NULL_RETURN(child->GetLayoutProperty(), DEFAULT_EDGES);
+    CHECK_NULL_RETURN(child->GetLayoutProperty(), Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto direction = layoutProperty->GetNonAutoLayoutDirection();
-    return GenEdgesGlobalized(layoutProperty->CreateMarginWithoutCache(), direction);
+    auto result = GenEdgesGlobalized(layoutProperty->CreateMarginWithoutCache(), direction);
+    return Converter::ArkValue<Opt_DirectionalEdgesT>(result);
 }
-Ark_DirectionalEdgesT GetPaddingImpl(Ark_Layoutable peer)
+Opt_DirectionalEdgesT GetPaddingImpl(Ark_Layoutable peer)
 {
-    CHECK_NULL_RETURN(peer && peer->measureLayoutParam, DEFAULT_EDGES);
+    CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
-    CHECK_NULL_RETURN(child, DEFAULT_EDGES);
+    CHECK_NULL_RETURN(child, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto layoutProperty = child->GetLayoutProperty();
-    CHECK_NULL_RETURN(child->GetLayoutProperty(), DEFAULT_EDGES);
+    CHECK_NULL_RETURN(child->GetLayoutProperty(), Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto direction = layoutProperty->GetNonAutoLayoutDirection();
-    return GenEdgesGlobalized(layoutProperty->CreatePaddingWithoutBorder(false, false), direction);
+    auto result = GenEdgesGlobalized(layoutProperty->CreatePaddingWithoutBorder(false, false), direction);
+    return Converter::ArkValue<Opt_DirectionalEdgesT>(result);
 }
-Ark_DirectionalEdgesT GetBorderWidthImpl(Ark_Layoutable peer)
+Opt_DirectionalEdgesT GetBorderWidthImpl(Ark_Layoutable peer)
 {
-    CHECK_NULL_RETURN(peer && peer->measureLayoutParam, DEFAULT_EDGES);
+    CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
-    CHECK_NULL_RETURN(child, DEFAULT_EDGES);
+    CHECK_NULL_RETURN(child, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto layoutProperty = child->GetLayoutProperty();
-    CHECK_NULL_RETURN(child->GetLayoutProperty(), DEFAULT_EDGES);
+    CHECK_NULL_RETURN(child->GetLayoutProperty(), Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto direction = layoutProperty->GetNonAutoLayoutDirection();
-    return GenBorderWidthGlobalized(layoutProperty->CreateBorder(), direction);
+    auto result = GenBorderWidthGlobalized(layoutProperty->CreateBorder(), direction);
+    return Converter::ArkValue<Opt_DirectionalEdgesT>(result);
 }
 Ark_MeasureResult GetMeasureResultImpl(Ark_Layoutable peer)
 {

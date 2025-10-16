@@ -414,7 +414,10 @@ export struct EditableTitleBar {
     let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     this.fontSize = this.decideFontScale();
     children.forEach((child) => {
-      result.height = child.measure(constraint).height;
+      let childMeasureResult = child.measure(constraint);
+      if (childMeasureResult) {
+        result.height = childMeasureResult.height;
+      }
       result.width = Number(constraint.maxWidth as number);
     })
     return result;
