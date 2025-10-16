@@ -23,6 +23,14 @@
 namespace OHOS::Ace::NG {
 namespace {
 
+bool IsEqualIgnoreCase(const std::string& str1, const std::string& str2)
+{
+    return (str1.size() == str2.size()) &&
+        std::equal(str1.begin(), str1.end(), str2.begin(), [](char a, char b) {
+        return std::tolower(a) == std::tolower(b);
+    });
+}
+
 bool IsNodeOfSupportControllerType(const RefPtr<NG::FrameNode>& node, AccessibilityRoleType controllerByType)
 {
     CHECK_NULL_RETURN(node, false);
@@ -41,8 +49,7 @@ bool IsNodeOfSupportControllerType(const RefPtr<NG::FrameNode>& node, Accessibil
         componentType = accessibilityProperty->GetAccessibilityRole();
     }
     auto targetType = AccessibilityUtils::GetAceComponentTypeByRoleType(controllerByType);
-    CHECK_EQUAL_RETURN(targetType, componentType, true);
-    return false;
+    return IsEqualIgnoreCase(targetType, componentType);
 }
 
 bool IsNodeOfExtraType(const RefPtr<NG::FrameNode>& node)
