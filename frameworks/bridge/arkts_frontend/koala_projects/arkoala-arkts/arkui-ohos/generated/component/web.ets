@@ -2862,8 +2862,8 @@ export interface ScreenCaptureConfig {
 }
 export interface FullScreenEnterEvent {
     handler: FullScreenExitHandler;
-    videoWidth?: number;
-    videoHeight?: number;
+    videoWidth?: int32;
+    videoHeight?: int32;
 }
 export type OnFullScreenEnterCallback = (event: FullScreenEnterEvent) => void;
 export enum RenderExitReason {
@@ -5601,7 +5601,7 @@ export class FullScreenEnterEvent_serializer {
         if (valueHolderForVideoWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForVideoWidthTmpValue  = valueHolderForVideoWidth!
-            valueSerializer.writeNumber(valueHolderForVideoWidthTmpValue)
+            valueSerializer.writeInt32(valueHolderForVideoWidthTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5609,7 +5609,7 @@ export class FullScreenEnterEvent_serializer {
         if (valueHolderForVideoHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForVideoHeightTmpValue  = valueHolderForVideoHeight!
-            valueSerializer.writeNumber(valueHolderForVideoHeightTmpValue)
+            valueSerializer.writeInt32(valueHolderForVideoHeightTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5618,17 +5618,17 @@ export class FullScreenEnterEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const handlerTmpResult : FullScreenExitHandler = (FullScreenExitHandler_serializer.read(valueDeserializer) as FullScreenExitHandler)
         const videoWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let videoWidthTmpBuf : number | undefined = undefined
+        let videoWidthTmpBuf : int32 | undefined = undefined
         if ((videoWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            videoWidthTmpBuf = (valueDeserializer.readNumber() as number)
+            videoWidthTmpBuf = (valueDeserializer.readInt32() as int32)
         }
-        const videoWidthTmpResult : number | undefined = videoWidthTmpBuf
+        const videoWidthTmpResult : int32 | undefined = videoWidthTmpBuf
         const videoHeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let videoHeightTmpBuf : number | undefined = undefined
+        let videoHeightTmpBuf : int32 | undefined = undefined
         if ((videoHeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            videoHeightTmpBuf = (valueDeserializer.readNumber() as number)
+            videoHeightTmpBuf = (valueDeserializer.readInt32() as int32)
         }
-        const videoHeightTmpResult : number | undefined = videoHeightTmpBuf
+        const videoHeightTmpResult : int32 | undefined = videoHeightTmpBuf
         let value : FullScreenEnterEvent = ({handler: handlerTmpResult, videoWidth: videoWidthTmpResult, videoHeight: videoHeightTmpResult} as FullScreenEnterEvent)
         return value
     }
