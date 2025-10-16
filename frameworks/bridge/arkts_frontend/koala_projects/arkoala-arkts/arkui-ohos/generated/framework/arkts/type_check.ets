@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { KBoolean, KStringPtr, MaterializedBase } from "@koalaui/interop"
-import { int32 } from "@koalaui/common"
+import { int32, int64 } from "@koalaui/common"
 import { AccessibilityHoverType, Alignment, AnimationPropertyType, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisType, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, Color, ColoringStrategy, ObscuredReasons, ModifierKey, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, RenderFit, FocusDrawLevel, ImageRepeat, ResponseType, FunctionKey, CopyOptions, CrownAction, CrownSensitivity, DialogButtonStyle, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FoldStatus, FontStyle, FontWeight, GradientDirection, HeightBreakpoint, HorizontalAlign, IlluminatedType, ImageFit, ImageSpanAlignment, InteractionHand, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, MouseAction, MouseButton, NestedScrollMode, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, ResponseRegionSupportedTool, ScrollSource, SharedTransitionEffectType, TextAlign, TextCase, TextContentStyle, TextDecorationStyle, TextDecorationType, TextHeightAdaptivePolicy, TextOverflow, TextSelectableMode, TitleHeight, TouchType, TransitionType, Nullable, WidthBreakpoint, VerticalAlign, Week, WordBreak, XComponentType } from "./../../component/enums"
 import { AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, BlendApplyType, BlendMode, BlurStyle, BlurStyleActivePolicy, TouchEvent, ChainStyle, Rectangle, ResponseRegion, TouchTestInfo, SafeAreaType, SafeAreaEdge, MenuElement, CommonMethod, LayoutPolicy, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilityFocusCallback, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, BackgroundOptions, BackgroundImageOptions, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, ContentClipMode, DismissReason, DragBehavior, DraggingSizeChangeEffect, DragPreviewMode, DragResult, EffectEdge, FinishCallbackType, HapticFeedbackMode, HoverModeAreaType, KeyboardAvoidMode, LayoutSafeAreaEdge, LayoutSafeAreaType, RectResult, CommonConfiguration, MenuPolicy, MenuPreviewMode, NestedScrollOptions, PixelMapMock, PopupStateChangeParam, RepeatMode, SelectionOptions, ScrollResult, ScrollSizeMode, TextContentControllerBase, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SizeResult, SourceTool, SourceType, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestStrategy, TransitionEdge, AsymmetricTransitionOption, TransitionHierarchyStrategy, UICommonEvent, HoverCallback, KeyframeState, KeyframeAnimateParam, VerticalAlignParam, Measurable, Layoutable, ChildrenMainSize, DateRange, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, ModifierKeyStateGetter, EdgeEffectOptions, ExpectedFrameRateRange, HorizontalAlignParam, InputCounterOptions, ItemDragEventHandler, OnMoveHandler, ItemDragInfo, FractionStop, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, MeasureResult, MotionBlurAnchor, OverlayOffset, PopupButton, SheetDismiss, SpringBackAction, TouchObject, BlurStyleOptions, BindOptions, ContextMenuAnimationOptions, AnimationNumberRange, MultiShadowOptions, FadingEdgeOptions, HistoricalPoint, LightSource, PopupMaskType, ReuseIdCallback, SheetTitleOptions, TerminationInfo, TextDecorationOptions, DividerStyle, PointLightStyle, BorderRadiusType, PopupStateChangeCallback, EventTarget, BaseEvent, GeometryInfo, PickerDialogButtonStyle, PickerTextStyle, PopupCommonOptions, PopupMessageOptions, SingleLengthDetent, DoubleLengthDetents, TripleLengthDetents } from "./../../component/common"
 import { AnimationMode, BarMode, BarPosition, LayoutStyle, TabContentTransitionProxy, TabsAnimationEvent, TabsCacheMode, TabsController, TabContentAnimatedTransition, TabsOptions, BarGridColumnOptions, ScrollableBarModeOptions } from "./../../component/tabs"
@@ -5508,136 +5508,382 @@ export class TypeChecker {
         return XComponentType.fromValue(ordinal)
     }
     static isArray_Number(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof number
+        }
+        return false
     }
     static isArray_Rectangle(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Rectangle
+        }
+        return false
     }
     static isArray_ResponseRegion(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_TouchTestInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof TouchTestInfo
+        }
+        return false
     }
     static isArray_uniformTypeDescriptor_UniformDataType(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof uniformTypeDescriptor.UniformDataType
+        }
+            return false
     }
     static isArray_ObscuredReasons(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ObscuredReasons
+        }
+        return false
     }
     static isArray_GestureRecognizer(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof GestureRecognizer
+        }
+        return false
     }
     static isArray_SafeAreaType(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof SafeAreaType
+        }
+        return false
     }
     static isArray_SafeAreaEdge(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof SafeAreaEdge
+        }
+        return false
     }
     static isArray_MenuElement(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof MenuElement
+        }
+        return false
     }
     static isArray_ModifierKey(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ModifierKey
+        }
+        return false
     }
     static isArray_Float64(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof double
+        }
+        return false
     }
     static isArray_Int32(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof int32
+        }
+        return false
     }
     static isArray_drawing_RectType(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof drawing.RectType
+        }
+        return false
     }
     static isArray_common2D_Color(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof common2D.Color
+        }
+        return false
     }
     static isArray_Opt_Object(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Object | null | undefined
+        }
+        return false
     }
     static isArray_String(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof string
+        }
+        return false
     }
     static isArray_SourceTool(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof SourceTool
+        }
+        return false
     }
     static isArray_GestureType(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_ImageAnalyzerType(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ImageAnalyzerType
+        }
+        return false
     }
     static isArray_ColorStop(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ColorStop
+        }
+        return false
     }
     static isArray_StyleOptions(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof StyleOptions
+        }
+        return false
     }
     static isArray_NavPathInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof NavPathInfo
+        }
+        return false
     }
     static isArray_Union_Number_String(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_Union_String_F64(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof string || e instanceof double
+        }
+        return false
     }
     static isArray_Union_RichEditorImageSpanResult_RichEditorTextSpanResult(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof RichEditorImageSpanResult || e instanceof RichEditorTextSpanResult
+        }
+        return false
     }
     static isArray_RichEditorParagraphResult(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof RichEditorParagraphResult
+        }
+        return false
     }
     static isArray_RichEditorSpan(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof RichEditorSpan
+        }
+        return false
     }
     static isArray_SpanStyle(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof SpanStyle
+        }
+        return false
     }
     static isArray_KeyframeState(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof KeyframeState
+        }
+        return false
     }
     static isArray_DynamicSyncScene(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof DynamicSyncScene
+        }
+        return false
     }
     static isArray_unifiedDataChannel_UnifiedRecord(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof unifiedDataChannel.UnifiedRecord
+        }
+        return false
     }
     static isArray_SectionOptions(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof SectionOptions
+        }
+        return false
     }
     static isArray_Header(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Header
+        }
+        return false
     }
     static isArray_webview_WebHeader(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof webview.WebHeader
+        }
+        return false
     }
     static isArray_webview_WebMessagePort(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof webview.WebMessagePort
+        }
+        return false
     }
     static isArray_webview_WebCustomScheme(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof webview.WebCustomScheme
+        }
+        return false
     }
     static isArray_cert_X509Cert(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof cert.X509Cert
+        }
+        return false
     }
     static isArray_webview_OfflineResourceMap(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof webview.OfflineResourceMap
+        }
+        return false
     }
     static isArray_TextMenuItem(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof TextMenuItem
+        }
+        return false
     }
     static isArray_Measurable(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Measurable
+        }
+        return false
     }
     static isArray_Layoutable(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Layoutable
+        }
+        return false
     }
     static isArray_NavDestinationTransition(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof NavDestinationTransition
+        }
+        return false
     }
     static isArray_Object(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Object
+        }
+        return false
     }
     static isArray_BlankScreenDetectionMethod(value: Object | string | number | undefined): boolean {
         return value instanceof Array
@@ -5646,82 +5892,226 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_font_UIFontGenericInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof font.UIFontGenericInfo
+        }
+        return false
     }
     static isArray_font_UIFontFallbackGroupInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof font.UIFontFallbackGroupInfo
+        }
+        return false
     }
     static isArray_font_UIFontFallbackInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof font.UIFontFallbackInfo
+        }
+        return false
     }
     static isArray_font_UIFontAliasInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof font.UIFontAliasInfo
+        }
+        return false
     }
     static isArray_font_UIFontAdjustInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof font.UIFontAdjustInfo
+        }
+        return false
     }
     static isArray_AbilityInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof AbilityInfo
+        }
+        return false
     }
     static isArray_ExtensionAbilityInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ExtensionAbilityInfo
+        }
+        return false
     }
     static isArray_Metadata(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Metadata
+        }
+        return false
     }
     static isArray_Dependency(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Dependency
+        }
+        return false
     }
     static isArray_PreloadItem(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof PreloadItem
+        }
+        return false
     }
     static isArray_RouterItem(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof RouterItem
+        }
+        return false
     }
     static isArray_FractionStop(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Tuple
+        }
+        return false
     }
     static isArray_Tuple_ResourceColor_Number(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Tuple
+        }
+        return false
     }
     static isArray_NativeEmbedParamItem(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_Buffer(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ArrayBuffer
+        }
+        return false
     }
     static isArray_ParticleOptionsInner(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_Union_String_I32_I64_F64_Resource(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof string || e instanceof int32 || e instanceof int64 || e instanceof double || e instanceof Resource
+        }
+        return false
     }
     static isArray_Union_RichEditorTextSpanResult_RichEditorImageSpanResult(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof RichEditorTextSpanResult || e instanceof RichEditorImageSpanResult
+        }
+        return false
     }
     static isArray_DataItem(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof DataItem
+        }
+        return false
     }
     static isArray_Animation(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Animation
+        }
+        return false
     }
     static isArray_SkillUri(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof SkillUri
+        }
+        return false
     }
     static isArray_ShadowOptions(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ShadowOptions
+        }
+        return false
     }
     static isArray_ModuleMetadata(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ModuleMetadata
+        }
+        return false
     }
     static isArray_DateRange(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof DateRange
+        }
+        return false
     }
     static isArray_Union_ResourceColor_LinearGradient(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ResourceColor || e instanceof LinearGradient
+        }
+        return false
     }
     static isArray_DragPreviewMode(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof DragPreviewMode
+        }
+        return false
     }
     static isArray_ParticlePropertyAnimationColorInner(value: Object | string | number | undefined): boolean {
         return value instanceof Array
@@ -5730,103 +6120,301 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_RichEditorTextSpanResult(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof RichEditorTextSpanResult
+        }
+        return false
     }
     static isArray_RichEditorImageSpanResult(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof RichEditorImageSpanResult
+        }
+        return false
     }
     static isArray_ResourceColor(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ResourceColor
+        }
+        return false
     }
     static isArray_TextCascadePickerRangeContent(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof TextCascadePickerRangeContent
+        }
+        return false
     }
     static isArray_bundleManager_SupportWindowMode(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof bundleManager.SupportWindowMode
+        }
+        return false
     }
     static isArray_Skill(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Skill
+        }
+        return false
     }
     static isArray_RadiusItem(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Tuple
+        }
+        return false
     }
     static isArray_Dimension(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Dimension
+        }
+        return false
     }
     static isArray_TextDataDetectorType(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof TextDataDetectorType
+        }
+        return false
     }
     static isArray_Array_String(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return TypeChecker.isArray_String(e)
+        }
+        return false
     }
     static isArray_TextPickerRangeContent(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof TextPickerRangeContent
+        }
+        return false
     }
     static isArray_ResourceStr(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ResourceStr
+        }
+        return false
     }
     static isArray_LengthMetrics(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof LengthMetrics
+        }
+        return false
     }
     static isArray_SheetInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof SheetInfo
+        }
+        return false
     }
     static isArray_AlertDialogButtonOptions(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof AlertDialogButtonOptions
+        }
+        return false
     }
     static isArray_FingerInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof FingerInfo
+        }
+        return false
     }
     static isArray_MouseButton(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof MouseButton
+        }
+        return false
     }
     static isArray_TouchObject(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof TouchObject
+        }
+        return false
     }
     static isArray_HistoricalPoint(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof HistoricalPoint
+        }
+        return false
     }
     static isArray_Length(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Length
+        }
+        return false
     }
     static isArray_Resource(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Resource
+        }
+        return false
     }
     static isArray_Tuple_Union_ResourceColor_LinearGradient_Number(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Tuple
+        }
+        return false
     }
     static isArray_ImageFrameInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ImageFrameInfo
+        }
+        return false
     }
     static isArray_NavigationMenuItem(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof NavigationMenuItem
+        }
+        return false
     }
     static isArray_Scroller(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Scroller
+        }
+        return false
     }
     static isArray_NestedScrollInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof NestedScrollInfo
+        }
+        return false
     }
     static isArray_ToolbarItem(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ToolbarItem
+        }
+        return false
     }
     static isArray_LayoutSafeAreaType(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof LayoutSafeAreaType
+        }
+        return false
     }
     static isArray_LayoutSafeAreaEdge(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof LayoutSafeAreaEdge
+        }
+        return false
     }
     static isArray_ParticlePropertyAnimation_Number(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ParticlePropertyAnimation<number>
+        }
+        return false
     }
     static isArray_ParticlePropertyAnimation_Arkui_Component_Units_ResourceColor(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ParticlePropertyAnimation<ResourceColor>
+        }
+        return false
     }
     static isArray_ShapePoint(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof Tuple
+        }
+        return false
     }
     static isArray_GuideLineStyle(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof GuideLineStyle
+        }
+        return false
     }
     static isArray_BarrierStyle(value: Object | string | number | undefined): boolean {
         if (Array.isArray(value)) {
@@ -5847,7 +6435,13 @@ export class TypeChecker {
         return false
     }
     static isArray_ScriptItem(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>
+            if (array.length == 0) return true
+            const e = array[0]
+            return e instanceof ScriptItem
+        }
+        return false
     }
     static isArray_DisturbanceFieldOptionsInner(value: Object | string | number | undefined): boolean {
         return value instanceof Array
