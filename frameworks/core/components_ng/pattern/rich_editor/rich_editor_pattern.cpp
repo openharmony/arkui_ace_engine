@@ -378,6 +378,15 @@ void RichEditorPattern::InsertValueInStyledString(
 {
     CHECK_NULL_VOID(styledString_);
     IF_TRUE(shouldCommitInput && previewTextRecord_.IsValid(), FinishTextPreviewInner());
+#if defined(CROSS_PLATFORM)
+    if (editingValue_ && editingValue_->compose.IsValid() &&
+        (editingValue_->compose.GetEnd() > editingValue_->compose.GetStart()) &&
+        (!insertValue.empty() || editingValue_->unmarkText)) {
+        auto deleteLength = editingValue_->compose.GetEnd() - editingValue_->compose.GetStart();
+        DeleteValueInStyledString(editingValue_->compose.GetStart(), deleteLength);
+        editingValue_->compose.Update(-1);
+    }
+#endif
     int32_t changeStart = caretPosition_;
     int32_t changeLength = 0;
     if (textSelector_.IsValid()) {
@@ -5066,13 +5075,25 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
     InsertValue(UtfUtils::Str8ToStr16(value->text), true);
 #else
     if (value->isDelete) {
+#ifdef IOS_PLATFORM
+        if (value->compose.IsValid()) {
+            EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
+            if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
+                relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
+                HandleOnDelete(true);
+            } else {
+                DeleteBackward(value->compose.GetEnd() - value->compose.GetStart(), TextChangeReason::INPUT);
+                value->compose.Update(-1);
+            }
+        } else {
+            HandleOnDelete(true);
+        }
+#else
         HandleOnDelete(true);
+#endif
     } else {
 #ifdef CROSS_PLATFORM
-#ifdef IOS_PLATFORM
-        compose_ = value->compose;
-        unmarkText_ = value->unmarkText;
-#endif
+        editingValue_ = value;
 #ifdef ANDROID_PLATFORM
         if (value->appendText.empty()) {
             return;
@@ -5565,6 +5586,19 @@ void RichEditorPattern::UpdateCaretInfoToController()
     for (auto iter = spans_.begin(); iter != spans_.end(); iter++) {
         text += (*iter)->content;
     }
+#if defined(CROSS_PLATFORM)
+#if defined(IOS_PLATFORM)
+    if (editingValue_ && editingValue_->selection.IsValid() && editingValue_->selection.GetEnd() < caretPosition_) {
+#else
+    if (editingValue_ && editingValue_->selection.IsValid() &&
+        editingValue_->selection.GetEnd() < caretPosition_ && !editingValue_->appendText.empty()) {
+#endif
+        SetCaretPosition(editingValue_->selection.GetEnd());
+    }
+    if (editingValue_ && editingValue_->selection.IsValid()) {
+        editingValue_->selection.Update(-1);
+    }
+#endif
     auto start = textSelector_.IsValid() ? textSelector_.GetTextStart() : caretPosition_;
     auto end = textSelector_.IsValid() ? textSelector_.GetTextEnd() : caretPosition_;
 #if defined(ENABLE_STANDARD_INPUT)
@@ -6040,10 +6074,11 @@ void RichEditorPattern::InsertValueByOperationType(const std::u16string& insertV
 bool RichEditorPattern::ProcessTextTruncationOperation(std::u16string& text, bool shouldCommitInput)
 {
 #if defined(IOS_PLATFORM)
-    if (compose_.IsValid()) {
+    if (editingValue_ && editingValue_->compose.IsValid()) {
         return true;
     }
-    if (GetTextContentLength() - text.length() < maxLength_.value_or(INT_MAX) && text.length() == 1 && !unmarkText_) {
+    if (GetTextContentLength() - text.length() < maxLength_.value_or(INT_MAX) && text.length() == 1 &&
+        !editingValue_->unmarkText) {
         return true;
     }
 #endif
@@ -6098,9 +6133,12 @@ void RichEditorPattern::ProcessInsertValueMore(const std::u16string& text, Opera
         return;
     }
     ClearRedoOperationRecords();
-#if defined(IOS_PLATFORM)
-    if (compose_.IsValid() && (record.addText.value_or(u"").length() > 0 || unmarkText_)) {
-        DeleteByRange(&record, compose_.GetStart(), compose_.GetEnd());
+#if defined(CROSS_PLATFORM)
+    if (editingValue_ && editingValue_->compose.IsValid() &&
+        (editingValue_->compose.GetEnd() > editingValue_->compose.GetStart()) &&
+        (record.addText.value_or(u"").length() > 0 || editingValue_->unmarkText)) {
+        DeleteByRange(&record, editingValue_->compose.GetStart(), editingValue_->compose.GetEnd());
+        editingValue_->compose.Update(-1);
     }
 #endif
     InsertValueOperation(text, &record, operationType, shouldCommitInput);
@@ -6158,9 +6196,11 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
         previewInputRecord_.Reset();
         undoManager_->ClearPreviewInputRecord();
 #if defined(IOS_PLATFORM)
-        if (compose_.IsValid() && (record.addText.value_or(u"").length() > 0 || unmarkText_)) {
-            DeleteByRange(&record, compose_.GetStart(), compose_.GetEnd());
-        }
+    if (editingValue_ && editingValue_->compose.IsValid() && (record.addText.value_or(u"").length() > 0 ||
+        editingValue_->unmarkText)) {
+        DeleteByRange(&record, editingValue_->compose.GetStart(), editingValue_->compose.GetEnd());
+        editingValue_->compose.Update(-1);
+    }
 #endif
         return;
     }
