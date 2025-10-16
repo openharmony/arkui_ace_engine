@@ -632,6 +632,8 @@ export struct BindMenuBootcamp {
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
   @State enableCompHapticFeedbackMode: boolean = false;
   @State compHapticFeedbackMode: HapticFeedbackMode = HapticFeedbackMode.DISABLED;
+  @State enableMask: boolean = false;
+  @State maskBool: boolean = false;
   scroller: Scroller = new Scroller()
 
   aboutToAppear(): void {
@@ -3349,7 +3351,8 @@ export struct BindMenuBootcamp {
         this.enableLabelNum ? '弹出菜单'.repeat(this.labelNum / 2) : '弹出菜单',
       )
         .bindMenu(this.MyMenu, {
-          hapticFeedbackMode: useEnabled(this.enableCompHapticFeedbackMode, this.compHapticFeedbackMode)
+          hapticFeedbackMode: useEnabled(this.enableCompHapticFeedbackMode, this.compHapticFeedbackMode),
+          mask: useEnabled(this.enableMask, this.maskBool)
         })
     }
     .onDragStart(() => {
@@ -3375,6 +3378,16 @@ export struct BindMenuBootcamp {
           title: 'SelectIcon',
           isEnabled: $enableMenuItemSelectIcon,
           icon: $menuItemSelectIcon
+        })
+
+        RadioBlock({
+          title: 'mask',
+          isEnabled: this.enableMask,
+          value: this.maskBool,
+          dataSource: [
+            { label: 'True', value: true },
+            { label: 'False', value: false }
+          ]
         })
 
         SliderBlock({
