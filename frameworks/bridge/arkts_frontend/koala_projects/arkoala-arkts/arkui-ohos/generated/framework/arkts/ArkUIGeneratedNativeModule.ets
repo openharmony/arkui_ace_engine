@@ -617,10 +617,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setOnGestureRecognizerJudgeBegin1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _Common_construct(id: KInt, flags: KInt): KPointer
-    @ani.unsafe.Direct
-    native static _CommonInterface_setCommonOptions(ptr: KPointer): void
-    @ani.unsafe.Direct
     native static _CommonShapeMethod_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _CommonShapeMethod_setStroke(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void

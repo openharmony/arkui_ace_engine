@@ -5474,15 +5474,6 @@ void impl_CommonMethod_setOnGestureRecognizerJudgeBegin1(Ark_NativePointer thisP
         GetNodeModifiers()->getCommonMethodModifier()->setOnGestureRecognizerJudgeBegin1(self, static_cast<Opt_GestureRecognizerJudgeBeginCallback*>(&callback_ValueTemp), static_cast<Opt_Boolean*>(&exposeInnerGestureValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnGestureRecognizerJudgeBegin1, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_Common_construct(Ark_Int32 id, Ark_Int32 flags) {
-        return GetNodeModifiers()->getCommonModifier()->construct(id, flags);
-}
-KOALA_INTEROP_DIRECT_2(Common_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
-void impl_CommonInterface_setCommonOptions(Ark_NativePointer thisPtr) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        GetNodeModifiers()->getCommonModifier()->setCommonOptions(self);
-}
-KOALA_INTEROP_DIRECT_V1(CommonInterface_setCommonOptions, Ark_NativePointer)
 Ark_NativePointer impl_CommonShapeMethod_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getCommonShapeMethodModifier()->construct(id, flags);
 }

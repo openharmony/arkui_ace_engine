@@ -375,4 +375,7 @@ export class ArkUIAniModule {
     native static _XBar_Set_ComponentCreateFunc(value: (isTitlebar: KInt, instanceID: KInt) => KLong): void;
     native static _XBar_Set_JsFunc(ptr: KLong, component: Any): void
     native static _XBar_Call_Native(xBarType: KInt, callType: string, message: string): void
+
+    native static _Common_construct(id: KInt, flags: KInt): KPointer
+    native static _CommonInterface_setCommonOptions(ptr: KPointer): void
 }

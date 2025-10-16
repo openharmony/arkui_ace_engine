@@ -3,6 +3,7 @@
 import { WrappedBuilder, CustomBuilderT } from "./builder"
 import { GestureGroupHandler, GestureHandler, GesturePriority } from "./gesture"
 import { GestureOps } from "./idlize"
+import { ArkUIAniModule } from "arkui.ani"
 
 export interface AttributeModifier<T> {
     applyNormalAttribute(instance: T): void {}
@@ -75,12 +76,12 @@ export class ArkCommonPeer extends ArkCommonMethodPeer {
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkCommonPeer {
         const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._Common_construct(peerId, flags)
+        const _peerPtr  = ArkUIAniModule._Common_construct(peerId, flags)
         const _peer  = new ArkCommonPeer(_peerPtr, peerId, "Common", flags)
         component?.setPeer(_peer)
         return _peer
     }
     setCommonOptionsAttribute(): void {
-        ArkUIGeneratedNativeModule._CommonInterface_setCommonOptions(this.peer.ptr)
+        ArkUIAniModule._CommonInterface_setCommonOptions(this.peer.ptr)
     }
 }
