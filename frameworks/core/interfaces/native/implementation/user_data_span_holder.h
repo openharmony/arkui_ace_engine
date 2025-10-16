@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 class UserDataSpanHolder final : public ExtSpan {
     DECLARE_ACE_TYPE(UserDataSpanHolder, ExtSpan)
 public:
-    UserDataSpanHolder(const Ark_UserDataSpan& span, int32_t start, int32_t end): 
+    UserDataSpanHolder(const Ark_UserDataSpan& span, int32_t start, int32_t end) :
         ExtSpan(start, end), span_(span)
     {
         if (span_.resource.hold) {

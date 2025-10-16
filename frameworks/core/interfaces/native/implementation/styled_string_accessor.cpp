@@ -79,7 +79,8 @@ static bool CheckKeyAndValueTypeEqual(int32_t styledKey, size_t valueTypeId)
         ARK_STYLED_STRING_KEY_URL, ARK_STYLED_STRING_KEY_CUSTOM_SPAN, ARK_STYLED_STRING_KEY_USER_DATA,
         ARK_STYLED_STRING_KEY_BACKGROUND_COLOR
     };
-    return ((valueTypeId < sizeof(KeyAndValueTypeMap) / sizeof(int32_t)) && (KeyAndValueTypeMap[valueTypeId] == styledKey));
+    return (valueTypeId < (sizeof(KeyAndValueTypeMap) / sizeof(int32_t))) &&
+        (KeyAndValueTypeMap[valueTypeId] == styledKey);
 }
 
 template<>
@@ -295,7 +296,7 @@ Ark_Buffer Marshalling0Impl(Ark_StyledString styledString,
             CHECK_NULL_VOID(valuePtr);
             auto arkBuff = *(static_cast<const Ark_Buffer*>(valuePtr));
             TLVUtil::WriteUint8(tlvData, TLV_CUSTOM_MARSHALL_BUFFER_START);
-            TLVUtil::WriteInt32(tlvData, static_cast<int32_t>(arkBuff.length) + static_cast<int32_t>(sizeof(int32_t) + sizeof(int32_t)));
+            TLVUtil::WriteInt32(tlvData, arkBuff.length + sizeof(int32_t) + sizeof(int32_t));
             TLVUtil::WriteInt32(tlvData, currentSpan->GetStartIndex());
             TLVUtil::WriteInt32(tlvData, currentSpan->GetLength());
             auto arkBuffData = static_cast<const uint8_t*>(arkBuff.data);
