@@ -30,6 +30,7 @@ using GetNodePropertyFunc = void (*)(const std::string&, std::unordered_map<std:
 using GetSimplifiedInspectorTreeFunc = void (*)(const TreeParams&, std::string&);
 using GetSimplifiedInspectorTreeAsyncFunc = void (*)(const TreeParams&, OnInspectorTreeResult&&);
 using ExecuteCommandAsyncFunc = void (*)(const UICommandParams&, UICommandResult&&);
+using GetComponentInfoFunc = void (*)(const ComponentParams&, std::shared_ptr<ComponentResult>&);
 
 class UIEventFunc final {
 public:
@@ -46,6 +47,8 @@ public:
 
     static void ExecuteCommandAsync(const UICommandParams& params, UICommandResult&& callback);
 
+    static void GetComponentImageInfo(const ComponentParams& params, std::shared_ptr<ComponentResult>& result);
+
     bool IsAvailable() const;
 
 private:
@@ -61,6 +64,7 @@ private:
     GetSimplifiedInspectorTreeFunc getTreeFunc_;
     GetSimplifiedInspectorTreeAsyncFunc getTreeAsyncFunc_;
     ExecuteCommandAsyncFunc executeCommandAsyncFunc_;
+    GetComponentInfoFunc getComponentInfoFuncFunc_;
     LIBHANDLE handle_;
 };
 } // namespace OHOS::Ace

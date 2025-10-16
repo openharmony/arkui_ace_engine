@@ -25,6 +25,7 @@ constexpr char GET_NODE_PROPERTY_FUNC[] = "OHOS_ACE_GetNodeProperty";
 constexpr char GET_SIMPLIFIED_INSPECTOR_TREE_FUNC[] = "OHOS_ACE_GetSimplifiedInspectorTree";
 constexpr char GET_SIMPLIFIED_INSPECTOR_TREE_ASYNC_FUNC[] = "OHOS_ACE_GetSimplifiedInspectorTreeAsync";
 constexpr char EXECUTE_COMMAND_ASYNC_FUNC[] = "OHOS_ACE_ExecuteCommandAsync";
+constexpr char GET_COMPONENT_IMAGE_INFO_FUNC[] = "OHOS_ACE_GetComponentImageInfo";
 
 UIEventFunc::UIEventFunc()
 {
@@ -42,6 +43,7 @@ UIEventFunc::UIEventFunc()
     getTreeAsyncFunc_ = reinterpret_cast<GetSimplifiedInspectorTreeAsyncFunc>(
         LOADSYM(handle_, GET_SIMPLIFIED_INSPECTOR_TREE_ASYNC_FUNC));
     executeCommandAsyncFunc_ = reinterpret_cast<ExecuteCommandAsyncFunc>(LOADSYM(handle_, EXECUTE_COMMAND_ASYNC_FUNC));
+    getComponentInfoFuncFunc_ = reinterpret_cast<GetComponentInfoFunc>(LOADSYM(handle_, GET_COMPONENT_IMAGE_INFO_FUNC));
     if (!IsAvailable()) {
         FREELIB(handle_);
         ResetFunc();
@@ -119,6 +121,13 @@ void UIEventFunc::ExecuteCommandAsync(const UICommandParams& params, UICommandRe
 {
     if (UIEventFunc::Get().executeCommandAsyncFunc_) {
         UIEventFunc::Get().executeCommandAsyncFunc_(params, std::move(callback));
+    }
+}
+
+void UIEventFunc::GetComponentImageInfo(const ComponentParams& params, std::shared_ptr<ComponentResult>& result)
+{
+    if (UIEventFunc::Get().getComponentInfoFuncFunc_) {
+        UIEventFunc::Get().getComponentInfoFuncFunc_(params, result);
     }
 }
 } // namespace OHOS::Ace

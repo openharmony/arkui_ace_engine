@@ -1466,4 +1466,47 @@ HWTEST_F(EventRecorderTest, SimplifiedInspectorTest01, TestSize.Level1)
     auto tree = inspector->GetInspector();
     EXPECT_TRUE(tree.empty());
 }
+
+/**
+ * @tc.name: EventRecorderTest020
+ * @tc.desc: Test FillImageNodeInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, EventRecorderTest020, TestSize.Level1)
+{
+    auto pageNode = CreatePageNode("pages/Index");
+    auto imgId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imgNode =
+        NG::FrameNode::GetOrCreateFrameNode("Image", imgId, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
+    pageNode->AddChild(imgNode);
+
+    int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_IMAGE_INFO);
+    EventRecorder::Get().globalSwitch_[index] = true;
+    EventRecorder::Get().eventSwitch_[index] = true;
+    EventParamsBuilder builder;
+    builder.eventType_ = EventType::CLICK;
+    builder.FillImageNodeInfo(pageNode);
+    EXPECT_FALSE(builder.GetValue("imgId").empty());
+}
+
+/**
+ * @tc.name: EventRecorderTest021
+ * @tc.desc: Test GetFirstImageNodeChild.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, EventRecorderTest021, TestSize.Level1)
+{
+    auto pageNode = CreatePageNode("pages/Index");
+    auto rowId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowNode =
+        NG::FrameNode::GetOrCreateFrameNode("Row", rowId, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
+    pageNode->AddChild(rowNode);
+    auto imgId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imgNode =
+        NG::FrameNode::GetOrCreateFrameNode("Image", imgId, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
+    rowNode->AddChild(imgNode);
+
+    auto ret = GetFirstImageNodeChild(pageNode);
+    EXPECT_TRUE(ret != nullptr);
+}
 } // namespace OHOS::Ace

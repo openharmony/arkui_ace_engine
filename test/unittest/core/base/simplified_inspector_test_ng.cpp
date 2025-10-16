@@ -41,6 +41,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/json/json_util.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "test/mock/core/render/mock_canvas_image.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/render/mock_rosen_render_context.h"
@@ -200,5 +201,80 @@ HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg005, TestSize.Level
     stageNode->tag_ = V2::WEB_ETS_TAG;
     inspector->GetWebContentIfNeed(stageNode);
     EXPECT_FALSE(inspector->isBackground_);
+}
+
+/**
+* @tc.name: SimplifiedInspectorTestNg006
+* @tc.desc: Test GetComponentImageInfo
+* @tc.type: FUNC
+*/
+HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg006, TestSize.Level1)
+{
+    auto stageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("one", stageNodeId, AceType::MakeRefPtr<Pattern>(), true);
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = NG::FrameNode::GetOrCreateFrameNode("page", pageNodeId, []() {
+        return AceType::MakeRefPtr<NG::PagePattern>(AceType::MakeRefPtr<NG::PageInfo>(1, "index", "index.js"));
+    });
+    stageNode->AddChild(pageNode);
+    auto rowId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowNode =
+        NG::FrameNode::GetOrCreateFrameNode("Row", rowId, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
+    pageNode->AddChild(rowNode);
+    auto imgId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imgNode =
+        NG::FrameNode::GetOrCreateFrameNode("Image", imgId, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
+    rowNode->AddChild(imgNode);
+
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+
+    ComponentParams params;
+    params.mode = 0;
+    params.aceId = imgId;
+    auto result = std::make_shared<ComponentResult>();
+    result->callback = [](const std::pair<int32_t, std::shared_ptr<Media::PixelMap>>& pixelMapInfo){};
+    auto inspector = std::make_shared<SimplifiedInspector>(0, params);
+    inspector->GetComponentImageInfo(result);
+    ASSERT_FALSE(result->isOk);
+
+    params.mode = 1;
+    params.aceId = imgId;
+    inspector = std::make_shared<SimplifiedInspector>(0, params);
+    inspector->GetComponentImageInfo(result);
+    ASSERT_FALSE(result->isOk);
+
+    params.mode = 2;
+    params.aceId = imgId;
+    inspector = std::make_shared<SimplifiedInspector>(0, params);
+    inspector->GetComponentImageInfo(result);
+    ASSERT_TRUE(result->isOk);
+
+    params.mode = 3;
+    params.aceId = imgId;
+    inspector = std::make_shared<SimplifiedInspector>(0, params);
+    inspector->GetComponentImageInfo(result);
+    ASSERT_TRUE(result->isOk);
+}
+
+/**
+* @tc.name: SimplifiedInspectorTestNg006
+* @tc.desc: Test GetImagePixelMap
+* @tc.type: FUNC
+*/
+HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg007, TestSize.Level1)
+{
+    auto imgId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pattern = AceType::MakeRefPtr<ImagePattern>();
+    pattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    auto imgNode = NG::FrameNode::GetOrCreateFrameNode("Image", imgId, [pattern]() { return pattern; });
+    ComponentParams params;
+    params.mode = 0;
+    params.aceId = imgId;
+    auto inspector = std::make_shared<SimplifiedInspector>(0, params);
+    auto ret = inspector->GetImagePixelMap(imgNode);
+    ASSERT_EQ(ret, nullptr);
 }
 } // namespace OHOS::Ace::NG
