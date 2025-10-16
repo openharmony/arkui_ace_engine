@@ -559,7 +559,48 @@ HWTEST_F(WaterFlowTestNg, EstimateTotalHeight002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     constexpr int32_t number = 4;
     CreateWaterFlowItems(TOTAL_LINE_NUMBER * number);
+#ifndef TEST_SEGMENTED_WATER_FLOW
+    constexpr float defaultFooterHeight = 50.0f;
     model.SetFooter(GetDefaultHeaderBuilder());
+#endif
+    CreateDone();
+    FlushUITasks();
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    constexpr float offset = 5000.f;
+    pattern_->UpdateCurrentOffset(-offset, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    // Calculate the height of the content area.
+    float columnHeight1 = .0f;
+    float columnHeight2 = .0f;
+    for (int32_t i = 0; i < TOTAL_LINE_NUMBER * number; i++) {
+        float curHeight = (i & 1) == 0 ? ITEM_MAIN_SIZE : BIG_ITEM_MAIN_SIZE;
+        if (LessOrEqual(columnHeight1, columnHeight2)) {
+            columnHeight1 += curHeight;
+        } else {
+            columnHeight2 += curHeight;
+        }
+    }
+    float expectVal = std::max(columnHeight1, columnHeight2);
+#ifndef TEST_SEGMENTED_WATER_FLOW
+    expectVal += defaultFooterHeight;
+#endif
+    EXPECT_EQ(info->EstimateTotalHeight(), expectVal);
+    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(info->EstimateTotalHeight(), expectVal);
+}
+
+/**
+ * @tc.name: EstimateTotalHeight003
+ * @tc.desc: Test EstimateTotalHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, EstimateTotalHeight003, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    constexpr int32_t number = 4;
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * number);
     CreateDone();
     FlushUITasks();
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);

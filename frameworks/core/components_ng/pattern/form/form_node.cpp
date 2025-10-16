@@ -369,6 +369,7 @@ RefPtr<FormNode> FormNode::GetOrCreateFormNode(
     formNode = AceType::MakeRefPtr<FormNode>(tag, nodeId, pattern, false);
     formNode->InitializePatternAndContext();
     formNode->InitializeFormAccessibility();
+    formNode->RegisterFormAccessibilityCallback();
     ElementRegister::GetInstance()->AddUINode(formNode);
     return formNode;
 }

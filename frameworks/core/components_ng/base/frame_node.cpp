@@ -2666,6 +2666,11 @@ void FrameNode::MarkModifyDone()
     pattern_->OnMountToParentDone();
 }
 
+void FrameNode::OnChildUpdateDone()
+{
+    pattern_->OnHostChildUpdateDone();
+}
+
 void FrameNode::AfterMountToParent()
 {
     if (pattern_) {

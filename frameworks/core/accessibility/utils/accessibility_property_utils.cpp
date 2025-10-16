@@ -22,36 +22,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-bool IsSupportControllerType(AccessibilityRoleType controllerByType)
-{
-    switch (controllerByType) {
-        case AccessibilityRoleType::TOGGLER:
-        case AccessibilityRoleType::CHECKBOX: // checkbox group?
-        case AccessibilityRoleType::RADIO:
-            return true;
-        default:
-            return false;
-    }
-    return false;
-}
-
-std::string GetAceComponentType(AccessibilityRoleType controllerByType)
-{
-    switch (controllerByType) {
-        case AccessibilityRoleType::TOGGLER:
-            return V2::TOGGLE_ETS_TAG;
-        case AccessibilityRoleType::CHECKBOX: // checkbox group?
-            return V2::CHECK_BOX_ETS_TAG;
-        case AccessibilityRoleType::RADIO:
-            return V2::RADIO_ETS_TAG;
-        default:
-            return "";
-    }
-    return "";
-}
 
 bool IsNodeOfSupportControllerType(const RefPtr<NG::FrameNode>& node, AccessibilityRoleType controllerByType)
 {
+    CHECK_NULL_RETURN(node, false);
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
 
@@ -66,12 +40,12 @@ bool IsNodeOfSupportControllerType(const RefPtr<NG::FrameNode>& node, Accessibil
     if (accessibilityProperty->HasAccessibilityRole()) {
         componentType = accessibilityProperty->GetAccessibilityRole();
     }
-    auto targetType = GetAceComponentType(controllerByType);
+    auto targetType = AccessibilityUtils::GetAceComponentTypeByRoleType(controllerByType);
     CHECK_EQUAL_RETURN(targetType, componentType, true);
     return false;
 }
 
-bool isNodeOfExtraType(const RefPtr<NG::FrameNode>& node)
+bool IsNodeOfExtraType(const RefPtr<NG::FrameNode>& node)
 {
     return IsNodeOfSupportControllerType(node, AccessibilityRoleType::TOGGLER);
 }
@@ -82,24 +56,22 @@ bool CheckAndGetController(const RefPtr<FrameNode>& node,
     const std::string& controllerByInspector)
 {
     if (!controllerByInspector.empty()) {
-        FindCondition condition = [controllerByType](const RefPtr<NG::FrameNode>& node) {
-            auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
-            CHECK_NULL_RETURN(accessibilityProperty, false);
-            return IsNodeOfSupportControllerType(node, controllerByType);
+        FindCondition condition = [controllerByInspector](const RefPtr<NG::FrameNode>& node) {
+            CHECK_NULL_RETURN(node, false);
+            return node->GetInspectorId() == controllerByInspector;
         };
         controllerNode = NG::AccessibilityFrameNodeUtils::GetFramenodeByCondition(node, condition);
         CHECK_NE_RETURN(controllerNode, nullptr, true);
     }
 
-    if (IsSupportControllerType(controllerByType)) {
-        FindCondition condition = [controllerByType](const RefPtr<NG::FrameNode>& node) {
-            auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
-            CHECK_NULL_RETURN(accessibilityProperty, false);
-            return IsNodeOfSupportControllerType(node, controllerByType);
-        };
-        controllerNode = AccessibilityFrameNodeUtils::GetFramenodeByCondition(node, condition);
-        CHECK_NE_RETURN(controllerNode, nullptr, true);
-    }
+    FindCondition condition = [controllerByType](const RefPtr<NG::FrameNode>& node) {
+        CHECK_NULL_RETURN(node, false);
+        auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_RETURN(accessibilityProperty, false);
+        return IsNodeOfSupportControllerType(node, controllerByType);
+    };
+    controllerNode = AccessibilityFrameNodeUtils::GetFramenodeByCondition(node, condition);
+    CHECK_NE_RETURN(controllerNode, nullptr, true);
     return false;
 }
 }
@@ -151,7 +123,7 @@ StateControllerType AccessibilityPropertyUtils::CheckAndGetStateController(const
     auto groupOptions = accessibilityProperty->GetAccessibilityGroupOptions();
     if (CheckAndGetController(
         node, controllerNode, groupOptions.stateControllerByType, groupOptions.stateControllerByInspector)) {
-        if (isNodeOfExtraType(controllerNode)) {
+        if (IsNodeOfExtraType(controllerNode)) {
             return StateControllerType::CONTROLLER_CHECK_WITH_EXTRA;
         }
         return StateControllerType::CONTROLLER_CHECK;
@@ -172,5 +144,12 @@ ActionControllerType AccessibilityPropertyUtils::CheckAndGetActionController(con
         return ActionControllerType::CONTROLLER_CLICK;
     }
     return ActionControllerType::CONTROLLER_NONE;
+}
+
+bool AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(const RefPtr<FrameNode>& controllerNode)
+{
+    return IsNodeOfSupportControllerType(controllerNode, AccessibilityRoleType::CHECKBOX) ||
+        IsNodeOfSupportControllerType(controllerNode, AccessibilityRoleType::CHECKBOX_GROUP) ||
+        IsNodeOfSupportControllerType(controllerNode, AccessibilityRoleType::RADIO);
 }
 } // namespace OHOS::Ace::NG

@@ -409,4 +409,43 @@ void SelectModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::opti
     ViewAbstract::SetBackgroundColor(frameNode, color.value_or(Color::TRANSPARENT));
     ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, BackgroundColorSetByUser, true, frameNode);
 }
+
+void SelectModelStatic::SetOptionTextModifier(
+    FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionTextModifier(optionApply);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, OptionTextModifierSetByUser, true, frameNode);
+}
+
+void SelectModelStatic::SetSelectedOptionTextModifier(
+    FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionTextModifier(optionSelectedApply);
+}
+
+void SelectModelStatic::SetTextModifierApply(
+    FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& textApply)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTextModifierApply(textApply);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, TextModifierSetByUser, true, frameNode);
+}
+
+void SelectModelStatic::SetArrowModifierApply(
+    FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetArrowModifierApply(arrowApply);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, ArrowModifierSetByUser, true, frameNode);
+}
 } // namespace OHOS::Ace::NG

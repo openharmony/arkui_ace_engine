@@ -30,8 +30,14 @@ public:
     ~ContainerPickerPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+
+    void SetSafeAreaPadding(PaddingPropertyF& value)
+    {
+        safeAreaPadding_ = value;
+    }
 private:
     void ClipPadding(PaintWrapper* paintWrapper, RSCanvas& canvas) const;
+    PaddingPropertyF safeAreaPadding_;
 };
 } // namespace OHOS::Ace::NG
 

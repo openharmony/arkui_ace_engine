@@ -1,0 +1,1165 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { KeyboardAvoidMode, UIContext } from '@kit.ArkUI';
+import { common, ConfigurationConstant } from '@kit.AbilityKit'
+import window from '@ohos.window'; //从@ohos.window模块中导入window对象，用于处理窗口相关操作
+import { HashMap, JSON } from '@kit.ArkTS';
+import prompt from '@system.prompt'
+import { BusinessError, pasteboard } from '@kit.BasicServicesKit';
+
+
+@Entry
+@Component
+struct richEditorSpan {
+  controller: RichEditorController = new RichEditorController();
+  options: RichEditorOptions = { controller: this.controller };
+  controller2: TextAreaController = new TextAreaController();
+  controller1: RichEditorController = new RichEditorController();
+  options1: RichEditorOptions = { controller: this.controller1 };
+  controller4: RichEditorController = new RichEditorController();
+  options4: RichEditorOptions = { controller: this.controller4 };
+  scroller3: Scroller = new Scroller()
+  controller3: RichEditorController = new RichEditorController();
+  will_controller: RichEditorController = new RichEditorController();
+  will_options: RichEditorOptions = { controller: this.will_controller };
+  @State layout_fontColor_num: number = 0
+  @State Direction_str: String = '';
+  @State Direction: Direction[] = [Direction.Ltr, Direction.Rtl, Direction.Auto]
+  @State Direction_num: number = 0
+  @State enableAutoSpace: (boolean | undefined | null) = true;
+  @State layout_fontSize: (number | string)[] = [26, 60, "26px"]
+  @State layout_fontSize_num: number = 0
+  @State layout_fontStyle: (FontStyle)[] = [FontStyle.Normal, FontStyle.Italic]
+  @State layout_fontStyle_num: number = 0
+  @State layout_fontWeight: (number)[] = [200, 800]
+  @State layout_fontWeight_num: number = 0
+  @State layout_fontFamily: (ResourceStr)[] = ["dog", "HarmonyOS Sans"]
+  @State layout_fontFamily_num: number = 0
+  @State layout_decoration: (DecorationStyleInterface)[] =
+    [{ type: TextDecorationType.Underline, color: Color.Red, style: TextDecorationStyle.WAVY },
+      { type: TextDecorationType.LineThrough, color: Color.Black, style: TextDecorationStyle.DASHED }]
+  @State layout_decoration_num: number = 0
+  @State layout_textShadow: (ShadowOptions | Array<ShadowOptions>) = [{
+    radius: 10,
+    type: ShadowType.BLUR,
+    color: Color.Red,
+    offsetX: 10,
+    offsetY: 0,
+    fill: true
+  }, {
+    radius: 10,
+    type: ShadowType.COLOR,
+    color: Color.Black,
+    offsetX: 20,
+    offsetY: 0,
+    fill: false
+  },
+    {
+      radius: 10,
+      color: Color.Brown,
+      offsetX: 30,
+      offsetY: 0
+    }, {
+      radius: 10,
+      color: Color.Green,
+      offsetX: 40,
+      offsetY: 0
+    },
+    {
+      radius: 10,
+      color: Color.Yellow,
+      offsetX: 100,
+      offsetY: 0
+    }]
+  @State layout_textShadow_num: number = 0
+  @State layout_lineHeight: (string | number | undefined)[] = [100, 30, -10, 40]
+  @State layout_lineHeight_num: number = 0
+  @State layout_letterSpacing: (string | number | undefined)[] = [100, 30, -10, 40]
+  @State layout_letterSpacing_num: number = 0
+  @State layout_fontFeature: (null | undefined | string)[] = [null, "\"sups\" 1", undefined, "\"subs\" 1"]
+  @State layout_fontFeature_num: number = 0
+  @State layout_halfLeading: (boolean)[] = [true, false]
+  @State layout_halfLeading_num: number = 0
+  @State layout_textBackgroundStyle_num: number = 0
+  @State layout_image_size: ([Dimension, Dimension])[] = [[50, 60], [100, 100]]
+  @State layout_image_size_num: number = 0
+  @State layout_image_verticalAlign: (ImageSpanAlignment)[] = [ImageSpanAlignment.BOTTOM, ImageSpanAlignment.TOP]
+  @State layout_image_verticalAlign_num: number = 0
+  @State layout_image_objectFit: (ImageFit)[] = [ImageFit.Cover, ImageFit.Contain]
+  @State layout_image_objectFit_num: number = 0
+  @State layout_image_layoutStyle: (RichEditorLayoutStyle)[] =
+    [{ "borderRadius": 30, "margin": 50 }, { "borderRadius": 100, "margin": 100 }]
+  @State layout_image_layoutStyle_num: number = 0
+  @State layout_Symbol_fontColor_num: number = 0
+  @State layout_Symbol_fontsize: (number)[] = [30, 80]
+  @State layout_Symbol_fontsize_num: number = 0
+  @State layout_Symbol_fontWeight: (number)[] = [200, 800]
+  @State layout_Symbol_fontWeight_num: number = 0
+  @State layout_Symbol_renderingStrategy: (SymbolRenderingStrategy)[] =
+    [SymbolRenderingStrategy.SINGLE, SymbolRenderingStrategy.MULTIPLE_COLOR]
+  @State layout_Symbol_renderingStrategy_num: number = 0
+  @State layout_Symbol_effectStrategy: (SymbolEffectStrategy)[] =
+    [SymbolEffectStrategy.NONE, SymbolEffectStrategy.HIERARCHICAL]
+  @State layout_Symbol_effectStrategy_num: number = 0
+  @State layout_textAlign: TextAlign[] = [TextAlign.Center, TextAlign.End]
+  @State layout_textAlign_num: number = 0
+  @State layout_leadingMargin: Dimension[] = [16, 66]
+  @State layout_leadingMargin_num: number = 0
+  @State layout_wordBreak: WordBreak[] = [WordBreak.BREAK_ALL, WordBreak.BREAK_WORD]
+  @State layout_wordBreak_num: number = 0
+  @State layout_lineBreakStrategy: LineBreakStrategy[] =
+    [LineBreakStrategy.GREEDY, LineBreakStrategy.HIGH_QUALITY, LineBreakStrategy.BALANCED]
+  @State layout_lineBreakStrategy_num: number = 0
+  @State image_size: number = 150
+  @State rangeBefore: string = "";
+  @State rangeAfter: string = "";
+  @State CursorPosition: number = 0
+  @State margin_editor: number = 10 //组件不同方向的外边距
+  @State padding1: number = 0
+  @State data: string = '<h1 style="text-align: center;">h1标题</h1>' +
+    '<h1 style="text-align: center;"><i>欢迎来到我的网页</i></h1>' +
+    '<h1 style="text-align: center;"><u>这是一个测试页面，用于展示HTML的基本语法和功能。</u></h1>' +
+    '<p style="font-size: 35px;text-align: center;font-weight: bold; color: rgb(24,78,228)">以上是随机内容。</p>';
+  @State runMetrics_key_str: string | undefined = 'Metrics'
+  @State lineMetrics_str: string | undefined = 'Metrics'
+  @State layout_list: Array<number> = [-1, 0, 1, 2, 3, 1000]
+  @State layout_index: number = 0
+  @State text: string = "email：1234@qq.com 18362227201 江苏省南京市雨花台 www.baidu.com 2025年8月"
+  @State text1: string = ''
+  @State start: number = -1;
+  @State end: number = -1;
+  @State message: string = "[-1, -1]"
+  @State content: string = ""
+  @State S: number = 30
+  @State w: number = 300
+  @State H: number = 150
+  @State radius: number = 0
+  @State lineHeight_rich_str: (string)[] =
+    ["0", "N100", "N-10", "N0b1010", "N30", "N0", "N0x20", "N100", "N10", "N50", "Str-10fp", "Str100px", "Str100%",
+      "Str10abcdefg$k\n", "Str30.4", "$r('app.string.lineHeight_letter_space_60')", "undefined", "100vp", "100px",
+      "100fp", "100lpx"]
+  @State lineHeight_rich_num: number = 0
+  private richEditorTextStyle: RichEditorTextStyle = {}
+  @State letterSpacing_rich: (string | number | undefined)[] =
+    [0, -1, 100, -10, 0b1010, 30, 0, 0x20, 100, -100, 50, "-10fp", "100px", "100%", "10abcdefg$k\n", "30.4", 60,
+      undefined, '100fp', '100px', '100lpx', '100vp']
+  @State letterSpacing_rich_str: (string)[] =
+    ["0", "N-1", "N100", "N-10", "N0b1010", "N30", "N0", "N0x20", "N100", "N-100", "N50", "Str-10fp", "Str100px",
+      "Str100%", "Str10abcdefg$k\n", "Str30.4", "N60", "undefined", 'str100fp', 'str100px', 'str100lpx', 'str100vp']
+  @State letterSpacing_rich_num: number = 0
+  @State get_type: string = ''
+  @State enable_change: boolean[] = [true, false]
+  @State enable_change_str: string[] = ["true", "false"]
+  @State enable_num: number = 0;
+  @State setCaretOffset_num_list: (undefined | null | number)[] = [2, undefined, 2, null, 2, -5, 2, 0, 2, 1, 2, 30];
+  @State setCaretOffset_num: number = 0;
+  @State setCaretOffset_num_: number = 0;
+  @State font_size_Str: (string)[] =
+    ["16.0", "50fp", "50dp", "50abcdefg", "20px", "10", "100px", "100%", "0px", "-1px", "上班qwer$k\n", "23.40",
+      "0b1010", "$r('app.string.placeholder_font_size_resource_30')", "$r('app.media.app_icon')",
+      "number:23.40", "number:20", "number:0x22", "number:0b1010", "number:0", "number:-10", "undefined", "100vp",
+      "100px", "100fp", "100lpx"]
+  @State size_num: number = 0
+  @State font_weight: (FontWeight | number | string | undefined)[] =
+    [FontWeight.Bold, FontWeight.Bolder, FontWeight.Lighter, FontWeight.Medium, FontWeight.Normal, FontWeight.Regular,
+      -100, 0, 0b1100100, 100, 100.6, 1000, 400, 499.9, 900, 900.6, 901, 99, 99.6, "-100", "0b1100100", "0", "100.6",
+      "1000", "100", "400", "900", "901", "abcdefg", undefined]
+  @State font_weight_Str: (string)[] =
+    ["FontWeight.Bold", "FontWeight.Bolder", "FontWeight.Lighter", "FontWeight.Medium", "FontWeight.Normal",
+      'FontWeight.Regular',
+      "number:-100", "number:0", "number:0b1100100", "number:100", "number:100.6", "number:1000", "number:400",
+      "number:499.9", "number:900", "number:900.6", "number:901", "number:99", "number:99.6", "-100", "0b1100100", "0",
+      "100.6", "1000", "100", "400", "900", "901", "abcdefg", "undefined"]
+  @State weight_num: number = 0
+  @State my_rect_left: number = 0
+  @State my_rect_right: number = 0
+  @State my_rect_top: number = 0
+  @State my_rect_bottom: number = 0
+  @State my_box_direction: number = 0
+  @State about_ToDelete: string = ''
+  @State get_selection: string = ''
+  @State getTypingStyle: string = ''
+  @State onIME_InputComplete: string = ''
+  @State onSelect: string = ''
+  @State get_span: string = ''
+  @State set_caret: boolean = true
+  @State change_px_fp: number = 0
+  @State change_px_fp_1: number = 0
+  @State change_value: number[] = [100] //lpx'-px vp'-fp
+  @State change_lpx_fp: number = 10
+  @State change_vp_fp: number = 0
+  @State preview_enable: (boolean | undefined | null)[] = [true, false, undefined, true, null]
+  @State preview_enable_str: string[] = ["true", "false", "undefined", "true", "null"]
+  @State preview_num: number = 0;
+  @State vibrates: boolean = true;
+  @State widthStyle_Index: number = 0 //矩形区域宽度规格枚举
+  @State widthStyleList: (RectWidthStyle | undefined | null)[] = [0, 1, undefined];
+  @State heightStyle_Index: number = 0 //矩形区域高度规格枚举
+  @State heightStyleList: (RectHeightStyle | undefined | null)[] = [0, 1, 2, 3, 4, 5, undefined];
+  private leftMargin: Dimension = 0;
+  @State richEditorFlag: boolean = true;
+  @State htmlStrResult: string = '';
+  @State textStrResult: string = '';
+  @State copyOption: CopyOptions[] =
+    [CopyOptions.None, CopyOptions.InApp, CopyOptions.LocalDevice, CopyOptions.CROSS_DEVICE]
+  @State copyOptionStr: string[] = ['None', 'InApp', 'LocalDevice', 'CROSS_DEVICE']
+  @State index: number = 2
+  @State private enableDataDetector: boolean = false
+  @State scrollbarcolor_num: (number) = 0
+  @State bs_num: number = 0;
+  @State bs: (BarState | undefined)[] = [BarState.Auto, BarState.On, BarState.Off, undefined];
+  @State bs_string: string[] = ["Auto", "On", "Off", "undefined"];
+  context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
+  ctx: common.ApplicationContext = this.context.getApplicationContext();
+
+  onCreateMenu(menuItems: Array<TextMenuItem>) {
+    let item1: TextMenuItem = {
+      content: 'custom1',
+      icon: $r('app.media.startIcon'),
+      id: TextMenuItemId.of('custom1'),
+    }
+    menuItems.push(item1)
+    return menuItems
+  }
+
+  @Builder
+  panel() {
+    Column() {
+      Text("这是自定义菜单").backgroundColor(Color.Green)
+      Text("这是自定义菜单").backgroundColor(Color.Green)
+      Text("这是自定义菜单").backgroundColor(Color.Green)
+      Text("这是自定义菜单").backgroundColor(Color.Green)
+    }.width(256)
+  }
+
+  @Builder
+  titleBuilder() {
+    Text("hello").padding('20').borderWidth(1).width('100%')
+  }
+
+  async getDataStr() {
+    // 获取系统剪贴板对象
+    let systemPasteboard: pasteboard.SystemPasteboard = pasteboard.getSystemPasteboard();
+
+    let data = await systemPasteboard.getData();
+    let primaryText = data.getPrimaryText();
+    console.info("getDataStr getPrimaryText: " + JSON.stringify(primaryText, undefined, 2));
+    this.textStrResult = primaryText;
+
+
+    let primaryHtml = data.getPrimaryHtml();
+    console.info("getDataStr getPrimaryHtml: " + JSON.stringify(primaryHtml));
+    this.htmlStrResult = primaryHtml;
+
+    let primaryURi = data.getPrimaryUri();
+    console.info("getDataStr getPrimaryUri: " + JSON.stringify(primaryURi));
+
+    let primaryPixelMap = data.getPrimaryPixelMap();
+    console.info("getDataStr getPrimaryPixelMap: " + JSON.stringify(primaryPixelMap.getImageInfo()));
+  }
+
+  isEmpty(str: string | undefined | null): boolean {
+    return str == undefined || str == null || str.length == 0;
+  }
+
+  build() {
+    Scroll() {
+      Column() { //使用Column组件包裹整个布局
+        //紧接着是另一个Column，包含了一个RichEditor组件，用于展示富文本编辑器
+        Button("占位")
+        Button("占位")
+        RichEditor(this.options)
+          .enableDataDetector(this.enableDataDetector)
+          .copyOptions(this.copyOption[this.index])
+          .direction(this.Direction[this.Direction_num])
+          .maxLines(10)
+          .bindSelectionMenu(RichEditorSpanType.IMAGE, this.panel, ResponseType.LongPress,
+            { menuType: MenuType.PREVIEW_MENU })
+          .editMenuOptions({
+            onCreateMenu: this.onCreateMenu,
+            onMenuItemClick: (menuItem: TextMenuItem, textRange: TextRange) => {
+              if (menuItem.id.equals(TextMenuItemId.of("custom1"))) {
+                console.log("拦截 id: custom1 start:" + textRange.start + "; end:" + textRange.end)
+                return true;
+              }
+              if (menuItem.id.equals(TextMenuItemId.SEARCH)) {
+                console.log("SEARCH Clicked" + textRange.start + "; end:" + textRange.end)
+                return false;
+              }
+              return false;
+            }
+          })
+          .enablePreviewText(this.preview_enable[this.preview_num])
+          .enableHapticFeedback(this.vibrates)
+          .placeholder('提示文本提示文本')
+          .backgroundColor(Color.White)
+          .enabled(this.enable_change[this.enable_num])
+          .padding(10)//在RichEditor组件中设置了一些属性，如clip、padding、borderWidth、borderColor等。
+          .enableAutoSpacing(this.enableAutoSpace)//中西文自动边距
+          .onReady(() => {
+            this.controller.addTextSpan("Email: 12345@123.com 天安门广场 真好玩 西湖 17858867166 www.baidu.com 2025年6月11日 你好、\n电话：(86) (755) ********\n网址：www.********.com\n；邮箱：***@example.com，\n地址：XX省XX市XX区XXXX")
+            this.controller.addTextSpan("Email: 12345@123.com 天安门广场 真好玩 西湖 17858867166 www.baidu.com 2025年6月11日 你好、电话：(86) (755) ********网址：www.********.com；邮箱：***@example.com，地址：XX省XX市XX区XXXX",
+              {
+                style:
+                {
+                  fontColor: Color.Red,
+                  fontSize: 15,
+                  fontStyle: FontStyle.Italic,
+                  decoration: { type: TextDecorationType.Overline, color: Color.Red },
+                }
+              })
+          })
+          .onSelect((value: RichEditorSelection) => { //监听选择文本事件.onSelect()，更新选择的文本范围。
+            //当用户选择文本时触发相应的操作
+            console.info("onselect_value，验证3击---------------------onSelect" + JSON.stringify(value))
+            this.controller4.addTextSpan("\n" + "\n" + "验证3击---------------------onSelect---------------------")
+            this.controller4.addTextSpan("\n" + "onSelect的内容:" + JSON.stringify(value))
+
+          })
+          .aboutToIMEInput((value: RichEditorInsertValue) => {
+            this.controller4.addTextSpan("\n" + "\n" + "---------------------aboutToIMEInput---------------------")
+            this.controller4.addTextSpan("\n" + "\n" + "aboutToIMEInput的内容:" + JSON.stringify(value))
+            return true; //返回true表示继续执行输入法的默认操作
+          })
+          .onWillChange((value: RichEditorChangeValue) => {
+            console.info("onWillChange，验证重复回调外部拖入" + JSON.stringify(value))
+            this.will_controller.addTextSpan("\n" + "\n" + "---------------------onWillChange---------------------" +
+            JSON.stringify(value, undefined, 2))
+            return true;
+          })
+          .onDidChange((rangeBefore, rangeAfter) => {
+            console.log('1-------触发onDidChange了啊啊啊啊 ')
+            console.log('2-------触发onDidChange了啊啊啊啊')
+            this.rangeBefore = '[ ' + rangeBefore.start + ' , ' + rangeBefore.end + ' ]';
+            this.rangeAfter = '[ ' + rangeAfter.start + ' , ' + rangeAfter.end + ' ]';
+            this.controller4.addTextSpan("\n" + "\n" + "---------------------onDidChange---------------------")
+            this.controller4.addTextSpan("\n" + "onDidChange的回调：" + JSON.stringify(this.rangeBefore) + ',' +
+            JSON.stringify(this.rangeAfter))
+          })
+          .onDeleteComplete(() => {
+            this.controller4.addTextSpan("\n" + "\n" + "---------------------onDeleteComplete---------------------")
+          })
+          .onIMEInputComplete((value: RichEditorTextSpanResult) => {
+            //验证RichEditor保持插入内容可见
+            console.log("dsh onIMEInputComplete" + JSON.stringify(value))
+            this.controller4.addTextSpan("\n" + "\n" + "---------------------onIMEInputComplete---------------------")
+
+            this.controller4.addTextSpan("\n" + "\n" + "onIMEInputComplete的内容:" + JSON.stringify(value))
+          })
+          .onEditingChange((isEditing: boolean) => {
+            this.controller4.addTextSpan("\n" + "\n" + "---------------------onEditingChange---------------------")
+            if (isEditing == true) {
+              prompt.showToast(
+                {
+                  message: "富文本开始编辑态",
+                  duration: 2000
+                })
+            } else {
+              prompt.showToast(
+                {
+                  message: "富文本开始预览态",
+                  duration: 2000
+                })
+            }
+          })
+          .onSubmit((enterKey: EnterKeyType, event: SubmitEvent) => {
+            this.controller4.addTextSpan("\n" + "\n" + "---------------------onSubmit---------------------")
+            console.log("trigger richeditor onsubmit" + enterKey);
+            event.keepEditableState();
+          })
+          .onSelectionChange((value: RichEditorRange) => {
+            //验证RichEditor保持插入内容可见
+            this.controller4.addTextSpan("\n" + "\n" + "---------------------onSelectionChange---------------------")
+            this.controller4.addTextSpan("\n" + "\n" + "onSelectionChange光标位置发生变化的内容:" +
+            JSON.stringify(value))
+          })
+          .aboutToDelete((value: RichEditorDeleteValue) => {
+            console.log('aboutToDelete-setSelectionsetSelection(0, 4,' + JSON.stringify(value))
+            this.controller4.addTextSpan("\n" + "\n" + "aboutToDelete的内容setSelection(0, 4,:" + JSON.stringify(value))
+            return true;
+          })
+          .onDeleteComplete(() => {
+            this.controller4.addTextSpan("\n" + "\n" + "---------------------onDeleteComplete:---------------------")
+            console.log("---------------------- onDeleteComplete ------------------------")
+          })
+          .onPaste(() => {
+            this.controller4.addTextSpan("\n" + "\n" + "---------------------onPaste:---------------------")
+          })
+          .onCut((event: CutEvent) => {
+            if (event != undefined && event.preventDefault) {
+            }
+            prompt.showToast({
+              message: "oncut回调", duration: 2000
+            })
+            this.controller4.addTextSpan("\n" + "\n" + "---------------------onCut:---------------------")
+          })
+          .barState(this.bs[this.bs_num])
+          .defaultFocus(true)
+          .borderWidth(1)
+          .borderColor(Color.Green)
+          .width(this.w)
+          .height(this.H)
+          .borderRadius(this.radius)
+          .padding(this.padding1)
+          .margin(this.margin_editor)
+
+
+        Scroll() {
+          Column({ space: 5 }) {
+            Scroll() {
+              Row() {
+                Button('设置barState为：' + this.bs_string[this.bs_num])
+                  .height(30)
+                  .fontSize(13)
+                  .onClick(() => {
+                    this.bs_num++;
+                    if (this.bs_num > (this.bs.length - 1)) {
+                      this.bs_num = 0;
+                    }
+                  })
+                Button('setSelection(-5,-10)').onClick(() => {
+                  this.controller.setSelection(-5, -10)
+                })
+                Button('深色：').onClick(() => {
+                  this.ctx.setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_DARK)
+                })
+                Button('浅色：').onClick(() => {
+                  this.ctx.setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT)
+                })
+                Button('copyOption:' + this.copyOptionStr[this.index], { controlSize: ControlSize.SMALL })
+                  .onClick(() => {
+                    this.index++
+                    if (this.index > (this.copyOptionStr.length - 1)) {
+                      this.index = 0
+                    }
+                  })
+                Button('切换AI' + this.enableDataDetector).onClick(() => {
+                  this.enableDataDetector = !this.enableDataDetector
+                })
+                Button("切换Direction" + this.Direction[this.Direction_num])
+                  .onClick(() => {
+                    this.Direction_num++
+                    if (this.Direction_num > (this.Direction.length - 1)) {
+                      this.Direction_num = 0
+                    }
+                  })
+                Button("GetPrimaryHtml").onClick(async () => {
+                  this.getDataStr();
+                })
+                Button("1删除rich_editor全部span", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.controller.deleteSpans();
+                })
+                Button("2删除rich_editor全部span", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.controller1.deleteSpans();
+                })
+                Button("3删除rich_editor全部span", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.controller4.deleteSpans();
+                })
+                Button('增加静态大图片size:' + this.image_size, { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.controller.addImageSpan($r("app.media.startIcon"),
+                    {
+                      imageStyle:
+                      {
+                        size: [this.image_size, this.image_size]
+                      }
+                    })
+                })
+                Button('padding+:' + this.padding1, { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.padding1 = this.padding1 + 1
+                })
+                Button('padding-:' + this.padding1, { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.padding1 = this.padding1 - 1
+                })
+                Button("margin+:" + this.margin_editor, { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.margin_editor = this.margin_editor + 2
+                })
+                Button("margin-:" + this.margin_editor, { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.margin_editor = this.margin_editor - 2
+                })
+                Button('setCaretOffset的value：' + this.setCaretOffset_num_list[this.setCaretOffset_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.setCaretOffset_num++
+                  if (this.setCaretOffset_num > (this.setCaretOffset_num_list.length - 1)) {
+                    this.setCaretOffset_num = 0
+                  }
+                  this.controller.setCaretOffset(this.setCaretOffset_num_list[this.setCaretOffset_num])
+                })
+                Button('setCaretOffset+：' + this.setCaretOffset_num_, { controlSize: ControlSize.SMALL })
+                  .onClick(() => {
+                    this.setCaretOffset_num_++
+                    this.controller.setCaretOffset(this.setCaretOffset_num_)
+                    this.set_caret = this.controller.setCaretOffset(this.setCaretOffset_num_)
+                    console.log("\n" + "1setCaretOffset返回值boolean:")
+
+                    console.log("\n" + "3setCaretOffset返回值boolean:" + this.set_caret)
+                    this.controller4.addTextSpan("\n" + "2setCaretOffset返回值boolean:" + this.set_caret)
+                  })
+                Button('setCaretOffset-：' + this.setCaretOffset_num_, { controlSize: ControlSize.SMALL })
+                  .onClick(() => {
+                    this.setCaretOffset_num_--
+                    this.controller.setCaretOffset(this.setCaretOffset_num_)
+                  })
+                Button("设置第一个富文本的enable为：" + this.enable_change_str[this.enable_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.enable_num++;
+                  if (this.enable_num > (this.enable_change.length - 1)) {
+                    this.enable_num = 0
+                  }
+
+                })
+                Button("右缩进", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  const Indentation = 10;
+                  let margin = Number(this.leftMargin)
+                  if (margin < 200) {
+                    margin += Indentation;
+                    this.leftMargin = margin;
+                  }
+                  this.controller.updateParagraphStyle({
+                    start: this.start,
+                    end: this.end,
+                    style: {
+                      leadingMargin: 32
+                    }
+                  })
+                })
+                Button('增加数字', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.controller.addTextSpan("0123456789",
+                    {
+                      style:
+                      {
+                        fontColor: Color.Orange,
+                        fontSize: 30
+                      }
+                    })
+                })
+                Button('增加日文', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.controller.addTextSpan("おはようございます。",
+                    {
+                      style:
+                      {
+                        fontColor: Color.Orange,
+                        fontSize: 30,
+                      }
+                    })
+                })
+                Button("get_paragraphs01", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.get_span = JSON.stringify(this.controller.getParagraphs({ start: 0, end: 1 }))
+                  this.controller4.addTextSpan("\nget_paragraphs" + this.get_span)
+                })
+                Button("getspan", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.get_span = JSON.stringify(this.controller.getSpans({ start: -1, end: -1 }))
+                  console.info("bbgq4 get_span = " + this.get_span)
+                  this.controller4.addTextSpan("this.get_span" + this.get_span)
+                })
+                Button("get_selection", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.get_selection = JSON.stringify(this.controller.getSelection())
+                  this.controller4.addTextSpan("this.get_selection:" + this.get_selection)
+                  console.log("dsh get_selection:" + JSON.stringify(this.get_selection))
+                })
+                Button("getTypingStyle", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.getTypingStyle = JSON.stringify(this.controller.getTypingStyle())
+                  console.log("getTypingStyle:" + JSON.stringify(this.getTypingStyle))
+                  this.controller4.addTextSpan("getTypingStyle为:" + this.getTypingStyle)
+                })
+                Button("addsymbol", { controlSize: ControlSize.SMALL }).onClick((event: ClickEvent) => {
+                  let CaretOffset = this.controller.getCaretOffset()
+                  this.controller.addSymbolSpan($r('sys.symbol.ohos_trash'),
+                    {
+                      offset: CaretOffset,
+                    })
+                })
+                Button("添加symbolrenderingStrategy: 111111", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.controller.addSymbolSpan($r("sys.symbol.ohos_trash"),
+                    {
+                      offset: null,
+                      style: {
+                        fontColor: undefined,
+                        fontSize: 16,
+                        fontWeight: undefined,
+                        renderingStrategy: 111111,
+                        effectStrategy: SymbolEffectStrategy.HIERARCHICAL
+                      }
+                    })
+                  this.controller.addSymbolSpan($r("sys.symbol.wifi"),
+                    {
+                      offset: null,
+                      style: {
+                        fontColor: [Color.Green],
+                        fontSize: 16,
+                        fontWeight: undefined,
+                        renderingStrategy: 111111,
+                        effectStrategy: SymbolEffectStrategy.HIERARCHICAL
+                      }
+                    })
+                })
+
+                Button('获取此时光标位置：' + this.controller.getCaretOffset(), { controlSize: ControlSize.SMALL })
+                  .onClick(() => {
+                    console.log('**********' + JSON.stringify(this.controller.getCaretOffset()));
+                  })
+                Button('增加单个字符', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  let CaretOffset = this.controller.getCaretOffset()
+                  this.controller.addTextSpan("人",
+                    {
+                      style:
+                      {
+                        fontColor: Color.Orange,
+                        fontSize: 230
+                      }
+                    })
+                })
+                Button("+builder", { controlSize: ControlSize.SMALL }).onClick((event: ClickEvent) => {
+                  let CaretOffset = this.controller1.getCaretOffset()
+                  this.controller.addBuilderSpan(() => {
+                    this.titleBuilder()
+                  }, { offset: CaretOffset })
+                })
+                Button("getLineCount:" + this.text1, { controlSize: ControlSize.SMALL })
+                  .onClick(() => {
+                    let layoutManager: LayoutManager = this.controller.getLayoutManager()
+                    console.log("getLineCount")
+                    let lineCount = layoutManager.getLineCount()
+                    let map: HashMap<string, string> = new HashMap()
+                    map.set("1", "value1")
+                    map.set("2", "value2")
+                    console.log(JSON.stringify(map))
+                    this.text1 = "lineCount = " + lineCount + "\n"
+                    console.log(this.text1)
+                  })
+              }
+            }
+            .backgroundColor(0xDCDCDC)
+            .scrollable(ScrollDirection.Horizontal) // 滚动方向
+            .scrollBar(BarState.Off) // 滚动条常驻显示
+            .scrollBarWidth(5) // 滚动条宽度
+
+            Scroll() {
+              Row() {
+                Button("开启中西文间距", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.enableAutoSpace = true;
+                })
+                Button("关闭中西文间距", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.enableAutoSpace = false;
+                })
+                Button("中西文间距null", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.enableAutoSpace = null;
+                })
+                Button("中西文间距undefined", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.enableAutoSpace = undefined;
+                })
+                Button('压缩')
+                  .fontSize(10)
+                  .onClick(() => {
+                    let uiContext: UIContext = this.getUIContext();
+                    uiContext.setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
+                  })
+
+                Button('上抬')
+                  .fontSize(10)
+                  .onClick(() => {
+                    let uiContext: UIContext = this.getUIContext();
+                    uiContext.setKeyboardAvoidMode(KeyboardAvoidMode.OFFSET)
+                  })
+                Button('getCaretRect', { controlSize: ControlSize.SMALL }).onClick((event: ClickEvent) => {
+                  this.controller4.addTextSpan("\ngetCaretRect" + JSON.stringify(this.controller.getCaretRect()),
+                    { style: { fontColor: Color.Green, fontSize: 20 } })
+                })
+                Button("vibrates=true", { controlSize: ControlSize.SMALL }).onClick((event: ClickEvent) => {
+                  this.vibrates = true
+                })
+                Button("vibrates=false", { controlSize: ControlSize.SMALL }).onClick((event: ClickEvent) => {
+                  this.vibrates = false
+                })
+                Button("get_paragraphs", { controlSize: ControlSize.SMALL }).onClick(() => {
+
+                  let get_span1 = this.controller.getParagraphs({ start: -1, end: -1 })
+                  console.log("dsh controller test getParagraphs:" + JSON.stringify(get_span1))
+                  this.controller4.addTextSpan("\nget_paragraphs0001" + JSON.stringify(this.get_span))
+                })
+                Button("deleteSpans:" + '(' + this.start + ',' + this.end + ')', { controlSize: ControlSize.SMALL })
+                  .onClick(() => {
+                    this.controller.deleteSpans({ start: this.start, end: this.end })
+                  })
+                Button("updateSpanStyle", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.controller.updateSpanStyle({
+                    textStyle:
+                    {
+                      fontColor: Color.Blue,
+                      letterSpacing: 30
+                    }
+                  })
+                })
+                Button("updateParagraphStyle", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.controller.updateSpanStyle({
+                    textStyle:
+                    {
+                      fontColor: Color.Green,
+                      letterSpacing: 30
+                    }
+                  })
+                })
+                Button("get_span", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.get_span = JSON.stringify(this.controller.getSpans())
+                  this.controller4.addTextSpan("\nget_paragraphs1" + this.get_span)
+                })
+              }
+            }
+            .backgroundColor(0xDCDCDC)
+            .scrollable(ScrollDirection.Horizontal) // 滚动方向
+            .scrollBar(BarState.Off) // 滚动条常驻显示
+            .scrollBarWidth(10) // 滚动条宽度
+
+            Scroll() {
+              Row() {
+                Button('动态切换粉色富文本的预上屏开关' + this.preview_enable[this.preview_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.preview_num++;
+                  if (this.preview_num > (this.preview_enable.length - 1)) {
+                    this.preview_num = 0
+                  }
+                })
+                Button('横屏', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.H = 120
+                  window.getLastWindow(getContext(this), (err, win) => {
+                    win.setPreferredOrientation(window.Orientation.LANDSCAPE);
+                  })
+                })
+                Button('竖屏', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.H = 300
+                  window.getLastWindow(getContext(this), (err, win) => {
+                    win.setPreferredOrientation(window.Orientation.PORTRAIT);
+                  })
+                })
+                Button("向右空白缩进", { controlSize: ControlSize.SMALL }).onClick(() => {
+                  const Indentation = 10;
+                  let margin = Number(this.leftMargin)
+                  if (margin < 200) {
+                    margin += Indentation;
+                    this.leftMargin = margin;
+                  }
+                  this.controller.updateParagraphStyle({
+                    start: this.start,
+                    end: this.end,
+                    style: {
+                      leadingMargin: margin
+                    }
+                  })
+                })
+              }
+            }
+            .backgroundColor(0xDCDCDC)
+            .scrollable(ScrollDirection.Horizontal) // 滚动方向
+            .scrollBar(BarState.Off) // 滚动条常驻显示
+            .scrollBarColor(Color.Gray) // 滚动条颜色
+            .scrollBarWidth(10) // 滚动条宽度
+
+            Scroll() {
+              Row() {
+                Button("getRectsForRange-Array<TextBox>", { controlSize: ControlSize.SMALL })
+                  .onClick(() => {
+                    let layoutManager: LayoutManager = this.controller.getLayoutManager()
+                    let boxes = layoutManager.getRectsForRange({ start: this.start, end: this.end },
+                      this.widthStyleList[this.widthStyle_Index], this.heightStyleList[this.heightStyle_Index])
+                    console.log("XXX" + JSON.stringify(boxes))
+                    this.controller1.addTextSpan("\nXXX" + this.start + '--' + this.end + ":\n" + JSON.stringify(boxes))
+
+                    let idx = 0;
+                    if (boxes && boxes[idx] && boxes.length > 0) {
+                      this.my_rect_left = boxes[idx].rect.left;
+                      this.my_rect_right = boxes[idx].rect.right;
+                      this.my_rect_top = boxes[idx].rect.top;
+                      this.my_rect_bottom = boxes[idx].rect.bottom;
+                      this.my_box_direction = boxes[idx].direction;
+                    } else {
+                      console.log("No rectangles found.");
+                      this.my_rect_left = -1;
+                      this.my_rect_right = -1;
+                      this.my_rect_top = -1;
+                      this.my_rect_bottom = -1;
+                      this.my_box_direction = -1;
+                    }
+                  })
+                Text('rect_left:' + this.my_rect_left)
+                Text('rect_right:' + this.my_rect_right)
+                Text('rect_top:' + this.my_rect_top)
+                Text('rect_bottom:' + this.my_rect_bottom)
+                Text('box_direction:' + this.my_box_direction)
+
+                Button('start++:' + this.start, { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.start = this.start + 1;
+                })
+                Button('start--', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.start = this.start - 1;
+                })
+                Button('end++:' + this.end, { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.end = this.end + 1;
+                })
+                Button('end--', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.end = this.end - 1;
+                })
+
+                Button('setSelection' + this.start + this.end, { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.controller.setSelection(this.start, this.end)
+                })
+                Button('start=2', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.start = 2;
+                })
+                Button('end=10000:' + this.end, { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.end = 10000;
+                })
+              }
+            }
+            .backgroundColor(0xDCDCDC)
+            .scrollable(ScrollDirection.Horizontal) // 滚动方向
+            .scrollBar(BarState.Off) // 滚动条常驻显示
+            .scrollBarColor(Color.Gray) // 滚动条颜色
+            .scrollBarWidth(10) // 滚动条宽度
+            Scroll(this.scroller3) {
+              Row() {
+                Button('this.CursorPosition:' + '光标位置' + this.CursorPosition, { controlSize: ControlSize.SMALL })
+                  .onClick(() => {
+                    this.CursorPosition = this.controller.getCaretOffset()
+                    console.log(JSON.stringify(this.controller.getCaretOffset()));
+                  })
+                Button('增加高度', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.H = this.H + 5
+                })
+                Button('减少高度', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.H = this.H - 5
+                })
+                Button('增加宽度', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.w = this.w + 5
+                })
+                Button('减少宽度', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.w = this.w - 5
+                })
+                Button('字体变大', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.S = this.S + 1
+                  this.controller.updateSpanStyle({
+                    start: -1,
+                    end: -1,
+                    textStyle:
+                    {
+                      fontSize: this.S
+                    }
+                  })
+
+                })
+                Button('字体变小', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.S = this.S - 1
+                  this.controller.updateSpanStyle({
+                    start: -1,
+                    end: -1,
+                    textStyle:
+                    {
+                      fontSize: this.S
+                    }
+                  })
+                })
+                Button('设置输入样式', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.controller.setTypingStyle({ fontColor: Color.Green })
+                })
+                Button('get样式', { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.controller4.addTextSpan("\n" + "\n" + "get样式:" +
+                  JSON.stringify(this.controller.getTypingStyle()))
+                })
+              }
+            }.scrollable(ScrollDirection.Horizontal) // 滚动方向横
+            .scrollBar(BarState.Off) // 滚动条常驻显示
+            .scrollBarColor(Color.Gray) // 滚动条颜色
+            .scrollBarWidth(10) // 滚动条宽度
+
+            Scroll(this.scroller3) {
+              Row({ space: 2 }) {
+                Text('更新组件textStyle样式').fontSize(10)
+                Button("updateSpanStyle1fontFeature").onClick(() => {
+                  this.controller.updateSpanStyle({
+                    textStyle: {
+                      fontFeature: "\"ss01\" on"
+                    }
+                  })
+                })
+                Button('subs').onClick(() => {
+                  this.controller.addTextSpan("1234567890",
+                    {
+                      style:
+                      {
+                        fontColor: Color.Orange,
+                        fontSize: this.S,
+                        fontFeature: "\"subs\" 1",
+                      }
+                    })
+                })
+                Button('切换fontSize' + this.layout_fontSize[this.layout_fontSize_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_fontSize_num++
+                  if (this.layout_fontSize_num > (this.layout_fontSize.length - 1)) {
+                    this.layout_fontSize_num = 0
+                  }
+                })
+                Button('切换fontStyle' + this.layout_fontStyle[this.layout_fontStyle_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_fontStyle_num++
+                  if (this.layout_fontStyle_num > (this.layout_fontStyle.length - 1)) {
+                    this.layout_fontStyle_num = 0
+                  }
+                })
+                Button('切换fontWeight' + this.layout_fontWeight[this.layout_fontWeight_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_fontWeight_num++
+                  if (this.layout_fontWeight_num > (this.layout_fontWeight.length - 1)) {
+                    this.layout_fontWeight_num = 0
+                  }
+                })
+                Button('切换fontFamily' + this.layout_fontFamily[this.layout_fontFamily_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_fontFamily_num++
+                  if (this.layout_fontFamily_num > (this.layout_fontFamily.length - 1)) {
+                    this.layout_fontFamily_num = 0
+                  }
+                })
+                Button('切换decoration' + this.layout_decoration[this.layout_decoration_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_decoration_num++
+                  if (this.layout_decoration_num > (this.layout_decoration.length - 1)) {
+                    this.layout_decoration_num = 0
+                  }
+                })
+                Button('切换textShadow' + this.layout_textShadow[this.layout_textShadow_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_textShadow_num++
+                  if (this.layout_textShadow_num > (5 - 1)) {
+                    this.layout_textShadow_num = 0
+                  }
+                })
+                Button('切换lineHeight' + this.layout_lineHeight[this.layout_lineHeight_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_lineHeight_num++
+                  if (this.layout_lineHeight_num > (this.layout_lineHeight.length - 1)) {
+                    this.layout_lineHeight_num = 0
+                  }
+                })
+                Button('切换letterSpacing' + this.layout_letterSpacing[this.layout_letterSpacing_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_letterSpacing_num++
+                  if (this.layout_letterSpacing_num > (this.layout_letterSpacing.length - 1)) {
+                    this.layout_letterSpacing_num = 0
+                  }
+                })
+                Button('切换fontFeature' + this.layout_fontFeature[this.layout_fontFeature_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_fontFeature_num++
+                  if (this.layout_fontFeature_num > (this.layout_fontFeature.length - 1)) {
+                    this.layout_fontFeature_num = 0
+                  }
+                })
+                Button('切换halfLeading' + this.layout_halfLeading[this.layout_halfLeading_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_halfLeading_num++
+                  if (this.layout_halfLeading_num > (this.layout_halfLeading.length - 1)) {
+                    this.layout_halfLeading_num = 0
+                  }
+                })
+              }
+            }.scrollable(ScrollDirection.Horizontal) // 滚动方向横
+            .scrollBar(BarState.Off) // 滚动条常驻显示
+            .scrollBarColor(Color.Gray) // 滚动条颜色
+            .scrollBarWidth(10) // 滚动条宽度
+
+            Scroll(this.scroller3) {
+              Row({ space: 2 }) {
+                Text('更新组件image样式').fontSize(10)
+                Button("updateSpanStyle第1个imageStyle:" + this.start + ":" + this.end,
+                  { controlSize: ControlSize.SMALL, type: ButtonType.Normal }).onClick(() => {
+                  this.controller.updateSpanStyle({
+                    start: this.start,
+                    end: this.end,
+                    imageStyle: {
+                      size: this.layout_image_size[this.layout_image_size_num],
+                      verticalAlign: this.layout_image_verticalAlign[this.layout_image_verticalAlign_num],
+                      layoutStyle: this.layout_image_layoutStyle[this.layout_image_layoutStyle_num],
+                      objectFit: this.layout_image_objectFit[this.layout_image_objectFit_num]
+                    }
+                  })
+                })
+                Button('切换size' + this.layout_image_size[this.layout_image_size_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_image_size_num++
+                  if (this.layout_image_size_num > (this.layout_image_size.length - 1)) {
+                    this.layout_image_size_num = 0
+                  }
+                })
+                Button('切换verticalAlign' + this.layout_image_verticalAlign[this.layout_image_verticalAlign_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_image_verticalAlign_num++
+                  if (this.layout_image_verticalAlign_num > (this.layout_image_verticalAlign.length - 1)) {
+                    this.layout_image_verticalAlign_num = 0
+                  }
+                })
+                Button('切换layoutStyle' + this.layout_image_layoutStyle[this.layout_image_layoutStyle_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_image_layoutStyle_num++
+                  if (this.layout_image_layoutStyle_num > (this.layout_image_layoutStyle.length - 1)) {
+                    this.layout_image_layoutStyle_num = 0
+                  }
+                })
+                Button('切换objectFit' + this.layout_image_objectFit[this.layout_image_objectFit_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_image_objectFit_num++
+                  if (this.layout_image_objectFit_num > (this.layout_image_objectFit.length - 1)) {
+                    this.layout_image_objectFit_num = 0
+                  }
+                })
+              }
+            }.scrollable(ScrollDirection.Horizontal) // 滚动方向横
+            .scrollBar(BarState.Off) // 滚动条常驻显示
+            .scrollBarColor(Color.Gray) // 滚动条颜色
+            .scrollBarWidth(10) // 滚动条宽度
+
+            Scroll(this.scroller3) {
+              Row({ space: 2 }) {
+                Text('更新组件Symbol样式').fontSize(10)
+                Button("updateSpanStyle第1个SymbolSpanStyle:" + this.start + ":" + this.end,
+                  { controlSize: ControlSize.SMALL, type: ButtonType.Normal }).onClick(() => {
+                  this.controller.updateSpanStyle({
+                    start: this.start,
+                    end: this.end,
+                    symbolStyle: {
+                      fontColor: [Color.Red],
+                      fontSize: this.layout_Symbol_fontsize[this.layout_Symbol_fontsize_num],
+                      fontWeight: this.layout_Symbol_fontWeight[this.layout_Symbol_fontWeight_num],
+                      renderingStrategy: this.layout_Symbol_renderingStrategy[this.layout_Symbol_renderingStrategy_num],
+                      effectStrategy: this.layout_Symbol_effectStrategy[this.layout_Symbol_effectStrategy_num]
+                    }
+                  })
+                })
+                Button('切换fontSize' + this.layout_Symbol_fontsize[this.layout_Symbol_fontsize_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_Symbol_fontsize_num++
+                  if (this.layout_Symbol_fontsize_num > (this.layout_Symbol_fontsize.length - 1)) {
+                    this.layout_Symbol_fontsize_num = 0
+                  }
+                })
+                Button('切换fontWeight' + this.layout_Symbol_fontWeight[this.layout_Symbol_fontWeight_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_Symbol_fontWeight_num++
+                  if (this.layout_Symbol_fontWeight_num > (this.layout_Symbol_fontWeight.length - 1)) {
+                    this.layout_Symbol_fontWeight_num = 0
+                  }
+                })
+                Button('切换renderingStrategy' +
+                this.layout_Symbol_renderingStrategy[this.layout_Symbol_renderingStrategy_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_Symbol_renderingStrategy_num++
+                  if (this.layout_Symbol_renderingStrategy_num > (this.layout_Symbol_renderingStrategy.length - 1)) {
+                    this.layout_Symbol_renderingStrategy_num = 0
+                  }
+                })
+                Button('切换effectStrategy' + this.layout_Symbol_effectStrategy[this.layout_Symbol_effectStrategy_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_Symbol_effectStrategy_num++
+                  if (this.layout_Symbol_effectStrategy_num > (this.layout_Symbol_effectStrategy.length - 1)) {
+                    this.layout_Symbol_effectStrategy_num = 0
+                  }
+                })
+              }
+            }.scrollable(ScrollDirection.Horizontal) // 滚动方向横
+            .scrollBar(BarState.On) // 滚动条常驻显示
+            .scrollBarColor(Color.Gray) // 滚动条颜色
+            .scrollBarWidth(10) // 滚动条宽度
+
+            Scroll(this.scroller3) {
+              Row({ space: 2 }) {
+                Text('更新组件内容样式')
+                Button("updateParagraphStyle第1个:" + this.start + ":" + this.end,
+                  { controlSize: ControlSize.SMALL, type: ButtonType.Normal }).onClick(() => {
+                  this.controller.updateParagraphStyle({
+                    start: this.start,
+                    end: this.end,
+                    style: {
+                      textAlign: this.layout_textAlign[this.layout_textAlign_num],
+                      leadingMargin: this.layout_leadingMargin[this.layout_leadingMargin_num],
+                      wordBreak: this.layout_wordBreak[this.layout_wordBreak_num],
+                      lineBreakStrategy: this.layout_lineBreakStrategy[this.layout_lineBreakStrategy_num],
+                    }
+                  })
+                })
+                Button('切换textAlign' + this.layout_textAlign[this.layout_textAlign_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_textAlign_num++
+                  if (this.layout_textAlign_num > (this.layout_textAlign.length - 1)) {
+                    this.layout_textAlign_num = 0
+                  }
+                })
+                Button('切换leadingMargin' + this.layout_leadingMargin[this.layout_leadingMargin_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_leadingMargin_num++
+                  if (this.layout_leadingMargin_num > (this.layout_leadingMargin.length - 1)) {
+                    this.layout_leadingMargin_num = 0
+                  }
+                })
+                Button('切换wordBreak' + this.layout_wordBreak[this.layout_wordBreak_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_wordBreak_num++
+                  if (this.layout_wordBreak_num > (this.layout_wordBreak.length - 1)) {
+                    this.layout_wordBreak_num = 0
+                  }
+                })
+                Button('切换lineBreakStrategy' + this.layout_lineBreakStrategy[this.layout_lineBreakStrategy_num],
+                  { controlSize: ControlSize.SMALL }).onClick(() => {
+                  this.layout_lineBreakStrategy_num++
+                  if (this.layout_lineBreakStrategy_num > (this.layout_lineBreakStrategy.length - 1)) {
+                    this.layout_lineBreakStrategy_num = 0
+                  }
+                })
+              }
+            }.scrollable(ScrollDirection.Horizontal) // 滚动方向横
+            .scrollBar(BarState.Off) // 滚动条常驻显示
+            .scrollBarColor(Color.Gray) // 滚动条颜色
+            .scrollBarWidth(10) // 滚动条宽度
+
+
+          }.height(400).backgroundColor(Color.Green)
+        }
+        .scrollable(ScrollDirection.Vertical) // 滚动方向纵向
+        .scrollBar(BarState.Off) // 滚动条常驻显示
+        .scrollBarColor(Color.Pink) // 滚动条颜色
+        .scrollBarWidth(10) // 滚动条宽度
+        .height(300)
+        .backgroundColor(Color.Red)
+
+        Row() {
+          RichEditor(this.options4)
+            .width("50%")
+            .height("25%")
+            .backgroundColor(Color.Orange)
+            .enablePreviewText(true)
+            .onSelect((value: RichEditorSelection) => {
+              console.info("onselect_value" + JSON.stringify(value))
+            })
+        }
+
+        RichEditor(this.will_options)
+          .width("50%")
+          .height("25%")
+          .id('RICH')
+
+        Text('getPrimaryText返回值: ' + this.textStrResult).fontColor(Color.Red).height(50).width('80%')
+        Text('getPrimaryHtml返回值:: ' + this.htmlStrResult).fontColor(Color.Blue).height(50).width('80%')
+      }
+    }
+  }
+}

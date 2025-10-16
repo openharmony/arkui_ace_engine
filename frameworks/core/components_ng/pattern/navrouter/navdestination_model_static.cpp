@@ -353,20 +353,20 @@ void NavDestinationModelStatic::SetHideTitleBar(FrameNode* frameNode, bool hideT
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, IsAnimatedTitleBar, animated, frameNode);
 }
 
-void NavDestinationModelStatic::SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow)
+void NavDestinationModelStatic::SetOnShown(FrameNode* frameNode, std::function<void(int32_t)>&& onShow)
 {
     CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
-    // navDestinationEventHub->SetOnShown(onShow);
+    navDestinationEventHub->SetOnShown(onShow);
 }
 
-void NavDestinationModelStatic::SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden)
+void NavDestinationModelStatic::SetOnHidden(FrameNode* frameNode, std::function<void(int32_t)>&& onHidden)
 {
     CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
-    // navDestinationEventHub->SetOnHidden(onHidden);
+    navDestinationEventHub->SetOnHidden(onHidden);
 }
 
 void NavDestinationModelStatic::SetOnBackPressed(FrameNode* frameNode, std::function<bool()>&& onBackPressed)
@@ -657,6 +657,17 @@ void NavDestinationModelStatic::SetHideItemText(FrameNode* frameNode, bool isHid
         AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
     CHECK_NULL_VOID(navDestinationGroupNode);
     NavigationToolbarUtil::SetHideItemText(navDestinationGroupNode, isHideItemText);
+}
+
+void NavDestinationModelStatic::SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<SystemBarStyle> style = SystemBarStyle::CreateStyleFromColor(contentColor.GetValue());
+    pattern->SetSystemBarStyle(style);
 }
 
 void NavDestinationModelStatic::SetPreferredOrientation(FrameNode* frameNode, const std::optional<Orientation>& ori)

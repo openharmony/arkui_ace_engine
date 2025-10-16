@@ -40,9 +40,9 @@ export enum Color {
     Transparent = '#00000000'
 }
 export enum ColoringStrategy {
-    INVERT = "'invert'",
-    AVERAGE = "'average'",
-    PRIMARY = "'primary'"
+    INVERT = 'invert',
+    AVERAGE = 'average',
+    PRIMARY = 'primary'
 }
 export enum ImageFit {
     CONTAIN = 0,
@@ -489,9 +489,9 @@ export enum Placement {
     RightBottom = 11
 }
 export enum ArrowPointPosition {
-    START = "'Start'",
-    CENTER = "'Center'",
-    END = "'End'"
+    START = 'Start',
+    CENTER = 'Center',
+    END = 'End'
 }
 export enum CopyOptions {
     NONE = 0,
@@ -628,8 +628,8 @@ export enum EllipsisMode {
 }
 export type Nullable<T = void> = T | undefined;
 export enum OptionWidthMode {
-    FIT_CONTENT = "'fit_content'",
-    FIT_TRIGGER = "'fit_trigger'"
+    FIT_CONTENT = 'fit_content',
+    FIT_TRIGGER = 'fit_trigger'
 }
 export enum FoldStatus {
     FOLD_STATUS_UNKNOWN = 0,

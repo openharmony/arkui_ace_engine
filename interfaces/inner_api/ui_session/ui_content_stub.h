@@ -35,6 +35,8 @@ private:
     int32_t RegisterSearchEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t RegisterComponentChangeEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t RegisterWebUnfocusEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t RegisterScrollEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t RegisterLifeCycleEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t SendCommandInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t SendCommandInnerAsync(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t SendCommandKeyCodeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
@@ -44,6 +46,8 @@ private:
     int32_t UnregisterComponentChangeEventCallbackInner(
         MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterWebUnfocusEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t UnregisterScrollEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t UnregisterLifeCycleEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t ResetTranslateTextAllInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t ResetTranslateTextInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetWebViewCurrentLanguageInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);

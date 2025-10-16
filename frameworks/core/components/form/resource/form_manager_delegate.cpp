@@ -1264,5 +1264,41 @@ void FormManagerDelegate::ProcessLockForm(bool lock)
     TAG_LOGI(AceLogTag::ACE_FORM, "ProcessLockForm, formId is %{public}" PRId64, runningCardId_);
     HandleLockFormCallback(lock);
 }
+
+void FormManagerDelegate::AddDueControlFormCallback(DueControlFormCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        return;
+    }
+    dueControlFormCallback_ = std::move(callback);
+}
+
+void FormManagerDelegate::HandleDueControlForm(bool isDisablePolicy, bool isControl)
+{
+    if (!dueControlFormCallback_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "dueControlFormCallback_ is null");
+        return;
+    }
+    dueControlFormCallback_(isDisablePolicy, isControl);
+}
+
+void FormManagerDelegate::ProcessDueControlForm(bool isDisablePolicy, bool isControl)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessDueControlForm, isDisablePolicy:%{public}d, isControl:%{public}d,"
+        "formId:%{public}" PRId64, isDisablePolicy, isControl, runningCardId_);
+    HandleDueControlForm(isDisablePolicy, isControl);
+}
+
+bool FormManagerDelegate::CheckFormDueControl(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &formName, const int32_t dimension, const bool isDisablePolicy)
+{
+    OHOS::AppExecFwk::FormMajorInfo formMajorInfo;
+    formMajorInfo.bundleName = bundleName;
+    formMajorInfo.moduleName = moduleName;
+    formMajorInfo.abilityName = abilityName;
+    formMajorInfo.formName = formName;
+    formMajorInfo.dimension = dimension;
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormDueControl(formMajorInfo, isDisablePolicy);
+}
 #endif
 } // namespace OHOS::Ace

@@ -340,7 +340,7 @@ private:
     void UpdateLooping();
     void UpdateSpeed();
     void UpdateMuted();
-    void PrepareSurface();
+    bool PrepareSurface();
 
     bool HasPlayer() const;
 

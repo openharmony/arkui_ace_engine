@@ -84,12 +84,12 @@ public:
         }
     }
 
-    const std::vector<int32_t>& GetOffScreemItems() const
+    const std::vector<int32_t>& GetOffScreenItems() const
     {
         return offScreenItemsIndex_;
     }
 
-    void SetOffScreemItems(const std::vector<int32_t>& offScreenItemsIndex)
+    void SetOffScreenItems(const std::vector<int32_t>& offScreenItemsIndex)
     {
         offScreenItemsIndex_ = offScreenItemsIndex;
     }
@@ -111,6 +111,11 @@ public:
 
 protected:
     bool ChildPreMeasureHelperEnabled() override
+    {
+        return true;
+    }
+
+    bool PostponedTaskForIgnoreEnabled() override
     {
         return true;
     }

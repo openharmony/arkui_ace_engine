@@ -252,6 +252,7 @@ bool CheckBetterRect(const Rect& nodeRect, int direction, const Rect& itemRect, 
 class AccessibilityUtils {
 public:
     static std::string GetRoleByType(AccessibilityRoleType roleType);
+    static std::string GetAceComponentTypeByRoleType(AccessibilityRoleType roleType);
 };
 } // namespace OHOS::Ace
 

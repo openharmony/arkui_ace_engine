@@ -30,14 +30,14 @@ void XComponentControllerPeerImpl::TriggerStartImageAnalyzer(Ark_VMContext vmCon
     CHECK_NULL_VOID(asyncWorker);
     CHECK_NULL_VOID(config);
     auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
-    if (isImageAnalyzing_) {
+    if (isImageAnalyzing) {
         promise->Reject(PeerUtils::CreateAIError(ImageAnalyzerState::ONGOING));
         return;
     }
-    isImageAnalyzing_ = true;
+    isImageAnalyzing = true;
 
     auto onAnalyzed = [peer = Claim(this), promise](ImageAnalyzerState state) {
-        peer->isImageAnalyzing_ = false;
+        peer->isImageAnalyzing = false;
         auto error = PeerUtils::CreateAIError(state);
         if (error.empty()) {
             promise->Resolve();
@@ -45,25 +45,23 @@ void XComponentControllerPeerImpl::TriggerStartImageAnalyzer(Ark_VMContext vmCon
             promise->Reject(error);
         }
     };
-    auto vectorIATypes = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
-    std::set<ImageAnalyzerType> types(vectorIATypes.begin(), vectorIATypes.end());
-    config_ = {
-        .types = std::move(types)
-    };
 
-    promise->StartAsync(vmContext, *asyncWorker, [peer = Claim(this), onAnalyzed = std::move(onAnalyzed)]() {
+    promise->StartAsync(vmContext, *asyncWorker, [peer = Claim(this), wrapConfigFunc = wrapAnalyzerConfigImpl,
+        onAnalyzed = std::move(onAnalyzed)]() {
         if (peer->controller) {
             OnAnalyzedCallback optOnAnalyzed = std::move(onAnalyzed);
-            peer->controller->StartImageAnalyzer(reinterpret_cast<void*>(&peer->config_), optOnAnalyzed);
+            void* config = wrapConfigFunc == nullptr ? nullptr : wrapConfigFunc();
+            peer->controller->StartImageAnalyzer(config, optOnAnalyzed);
         } else {
             onAnalyzed(ImageAnalyzerState::STOPPED);
         }
     });
+    wrapAnalyzerConfigImpl = nullptr;
 }
 void XComponentControllerPeerImpl::SetOnSurfaceCreatedEvent(const Callback_String_Void& callback)
 {
     arkOnSurfaceCreated = callback;
-    onSurfaceCreatedEvent_ = [arkCallback = CallbackHelper(callback)]
+    onSurfaceCreatedEvent = [arkCallback = CallbackHelper(callback)]
         (const std::string& surfaceId, const std::string& xcomponentId) {
         auto arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId);
         arkCallback.InvokeSync(arkSurfaceId);
@@ -72,7 +70,7 @@ void XComponentControllerPeerImpl::SetOnSurfaceCreatedEvent(const Callback_Strin
 void XComponentControllerPeerImpl::SetOnSurfaceChangedEvent(const Callback_String_SurfaceRect_Void& callback)
 {
     arkOnSurfaceChanged = callback;
-    onSurfaceChangedEvent_ = [arkCallback = CallbackHelper(callback)]
+    onSurfaceChangedEvent = [arkCallback = CallbackHelper(callback)]
         (const std::string& surfaceId, const RectF& rect) {
         auto arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId);
         Ark_SurfaceRect arkSurfaceRect;
@@ -86,23 +84,11 @@ void XComponentControllerPeerImpl::SetOnSurfaceChangedEvent(const Callback_Strin
 void XComponentControllerPeerImpl::SetOnSurfaceDestroyedEvent(const Callback_String_Void& callback)
 {
     arkOnSurfaceDestroyed = callback;
-    onSurfaceDestroyedEvent_ = [arkCallback = CallbackHelper(callback)]
+    onSurfaceDestroyedEvent = [arkCallback = CallbackHelper(callback)]
         (const std::string& surfaceId, const std::string& xcomponentId) {
         auto arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId);
         arkCallback.InvokeSync(arkSurfaceId);
     };
-}
-SurfaceCreatedEvent XComponentControllerPeerImpl::GetOnSurfaceCreatedEvent()
-{
-    return onSurfaceCreatedEvent_;
-}
-SurfaceChangedEvent XComponentControllerPeerImpl::GetOnSurfaceChangedEvent()
-{
-    return onSurfaceChangedEvent_;
-}
-SurfaceDestroyedEvent XComponentControllerPeerImpl::GetOnSurfaceDestroyedEvent()
-{
-    return onSurfaceDestroyedEvent_;
 }
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

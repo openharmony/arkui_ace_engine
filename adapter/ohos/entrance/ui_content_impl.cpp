@@ -2999,6 +2999,7 @@ void UIContentImpl::Destroy()
     SubwindowManager::GetInstance()->OnDestroyContainer(instanceId_);
 
     if (window_) {
+        SubwindowManager::GetInstance()->RemoveContainerId(window_->GetWindowId());
         window_->UnregisterWaterfallModeChangeListener(waterfallModeChangeListener_);
         window_->UnregisterDisplayIdChangeListener(displayIdChangeListener_);
         if (windowRectChangeListener_) {

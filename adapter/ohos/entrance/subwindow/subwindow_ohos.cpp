@@ -60,6 +60,7 @@
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #ifdef OS_ACCOUNT_EXISTS
 #include "os_account_manager.h"
@@ -811,6 +812,7 @@ void SubwindowOhos::ShowWindow(bool needFocus)
     if (ifNeedSetCurrentWindow_) {
         SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
     }
+    UiSessionManager::GetInstance()->OnRouterChange(window_->GetWindowName(), "onPageChange");
 }
 
 void SubwindowOhos::HideWindow()
@@ -906,6 +908,7 @@ void SubwindowOhos::HideWindow()
     event.windowId = context->GetWindowId();
     event.windowChangeTypes = WINDOW_UPDATE_REMOVED;
     context->SendEventToAccessibility(event);
+    UiSessionManager::GetInstance()->OnRouterChange(window_->GetWindowName(), "onPageChange");
 }
 
 void SubwindowOhos::ContainerModalUnFocus()

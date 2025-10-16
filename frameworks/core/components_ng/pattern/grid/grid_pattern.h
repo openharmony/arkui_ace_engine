@@ -146,7 +146,7 @@ public:
         return info_.reachStart_;
     }
 
-    bool IsAtBottom(bool considerRepeat = false) const override
+    bool IsAtBottom(bool considerRepeat = false, bool fromController = false) const override
     {
         return considerRepeat ? (info_.offsetEnd_ && info_.repeatDifference_ == 0) : info_.offsetEnd_;
     }

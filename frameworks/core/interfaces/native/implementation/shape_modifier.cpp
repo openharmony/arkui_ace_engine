@@ -28,6 +28,21 @@
 
 static const double STROKE_MITER_LIMIT_MIN_VALUE = 1.0;
 
+namespace {
+OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> ConvertPixelMap(const Opt_image_PixelMap* value)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    CHECK_NULL_RETURN(value, nullptr);
+    CHECK_EQUAL_RETURN(value->tag, InteropTag::INTEROP_TAG_UNDEFINED, nullptr);
+    auto arkPixelMap = value->value;
+    CHECK_NULL_RETURN(arkPixelMap, nullptr);
+    return arkPixelMap->pixelMap;
+#else
+    return nullptr;
+#endif
+}
+} // namespace
+
 namespace OHOS::Ace::NG {
 struct ShapeOptions {
     std::optional<Dimension> x;
@@ -68,8 +83,7 @@ void SetShapeOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetFocusable(frameNode, true);
-    RefPtr<PixelMap> pixelMap;
-    ShapeModelStatic::InitBox(frameNode, pixelMap);
+    ShapeModelStatic::InitBox(frameNode, ConvertPixelMap(value));
 }
 } // ShapeInterfaceModifier
 namespace ShapeAttributeModifier {

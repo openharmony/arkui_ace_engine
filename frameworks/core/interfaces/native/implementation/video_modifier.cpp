@@ -371,7 +371,10 @@ void SetAnalyzerConfigImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("ARKOALA VideoInterface::AnalyzerConfigImpl -> method is not implemented.");
+    CHECK_NULL_VOID(value);
+    auto optValue = Converter::GetOptPtr(value);
+    CHECK_NULL_VOID(optValue);
+    VideoModelNG::SetImageAnalyzerConfig(frameNode, reinterpret_cast<void*>(optValue->types.array));
 }
 void SetSurfaceBackgroundColorImpl(Ark_NativePointer node,
                                    const Opt_ColorMetrics* value)

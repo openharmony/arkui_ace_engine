@@ -25,6 +25,7 @@ import { WatchFunc } from './decoratorWatch';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { getObservedObject, isDynamicObject } from '../../component/interop';
 
 export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IPropRefDecoratedVariable<T> {
     sourceValue: T;
@@ -34,7 +35,12 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     constructor(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType) {
         super('@PropRef', owningView, varName, watchFunc);
         this.sourceValue = initValue;
-        this.localValue = FactoryInternal.mkDecoratorValue<T>(varName, initValue);
+        if (isDynamicObject(initValue)) {
+            initValue = getObservedObject(initValue);
+            this.localValue = FactoryInternal.mkInteropDecoratorValue(varName, initValue);
+        } else {
+            this.localValue = FactoryInternal.mkDecoratorValue(varName, initValue);
+        }
         this.registerWatchForObservedObjectChanges(initValue);
         this.needForceUpdateFunc = new WatchFunc(() => {
             this.isForceRender = true;
@@ -53,10 +59,16 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         if (oldValue === newValue) {
             return;
         }
-        const value = uiUtils.makeObserved(newValue);
+        if (isDynamicObject(newValue)) {
+            const value = getObservedObject(newValue);
+            this.localValue.setNoCheck(value);
+        } else {
+            const value = uiUtils.makeObserved(newValue);
+            this.localValue.setNoCheck(value);
+            
+        }
         this.unregisterWatchFromObservedObjectChanges(oldValue);
-        this.registerWatchForObservedObjectChanges(value);
-        this.localValue.setNoCheck(value);
+        this.registerWatchForObservedObjectChanges(this.localValue.get(false));
         this.execWatchFuncs();
     }
 

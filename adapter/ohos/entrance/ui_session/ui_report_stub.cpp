@@ -60,6 +60,16 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             ReportWebUnfocusEvent(accessibilityId, result);
             break;
         }
+        case REPORT_SCROLL_EVENT: {
+            std::string result = data.ReadString();
+            ReportScrollEvent(result);
+            break;
+        }
+        case REPORT_LIFE_CYCLE_EVENT: {
+            std::string result = data.ReadString();
+            ReportLifeCycleEvent(result);
+            break;
+        }
         case SEND_BASE_INFO: {
             std::string result = data.ReadString();
             SendBaseInfo(result);
@@ -149,6 +159,20 @@ void UiReportStub::ReportWebUnfocusEvent(int64_t accessibilityId, const std::str
     }
 }
 
+void UiReportStub::ReportScrollEvent(const std::string& data)
+{
+    if (scrollEventCallback_ != nullptr) {
+        scrollEventCallback_(data);
+    }
+}
+
+void UiReportStub::ReportLifeCycleEvent(const std::string& data)
+{
+    if (lifeCycleEventCallback_ != nullptr) {
+        lifeCycleEventCallback_(data);
+    }
+}
+
 void UiReportStub::SendBaseInfo(const std::string& data)
 {
     if (sendBaseInfoCallback_ != nullptr) {
@@ -193,6 +217,16 @@ void UiReportStub::RegisterWebUnfocusEventCallback(
     unfocusEvent_ = std::move(eventCallback);
 }
 
+void UiReportStub::RegisterScrollEventCallback(const EventCallback& eventCallback)
+{
+    scrollEventCallback_ = std::move(eventCallback);
+}
+
+void UiReportStub::RegisterLifeCycleEventCallback(const EventCallback& eventCallback)
+{
+    lifeCycleEventCallback_ = std::move(eventCallback);
+}
+
 void UiReportStub::RegisterGetWebViewCurrentLanguage(const EventCallback& eventCallback)
 {
     getWebViewCurrentLanguageCallback_ = std::move(eventCallback);
@@ -231,6 +265,16 @@ void UiReportStub::UnregisterComponentChangeEventCallback()
 void UiReportStub::UnregisterWebUnfocusEventCallback()
 {
     unfocusEvent_ = nullptr;
+}
+
+void UiReportStub::UnregisterScrollEventCallback()
+{
+    scrollEventCallback_ = nullptr;
+}
+
+void UiReportStub::UnregisterLifeCycleEventCallback()
+{
+    lifeCycleEventCallback_ = nullptr;
 }
 
 void UiReportStub::SendCurrentLanguage(const std::string& data)

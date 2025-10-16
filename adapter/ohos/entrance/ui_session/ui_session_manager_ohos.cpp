@@ -115,6 +115,32 @@ void UiSessionManagerOhos::ReportWebInputEvent(
     }
 }
 
+void UiSessionManagerOhos::ReportScrollEvent(const std::string& data)
+{
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr && GetScrollEventRegistered()) {
+            reportService->ReportScrollEvent(data);
+        } else {
+            LOGW("report scroll event failed,process id:%{public}d", pair.first);
+        }
+    }
+}
+
+void UiSessionManagerOhos::ReportLifeCycleEvent(const std::string& data)
+{
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr && GetLifeCycleEventRegistered()) {
+            reportService->ReportLifeCycleEvent(data);
+        } else {
+            LOGW("report life cycle event failed,process id:%{public}d", pair.first);
+        }
+    }
+}
+
 void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId)
 {
     // add death callback
@@ -165,6 +191,24 @@ void UiSessionManagerOhos::SetComponentChangeEventRegistered(bool status)
     }
 }
 
+void UiSessionManagerOhos::SetScrollEventRegistered(bool status)
+{
+    if (status) {
+        scrollEventRegisterProcesses_.fetch_add(1);
+    } else {
+        scrollEventRegisterProcesses_.fetch_sub(1);
+    }
+}
+
+void UiSessionManagerOhos::SetLifeCycleEventRegistered(bool status)
+{
+    if (status) {
+        lifeCycleEventRegisterProcesses_.fetch_add(1);
+    } else {
+        lifeCycleEventRegisterProcesses_.fetch_sub(1);
+    }
+}
+
 bool UiSessionManagerOhos::GetClickEventRegistered()
 {
     return clickEventRegisterProcesses_.load() > 0 ? true : false;
@@ -183,6 +227,16 @@ bool UiSessionManagerOhos::GetRouterChangeEventRegistered()
 bool UiSessionManagerOhos::GetComponentChangeEventRegistered()
 {
     return componentChangeEventRegisterProcesses_.load() > 0 ? true : false;
+}
+
+bool UiSessionManagerOhos::GetScrollEventRegistered()
+{
+    return scrollEventRegisterProcesses_.load() > 0 ? true : false;
+}
+
+bool UiSessionManagerOhos::GetLifeCycleEventRegistered()
+{
+    return lifeCycleEventRegisterProcesses_.load() > 0 ? true : false;
 }
 
 void UiSessionManagerOhos::GetInspectorTree(ParamConfig config)

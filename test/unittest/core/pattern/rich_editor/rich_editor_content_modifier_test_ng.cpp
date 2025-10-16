@@ -474,6 +474,39 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintLeadingMarginSpan001, TestSize.Le
 }
 
 /**
+ * @tc.name: PaintLeadingMarginSpan002
+ * @tc.desc: Test PaintLeadingMarginSpan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorContentModifierTestNg, PaintLeadingMarginSpan002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
+    auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
+    ASSERT_NE(testContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step1. set paragraphInfo
+     */
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    ParagraphStyle paragraphStyle;
+    DrawableLeadingMargin leadingMargin;
+    leadingMargin.onDraw_ = [](NG::DrawingContext& context, NG::LeadingMarginSpanOptions options) {};
+    paragraphStyle.drawableLeadingMargin = std::make_optional<NG::DrawableLeadingMargin>(leadingMargin);
+    paragraphInfo.paragraphStyle = paragraphStyle;
+
+    /**
+     * @tc.steps: step2. test PaintLeadingMarginSpan
+     */
+    auto offset = richEditorPattern->GetTextRect().GetOffset();
+    DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    testContentModifier->pManager_->PaintLeadingMarginSpan(paragraphInfo, offset, context);
+}
+
+/**
  * @tc.name: AdjustParagraphX001
  * @tc.desc: Test AdjustParagraphX.
  * @tc.type: FUNC

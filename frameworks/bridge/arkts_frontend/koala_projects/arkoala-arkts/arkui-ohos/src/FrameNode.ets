@@ -662,6 +662,36 @@ export class FrameNode implements MaterializedBase {
         }
         return ArkUIAniModule._Common_getCustomProperty(this!.peer!.ptr, name_casted);
     }
+    public convertPoint(position: NodePosition, targetNode: FrameNode): NodePosition {
+        if (targetNode === null) {
+            const error = Error("The parameter 'targetNode' is invalid: it cannot be null. Please pass a non-null FrameNode object.");
+            throw new BusinessError(100025, error);
+        }
+        if (targetNode === undefined) {
+            const error = Error("The parameter 'targetNode' is invalid: it cannot be undefined.");
+            throw new BusinessError(100025, error);
+        }
+        if (position === undefined) {
+            const error = Error("The parameter 'position' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.");
+            throw new BusinessError(100025, error);
+        }
+        if (position === null) {
+            const error = Error("The parameter 'position' is invalid: it cannot be null. Provide a non-null position object.");
+            throw new BusinessError(100025, error);
+        }
+        const instanceId = this.instanceId_!.toInt();
+        let chanels: Array<number> = [];
+        ArkUIAniModule._Common_Sync_InstanceId(instanceId);
+        chanels = FrameNodeExtender.convertPoint(this, targetNode, position);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        if (chanels.length < 3) {
+            const error = new Error("The current FrameNode and the target FrameNode do not have a common ancestor node.");
+            throw new BusinessError(100024, error);
+        }
+        const x = chanels[1];
+        const y = chanels[2];
+        return { x: x, y: y } as NodePosition;
+    }
 }
 class ImmutableFrameNode extends FrameNode {
     constructor(uiContext: UIContext, type: string, ptr?: KPointer) {
@@ -1552,7 +1582,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createXComponentNodeDefault(context: UIContext, type: string): XComponentFrameNode {
+    function createXComponentNodeDefault(context: UIContext): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1565,7 +1595,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createXComponentNodeWithOptions(context: UIContext, type: string, options: XComponentOptions): XComponentFrameNode {
+    function createXComponentNodeWithOptions(context: UIContext, options: XComponentOptions): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1578,7 +1608,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createXComponentNodeWithNativeParameters(context: UIContext, type: string, parameters: NativeXComponentParameters): XComponentFrameNode {
+    function createXComponentNodeWithNativeParameters(context: UIContext, parameters: NativeXComponentParameters): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);

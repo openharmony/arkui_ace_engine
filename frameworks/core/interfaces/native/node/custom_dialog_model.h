@@ -72,10 +72,10 @@ struct _ArkUIDialog {
     ArkUI_Int32 focusable;
     ArkUI_Int32* dialogState;
     std::vector<void*> historyDialogHandle;
-    bool hasCustomMaskColor;
-    bool hasCustomBackgroundColor;
-    bool hasCustomShadowColor;
-    bool hasCustomBorderColor;
+    bool hasCustomMaskColor = false;
+    bool hasCustomBackgroundColor = false;
+    bool hasCustomShadowColor = false;
+    bool hasCustomBorderColor = false;
     bool hasCustomBlurStyleOptionInactiveColor = false;
     bool hasCustomEffectOptionColor = false;
     bool hasCustomEffectOptionInactiveColor = false;

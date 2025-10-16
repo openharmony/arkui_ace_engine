@@ -41,10 +41,10 @@ import { SliderConfiguration } from "./slider"
 import { TextClockConfiguration } from "./textClock"
 import { TextTimerConfiguration } from "./textTimer"
 import { ToggleConfiguration } from "./toggle"
-import { Size_serializer, Frame_serializer, LengthMetrics_serializer } from "./../Graphics"
+import { Size_serializer, Frame_serializer, LengthMetrics_serializer, Vector2_serializer } from "./../Graphics"
 import { LayoutConstraint_serializer } from "./../FrameNode"
 import { FrameNode, LayoutConstraint } from "arkui.FrameNode"
-import { Size, Frame, LengthMetrics } from "arkui.Graphics"
+import { Size, Frame, LengthMetrics, Vector2 } from "arkui.Graphics"
 import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask } from "./gesture"
 import { default as image } from "@ohos.multimedia.image"
 import { font_FontOptions_serializer, font_FontInfo_serializer } from "./../framework/ohos.font"
@@ -1051,6 +1051,20 @@ export class FrameNodeExtender {
         const obj : UICommonEvent = UICommonEventInternal.fromPtr(retval)
         return obj
     }
+    static convertPoint_serialize(peer: FrameNode, node: FrameNode, vector2: Vector2): Array<double> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector2_serializer.write(thisSerializer, vector2)
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_convertPoint(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(node), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<double> = new Array<double>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = retvalDeserializer.readFloat64()
+        }
+        const returnResult : Array<double> = buffer
+        return returnResult
+    }
     public static constructorFrameNode(): KPointer {
         return FrameNodeExtender.constructorFrameNode_serialize()
     }
@@ -1300,6 +1314,12 @@ export class FrameNodeExtender {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getCommonEvent_serialize(peer_casted)
     }
+    public static convertPoint(peer: FrameNode, node: FrameNode, vector2: Vector2): Array<double> {
+        const peer_casted = peer as (FrameNode)
+        const node_casted = node as (FrameNode)
+        const vector2_casted = vector2 as (Vector2)
+        return FrameNodeExtender.convertPoint_serialize(peer_casted, node_casted, vector2_casted)
+    }
 }
 export class GestureOps {
     static createTapGesture_serialize(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: boolean): KPointer {
@@ -1395,6 +1415,14 @@ export class GestureOps {
     }
     static clearGestures_serialize(node: KPointer): void {
         ArkUIGeneratedNativeModule._GestureOps_clearGestures(node)
+    }
+    static getGestureEventType_serialize(event: KPointer): number {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_getGestureEventType(event)
+        return retval
+    }
+    static isScrollableComponent_serialize(event: KPointer): boolean {
+        const retval  = ArkUIGeneratedNativeModule._GestureOps_isScrollableComponent(event)
+        return retval
     }
     public static createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: boolean): KPointer {
         const fingers_casted = fingers as (number)
@@ -1518,6 +1546,14 @@ export class GestureOps {
         const node_casted = node as (KPointer)
         GestureOps.clearGestures_serialize(node_casted)
         return
+    }
+    public static getGestureEventType(event: KPointer): number {
+        const event_casted = event as (KPointer)
+        return GestureOps.getGestureEventType_serialize(event_casted)
+    }
+    public static isScrollableComponent(event: KPointer): boolean {
+        const event_casted = event as (KPointer)
+        return GestureOps.isScrollableComponent_serialize(event_casted)
     }
 }
 export class GlobalScope_ohos_arkui_componentSnapshot {

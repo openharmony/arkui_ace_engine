@@ -319,7 +319,6 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest005, TestSize.Level1)
     clickEventActuator.OnCollectTouchTarget(
         COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_EQ(finalResult.size(), CLICK_TEST_RESULT_SIZE_1);
-
     /**
      * @tc.steps: step3. test clear callback again.
      * @tc.expected: Add clickRecognizer_ to finalResult, and it's size is equal 1.

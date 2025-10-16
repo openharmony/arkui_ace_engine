@@ -437,6 +437,30 @@ void SideBarContainerPattern::OnModifyDone()
     UpdateSideBarColorToToolbarManager();
 }
 
+void SideBarContainerPattern::OnHostChildUpdateDone()
+{
+    Pattern::OnHostChildUpdateDone();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    CreateAndMountNodes();
+
+    auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    OnUpdateShowSideBar(layoutProperty);
+    OnUpdateShowControlButton(layoutProperty, host);
+    OnUpdateShowDivider(layoutProperty, host);
+    UpdateControlButtonIcon();
+
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        OnUpdateSideBarAndContent(host);
+    }
+
+    UpdateSideBarColorToToolbarManager();
+}
+
 void SideBarContainerPattern::CreateAndMountNodes()
 {
     auto host = GetHost();

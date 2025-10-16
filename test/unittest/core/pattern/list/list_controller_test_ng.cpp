@@ -1318,4 +1318,29 @@ HWTEST_F(ListControllerTestNg, IfElseNodeHeaderFooterTest, TestSize.Level1)
     EXPECT_TRUE(IsEqual(pattern_->GetItemIndexInGroup(GROUP_HEADER_LEN / 2.0f, GROUP_HEADER_LEN / 2.0f),
         { 0, ListItemGroupArea::IN_HEADER_AREA, -1 }));
 }
+
+/**
+ * @tc.name: CheckIsAtEndWhenScrollToBottom
+ * @tc.desc: Test IsAtEnd when scroll to bottom.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListControllerTestNg, CheckIsAtEndWhenScrollToBottom, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create 10 listItems with normal height and 1 listItem with zero height.
+     */
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(0.f)));
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Scroll to bottom, check IsAtEnd.
+     * @tc.expected: IsAtEnd is true.
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(frameNode_);
+    EXPECT_TRUE(pattern_->positionController_->IsAtEnd());
+}
 } // namespace OHOS::Ace::NG

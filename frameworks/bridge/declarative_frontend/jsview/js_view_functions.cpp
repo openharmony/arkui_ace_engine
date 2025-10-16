@@ -33,6 +33,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_param.h"
 #include "core/pipeline/base/composed_element.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::Framework {
 const std::string EMPTY_STATUS_DATA = "empty_status_data";
@@ -521,11 +522,14 @@ void ViewFunctions::ExecuteRender()
 void ViewFunctions::ExecuteAppear()
 {
     ExecuteFunction(jsAppearFunc_, "aboutToAppear");
+    UiSessionManager::GetInstance()->ReportLifeCycleEvent("aboutToAppear");
 }
 
 void ViewFunctions::ExecuteDisappear()
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    UiSessionManager::GetInstance()->ReportLifeCycleEvent("aboutToDisappear");
+
     if (jsDisappearFunc_.IsEmpty()) {
         return;
     }
@@ -543,6 +547,7 @@ void ViewFunctions::ExecuteDisappear()
 void ViewFunctions::ExecuteDidBuild()
 {
     ExecuteFunction(jsDidBuildFunc_, "onDidBuild");
+    UiSessionManager::GetInstance()->ReportLifeCycleEvent("onDidBuild");
 }
 
 void ViewFunctions::ExecuteAboutToRecycle()
@@ -624,6 +629,7 @@ void ViewFunctions::ExecuteOnRenderDone()
     ExecuteFunction(jsRenderDoneFunc_, "onRenderDone");
     // for developer callback.
     ExecuteFunction(jsBuildDoneFunc_, "onBuildDone");
+    UiSessionManager::GetInstance()->ReportLifeCycleEvent("onBuildDone");
 }
 
 void ViewFunctions::ExecuteTransition()
@@ -639,11 +645,13 @@ bool ViewFunctions::HasPageTransition() const
 void ViewFunctions::ExecuteShow()
 {
     ExecuteFunction(jsOnShowFunc_, "onPageShow");
+    UiSessionManager::GetInstance()->ReportLifeCycleEvent("onPageShow");
 }
 
 void ViewFunctions::ExecuteHide()
 {
     ExecuteFunction(jsOnHideFunc_, "onPageHide");
+    UiSessionManager::GetInstance()->ReportLifeCycleEvent("onPageHide");
 }
 
 void ViewFunctions::ExecuteInitiallyProvidedValue(const std::string& jsonData)

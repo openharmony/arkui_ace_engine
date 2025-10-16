@@ -176,7 +176,7 @@ const Provider = (aliasName?: string) => {
   return (proto: Object, varName: string): void => {
     const providedUnderName: string = aliasName || varName;
     ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, providedUnderName, '@Provider');
-    if (!InteropConfigureStateMgmt.needsInterop) {
+    if (!InteropConfigureStateMgmt.needsInterop()) {
       trackInternal(proto, varName);
     } else {
       trackInternalInterop(proto, varName);
@@ -310,7 +310,17 @@ const Computed = (target: Object, propertyKey: string, descriptor: PropertyDescr
 
 };
 
+/**
+ * @Env Environment property decorator.
+ * Returns an `IEnvironmentValue<T>` instance corresponding to the specified `envKey`.
+ *
+ * Currently, only `envKey = 'system.arkui.breakpoint'` is supported.
+ *
+ * @partof SDK
+ * @since 22
+ */
 const Env = (envKey: string) => {
+  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@Env`, envKey);
   return (proto: object, varName: string): void => {
     Reflect.defineProperty(proto, varName, {
       get() {

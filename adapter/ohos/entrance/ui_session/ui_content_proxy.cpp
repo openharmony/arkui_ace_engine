@@ -212,6 +212,48 @@ int32_t UIContentServiceProxy::RegisterWebUnfocusEventCallback(
     return NO_ERROR;
 }
 
+int32_t UIContentServiceProxy::RegisterScrollEventCallback(const EventCallback& eventCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("RegisterScrollEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterScrollEventCallback(eventCallback);
+    if (Remote()->SendRequest(REGISTER_SCROLL_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("RegisterScrollEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::RegisterLifeCycleEventCallback(const EventCallback& eventCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("RegisterLifeCycleEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterLifeCycleEventCallback(eventCallback);
+    if (Remote()->SendRequest(REGISTER_LIFE_CYCLE_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("RegisterLifeCycleEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceProxy::SendCommand(int32_t id, const std::string& command)
 {
     MessageParcel data;
@@ -375,6 +417,48 @@ int32_t UIContentServiceProxy::UnregisterWebUnfocusEventCallback()
     report_->UnregisterWebUnfocusEventCallback();
     if (Remote()->SendRequest(UNREGISTER_WEB_UNFOCUS_EVENT, data, reply, option) != ERR_NONE) {
         LOGW("UnregisterWebUnfocusEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::UnregisterScrollEventCallback()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("UnRegisterScrollEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->UnregisterScrollEventCallback();
+    if (Remote()->SendRequest(UNREGISTER_SCROLL_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("UnRegisterScrollEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::UnregisterLifeCycleEventCallback()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("UnregisterLifeCycleEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->UnregisterLifeCycleEventCallback();
+    if (Remote()->SendRequest(UNREGISTER_LIFE_CYCLE_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("UnregisterLifeCycleEventCallback send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;

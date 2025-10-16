@@ -22,18 +22,18 @@ namespace OHOS::Ace::NG {
     
 void OnUpdateDone(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node)
 {
-    // auto* uiNode = reinterpret_cast<UINode*>(node);
-    // CHECK_NULL_VOID(uiNode);
-    // uiNode->OnChildUpdateDone();
-    // return;
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->OnChildUpdateDone();
+    return;
 }
 
 void SetUINodeIsStatic(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node)
 {
-    // auto* uiNode = reinterpret_cast<UINode*>(node);
-    // CHECK_NULL_VOID(uiNode);
-    // uiNode->SetIsStatic(true);
-    // return;
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetIsStatic(true);
+    return;
 }
     
 const ArkUIAniUINodeOnUpdateDoneAniModifier* GetUINodeOnUpdateDoneAniModifier()

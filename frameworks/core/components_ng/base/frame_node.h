@@ -226,6 +226,8 @@ public:
 
     [[deprecated]] void OnMountToParentDone();
 
+    void OnChildUpdateDone() override;
+
     void AfterMountToParent() override;
 
     bool GetIsLayoutNode();

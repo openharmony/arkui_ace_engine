@@ -131,6 +131,7 @@ public:
         IC_PERSON_FILL_SVG,
         IC_LINK_SVG,
         IC_LOACTION_SVG,
+        IC_DUE_CONTROL_SVG,
         SVG_END = 20000,
 
         // 20001 - 30000 is reserved for i18n resource.

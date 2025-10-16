@@ -55,6 +55,18 @@ int32_t UIContentServiceStubImpl::RegisterWebUnfocusEventCallback(
     return NO_ERROR;
 }
 
+int32_t UIContentServiceStubImpl::RegisterScrollEventCallback(const EventCallback& eventCallback)
+{
+    UiSessionManager::GetInstance()->SetScrollEventRegistered(true);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::RegisterLifeCycleEventCallback(const EventCallback& eventCallback)
+{
+    UiSessionManager::GetInstance()->SetLifeCycleEventRegistered(true);
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceStubImpl::SendCommand(int32_t id, const std::string& command)
 {
     UiSessionManager::GetInstance()->NotifySendCommandPattern(id, command);
@@ -96,6 +108,18 @@ int32_t UIContentServiceStubImpl::UnregisterComponentChangeEventCallback()
 int32_t UIContentServiceStubImpl::UnregisterWebUnfocusEventCallback()
 {
     UiSessionManager::GetInstance()->NotifyAllWebPattern(false);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::UnregisterScrollEventCallback()
+{
+    UiSessionManager::GetInstance()->SetScrollEventRegistered(false);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::UnregisterLifeCycleEventCallback()
+{
+    UiSessionManager::GetInstance()->SetLifeCycleEventRegistered(false);
     return NO_ERROR;
 }
 

@@ -603,7 +603,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAdjustGridOffset0011, TestSize.Level1)
 
     FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
     FRAME_NODE2->GetAncestorNodeOfFrame(false);
-
     FRAME_NODE2->SetActive(false);
 
     /**

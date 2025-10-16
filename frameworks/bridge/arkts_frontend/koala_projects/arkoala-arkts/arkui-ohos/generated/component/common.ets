@@ -7032,20 +7032,6 @@ export interface MenuOptions extends ContextMenuOptions {
     title?: ResourceStr;
     showInSubWindow?: boolean;
 }
-export interface TouchTestInfo {
-    windowX: number;
-    windowY: number;
-    parentX: number;
-    parentY: number;
-    x: number;
-    y: number;
-    rect: RectResult;
-    id: string;
-}
-export interface TouchResult {
-    strategy: TouchTestStrategy;
-    id?: string | undefined;
-}
 export interface PixelStretchEffectOptions {
     top?: Length;
     bottom?: Length;

@@ -278,13 +278,10 @@ export function getRawObject<T>(value: T): T {
     return getRawObjectForInterop.invoke(ESValue.wrap(value)).unwrap()! as Object as T;
 }
 
-export function getObservedObject<T>(value: T, staticState: StateUnion<T>): T {
-    const callback = (): void => {
-        staticState.fireChange();
-    };
+export function getObservedObject<T>(value: T): T {
     const global = ESValue.getGlobal();
-    const staticStateBindObservedObject = global.getProperty('staticStateBindObservedObject');
-    return staticStateBindObservedObject.invoke(ESValue.wrap(value), ESValue.wrap(callback)).unwrap()! as Object as T;
+    const createObservedObject = global.getProperty('createObservedObject');
+    return createObservedObject.invoke(ESValue.wrap(value)).unwrap()! as Object as T;
 }
 
 export function registerCreateWatchFuncCallback(): void {
@@ -673,4 +670,19 @@ function addCompatibleWatchFuncForDynamic(value: IObservedObject): void {
             addCompatibleWatchFuncForDynamic(attr as IObservedObject);
         }
     }
+}
+
+export function staticStateBindObservedObject<T>(
+    value: T,
+    onPropertyChange?: () => void,
+    onTrackPropertyRead?: (readPropName: string, isTracked: boolean) => void,
+    onTrackPropertyChange?: (readPropName: string) => void
+): T {
+    let global = ESValue.getGlobal();
+    let staticStateBindObservedObject = global.getProperty('staticStateBindObservedObject');
+    return staticStateBindObservedObject.invoke(
+        ESValue.wrap(value),
+        ESValue.wrap(onPropertyChange),
+        ESValue.wrap(onTrackPropertyRead),
+        ESValue.wrap(onTrackPropertyChange)) as Object as T;
 }

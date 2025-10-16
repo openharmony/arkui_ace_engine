@@ -24,6 +24,8 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/interfaces/native/implementation/text_modifier_peer.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -506,24 +508,45 @@ void SetTextModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (value->tag == INTEROP_TAG_UNDEFINED || !value->value) {
+        SelectModelStatic::SetTextModifierApply(frameNode, nullptr);
+        return;
+    }
+    SelectModelStatic::SetTextModifierApply(frameNode, value->value->textApply);
 }
 void SetArrowModifierImpl(Ark_NativePointer node,
                           const Opt_SymbolGlyphModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto symbolModifier = Converter::OptConvert<Ark_SymbolGlyphModifier>(*value);
+    if (symbolModifier && *symbolModifier) {
+        SelectModelStatic::SetArrowModifierApply(frameNode, (*symbolModifier)->symbolApply);
+        return;
+    }
+    SelectModelStatic::SetArrowModifierApply(frameNode, nullptr);
 }
 void SetOptionTextModifierImpl(Ark_NativePointer node,
                                const Opt_TextModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (value->tag == INTEROP_TAG_UNDEFINED || !value->value) {
+        SelectModelStatic::SetOptionTextModifier(frameNode, nullptr);
+        return;
+    }
+    SelectModelStatic::SetOptionTextModifier(frameNode, value->value->textApply);
 }
 void SetSelectedOptionTextModifierImpl(Ark_NativePointer node,
                                        const Opt_TextModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (value->tag == INTEROP_TAG_UNDEFINED || !value->value) {
+        SelectModelStatic::SetSelectedOptionTextModifier(frameNode, nullptr);
+        return;
+    }
+    SelectModelStatic::SetSelectedOptionTextModifier(frameNode, value->value->textApply);
 }
 void SetDividerStyleImpl(Ark_NativePointer node,
                          const Opt_DividerStyleOptions* value)

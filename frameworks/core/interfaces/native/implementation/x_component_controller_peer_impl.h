@@ -17,7 +17,7 @@
 
 #include "base/memory/referenced.h"
 #ifdef XCOMPONENT_SUPPORTED
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
@@ -32,19 +32,15 @@ struct XComponentControllerPeerImpl : public Referenced {
     void SetOnSurfaceCreatedEvent(const Callback_String_Void& callback);
     void SetOnSurfaceChangedEvent(const Callback_String_SurfaceRect_Void& callback);
     void SetOnSurfaceDestroyedEvent(const Callback_String_Void& callback);
-    SurfaceCreatedEvent GetOnSurfaceCreatedEvent();
-    SurfaceChangedEvent GetOnSurfaceChangedEvent();
-    SurfaceDestroyedEvent GetOnSurfaceDestroyedEvent();
     Callback_String_Void arkOnSurfaceCreated = {};
     Callback_String_SurfaceRect_Void arkOnSurfaceChanged = {};
     Callback_String_Void arkOnSurfaceDestroyed = {};
-
-private:
-    SurfaceCreatedEvent onSurfaceCreatedEvent_ = nullptr;
-    SurfaceChangedEvent onSurfaceChangedEvent_ = nullptr;
-    SurfaceDestroyedEvent onSurfaceDestroyedEvent_ = nullptr;
-    bool isImageAnalyzing_ = false;
-    ImageAnalyzerConfig config_;
+    SurfaceCreatedEvent onSurfaceCreatedEvent = nullptr;
+    SurfaceChangedEvent onSurfaceChangedEvent = nullptr;
+    SurfaceDestroyedEvent onSurfaceDestroyedEvent = nullptr;
+    bool isImageAnalyzing = false;
+    ImageAnalyzerConfig analyzerConfig;
+    std::function<void*()> wrapAnalyzerConfigImpl = nullptr;
 #endif // XCOMPONENT_SUPPORTED
 };
 

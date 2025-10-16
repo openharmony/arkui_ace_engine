@@ -15,6 +15,7 @@ struct bindMenuTest {
     {title:'secondInterface',utl:'pages/BindContextMenu/bindContextMenus/bindMenu/secondInterface'},
     {title:'menu',utl:'pages/BindContextMenu/bindContextMenus/bindMenu/menu'},
     {title:'menuBuilder',utl:'pages/BindContextMenu/bindContextMenus/bindMenu/menuBuilder'},
+    {title:'outline',utl:'pages/BindContextMenu/bindContextMenus/bindMenu/outline'},
   ]
 
   build() {

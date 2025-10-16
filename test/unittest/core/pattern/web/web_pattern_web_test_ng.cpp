@@ -1360,6 +1360,7 @@ HWTEST_F(WebPatternWebTest, OnStatusBarClick, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
+
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
