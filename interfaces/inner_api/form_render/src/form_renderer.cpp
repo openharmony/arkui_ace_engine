@@ -52,7 +52,7 @@ FormRenderer::~FormRenderer()
 
 void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
-    HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f, borderWidth = %{public}f,"
+    HILOG_WARN("InitUIContent width = %{public}f , height = %{public}f, borderWidth = %{public}f,"
         " formViewScale = %{public}f. formJsInfo.formData.size = %{public}zu."
         " formJsInfo.imageDataMap.size = %{public}zu.", width_, height_, borderWidth_, formViewScale_,
         formJsInfo.formData.size(), formJsInfo.imageDataMap.size());
@@ -308,7 +308,7 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
         uiContent_->SetFormViewScale(resizedWidth, resizedHeight, formViewScale_);
         lastBorderWidth_ = borderWidth_;
         std::shared_ptr<EventHandler> eventHandler = eventHandler_.lock();
-        HILOG_INFO("UpdateFormSize after set uiContent, width: %{public}f, height: %{public}f", width, height);
+        HILOG_WARN("UpdateFormSize after set uiContent, width: %{public}f, height: %{public}f", width, height);
         if (!eventHandler) {
             HILOG_ERROR("eventHandler is null");
             return;
@@ -566,7 +566,7 @@ int32_t FormRenderer::AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppE
 
 void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
-    HILOG_INFO("AttachUIContent width = %{public}f , height = %{public}f, borderWidth_ = %{public}f,"
+    HILOG_WARN("AttachUIContent width = %{public}f , height = %{public}f, borderWidth_ = %{public}f,"
         " formViewScale_ = %{public}f.", width_, height_, borderWidth_, formViewScale_);
     SetAllowUpdate(allowUpdate_);
     float width = width_ - borderWidth_ * DOUBLE;
@@ -578,7 +578,7 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
         uiContent_->SetFormViewScale(width, height, formViewScale_);
         lastBorderWidth_ = borderWidth_;
         uiContent_->OnFormSurfaceChange(width, height);
-        HILOG_INFO("AttachUIContent after set uiContent, width: %{public}f, height: %{public}f", width, height);
+        HILOG_WARN("AttachUIContent after set uiContent, width: %{public}f, height: %{public}f", width, height);
     }
     auto backgroundColor = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
     if (backgroundColor_ != backgroundColor) {
