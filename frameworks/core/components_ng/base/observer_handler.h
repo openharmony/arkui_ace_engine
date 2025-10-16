@@ -223,8 +223,8 @@ public:
     using ScrollEventHandleFunc = void (*)(const std::string&, int32_t, ScrollEventType, float, Ace::Axis);
     using RouterPageHandleFunc = void (*)(AbilityContextInfo&, const RouterPageInfoNG&);
     using RouterPageHandleFuncForAni = std::function<void(AbilityContextInfo&, const RouterPageInfoNG&)>;
-    using DrawCommandSendHandleFunc = void (*)();
-    using LayoutDoneHandleFunc = void (*)();
+    using DrawCommandSendHandleFunc = std::function<void()>;
+    using LayoutDoneHandleFunc = std::function<void()>;
     using NavDestinationSwitchHandleFunc = void (*)(const AbilityContextInfo&, NavDestinationSwitchInfo&);
     using WillClickHandleFunc = void (*)(
         AbilityContextInfo&, const GestureEvent&, const ClickInfo&, const RefPtr<FrameNode>&);
