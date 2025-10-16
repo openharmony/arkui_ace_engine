@@ -3168,7 +3168,7 @@ void SetUseShadowBatchingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        ViewAbstractModelNG::SetUseShadowBatching(frameNode, false);
+        ViewAbstractModelStatic::SetUseShadowBatching(frameNode, false);
         return;
     }
     ViewAbstractModelStatic::SetUseShadowBatching(frameNode, convValue);
