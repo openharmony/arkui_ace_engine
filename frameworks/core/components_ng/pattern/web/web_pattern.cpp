@@ -5061,16 +5061,12 @@ void WebPattern::UpdateDataDetectorConfig(const TextDetectConfig& config)
     adapter->SetDataDetectorConfig(config);
 }
 
-void WebPattern::UpdateEnableSelectDataDetector(bool isEnabled)
-{
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::UpdateEnableSelectDataDetector");
-    auto adapter = GetDataDetectorAdapter();
-    CHECK_NULL_VOID(adapter);
-    adapter->SetSelectDataDetectorEnable(isEnabled);
-}
-
 void WebPattern::UpdateSelectedDataDetectorConfig(const TextDetectConfig& config)
 {
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "Using API Version less than 22");
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::UpdateSelectDataDetectorConfig");
     auto adapter = GetDataDetectorAdapter();
     CHECK_NULL_VOID(adapter);
@@ -8651,6 +8647,19 @@ void WebPattern::OnEnableDataDetectorUpdate(bool enable)
     auto adapter = GetDataDetectorAdapter();
     CHECK_NULL_VOID(adapter);
     adapter->SetDataDetectorEnable(enable);
+}
+
+void WebPattern::OnEnableSelectedDataDetectorUpdate(bool enable)
+{
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "Using API Version less than 22");
+        return;
+    }
+    RETURN_IF_CALLING_FROM_M114();
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnEnableSelectedDataDetectorUpdate enable:%{public}d", enable);
+    auto adapter = GetDataDetectorAdapter();
+    CHECK_NULL_VOID(adapter);
+    adapter->SetSelectDataDetectorEnable(enable);
 }
 
 void WebPattern::PushOverlayInfo(float x, float y, int32_t id)

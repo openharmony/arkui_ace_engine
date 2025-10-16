@@ -2086,7 +2086,7 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebEnableSelectedDataDetectorModifier.identity, WebEnableSelectedDataDetectorModifier, enabled);
     return this;
   }
-  SelecteddataDetectorConfig(config: TextDataDetectorConfig): this {
+  SelectedDataDetectorConfig(config: TextDataDetectorConfig): this {
     modifierWithKey(this._modifiersWithKeys, WebSelectedDataDetectorConfigModifier.identity, WebSelectedDataDetectorConfigModifier, config);
     return this;
   }
