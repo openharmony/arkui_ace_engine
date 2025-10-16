@@ -2742,7 +2742,7 @@ HWTEST_F(WebModelStaticTest, SetNativeEmbedObjectParamChangeId001, TestSize.Leve
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     ASSERT_NE(webEventHub, nullptr);
     auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
-    webEventHub->FireNativeEmbedObjectParamChangeEvent(mockEventInfo);
+    webEventHub->FireOnNativeEmbedObjectParamChangeEvent(mockEventInfo);
     EXPECT_NE(callCount, 0);
 #endif
 }
