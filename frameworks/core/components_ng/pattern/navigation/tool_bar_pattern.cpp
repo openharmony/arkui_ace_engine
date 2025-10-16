@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 
 #include "base/utils/utf_helper.h"
+#include "base/utils/multi_thread.h"
 #include "base/i18n/localization.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/button/button_theme.h"
@@ -91,6 +92,7 @@ void NavToolbarPattern::UpdateBackgroundStyle()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, UpdateBackgroundStyle);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (options_.bgOptions.color.has_value()) {

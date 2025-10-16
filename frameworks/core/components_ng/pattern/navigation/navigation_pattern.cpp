@@ -24,6 +24,7 @@
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/ressched/ressched_report.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/force_split/force_split_utils.h"
@@ -300,6 +301,7 @@ void NavigationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode); // call OnAttachToFrameNodeMultiThread
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto id = host->GetId();
@@ -324,6 +326,7 @@ void NavigationPattern::OnAttachToFrameNode()
 void NavigationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto id = frameNode->GetId();
@@ -558,6 +561,7 @@ void NavigationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetSystemBarStyle, style);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
@@ -603,6 +607,7 @@ void NavigationPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
     InitPageNode(host);
     InitFoldState();
     RegisterAvoidInfoChangeListener(host);
@@ -620,9 +625,10 @@ void NavigationPattern::InitFoldState()
 
 void NavigationPattern::OnDetachFromMainTree()
 {
-    isFullPageNavigation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    isFullPageNavigation_ = false;
     UnregisterAvoidInfoChangeListener(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
