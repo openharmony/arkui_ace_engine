@@ -35,6 +35,7 @@ namespace {
 constexpr int32_t MIN_THRESHOLD_PERCENTAGE = 1;
 constexpr int32_t MAX_THRESHOLD_PERCENTAGE = 100;
 constexpr float SCALE_LIMIT = 1.f;
+constexpr uint32_t ILLEGAL_VALUE = 0;
 
 struct InputCounterOptions {
     std::optional<int> thresholdPercentage;
@@ -1024,7 +1025,7 @@ void SetShowCounterImpl(Ark_NativePointer node,
     if (counterOptions && counterOptions->thresholdPercentage.has_value()) {
         int32_t thresholdValue = counterOptions->thresholdPercentage.value();
         if (thresholdValue < MIN_THRESHOLD_PERCENTAGE || thresholdValue > MAX_THRESHOLD_PERCENTAGE) {
-            counterOptions->thresholdPercentage = std::nullopt;
+            counterOptions->thresholdPercentage = ILLEGAL_VALUE;
             isShowCounter = false;
         }
     }

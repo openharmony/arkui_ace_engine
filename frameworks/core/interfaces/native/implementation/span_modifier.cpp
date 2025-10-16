@@ -58,7 +58,7 @@ void SetFontImpl(Ark_NativePointer node,
         SpanModelNG::ResetFont(frameNode);
         return;
     }
-    auto fontSizeValue = Converter::OptConvert<Dimension>(optValue->size);
+    auto fontSizeValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->size);
     Validator::ValidateNonNegative(fontSizeValue);
     Validator::ValidateNonPercent(fontSizeValue);
     SpanModelStatic::SetFontSize(frameNode, fontSizeValue);
