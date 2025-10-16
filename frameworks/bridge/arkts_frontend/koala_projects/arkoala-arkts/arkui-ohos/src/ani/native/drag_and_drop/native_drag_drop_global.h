@@ -38,7 +38,7 @@ void DragEventSetCustomNode([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_
 void DragSetAllowDropNull([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer);
 void DragSetAllowDrop([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_array array, [[maybe_unused]] ani_int length);
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_array array);
 void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object dragInfo);
 void DragSetDragPreviewOptions([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -57,5 +57,9 @@ bool ParseSizeChangeEffect(ani_env* env, ArkUIDragPreviewOption& previewOptions,
 void ParseDragPreviewOptions(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_object value);
 void ParseDragInteractionOptions(ani_env* env, ArkUIDragPreviewOption& previewOptions,
     ani_object options);
+
+// extractors
+ani_long ExtractorFromUnifiedDataToPtr(ani_env* env, [[maybe_unused]] ani_object object, ani_object data);
+ani_object ExtractorFromPtrToUnifiedData(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer);
 } // namespace OHOS::Ace::Ani
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_DRAG_AND_DROP_NATIVE_DRAG_DROP_GLOBAL

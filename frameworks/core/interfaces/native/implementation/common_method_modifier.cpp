@@ -3821,14 +3821,6 @@ void SetOnDragEndImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetOnDragEnd(frameNode, std::move(onDragEnd));
 }
-void SetAllowDropImpl(Ark_NativePointer node,
-                      const Opt_Array_uniformTypeDescriptor_UniformDataType* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto allowDrop = value ? Converter::OptConvert<std::set<std::string>>(*value) : std::nullopt;
-    ViewAbstractModelStatic::SetAllowDrop(frameNode, allowDrop);
-}
 void SetDraggableImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
 {
@@ -4832,6 +4824,28 @@ void SetOnDrop1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(eventCallback);
+    if (!optValue) {
+        ViewAbstract::SetOnDrop(frameNode, nullptr);
+        return;
+    }
+    auto onDrop = [callback = CallbackHelper(*optValue)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
+                                                      const std::string& extraParams) {
+        CHECK_NULL_VOID(dragEvent);
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
+        callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto optValueDropOption = Converter::GetOptPtr(dropOptions);
+    if (!optValueDropOption) {
+        eventHub->SetDisableDataPrefetch(false);
+        return;
+    }
+    auto disableDataPrefetch = Converter::OptConvert<bool>(optValueDropOption->disableDataPrefetch).value_or(false);
+    eventHub->SetDisableDataPrefetch(disableDataPrefetch);
 }
 void SetDragPreview1Impl(Ark_NativePointer node,
                          const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
@@ -4858,6 +4872,7 @@ void SetDragPreview1Impl(Ark_NativePointer node,
         [node, frameNode, onlyForLifting, delayCreating](const Ark_DragItemInfo& value) {
             auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
             DragDropInfo dragDropInfo {
+                .pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr),
                 .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string()),
                 .onlyForLifting = onlyForLifting, .delayCreating = delayCreating };
             if (builder) {
@@ -4867,6 +4882,7 @@ void SetDragPreview1Impl(Ark_NativePointer node,
                     info.customNode = uiNode;
                     info.onlyForLifting = dragDropInfo.onlyForLifting;
                     info.delayCreating = dragDropInfo.delayCreating;
+                    info.pixelMap = dragDropInfo.pixelMap;
                     ViewAbstract::SetDragPreview(frameNode, info);
                     }, node);
             } else {
@@ -4877,49 +4893,6 @@ void SetDragPreview1Impl(Ark_NativePointer node,
         [frameNode]() {
             ViewAbstract::SetDragPreview(frameNode, DragDropInfo {});
         });
-}
-void SetDragPreviewOptionsImpl(Ark_NativePointer node,
-                               const Opt_DragPreviewOptions* value,
-                               const Opt_DragInteractionOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto previewOption = Converter::OptConvertPtr<DragPreviewOption>(value);
-    if (!previewOption) {
-        DragPreviewOption defaultOption;
-        ViewAbstract::SetDragPreviewOptions(frameNode, defaultOption);
-        return;
-    }
-    auto optionsOpt = Converter::OptConvertPtr<Ark_DragInteractionOptions>(options);
-    if (optionsOpt) {
-        auto defaultAnimationBeforeLifting = Converter::OptConvert<Ark_Boolean>(
-            optionsOpt.value().defaultAnimationBeforeLifting);
-        if (defaultAnimationBeforeLifting) {
-            previewOption->defaultAnimationBeforeLifting = defaultAnimationBeforeLifting.value();
-        }
-        auto isMultiSelectionEnabled = Converter::OptConvert<Ark_Boolean>(
-            optionsOpt.value().isMultiSelectionEnabled);
-        if (isMultiSelectionEnabled) {
-            previewOption->isMultiSelectionEnabled = isMultiSelectionEnabled.value();
-        }
-        auto enableEdgeAutoScroll = Converter::OptConvert<Ark_Boolean>(
-            optionsOpt.value().enableEdgeAutoScroll);
-        if (enableEdgeAutoScroll) {
-            previewOption->enableEdgeAutoScroll = enableEdgeAutoScroll.value();
-        }
-        auto enableHapticFeedback = Converter::OptConvert<Ark_Boolean>(
-            optionsOpt.value().enableHapticFeedback);
-        if (enableHapticFeedback) {
-            previewOption->enableHapticFeedback = enableHapticFeedback.value();
-        }
-        auto isLiftingDisabled = Converter::OptConvert<Ark_Boolean>(
-            optionsOpt.value().isLiftingDisabled);
-        if (isLiftingDisabled) {
-            previewOption->isLiftingDisabled = isLiftingDisabled.value();
-        }
-    }
-    LOGE("CommonMethodModifier::DragPreviewOptionsImpl Ark_ImageModifier is not supported yet.");
-    ViewAbstract::SetDragPreviewOptions(frameNode, *previewOption);
 }
 void SetOverlayImpl(Ark_NativePointer node,
                     const Opt_Union_String_CustomBuilder_ComponentContent* value,
@@ -5672,7 +5645,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnDragLeaveImpl,
         CommonMethodModifier::SetOnDrop0Impl,
         CommonMethodModifier::SetOnDragEndImpl,
-        CommonMethodModifier::SetAllowDropImpl,
         CommonMethodModifier::SetDraggableImpl,
         CommonMethodModifier::SetDragPreview0Impl,
         CommonMethodModifier::SetOnPreDragImpl,
@@ -5741,7 +5713,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetChainModeImpl,
         CommonMethodModifier::SetOnDrop1Impl,
         CommonMethodModifier::SetDragPreview1Impl,
-        CommonMethodModifier::SetDragPreviewOptionsImpl,
         CommonMethodModifier::SetOverlayImpl,
         CommonMethodModifier::SetBlendModeImpl,
         CommonMethodModifier::SetAdvancedBlendModeImpl,

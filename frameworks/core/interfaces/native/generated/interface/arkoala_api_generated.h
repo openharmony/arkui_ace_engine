@@ -4230,6 +4230,7 @@ typedef struct Opt_DragPreviewMode {
     Ark_DragPreviewMode value;
 } Opt_DragPreviewMode;
 typedef enum Ark_DragResult {
+    ARK_DRAG_RESULT_UNKNOWN = -1,
     ARK_DRAG_RESULT_DRAG_SUCCESSFUL = 0,
     ARK_DRAG_RESULT_DRAG_FAILED = 1,
     ARK_DRAG_RESULT_DRAG_CANCELED = 2,
@@ -21025,8 +21026,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                        const Opt_Callback_DragEvent_Opt_String_Void* value);
     void (*setOnDragEnd)(Ark_NativePointer node,
                          const Opt_Callback_DragEvent_Opt_String_Void* value);
-    void (*setAllowDrop)(Ark_NativePointer node,
-                         const Opt_Array_uniformTypeDescriptor_UniformDataType* value);
     void (*setDraggable)(Ark_NativePointer node,
                          const Opt_Boolean* value);
     void (*setDragPreview0)(Ark_NativePointer node,
@@ -21186,9 +21185,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setDragPreview1)(Ark_NativePointer node,
                             const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
                             const Opt_PreviewConfiguration* config);
-    void (*setDragPreviewOptions)(Ark_NativePointer node,
-                                  const Opt_DragPreviewOptions* value,
-                                  const Opt_DragInteractionOptions* options);
     void (*setOverlay)(Ark_NativePointer node,
                        const Opt_Union_String_CustomBuilder_ComponentContent* value,
                        const Opt_OverlayOptions* options);

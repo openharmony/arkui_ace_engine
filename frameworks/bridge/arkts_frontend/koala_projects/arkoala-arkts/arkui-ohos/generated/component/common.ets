@@ -20,7 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, DrawModifier, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from "#handwritten"
+import { extractors, DrawModifier, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDropAttribute, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary } from "#handwritten"
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisModel, MouseButton, MouseAction } from "./enums"
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
@@ -672,6 +672,7 @@ export interface DragEvent {
     getVelocityY(): double
     getVelocity(): double
     executeDropAnimation(customDropAnimation: (() => void)): void
+    startDataLoading(options: unifiedDataChannel.GetDataParams): string
     enableInternalDropAnimation(configuration: string): void
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
@@ -735,7 +736,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         return this.getData_serialize()
     }
     public getSummary(): unifiedDataChannel.Summary {
-        return this.getSummary_serialize()
+        return hookDragEventGetSummary(this)
     }
     public setResult(dragResult: DragResult): void {
         const dragResult_casted = dragResult as (DragResult)
@@ -761,6 +762,9 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         const customDropAnimation_casted = customDropAnimation as ((() => void))
         this.executeDropAnimation_serialize(customDropAnimation_casted)
         return
+    }
+    public startDataLoading(options: unifiedDataChannel.GetDataParams): string {
+        return hookDragEventStartDataLoading(this, options)
     }
     public enableInternalDropAnimation(configuration: string): void {
         const configuration_casted = configuration as (string)
@@ -3983,22 +3987,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnDragEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAllowDropAttribute(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined && value !== null) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.writeInt32((valueTmpValue.length).toInt())
-            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
-                const valueTmpValueTmpElement : uniformTypeDescriptor.UniformDataType = valueTmpValue[valueTmpValueCounterI]
-                thisSerializer.writeInt32(valueTmpValueTmpElement.getOrdinal())
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setAllowDrop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setDraggableAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -5080,25 +5068,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setDragPreview1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setDragPreviewOptionsAttribute(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            DragPreviewOptions_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (options !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue  = options!
-            DragInteractionOptions_serializer.write(thisSerializer, optionsTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setDragPreviewOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOverlayAttribute(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): void {
@@ -6639,7 +6608,9 @@ export enum DragBehavior {
 export type UnifiedData = unifiedDataChannel.UnifiedData;
 export type Summary = unifiedDataChannel.Summary;
 export type UniformDataType = uniformTypeDescriptor.UniformDataType;
+export type DataSyncOptions = unifiedDataChannel.GetDataParams;
 export enum DragResult {
+    UNKNOWN = -1,
     DRAG_SUCCESSFUL = 0,
     DRAG_FAILED = 1,
     DRAG_CANCELED = 2,
@@ -9675,8 +9646,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
         if (this.checkPriority("allowDrop")) {
-            const value_casted = value as (Array<uniformTypeDescriptor.UniformDataType> | null | undefined)
-            this.getPeer()?.setAllowDropAttribute(value_casted)
+            hookAllowDropAttribute(this, value)
             return this
         }
         return this
@@ -10315,9 +10285,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
         if (this.checkPriority("dragPreviewOptions")) {
-            const value_casted = value as (DragPreviewOptions | undefined)
-            const options_casted = options as (DragInteractionOptions | undefined)
-            this.getPeer()?.setDragPreviewOptionsAttribute(value_casted, options_casted)
+            hookDragPreviewOptions(this, value, options)
             return this
         }
         return this
