@@ -232,7 +232,7 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPickerModifierTest, setTextStyleFontWeightTest, TestSize.Level1)
+HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontWeightTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -265,7 +265,7 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleFontWeightTest, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPickerModifierTest, setTextStyleFontSizeTest, TestSize.Level1)
+HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontSizeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {

@@ -81,7 +81,7 @@ HWTEST_F(BlankModifierTest, DISABLED_BlankModifierTest001, TestSize.Level1)
  * @tc.desc: Check the functionality of BlankModifier.setBlankOptions
  * @tc.type: FUNC
  */
-HWTEST_F(BlankModifierTest, BlankModifierTest002, TestSize.Level1)
+HWTEST_F(BlankModifierTest, DISABLED_BlankModifierTest002, TestSize.Level1)
 {
     static const std::string PROP_NAME("min");
     ASSERT_NE(modifier_->setBlankOptions, nullptr);

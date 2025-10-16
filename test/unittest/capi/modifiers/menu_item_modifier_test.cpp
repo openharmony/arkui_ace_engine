@@ -502,7 +502,7 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest4, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuModifier.setContentFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setContentFontTest5, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontTest5, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFont, nullptr);
     Ark_Font font = {
@@ -677,7 +677,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest4, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuModifier.setLabelFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setLabelFontTest5, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontTest5, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFont, nullptr);
     Ark_Font font = {

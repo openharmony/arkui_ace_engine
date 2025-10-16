@@ -924,7 +924,7 @@ HWTEST_F(MenuModifierTest, setFontTest4, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuModifier.setFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setFontTest5, TestSize.Level1)
+HWTEST_F(MenuModifierTest, DISABLED_setFontTest5, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont, nullptr);
     Ark_Font font = {

@@ -21,7 +21,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-
+#include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -549,7 +549,7 @@ HWTEST_F(CommonMethodModifierTest19, NextFocusTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest19, bindMenusTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_bindMenusTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindMenu0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

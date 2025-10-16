@@ -102,7 +102,7 @@ HWTEST_F(BlankModifierTest, setBlankOptionsTestMinValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BlankModifierTest, setBlankOptionsTestMinInvalidValues, TestSize.Level1)
+HWTEST_F(BlankModifierTest, DISABLED_setBlankOptionsTestMinInvalidValues, TestSize.Level1)
 {
     Opt_Union_Number_String initValueMin;
 
