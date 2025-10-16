@@ -522,6 +522,12 @@ std::optional<Dimension> ResourceConverter::ToDimension()
         } else {
             LOGE("ResourceConverter::ToDimension Unknown resource value");
         }
+    } else if (type_ == ResourceType::STRING) {
+        if (auto str = GetStringResource(); str) {
+            return StringUtils::StringToDimension(*str, true);
+        } else {
+            LOGE("ResourceConverter::ToDimension Unknown string value");
+        }
     }
     return std::nullopt;
 }

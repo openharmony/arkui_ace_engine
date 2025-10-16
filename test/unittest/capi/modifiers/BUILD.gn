@@ -101,6 +101,7 @@ ace_unittest("capi_all_modifiers_test") {
     #"rect_modifier_test.cpp",
     "refresh_modifier_test.cpp",
     "relative_container_modifier_test.cpp",
+    "resource_converter_test.cpp",
     "richeditor_modifier_callbacks_test.cpp",
     "richeditor_modifier_test.cpp",
     "richtext_modifier_test.cpp",
