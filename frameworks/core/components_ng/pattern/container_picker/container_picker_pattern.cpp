@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 
 #include <sys/time.h>
@@ -21,7 +20,6 @@
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
 
 namespace OHOS::Ace::NG {
 namespace {

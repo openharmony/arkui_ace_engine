@@ -145,7 +145,7 @@ void ContainerPickerLayoutAlgorithmTest::AddChildNodes(RefPtr<FrameNode>& parent
 
 /**
  * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest001
- * @tc.desc: Test MeasureHeight method of ContainerPickerLayoutAlgorithm with defined height
+ * @tc.desc: Test MeasureHeight method with default height
  * @tc.type: FUNC
  */
 HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest001, TestSize.Level0)
@@ -164,24 +164,88 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set contentIdealSize with defined height and call MeasureHeight
-     * @tc.expected: step2. The height should be set correctly
+     * @tc.steps: step2. Set contentIdealSize and call MeasureHeight
+     * @tc.expected: step2. The height should be set to default value
      */
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Height().has_value());
-    EXPECT_FALSE(NearEqual(algorithm_->height_, -1.0f));
+    EXPECT_FALSE(Negative(algorithm_->GetHeight()));
+    EXPECT_FALSE(Negative(algorithm_->GetContentMainSize()));
 }
 
 /**
  * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest002
- * @tc.desc: Test MeasureHeight method of ContainerPickerLayoutAlgorithm with undefined height
+ * @tc.desc: Test MeasureHeight method with heightMatch policy
  * @tc.type: FUNC
  */
 HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest002, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker and modify layout constraint
+     * @tc.steps: step1. Create ContainerPicker and set heightMatch policy
+     */
+    CreateContainerPickerNode();
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+
+    /**
+     * @tc.steps: step2. Call MeasureHeight with heightMatch policy
+     * @tc.expected: step2. The height should be set to parent size
+     */
+    OptionalSizeF contentIdealSize;
+    algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
+    EXPECT_TRUE(contentIdealSize.Height().has_value());
+    EXPECT_FALSE(Negative(algorithm_->GetHeight()));
+}
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest003
+ * @tc.desc: Test MeasureHeight method with negative height
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
+     */
+    CreateContainerPickerNode();
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF constraintWithNegativeHeight = layoutConstraintF;
+    constraintWithNegativeHeight.selfIdealSize = { 200, -100 };
+    layoutProperty->contentConstraint_ = constraintWithNegativeHeight;
+
+    /**
+     * @tc.steps: step2. Call MeasureHeight with negative height
+     * @tc.expected: step2. The height should be set to default value
+     */
+    OptionalSizeF contentIdealSize;
+    algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
+    EXPECT_TRUE(contentIdealSize.Height().has_value());
+    EXPECT_FALSE(Negative(algorithm_->GetHeight()));
+}
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest004
+ * @tc.desc: Test MeasureHeight method with height changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker and set initial height
      */
     CreateContainerPickerNode();
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
@@ -193,26 +257,36 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
-    LayoutConstraintF constraint = layoutConstraintF;
-    constraint.selfIdealSize = { 200, -1 };
-    layoutProperty->contentConstraint_ = constraint;
+    // Set initial height
+    float initialHeight = 300.0f;
+    algorithm_->SetHeight(initialHeight);
+    
+    // Add some items to itemPosition_
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
+    
+    EXPECT_FALSE(algorithm_->itemPosition_.empty());
 
     /**
-     * @tc.steps: step2. Call MeasureHeight with undefined height
-     * @tc.expected: step2. The default height should be used
+     * @tc.steps: step2. Change height and call MeasureHeight
+     * @tc.expected: step2. itemPosition_ should be cleared when height changes
      */
     OptionalSizeF contentIdealSize;
+    LayoutConstraintF constraintWithDifferentHeight = layoutConstraintF;
+    constraintWithDifferentHeight.selfIdealSize = { 200, 500 };
+    layoutProperty->contentConstraint_ = constraintWithDifferentHeight;
+    
     algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
-    EXPECT_TRUE(contentIdealSize.Height().has_value());
-    EXPECT_FALSE(NearEqual(algorithm_->height_, -1.0f));
+    EXPECT_FALSE(NearEqual(algorithm_->GetHeight(), initialHeight));
+    EXPECT_TRUE(algorithm_->itemPosition_.empty());
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest003
- * @tc.steps: Test MeasureHeight method with height change
- * @tc.expected: itemPosition_ should be cleared when height changes
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest005
+ * @tc.desc: Test MeasureHeight method with height unchanged
+ * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest003, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and set initial height
@@ -223,22 +297,95 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
     ASSERT_NE(layoutWrapper, nullptr);
 
-    algorithm_->SetHeight(500.0f);
-    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, nullptr };
-    ASSERT_FALSE(algorithm_->itemPosition_.empty());
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    float sameHeight = 400.0f;
+    LayoutConstraintF constraintWithSameHeight = layoutConstraintF;
+    constraintWithSameHeight.selfIdealSize = { 200, sameHeight };
+    layoutProperty->contentConstraint_ = constraintWithSameHeight;
+
+    // Set initial height to the same value
+    algorithm_->SetHeight(sameHeight);
+    
+    // Add some items to itemPosition_
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
+    
+    EXPECT_FALSE(algorithm_->itemPosition_.empty());
 
     /**
-     * @tc.steps: step2. Change height and call MeasureHeight
-     * @tc.expected: itemPosition_ should be cleared when height changes
+     * @tc.steps: step2. Call MeasureHeight with same height
+     * @tc.expected: step2. itemPosition_ should not be cleared
      */
     OptionalSizeF contentIdealSize;
-    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    LayoutConstraintF constraint = layoutConstraintF;
-    constraint.selfIdealSize = { 200, 600 };
-    layoutProperty->contentConstraint_ = constraint;
-
     algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
-    EXPECT_TRUE(algorithm_->itemPosition_.empty());
+    EXPECT_TRUE(NearEqual(algorithm_->GetHeight(), sameHeight));
+    EXPECT_FALSE(algorithm_->itemPosition_.empty());
+}
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest006
+ * @tc.desc: Test MeasureHeight method without layoutPolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest006, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker without layoutPolicy
+     */
+    CreateContainerPickerNode();
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+    // Ensure no layoutPolicy is set
+    layoutProperty->layoutPolicy_.reset();
+
+    /**
+     * @tc.steps: step2. Call MeasureHeight without layoutPolicy
+     * @tc.expected: step2. The height should be set correctly
+     */
+    OptionalSizeF contentIdealSize;
+    algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
+    EXPECT_TRUE(contentIdealSize.Height().has_value());
+    EXPECT_FALSE(Negative(algorithm_->GetHeight()));
+}
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest007
+ * @tc.desc: Test MeasureHeight method with custom selfIdealSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest007, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker with custom selfIdealSize
+     */
+    CreateContainerPickerNode();
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    float customHeight = 450.0f;
+    LayoutConstraintF constraintWithCustomHeight = layoutConstraintF;
+    constraintWithCustomHeight.selfIdealSize = { 200, customHeight };
+    layoutProperty->contentConstraint_ = constraintWithCustomHeight;
+
+    /**
+     * @tc.steps: step2. Call MeasureHeight with custom height
+     * @tc.expected: step2. The height should be set to custom value
+     */
+    OptionalSizeF contentIdealSize;
+    algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
+    EXPECT_TRUE(contentIdealSize.Height().has_value());
+    EXPECT_TRUE(NearEqual(algorithm_->GetHeight(), customHeight));
 }
 
 /**
