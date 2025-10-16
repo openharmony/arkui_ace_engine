@@ -145,7 +145,7 @@ HWTEST_F(PatternLockModifierTest, setCircleRadiusTestDefaultValues, TestSize.Lev
 // Valid values for attribute 'circleRadius' of method 'circleRadius'
 static std::vector<std::tuple<std::string, Ark_Length, std::string>> circleRadiusValidValues = {
     {EXPECTED_NUM_NEG_PX, LEN_NUM_NEG, ATTRIBUTE_CIRCLE_RADIUS_DEFAULT_VALUE},
-    {EXPECTED_NUM_ZERO_PX, LEN_NUM_ZERO, EXPECTED_NUM_ZERO_PX},
+    {"0.00px", Converter::ArkValue<Ark_Length>("0.00px"), ATTRIBUTE_CIRCLE_RADIUS_DEFAULT_VALUE},
     {EXPECTED_NUM_VILID_PX, LEN_NUM_VALID, EXPECTED_NUM_VILID_PX},
     {EXPECTED_NUM_MAX_PX, LEN_NUM_MAX, EXPECTED_NUM_MAX_PX},
 };
