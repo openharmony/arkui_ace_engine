@@ -30,39 +30,41 @@ public:
         : FocusRulesCheckNode(accessibilityId), handleParam_(handleParam), weakNode_(node) {}
     ~FrameNodeRulesCheckNode() override = default;
 
-    bool GetPropText(Accessibility::PropValueStub& value) override;
+    bool GetPropText(Accessibility::PropValue& value) override;
 
-    bool GetPropHintText(Accessibility::PropValueStub& value) override;
+    bool GetPropHintText(Accessibility::PropValue& value) override;
 
-    bool GetPropDesc(Accessibility::PropValueStub& value) override;
+    bool GetPropDesc(Accessibility::PropValue& value) override;
 
-    bool GetPropAccessibilityText(Accessibility::PropValueStub& value) override;
+    bool GetPropAccessibilityText(Accessibility::PropValue& value) override;
 
-    bool GetPropType(Accessibility::PropValueStub& value) override;
+    bool GetPropType(Accessibility::PropValue& value) override;
 
-    bool GetPropAccessibilityLevel(Accessibility::PropValueStub& value) override;
+    bool GetPropAccessibilityLevel(Accessibility::PropValue& value) override;
 
-    bool GetPropAccessibilityGroup(Accessibility::PropValueStub& value) override;
+    bool GetPropAccessibilityGroup(Accessibility::PropValue& value) override;
 
-    bool GetPropIsEnable(Accessibility::PropValueStub& value) override;
+    bool GetPropIsEnable(Accessibility::PropValue& value) override;
 
-    bool GetPropChildrenCount(Accessibility::PropValueStub& value) override;
+    bool GetPropChildrenCount(Accessibility::PropValue& value) override;
 
-    bool GetPropActionNames(Accessibility::PropValueStub& value) override;
+    bool GetPropActionNames(Accessibility::PropValue& value) override;
 
-    std::vector<std::shared_ptr<Accessibility::ReadableRulesNodeStub>> GetChildren() override;
+    std::vector<std::shared_ptr<Accessibility::ReadableRulesNode>> GetChildren() override;
 
-    std::shared_ptr<Accessibility::ReadableRulesNodeStub> GetParent() override;
+    std::shared_ptr<Accessibility::ReadableRulesNode> GetParent() override;
 
     std::vector<std::shared_ptr<FocusRulesCheckNode>> GetAceChildren() override;
 
     std::shared_ptr<FocusRulesCheckNode> GetAceParent() override;
 
-    bool IsModalForPopup() override;
+    bool IsModal() override;
 
-    std::shared_ptr<Accessibility::ReadableRulesNodeStub> GetUserNextFocusNode() override;
+    bool IsInChildTree() override;
 
-    std::shared_ptr<Accessibility::ReadableRulesNodeStub> GetUserPrevFocusNode() override;
+    std::shared_ptr<FocusRulesCheckNode> GetUserNextFocusNode() override;
+
+    std::shared_ptr<FocusRulesCheckNode> GetUserPrevFocusNode() override;
 
     bool IsAccessibiltyVisible() override;
 
@@ -92,5 +94,47 @@ private:
     WeakPtr<NG::FrameNode> nextNode_;
     WeakPtr<NG::FrameNode> prevNode_;
 };
+
+class DetectParentRulesCheckNode : public FocusRulesCheckNode {
+public:
+    DetectParentRulesCheckNode(
+        const Accessibility::AccessibilityElementInfo& elementInfo, const RefPtr<NG::FrameNode>& customizedParentNode)
+        : FocusRulesCheckNode(elementInfo.GetAccessibilityId()),
+        elementInfo_(elementInfo), customizedParentNode_(customizedParentNode) {}
+    ~DetectParentRulesCheckNode() override = default;
+
+    bool GetPropText(Accessibility::PropValue& value) override;
+
+    bool GetPropHintText(Accessibility::PropValue& value) override;
+
+    bool GetPropDesc(Accessibility::PropValue& value) override;
+
+    bool GetPropAccessibilityText(Accessibility::PropValue& value) override;
+
+    bool GetPropType(Accessibility::PropValue& value) override;
+
+    bool GetPropAccessibilityLevel(Accessibility::PropValue& value) override;
+
+    bool GetPropAccessibilityGroup(Accessibility::PropValue& value) override;
+
+    bool GetPropIsEnable(Accessibility::PropValue& value) override;
+
+    bool GetPropChildrenCount(Accessibility::PropValue& value) override;
+
+    bool GetPropActionNames(Accessibility::PropValue& value) override;
+
+    std::vector<std::shared_ptr<Accessibility::ReadableRulesNode>> GetChildren() override;
+
+    std::shared_ptr<Accessibility::ReadableRulesNode> GetParent() override;
+
+    std::vector<std::shared_ptr<FocusRulesCheckNode>> GetAceChildren() override;
+
+    std::shared_ptr<FocusRulesCheckNode> GetAceParent() override;
+
+private:
+    Accessibility::AccessibilityElementInfo elementInfo_;
+    WeakPtr<NG::FrameNode> customizedParentNode_;
+};
+
 } // OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_FRAME_NODE_UTILS_H

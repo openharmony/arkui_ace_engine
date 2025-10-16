@@ -36,6 +36,7 @@
 #include "adapter/ohos/osal/js_third_provider_interaction_operation.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include "test/unittest/core/accessibility/js_accessibility_manager_test.h"
 #include "test/unittest/core/accessibility/js_third_provider_interaction_operation_test.h"
 
 using namespace OHOS::Accessibility;
@@ -46,6 +47,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr float TEST_FRAME_NODE_WIDTH = 10.0f;
 constexpr float TEST_FRAME_NODE_HEIGHT = 10.0f;
+
 class MockRenderContextTest : public NG::RenderContext {
 public:
     NG::RectF GetPaintRectWithoutTransform() override
@@ -172,7 +174,7 @@ HWTEST_F(AccessibilityFocusMoveTest, AccessibilityNodeUtilsTest001, TestSize.Lev
     auto checkNode = std::make_shared<AccessibilityNodeRulesCheckNode>(
         accessibilityNode, static_cast<int64_t>(accessibilityNode->GetNodeId()));
     ASSERT_NE(checkNode, nullptr);
-    Accessibility::PropValueStub value;
+    Accessibility::PropValue value;
     auto result = checkNode->GetPropText(value);
     ASSERT_TRUE(result);
     ASSERT_EQ(value.valueStr, testStr);
@@ -196,7 +198,7 @@ HWTEST_F(AccessibilityFocusMoveTest, AccessibilityNodeUtilsTest002, TestSize.Lev
         accessibilityNode, static_cast<int64_t>(accessibilityNode->GetNodeId()));
     ASSERT_NE(checkNode, nullptr);
     accessibilityNode->AddSupportAction(AceAction::ACTION_FOCUS);
-    Accessibility::PropValueStub value;
+    Accessibility::PropValue value;
     auto result = checkNode->GetPropActionNames(value);
     EXPECT_EQ(result, true);
     auto findRet = value.valueArray.find("clearFocus");
@@ -220,10 +222,10 @@ HWTEST_F(AccessibilityFocusMoveTest, AccessibilityNodeUtilsTest003, TestSize.Lev
     auto checkNode = std::make_shared<AccessibilityNodeRulesCheckNode>(
         accessibilityNode, static_cast<int64_t>(accessibilityNode->GetNodeId()));
     ASSERT_NE(checkNode, nullptr);
-    Accessibility::PropValueStub value;
+    Accessibility::PropValue value;
     auto result = checkNode->GetPropHintText(value);
     ASSERT_TRUE(result);
-    ASSERT_EQ(value.valueType, Accessibility::ValueTypeStub::STRING);
+    ASSERT_EQ(value.valueType, Accessibility::ValueType::STRING);
     ASSERT_EQ(value.valueStr, testStr);
 }
 
@@ -453,7 +455,7 @@ HWTEST_F(AccessibilityFocusMoveTest, ThirdRulesCheckNodeTest001, TestSize.Level1
     auto checkNode = std::make_shared<ThirdRulesCheckNode>(nodeInfo, elementId, ohAccessibilityProvider);
     ASSERT_NE(checkNode, nullptr);
     
-    Accessibility::PropValueStub value;
+    Accessibility::PropValue value;
     auto result = checkNode->GetPropActionNames(value);
     EXPECT_EQ(result, true);
     auto findRet = value.valueArray.find("clearAccessibilityFocus");
@@ -541,13 +543,13 @@ HWTEST_F(AccessibilityFocusMoveTest, ThirdRulesCheckNodeTest003, TestSize.Level1
  */
 HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalTest001, TestSize.Level1)
 {
-    std::map<FocusMoveDirectionStub, bool> IsProcessGetScrollAncestorTest = {
-        { FocusMoveDirectionStub::GET_FORWARD_SCROLL_ANCESTOR, true },
-        { FocusMoveDirectionStub::GET_BACKWARD_SCROLL_ANCESTOR, true },
-        { FocusMoveDirectionStub::GET_SCROLLABLE_ANCESTOR, true },
-        { FocusMoveDirectionStub::DIRECTION_INVAILD, false },
+    std::map<FocusMoveDirection, bool> IsProcessGetScrollAncestorTest = {
+        { FocusMoveDirection::GET_FORWARD_SCROLL_ANCESTOR, true },
+        { FocusMoveDirection::GET_BACKWARD_SCROLL_ANCESTOR, true },
+        { FocusMoveDirection::GET_SCROLLABLE_ANCESTOR, true },
+        { FocusMoveDirection::DIRECTION_INVALID, false },
     };
-    Accessibility::AccessibilityFocusMoveParamStub param;
+    Accessibility::AccessibilityFocusMoveParam param;
     for (auto& testMap : IsProcessGetScrollAncestorTest) {
         param.direction = testMap.first;
         auto result = FocusStrategyOsal::IsProcessGetScrollAncestor(param);
@@ -566,14 +568,14 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalTest002, TestSize.Level1)
     ASSERT_NE(jsAccessibilityManager, nullptr);
     MockFocusStrategyOsal strategy(jsAccessibilityManager);
     bool result = false;
-    Accessibility::AccessibilityFocusMoveParamStub param;
+    Accessibility::AccessibilityFocusMoveParam param;
 
     int64_t elementId = 0;
     std::list<Accessibility::AccessibilityElementInfo> infos;
-    param.direction = FocusMoveDirectionStub::GET_BACKWARD_SCROLL_ANCESTOR;
+    param.direction = FocusMoveDirection::GET_BACKWARD_SCROLL_ANCESTOR;
     strategy.ProcessGetScrollAncestor(elementId, param, infos);
     ASSERT_EQ(infos.empty(), true);
-    param.direction = FocusMoveDirectionStub::GET_FORWARD_SCROLL_ANCESTOR;
+    param.direction = FocusMoveDirection::GET_FORWARD_SCROLL_ANCESTOR;
     strategy.ProcessGetScrollAncestor(elementId, param, infos);
     ASSERT_EQ(infos.empty(), true);
 }
@@ -585,17 +587,17 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalTest002, TestSize.Level1)
  */
 HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalTest003, TestSize.Level1)
 {
-    std::map<DetailConditionStub, AceFocusMoveDetailCondition> GetAceConditionTest = {
-        { DetailConditionStub::BYPASS_SELF, {.bypassSelf = true, .bypassDescendants = false} },
-        { DetailConditionStub::BYPASS_SELF_DESCENDANTS, {.bypassSelf = true, .bypassDescendants = true} },
-        { DetailConditionStub::CHECK_SELF, {.bypassSelf = false, .bypassDescendants = false} },
-        { DetailConditionStub::CHECK_SELF_BYPASS_DESCENDANTS, {.bypassSelf = false, .bypassDescendants = true} },
+    std::map<DetailCondition, AceFocusMoveDetailCondition> GetAceConditionTest = {
+        { DetailCondition::BYPASS_SELF, {.bypassSelf = true, .bypassDescendants = false} },
+        { DetailCondition::BYPASS_SELF_DESCENDANTS, {.bypassSelf = true, .bypassDescendants = true} },
+        { DetailCondition::CHECK_SELF, {.bypassSelf = false, .bypassDescendants = false} },
+        { DetailCondition::CHECK_SELF_BYPASS_DESCENDANTS, {.bypassSelf = false, .bypassDescendants = true} },
     };
 
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
     MockFocusStrategyOsal strategy(jsAccessibilityManager);
-    Accessibility::AccessibilityFocusMoveParamStub param;
+    Accessibility::AccessibilityFocusMoveParam param;
 
     for (auto& testMap : GetAceConditionTest) {
         param.condition = testMap.first;
@@ -619,30 +621,30 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalHandleFocusMoveSearchResul
     ASSERT_NE(frameNode, nullptr);
 
     MockFocusStrategyOsal strategy(jsAccessibilityManager);
-    Accessibility::AccessibilityFocusMoveParamStub param;
+    Accessibility::AccessibilityFocusMoveParam param;
     Accessibility::AccessibilityElementInfo info;
     // aceResult FIND_SUCCESS
     auto targetNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
     AceFocusMoveResult aceResult = AceFocusMoveResult::FIND_SUCCESS;
     auto finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode, aceResult, info);
-    ASSERT_EQ(finalResult, FocusMoveResultStub::SEARCH_SUCCESS);
+    ASSERT_EQ(finalResult, FocusMoveResult::SEARCH_SUCCESS);
     // aceResult FIND_FAIL
     aceResult = AceFocusMoveResult::FIND_FAIL;
     finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode, aceResult, info);
-    ASSERT_EQ(finalResult, FocusMoveResultStub::SEARCH_FAIL);
+    ASSERT_EQ(finalResult, FocusMoveResult::SEARCH_FAIL);
 
     // aceResult FIND_SUCCESS, UpdateElementInfo fail
     aceResult = AceFocusMoveResult::FIND_SUCCESS;
     strategy.updateElementInfoResult_ = false;
     finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode, aceResult, info);
-    ASSERT_EQ(finalResult, FocusMoveResultStub::SEARCH_FAIL);
+    ASSERT_EQ(finalResult, FocusMoveResult::SEARCH_FAIL);
 
     // aceResult FIND_FAIL, finalNode nullptr
     std::shared_ptr<FocusRulesCheckNode> targetNode1;
     aceResult = AceFocusMoveResult::FIND_FAIL;
     strategy.updateElementInfoResult_ = false;
     finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode1, aceResult, info);
-    ASSERT_EQ(finalResult, FocusMoveResultStub::SEARCH_FAIL);
+    ASSERT_EQ(finalResult, FocusMoveResult::SEARCH_FAIL);
 }
 
 /**
@@ -659,14 +661,14 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalHandleFocusMoveSearchResul
     ASSERT_NE(frameNode, nullptr);
 
     MockFocusStrategyOsal strategy(jsAccessibilityManager);
-    Accessibility::AccessibilityFocusMoveParamStub param;
+    Accessibility::AccessibilityFocusMoveParam param;
     Accessibility::AccessibilityElementInfo info;
     // aceResult FIND_CHILDTREE
     auto targetNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
     AceFocusMoveResult aceResult = AceFocusMoveResult::FIND_CHILDTREE;
-    param.direction = FocusMoveDirectionStub::BACKWARD;
+    param.direction = FocusMoveDirection::BACKWARD;
     auto finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode, aceResult, info);
-    ASSERT_EQ(finalResult, FocusMoveResultStub::DOUBLE_CHECK_CHILD_PROPERTY_AND_GET_LAST);
+    ASSERT_EQ(finalResult, FocusMoveResult::DOUBLE_CHECK_CHILD_PROPERTY_AND_GET_LAST);
 }
 
 /**
@@ -683,14 +685,14 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalHandleFocusMoveSearchResul
     ASSERT_NE(frameNode, nullptr);
 
     MockFocusStrategyOsal strategy(jsAccessibilityManager);
-    Accessibility::AccessibilityFocusMoveParamStub param;
+    Accessibility::AccessibilityFocusMoveParam param;
     Accessibility::AccessibilityElementInfo info;
     // aceResult FIND_FAIL_IN_CHILDTREE, direction  BACKWARD
     auto targetNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
     AceFocusMoveResult aceResult = AceFocusMoveResult::FIND_FAIL_IN_CHILDTREE;
-    param.direction = FocusMoveDirectionStub::BACKWARD;
+    param.direction = FocusMoveDirection::BACKWARD;
     auto finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode, aceResult, info);
-    ASSERT_EQ(finalResult, FocusMoveResultStub::SEARCH_FAIL_IN_CHILDTREE);
+    ASSERT_EQ(finalResult, FocusMoveResult::SEARCH_FAIL_IN_CHILDTREE);
 }
 
 /**
@@ -707,20 +709,20 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalHandleFocusMoveSearchResul
     ASSERT_NE(frameNode, nullptr);
 
     MockFocusStrategyOsal strategy(jsAccessibilityManager);
-    Accessibility::AccessibilityFocusMoveParamStub param;
+    Accessibility::AccessibilityFocusMoveParam param;
     Accessibility::AccessibilityElementInfo info;
     auto targetNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
     // aceResult FIND_EMBED_TARGET, ChangeToEmbed successs
     AceFocusMoveResult aceResult = AceFocusMoveResult::FIND_EMBED_TARGET;
     strategy.changeToEmbedResult_ = true;
     auto finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode, aceResult, info);
-    ASSERT_EQ(finalResult, FocusMoveResultStub::SEARCH_NEXT);
+    ASSERT_EQ(finalResult, FocusMoveResult::SEARCH_NEXT);
 
     // aceResult FIND_EMBED_TARGET, ChangeToEmbed fail
     aceResult = AceFocusMoveResult::FIND_EMBED_TARGET;
     strategy.changeToEmbedResult_ = false;
     finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode, aceResult, info);
-    ASSERT_EQ(finalResult, FocusMoveResultStub::SEARCH_FAIL);
+    ASSERT_EQ(finalResult, FocusMoveResult::SEARCH_FAIL);
 }
 
 /**
@@ -737,13 +739,13 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalHandleFocusMoveSearchResul
     ASSERT_NE(frameNode, nullptr);
 
     MockFocusStrategyOsal strategy(jsAccessibilityManager);
-    Accessibility::AccessibilityFocusMoveParamStub param;
+    Accessibility::AccessibilityFocusMoveParam param;
     Accessibility::AccessibilityElementInfo info;
     // aceResult FIND_FAIL_IN_SCROLL
     auto targetNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
     AceFocusMoveResult aceResult = AceFocusMoveResult::FIND_FAIL_IN_SCROLL;
     auto finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode, aceResult, info);
-    ASSERT_EQ(finalResult, FocusMoveResultStub::SERAH_FAIL_IN_SCROLL);
+    ASSERT_EQ(finalResult, FocusMoveResult::SERACH_FAIL_IN_SCROLL);
 }
 
 /**
@@ -761,16 +763,164 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalTest004, TestSize.Level1)
 
     MockFocusStrategyOsal strategy(jsAccessibilityManager);
         int64_t elementId = 0;
-    Accessibility::AccessibilityFocusMoveParamStub param;
+    Accessibility::AccessibilityFocusMoveParam param;
     Accessibility::AccessibilityElementInfo info;
-    param.direction = FocusMoveDirectionStub::BACKWARD;
+    param.direction = FocusMoveDirection::BACKWARD;
     auto finalResult = strategy.ExecuteFocusMoveSearch(elementId, param, info);
-    param.direction = FocusMoveDirectionStub::FORWARD;
+    param.direction = FocusMoveDirection::FORWARD;
     finalResult = strategy.ExecuteFocusMoveSearch(elementId, param, info);
-    param.direction = FocusMoveDirectionStub::FIND_LAST;
+    param.direction = FocusMoveDirection::FIND_LAST;
     finalResult = strategy.ExecuteFocusMoveSearch(elementId, param, info);
-    param.direction = FocusMoveDirectionStub::DIRECTION_INVAILD;
+    param.direction = FocusMoveDirection::DIRECTION_INVALID;
     finalResult = strategy.ExecuteFocusMoveSearch(elementId, param, info);
-    ASSERT_EQ(finalResult, FocusMoveResultStub::NOT_SUPPORT);
+    ASSERT_EQ(finalResult, FocusMoveResult::NOT_SUPPORT);
 }
+
+/**
+ * @tc.name: DetectParentRulesCheckNodeTest001
+ * @tc.desc: ExecuteFocusMoveSearch
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, DetectParentRulesCheckNodeTest001, TestSize.Level1)
+{
+    auto baseNode = NG::FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(baseNode, nullptr);
+    AccessibilityElementInfo nodeInfo;
+    AccessibleAction action(ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, "ace");
+    AccessibleAction action1(ActionType::ACCESSIBILITY_ACTION_INVALID, "ace");
+    nodeInfo.AddAction(action);
+    nodeInfo.AddAction(action1);
+    auto checkNode = std::make_shared<DetectParentRulesCheckNode>(nodeInfo, baseNode);
+
+    Accessibility::PropValue value;
+    auto result = checkNode->GetPropActionNames(value);
+    EXPECT_EQ(result, true);
+    auto findRet = value.valueArray.find("clearAccessibilityFocus");
+    EXPECT_TRUE(findRet == value.valueArray.end());
+    findRet = value.valueArray.find("accessibilityFocus");
+    EXPECT_TRUE(findRet != value.valueArray.end());
+}
+
+/**
+ * @tc.name: FocusMoveSearchWithCondition001
+ * @tc.desc: ExecuteFocusMoveSearch
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, FocusMoveSearchWithCondition001, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    MockAccessibilityElementOperatorCallback operatorCallback;
+
+    //  GetPipelineByWindowId fail
+    auto windowId = context->GetWindowId();
+    auto elementId = 0;
+    Accessibility::AccessibilityFocusMoveParam param;
+    int32_t requestId = 1;
+    jsAccessibilityManager->FocusMoveSearchWithCondition(elementId, param, requestId, operatorCallback, windowId + 1);
+    EXPECT_EQ(operatorCallback.mockResult_, FocusMoveResult::SEARCH_FAIL);
+}
+
+/**
+ * @tc.name: FocusMoveSearchWithCondition002
+ * @tc.desc: IsProcessGetScrollAncestor
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, FocusMoveSearchWithCondition002, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    MockAccessibilityElementOperatorCallback operatorCallback;
+
+    //  ProcessGetScrollAncestor no infos
+    auto windowId = context->GetWindowId();
+    jsAccessibilityManager->SetWindowId(windowId);
+    auto elementId = 0;
+    Accessibility::AccessibilityFocusMoveParam param;
+    int32_t requestId = 1;
+    param.direction = FocusMoveDirection::GET_FORWARD_SCROLL_ANCESTOR;
+    jsAccessibilityManager->FocusMoveSearchWithCondition(elementId, param, requestId, operatorCallback, windowId);
+    EXPECT_EQ(operatorCallback.mockResult_, FocusMoveResult::SEARCH_FAIL);
+}
+
+/**
+ * @tc.name: FocusMoveSearchWithCondition003
+ * @tc.desc: IsProcessGetScrollAncestor
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, FocusMoveSearchWithCondition003, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    ASSERT_NE(ngPipeline, nullptr);
+    auto rootNode = ngPipeline->GetRootElement();
+    ASSERT_NE(rootNode, nullptr);
+
+    auto frameNode = CreatFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto frameNode1 = CreatFrameNode();
+    ASSERT_NE(frameNode1, nullptr);
+    frameNode->AddChild(frameNode1);
+    frameNode1->MountToParent(frameNode);
+    rootNode->AddChild(frameNode);
+    frameNode->MountToParent(rootNode);
+    // parent is fowardScrollAncestor
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetSpecificSupportActionCallback(
+        [accessibilityPtr = AceType::WeakClaim(AceType::RawPtr(accessibilityProperty))]() {
+        const auto& accessibilityProperty = accessibilityPtr.Upgrade();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+    });
+
+    //  ProcessGetScrollAncestor have infos
+    MockAccessibilityElementOperatorCallback operatorCallback;
+    auto windowId = context->GetWindowId();
+    jsAccessibilityManager->SetWindowId(windowId);
+    auto elementId = frameNode1->GetAccessibilityId();
+    Accessibility::AccessibilityFocusMoveParam param;
+    int32_t requestId = 1;
+    param.direction = FocusMoveDirection::GET_FORWARD_SCROLL_ANCESTOR;
+    jsAccessibilityManager->FocusMoveSearchWithCondition(elementId, param, requestId, operatorCallback, windowId);
+    EXPECT_EQ(operatorCallback.mockResult_, FocusMoveResult::SEARCH_SUCCESS);
+    rootNode->RemoveChild(frameNode);
+}
+
+/**
+ * @tc.name: FocusMoveSearchWithCondition004
+ * @tc.desc: IsProcessGetScrollAncestor
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, FocusMoveSearchWithCondition004, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    MockAccessibilityElementOperatorCallback operatorCallback;
+
+    //  ExecuteFocusMoveSearch no infos
+    auto windowId = context->GetWindowId();
+    jsAccessibilityManager->SetWindowId(windowId);
+    auto elementId = 0;
+    Accessibility::AccessibilityFocusMoveParam param;
+    int32_t requestId = 1;
+    param.direction = FocusMoveDirection::FORWARD;
+    jsAccessibilityManager->FocusMoveSearchWithCondition(elementId, param, requestId, operatorCallback, windowId);
+    EXPECT_EQ(operatorCallback.mockResult_, FocusMoveResult::SEARCH_FAIL);
+}
+
 } // namespace OHOS::Ace::NG

@@ -166,9 +166,27 @@ bool FocusStrategyOsalNG::UpdateElementInfo(
     return true;
 }
 
-bool DetectElementInfoFocusableThroughAncestor(
+bool FocusStrategyOsalNG::DetectElementInfoFocusableThroughAncestor(
     const Accessibility::AccessibilityElementInfo& info, const int64_t parentId)
 {
-    return true;
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    auto mainContext = mainContext_.Upgrade();
+    CHECK_NULL_RETURN(mainContext, false);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_RETURN(ngPipeline, false);
+    auto rootNode = ngPipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto baseNode = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, parentId);
+    CHECK_NULL_RETURN(baseNode, false);
+    auto jsAccessibilityManager = jsAccessibilityManager_.Upgrade();
+    CHECK_NULL_RETURN(jsAccessibilityManager, false);
+    auto checkNode = std::make_shared<DetectParentRulesCheckNode>(info, baseNode);
+    bool isReadable = true;
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, true);
+    auto checkResult = client->CheckNodeIsReadable(checkNode, isReadable);
+    CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, true);
+    return isReadable;
 }
 } // OHOS::Ace::Framework

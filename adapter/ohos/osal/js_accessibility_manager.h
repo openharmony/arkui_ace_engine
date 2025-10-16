@@ -415,7 +415,7 @@ public:
     void AddHoverTransparentCallback(const RefPtr<NG::FrameNode>& node) override;
     bool CheckHoverTransparentCallbackListEmpty(int32_t containerId) override;
 
-    int64_t CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node);
+    int64_t CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node) override;
     void ChooseDumpEvent(const std::vector<std::string>& params,
         DumpInfoArgument& argument, uint32_t windowId, bool hasJson);
 
@@ -452,6 +452,18 @@ public:
     void UpdateAccessibilityElementInfo(
         const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
         Accessibility::AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline);
+
+    void DetectElementInfoFocusableThroughAncestor(
+        const Accessibility::AccessibilityElementInfo &info,
+        const int64_t parentId, const int32_t requestId,
+        Accessibility::AccessibilityElementOperatorCallback &callback, const int32_t windowId);
+
+    void FocusMoveSearchWithCondition(
+        const int64_t elementId, const Accessibility::AccessibilityFocusMoveParam param,
+        const int32_t requestId, Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
+
+    bool NeedChangeToReadableNode(const RefPtr<NG::FrameNode>& curFrameNode,
+        RefPtr<NG::FrameNode>& readableNode) override;
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
@@ -830,6 +842,24 @@ private:
     void CheckActionTakeOver(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
     void UpdateUserAccessibilityElementInfo(
         const RefPtr<NG::AccessibilityProperty>& accessibilityProperty, AccessibilityElementInfo& nodeInfo);
+
+    // focus move
+    void ProcessGetScrollAncestorNode(
+        const int64_t elementId, const Accessibility::AccessibilityFocusMoveParam param,
+        const int32_t requestId, Accessibility::AccessibilityElementOperatorCallback& callback);
+
+    void ProcessGetScrollAncestor(
+        const int64_t elementId, const Accessibility::AccessibilityFocusMoveParam param,
+        const RefPtr<PipelineBase>& context, const int32_t requestId,
+        Accessibility::AccessibilityElementOperatorCallback& callback);
+
+    FocusMoveResult FocusMoveSearchWithConditionNG(
+        const int64_t elementId, const Accessibility::AccessibilityFocusMoveParam param,
+        const RefPtr<PipelineBase>& context, Accessibility::AccessibilityElementInfo& info);
+
+    void FocusMoveSearchAccessibilityNodeWithCondition(
+        const int64_t elementId, const Accessibility::AccessibilityFocusMoveParam param,
+        const int32_t requestId, Accessibility::AccessibilityElementOperatorCallback &callback);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;

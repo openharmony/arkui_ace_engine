@@ -43,6 +43,7 @@ constexpr int32_t QUARTER_ANGLE = 90;
 constexpr int32_t HALF_ANGLE = 180;
 constexpr int32_t THREE_QUARTER_ANGLE = 270;
 constexpr int32_t FULL_ANGLE = 360;
+constexpr int64_t INVALID_ACCESSIBILITY_NODE_ID = -1;
 
 struct RotateTransform {
     int32_t rotateDegree = 0;  // final rotate degree of parent interface
@@ -388,6 +389,16 @@ public:
     virtual void AddHoverTransparentCallback(const RefPtr<NG::FrameNode>& node) {};
     virtual bool CheckHoverTransparentCallbackListEmpty(int32_t containerId) {return true;};
 
+    virtual bool NeedChangeToReadableNode(const RefPtr<NG::FrameNode>& curFrameNode,
+        RefPtr<NG::FrameNode>& readableNode)
+    {
+        return true;
+    }
+
+    virtual int64_t CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node)
+    {
+        return INVALID_ACCESSIBILITY_NODE_ID;
+    }
 protected:
     int32_t treeId_ = 0;
 

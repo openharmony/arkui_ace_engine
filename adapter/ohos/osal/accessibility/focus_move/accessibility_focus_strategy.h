@@ -25,88 +25,11 @@
 #include "hilog/log.h"
 #include "frameworks/core/accessibility/accessibility_utils.h"
 
-namespace OHOS::Accessibility {
-
-enum class ValueTypeStub {
-    UNKONW = -1,
-    BOOL,
-    STRING,
-    ARRAY,
-    NUMBER
-};
-
-enum class CondOperatorStub {
-    UNKONW = -1,
-    EQ,
-    NE,
-    NOT_ONEOF,
-    IS_ONEOF,
-    HAS_ANY
-};
-
-class PropValueStub {
-public:
-    bool Compare(CondOperatorStub op, const ValueTypeStub& other)
-    {
-        return false;
-    }
-
-    ValueTypeStub valueType = ValueTypeStub::UNKONW;
-    std::set<std::string> valueArray;
-    std::string valueStr;
-    int32_t valueNum = 0;
-    bool valueBool = false;
-};
-
-class ReadableRulesNodeStub {
-public:
-    explicit ReadableRulesNodeStub(int64_t accessibilityId) : accessibilityId_(accessibilityId) {}
-
-    virtual ~ReadableRulesNodeStub() = default;
-
-    int64_t GetAccessibilityId()
-    {
-        return accessibilityId_;
-    }
-
-    virtual bool GetPropText(PropValueStub& value);
-
-    virtual bool GetPropHintText(PropValueStub& value);
-
-    virtual bool GetPropDesc(PropValueStub& value);
-
-    virtual bool GetPropAccessibilityText(PropValueStub& value);
-
-    virtual bool GetPropType(PropValueStub& value);
-
-    virtual bool GetPropAccessibilityLevel(PropValueStub& value);
-
-    virtual bool GetPropAccessibilityGroup(PropValueStub& value);
-
-    virtual bool GetPropIsEnable(PropValueStub& value);
-
-    virtual bool GetPropChildrenCount(PropValueStub& value);
-
-    virtual bool GetPropActionNames(PropValueStub& value);
-
-    virtual std::vector<std::shared_ptr<ReadableRulesNodeStub>> GetChildren();
-
-    virtual std::shared_ptr<ReadableRulesNodeStub> GetParent();
-
-    virtual bool IsModalForPopup()
-    {
-        return true;
-    }
-private:
-    int64_t accessibilityId_;
-};
-}
-
 namespace OHOS::Ace::Framework {
 
 #ifdef SUPPORT_ACCESSIBILITY_FOCUS_MOVE
 #define HILOG_INFO_FOCUS(fmt, ...)                                      \
-    (TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "AceFocus " fmt, ##__VA__ARGS__))
+    (TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "AceFocus " fmt, ##__VA_ARGS__))
 #else
 #define HILOG_INFO_FOCUS(...)
 #endif
@@ -125,22 +48,22 @@ struct AceFocusMoveDetailCondition {
     bool bypassDescendants = false;
 };
 
-class FocusRulesCheckNode : public Accessibility::ReadableRulesNodeStub {
+class FocusRulesCheckNode : public Accessibility::ReadableRulesNode {
 public:
     explicit FocusRulesCheckNode(int64_t accessibilityId)
-        : Accessibility::ReadableRulesNodeStub(accessibilityId) {}
+        : Accessibility::ReadableRulesNode(accessibilityId) {}
     ~FocusRulesCheckNode() override = default;
 
     virtual std::vector<std::shared_ptr<FocusRulesCheckNode>> GetAceChildren();
 
     virtual std::shared_ptr<FocusRulesCheckNode> GetAceParent();
 
-    virtual std::shared_ptr<Accessibility::ReadableRulesNodeStub> GetUserNextFocusNode()
+    virtual std::shared_ptr<FocusRulesCheckNode> GetUserNextFocusNode()
     {
         return nullptr;
     }
 
-    virtual std::shared_ptr<Accessibility::ReadableRulesNodeStub> GetUserPrevFocusNode()
+    virtual std::shared_ptr<FocusRulesCheckNode> GetUserPrevFocusNode()
     {
         return nullptr;
     }
@@ -159,6 +82,11 @@ public:
     {
         return false;
     }
+
+    virtual bool IsInChildTree()
+    {
+        return false;
+    }
 };
 
 class AccessibilityFocusStrategy {
@@ -169,7 +97,7 @@ public:
     static const std::map<AceAction, std::string> aceActionToFocusActionName;
     static const std::map<OHOS::Accessibility::ActionType, std::string> actionToFocusActionName;
 
-    bool CanAccessibilityFocus(const std::shared_ptr<FocusRulesCheckNode>& currentNode);
+    virtual bool CanAccessibilityFocus(const std::shared_ptr<FocusRulesCheckNode>& currentNode);
 
     std::shared_ptr<FocusRulesCheckNode> GetParentNodeStopByRootType(
         const std::shared_ptr<FocusRulesCheckNode>& currentNode);
@@ -202,12 +130,27 @@ private:
     AceFocusMoveResult FindNextReadableNodeBySelfAndSameLevel (
         AceFocusMoveDetailCondition condition,
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
-        const std::vector<std::shared_ptr<FocusRulesCheckNode>>& samenLevelNodes,
+        const std::vector<std::shared_ptr<FocusRulesCheckNode>>& sameLevelNodes,
         std::shared_ptr<FocusRulesCheckNode>& targetNode);
 
     AceFocusMoveResult FindPrevReadableNodeByChildAndSelf (
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
         std::shared_ptr<FocusRulesCheckNode>& targetNode);
+
+    AceFocusMoveResult FindNextReadableNodeToCheckUserNext(
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+
+    AceFocusMoveResult FindNextReadableNodeToHigherLevel(
+        std::shared_ptr<FocusRulesCheckNode>& parent,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+
+    AceFocusMoveResult FindPrevReadableNodeToHigherLevel(
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+
+    std::string GetChildrenIdsStr(
+        const std::vector<std::shared_ptr<FocusRulesCheckNode>>& children);
 };
 } // OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_STRATEGY_H
