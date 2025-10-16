@@ -19358,7 +19358,7 @@ typedef struct Ark_CustomDialogControllerOptionsExtender {
     Opt_DialogAlignment alignment;
     Opt_Offset offset;
     Opt_Boolean customStyle;
-    Opt_Number gridCount;
+    Opt_Int32 gridCount;
     Opt_ResourceColor maskColor;
     Opt_Rectangle maskRect;
     Opt_AnimateParam openAnimation;
@@ -19386,7 +19386,7 @@ typedef struct Ark_CustomDialogControllerOptionsExtender {
     Opt_Callback_Void onWillDisappear;
     Opt_LengthMetrics keyboardAvoidDistance;
     Opt_LevelMode levelMode;
-    Opt_Number levelUniqueId;
+    Opt_Int32 levelUniqueId;
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
     Opt_Boolean focusable;

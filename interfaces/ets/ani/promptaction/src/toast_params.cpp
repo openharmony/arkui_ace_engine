@@ -164,8 +164,7 @@ std::function<void(int32_t)> GetToastPromise(std::shared_ptr<PromptActionAsyncCo
             }
 
             if (toastId > 0) {
-                double returnToastId = static_cast<double>(toastId);
-                ani_object toastIdObj = CreateANIDoubleObject(env, returnToastId);
+                ani_object toastIdObj = CreateANIIntObject(env, toastId);
                 ani_ref toastRef = static_cast<ani_ref>(toastIdObj);
                 status = env->PromiseResolver_Resolve(asyncContext->deferred, toastRef);
                 if (status != ANI_OK) {
