@@ -494,7 +494,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
 
     /**
-     * @tc.steps: step2. Test WRAP_CONTENT with parent cross size constraint
+     * @tc.steps: step2. Test FIX_AT_IDEAL_SIZE with parent cross size constraint
      * @tc.expected: step2. The width should be constrained by parent cross size
      */
     OptionalSizeF contentIdealSize;
