@@ -3164,7 +3164,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // HyperlinkModifier
     namespace HyperlinkInterfaceModifier {
     void SetHyperlinkOptionsImpl(Ark_NativePointer node,
-                                 const Ark_Union_String_Resource* address,
+                                 const Opt_Union_String_Resource* address,
                                  const Opt_Union_String_Resource* content)
     {
     }
