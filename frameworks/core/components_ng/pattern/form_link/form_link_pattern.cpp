@@ -49,7 +49,7 @@ void FormLinkPattern::SetAction(const std::string& action)
     TAG_LOGD(AceLogTag::ACE_FORM, "SetAction:%{public}s", action.c_str());
     formLinkInfo_.SetAction(action);
     auto host = GetHost();	
-    CHECK_NULL_VOID(host);	
+    CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();	
     CHECK_NULL_VOID(pipeline);	
     pipeline->AddFormLinkInfo(host->GetId(), formLinkInfo_.ToString());
