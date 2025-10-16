@@ -46,9 +46,7 @@ void SetTextBackgroundStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<TextBackgroundStyle>(value);
     if (!convValue) {
-        // Implement Reset value
-        TextBackgroundStyle textBackgroundStyle;
-        SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, textBackgroundStyle);
+        SpanModelNG::ResetTextBackgroundStyleByBaseSpan(frameNode);
         return;
     }
     SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, *convValue);

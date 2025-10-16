@@ -69,6 +69,7 @@ public:
         std::function<void()>&& buildFunc, SelectMenuParam& menuParam);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void ResetSelectionMenuOptions(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

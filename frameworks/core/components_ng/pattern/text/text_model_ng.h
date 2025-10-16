@@ -161,9 +161,12 @@ public:
     static std::vector<TextDataDetectType> GetSelectDetectConfig(FrameNode* frameNode);
     static void ResetSelectDetectConfig(FrameNode* frameNode);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
+    static void ResetFontFeature(FrameNode* frameNode);
     static void SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptions& options);
     static void SetOnMarqueeStateChange(FrameNode* frameNode, std::function<void(int32_t)>&& func);
+    static void ResetOnMarqueeStateChange(FrameNode* frameNode);
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
+    static void ResetTextDetectConfig(FrameNode* frameNode);
     static void SetOnClick(FrameNode* frameNode, GestureEventFunc&& click);
     static void ClearOnClick(FrameNode* frameNode);
     static void SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions);
@@ -219,7 +222,9 @@ public:
     static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
+    static void ResetOnCopy(FrameNode* frameNode);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
+    static void ResetOnTextSelectionChange(FrameNode* frameNode);
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
