@@ -31,6 +31,8 @@
 
 namespace OHOS::Ace::NG {
 
+class TabsNode;
+
 class TabsPattern : public Pattern {
     DECLARE_ACE_TYPE(TabsPattern, Pattern);
 
@@ -65,6 +67,9 @@ public:
 
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
 
+    void PerformanceCheckTabChange(
+        RefPtr<OHOS::Ace::NG::TabsPattern> pattern, RefPtr<OHOS::Ace::NG::TabsNode> tabsNode, bool currentIndex);
+    
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
 
     ChangeEventWithPreIndexPtr GetChangeEvent()
