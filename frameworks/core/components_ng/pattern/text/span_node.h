@@ -526,6 +526,9 @@ public:
         if (backgroundStyle.has_value()) {
             backgroundStyle->ReloadResources();
         }
+        if (resourceMgr_) {
+            resourceMgr_->ReloadResources();
+        }
     }
 
     // 后续修改spanNode逻辑下沉到spanItem
@@ -753,18 +756,6 @@ public:
         spanItem_->description = desc;
     }
 
-    void UpdateColorByResourceId()
-    {
-        if (SystemProperties::ConfigChangePerform()) {
-            ReloadResources();
-            return;
-        }
-        spanItem_->fontStyle->UpdateColorByResourceId();
-        if (spanItem_->backgroundStyle) {
-            spanItem_->backgroundStyle->UpdateColorByResourceId();
-        }
-    }
-
     void UpdateTextColorWithoutCheck(Color color)
     {
         spanItem_->UpdateTextColorWithoutCheck(color);
@@ -936,12 +927,6 @@ public:
     const RefPtr<UINode> GetCustomNode() const
     {
         return customNode_;
-    }
-
-    void UpdateColorByResourceId()
-    {
-        CHECK_NULL_VOID(dragBackgroundColor_.has_value());
-        dragBackgroundColor_.value().UpdateColorByResourceId();
     }
 
 private:

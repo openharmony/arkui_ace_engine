@@ -1200,6 +1200,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     spanItem->content = u" ";
     spanItem->SetCustomNode(customNode);
     spanItem->dragBackgroundColor_ = options.dragBackgroundColor;
+    StyleManager::AddDragBackgroundColorResource(spanItem, options.dragBackgroundColorResObj);
     spanItem->isDragShadowNeeded_ = options.isDragShadowNeeded;
     AddSpanItem(spanItem, spanIndex);
     IF_TRUE(options.optionSource != OptionSource::UNDO_REDO,
@@ -5559,7 +5560,7 @@ void RichEditorPattern::OnCommonColorChange()
         if (placeholderSpan) {
             auto spanItem = placeholderSpan->GetSpanItem();
             CHECK_NULL_CONTINUE(spanItem);
-            IF_PRESENT(spanItem, UpdateColorByResourceId());
+            IF_PRESENT(spanItem, ReloadResources());
         }
         auto spanNode = DynamicCast<SpanNode>(uiNode);
         CHECK_NULL_CONTINUE(spanNode);
@@ -5568,12 +5569,11 @@ void RichEditorPattern::OnCommonColorChange()
         auto& textColor = spanItem->urlOnRelease ? themeUrlSpanColor : themeTextColor;
         IF_TRUE(spanItem->useThemeFontColor, spanNode->UpdateTextColorWithoutCheck(textColor));
         IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColorWithoutCheck(themeTextDecColor));
-        spanNode->UpdateColorByResourceId();
+        spanNode->ReloadResources();
     }
     paragraphCache_.Clear();
-    IF_PRESENT(typingTextStyle_, UpdateColorByResourceId());
-    IF_PRESENT(typingStyle_, UpdateColorByResourceId());
-    IF_PRESENT(selectedBackgroundColor_, UpdateColorByResourceId());
+    IF_PRESENT(typingTextStyle_, ReloadResources());
+    IF_PRESENT(typingStyle_, ReloadResources());
 
     IF_PRESENT(magnifierController_, SetColorModeChange(true));
     UpdateScrollBarColor(GetScrollBarColor());

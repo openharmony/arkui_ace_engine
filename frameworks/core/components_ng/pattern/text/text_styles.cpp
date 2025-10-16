@@ -323,28 +323,6 @@ std::unique_ptr<JsonValue> GetShaderStyleInJson(const std::optional<std::vector<
     return array;
 }
 
-void FontStyle::UpdateColorByResourceId()
-{
-    if (SystemProperties::ConfigChangePerform()) {
-        ReloadResources();
-        return;
-    }
-    if (propTextColor) {
-        propTextColor->UpdateColorByResourceId();
-    }
-    if (propTextDecorationColor) {
-        propTextDecorationColor->UpdateColorByResourceId();
-    }
-    if (propTextShadow) {
-        auto& shadows = propTextShadow.value();
-        std::for_each(shadows.begin(), shadows.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
-    }
-    if (propSymbolColorList) {
-        auto& colors = propSymbolColorList.value();
-        std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
-    }
-}
-
 PlaceholderAlignment GetPlaceHolderAlignmentFromVerticalAlign(VerticalAlign verticalAlign)
 {
     PlaceholderAlignment alignment;

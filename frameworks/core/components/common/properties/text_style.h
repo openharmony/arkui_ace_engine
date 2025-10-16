@@ -360,12 +360,6 @@ struct TextBackgroundStyle {
     int32_t groupId = 0;
     bool needCompareGroupId = true;
 
-    void UpdateColorByResourceId()
-    {
-        CHECK_NULL_VOID(backgroundColor);
-        backgroundColor->UpdateColorByResourceId();
-    }
-
     static void ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextBackgroundStyle>& style,
         const NG::InspectorFilter& filter);
 
@@ -1235,7 +1229,6 @@ public:
     }
 
     std::string ToString() const;
-    void UpdateColorByResourceId();
 
     const std::bitset<static_cast<size_t>(TextStyleAttribute::MAX_TEXT_STYLE)>& GetReLayoutTextStyleBitmap() const
     {
