@@ -3736,18 +3736,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetAllowDropImpl(Ark_NativePointer node,
-                          const Opt_Array_uniformTypeDescriptor_UniformDataType* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setAllowDrop(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void SetDraggableImpl(Ark_NativePointer node,
                           const Opt_Boolean* value)
     {
@@ -4676,21 +4664,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, preview);
         out.append(", ");
         WriteToString(&out, config);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void SetDragPreviewOptionsImpl(Ark_NativePointer node,
-                                   const Opt_DragPreviewOptions* value,
-                                   const Opt_DragInteractionOptions* options)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setDragPreviewOptions(");
-        WriteToString(&out, value);
-        out.append(", ");
-        WriteToString(&out, options);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -21314,7 +21287,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnDragLeaveImpl,
             CommonMethodModifier::SetOnDrop0Impl,
             CommonMethodModifier::SetOnDragEndImpl,
-            CommonMethodModifier::SetAllowDropImpl,
             CommonMethodModifier::SetDraggableImpl,
             CommonMethodModifier::SetDragPreview0Impl,
             CommonMethodModifier::SetOnPreDragImpl,
@@ -21386,7 +21358,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetChainModeImpl,
             CommonMethodModifier::SetOnDrop1Impl,
             CommonMethodModifier::SetDragPreview1Impl,
-            CommonMethodModifier::SetDragPreviewOptionsImpl,
             CommonMethodModifier::SetOverlayImpl,
             CommonMethodModifier::SetBlendModeImpl,
             CommonMethodModifier::SetAdvancedBlendModeImpl,

@@ -1991,10 +1991,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           const Opt_Callback_DragEvent_Opt_String_Void* value)
     {
     }
-    void SetAllowDropImpl(Ark_NativePointer node,
-                          const Opt_Array_uniformTypeDescriptor_UniformDataType* value)
-    {
-    }
     void SetDraggableImpl(Ark_NativePointer node,
                           const Opt_Boolean* value)
     {
@@ -2303,11 +2299,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetDragPreview1Impl(Ark_NativePointer node,
                              const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
                              const Opt_PreviewConfiguration* config)
-    {
-    }
-    void SetDragPreviewOptionsImpl(Ark_NativePointer node,
-                                   const Opt_DragPreviewOptions* value,
-                                   const Opt_DragInteractionOptions* options)
     {
     }
     void SetOverlayImpl(Ark_NativePointer node,
@@ -8378,7 +8369,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnDragLeaveImpl,
             CommonMethodModifier::SetOnDrop0Impl,
             CommonMethodModifier::SetOnDragEndImpl,
-            CommonMethodModifier::SetAllowDropImpl,
             CommonMethodModifier::SetDraggableImpl,
             CommonMethodModifier::SetDragPreview0Impl,
             CommonMethodModifier::SetOnPreDragImpl,
@@ -8450,7 +8440,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetChainModeImpl,
             CommonMethodModifier::SetOnDrop1Impl,
             CommonMethodModifier::SetDragPreview1Impl,
-            CommonMethodModifier::SetDragPreviewOptionsImpl,
             CommonMethodModifier::SetOverlayImpl,
             CommonMethodModifier::SetBlendModeImpl,
             CommonMethodModifier::SetAdvancedBlendModeImpl,
