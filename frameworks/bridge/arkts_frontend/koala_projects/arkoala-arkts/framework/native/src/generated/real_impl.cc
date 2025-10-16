@@ -16342,7 +16342,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void HandleConfirmImpl(Ark_SslErrorHandler peer)
     {
     }
-    void HandleCancelImpl(Ark_SslErrorHandler peer)
+    void HandleCancel0Impl(Ark_SslErrorHandler peer)
+    {
+    }
+    void HandleCancel1Impl(Ark_SslErrorHandler peer,
+                           Ark_Boolean abortLoading)
     {
     }
     } // SslErrorHandlerAccessor
@@ -20633,7 +20637,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SslErrorHandlerAccessor::ConstructImpl,
             SslErrorHandlerAccessor::GetFinalizerImpl,
             SslErrorHandlerAccessor::HandleConfirmImpl,
-            SslErrorHandlerAccessor::HandleCancelImpl,
+            SslErrorHandlerAccessor::HandleCancel0Impl,
+            SslErrorHandlerAccessor::HandleCancel1Impl,
         };
         return &SslErrorHandlerAccessorImpl;
     }

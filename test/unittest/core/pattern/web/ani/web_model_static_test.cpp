@@ -2126,7 +2126,6 @@ HWTEST_F(WebModelStaticTest, SetOnSslErrorRequest001, TestSize.Level1)
     auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
     ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
-
     auto callback = [&callCount](const BaseEventInfo* info) {
         callCount++;
         return true;
@@ -2154,7 +2153,6 @@ HWTEST_F(WebModelStaticTest, SetOnAllSslErrorRequest001, TestSize.Level1)
     auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
     ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
-
     auto callback = [&callCount](const BaseEventInfo* info) {
         callCount++;
         return true;

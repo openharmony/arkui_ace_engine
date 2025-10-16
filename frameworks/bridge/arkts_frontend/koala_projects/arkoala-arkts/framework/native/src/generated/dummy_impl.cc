@@ -38916,13 +38916,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void HandleCancelImpl(Ark_SslErrorHandler peer)
+    void HandleCancel0Impl(Ark_SslErrorHandler peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("handleCancel(");
+        string out("handleCancel0(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void HandleCancel1Impl(Ark_SslErrorHandler peer,
+                           Ark_Boolean abortLoading)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("handleCancel1(");
+        WriteToString(&out, abortLoading);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -46192,7 +46204,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SslErrorHandlerAccessor::ConstructImpl,
             SslErrorHandlerAccessor::GetFinalizerImpl,
             SslErrorHandlerAccessor::HandleConfirmImpl,
-            SslErrorHandlerAccessor::HandleCancelImpl,
+            SslErrorHandlerAccessor::HandleCancel0Impl,
+            SslErrorHandlerAccessor::HandleCancel1Impl,
         };
         return &SslErrorHandlerAccessorImpl;
     }

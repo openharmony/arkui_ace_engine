@@ -565,11 +565,17 @@ bool OnSslErrorEventReceive(const CallbackHelper<Callback_OnSslErrorEventReceive
     parameter.error = Converter::ArkValue<Ark_SslError>(static_cast<Converter::SslError>(eventInfo->GetError()));
     Converter::ArkArrayHolder<Array_Buffer> vecHolder(eventInfo->GetCertChainData());
     auto tempValue = vecHolder.ArkValue();
+    for (int i = 0; i < tempValue.length; ++i) {
+        tempValue.array[i].resource.resourceId = i;
+        tempValue.array[i].resource.hold = [](int id) { return; };
+        tempValue.array[i].resource.release = [](int id) { return; };
+    }
     parameter.certChainData = Converter::ArkValue<Opt_Array_Buffer>(tempValue);
     auto peer = new SslErrorHandlerPeer();
-    peer->handler = eventInfo->GetResult();
+    peer->sslErrorHandler = eventInfo->GetResult();
+    peer->type = SSL_ERROR_HANDLER;
     parameter.handler = peer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
     return true;
 }
 
@@ -594,11 +600,10 @@ bool OnSslError(const CallbackHelper<OnSslErrorEventCallback>& arkCallback,
     parameter.url = Converter::ArkValue<Ark_String>(url);
     auto peer = new SslErrorHandlerPeer();
     // need check
-#ifdef WRONG_NEW_ACE
-    peer->handler = eventInfo->GetResult();
-#endif
+    peer->allSslErrorHandler = eventInfo->GetResult();
+    peer->type = ALL_SSL_ERROR_HANDLER;
     parameter.handler = peer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
     return true;
 }
 
@@ -793,8 +798,7 @@ void OnFaviconReceived(const CallbackHelper<Callback_OnFaviconReceivedEvent_Void
         CHECK_NULL_VOID(parameter.favicon);
         parameter.favicon->pixelMap = PixelMap::Create(std::move(pixelMap));
         CHECK_NULL_VOID(parameter.favicon->pixelMap);
-        LOGE("WebAttributeModifier::OnFaviconReceivedImpl PixelMap supporting is not implemented yet");
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
     func();
@@ -1043,7 +1047,7 @@ void OnIntelligentTrackingPrevention(const CallbackHelper<OnIntelligentTrackingP
         Ark_IntelligentTrackingPreventionDetails parameter;
         parameter.host = Converter::ArkValue<Ark_String>(eventInfo->GetHost());
         parameter.trackerHost = Converter::ArkValue<Ark_String>(eventInfo->GetTrackerHost());
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
     func();
