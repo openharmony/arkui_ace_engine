@@ -3891,7 +3891,7 @@ function getAccessibilityText(context, resource, selected) {
         if (typeof resource === 'string') {
             resourceString = resource;
         } else {
-            resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource.id) ?? '' : '';
+            resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource?.id) ?? '' : '';
         }
         return selected ? `${selectText},${resourceString}` : resourceString;
     } catch (error) {
@@ -3926,7 +3926,7 @@ function getCheckTipsAccessibilityText(context, resource, selected) {
         if (typeof resource === 'string') {
             resourceString = resource;
         } else {
-            resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource.id) ?? '' : '';
+            resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource?.id) ?? '' : '';
         }
         return selected ? `${selectText},${resourceString},${checkBoxText}` :
             `${unselectText},${resourceString},${checkBoxText}`;

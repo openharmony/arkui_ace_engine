@@ -1844,7 +1844,7 @@ function getAccessibilityText(context: UIContext, resource: ResourceStr, selecte
     if (typeof resource === 'string') {
       resourceString = resource;
     } else {
-      resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource.id) ?? '' : '';
+      resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource?.id) ?? '' : '';
     }
     return selected ? `${selectText},${resourceString}` : resourceString;
   } catch (error) {
@@ -1924,7 +1924,8 @@ function resolveKeyEvent(event: KeyEvent, controller: Scroller) {
  * @param selected select state
  * @returns string
  */
-function getCheckTipsAccessibilityText(context: UIContext, resource: ResourceStr | null | undefined, selected?: boolean): string {
+function getCheckTipsAccessibilityText(context: UIContext, resource: ResourceStr | null | undefined,
+  selected?: boolean): string {
   try {
     // 'sys.string.slider_accessibility_selected'
     let selectText: string = context?.getHostContext()?.resourceManager.getStringSync(125833934) ?? '';
@@ -1936,7 +1937,7 @@ function getCheckTipsAccessibilityText(context: UIContext, resource: ResourceStr
     if (typeof resource === 'string') {
       resourceString = resource
     } else {
-      resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource.id) ?? '' : '';
+      resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource?.id) ?? '' : '';
     }
     return selected ? `${selectText},${resourceString},${checkBoxText}` :
       `${unselectText},${resourceString},${checkBoxText}`;
