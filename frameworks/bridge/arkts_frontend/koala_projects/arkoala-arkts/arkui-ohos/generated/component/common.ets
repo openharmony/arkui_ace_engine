@@ -6519,7 +6519,9 @@ export enum SourceType {
     MOUSE = 1,
     Mouse = 1,
     TOUCH_SCREEN = 2,
-    TouchScreen = 2
+    TouchScreen = 2,
+    KEY = 4,
+    JOYSTICK = 5
 }
 export enum SourceTool {
     UNKNOWN = 0,
