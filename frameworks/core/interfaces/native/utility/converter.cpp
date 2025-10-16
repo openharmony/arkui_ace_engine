@@ -30,6 +30,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
@@ -1780,8 +1781,12 @@ OptionParam Convert(const Ark_MenuElement& src)
         arkCallback.Invoke();
     };
     param.icon = Converter::OptConvert<std::string>(src.icon).value_or(param.icon);
-    LOGE("Ark_MenuElement Converter: SymbolGlyphModifier is not supported yet");
     param.enabled = Converter::OptConvert<bool>(src.enabled).value_or(param.enabled);
+    auto symbolIcon = Converter::OptConvert<Ark_SymbolGlyphModifier>(src.symbolIcon);
+    if (symbolIcon && *symbolIcon) {
+        param.symbol = (*symbolIcon)->symbolApply;
+        PeerUtils::DestroyPeer(*symbolIcon);
+    }
     return param;
 }
 
