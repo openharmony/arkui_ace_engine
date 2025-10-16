@@ -3690,26 +3690,6 @@ void impl_CommonMethod_setOnDragEnd(Ark_NativePointer thisPtr, KSerializerBuffer
         GetNodeModifiers()->getCommonMethodModifier()->setOnDragEnd(self, static_cast<Opt_Callback_DragEvent_Opt_String_Void*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnDragEnd, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setAllowDrop(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Array_uniformTypeDescriptor_UniformDataType valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            const Ark_Int32 valueValueTempTmpBuf_Length = thisDeserializer.readInt32();
-            Array_uniformTypeDescriptor_UniformDataType valueValueTempTmpBuf_ = {};
-            thisDeserializer.resizeArray<std::decay<decltype(valueValueTempTmpBuf_)>::type,
-        std::decay<decltype(*valueValueTempTmpBuf_.array)>::type>(&valueValueTempTmpBuf_, valueValueTempTmpBuf_Length);
-            for (int valueValueTempTmpBuf_BufCounterI = 0; valueValueTempTmpBuf_BufCounterI < valueValueTempTmpBuf_Length; valueValueTempTmpBuf_BufCounterI++) {
-                valueValueTempTmpBuf_.array[valueValueTempTmpBuf_BufCounterI] = static_cast<Ark_uniformTypeDescriptor_UniformDataType>(thisDeserializer.readInt32());
-            }
-            valueValueTempTmpBuf.value = valueValueTempTmpBuf_;
-        }
-        Opt_Array_uniformTypeDescriptor_UniformDataType valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setAllowDrop(self, static_cast<Opt_Array_uniformTypeDescriptor_UniformDataType*>(&valueValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setAllowDrop, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setDraggable(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -4888,26 +4868,6 @@ void impl_CommonMethod_setDragPreview1(Ark_NativePointer thisPtr, KSerializerBuf
         GetNodeModifiers()->getCommonMethodModifier()->setDragPreview1(self, static_cast<Opt_Union_CustomBuilder_DragItemInfo_String*>(&previewValueTemp), static_cast<Opt_PreviewConfiguration*>(&configValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setDragPreview1, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setDragPreviewOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_DragPreviewOptions valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = DragPreviewOptions_serializer::read(thisDeserializer);
-        }
-        Opt_DragPreviewOptions valueValueTemp = valueValueTempTmpBuf;;
-        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_DragInteractionOptions optionsValueTempTmpBuf = {};
-        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            optionsValueTempTmpBuf.value = DragInteractionOptions_serializer::read(thisDeserializer);
-        }
-        Opt_DragInteractionOptions optionsValueTemp = optionsValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setDragPreviewOptions(self, static_cast<Opt_DragPreviewOptions*>(&valueValueTemp), static_cast<Opt_DragInteractionOptions*>(&optionsValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setDragPreviewOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setOverlay(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

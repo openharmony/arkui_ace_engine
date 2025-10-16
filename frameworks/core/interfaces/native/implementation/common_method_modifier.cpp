@@ -3796,14 +3796,6 @@ void SetOnDragEndImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetOnDragEnd(frameNode, std::move(onDragEnd));
 }
-void SetAllowDropImpl(Ark_NativePointer node,
-                      const Opt_Array_uniformTypeDescriptor_UniformDataType* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto allowDrop = value ? Converter::OptConvert<std::set<std::string>>(*value) : std::nullopt;
-    ViewAbstractModelStatic::SetAllowDrop(frameNode, allowDrop);
-}
 void SetDraggableImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
 {
@@ -4860,49 +4852,6 @@ void SetDragPreview1Impl(Ark_NativePointer node,
             ViewAbstract::SetDragPreview(frameNode, DragDropInfo {});
         });
 }
-void SetDragPreviewOptionsImpl(Ark_NativePointer node,
-                               const Opt_DragPreviewOptions* value,
-                               const Opt_DragInteractionOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto previewOption = Converter::OptConvertPtr<DragPreviewOption>(value);
-    if (!previewOption) {
-        DragPreviewOption defaultOption;
-        ViewAbstract::SetDragPreviewOptions(frameNode, defaultOption);
-        return;
-    }
-    auto optionsOpt = Converter::OptConvertPtr<Ark_DragInteractionOptions>(options);
-    if (optionsOpt) {
-        auto defaultAnimationBeforeLifting = Converter::OptConvert<Ark_Boolean>(
-            optionsOpt.value().defaultAnimationBeforeLifting);
-        if (defaultAnimationBeforeLifting) {
-            previewOption->defaultAnimationBeforeLifting = defaultAnimationBeforeLifting.value();
-        }
-        auto isMultiSelectionEnabled = Converter::OptConvert<Ark_Boolean>(
-            optionsOpt.value().isMultiSelectionEnabled);
-        if (isMultiSelectionEnabled) {
-            previewOption->isMultiSelectionEnabled = isMultiSelectionEnabled.value();
-        }
-        auto enableEdgeAutoScroll = Converter::OptConvert<Ark_Boolean>(
-            optionsOpt.value().enableEdgeAutoScroll);
-        if (enableEdgeAutoScroll) {
-            previewOption->enableEdgeAutoScroll = enableEdgeAutoScroll.value();
-        }
-        auto enableHapticFeedback = Converter::OptConvert<Ark_Boolean>(
-            optionsOpt.value().enableHapticFeedback);
-        if (enableHapticFeedback) {
-            previewOption->enableHapticFeedback = enableHapticFeedback.value();
-        }
-        auto isLiftingDisabled = Converter::OptConvert<Ark_Boolean>(
-            optionsOpt.value().isLiftingDisabled);
-        if (isLiftingDisabled) {
-            previewOption->isLiftingDisabled = isLiftingDisabled.value();
-        }
-    }
-    LOGE("CommonMethodModifier::DragPreviewOptionsImpl Ark_ImageModifier is not supported yet.");
-    ViewAbstract::SetDragPreviewOptions(frameNode, *previewOption);
-}
 void SetOverlayImpl(Ark_NativePointer node,
                     const Opt_Union_String_CustomBuilder_ComponentContent* value,
                     const Opt_OverlayOptions* options)
@@ -5655,7 +5604,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnDragLeaveImpl,
         CommonMethodModifier::SetOnDrop0Impl,
         CommonMethodModifier::SetOnDragEndImpl,
-        CommonMethodModifier::SetAllowDropImpl,
         CommonMethodModifier::SetDraggableImpl,
         CommonMethodModifier::SetDragPreview0Impl,
         CommonMethodModifier::SetOnPreDragImpl,
@@ -5723,7 +5671,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetChainModeImpl,
         CommonMethodModifier::SetOnDrop1Impl,
         CommonMethodModifier::SetDragPreview1Impl,
-        CommonMethodModifier::SetDragPreviewOptionsImpl,
         CommonMethodModifier::SetOverlayImpl,
         CommonMethodModifier::SetBlendModeImpl,
         CommonMethodModifier::SetAdvancedBlendModeImpl,
