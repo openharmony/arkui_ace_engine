@@ -130,43 +130,42 @@ namespace GaugeModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = GaugeModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = GaugeModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // GaugeModifier
 namespace GaugeInterfaceModifier {
 void SetGaugeOptionsImpl(Ark_NativePointer node,
                          const Ark_GaugeOptions* options)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(options);
-    // auto min = Converter::OptConvert<float>(options->min);
-    // auto max = Converter::OptConvert<float>(options->max);
-    // if (!min) {
-    //     min = DEFAULT_GAUGE_MIN;
-    // }
-    // if (!max) {
-    //     max = DEFAULT_GAUGE_MAX;
-    // }
-    // if (LessNotEqual(*max, *min)) {
-    //     min = DEFAULT_GAUGE_MIN;
-    //     max = DEFAULT_GAUGE_MAX;
-    // }
-    // auto value = Converter::OptConvert<float>(options->value);
-    // if (!value) {
-    //     value = DEFAULT_GAUGE_VALUE;
-    // }
-    // if (LessNotEqual(*value, *min) || GreatNotEqual(*value, *max)) {
-    //     value = min;
-    // }
-    // GaugeModelStatic::SetValue(frameNode, value);
-    // GaugeModelStatic::SetMin(frameNode, min);
-    // GaugeModelStatic::SetMax(frameNode, max);
-    // GaugeModelNG::SetIsShowLimitValue(frameNode, min || max);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    auto min = Converter::OptConvert<float>(options->min);
+    auto max = Converter::OptConvert<float>(options->max);
+    if (!min) {
+        min = DEFAULT_GAUGE_MIN;
+    }
+    if (!max) {
+        max = DEFAULT_GAUGE_MAX;
+    }
+    if (LessNotEqual(*max, *min)) {
+        min = DEFAULT_GAUGE_MIN;
+        max = DEFAULT_GAUGE_MAX;
+    }
+    auto value = Converter::OptConvert<float>(options->value);
+    if (!value) {
+        value = DEFAULT_GAUGE_VALUE;
+    }
+    if (LessNotEqual(*value, *min) || GreatNotEqual(*value, *max)) {
+        value = min;
+    }
+    GaugeModelStatic::SetValue(frameNode, value);
+    GaugeModelStatic::SetMin(frameNode, min);
+    GaugeModelStatic::SetMax(frameNode, max);
+    GaugeModelStatic::SetIsShowLimitValue(frameNode, min || max);
 }
 } // GaugeInterfaceModifier
 namespace GaugeAttributeModifier {

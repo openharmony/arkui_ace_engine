@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT PatternLockModelStatic {
 public:
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetActiveColor(FrameNode* frameNode, const std::optional<Color>& activeColor);
     static void SetCircleRadius(FrameNode* frameNode, const std::optional<Dimension>& radius);
     static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
@@ -35,6 +36,7 @@ public:
     static void SetEnableWaveEffect(FrameNode* frameNode, const std::optional<bool>& enableWaveEffect);
     static void SetSkipUnselectedPoint(FrameNode* frameNode, const std::optional<bool>& skipValue);
     static void SetEnableForeground(FrameNode* frameNode, const std::optional<bool>& enableForeground);
+    static const RefPtr<V2::PatternLockController> GetController(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

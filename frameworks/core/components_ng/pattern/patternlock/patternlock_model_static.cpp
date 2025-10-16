@@ -18,6 +18,16 @@
 #include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
 
 namespace OHOS::Ace::NG {
+RefPtr<FrameNode> PatternLockModelStatic::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PATTERN_LOCK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PatternLockPattern>(); });
+    CHECK_NULL_RETURN(frameNode, frameNode);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    pattern->SetPatternLockController(AceType::MakeRefPtr<V2::PatternLockController>());
+    return frameNode;
+}
+
 void PatternLockModelStatic::SetActiveColor(FrameNode* frameNode, const std::optional<Color>& activeColor)
 {
     if (activeColor.has_value()) {
@@ -139,4 +149,11 @@ void PatternLockModelStatic::SetSkipUnselectedPoint(FrameNode* frameNode, const 
     }
 }
 
+const RefPtr<V2::PatternLockController> PatternLockModelStatic::GetController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetPatternLockController();
+}
 } // namespace OHOS::Ace::NG
