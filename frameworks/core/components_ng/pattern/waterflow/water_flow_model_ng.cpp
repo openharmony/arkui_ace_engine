@@ -117,6 +117,7 @@ void WaterFlowModelNG::SetColumnsTemplate(const std::string& value)
         ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, "1fr");
         return;
     }
+    ACE_RESET_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ItemFillPolicy);
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, value);
 }
 
@@ -468,6 +469,11 @@ void WaterFlowModelNG::SetColumnsTemplate(FrameNode* frameNode, const std::strin
     CHECK_NULL_VOID(frameNode);
     if (value.empty()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, "1fr", frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        if (layoutProperty->GetItemFillPolicy().has_value()) {
+            layoutProperty->ResetItemFillPolicy();
+        }
         return;
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, value, frameNode);
@@ -845,5 +851,29 @@ void WaterFlowModelNG::ParseResObjScrollBarColor(const RefPtr<ResourceObject>& r
 void WaterFlowModelNG::ParseResObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
     ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
+
+void WaterFlowModelNG::SetItemFillPolicy(PresetFillType policy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ItemFillPolicy, policy);
+}
+
+void WaterFlowModelNG::SetItemFillPolicy(FrameNode* frameNode, PresetFillType fillType)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ItemFillPolicy, fillType, frameNode);
+}
+
+void WaterFlowModelNG::ResetItemFillPolicy(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ItemFillPolicy, frameNode);
+}
+
+PresetFillType WaterFlowModelNG::GetItemFillPolicy(FrameNode* frameNode)
+{
+    PresetFillType value = PresetFillType::BREAKPOINT_DEFAULT;
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    auto itemFillPolicy = layoutProperty->GetItemFillPolicy();
+    return itemFillPolicy.value_or(value);
 }
 } // namespace OHOS::Ace::NG

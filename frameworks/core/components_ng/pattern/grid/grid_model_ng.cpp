@@ -18,6 +18,7 @@
 #include "base/utils/system_properties.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
@@ -89,12 +90,19 @@ void GridModelNG::SetLayoutOptions(GridLayoutOptions options)
 
 void GridModelNG::SetColumnsTemplate(const std::string& value)
 {
+    ACE_RESET_LAYOUT_PROPERTY(GridLayoutProperty, ItemFillPolicy);
     if (value.empty()) {
         TAG_LOGW(AceLogTag::ACE_GRID, "Columns Template [%{public}s] is not valid.", value.c_str());
         ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, "1fr");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, value);
+}
+
+void GridModelNG::SetItemFillPolicy(PresetFillType policy)
+{
+    ACE_RESET_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ItemFillPolicy, policy);
 }
 
 void GridModelNG::SetRowsTemplate(const std::string& value)
@@ -431,12 +439,19 @@ void GridModelNG::SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScr
 
 void GridModelNG::SetColumnsTemplate(FrameNode* frameNode, const std::string& columnsTemplate)
 {
+    ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ItemFillPolicy, frameNode);
     if (columnsTemplate.empty()) {
         TAG_LOGW(AceLogTag::ACE_GRID, "Columns Template [%{public}s] is not valid.", columnsTemplate.c_str());
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, "1fr", frameNode);
         return;
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, columnsTemplate, frameNode);
+}
+
+void GridModelNG::SetItemFillPolicy(FrameNode* frameNode, PresetFillType policy)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ItemFillPolicy, policy, frameNode);
 }
 
 void GridModelNG::SetRowsTemplate(FrameNode* frameNode, const std::string& rowsTemplate)
@@ -699,6 +714,15 @@ std::string GridModelNG::GetColumnsTemplate(FrameNode* frameNode)
     std::string value = "1fr";
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, ColumnsTemplate, value, frameNode, value);
     return value;
+}
+
+PresetFillType GridModelNG::GetItemFillPolicy(FrameNode* frameNode)
+{
+    PresetFillType type = PresetFillType::BREAKPOINT_DEFAULT;
+    CHECK_NULL_RETURN(frameNode, type);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        GridLayoutProperty, ItemFillPolicy, type, frameNode, PresetFillType::BREAKPOINT_DEFAULT);
+    return type;
 }
 
 std::string GridModelNG::GetRowsTemplate(FrameNode* frameNode)

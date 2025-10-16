@@ -1498,17 +1498,20 @@ class ArkLanesOpt {
   lanesNum: number | undefined;
   minLength: Length | undefined;
   maxLength: Length | undefined;
+  fillType: number | undefined;
   gutter?: undefined;
   constructor() {
     this.lanesNum = undefined;
     this.minLength = undefined;
     this.maxLength = undefined;
+    this.fillType = undefined;
     this.gutter = undefined;
   }
 
   isEqual(another: ArkLanesOpt): boolean {
     return (this.lanesNum === another.lanesNum && this.minLength === another.minLength
-      && this.maxLength === another.maxLength && this.gutter === another.gutter);
+      && this.maxLength === another.maxLength && this.fillType === another.fillType 
+      && this.gutter === another.gutter);
   }
 }
 

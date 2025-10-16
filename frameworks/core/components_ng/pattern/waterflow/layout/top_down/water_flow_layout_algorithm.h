@@ -43,8 +43,8 @@ private:
     void FillViewport(float mainSize, LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper);
     float ComputeCrossPosition(int32_t crossIndex) const;
-    void InitialItemsCrossSize(
-        const RefPtr<WaterFlowLayoutProperty>& layoutProperty, const SizeF& frameSize, int32_t childrenCount);
+    void InitialItemsCrossSize(const RefPtr<WaterFlowLayoutProperty>& layoutProperty, const SizeF& frameSize,
+        int32_t childrenCount, double originalWidth);
     int32_t GetChildIndexWithFooter(int32_t index) const
     {
         return index + layoutInfo_->footerIndex_ + 1;
@@ -74,6 +74,7 @@ private:
     // Record the index range after measurement completion
     int32_t measuredStartIndex_ = -1;
     int32_t measuredEndIndex_ = -1;
+    LayoutWrapper* layoutWrapper_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_ALGORITHM_H

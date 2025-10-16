@@ -20471,11 +20471,12 @@ class ArkLanesOpt {
     this.lanesNum = undefined;
     this.minLength = undefined;
     this.maxLength = undefined;
+    this.fillType = undefined;
     this.gutter = undefined;
   }
   isEqual(another) {
     return (this.lanesNum === another.lanesNum && this.minLength === another.minLength
-      && this.maxLength === another.maxLength && this.gutter === another.gutter);
+      && this.maxLength === another.maxLength&& this.fillType === another.fillType && this.gutter === another.gutter);
   }
 }
 class ArkScrollSnapOptions {
@@ -35326,7 +35327,7 @@ class ListLanesModifier extends ModifierWithKey {
       getUINativeModule().list.resetListLanes(node);
     }
     else {
-      getUINativeModule().list.setListLanes(node, this.value.lanesNum, this.value.minLength, this.value.maxLength, this.value.gutter);
+      getUINativeModule().list.setListLanes(node, this.value.lanesNum, this.value.minLength, this.value.maxLength, this.value.fillType, this.value.gutter);
     }
   }
   checkObjectDiff() {
@@ -35654,10 +35655,18 @@ class ArkListComponent extends ArkScrollable {
     else if (isNumber(value)) {
       opt.lanesNum = value;
     }
-    else {
-      const lc = value;
-      opt.minLength = lc.minLength;
-      opt.maxLength = lc.maxLength;
+    else if (isObject(value)) {
+      if (isNumber(value.fillType)) {
+        opt.fillType = value.fillType;
+      }
+      else {
+        const lc = value;
+        opt.minLength = lc.minLength;
+        opt.maxLength = lc.maxLength;
+        if (isUndefined(opt.minLength) && isUndefined(opt.maxLength)) {
+          opt.fillType = -1;
+        }
+      }
     }
     modifierWithKey(this._modifiersWithKeys, ListLanesModifier.identity, ListLanesModifier, opt);
     return this;

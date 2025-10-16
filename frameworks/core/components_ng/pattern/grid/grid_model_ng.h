@@ -34,6 +34,7 @@ public:
     void Pop() override;
     void SetLayoutOptions(GridLayoutOptions options) override;
     void SetColumnsTemplate(const std::string& value) override;
+    void SetItemFillPolicy(PresetFillType policy) override;
     void SetRowsTemplate(const std::string& value) override;
     void SetColumnsGap(const Dimension& value) override;
     void SetRowsGap(const Dimension& value) override;
@@ -155,7 +156,8 @@ public:
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-
+    static void SetItemFillPolicy(FrameNode* frameNode, PresetFillType policy);
+    static PresetFillType GetItemFillPolicy(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

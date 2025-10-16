@@ -371,6 +371,45 @@ void JSList::SetListItemAlign(int32_t itemAlignment)
     ListModel::GetInstance()->SetListItemAlign(static_cast<V2::ListItemAlign>(itemAlignment));
 }
 
+bool SetFillType(const JSRef<JSObject>& jsObj)
+{
+    auto fillTypeParam = jsObj->GetProperty("fillType");
+    auto minLengthParam = jsObj->GetProperty("minLength");
+    auto maxLengthParam = jsObj->GetProperty("maxLength");
+    if (!fillTypeParam->IsNull() && !fillTypeParam->IsUndefined()) {
+        auto itemFillPolicy = JSScrollable::ParsePresetFillType(fillTypeParam);
+        if (itemFillPolicy.has_value()) {
+            ListModel::GetInstance()->SetItemFillPolicy(itemFillPolicy.value());
+        } else {
+            ListModel::GetInstance()->SetItemFillPolicy(PresetFillType::BREAKPOINT_DEFAULT);
+        }
+        ListModel::GetInstance()->SetLanes(1);
+        return true;
+    } else {
+        if ((minLengthParam->IsNull() || minLengthParam->IsUndefined()) &&
+            (maxLengthParam->IsNull() || maxLengthParam->IsUndefined())) {
+            ListModel::GetInstance()->SetItemFillPolicy(PresetFillType::BREAKPOINT_DEFAULT);
+            return true;
+        } else {
+            ListModel::GetInstance()->ResetItemFillPolicy();
+            return false;
+        }
+    }
+}
+
+bool SetLineNum(const JSCallbackInfo& info)
+{
+    int32_t laneNum = 1;
+    if (JSViewAbstract::ParseJsInteger<int32_t>(info[0], laneNum)) {
+        // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
+        ListModel::GetInstance()->SetLanes(laneNum);
+        ListModel::GetInstance()->ResetItemFillPolicy();
+        ListModel::GetInstance()->SetLaneConstrain(-1.0_vp, -1.0_vp);
+        return true;
+    }
+    return false;
+}
+
 void JSList::SetLanes(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -390,18 +429,16 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         }
         ListModel::GetInstance()->SetLaneGutter(laneGutter);
     }
-
-    int32_t laneNum = 1;
-    if (ParseJsInteger<int32_t>(info[0], laneNum)) {
-        // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
-        ListModel::GetInstance()->SetLanes(laneNum);
-        ListModel::GetInstance()->SetLaneConstrain(-1.0_vp, -1.0_vp);
+    if (SetLineNum(info)) {
         return;
     }
     RefPtr<ResourceObject> resObjMinLengthValue;
     RefPtr<ResourceObject> resObjMaxLengthValue;
     if (info[0]->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        if (SetFillType(jsObj)) {
+            return;
+        }
         auto minLengthParam = jsObj->GetProperty("minLength");
         auto maxLengthParam = jsObj->GetProperty("maxLength");
         if (minLengthParam->IsNull() || maxLengthParam->IsNull()) {
