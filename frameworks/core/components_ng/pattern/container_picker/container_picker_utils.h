@@ -57,9 +57,9 @@ public:
                 layoutConstraint.maxSize.SetWidth(widthOpt.value());
             }
         }
-        
-        childSelfIdealSize.Reset();
-        childSelfIdealSize.SetHeight(static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx()));
+        auto maxHeight = static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx());
+        layoutConstraint.maxSize.SetHeight(maxHeight);
+        childSelfIdealSize.SetHeight(maxHeight);
         layoutConstraint.selfIdealSize = childSelfIdealSize;
         return layoutConstraint;
     }

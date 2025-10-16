@@ -93,16 +93,18 @@ void ContainerPickerLayoutAlgorithm::MeasureHeight(LayoutWrapper* layoutWrapper,
 {
     auto pickerLayoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto contentConstraint = pickerLayoutProperty->GetContentLayoutConstraint().value();
-    auto isHeightDefined = false;
-    float height = GetMainAxisSize(contentConstraint.selfIdealSize, axis_).value_or(UNDEFINED_SIZE);
-    if (NonNegative(height)) {
-        isHeightDefined = true;
-    }
+    auto layoutPolicy = pickerLayoutProperty->GetLayoutPolicyProperty();
 
     // measure height
-    if (!isHeightDefined) {
-        auto parentMaxHeight = GetMainAxisSize(contentConstraint.maxSize, axis_);
-        height = std::min(parentMaxHeight, static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx()));
+    float height = GetMainAxisSize(contentConstraint.selfIdealSize, axis_).value_or(UNDEFINED_SIZE);
+    if (layoutPolicy.has_value() && layoutPolicy->IsHeightMatch()) {
+        auto parentMainSize =
+            CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_MAIN_AXIS).MainSize(axis_);
+        height = parentMainSize.value_or(static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx()));
+    } else {
+        if (Negative(height)) {
+            height = static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx());
+        }
     }
 
     if (!NearEqual(height, height_)) {
@@ -110,7 +112,7 @@ void ContainerPickerLayoutAlgorithm::MeasureHeight(LayoutWrapper* layoutWrapper,
         itemPosition_.clear();
     }
     SetHeight(height);
-    contentMainSize_ = std::min(height, static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx()));
+    contentMainSize_ = height;
     contentIdealSize.SetMainSize(height, axis_);
 }
 
@@ -119,9 +121,9 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
     auto pickerLayoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto contentConstraint = pickerLayoutProperty->GetContentLayoutConstraint().value();
     auto layoutPolicy = pickerLayoutProperty->GetLayoutPolicyProperty();
+    auto crossSize = contentIdealSize.CrossSize(axis_).value_or(UNDEFINED_SIZE);
 
     // measure width
-    auto crossSize = contentIdealSize.CrossSize(axis_).value_or(UNDEFINED_SIZE);
     float width;
     if (layoutPolicy.has_value()) {
         if (layoutPolicy->IsWidthWrap()) {
@@ -251,7 +253,7 @@ void ContainerPickerLayoutAlgorithm::MeasureBelow(LayoutWrapper* layoutWrapper,
 {
     float currentEndPos = startPos;
     float currentStartPos = 0.0f;
-    float endMainPos = overScrollFeature_ ? std::max(startPos + contentMainSize_, endMainPos_) : endMainPos_;
+    float endMainPos = endMainPos_;
 
     auto currentIndex = startIndex - 1;
     do {
@@ -262,7 +264,7 @@ void ContainerPickerLayoutAlgorithm::MeasureBelow(LayoutWrapper* layoutWrapper,
         }
     } while (NeedMeasureBelow(currentIndex, currentStartPos, endMainPos, cachedLayout));
 
-    if (overScrollFeature_ || isLoop_) {
+    if (canOverScroll_ || isLoop_) {
         return;
     }
 
@@ -276,7 +278,7 @@ void ContainerPickerLayoutAlgorithm::MeasureAbove(LayoutWrapper* layoutWrapper,
 {
     float currentStartPos = endPos;
     float currentEndPos = 0.0f;
-    float startMainPos = overScrollFeature_ ? std::min(endPos - contentMainSize_, startMainPos_) : startMainPos_;
+    float startMainPos = startMainPos_;
     auto currentIndex = endIndex + 1;
 
     do {
@@ -287,7 +289,7 @@ void ContainerPickerLayoutAlgorithm::MeasureAbove(LayoutWrapper* layoutWrapper,
         }
     } while (NeedMeasureAbove(currentIndex, currentEndPos, startMainPos, cachedLayout));
 
-    if (overScrollFeature_ || isLoop_) {
+    if (canOverScroll_ || isLoop_) {
         return;
     }
 
@@ -343,9 +345,7 @@ bool ContainerPickerLayoutAlgorithm::MeasureAboveItem(LayoutWrapper* layoutWrapp
 bool ContainerPickerLayoutAlgorithm::NeedMeasureBelow(
     int32_t currentIndex, float currentStartPos, float endMainPos, bool cachedLayout) const
 {
-    auto contentMainSize = contentMainSize_;
-    bool isLayoutOver = overScrollFeature_ && GreatOrEqual(currentStartPos, contentMainSize);
-    return !isLayoutOver && LessNotEqual(currentStartPos, endMainPos);
+    return LessNotEqual(currentStartPos, endMainPos);
 }
 
 bool ContainerPickerLayoutAlgorithm::NeedMeasureAbove(
