@@ -27,8 +27,8 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 int32_t testOnSelect = 1;
-bool isOnWillChangeCalled = false;
-bool isOnDidChangeCalled = false;
+bool g_isOnWillChangeCalled = false;
+bool g_isOnDidChangeCalled = false;
 RichEditorChangeValue onWillChangeValue;
 RichEditorChangeValue onDidChangeValue;
 RichEditorDeleteValue aboutToDeleteValue;
@@ -77,8 +77,8 @@ void RichEditorChangeCallbackOneTestNg::TearDownTestSuite()
 
 void RichEditorChangeCallbackOneTestNg::ResetContentChangeCallbackState()
 {
-    isOnWillChangeCalled = false;
-    isOnDidChangeCalled = false;
+    g_isOnWillChangeCalled = false;
+    g_isOnDidChangeCalled = false;
     onWillChangeValue.reset();
     onDidChangeValue.reset();
 }
@@ -87,14 +87,14 @@ void RichEditorChangeCallbackOneTestNg::InitContentChangeCallback(RichEditorMode
 {
     ResetContentChangeCallbackState();
     auto onWillChange = [](const RichEditorChangeValue& changeValue) {
-        isOnWillChangeCalled = true;
+        g_isOnWillChangeCalled = true;
         onWillChangeValue = changeValue;
         return true;
     };
     richEditorModel.SetOnWillChange(std::move(onWillChange));
 
     auto onDidChange = [](const RichEditorChangeValue& changeValue) {
-        isOnDidChangeCalled = true;
+        g_isOnDidChangeCalled = true;
         onDidChangeValue = changeValue;
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
