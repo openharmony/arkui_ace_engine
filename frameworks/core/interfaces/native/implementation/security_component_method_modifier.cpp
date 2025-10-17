@@ -101,6 +101,7 @@ void SetIconSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto valueOpt = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(valueOpt);
+    Validator::ValidateNonPercent(valueOpt);
     SecurityComponentModelNG::SetIconSize(frameNode, valueOpt);
 }
 void SetLayoutDirectionImpl(Ark_NativePointer node,
