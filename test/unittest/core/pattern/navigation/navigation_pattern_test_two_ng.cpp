@@ -1380,6 +1380,7 @@ HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_049, TestSize.Leve
         std::pair<std::string, RefPtr<UINode>>("preTopNavDestination", preTopNavDestination);
     navigationPattern->FireInterceptionBeforeLifeCycleEvent(topNavPath, 1);
     EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+    
     navigationPattern->isReplace_ = 1;
     navigationPattern->FireInterceptionBeforeLifeCycleEvent(optPair, 1);
     EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);

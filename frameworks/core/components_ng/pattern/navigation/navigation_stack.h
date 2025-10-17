@@ -191,8 +191,7 @@ public:
         const RefPtr<NG::NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) {}
 
     virtual void FireNavigationInterceptionBeforeLifeCycle(const RefPtr<NavigationStack>& navigationStack,
-        const RefPtr<NG::NavDestinationContext>& from, const int32_t index, NG::NavigationOperation operation,
-        bool isAnimated)
+        const RefPtr<NG::NavDestinationContext>& from, const int32_t index, bool isAnimated)
     {}
 
     virtual void FireNavigationModeChange(NavigationMode mode) {}
@@ -285,6 +284,8 @@ public:
     {
         return false;
     }
+
+    virtual void UpdatePreTopInfo() {}
 
     virtual bool IsStaticStack()
     {
