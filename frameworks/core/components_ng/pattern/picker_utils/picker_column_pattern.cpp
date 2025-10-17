@@ -1042,6 +1042,9 @@ void PickerColumnPattern::AddHotZoneRectToText()
     CHECK_NULL_VOID(host);
     auto childSize = static_cast<int32_t>(host->GetChildren().size());
     auto midSize = childSize / MIDDLE_CHILD_INDEX;
+    if (static_cast<int32_t>(optionProperties_.size()) <= midSize || midSize <= 0) {
+        return;
+    }
     auto middleChildHeight = optionProperties_[midSize].height;
     auto otherChildHeight = optionProperties_[midSize - 1].height;
     for (int32_t i = 0; i < childSize; i++) {
