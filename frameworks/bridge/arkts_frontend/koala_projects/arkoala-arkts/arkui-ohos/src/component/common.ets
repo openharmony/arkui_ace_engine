@@ -979,3 +979,19 @@ export class AxisEventTransfer {
         return retValue;
     }
 }
+
+export class ArkCommonPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkCommonPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIAniModule._Common_construct(peerId, flags)
+        const _peer  = new ArkCommonPeer(_peerPtr, peerId, "Common", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setCommonOptionsAttribute(): void {
+        ArkUIAniModule._CommonInterface_setCommonOptions(this.peer.ptr)
+    }
+}

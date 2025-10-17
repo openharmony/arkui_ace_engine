@@ -731,6 +731,11 @@ struct ArkUIAniComponent3DModifier {
     void (*setWidget)(ArkUINodeHandle node, const std::string& scenePath, int32_t modelType);
 };
 
+struct ArkUIAniCommonNodeAniModifier {
+    ani_long (*construct)(ani_int id, ani_int flags);
+    void (*setCommonOptions)(ani_long node);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -766,6 +771,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniForEachNodeModifier* (*getForEachNodeAniModifier)();
     const ArkUIAniComponent3DModifier* (*getComponent3DModifier)();
     const ArkUIAniXBarModifier* (*getXBarAniModifier)();
+    const ArkUIAniCommonNodeAniModifier* (*getCommonNodeAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

@@ -16,6 +16,7 @@
 #include "animation_ani_modifier.h"
 #include "canvas_ani_modifier.h"
 #include "common_ani_modifier.h"
+#include "common_node_ani_modifier.h"
 #include "component3d_ani_modifier.h"
 #include "component_content_ani_modifier.h"
 #include "component_snapshot_ani_modifier.h"
@@ -83,6 +84,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getForEachNodeAniModifier = OHOS::Ace::NG::GetForEachNodeAniModifier,
         .getComponent3DModifier = OHOS::Ace::NG::GetComponent3DModifier,
         .getXBarAniModifier = OHOS::Ace::NG::GetXBarAniModifier,
+        .getCommonNodeAniModifier = OHOS::Ace::NG::GetCommonNodeAniModifier,
     };
     return &impl;
 }
