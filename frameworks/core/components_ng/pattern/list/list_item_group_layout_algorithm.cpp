@@ -1192,12 +1192,12 @@ void ListItemGroupLayoutAlgorithm::UpdateLayoutedItemInfo()
         auto& itemInfo = layoutedItemInfo_.value();
         auto prevStartIndex = itemInfo.startIndex;
         if (startIndex <= itemInfo.startIndex || LessNotEqual(startPos, itemInfo.startPos) ||
-            startIndex > itemInfo.endIndex) {
+            (!isNeedCheckOffset_ && startIndex > itemInfo.endIndex)) {
             itemInfo.startIndex = startIndex;
             itemInfo.startPos = startPos;
         }
         if (endIndex >= itemInfo.endIndex || GreatNotEqual(endPos, itemInfo.endPos) ||
-            itemInfo.endIndex > totalItemCount_ - 1 || endIndex < prevStartIndex) {
+            itemInfo.endIndex > totalItemCount_ - 1 || (!isNeedCheckOffset_ && endIndex < prevStartIndex)) {
             itemInfo.endIndex = endIndex;
             itemInfo.endPos = endPos;
         }
