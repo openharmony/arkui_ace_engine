@@ -7085,7 +7085,9 @@ export interface BackgroundImageOptions {
 export interface BackgroundOptions {
     align?: Alignment;
 }
-export type CustomProperty = Object | undefined;
+// instructive change start
+export type CustomProperty = undefined | null | Object | Record<string, CustomProperty> | Array<CustomProperty>;
+// instructive change end
 export interface CommonMethod {
     width(value: Length | LayoutPolicy | undefined): this {
         throw new Error("Unimplemented method width")
