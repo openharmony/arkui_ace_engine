@@ -24,8 +24,11 @@ ArkoalaLazyNode::ArkoalaLazyNode(int32_t nodeId, bool isRepeat) : ForEachBaseNod
 void ArkoalaLazyNode::DoSetActiveChildRange(
     int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
-    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
-        "ArkoalaLazyNode(%{public}d).DoSetActiveChildRange(%{public}d, %{public}d, %{public}d, %{public}d, %{public}d)",
+    ACE_SYNTAX_SCOPED_TRACE(
+        "ArkoalaLazyNode[self:%d].DoSetActiveChildRange start[%d] end[%d] cacheStart[%d] cacheEnd[%d] showCache[%d]",
+        GetId(), start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
+    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "ArkoalaLazyNode[self:%{public}d].DoSetActiveChildRange"
+        "(%{public}d, %{public}d, %{public}d, %{public}d, %{public}d)",
         GetId(), start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
     // range of screen node & preload node
     const RangeType cacheRange { start - cacheStart, end + cacheEnd };
@@ -37,15 +40,14 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
     // range of screen node
     const RangeType activeRange = showCache ? cacheRange : std::make_pair(start, end);
     std::list<RefPtr<UINode>> toRemove;
-    for (const auto& [index, nodeWeak] : node4Index_) {
-        auto node = nodeWeak.Upgrade();
+    for (const auto& [index, node] : node4Index_) {
         if (!node) {
             continue;
         }
         const auto indexMapped = ConvertFromToIndexRevert(index);
         const bool isInCacheRange = IsNodeInRange(indexMapped, cacheRange);
         const bool isInActiveRange = IsNodeInRange(indexMapped, activeRange);
-        if (!isInCacheRange) {
+        if (!isInCacheRange || (!isRepeat_ && !isInActiveRange)) { // LazyForEach need to remove inactive nodes
             RemoveChild(node);
         }
         node->SetActive(isInActiveRange);
@@ -88,14 +90,20 @@ void ArkoalaLazyNode::UpdateIsCache(const RefPtr<UINode>& node, bool isCache, bo
 RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
     const auto indexCasted = static_cast<int32_t>(index);
+    ACE_SYNTAX_SCOPED_TRACE(
+        "ArkoalaLazyNode[self:%d].GetFrameChildByIndex index[%d] needBuild[%d] isCache[%d] addToRenderTree[%d]",
+        GetId(), indexCasted, static_cast<int32_t>(needBuild), static_cast<int32_t>(isCache),
+        static_cast<int32_t>(addToRenderTree));
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
-        "ArkoalaLazyNode(%{public}d).GetFrameChildByIndex(%{public}d, %{public}d, %{public}d, %{public}d)",
+        "ArkoalaLazyNode[self:%{public}d].GetFrameChildByIndex(%{public}d, %{public}d, %{public}d, %{public}d)",
         GetId(), indexCasted, static_cast<int32_t>(needBuild), static_cast<int32_t>(isCache),
         static_cast<int32_t>(addToRenderTree));
 
     const auto indexMapped = ConvertFromToIndex(indexCasted);
     auto child = GetChildByIndex(indexMapped);
     if (!child && !needBuild) {
+        TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
+            "child not found and needBuild==false for index %{public}d, return nullptr.", indexMapped);
         return nullptr;
     }
     if (!child && createItem_) {
@@ -138,14 +146,13 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
 RefPtr<UINode> ArkoalaLazyNode::GetChildByIndex(int32_t index)
 {
     auto node = node4Index_.Get(index);
-    return node ? node->Upgrade() : nullptr;
+    return node ? node.value() : nullptr;
 }
 
 const std::list<RefPtr<UINode>>& ArkoalaLazyNode::GetChildren(bool /* notDetach */) const
 {
     if (!children_.empty()) {
-        TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
-            "ArkoalaLazyNode(%{public}d).GetChildren just returns non-empty children_", GetId());
+        TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "GetChildren just returns non-empty children_");
         return children_;
     }
     
@@ -175,8 +182,7 @@ RefPtr<FrameNode> ArkoalaLazyNode::GetFrameNode(int32_t index)
 void ArkoalaLazyNode::OnDataChange(int32_t changeIndex, int32_t count, NotificationType type)
 {
     // temp: naive data reset
-    for (const auto& [index, nodeWeak] : node4Index_) {
-        auto node = nodeWeak.Upgrade();
+    for (const auto& [index, node] : node4Index_) {
         if (index >= changeIndex) {
             RemoveChild(node);
         }
@@ -201,8 +207,7 @@ void ArkoalaLazyNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool 
 {
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
         "ArkoalaLazyNode.SetJSViewActive: %{public}s ...", active ? "true" : "false");
-    for (const auto& [index, nodeWeak] : node4Index_) {
-        auto node = nodeWeak.Upgrade();
+    for (const auto& [index, node] : node4Index_) {
         CHECK_NULL_VOID(node);
         node->SetJSViewActive(active);
     }
@@ -221,7 +226,7 @@ void ArkoalaLazyNode::PostIdleTask()
     if (postUpdateTaskHasBeenScheduled_) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "ArkoalaLazyNode(%{public}d).PostIdleTask Posting idle task", GetId());
+    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "ArkoalaLazyNode[self:%{public}d].PostIdleTask", GetId());
     postUpdateTaskHasBeenScheduled_ = true;
     auto* context = GetContext();
     CHECK_NULL_VOID(context);
@@ -309,8 +314,7 @@ int32_t ArkoalaLazyNode::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool /
         return -1;
     }
     // todo: if repeat and lazyforeach can be distinguished, index can be get directly from node4Index_ map.
-    for (const auto& [index, nodeWeak] : node4Index_) {
-        auto iterNode = nodeWeak.Upgrade();
+    for (const auto& [index, iterNode] : node4Index_) {
         if (!iterNode) {
             continue;
         }
@@ -361,10 +365,9 @@ void ArkoalaLazyNode::UpdateItemsForOnMove()
 
     int32_t rangeStart = std::min(from, to);
     int32_t rangeEnd = std::max(from, to);
-    UniqueValuedMap<int32_t, WeakPtr<UINode>, WeakPtr<UINode>::Hash> tempItems = std::move(node4Index_);
+    UniqueValuedMap<int32_t, RefPtr<UINode>, WeakPtr<UINode>::Hash> tempItems = std::move(node4Index_);
     node4Index_.Clear();
-    for (const auto& [index, nodeWeak] : tempItems) {
-        auto node = nodeWeak.Upgrade();
+    for (const auto& [index, node] : tempItems) {
         if (!node) {
             continue;
         }
@@ -431,8 +434,7 @@ void ArkoalaLazyNode::InitAllChildrenDragManager(bool init)
     if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
         return;
     }
-    for (const auto& [index, nodeWeak] : node4Index_) {
-        auto child = nodeWeak.Upgrade();
+    for (const auto& [index, child] : node4Index_) {
         if (!child) {
             continue;
         }
@@ -458,7 +460,7 @@ void ArkoalaLazyNode::ForEachL1Node(
     const std::function<void(int32_t index, const RefPtr<UINode>& node)>& cbFunc) const
 {
     for (auto it = node4Index_.begin(); it != node4Index_.end(); ++it) {
-        if (const RefPtr<UINode> node = it->second.Upgrade()) {
+        if (const RefPtr<UINode> node = it->second) {
             cbFunc(static_cast<int32_t>(it->first), node);
         }
     }
