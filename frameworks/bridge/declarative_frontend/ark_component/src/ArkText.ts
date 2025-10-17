@@ -381,14 +381,14 @@ class TextMaxLineHeightModifier extends ModifierWithKey<LengthMetrics> {
     super(value);
   }
   static identity: Symbol = Symbol('textMaxLineHeight');
-  applyPeer(node, reset) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().text.resetMaxLineHeight(node);
     } else {
       getUINativeModule().text.setMaxLineHeight(node, this.value);
     }
   }
-  checkObjectDiff() {
+  checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
@@ -398,14 +398,14 @@ class TextMinLineHeightModifier extends ModifierWithKey<LengthMetrics> {
     super(value);
   }
   static identity: Symbol = Symbol('textMinLineHeight');
-  applyPeer(node, reset) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().text.resetMinLineHeight(node);
     } else {
       getUINativeModule().text.setMinLineHeight(node, this.value);
     }
   }
-  checkObjectDiff() {
+  checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
@@ -1159,7 +1159,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMinLineHeightModifier.identity, TextMinLineHeightModifier, value);
     return this;
   }
-  lineHeightMultiple(value: number) {
+  lineHeightMultiple(value: number): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLineHeightMultipleModifier.identity, TextLineHeightMultipleModifier, value);
     return this;
   }
