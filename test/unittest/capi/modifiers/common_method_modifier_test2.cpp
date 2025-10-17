@@ -309,7 +309,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnClick1Test, TestSize.Level1)
     };
 
     const int32_t contextId = 123;
-    auto distanceThreshold = Converter::ArkValue<Opt_Number>(1.0);
+    auto distanceThreshold = Converter::ArkValue<Opt_Float64>(1.0);
     auto func = Converter::ArkValue<Callback_ClickEvent_Void>(onClick, contextId);
     auto optFunc = Converter::ArkValue<Opt_Callback_ClickEvent_Void>(func);
     modifier_->setOnClick1(node_, &optFunc, &distanceThreshold);
@@ -1040,12 +1040,12 @@ HWTEST_F(CommonMethodModifierTest2, setDisplayPriority, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, setZIndex, TestSize.Level1)
 {
-    auto value = Converter::ArkValue<Opt_Number>(0.7001);
+    auto value = Converter::ArkValue<Opt_Int32>(0.7001);
     modifier_->setZIndex(node_, &value);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_Z_INDEX_NAME);
     EXPECT_EQ(strResult, "0");
 
-    value = Converter::ArkValue<Opt_Number>(13);
+    value = Converter::ArkValue<Opt_Int32>(13);
     modifier_->setZIndex(node_, &value);
     strResult = GetStringAttribute(node_, ATTRIBUTE_Z_INDEX_NAME);
     EXPECT_EQ(strResult, "13");
@@ -1345,8 +1345,8 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOverlay, TestSize.Level1)
             .align = Converter::ArkValue<Opt_Alignment>(ARK_ALIGNMENT_BOTTOM_END),
             .offset = Converter::ArkValue<Opt_OverlayOffset>(
                 Ark_OverlayOffset {
-                    .x = Converter::ArkValue<Opt_Number>(7),
-                    .y = Converter::ArkValue<Opt_Number>(7),
+                    .x = Converter::ArkValue<Opt_Float64>(7),
+                    .y = Converter::ArkValue<Opt_Float64>(7),
                 }
             ),
         }
@@ -1396,11 +1396,11 @@ HWTEST_F(CommonMethodModifierTest2, setBorder, TestSize.Level1)
     modifier_->setBorder(node_, &inputValue);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_BORDER_NAME);
     EXPECT_EQ(strResult, "{\"style\":\"BorderStyle.Dashed\",\"color\":\"#FF0000FF\","
-                         "\"width\":\"10.00px\",\"radius\":\"5.00px\","
-                         "\"dashGap\":{\"left\":\"8.00%\",\"top\":\"9.00fp\",\"start\":\"0.00vp\",\"end\":\"0.00vp\","
-                         "\"right\":\"8.00px\",\"bottom\":\"6.00vp\"},"
-                         "\"dashWidth\":{\"left\":\"8.00%\",\"top\":\"4.00fp\",\"start\":\"0.00vp\",\"end\":\"0.00vp\","
-                         "\"right\":\"3.00px\",\"bottom\":\"1.00vp\"}}");
+                        "\"width\":\"10.00px\",\"radius\":\"5.00px\","
+                        "\"dashGap\":{\"left\":\"0.00vp\",\"top\":\"9.00fp\",\"start\":\"0.00vp\",\"end\":\"0.00vp\","
+                        "\"right\":\"8.00px\",\"bottom\":\"6.00vp\"},"
+                        "\"dashWidth\":{\"left\":\"0.00vp\",\"top\":\"4.00fp\",\"start\":\"0.00vp\",\"end\":\"0.00vp\","
+                        "\"right\":\"3.00px\",\"bottom\":\"1.00vp\"}}");
 }
 
 /*
@@ -1439,7 +1439,7 @@ HWTEST_F(CommonMethodModifierTest2, setBorderWidth, TestSize.Level1)
     auto width = Converter::ArkUnion<Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths, Ark_EdgeWidths>(arkWidth);
     modifier_->setBorderWidth(node_, &width);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_BORDER_WIDTH_NAME);
-    EXPECT_EQ(strResult, "{\"left\":\"8.00%\",\"top\":\"4.00fp\",\"start\":\"0.00vp\","
+    EXPECT_EQ(strResult, "{\"left\":\"0.00vp\",\"top\":\"4.00fp\",\"start\":\"0.00vp\","
                          "\"end\":\"0.00vp\",\"right\":\"3.00px\",\"bottom\":\"1.00vp\"}");
 }
 
@@ -1517,7 +1517,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setLinearGradient, TestSize.Level1)
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), 0.9 },
     };
     auto arkInputValue = Ark_LinearGradientOptions {
-        .angle = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(77),
+        .angle = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(77),
         .direction = Converter::ArkValue<Opt_GradientDirection>(ARK_GRADIENT_DIRECTION_LEFT_BOTTOM),
         .repeating = Converter::ArkValue<Opt_Boolean>(true),
         .colors = Converter::ArkValue<Array_Tuple_ResourceColor_Number>(colorSteps, Converter::FC),

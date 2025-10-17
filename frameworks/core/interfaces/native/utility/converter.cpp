@@ -2652,12 +2652,16 @@ BorderWidthProperty Convert(const Ark_EdgeWidths& src)
     BorderWidthProperty widthProperty;
     widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
     Validator::ValidateNonNegative(widthProperty.topDimen);
+    Validator::ValidateNonPercent(widthProperty.topDimen);
     widthProperty.leftDimen = Converter::OptConvert<Dimension>(src.left);
     Validator::ValidateNonNegative(widthProperty.leftDimen);
+    Validator::ValidateNonPercent(widthProperty.leftDimen);
     widthProperty.bottomDimen = Converter::OptConvert<Dimension>(src.bottom);
     Validator::ValidateNonNegative(widthProperty.bottomDimen);
+    Validator::ValidateNonPercent(widthProperty.bottomDimen);
     widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.right);
     Validator::ValidateNonNegative(widthProperty.rightDimen);
+    Validator::ValidateNonPercent(widthProperty.rightDimen);
     widthProperty.multiValued = true;
     return widthProperty;
 }
@@ -2701,22 +2705,24 @@ template<>
 BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
 {
     BorderWidthProperty widthProperty;
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
     Validator::ValidateNonNegative(widthProperty.topDimen);
-    widthProperty.leftDimen = Converter::OptConvert<Dimension>(src.start);
+    Validator::ValidateNonPercent(widthProperty.topDimen);
+    widthProperty.leftDimen = isRightToLeft
+        ? Converter::OptConvert<Dimension>(src.end)
+        : Converter::OptConvert<Dimension>(src.start);
     Validator::ValidateNonNegative(widthProperty.leftDimen);
+    Validator::ValidateNonPercent(widthProperty.leftDimen);
     widthProperty.bottomDimen = Converter::OptConvert<Dimension>(src.bottom);
     Validator::ValidateNonNegative(widthProperty.bottomDimen);
-    widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.end);
+    Validator::ValidateNonPercent(widthProperty.bottomDimen);
+    widthProperty.rightDimen = isRightToLeft
+        ? Converter::OptConvert<Dimension>(src.start)
+        : Converter::OptConvert<Dimension>(src.end);
     Validator::ValidateNonNegative(widthProperty.rightDimen);
+    Validator::ValidateNonPercent(widthProperty.rightDimen);
     widthProperty.multiValued = true;
-
-    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    widthProperty.leftDimen =
-        isRightToLeft? Converter::OptConvert<Dimension>(src.end) : Converter::OptConvert<Dimension>(src.start);
-    widthProperty.rightDimen =
-        isRightToLeft? Converter::OptConvert<Dimension>(src.start) : Converter::OptConvert<Dimension>(src.end);
-
     return widthProperty;
 }
 
