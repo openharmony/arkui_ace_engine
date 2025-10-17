@@ -101,11 +101,11 @@ export function compatibleComponent(
 function getInstantiateImplMethod(param: ClassType): Method {
     for (let methodIdx = 0; methodIdx < param.getMethodsNum(); ++methodIdx) {
         const method = param.getMethod(methodIdx);
-        if (method.getName() === '_instantiateImpl') {
+        if (method.getName() === '_invokeImpl') {
             return method;
         }
     }
-    throw new Error('cannot find method _instantiateImpl');
+    throw new Error('cannot find method _invokeImpl');
 }
 
 export function compatibleStaticComponent<T extends BaseCustomComponent<T_Options>, T_Options>(
@@ -116,7 +116,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     const instantiateImpl = /** @memo */ (): void => {
         const instance = factory();
         const method = getInstantiateImplMethod(Type.of(instance) as ClassType);
-        method.invoke(null, [__context(), __id(), undefined, factory, options ? options() : undefined, undefined, content]);
+        method.invoke(null, [__context(), __id(), undefined, factory, options, undefined, content]);
     };
 
     const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
