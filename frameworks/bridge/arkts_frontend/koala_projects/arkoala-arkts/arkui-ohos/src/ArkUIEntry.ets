@@ -32,7 +32,6 @@ import { checkEvents, wrapSystemCallback, KUint8ArrayPtr } from "@koalaui/intero
 import { Routed } from "./base"
 import router from "@ohos/router"
 import { UIContextImpl, ContextRecord, DetachedRootEntryManager, DetachedRootEntry } from "arkui/base/UIContextImpl"
-import { updateLazyItems } from "arkui/base/LazyForEachImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { registerArkuiApiHandler } from "./framework/peers/CallbackDeserializeCall"
 import { ObserveSingleton } from './stateManagement/base/observeSingleton'
@@ -374,7 +373,6 @@ export class Application {
         for (const detachedRoot of detachedRoots.values()) {
             detachedRoot.compute()
         }
-        updateLazyItems()
         // flushBuilderRootNode()
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.

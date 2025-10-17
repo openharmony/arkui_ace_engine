@@ -14,9 +14,59 @@
  */
 
 import { IncrementalNode, Disposable } from '@koalaui/runtime'
-import { KoalaCallsiteKey } from '@koalaui/common'
-import { nullptr, pointer } from '@koalaui/interop'
+import { int32, KoalaCallsiteKey } from '@koalaui/common'
+import { nullptr, pointer, KPointer } from '@koalaui/interop'
 import { PeerNode, LazyItemNodeType, PeerNodeType } from '../PeerNode'
+import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
+
+export class NodeHolder {
+    node?: PeerNode
+}
+
+export class SyntaxItemPeer extends PeerNode {
+    public static create(): SyntaxItemPeer {
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIAniModule._SyntaxItem_Construct(peerId)
+        if (!_peerPtr) {
+            throw new Error(`Failed to create SyntaxItemPeer with id: ${peerId}`)
+        }
+        return new SyntaxItemPeer(_peerPtr, peerId, 'SyntaxItem')
+    }
+
+    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+}
+
+export class ForEachNodePeer extends PeerNode {
+    public static create(isRepeat: boolean = false): ForEachNodePeer {
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIAniModule._ForEachNode_Construct(peerId, isRepeat)
+        if (!_peerPtr) {
+            throw new Error(`Failed to create ForEachNodePeer with id: ${peerId}`)
+        }
+        return new ForEachNodePeer(_peerPtr, peerId, isRepeat ? 'Repeat' : 'ForEach')
+    }
+
+    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+}
+
+export class LazyNodePeer extends PeerNode {
+    public static create(isRepeat: boolean = false): LazyNodePeer {
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId, isRepeat)
+        if (!_peerPtr) {
+            throw new Error(`Failed to create LazyNodePeer with id: ${peerId}`)
+        }
+        return new LazyNodePeer(_peerPtr, peerId, isRepeat ? 'Repeat' : 'LazyForEach')
+    }
+
+    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+}
 
 /**
  * LazyItemNode is the root node of an item in LazyForEach.

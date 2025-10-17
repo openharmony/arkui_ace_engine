@@ -175,7 +175,6 @@ export function LazyForEachImpl<T>(
             receiver.dataSource!,
             receiver.itemGenerator,
             receiver.keyGenerator,
-            false,
             receiver.onMoveEvent,
             receiver.itemDragEvent);
     }
