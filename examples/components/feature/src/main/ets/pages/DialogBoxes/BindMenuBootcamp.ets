@@ -634,6 +634,12 @@ export struct BindMenuBootcamp {
   @State compHapticFeedbackMode: HapticFeedbackMode = HapticFeedbackMode.DISABLED;
   @State enableMask: boolean = false;
   @State maskBool: boolean = false;
+  @State config: DragSpringLoadingConfiguration = {
+    stillTimeLimit: 200,
+    updateInterval: 300,
+    updateNotifyCount: 4,
+    updateToFinishInterval: 300
+  };
   scroller: Scroller = new Scroller()
 
   aboutToAppear(): void {
@@ -1366,6 +1372,20 @@ export struct BindMenuBootcamp {
         .onChange(() => {
           this.compEventTriggeredLog('onChange触发')
         })
+        .onDragSpringLoading((context: SpringLoadingContext) => {
+          if (context.state = 0) {
+            this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.BEGIN触发')
+          } else if(context.state = 1) {
+            this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.UPDATE触发')
+          } else if(context.state = 2) {
+            this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.END触发')
+          } else if(context.state = 3) {
+            this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.CANCEL触发')
+          }
+          if (context.currentNotifySequence = 5) {
+            this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.currentNotifySequence触发')
+          }
+        }, this.config)
 
       MenuItem({
         startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
