@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,22 @@
  * limitations under the License.
  */
 
-#include "adapter/preview/entrance/ui_session/ui_session_manager_preview.h"
-namespace OHOS::Ace {
-UiSessionManager* UiSessionManager::GetInstance()
+#include "ashmem.h"
+
+#include <memory>
+
+namespace OHOS {
+sptr<Ashmem> Ashmem::CreateAshmem(const char *name, int32_t size)
 {
-    static UiSessionManagerPreview instance;
-    return &instance;
+    return sptr<Ashmem>(new Ashmem(0, size));
 }
-void UiSessionManagerPreview::AddValueForTree(int32_t id, const std::string& value) {};
-void UiSessionManagerPreview::ReportInspectorTreeValue(const std::string& value) {};
-} // namespace OHOS::Ace
+
+Ashmem::Ashmem(int fd, int32_t size)
+{
+}
+
+Ashmem::~Ashmem() = default;
+
+void Ashmem::CloseAshmem() {}
+void Ashmem::UnmapAshmem() {}
+}

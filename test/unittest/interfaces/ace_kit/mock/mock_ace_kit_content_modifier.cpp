@@ -17,11 +17,6 @@
 
 #include <memory>
 
-#include "2d_graphics/include/draw/brush.h"
-#include "2d_graphics/include/draw/canvas.h"
-#include "2d_graphics/include/draw/color.h"
-#include "2d_graphics/include/draw/pen.h"
-#include "render_service_client/core/modifier/rs_property.h"
 #include "ui/animation/animation_option.h"
 #include "ui/animation/animation_utils.h"
 #include "ui/animation/curves.h"
@@ -30,70 +25,16 @@
 #include "ui/properties/linear_color.h"
 
 namespace OHOS::Ace::Kit {
-namespace {
-constexpr int32_t DEFAULT_PEN_WIDTH = 5;
-constexpr int32_t DEFAULT_DURATION = 300;
-} // namespace
-using RSPen = Rosen::Drawing::Pen;
-using RSCanvas = Rosen::Drawing::Canvas;
-using RSColor = Rosen::Drawing::Color;
-using RSBrush = Rosen::Drawing::Brush;
-
-RSColor ToRSColor(const Ace::LinearColor& color)
-{
-    return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
-}
-
-MockAceKitContentModifier::MockAceKitContentModifier()
-{
-    ringWidth_ = std::make_shared<Rosen::RSProperty<float>>();
-    fillColor_ = std::make_shared<Rosen::RSAnimatableProperty<Ace::LinearColor>>();
-}
+MockAceKitContentModifier::MockAceKitContentModifier() = default;
 
 void MockAceKitContentModifier::OnDraw(const Ace::Kit::DrawingContext& context)
 {
-    RSCanvas* canvas = context.canvas;
-    RSPen pen;
-    pen.SetWidth(ringWidth_ ? ringWidth_->Get() : DEFAULT_PEN_WIDTH);
-    pen.SetColor(RSColor::COLOR_CYAN);
-    RSBrush brush;
-    if (fillColor_ && attached_) {
-        brush.SetColor(ToRSColor(fillColor_->Get()));
-    }
-    canvas->AttachPen(pen);
-    canvas->AttachBrush(brush);
-    canvas->DrawRect({ 0, 0, context.width, context.height });
-    canvas->DetachPen();
-    canvas->DetachBrush();
 }
 
 void MockAceKitContentModifier::OnAttached()
 {
     if (!attached_) {
-        AttachRSProperty(ringWidth_);
-        AttachRSProperty(fillColor_);
-        fillColor_->Set(Ace::LinearColor(initialColor_));
         attached_ = true;
     }
 }
-
-void MockAceKitContentModifier::SetFillColor(const Ace::Color& color)
-{
-    if (!attached_) {
-        initialColor_ = color;
-    } else {
-        Ace::AnimationOption option;
-        option.SetDuration(DEFAULT_DURATION);
-        option.SetIteration(1);
-        option.SetCurve(Ace::Curves::EASE_IN);
-        Ace::Kit::AnimationUtils::Animate(
-            option, [fillColor = fillColor_, color]() { fillColor->Set(Ace::LinearColor(color)); });
-    }
-}
-
-void MockAceKitContentModifier::SetRingWidth(const Ace::Dimension& width)
-{
-    ringWidth_->Set(width.ConvertToPx());
-}
-
 } // namespace OHOS::Ace::Kit

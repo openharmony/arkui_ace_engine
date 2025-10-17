@@ -15,7 +15,8 @@
 
 #ifndef FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H
 #define FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H
-#include <iremote_broker.h>
+
+#include "iremote_broker.h"
 
 #include "ui/base/macros.h"
 #include "param_config.h"
@@ -34,7 +35,7 @@ public:
     IUiContentService() = default;
     ~IUiContentService() override = default;
     enum {
-        UI_CONTENT_SERVICE_GET_TREE,
+        UI_CONTENT_SERVICE_GET_TREE = 0,
         UI_CONTENT_CONNECT,
         REGISTER_CLICK_EVENT,
         REGISTER_SEARCH_EVENT,

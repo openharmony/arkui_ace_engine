@@ -13,14 +13,9 @@
  * limitations under the License.
  */
 
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
 #include "mock_uisession_manager.h"
 
 namespace OHOS::Ace {
-std::mutex UiSessionManager::mutex_;
-std::shared_mutex UiSessionManager::reportObjectMutex_;
-
 UiSessionManager* UiSessionManager::GetInstance()
 {
     static MockUiSessionManager instance;

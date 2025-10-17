@@ -18,21 +18,21 @@
 #include <atomic>
 #include <cstdint>
 #include <functional>
-#include "param_config.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-#include <iremote_object.h>
-
-#include "ui_report_stub.h"
-#endif
-
 #include <map>
 #include <mutex>
 #include <shared_mutex>
 
+#include "base/utils/macros.h"
+
+#include "param_config.h"
 #include "ui_session_json_util.h"
 #include "ui_translate_manager.h"
 
-#include "base/utils/macros.h"
+namespace OHOS {
+namespace Media {
+class PixelMap;
+} // namespace Media
+} // namespace OHOS
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UiSessionManager {
 public:
@@ -73,7 +73,7 @@ public:
      */
     virtual void ReportComponentChangeEvent(
         int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value) {};
-    
+
     /**
      * @description: execute callback when scroll event occurs
      */
@@ -83,13 +83,7 @@ public:
      * @description: execute callback when life cycle event occurs
      */
     virtual void ReportLifeCycleEvent(const std::string& data) {};
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    /**
-     * @description: save report communication stub side
-     * @param reportStub report communication stub side
-     */
-    virtual void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId) {};
-#endif
+
     /**
      * @description: get current page inspector tree value
      */
@@ -170,9 +164,7 @@ public:
     virtual void GetPixelMap() {};
     virtual void SendCommand(const std::string& command) {};
     virtual void SaveSendCommandFunction(SendCommandFunction&& function) {};
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     virtual void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) {};
-#endif
     virtual void GetVisibleInspectorTree(ParamConfig config = ParamConfig()) {};
     virtual void RegisterPipeLineExeAppAIFunction(
         std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) {};
@@ -182,11 +174,6 @@ protected:
     UiSessionManager() = default;
     virtual ~UiSessionManager() = default;
 
-    static std::mutex mutex_;
-    static std::shared_mutex reportObjectMutex_;
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
-#endif
     std::map<std::string, int32_t> processMap_;
     std::atomic<int32_t> clickEventRegisterProcesses_ = 0;
     std::atomic<int32_t> searchEventRegisterProcesses_ = 0;
