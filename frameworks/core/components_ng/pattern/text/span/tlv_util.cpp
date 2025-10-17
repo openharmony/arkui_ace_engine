@@ -492,6 +492,8 @@ void TLVUtil::WriteImageSpanAttribute(std::vector<uint8_t>& buff, ImageSpanAttri
         WriteUint8(buff, TLV_IMAGESPANATTRIBUTE_PADDINGPROP_TAG);
         WritePaddingProperty(buff, value.paddingProp.value());
     }
+    WriteUint8(buff, TLV_IMAGESPANATTRIBUTE_SUPPORTSVG2_TAG);
+    WriteBool(buff, value.supportSvg2);
     WriteUint8(buff, TLV_IMAGESPANATTRIBUTE_END_TAG);
 }
 
@@ -526,6 +528,10 @@ ImageSpanAttribute TLVUtil::ReadImageSpanAttribute(std::vector<uint8_t>& buff, i
             }
             case TLV_IMAGESPANATTRIBUTE_PADDINGPROP_TAG: {
                 l.paddingProp = ReadPaddingProperty(buff, cursor);
+                break;
+            }
+            case TLV_IMAGESPANATTRIBUTE_SUPPORTSVG2_TAG: {
+                l.supportSvg2 = ReadBool(buff, cursor);
                 break;
             }
             default:
