@@ -76,6 +76,8 @@ public:
     }
 
 private:
+    bool IsDynamicComponentEnv();
+    bool IsRootSizeUnValid(LayoutWrapper* layoutWrapper);
     void UpdateChildPositionWidthIgnoreLayoutSafeArea(
         const RefPtr<LayoutWrapper>& childLayoutWrapper, const OffsetF& originOffset);
     void DisableLayoutPolicy(const RefPtr<LayoutWrapper>& child);
