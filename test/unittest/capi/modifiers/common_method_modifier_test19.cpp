@@ -544,4 +544,30 @@ HWTEST_F(CommonMethodModifierTest19, NextFocusTest, TestSize.Level1)
     }
 }
 
+/*
+ * @tc.name: bindMenusTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, bindMenusTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBindMenu0, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    Ark_MenuOptions arkOptions;
+    Opt_MenuOptions optOptions;
+    arkOptions.enableArrow = Converter::ArkValue<Opt_Boolean>(true);
+    optOptions = Converter::ArkValue<Opt_MenuOptions>(arkOptions);
+    int callsCount = 0;
+    CustomNodeBuilderTestHelper<CommonMethodModifierTest19> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    auto unionCustomNodeBuilderValue = Converter::ArkUnion<Opt_Union_Array_MenuElement_CustomBuilder,
+        CustomNodeBuilder>(builder);
+
+    modifier_->setBindMenu0(node_, &unionCustomNodeBuilderValue, &optOptions);
+    EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
+}
+
 } // namespace OHOS::Ace::NG
+
