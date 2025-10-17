@@ -3717,4 +3717,28 @@ HWTEST_F(UINodeTestNg, UpdateForceDarkAllowedNode001, TestSize.Level1)
     EXPECT_FALSE(parentNode->GetForceDarkAllowed());
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: TestFrameNodeByInspectorId001
+ * @tc.desc: Test FrameNodeByInspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, TestFrameNodeByInspectorId001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a uinode
+     */
+    const std::string& existingId = "testNode";
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode(existingId, 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. Test Add/Remove FrameNodeByInspectorId
+     */
+    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(existingId, testNode, testNode->GetId());
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(existingId, testNode->GetId());
+    auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(existingId);
+    EXPECT_EQ(node, 0);
+}
+
 } // namespace OHOS::Ace::NG
