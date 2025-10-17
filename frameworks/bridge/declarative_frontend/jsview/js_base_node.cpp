@@ -92,6 +92,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 
     if (newNode && (infoLen >= BUILD_PARAM_INDEX_TWO + 1)) {
         auto updateTsNodeBuilder = info[BUILD_PARAM_INDEX_TWO];
+        CHECK_NULL_VOID(updateTsNodeBuilder->IsFunction());
         EcmaVM* vm = info.GetVm();
         auto updateTsFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(updateTsNodeBuilder));
         auto updateNodeFunc = [updateTsFunc, vm](int32_t instanceId, RefPtr<NG::UINode>& node) mutable {
@@ -126,6 +127,9 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 
     if (newNode && (infoLen >= BUILD_PARAM_INDEX_THREE + 1)) {
         auto updateTsNodeConfig = info[BUILD_PARAM_INDEX_THREE];
+        if (!updateTsNodeConfig->IsFunction()) {
+            return;
+        }
         EcmaVM* vm = info.GetVm();
         auto updateTsConfig = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(updateTsNodeConfig));
         auto updateNodeConfig = [updateTsConfig, vm]() mutable { updateTsConfig->ExecuteJS(); };

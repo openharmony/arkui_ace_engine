@@ -535,8 +535,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
       }
   }
 
-  private updateNodePtr(nodePtr: NodePtr)
-  {
+  private updateNodePtr(nodePtr: NodePtr): void {
     if (nodePtr != this.nodePtr_) {
       this.dispose();
       this.nodePtr_ = nodePtr;
@@ -545,13 +544,11 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     }
   }
 
-  private updateInstanceId(instanceId: number)
-  {
+  private updateInstanceId(instanceId: number): void {
     this.instanceId_ = instanceId;
   }
 
-  protected updateNodeFromNative(instanceId: number, nodePtr: NodePtr)
-  {
+  protected updateNodeFromNative(instanceId: number, nodePtr: NodePtr): void {
     this.updateNodePtr(nodePtr);
     this.updateInstanceId(instanceId);
   }

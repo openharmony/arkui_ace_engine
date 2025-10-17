@@ -50,7 +50,7 @@ declare enum EventQueryType {
 
 declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) => void;
 
-function getFrameNodeRawPtr(frameNode) {
+function getFrameNodeRawPtr(frameNode: FrameNode): number {
     return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
 }
 
@@ -67,7 +67,7 @@ class FrameNode extends Disposable {
   protected baseNode_: BaseNode;
   protected builderNode_: JSBuilderNode;
   protected uiContext_: UIContext | undefined | null;
-  protected nodePtr_: NodePtr;
+  public nodePtr_: NodePtr;
   protected instanceId_?: number;
   private nodeAdapterRef_?: NodeAdapter;
   constructor(uiContext: UIContext, type: string, options?: object) {

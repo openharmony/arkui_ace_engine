@@ -76,7 +76,8 @@
 #include "converter_union.h"
 #include "generated/converter_generated.h"
 
-#define OPT_CONVERT_FIELD(type, src, field) ((src).has_value() ? Converter::OptConvert<type>((src)->field) : std::nullopt)
+#define OPT_CONVERT_FIELD(type, src, field) ((src).has_value() ? \
+            Converter::OptConvert<type>((src)->field) : std::nullopt)
 #define GET_OPT_FIELD(src, field) ((src).has_value() ? Converter::GetOpt((src)->field) : std::nullopt)
 
 namespace OHOS::Ace {

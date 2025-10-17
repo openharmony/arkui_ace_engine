@@ -32,7 +32,7 @@ class WindowSizeLayoutBreakpoint implements IEnvironmentValue<uiObserver.WindowS
   public uiContext: UIContext;
   public uiObserver: UIObserver;
 
-  private breakPointCallback= (breakPoint: uiObserver.WindowSizeLayoutBreakpointInfo) => {
+  private breakPointCallback= (breakPoint: uiObserver.WindowSizeLayoutBreakpointInfo): void => {
     this.update(breakPoint);
   };
 
@@ -44,7 +44,7 @@ class WindowSizeLayoutBreakpoint implements IEnvironmentValue<uiObserver.WindowS
     if (this.uiObserver && typeof this.uiObserver.on === 'function') {
       this.uiObserver.on('windowSizeLayoutBreakpointChange', this.breakPointCallback);
     } else {
-        aceConsole.warn("Failed to register window size change listener");
+        aceConsole.warn('Failed to register window size change listener');
     }
   }
 
@@ -55,7 +55,7 @@ class WindowSizeLayoutBreakpoint implements IEnvironmentValue<uiObserver.WindowS
     return windowSizeLayoutBreakpointInfo;
   }
 
-  update(payload: uiObserver.WindowSizeLayoutBreakpointInfo) {
+  update(payload: uiObserver.WindowSizeLayoutBreakpointInfo): void {
     this.widthBreakpoint = payload.widthBreakpoint;
     this.heightBreakpoint = payload.heightBreakpoint;
   }
@@ -64,7 +64,7 @@ class WindowSizeLayoutBreakpoint implements IEnvironmentValue<uiObserver.WindowS
     if (this.uiObserver && typeof this.uiObserver.off === 'function') {
       this.uiObserver.off('windowSizeLayoutBreakpointChange', this.breakPointCallback);
     } else {
-        aceConsole.warn("Failed to unregister window size change listener");
+        aceConsole.warn('Failed to unregister window size change listener');
     }
   }
 }

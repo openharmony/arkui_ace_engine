@@ -1826,7 +1826,7 @@ function __removeAvailableInstanceId__(instanceId) {
 }
 
 function __getResourceId__(params) {
-    let resName = "";
+    let resName = '';
     if (params.params.length > 0) {
         resName = params.params[0];
     }
