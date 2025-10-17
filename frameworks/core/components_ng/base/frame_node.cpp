@@ -5655,7 +5655,13 @@ void FrameNode::LayoutOverlay()
     auto childLayoutProperty = overlayNode_->GetLayoutProperty();
     CHECK_NULL_VOID(childLayoutProperty);
     childLayoutProperty->GetOverlayOffset(offsetX, offsetY);
-    auto direction = childLayoutProperty->GetNonAutoLayoutDirection();
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto options = renderContext->GetOverlayTextValue(NG::OverlayOptions());
+    auto direction = options.direction;
+    if (direction == TextDirection::AUTO) {
+        direction = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
     if (direction == TextDirection::RTL) {
         offsetX = -offsetX;
     }
@@ -5668,6 +5674,8 @@ void FrameNode::LayoutOverlay()
     auto translate = Alignment::GetAlignPositionWithDirection(size, childSize, align, direction) + offset;
     overlayNode_->GetGeometryNode()->SetMarginFrameOffset(translate);
     overlayNode_->Layout();
+    overlayNode_->SetActive(true);
+    overlayNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
