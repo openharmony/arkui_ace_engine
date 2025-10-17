@@ -205,6 +205,15 @@ void MarqueeModelNG::SetAllowScale(FrameNode* frameNode, const bool allowScale)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AllowScale, allowScale, textChild);
 }
 
+void MarqueeModelNG::ResetAllowScale(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, AllowScale, PROPERTY_UPDATE_MEASURE, frameNode);
+    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textChild);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, AllowScale, PROPERTY_UPDATE_MEASURE, textChild);
+}
+
 void MarqueeModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& fontWeight)
 {
     CHECK_NULL_VOID(frameNode);
@@ -271,6 +280,14 @@ void MarqueeModelNG::SetOnStart(FrameNode* frameNode, std::function<void()>&& on
     eventHub->SetOnStart(std::move(onChange));
 }
 
+void MarqueeModelNG::ResetOnStart(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStart(nullptr);
+}
+
 void MarqueeModelNG::SetOnBounce(FrameNode* frameNode, std::function<void()>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
@@ -279,12 +296,28 @@ void MarqueeModelNG::SetOnBounce(FrameNode* frameNode, std::function<void()>&& o
     eventHub->SetOnBounce(std::move(onChange));
 }
 
+void MarqueeModelNG::ResetOnBounce(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnBounce(nullptr);
+}
+
 void MarqueeModelNG::SetOnFinish(FrameNode* frameNode, std::function<void()>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFinish(std::move(onChange));
+}
+
+void MarqueeModelNG::ResetOnFinish(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnFinish(nullptr);
 }
 
 void MarqueeModelNG::SetMarqueeFrameRateRange(

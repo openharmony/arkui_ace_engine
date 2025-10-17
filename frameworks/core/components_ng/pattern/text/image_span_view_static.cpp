@@ -27,7 +27,7 @@ void ImageSpanViewStatic::SetObjectFit(FrameNode* frameNode, const std::optional
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ImageLayoutProperty, ImageFit, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
@@ -36,7 +36,8 @@ void ImageSpanViewStatic::SetVerticalAlign(FrameNode* frameNode, const std::opti
     if (verticalAlign) {
         ImageSpanView::SetVerticalAlign(frameNode, verticalAlign.value());
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, VerticalAlign, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            ImageLayoutProperty, VerticalAlign, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 

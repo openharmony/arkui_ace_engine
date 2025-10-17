@@ -931,6 +931,11 @@ void TextModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST&
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value, frameNode);
 }
 
+void TextModelNG::ResetFontFeature(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, FontFeature, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
 void TextModelNG::SetMarqueeOptions(const TextMarqueeOptions& options)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -998,6 +1003,14 @@ void TextModelNG::SetOnMarqueeStateChange(FrameNode* frameNode, std::function<vo
     auto eventHub = frameNode->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnMarqueeStateChange(std::move(func));
+}
+
+void TextModelNG::ResetOnMarqueeStateChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnMarqueeStateChange(nullptr);
 }
 
 TextMarqueeOptions TextModelNG::GetMarqueeOptions(FrameNode* frameNode)
@@ -1323,6 +1336,12 @@ void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& v
     textPattern->SetTextDetectTypes(value);
 }
 
+void TextModelNG::ResetTextDetectConfig(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextDetectConfig(frameNode, "");
+}
+
 void TextModelNG::SetOnClick(FrameNode* frameNode, GestureEventFunc&& click)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1497,12 +1516,28 @@ void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::
     eventHub->SetOnCopy(std::move(func));
 }
 
+void TextModelNG::ResetOnCopy(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(nullptr);
+}
+
 void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelectionChange(std::move(func));
+}
+
+void TextModelNG::ResetOnTextSelectionChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(nullptr);
 }
 
 void TextModelNG::SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
