@@ -62,6 +62,7 @@ struct DragDataCore {
     std::map<std::string, std::vector<int32_t>> summaryFormat;
     int32_t version { 0 };
     int64_t totalSize { -1 };
+    std::string summaryTag;
 };
 
 struct DragBundleInfo {
