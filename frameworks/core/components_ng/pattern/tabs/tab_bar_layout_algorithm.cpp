@@ -1206,7 +1206,7 @@ void TabBarLayoutAlgorithm::MeasureSubTabBarImageIndicator(LayoutWrapper* layout
     auto indicatorIndex = layoutWrapper->GetTotalChildCount() - 1;
     auto indicatorWrapper = layoutWrapper->GetOrCreateChildByIndex(indicatorIndex);
     CHECK_NULL_VOID(indicatorWrapper);
-    auto index = tabBarPattern->GetIndicator();
+    auto index = layoutProperty->GetIndicatorValue(0);
     auto indicatorStyle = tabBarPattern->GetIndicatorStyleByIndex(index);
     auto indicatorProp = indicatorWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(indicatorProp);
@@ -1245,7 +1245,7 @@ void TabBarLayoutAlgorithm::LayoutSubTabBarImageIndicator(LayoutWrapper* layoutW
     CHECK_NULL_VOID(indicatorWrapper);
     auto indicatorGeometryNode = indicatorWrapper->GetGeometryNode();
     CHECK_NULL_VOID(indicatorGeometryNode);
-    auto index = tabBarPattern->GetIndicator();
+    auto index = layoutProperty->GetIndicatorValue(0);
     auto subTabBarStyle = tabBarPattern->GetIndicatorStyleByIndex(index);
     if (tabBarPattern->NeedShowImageIndicator(index)) {
         OffsetF indicatorOffset;
