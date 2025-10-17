@@ -1934,7 +1934,7 @@ void SetMouseResponseRegionImpl(Ark_NativePointer node,
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
         ViewAbstract::SetMouseResponseRegion(frameNode, *convArray);
     } else {
-        ViewAbstract::SetMouseResponseRegion(frameNode, { DimensionRect() });
+        ViewAbstract::SetMouseResponseRegion(frameNode, {});
     }
 }
 void SetSizeImpl(Ark_NativePointer node,
