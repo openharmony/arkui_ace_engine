@@ -629,6 +629,7 @@ export function enableCompatibleObservedV2ForStatic<T>(
     }
     let updateStaticState = (value: MutableState<int32>) => {   
         value.value++
+        ESValue.getGlobal().getProperty('runPendingJobs').invoke();
     }
     method.invoke(ESValue.wrap(value), ESValue.wrap(createStaticState),
         ESValue.wrap(recordStaticState), ESValue.wrap(updateStaticState))
