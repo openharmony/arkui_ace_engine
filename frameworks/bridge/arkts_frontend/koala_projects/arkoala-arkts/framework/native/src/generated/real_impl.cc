@@ -1301,9 +1301,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ButtonModifier
     namespace ButtonInterfaceModifier {
-    void SetButtonOptionsImpl(Ark_NativePointer node,
-                              const Ark_Union_ButtonOptions_ResourceStr* label,
-                              const Opt_ButtonOptions* options)
+    void SetButtonOptions0Impl(Ark_NativePointer node,
+                               const Ark_ResourceStr* label,
+                               const Opt_ButtonOptions* options)
+    {
+    }
+    void SetButtonOptions1Impl(Ark_NativePointer node,
+                               const Opt_ButtonOptions* options)
     {
     }
     } // ButtonInterfaceModifier
@@ -8208,7 +8212,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIButtonModifier ArkUIButtonModifierImpl {
             ButtonModifier::ConstructImpl,
-            ButtonInterfaceModifier::SetButtonOptionsImpl,
+            ButtonInterfaceModifier::SetButtonOptions0Impl,
+            ButtonInterfaceModifier::SetButtonOptions1Impl,
             ButtonAttributeModifier::SetTypeImpl,
             ButtonAttributeModifier::SetStateEffectImpl,
             ButtonAttributeModifier::SetButtonStyleImpl,
