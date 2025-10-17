@@ -575,6 +575,12 @@ void MovingPhotoPattern::RegisterImageEvent(const RefPtr<FrameNode>& imageNode)
         pattern->HandleImageCompleteEvent(info);
     };
     imageHub->SetOnComplete(imageCompleteEventCallback);
+    auto imageErrorEventCallback = [weak = WeakClaim(this)](const LoadImageFailEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleImageErrorEvent(info);
+    };
+    imageHub->SetOnError(imageErrorEventCallback);
 }
 
 void MovingPhotoPattern::RegisterTransitionImageEvent(const RefPtr<FrameNode>& imageNode)
@@ -589,6 +595,12 @@ void MovingPhotoPattern::RegisterTransitionImageEvent(const RefPtr<FrameNode>& i
         pattern->HandleTransitionImageCompleteEvent(info);
     };
     imageHub->SetOnComplete(imageCompleteEventCallback);
+    auto imageErrorEventCallback = [weak = WeakClaim(this)](const LoadImageFailEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleTransitionImageErrorEvent(info);
+    };
+    imageHub->SetOnError(imageErrorEventCallback);
 }
 
 void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& info)
@@ -598,6 +610,15 @@ void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& i
     if (loadingStatus == IMAGE_DECODE_COMPLETE) {
         FireMediaPlayerImageComplete();
     }
+}
+
+void MovingPhotoPattern::HandleImageErrorEvent(const LoadImageFailEvent& info)
+{
+    auto errorStatus = info.GetErrorInfo();
+    TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "HandleImageErrorEvent errorCode:%{public}d.", errorStatus.errorCode);
+    TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "HandleImageErrorEvent errorMessage:%{public}s.",
+        errorStatus.errorMessage.c_str());
+    FireMediaPlayerImageError();
 }
 
 void MovingPhotoPattern::HandleTransitionImageCompleteEvent(const LoadImageSuccessEvent& info)
@@ -611,6 +632,16 @@ void MovingPhotoPattern::HandleTransitionImageCompleteEvent(const LoadImageSucce
             EightyToHundredAnimation();
         }
     }
+}
+
+void MovingPhotoPattern::HandleTransitionImageErrorEvent(const LoadImageFailEvent& info)
+{
+    auto errorStatus = info.GetErrorInfo();
+    TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "HandleTransitionImageErrorEvent  errorCode:%{public}d.",
+        errorStatus.errorCode);
+    TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "HandleTransitionImageErrorEvent  errorMessage:%{public}s.",
+        errorStatus.errorMessage.c_str());
+    FireMediaPlayerImageError();
 }
 
 void MovingPhotoPattern::UpdateVideoNode()
@@ -832,6 +863,13 @@ void MovingPhotoPattern::FireMediaPlayerImageComplete()
     auto eventHub = GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireCompleteEvent();
+}
+
+void MovingPhotoPattern::FireMediaPlayerImageError()
+{
+    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireErrorEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerStart()
