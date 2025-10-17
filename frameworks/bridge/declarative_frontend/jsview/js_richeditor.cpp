@@ -685,6 +685,10 @@ void JSRichEditor::SetOnShare(const JSCallbackInfo& info)
 
 void JSRichEditor::SetOnWillAttachIME(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined()) {
+        RichEditorModel::GetInstance()->SetOnWillAttachIME(nullptr);
+        return;
+    }
     auto onWillAttachIME = JSTextField::ParseAndCreateAttachCallback(info);
     CHECK_NULL_VOID(onWillAttachIME);
     RichEditorModel::GetInstance()->SetOnWillAttachIME(std::move(onWillAttachIME));

@@ -87,6 +87,7 @@ public:
     static void SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
+    static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
     void SetEnterKeyType(TextInputAction value) override;
     static void SetEnterKeyType(FrameNode* frameNode, const TextInputAction& action);
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;

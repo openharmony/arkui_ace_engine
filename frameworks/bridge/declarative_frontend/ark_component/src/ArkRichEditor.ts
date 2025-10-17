@@ -434,6 +434,20 @@ class RichEditorOnDidIMEInputModifier extends ModifierWithKey<(value: TextRange)
   }
 }
 
+class RichEditorOnWillAttachIMEModifier extends ModifierWithKey<Callback<IMEClient> | undefined> {
+  constructor(value: Callback<IMEClient> | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorOnWillAttachIME');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnWillAttachIME(node);
+    } else {
+      getUINativeModule().richEditor.setOnWillAttachIME(node, this.value);
+    }
+  }
+}
+
 class RichEditorEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -611,6 +625,10 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
   onDidIMEInput(callback: (value: TextRange) => void): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnDidIMEInputModifier.identity, RichEditorOnDidIMEInputModifier, callback);
+    return this;
+  }
+  onWillAttachIME(callback: Callback<IMEClient> | undefined): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnWillAttachIMEModifier.identity, RichEditorOnWillAttachIMEModifier, callback);
     return this;
   }
   enableHapticFeedback(value: boolean): this {

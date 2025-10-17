@@ -645,6 +645,25 @@ void ResetRichEditorOnDidIMEInput(ArkUINodeHandle node)
     RichEditorModelNG::SetOnDidIMEInput(frameNode, nullptr);
 }
 
+void SetRichEditorOnWillAttachIME(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillAttachIMECallback = reinterpret_cast<IMEAttachCallback*>(callback);
+        RichEditorModelNG::SetOnWillAttachIME(frameNode, std::move(*onWillAttachIMECallback));
+    } else {
+        RichEditorModelNG::SetOnWillAttachIME(frameNode, nullptr);
+    }
+}
+
+void ResetRichEditorOnWillAttachIME(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnWillAttachIME(frameNode, nullptr);
+}
+
 void SetRichEditorEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -766,6 +785,8 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorKeyboardAppearance = ResetRichEditorKeyboardAppearance,
         .setRichEditorOnDidIMEInput = SetRichEditorOnDidIMEInput,
         .resetRichEditorOnDidIMEInput = ResetRichEditorOnDidIMEInput,
+        .setRichEditorOnWillAttachIME = SetRichEditorOnWillAttachIME,
+        .resetRichEditorOnWillAttachIME = ResetRichEditorOnWillAttachIME,
         .setRichEditorEnableHapticFeedback = SetRichEditorEnableHapticFeedback,
         .resetRichEditorEnableHapticFeedback = ResetRichEditorEnableHapticFeedback,
         .setRichEditorEnableAutoSpacing = SetRichEditorEnableAutoSpacing,
