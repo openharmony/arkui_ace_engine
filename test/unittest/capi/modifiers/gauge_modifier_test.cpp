@@ -19,6 +19,7 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/components_ng/pattern/gauge/gauge_model_static.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/linear_gradient_peer.h"
 #include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
@@ -580,6 +581,52 @@ HWTEST_F(GaugeModifierTest, setColorsTestValidValues, TestSize.Level1)
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
+}
+
+/*
+ * @tc.name: setColorsTestInvalidValue1
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeModifierTest, setColorsTestInvalidValue1, TestSize.Level1)
+{
+    auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("Wrong color");
+    auto inputColor = Converter::ArkUnion<ArkColorColor, Ark_ResourceColor>(resourceColor);
+    modifier_->setColors(node_, &inputColor);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLORS_NAME);
+    EXPECT_EQ(resultStr, GaugeModelStatic::ERROR_COLOR.ToString());
+}
+
+/*
+ * @tc.name: setColorsTestInvalidValue2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeModifierTest, setColorsTestInvalidValue2, TestSize.Level1)
+{
+    // color is std::nullopt
+    GaugeModelStatic::LinearGradientColorSteps colors = {
+        std::make_pair(std::optional<Color>(), Dimension(0.0)),
+        std::make_pair(std::optional<Color>(), Dimension(1.0))
+    };
+    Ark_LinearGradient gradient = PeerUtils::CreatePeer<LinearGradientPeer>(colors);
+    auto inputColor = Converter::ArkUnion<ArkColorColor, Ark_LinearGradient>(gradient);
+    modifier_->setColors(node_, &inputColor);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GaugePaintProperty> paintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    std::optional<std::vector<ColorStopArray>> resultColors = paintProperty->GetGradientColors();
+    ASSERT_TRUE(resultColors.has_value());
+    ASSERT_EQ(resultColors->size(), 1);
+    const ColorStopArray& item = resultColors->front();
+    ASSERT_EQ(item.size(), 2);
+
+    std::string expected = GaugeModelStatic::ERROR_COLOR.ToString();
+    ASSERT_EQ(item[0].first.ToString(), expected);
+    ASSERT_EQ(item[1].first.ToString(), expected);
 }
 
 /*

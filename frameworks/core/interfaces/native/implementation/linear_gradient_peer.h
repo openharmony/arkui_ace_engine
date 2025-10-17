@@ -17,11 +17,12 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/gauge/gauge_model_static.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 
-using LinearGradientColorSteps = std::vector<std::pair<std::optional<OHOS::Ace::Color>, OHOS::Ace::Dimension>>;
-
 struct LinearGradientPeer final {
+    using LinearGradientColorSteps = OHOS::Ace::NG::GaugeModelStatic::LinearGradientColorSteps;
+
     LinearGradientColorSteps colorStops;
 
 protected:
