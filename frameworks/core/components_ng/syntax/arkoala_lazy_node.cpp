@@ -45,7 +45,7 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
         const auto indexMapped = ConvertFromToIndexRevert(index);
         const bool isInCacheRange = IsNodeInRange(indexMapped, cacheRange);
         const bool isInActiveRange = IsNodeInRange(indexMapped, activeRange);
-        if (!isInCacheRange) {
+        if (!isInCacheRange || (!isRepeat_ && !isInActiveRange)) { // LazyForEach need to remove inactive nodes
             RemoveChild(node);
         }
         node->SetActive(isInActiveRange);

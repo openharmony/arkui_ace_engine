@@ -385,6 +385,11 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest013)
     EXPECT_EQ(lazyNode->DumpUINode(node), ret);
 }
 
+/**
+ * @tc.name: ArkoalaLazyNodeTest014
+ * @tc.desc: Test ArkoalaLazyNode RequestSyncTree.
+ * @tc.type: FUNC
+ */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest014)
 {
     auto lazyNode = CreateLazyForEachNode(GetNextId());
@@ -394,6 +399,11 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest014)
     EXPECT_EQ(lazyNode->children_.size(), 0);
 }
 
+/**
+ * @tc.name: ArkoalaLazyNodeTest015
+ * @tc.desc: Test ArkoalaLazyNode PostIdleTask.
+ * @tc.type: FUNC
+ */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest015)
 {
     auto lazyNode = CreateLazyForEachNode(GetNextId());
@@ -409,6 +419,11 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest015)
     EXPECT_TRUE(lazyNode->postUpdateTaskHasBeenScheduled_);
 }
 
+/**
+ * @tc.name: ArkoalaLazyNodeTest016
+ * @tc.desc: Test ArkoalaLazyNode BuildAllChildren.
+ * @tc.type: FUNC
+ */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest016)
 {
     auto lazyNode = CreateLazyForEachNode(GetNextId());
@@ -416,6 +431,29 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest016)
     CreateChildren(lazyNode, totalCount);
     lazyNode->BuildAllChildren();
     EXPECT_EQ(lazyNode->children_.size(), totalCount);
+}
+
+/**
+ * @tc.name: ArkoalaLazyNodeTest017
+ * @tc.desc: Test ArkoalaLazyNode attached nodes for LazyForEach and Repeat node.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest017)
+{
+    int32_t totalCount = 50;
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    CreateChildren(lazyNode, totalCount);
+    lazyNode->DoSetActiveChildRange(INDEX_1, INDEX_9, CACHED_COUNT, CACHED_COUNT, false);
+    int32_t result_size = INDEX_9 - INDEX_1 + 1 + CACHED_COUNT * 2;
+    EXPECT_EQ(static_cast<int32_t>(lazyNode->node4Index_.Size()), result_size);
+    EXPECT_EQ(static_cast<int32_t>(lazyNode->GetChildren().size()), result_size);
+
+    auto repeatNode = CreateRepeatNode(GetNextId());
+    CreateChildren(repeatNode, totalCount);
+    repeatNode->DoSetActiveChildRange(INDEX_1, INDEX_9, CACHED_COUNT, CACHED_COUNT, false);
+    int32_t result_size_2 = INDEX_9 - INDEX_1 + 1 + CACHED_COUNT * 2;
+    EXPECT_EQ(static_cast<int32_t>(repeatNode->node4Index_.Size()), result_size_2);
+    EXPECT_EQ(static_cast<int32_t>(repeatNode->GetChildren().size()), result_size_2);
 }
 
 /**
