@@ -232,9 +232,14 @@ export class FrameNode implements MaterializedBase {
             }
             this._nodeId = FrameNodeExtender.getIdByFrameNode(this.peer!.ptr);
             ArkUIAniModule._Common_Restore_InstanceId();
-            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this._nodeId, this);
-            ArkUIAniModule._SetCustomCallback(this!.peer!.ptr, this.onMeasureInner, this.onLayoutInner);
-            ArkUIAniModule._SetFrameNodeDrawCallback(this.peer!.ptr, this.onDrawWrapper);
+             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this._nodeId, this);
+            if (this.isContainerOnMeasureOrOnLayout()) {
+                ArkUIAniModule._SetCustomCallback(this!.peer!.ptr, this.onMeasureInner, this.onLayoutInner);
+            }
+            if (this.isContainerOnDraw()) {
+                ArkUIAniModule._SetFrameNodeDrawCallback(this.peer!.ptr, this.onDrawWrapper);
+            }
+
         }
     }
     static getFinalizer(): KPointer {
@@ -656,6 +661,18 @@ export class FrameNode implements MaterializedBase {
             }
         }
         return ArkUIAniModule._Common_getCustomProperty(this!.peer!.ptr, name_casted);
+    }
+    private isContainerOnDraw(): boolean {
+        const onDrawFuncBase = (Type.from<FrameNode>() as ClassType).getMethodByName('onDraw');
+        const onDrawFuncImpl = (Type.of(this) as ClassType).getMethodByName("onDraw");
+        return onDrawFuncImpl.toString() !== onDrawFuncBase.toString();
+    }
+    private isContainerOnMeasureOrOnLayout(): boolean {
+        const onMeasureBase = (Type.from<FrameNode>() as ClassType).getMethodByName('onMeasure');
+        const onMeasureImpl = (Type.of(this) as ClassType).getMethodByName('onMeasure');
+        const onLayoutBase = (Type.from<FrameNode>() as ClassType).getMethodByName('onLayout');
+        const onLayoutImpl = (Type.of(this) as ClassType).getMethodByName('onLayout');
+        return onMeasureBase.toString() !== onMeasureImpl.toString() || onLayoutBase.toString() !== onLayoutImpl.toString();
     }
 }
 class ImmutableFrameNode extends FrameNode {
