@@ -294,6 +294,8 @@ private:
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleBlurEvent();
 
     void ClearMultiSelect() override;
     bool IsItemSelected(float offsetX, float offsetY) override;
