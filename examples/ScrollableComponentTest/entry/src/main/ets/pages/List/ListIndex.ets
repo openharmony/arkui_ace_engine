@@ -21,13 +21,17 @@ interface routerInfo {
 }
 
 let routerData: routerInfo[] = [
-  { url: 'pages/List/dividerColor', info: 'divider_Color' },
-  { url: 'pages/List/dividerEndMargin', info: 'divider_EndMargin' },
-  { url: 'pages/List/dividerStartMargin', info: 'divider_StartMargin' },
-  { url: 'pages/List/dividerStrokeWidth', info: 'divider_StrokeWidth' },
-  { url: 'pages/List/friction', info: 'friction' },
-  { url: 'pages/List/lanesMaxLength', info: 'lanes_MaxLength' },
-  { url: 'pages/List/lanesMinLength', info: 'lanes_MinLength' }
+  { url: 'pages/List/divider/dividerColor', info: 'divider_Color' },
+  { url: 'pages/List/divider/dividerEndMargin', info: 'divider_EndMargin' },
+  { url: 'pages/List/divider/dividerStartMargin', info: 'divider_StartMargin' },
+  { url: 'pages/List/divider/dividerStrokeWidth', info: 'divider_StrokeWidth' },
+  { url: 'pages/List/friction/friction', info: 'friction' },
+  { url: 'pages/List/Lanes/lanesMaxLength', info: 'lanes_MaxLength' },
+  { url: 'pages/List/Lanes/lanesMinLength', info: 'lanes_MinLength' },
+  { url: "pages/List/swipeAction/children", info: "children"},
+  { url: "pages/List/swipeAction/hIndex", info: "多列list"},
+  { url: "pages/List/swipeAction/Page1", info: "cxnIndex"},
+  { url: "pages/List/swipeActionPageRepeat", info: "Repeat"}
 ]
 
 @Entry
