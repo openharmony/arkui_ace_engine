@@ -18,14 +18,17 @@
 
 import { int32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common'
 import { KPointer } from '@koalaui/interop'
-import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback } from '@koalaui/runtime'
+import { __context, __id, memoEntry2, remember, NodeAttach, contextNode, scheduleCallback } from '@koalaui/runtime'
 import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat'
 import { IDataSource, DataChangeListener } from '../component/lazyForEach'
 import { OnMoveHandler, ItemDragEventHandler, ForEachOps } from '#generated'
-import { LazyForEachImplForOptions, NodeHolder } from './LazyForEachImpl'
+import { LazyForEachImplForOptions } from './LazyForEachImpl'
 import { InternalListener } from './DataChangeListener'
 import { PeerNode } from '../PeerNode'
 import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
+import { SyntaxItemPeer, ForEachNodePeer, NodeHolder } from './SyntaxNodeBase'
+import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
+import { ExtendableComponent } from '../component/extendableComponent'
 
 /** @memo:intrinsic */
 export function RepeatImplForOptions<T>(
@@ -44,8 +47,7 @@ export function RepeatImplForOptions<T>(
         if (repeat.useTemplate_) {
             throw new Error('Repeat: template function is not supported in non-virtualScroll mode.');
         }
-        nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(REPEAT_EACH_FUNC_TYPE)!, repeat.keyGenFunc_,
-            repeat.onMove_, repeat.itemDragEvent_);
+        nonVirtualRender<T>(arr, repeat);
     } else {
         const repeatId = __id();
         const node = contextNode<PeerNode>();
@@ -241,36 +243,6 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     }
 }
 
-export class SyntaxItemPeer extends PeerNode {
-    public static create(): SyntaxItemPeer {
-        const peerId = PeerNode.nextId();
-        const _peerPtr = ArkUIAniModule._SyntaxItem_Construct(peerId);
-        if (!_peerPtr) {
-            throw new Error(`Failed to create SyntaxItemPeer with id: ${peerId}`);
-        }
-        return new SyntaxItemPeer(_peerPtr, peerId, 'SyntaxItem');
-    }
-
-    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
-        super(peerPtr, id, name, flags);
-    }
-}
-
-export class ForEachNodePeer extends PeerNode {
-    public static create(isRepeat: boolean = false): ForEachNodePeer {
-        const peerId = PeerNode.nextId();
-        const _peerPtr = ArkUIAniModule._ForEachNode_Construct(peerId, isRepeat);
-        if (!_peerPtr) {
-            throw new Error(`Failed to create ForEachNodePeer with id: ${peerId}`);
-        }
-        return new ForEachNodePeer(_peerPtr, peerId, isRepeat ? 'Repeat' : 'ForEach');
-    }
-
-    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
-        super(peerPtr, id, name, flags);
-    }
-}
-
 /** @memo:intrinsic */
 function virtualRender<T>(
     arr: RepeatArray<T>,
@@ -299,28 +271,31 @@ function virtualRender<T>(
          * To optimize performance, insert reuseKey through compiler plugin to the content of itemBuilder.
          */
         if (attributes.reusable_) {
+            const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
+            const currentExtendableComponent = ExtendableComponent.current;
             NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
+                const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
+                const lastExtendableComponent = ExtendableComponent.current;
+                ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
+                ExtendableComponent.current = currentExtendableComponent;
                 itemBuilder(ri);
+                ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
+                ExtendableComponent.current = lastExtendableComponent;
             }, _type + repeatId); // using type as reuseKey
         } else {
             itemBuilder(ri);
         }
     };
-    LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_, true,
-        attributes.onMove_, attributes.itemDragEvent_);
+    LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_,
+        attributes.onMove_, attributes.itemDragEvent_, true);
 }
 
-// onMoveFromTo has no operation in non-virtual mode
-function onMoveFromTo(moveFrom: int32, moveTo: int32): void {}
-
 /** @memo */
-function nonVirtualRender<T>(arr: RepeatArray<T>,
-    /** @memo */
-    itemGenerator: RepeatItemBuilder<T>,
-    keyGenerator?: (element: T, index: int32) => string,
-    onMove?: OnMoveHandler,
-    itemDragEvent?: ItemDragEventHandler,
+function nonVirtualRender<T>(
+    arr: RepeatArray<T>,
+    attributes: RepeatAttributeImpl<T>
 ): void {
+    const keyGenerator = attributes.keyGenFunc_;
     if (keyGenerator && typeof keyGenerator !== 'function') {
         throw new Error('key generator is not a function. Application error!');
     }
@@ -337,21 +312,27 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
         keyGenerator ? hashCodeFromString(keyGenerator!(ele, i)) : hashCodeFromString(defaultKey(ele, i));
     /** @memo */
-    const action = (ele: T, i: int32) => {
+    const itemGen = (ele: T, i: int32) => {
+        /** @memo */
+        const itemGenerator = attributes.itemGenFuncs_.get(REPEAT_EACH_FUNC_TYPE)!;
         const ri = new RepeatItemImpl<T>(ele, i);
         NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
             itemGenerator(ri);
         });
     };
     NodeAttach(() => ForEachNodePeer.create(true), (node: ForEachNodePeer) => {
-        RepeatByArray<T>(arr, keyGen, action);
+        for (let i = 0; i < arr.length; i++) {
+            const e: T = arr[i];
+            memoEntry2<T, int32, void>(__context(), keyGen(e, i), itemGen, e, i);
+        }
         nodeHolder.node = node;
     });
 
     /**
      * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
      */
-    ForEachOps.SyncOnMoveOps(nodeHolder.node!.getPeerPtr(), new Array<KPointer>(), onMove, itemDragEvent);
+    ForEachOps.SyncOnMoveOps(
+        nodeHolder.node!.getPeerPtr(), new Array<KPointer>(), attributes.onMove_, attributes.itemDragEvent_);
 
     ArkUIAniModule._ForEach_FinishRender(nodeHolder.node!.getPeerPtr());
 }
