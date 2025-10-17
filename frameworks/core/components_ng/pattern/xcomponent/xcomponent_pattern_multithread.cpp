@@ -222,32 +222,6 @@ void XComponentPattern::OnDetachFromFrameNodeMultiThread(FrameNode* frameNode)
     }
 }
 
-void XComponentPatternV2::InitSurfaceMultiThread(const RefPtr<FrameNode>& host)
-{
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    renderContext->SetClipToFrame(true);
-    renderContext->SetClipToBounds(true);
-    renderSurface_ = RenderSurface::Create();
-    renderSurface_->SetInstanceId(GetHostInstanceId());
-    if (type_ == XComponentType::SURFACE) {
-        InitializeRenderContext();
-        renderSurface_->SetRenderContext(renderContextForSurface_);
-    } else if (type_ == XComponentType::TEXTURE) {
-        renderSurface_->SetRenderContext(renderContext);
-        renderSurface_->SetIsTexture(true);
-        renderContext->OnNodeNameUpdate(GetId());
-    }
-    renderSurface_->InitSurface();
-    renderSurface_->UpdateSurfaceConfig();
-    if (type_ == XComponentType::TEXTURE) {
-        renderSurface_->RegisterBufferCallback();
-    }
-    surfaceId_ = renderSurface_->GetUniqueId();
-}
-
 void XComponentPatternV2::OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& host)
 {
     RegisterContextEventMultiThread(host);
@@ -255,6 +229,14 @@ void XComponentPatternV2::OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>&
     if (autoInitialize_) {
         HandleSurfaceCreated();
     }
+    CHECK_NULL_VOID(displaySync_);
+    if (needRecoverDisplaySync_  && !displaySync_->IsOnPipeline()) {
+        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnAttachToMainTree:recover displaySync: "
+            "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
+        displaySync_->AddToPipelineOnContainer();
+        needRecoverDisplaySync_ = false;
+    }
+    displaySync_->NotifyXComponentExpectedFrameRate(GetId());
 }
 
 void XComponentPatternV2::RegisterContextEventMultiThread(const RefPtr<FrameNode>& host)
@@ -282,6 +264,14 @@ void XComponentPatternV2::OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode
         pipeline->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value_or(-1));
         transformHintChangedCallbackId_ = std::nullopt;
     }
+    CHECK_NULL_VOID(displaySync_);
+    if (displaySync_->IsOnPipeline()) {
+        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnDetachFromMainTree:remove displaySync: "
+            "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
+        displaySync_->DelFromPipelineOnContainer();
+        needRecoverDisplaySync_ = true;
+    }
+    displaySync_->NotifyXComponentExpectedFrameRate(GetId(), 0);
 }
 
 void XComponentPatternV2::OnDetachFromFrameNodeMultiThread()

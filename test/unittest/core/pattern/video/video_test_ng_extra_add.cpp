@@ -1608,4 +1608,100 @@ HWTEST_F(VideoTestExtraAddNg, UpdatePreviewImage002, TestSize.Level1)
     videoPattern->UpdatePreviewImage();
     EXPECT_NE(videoPattern->renderContextForMediaPlayer_->GetBackgroundColorValue(), Color::TRANSPARENT);
 }
+
+/**
+ * @tc.name: Test VideoPattern OnAttachToMainTree001.
+ * @tc.desc: Test VideoPattern OnAttachToMainTree() func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestExtraAddNg, CallVideoPatternOnAttachToMainTreeFunc001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Video frame node.
+     * @tc.expected: create Video frame node successfully.
+     */
+    g_testProperty.videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+    frameNode->isThreadSafeNode_ = true;
+    ASSERT_TRUE(pattern->videoControllerV2_);
+    pattern->videoControllerV2_->controllers_.clear();
+
+    /**
+     * @tc.steps: step2. call OnAttachToMainTree
+     * @tc.expected: video events are initialized.
+     */
+    pattern->OnAttachToMainTree();
+    EXPECT_TRUE(pattern->videoControllerV2_);
+    EXPECT_NE(pattern->videoControllerV2_->controllers_.size(), 0);
+}
+
+/**
+ * @tc.name: Test VideoFullScreenPattern OnAttachToMainTree002.
+ * @tc.desc: Test VideoFullScreenPattern OnAttachToMainTree() func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestExtraAddNg, CallVideoFullScreenPatternOnAttachToMainTreeFunc002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Video frame node.
+     * @tc.expected: create Video frame node successfully.
+     */
+    g_testProperty.videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+    frameNode->isThreadSafeNode_ = true;
+
+    /**
+     * @tc.steps: step2. get VideoFullScreenPattern.
+     * @tc.expected: get VideoFullScreenPattern successfully.
+     */
+    pattern->FullScreen();
+    auto fullScreenNode = pattern->GetFullScreenNode();
+    ASSERT_TRUE(fullScreenNode);
+    fullScreenNode->isThreadSafeNode_ = true;
+    auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
+    ASSERT_TRUE(fullScreenPattern);
+    ASSERT_TRUE(fullScreenPattern->videoControllerV2_);
+    fullScreenPattern->videoControllerV2_->controllers_.clear();
+
+    /**
+     * @tc.steps: step3. call OnAttachToMainTree
+     * @tc.expected: video events are not initialized.
+     */
+    fullScreenPattern->OnAttachToMainTree();
+    EXPECT_EQ(fullScreenPattern->videoControllerV2_->controllers_.size(), 0);
+}
+
+/**
+ * @tc.name: Test VideoPattern OnAttachToFrameNodeMultiThread.
+ * @tc.desc: Test VideoPattern OnAttachToFrameNodeMultiThread() func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestExtraAddNg, CallVideoPatternOnAttachToFrameNodeMultiThreadFunc, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Video frame node.
+     * @tc.expected: create Video frame node successfully.
+     */
+    g_testProperty.videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+    ASSERT_TRUE(pattern->videoControllerV2_);
+    pattern->videoControllerV2_->controllers_.clear();
+    frameNode->isThreadSafeNode_ = true;
+
+    /**
+     * @tc.steps: step2. call OnAttachToFrameNodeMultiThread
+     * @tc.expected: video events are not initialized.
+     */
+    pattern->OnAttachToFrameNodeMultiThread(frameNode);
+    EXPECT_EQ(pattern->videoControllerV2_->controllers_.size(), 0);
+}
 } // namespace OHOS::Ace::NG

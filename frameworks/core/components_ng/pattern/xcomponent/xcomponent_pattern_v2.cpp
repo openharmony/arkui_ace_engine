@@ -79,7 +79,7 @@ void XComponentPatternV2::OnAttachToFrameNode()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    FREE_NODE_CHECK(host, InitSurface, host);
+    nodeId_ = std::to_string(host->GetId());
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
@@ -89,7 +89,7 @@ void XComponentPatternV2::OnAttachToFrameNode()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EnableSelfRender();
     }
-    nodeId_ = std::to_string(host->GetId());
+    CHECK_EQUAL_VOID(host->IsThreadSafeNode(), true);
     UpdateTransformHint();
 }
 
@@ -270,7 +270,6 @@ void XComponentPatternV2::InitSurface()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    FREE_NODE_CHECK(host, InitSurface, host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
